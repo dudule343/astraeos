@@ -156,24 +156,25 @@ export default function ClientNewPage() {
                   </span>
                 </button>
 
-                {isOpen && (
-                  <div className="border-t border-[var(--navy-100)] p-5">
-                    {step.num === 1 && <Step1 onNext={() => goNext(1)} />}
-                    {step.num === 2 && (
-                      <Step2 onPrev={() => goPrev(2)} onNext={() => goNext(2)} />
-                    )}
-                    {step.num === 3 && (
-                      <Step3 onPrev={() => goPrev(3)} onNext={() => goNext(3)} />
-                    )}
-                    {step.num === 4 && (
-                      <Step4 onPrev={() => goPrev(4)} onNext={() => goNext(4)} />
-                    )}
-                    {step.num === 5 && (
-                      <Step5 onPrev={() => goPrev(5)} onNext={() => goNext(5)} />
-                    )}
-                    {step.num === 6 && <Step6 onPrev={() => goPrev(6)} />}
-                  </div>
-                )}
+                {/* Toutes les étapes sont rendues en permanence pour que les inputs
+                    restent dans le formulaire même si la step n'est pas ouverte.
+                    On masque les étapes fermées avec `hidden`. */}
+                <div className={isOpen ? "border-t border-[var(--navy-100)] p-5" : "hidden"}>
+                  {step.num === 1 && <Step1 onNext={() => goNext(1)} />}
+                  {step.num === 2 && (
+                    <Step2 onPrev={() => goPrev(2)} onNext={() => goNext(2)} />
+                  )}
+                  {step.num === 3 && (
+                    <Step3 onPrev={() => goPrev(3)} onNext={() => goNext(3)} />
+                  )}
+                  {step.num === 4 && (
+                    <Step4 onPrev={() => goPrev(4)} onNext={() => goNext(4)} />
+                  )}
+                  {step.num === 5 && (
+                    <Step5 onPrev={() => goPrev(5)} onNext={() => goNext(5)} />
+                  )}
+                  {step.num === 6 && <Step6 onPrev={() => goPrev(6)} />}
+                </div>
               </div>
             );
           })}
