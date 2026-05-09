@@ -98,3 +98,75 @@ export async function deleteClientsAction(ids: string[]) {
   revalidatePath("/clients");
   revalidatePath("/");
 }
+
+export type UpdateClientPayload = {
+  id: string;
+  raison_sociale?: string;
+  representant?: string;
+  email?: string;
+  pack?: string;
+  revenue?: string;
+  engineers?: string;
+  end_clients?: string;
+  status?: string;
+  health?: string;
+  category?: string;
+  sub_category?: string;
+};
+
+export async function updateClientAction(payload: UpdateClientPayload) {
+  const supabase = createAdminClient();
+
+  // 1. Mettre à jour la personne représentant légal
+  if (payload.representant || payload.email) {
+    const { data: existingPersons } = await supabase
+      .from("personnes")
+      .select("id")
+      .eq("client_id", payload.id)
+      .limit(1);
+
+    if (existingPersons && existingPersons[0]) {
+      const update: Record<string, string> = {};
+      if (payload.representant) {
+        const [firstName, ...rest] = payload.representant.split(" ");
+        update.first_name = firstName;
+        update.last_name = rest.join(" ") || firstName;
+      }
+      if (payload.email) update.email = payload.email;
+      const { error: pErr } = await supabase
+        .from("personnes")
+        .update(update)
+        .eq("id", existingPersons[0].id);
+      if (pErr) throw new Error(`Personne : ${pErr.message}`);
+    }
+  }
+
+  // 2. Mettre à jour les notes du dossier (raison sociale, pack, revenu, etc.)
+  const { data: dossiers } = await supabase
+    .from("dossiers")
+    .select("id, internal_notes")
+    .eq("client_id", payload.id)
+    .limit(1);
+
+  if (dossiers && dossiers[0]) {
+    let notes: Record<string, unknown> = {};
+    if (dossiers[0].internal_notes) {
+      try {
+        notes = JSON.parse(dossiers[0].internal_notes as string);
+      } catch {
+        // ignore
+      }
+    }
+    const fields = ["raison_sociale", "pack", "revenue", "engineers", "end_clients", "status", "health", "category", "sub_category"] as const;
+    for (const f of fields) {
+      if (payload[f] !== undefined) notes[f] = payload[f];
+    }
+    const { error: dErr } = await supabase
+      .from("dossiers")
+      .update({ internal_notes: JSON.stringify(notes) })
+      .eq("id", dossiers[0].id);
+    if (dErr) throw new Error(`Dossier : ${dErr.message}`);
+  }
+
+  revalidatePath("/clients");
+}

@@ -24,7 +24,7 @@ async function fetchDbClients(): Promise<DbClient[]> {
         `,
       )
       .order("created_at", { ascending: false })
-      .limit(50);
+      .limit(100);
 
     if (!clients) return [];
 
@@ -35,7 +35,19 @@ async function fetchDbClients(): Promise<DbClient[]> {
       const person = personnesArr[0];
       const dossiersArr = (c.dossiers as Array<{ internal_notes?: string }>) ?? [];
       const notesRaw = dossiersArr[0]?.internal_notes;
-      let notes: { raison_sociale?: string; siren?: string } = {};
+      let notes: {
+        raison_sociale?: string;
+        siren?: string;
+        category?: string;
+        sub_category?: string;
+        pack?: string;
+        revenue?: string;
+        engineers?: string;
+        end_clients?: string;
+        status?: string;
+        health?: string;
+        is_demo?: boolean;
+      } = {};
       if (notesRaw) {
         try {
           notes = JSON.parse(notesRaw);
@@ -52,6 +64,15 @@ async function fetchDbClients(): Promise<DbClient[]> {
         representant_email: person?.email ?? null,
         raison_sociale: notes.raison_sociale ?? null,
         siren: notes.siren ?? null,
+        category: notes.category ?? null,
+        sub_category: notes.sub_category ?? null,
+        pack: notes.pack ?? null,
+        revenue: notes.revenue ?? null,
+        engineers: notes.engineers ?? null,
+        end_clients: notes.end_clients ?? null,
+        status: notes.status ?? null,
+        health: notes.health ?? null,
+        is_demo: Boolean(notes.is_demo),
       };
     });
   } catch {
@@ -59,17 +80,48 @@ async function fetchDbClients(): Promise<DbClient[]> {
   }
 }
 
-const kpis: KpiBlock[] = [
-  { label: "Total clients", value: "23", meta: "portefeuille global" },
-  { label: "Marques", value: "3", meta: "franchise · licence · réseau" },
-  { label: "Cabinets directs", value: "17", meta: "indépendants + mandataires" },
-  { label: "Autres professionnels", value: "3", meta: "notaires · avocats · EC" },
-  { label: "Total ingénieurs", value: "~280", meta: "utilisateurs créés" },
-  { label: "Revenu mensuel récurrent", value: "128 400", unit: "€", meta: "cumul mensuel récurrent" },
-];
+function computeKpis(clients: DbClient[]): KpiBlock[] {
+  const total = clients.length;
+  const marques = clients.filter((c) => c.category === "marque").length;
+  const cabinets = clients.filter((c) => c.category === "cabinet_direct").length;
+  const autres = clients.filter((c) => c.category === "autre_pro").length;
+
+  const totalEngineers = clients.reduce((acc, c) => {
+    const n = c.engineers?.replace(/[^0-9]/g, "");
+    return acc + (n ? parseInt(n, 10) : 0);
+  }, 0);
+
+  const totalRevenue = clients.reduce((acc, c) => {
+    const n = c.revenue?.replace(/[^0-9]/g, "");
+    return acc + (n ? parseInt(n, 10) : 0);
+  }, 0);
+
+  return [
+    { label: "Total clients", value: String(total), meta: "portefeuille global" },
+    { label: "Marques", value: String(marques), meta: "franchise · licence · réseau" },
+    {
+      label: "Cabinets directs",
+      value: String(cabinets),
+      meta: "indépendants + mandataires",
+    },
+    { label: "Autres professionnels", value: String(autres), meta: "notaires · avocats · EC" },
+    {
+      label: "Total ingénieurs",
+      value: totalEngineers > 0 ? String(totalEngineers) : "—",
+      meta: "cumulés sur les comptes",
+    },
+    {
+      label: "Revenu mensuel récurrent",
+      value: totalRevenue > 0 ? totalRevenue.toLocaleString("fr-FR") : "—",
+      unit: "€",
+      meta: "cumul mensuel récurrent",
+    },
+  ];
+}
 
 export default async function ClientsPage() {
   const dbClients = await fetchDbClients();
+  const kpis = computeKpis(dbClients);
 
   return (
     <>
