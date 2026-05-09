@@ -2,6 +2,72 @@ import Link from "next/link";
 import { Topbar } from "../_components/Topbar";
 import { KpiCard, type KpiBlock } from "../_components/KpiCard";
 import { PageHero, GhostButton, GoldButton } from "../_components/PageHeader";
+import { createAdminClient } from "@/lib/supabase/admin";
+
+export const dynamic = "force-dynamic";
+
+type DbClient = {
+  id: string;
+  created_at: string;
+  household_address: string | null;
+  cabinet_name: string | null;
+  representant: string | null;
+  representant_email: string | null;
+  raison_sociale: string | null;
+  siren: string | null;
+};
+
+async function fetchDbClients(): Promise<DbClient[]> {
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) return [];
+  try {
+    const supabase = createAdminClient();
+    const { data: clients } = await supabase
+      .from("clients")
+      .select(
+        `
+          id,
+          created_at,
+          household_address,
+          cabinets ( name ),
+          personnes ( first_name, last_name, email ),
+          dossiers ( internal_notes )
+        `,
+      )
+      .order("created_at", { ascending: false })
+      .limit(50);
+
+    if (!clients) return [];
+
+    return clients.map((c: Record<string, unknown>) => {
+      const cabinetRaw = c.cabinets as { name?: string } | { name?: string }[] | null | undefined;
+      const cabinet = Array.isArray(cabinetRaw) ? cabinetRaw[0] : cabinetRaw;
+      const personnesArr = (c.personnes as Array<{ first_name?: string; last_name?: string; email?: string }>) ?? [];
+      const person = personnesArr[0];
+      const dossiersArr = (c.dossiers as Array<{ internal_notes?: string }>) ?? [];
+      const notesRaw = dossiersArr[0]?.internal_notes;
+      let notes: { raison_sociale?: string; siren?: string } = {};
+      if (notesRaw) {
+        try {
+          notes = JSON.parse(notesRaw);
+        } catch {
+          // ignore
+        }
+      }
+      return {
+        id: c.id as string,
+        created_at: c.created_at as string,
+        household_address: (c.household_address as string) ?? null,
+        cabinet_name: cabinet?.name ?? null,
+        representant: person ? `${person.first_name ?? ""} ${person.last_name ?? ""}`.trim() : null,
+        representant_email: person?.email ?? null,
+        raison_sociale: notes.raison_sociale ?? null,
+        siren: notes.siren ?? null,
+      };
+    });
+  } catch {
+    return [];
+  }
+}
 
 const kpis: KpiBlock[] = [
   { label: "Total clients", value: "23", meta: "portefeuille global" },
@@ -285,7 +351,9 @@ function SectionRow({ title }: { title: string }) {
   );
 }
 
-export default function ClientsPage() {
+export default async function ClientsPage() {
+  const dbClients = await fetchDbClients();
+
   return (
     <>
       <Topbar current="Clients totaux actifs" />
@@ -304,6 +372,47 @@ export default function ClientsPage() {
             </>
           }
         />
+
+        {dbClients.length > 0 && (
+          <section className="mb-8 rounded-md border border-[var(--gold-300)] bg-white">
+            <div className="flex items-center justify-between border-b border-[var(--navy-100)] bg-[var(--gold-200)]/30 px-4 py-3">
+              <div className="text-[13px] font-semibold text-[var(--navy)]">
+                ✨ Clients créés via le wizard ({dbClients.length})
+              </div>
+              <span className="text-[10.5px] text-[var(--navy-300)]">
+                Données réelles · Supabase
+              </span>
+            </div>
+            <table className="w-full text-left">
+              <thead>
+                <tr className="border-b border-[var(--navy-100)] bg-[var(--ivory)] text-[10.5px] font-bold uppercase tracking-[0.08em] text-[var(--navy-300)]">
+                  <th className="px-4 py-3">Raison sociale</th>
+                  <th className="px-4 py-3">SIREN</th>
+                  <th className="px-4 py-3">Représentant légal</th>
+                  <th className="px-4 py-3">Email</th>
+                  <th className="px-4 py-3">Cabinet</th>
+                  <th className="px-4 py-3">Adresse</th>
+                  <th className="px-4 py-3 text-right">Créé le</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[var(--navy-100)]">
+                {dbClients.map((c) => (
+                  <tr key={c.id} className="text-[12px] text-[var(--navy)] hover:bg-[var(--light-blue)]">
+                    <td className="px-4 py-3 font-semibold">{c.raison_sociale ?? "—"}</td>
+                    <td className="px-4 py-3 tabular-nums text-[var(--navy-300)]">{c.siren ?? "—"}</td>
+                    <td className="px-4 py-3">{c.representant ?? "—"}</td>
+                    <td className="px-4 py-3 text-[var(--navy-300)]">{c.representant_email ?? "—"}</td>
+                    <td className="px-4 py-3">{c.cabinet_name ?? "—"}</td>
+                    <td className="px-4 py-3 text-[11px] text-[var(--navy-300)]">{c.household_address ?? "—"}</td>
+                    <td className="px-4 py-3 text-right text-[11px] text-[var(--navy-300)]">
+                      {new Date(c.created_at).toLocaleDateString("fr-FR")}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </section>
+        )}
 
         <section className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
           {kpis.map((k) => (

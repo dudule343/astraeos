@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { Topbar } from "../_components/Topbar";
-import { PageHero, GhostButton, GoldButton } from "../_components/PageHeader";
+import { PageHero, GhostButton } from "../_components/PageHeader";
+import { createClientAction } from "./actions";
 
 type StepStatus = "completed" | "active" | "todo" | "final";
 
@@ -89,7 +90,7 @@ export default function ClientNewPage() {
     <>
       <Topbar current="Nouveau client" />
 
-      <div className="px-10 py-8">
+      <form action={createClientAction} className="px-10 py-8">
         <PageHero
           eyebrow="Opérations clients"
           title="Créer un nouveau client"
@@ -177,7 +178,7 @@ export default function ClientNewPage() {
             );
           })}
         </div>
-      </div>
+      </form>
     </>
   );
 }
@@ -236,18 +237,18 @@ function Step2({ onPrev, onNext }: { onPrev: () => void; onNext: () => void }) {
     <>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <Field label="Raison sociale" required>
-          <input className={inputClass} defaultValue="Patrimoine Conseil Avignon SAS" />
+          <input name="raison_sociale" className={inputClass} defaultValue="Patrimoine Conseil Avignon SAS" />
         </Field>
         <Field label="Nom commercial">
-          <input className={inputClass} defaultValue="Patrimoine Conseil" />
+          <input name="nom_commercial" className={inputClass} defaultValue="Patrimoine Conseil" />
         </Field>
       </div>
       <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
         <Field label="SIREN" required help="Vérifié auprès de l'INSEE ✓">
-          <input className={inputClass} defaultValue="892 547 318" />
+          <input name="siren" className={inputClass} defaultValue="892 547 318" />
         </Field>
         <Field label="Statut juridique">
-          <select className={inputClass} defaultValue="SAS">
+          <select name="statut_juridique" className={inputClass} defaultValue="SAS">
             <option>SAS</option>
             <option>SARL</option>
             <option>SA</option>
@@ -255,23 +256,23 @@ function Step2({ onPrev, onNext }: { onPrev: () => void; onNext: () => void }) {
           </select>
         </Field>
         <Field label="Numéro ORIAS" required help="CIF + Courtier en assurance">
-          <input className={inputClass} defaultValue="24 002 845" />
+          <input name="numero_orias" className={inputClass} defaultValue="24 002 845" />
         </Field>
       </div>
       <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
         <Field label="Adresse siège" required>
-          <input className={inputClass} defaultValue="42 boulevard Saint-Roch, 84000 Avignon" />
+          <input name="adresse_siege" className={inputClass} defaultValue="42 boulevard Saint-Roch, 84000 Avignon" />
         </Field>
         <Field label="Représentant légal" required>
-          <input className={inputClass} defaultValue="Marc DELORME" />
+          <input name="representant_legal" className={inputClass} defaultValue="Marc DELORME" />
         </Field>
       </div>
       <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
         <Field label="Email principal" required>
-          <input className={inputClass} defaultValue="m.delorme@patrimoine-avignon.fr" />
+          <input name="email_principal" className={inputClass} defaultValue="m.delorme@patrimoine-avignon.fr" />
         </Field>
         <Field label="Téléphone">
-          <input className={inputClass} defaultValue="04 90 12 34 56" />
+          <input name="telephone" className={inputClass} defaultValue="04 90 12 34 56" />
         </Field>
       </div>
       <div className="mt-5 flex justify-between">
@@ -304,7 +305,7 @@ function Step3({ onPrev, onNext }: { onPrev: () => void; onNext: () => void }) {
           help="URL d'accès des ingénieurs : https://patrimoine-avignon.astraeos.fr"
         >
           <div className="flex items-center gap-1.5">
-            <input className={`${inputClass} flex-1`} defaultValue="patrimoine-avignon" />
+            <input name="sous_domaine" className={`${inputClass} flex-1`} defaultValue="patrimoine-avignon" />
             <span className="text-[12px] text-[var(--navy-300)]">.astraeos.fr</span>
           </div>
         </Field>
@@ -333,14 +334,14 @@ function Step3({ onPrev, onNext }: { onPrev: () => void; onNext: () => void }) {
       </div>
       <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
         <Field label="Mode de facturation" required>
-          <select className={inputClass} defaultValue="Mensuel · prélèvement automatique">
+          <select name="mode_facturation" className={inputClass} defaultValue="Mensuel · prélèvement automatique">
             <option>Mensuel · prélèvement automatique</option>
             <option>Mensuel · virement</option>
             <option>Annuel · 1 paiement</option>
           </select>
         </Field>
         <Field label="Date d'activation" required>
-          <input type="date" className={inputClass} defaultValue="2026-05-15" />
+          <input name="date_activation" type="date" className={inputClass} defaultValue="2026-05-15" />
         </Field>
       </div>
       <div className="mt-5 flex justify-between">
@@ -625,7 +626,12 @@ function Step6({ onPrev }: { onPrev: () => void }) {
         >
           ← Retour
         </button>
-        <GoldButton>✓ Activer le client maintenant</GoldButton>
+        <button
+          type="submit"
+          className="rounded-md bg-[var(--gold)] px-4 py-2 text-[12.5px] font-bold text-white hover:brightness-110"
+        >
+          ✓ Activer le client maintenant
+        </button>
       </div>
     </>
   );
