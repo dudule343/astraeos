@@ -303,7 +303,7 @@ export default function TeamPage() {
                   <tr className="border-b border-[var(--navy-100)] text-[10.5px] font-bold uppercase tracking-[0.08em] text-[var(--navy-300)]">
                     <th className="px-4 py-2.5">Prénom Nom</th>
                     <th className="px-4 py-2.5">Rôle</th>
-                    <th className="px-4 py-2.5">Email</th>
+                    <th className="px-4 py-2.5">Email interne</th>
                     <th className="px-4 py-2.5">Téléphone</th>
                     <th className="px-4 py-2.5 text-right">Clients affectés</th>
                     <th className="px-4 py-2.5 text-right">Coût ASTRAEOS /mois</th>

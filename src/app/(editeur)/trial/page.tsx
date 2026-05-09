@@ -207,7 +207,7 @@ export default function TrialPage() {
             <table className="w-full text-left">
               <thead>
                 <tr className="border-b border-[var(--navy-100)] bg-[var(--ivory)] text-[10.5px] font-bold uppercase tracking-[0.08em] text-[var(--navy-300)]">
-                  <th className="px-4 py-3">Contact</th>
+                  <th className="px-4 py-3">Contact (Prénom Nom)</th>
                   <th className="px-4 py-3">Fonction</th>
                   <th className="px-4 py-3">Cabinet</th>
                   <th className="px-4 py-3">Coordonnées</th>

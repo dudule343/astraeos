@@ -229,7 +229,7 @@ export default function AcquisitionPage() {
                   <th className="px-4 py-3 text-right">Essais</th>
                   <th className="px-4 py-3 text-right">Convertis</th>
                   <th className="px-4 py-3 text-right">Coût total</th>
-                  <th className="px-4 py-3 text-right">Coût / client</th>
+                  <th className="px-4 py-3 text-right">Coût par client</th>
                   <th className="px-4 py-3 text-center">Rentabilité</th>
                 </tr>
               </thead>

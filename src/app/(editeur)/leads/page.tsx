@@ -197,7 +197,7 @@ export default function LeadsPage() {
                 <th className="px-4 py-3">Source</th>
                 <th className="px-4 py-3">Étape</th>
                 <th className="px-4 py-3">Dernier contact</th>
-                <th className="px-4 py-3">Prochaine action</th>
+                <th className="px-4 py-3">Prochain action</th>
                 <th className="px-4 py-3">Affecté à</th>
                 <th className="px-4 py-3 text-center">Actions</th>
               </tr>
