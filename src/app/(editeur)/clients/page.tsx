@@ -3,6 +3,7 @@ import { Topbar } from "../_components/Topbar";
 import { KpiCard, type KpiBlock } from "../_components/KpiCard";
 import { PageHero, GhostButton, GoldButton } from "../_components/PageHeader";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { DeleteAllButton } from "./DeleteAllButton";
 
 export const dynamic = "force-dynamic";
 
@@ -379,9 +380,12 @@ export default async function ClientsPage() {
               <div className="text-[13px] font-semibold text-[var(--navy)]">
                 ✨ Clients créés via le wizard ({dbClients.length})
               </div>
-              <span className="text-[10.5px] text-[var(--navy-300)]">
-                Données réelles · Supabase
-              </span>
+              <div className="flex items-center gap-3">
+                <span className="text-[10.5px] text-[var(--navy-300)]">
+                  Données réelles · Supabase
+                </span>
+                <DeleteAllButton />
+              </div>
             </div>
             <table className="w-full text-left">
               <thead>

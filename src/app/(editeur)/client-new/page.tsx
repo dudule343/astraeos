@@ -1,9 +1,23 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useFormStatus } from "react-dom";
 import { Topbar } from "../_components/Topbar";
 import { PageHero, GhostButton } from "../_components/PageHeader";
 import { createClientAction } from "./actions";
+
+function SubmitButton() {
+  const { pending } = useFormStatus();
+  return (
+    <button
+      type="submit"
+      disabled={pending}
+      className="rounded-md bg-[var(--gold)] px-4 py-2 text-[12.5px] font-bold text-white transition-opacity hover:brightness-110 disabled:cursor-wait disabled:opacity-60"
+    >
+      {pending ? "⏳ Création en cours…" : "✓ Activer le client maintenant"}
+    </button>
+  );
+}
 
 const DRAFT_KEY = "astraeos:client-new:draft";
 
@@ -716,12 +730,7 @@ function Step6({ onPrev }: { onPrev: () => void }) {
         >
           ← Retour
         </button>
-        <button
-          type="submit"
-          className="rounded-md bg-[var(--gold)] px-4 py-2 text-[12.5px] font-bold text-white hover:brightness-110"
-        >
-          ✓ Activer le client maintenant
-        </button>
+        <SubmitButton />
       </div>
     </>
   );

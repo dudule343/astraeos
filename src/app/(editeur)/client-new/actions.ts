@@ -29,69 +29,76 @@ export async function createClientAction(formData: FormData) {
 
   const supabase = createAdminClient();
 
-  // 1. Crée l'entité client (foyer patrimonial pour ce cabinet)
+  // 1. Insert client
   const { data: client, error: clientErr } = await supabase
     .from("clients")
     .insert({
       tenant_id: DEFAULT_TENANT_ID,
       cabinet_id: DEFAULT_CABINET_ID,
-      household_type: "celibataire", // par défaut
+      household_type: "celibataire",
       household_address: adresseSiege,
       acquisition_origin: "captation_directe",
     })
-    .select()
+    .select("id")
     .single();
 
   if (clientErr || !client) {
     throw new Error(clientErr?.message ?? "Création client échouée");
   }
 
-  // 2. Crée la personne représentant légal
+  // 2. & 3. Insert personne + dossier en parallèle (gagne ~50% sur le temps total)
   const [firstName, ...rest] = representantLegal.split(" ");
   const lastName = rest.join(" ") || firstName;
 
-  const { error: personErr } = await supabase.from("personnes").insert({
-    client_id: client.id,
-    role_in_household: "person_a",
-    first_name: firstName,
-    last_name: lastName,
-    email: emailPrincipal,
-    phone: telephone || null,
+  const internalNotes = JSON.stringify({
+    raison_sociale: raisonSociale,
+    nom_commercial: nomCommercial,
+    siren,
+    statut_juridique: statutJuridique,
+    numero_orias: numeroOrias,
+    sous_domaine: sousDomaine,
+    mode_facturation: modeFacturation,
+    date_activation: dateActivation,
   });
 
-  if (personErr) {
-    throw new Error(`Personne : ${personErr.message}`);
-  }
-
-  // 3. Crée un dossier initial à l'étape prospect
-  const { data: dossier, error: dossierErr } = await supabase
-    .from("dossiers")
-    .insert({
+  const [personRes, dossierRes] = await Promise.all([
+    supabase.from("personnes").insert({
+      client_id: client.id,
+      role_in_household: "person_a",
+      first_name: firstName,
+      last_name: lastName,
+      email: emailPrincipal,
+      phone: telephone || null,
+    }),
+    supabase.from("dossiers").insert({
       tenant_id: DEFAULT_TENANT_ID,
       cabinet_id: DEFAULT_CABINET_ID,
       client_id: client.id,
       engineer_id: DEFAULT_ENGINEER_ID,
       pipeline_stage: "01_prospect",
       pipeline_entry_date: new Date().toISOString().slice(0, 10),
-      internal_notes: JSON.stringify({
-        raison_sociale: raisonSociale,
-        nom_commercial: nomCommercial,
-        siren,
-        statut_juridique: statutJuridique,
-        numero_orias: numeroOrias,
-        sous_domaine: sousDomaine,
-        mode_facturation: modeFacturation,
-        date_activation: dateActivation,
-      }),
-    })
-    .select()
-    .single();
+      internal_notes: internalNotes,
+    }),
+  ]);
 
-  if (dossierErr) {
-    throw new Error(`Dossier : ${dossierErr.message}`);
-  }
+  if (personRes.error) throw new Error(`Personne : ${personRes.error.message}`);
+  if (dossierRes.error) throw new Error(`Dossier : ${dossierRes.error.message}`);
 
   revalidatePath("/clients");
   revalidatePath("/");
   redirect("/clients");
+}
+
+export async function deleteAllTestClientsAction() {
+  const supabase = createAdminClient();
+  // ON DELETE CASCADE supprime personnes + dossiers + souscriptions associées
+  const { error } = await supabase
+    .from("clients")
+    .delete()
+    .eq("tenant_id", DEFAULT_TENANT_ID);
+
+  if (error) throw new Error(error.message);
+
+  revalidatePath("/clients");
+  revalidatePath("/");
 }
