@@ -22,6 +22,7 @@ insert_demo_client() {
   local health="$9"
   local representant="${10}"
   local email="${11}"
+  local phone="${12}"
 
   # 1. Insert client
   local client_resp=$(curl -s -X POST "${URL}/rest/v1/clients" \
@@ -36,7 +37,7 @@ insert_demo_client() {
   curl -s -X POST "${URL}/rest/v1/personnes" \
     -H "apikey: ${SERVICE_ROLE}" -H "Authorization: Bearer ${SERVICE_ROLE}" \
     -H "Content-Type: application/json" -H "Prefer: return=minimal" \
-    -d "{\"client_id\":\"${client_id}\",\"role_in_household\":\"person_a\",\"first_name\":\"${first_name}\",\"last_name\":\"${last_name}\",\"email\":\"${email}\"}" > /dev/null
+    -d "{\"client_id\":\"${client_id}\",\"role_in_household\":\"person_a\",\"first_name\":\"${first_name}\",\"last_name\":\"${last_name}\",\"email\":\"${email}\",\"phone\":\"${phone}\"}" > /dev/null
 
   # 3. Insert dossier with notes (raison sociale, catégorie, etc.)
   local notes="{\"raison_sociale\":\"${raison_sociale}\",\"category\":\"${category}\",\"sub_category\":\"${sub_category}\",\"pack\":\"${pack}\",\"revenue\":\"${revenue}\",\"engineers\":\"${engineers}\",\"end_clients\":\"${end_clients}\",\"status\":\"${status}\",\"health\":\"${health}\",\"is_demo\":true}"
@@ -49,20 +50,20 @@ insert_demo_client() {
 }
 
 echo "=== Seed 3 marques ==="
-insert_demo_client "PRIVEOS Capital"      "marque" "Marque · Licence"   "Premium"  "12800"  "~80" "486" "actif"   "78" "Marc DELORME"        "contact@priveos-capital.fr"
-insert_demo_client "Fontaine & Réseau"    "marque" "Marque · Réseau"    "Premium"  "5600"   "~32" "198" "actif"   "85" "Pierre FONTAINE"     "p.fontaine@fontaine-reseau.fr"
-insert_demo_client "Atlas Patrimoine"     "marque" "Marque · Franchise" "Standard" "3800"   "~24" "142" "actif"   "82" "Émilie ATLAS"        "e.atlas@atlas-patrimoine.fr"
+insert_demo_client "PRIVEOS Capital"      "marque" "Marque · Licence"   "Premium"  "12800"  "~80" "486" "actif"   "78" "Marc DELORME"        "contact@priveos-capital.fr"        "01 42 25 80 12"
+insert_demo_client "Fontaine & Réseau"    "marque" "Marque · Réseau"    "Premium"  "5600"   "~32" "198" "actif"   "85" "Pierre FONTAINE"     "p.fontaine@fontaine-reseau.fr"     "04 78 92 14 56"
+insert_demo_client "Atlas Patrimoine"     "marque" "Marque · Franchise" "Standard" "3800"   "~24" "142" "actif"   "82" "Émilie ATLAS"        "e.atlas@atlas-patrimoine.fr"       "01 56 88 22 70"
 
 echo "=== Seed 4 cabinets directs ==="
-insert_demo_client "Cabinet Dupont & Associés" "cabinet_direct" "Cabinet direct" "Premium"  "2400" "6" "48" "actif"    "92" "Jean DUPONT"     "j.dupont@dupont-associes.fr"
-insert_demo_client "Mont-Blanc Patrimoine"     "cabinet_direct" "Cabinet direct" "Premium"  "2100" "4" "32" "actif"    "89" "Sophie MORENO"   "s.moreno@montblanc-patrimoine.fr"
-insert_demo_client "Cabinet Lyonnais"          "cabinet_direct" "Cabinet direct" "Standard" "1800" "3" "22" "a_risque" "58" "Patrick LYON"    "p.lyon@cabinet-lyonnais.fr"
-insert_demo_client "Bordeaux Patrimoine"       "cabinet_direct" "Cabinet direct" "Standard" "1200" "2" "14" "a_risque" "42" "Hélène BORDEAUX" "h.bordeaux@bordeaux-patrimoine.fr"
+insert_demo_client "Cabinet Dupont & Associés" "cabinet_direct" "Cabinet direct" "Premium"  "2400" "6" "48" "actif"    "92" "Jean DUPONT"     "j.dupont@dupont-associes.fr"          "01 47 23 88 11"
+insert_demo_client "Mont-Blanc Patrimoine"     "cabinet_direct" "Cabinet direct" "Premium"  "2100" "4" "32" "actif"    "89" "Sophie MORENO"   "s.moreno@montblanc-patrimoine.fr"     "04 50 77 30 25"
+insert_demo_client "Cabinet Lyonnais"          "cabinet_direct" "Cabinet direct" "Standard" "1800" "3" "22" "a_risque" "58" "Patrick LYON"    "p.lyon@cabinet-lyonnais.fr"           "04 78 14 22 65"
+insert_demo_client "Bordeaux Patrimoine"       "cabinet_direct" "Cabinet direct" "Standard" "1200" "2" "14" "a_risque" "42" "Hélène BORDEAUX" "h.bordeaux@bordeaux-patrimoine.fr"    "05 56 81 17 90"
 
 echo "=== Seed 3 autres professionnels ==="
-insert_demo_client "Notaire Mercier & Cie"  "autre_pro" "Notaire" "Standard" "1200" "3" "28" "actif"    "88" "Maître MERCIER" "contact@mercier-notaires.fr"
-insert_demo_client "Cabinet Aubert Avocats" "autre_pro" "Avocat"  "Standard" "980"  "2" "12" "actif"    "81" "Maître AUBERT"  "contact@aubert-avocats.fr"
-insert_demo_client "Notaire Pollet"         "autre_pro" "Notaire" "Standard" "820"  "1" "8"  "a_risque" "54" "Maître POLLET"  "contact@pollet-notaire.fr"
+insert_demo_client "Notaire Mercier & Cie"  "autre_pro" "Notaire" "Standard" "1200" "3" "28" "actif"    "88" "Maître MERCIER" "contact@mercier-notaires.fr" "01 44 50 22 18"
+insert_demo_client "Cabinet Aubert Avocats" "autre_pro" "Avocat"  "Standard" "980"  "2" "12" "actif"    "81" "Maître AUBERT"  "contact@aubert-avocats.fr"   "01 44 55 90 33"
+insert_demo_client "Notaire Pollet"         "autre_pro" "Notaire" "Standard" "820"  "1" "8"  "a_risque" "54" "Maître POLLET"  "contact@pollet-notaire.fr"   "02 99 67 18 44"
 
 echo ""
 echo "=== Seed terminé : 10 clients de démo créés ==="

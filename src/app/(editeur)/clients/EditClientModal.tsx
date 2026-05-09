@@ -110,6 +110,7 @@ export function EditClientModal({
     raison_sociale: client.raison_sociale ?? "",
     representant: client.representant ?? "",
     email: client.representant_email ?? "",
+    phone: client.representant_phone ?? "",
     sub_category: client.sub_category ?? "",
     pack: client.pack ?? "Standard",
     revenue: client.revenue ?? "",
@@ -193,6 +194,15 @@ export function EditClientModal({
                 className={inputClass}
                 value={form.email}
                 onChange={(e) => set("email", e.target.value)}
+              />
+            </div>
+            <div>
+              <label className={labelClass}>Téléphone</label>
+              <FieldWithCopy
+                type="tel"
+                className={inputClass}
+                value={form.phone}
+                onChange={(e) => set("phone", e.target.value)}
               />
             </div>
             <div>

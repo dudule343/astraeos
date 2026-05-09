@@ -11,6 +11,7 @@ export type DbClient = {
   cabinet_name: string | null;
   representant: string | null;
   representant_email: string | null;
+  representant_phone: string | null;
   raison_sociale: string | null;
   siren: string | null;
   category: string | null;
@@ -167,6 +168,12 @@ export function DbClientsTable({ clients }: { clients: DbClient[] }) {
                       {c.representant && (
                         <div className="mt-0.5 text-[10.5px] text-[var(--navy-300)]">
                           {c.representant}
+                        </div>
+                      )}
+                      {(c.representant_email || c.representant_phone) && (
+                        <div className="mt-0.5 flex flex-wrap gap-x-2 text-[10px] text-[var(--navy-300)]">
+                          {c.representant_email && <span>📧 {c.representant_email}</span>}
+                          {c.representant_phone && <span>📞 {c.representant_phone}</span>}
                         </div>
                       )}
                     </td>
