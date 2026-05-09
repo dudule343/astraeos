@@ -597,13 +597,12 @@ BEGIN
   END LOOP;
 END$$;
 
--- Restriction supplémentaire : les engineers voient leurs dossiers + ceux du cabinet (à raffiner)
+-- Restriction supplémentaire : les engineers voient UNIQUEMENT leurs propres dossiers
 CREATE POLICY engineer_dossier_scope ON dossiers
   FOR SELECT
   USING (
     current_user_role() IN ('brand_owner', 'editor', 'cabinet_director', 'compliance')
     OR engineer_id = current_user_id()
-    OR (current_user_role() = 'engineer' AND cabinet_id = current_user_cabinet_id())
   );
 
 -- Les clients ne voient QUE leur dossier
