@@ -3,19 +3,9 @@ import { Topbar } from "../_components/Topbar";
 import { KpiCard, type KpiBlock } from "../_components/KpiCard";
 import { PageHero, GhostButton, GoldButton } from "../_components/PageHeader";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { DbClientsTable, type DbClient } from "./DbClientsTable";
 
 export const dynamic = "force-dynamic";
-
-type DbClient = {
-  id: string;
-  created_at: string;
-  household_address: string | null;
-  cabinet_name: string | null;
-  representant: string | null;
-  representant_email: string | null;
-  raison_sociale: string | null;
-  siren: string | null;
-};
 
 async function fetchDbClients(): Promise<DbClient[]> {
   if (!process.env.SUPABASE_SERVICE_ROLE_KEY) return [];
@@ -373,46 +363,7 @@ export default async function ClientsPage() {
           }
         />
 
-        {dbClients.length > 0 && (
-          <section className="mb-8 rounded-md border border-[var(--gold-300)] bg-white">
-            <div className="flex items-center justify-between border-b border-[var(--navy-100)] bg-[var(--gold-200)]/30 px-4 py-3">
-              <div className="text-[13px] font-semibold text-[var(--navy)]">
-                ✨ Clients créés via le wizard ({dbClients.length})
-              </div>
-              <span className="text-[10.5px] text-[var(--navy-300)]">
-                Données réelles · Supabase
-              </span>
-            </div>
-            <table className="w-full text-left">
-              <thead>
-                <tr className="border-b border-[var(--navy-100)] bg-[var(--ivory)] text-[10.5px] font-bold uppercase tracking-[0.08em] text-[var(--navy-300)]">
-                  <th className="px-4 py-3">Raison sociale</th>
-                  <th className="px-4 py-3">SIREN</th>
-                  <th className="px-4 py-3">Représentant légal</th>
-                  <th className="px-4 py-3">Email</th>
-                  <th className="px-4 py-3">Cabinet</th>
-                  <th className="px-4 py-3">Adresse</th>
-                  <th className="px-4 py-3 text-right">Créé le</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[var(--navy-100)]">
-                {dbClients.map((c) => (
-                  <tr key={c.id} className="text-[12px] text-[var(--navy)] hover:bg-[var(--light-blue)]">
-                    <td className="px-4 py-3 font-semibold">{c.raison_sociale ?? "—"}</td>
-                    <td className="px-4 py-3 tabular-nums text-[var(--navy-300)]">{c.siren ?? "—"}</td>
-                    <td className="px-4 py-3">{c.representant ?? "—"}</td>
-                    <td className="px-4 py-3 text-[var(--navy-300)]">{c.representant_email ?? "—"}</td>
-                    <td className="px-4 py-3">{c.cabinet_name ?? "—"}</td>
-                    <td className="px-4 py-3 text-[11px] text-[var(--navy-300)]">{c.household_address ?? "—"}</td>
-                    <td className="px-4 py-3 text-right text-[11px] text-[var(--navy-300)]">
-                      {new Date(c.created_at).toLocaleDateString("fr-FR")}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </section>
-        )}
+        {dbClients.length > 0 && <DbClientsTable clients={dbClients} />}
 
         <section className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
           {kpis.map((k) => (
