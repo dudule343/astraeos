@@ -1,3 +1,5 @@
+import { DateSelector } from "./DateSelector";
+
 type TopbarProps = {
   current: string;
 };
@@ -12,14 +14,7 @@ export function Topbar({ current }: TopbarProps) {
       </div>
 
       <div className="flex items-center gap-2.5">
-        <button
-          type="button"
-          className="inline-flex h-[34px] items-center gap-2 rounded-md border border-[var(--gold-300)] bg-gradient-to-br from-[var(--ivory)] to-[var(--gold-200)] px-3 text-[11.5px] font-semibold text-[var(--medium-400)] hover:border-[var(--gold)]"
-        >
-          <span>📅</span>
-          <span>06 mai 2026</span>
-          <span className="text-[10.5px] font-medium text-[var(--navy-300)]">vs M-1</span>
-        </button>
+        <DateSelector />
 
         <div className="flex h-[34px] w-[34px] cursor-pointer items-center justify-center rounded-md border border-[var(--navy-100)] bg-white text-[var(--navy-300)]">
           🔔
