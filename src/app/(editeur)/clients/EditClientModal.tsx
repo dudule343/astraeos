@@ -49,6 +49,55 @@ function findParentCategory(subCategory: string): "marque" | "cabinet_direct" | 
   return null;
 }
 
+function CopyButton({ value }: { value: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    if (!value) return;
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      // Fallback : sélection manuelle
+    }
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={handleCopy}
+      disabled={!value}
+      title="Copier dans le presse-papiers"
+      className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-[var(--navy-300)] hover:bg-[var(--ivory)] hover:text-[var(--navy)] disabled:cursor-not-allowed disabled:opacity-30"
+    >
+      {copied ? (
+        <span className="text-[12px] text-[var(--green-text)]">✓</span>
+      ) : (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+        </svg>
+      )}
+    </button>
+  );
+}
+
+function FieldWithCopy({
+  className,
+  ...props
+}: React.InputHTMLAttributes<HTMLInputElement>) {
+  return (
+    <div className="relative">
+      <input
+        {...props}
+        className={`${className} pr-9`}
+      />
+      <CopyButton value={String(props.value ?? "")} />
+    </div>
+  );
+}
+
 export function EditClientModal({
   client,
   onClose,
@@ -123,7 +172,7 @@ export function EditClientModal({
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div className="md:col-span-2">
               <label className={labelClass}>Raison sociale</label>
-              <input
+              <FieldWithCopy
                 className={inputClass}
                 value={form.raison_sociale}
                 onChange={(e) => set("raison_sociale", e.target.value)}
@@ -131,7 +180,7 @@ export function EditClientModal({
             </div>
             <div>
               <label className={labelClass}>Représentant légal</label>
-              <input
+              <FieldWithCopy
                 className={inputClass}
                 value={form.representant}
                 onChange={(e) => set("representant", e.target.value)}
@@ -139,7 +188,7 @@ export function EditClientModal({
             </div>
             <div>
               <label className={labelClass}>Email</label>
-              <input
+              <FieldWithCopy
                 type="email"
                 className={inputClass}
                 value={form.email}
