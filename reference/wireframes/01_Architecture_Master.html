@@ -1,0 +1,2385 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ASTRAEOS — Architecture · Document maître</title>
+<link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.0/dist/mermaid.min.js"></script>
+<style>
+  :root {
+    --navy: #102D50;
+    --navy-300: #708196;
+    --navy-200: #A4AEBB;
+    --navy-100: #DBE0E4;
+    --gold: #C68E0E;
+    --gold-300: #DDBB6E;
+    --gold-200: #EEDDB6;
+    --gold-100: #FAF8F3;
+    --medium-400: #695D30;
+    --medium-300: #877D59;
+    --ivory: #FAF8F3;
+    --light-blue: #EBF1FA;
+    --green-bg: #E8F3EC;
+    --green-text: #1F8A4C;
+    --red-bg: #FCE8E8;
+    --red-text: #B23A3A;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; scroll-padding-top: 24px; }
+  body {
+    font-family: 'Epilogue', -apple-system, sans-serif;
+    background: var(--ivory);
+    color: var(--navy);
+    line-height: 1.6;
+    font-size: 14.5px;
+  }
+
+  /* Layout principal */
+  .doc-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    min-height: 100vh;
+  }
+
+  /* Sidebar de navigation */
+  .doc-sidebar {
+    background: linear-gradient(180deg, var(--navy) 0%, #0a1f38 100%);
+    color: white;
+    padding: 32px 24px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+  .doc-sidebar::-webkit-scrollbar { width: 4px; }
+  .doc-sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+  .sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  .sidebar-brand-mark {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, var(--gold), var(--medium-400));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 800;
+    font-size: 13px;
+    letter-spacing: 0.04em;
+  }
+  .sidebar-brand-name {
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+  }
+  .sidebar-brand-sub {
+    font-size: 9.5px;
+    color: var(--gold-300);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-top: 6px;
+    margin-bottom: 36px;
+  }
+
+  .sidebar-nav { display: flex; flex-direction: column; gap: 2px; }
+  .sidebar-nav a {
+    color: rgba(255,255,255,0.75);
+    text-decoration: none;
+    font-size: 12.5px;
+    padding: 8px 10px;
+    border-radius: 5px;
+    transition: all 0.15s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    line-height: 1.35;
+  }
+  .sidebar-nav a:hover { background: rgba(255,255,255,0.06); color: white; }
+  .sidebar-nav a.active {
+    background: rgba(198,142,14,0.18);
+    color: var(--gold-300);
+    font-weight: 700;
+  }
+  .sidebar-nav-num {
+    background: rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.6);
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .sidebar-nav a.active .sidebar-nav-num {
+    background: var(--gold);
+    color: white;
+  }
+  .sidebar-section-header {
+    font-size: 9px;
+    font-weight: 800;
+    color: var(--gold);
+    letter-spacing: 0.20em;
+    text-transform: uppercase;
+    margin-top: 24px;
+    margin-bottom: 8px;
+    padding: 0 10px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .sidebar-section-header::before {
+    content: '';
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--gold);
+  }
+
+  /* Contenu principal */
+  .doc-main {
+    padding: 48px 60px 80px;
+    max-width: 1200px;
+  }
+
+  /* Header doc */
+  .doc-header {
+    margin-bottom: 48px;
+    padding-bottom: 32px;
+    border-bottom: 1px solid var(--navy-100);
+  }
+  .doc-header-eyebrow {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .doc-title {
+    font-size: 38px;
+    font-weight: 700;
+    letter-spacing: -0.018em;
+    line-height: 1.15;
+    margin-bottom: 16px;
+  }
+  .doc-title strong {
+    color: var(--gold);
+  }
+  .doc-subtitle {
+    font-size: 15px;
+    color: var(--navy-300);
+    line-height: 1.6;
+    max-width: 800px;
+  }
+  .doc-meta {
+    display: flex;
+    gap: 24px;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px dashed var(--navy-100);
+    font-size: 11px;
+    color: var(--navy-300);
+  }
+  .doc-meta strong { color: var(--navy); font-weight: 700; }
+
+  /* Sections */
+  section { margin-bottom: 80px; scroll-margin-top: 24px; }
+  .section-header {
+    margin-bottom: 32px;
+  }
+  .section-eyebrow {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-eyebrow .num {
+    background: var(--gold);
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+  }
+  .section-title {
+    font-size: 30px;
+    font-weight: 600;
+    letter-spacing: -0.012em;
+    color: var(--navy);
+    margin-bottom: 12px;
+    line-height: 1.2;
+  }
+  .section-intro {
+    font-size: 14.5px;
+    color: var(--navy-300);
+    line-height: 1.65;
+    max-width: 800px;
+    margin-bottom: 12px;
+  }
+
+  /* Sous-titres */
+  h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--navy);
+    margin-top: 36px;
+    margin-bottom: 14px;
+    letter-spacing: -0.005em;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  h3::before {
+    content: '';
+    width: 5px;
+    height: 14px;
+    background: var(--gold);
+    border-radius: 2px;
+  }
+  h4 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--navy);
+    margin-top: 24px;
+    margin-bottom: 10px;
+    letter-spacing: -0.003em;
+  }
+
+  /* Texte */
+  p {
+    color: var(--navy);
+    margin-bottom: 14px;
+    line-height: 1.65;
+    max-width: 850px;
+  }
+  p strong { color: var(--navy); font-weight: 700; }
+  .gold { color: var(--gold); }
+  em { color: var(--medium-400); font-style: italic; }
+
+  /* Cards */
+  .card {
+    background: white;
+    border: 1px solid var(--navy-100);
+    border-radius: 10px;
+    padding: 24px 28px;
+    margin-bottom: 16px;
+    transition: box-shadow 0.2s ease;
+  }
+  .card:hover { box-shadow: 0 2px 14px rgba(16,45,80,0.06); }
+  .card.gold-left { border-left: 4px solid var(--gold); }
+  .card.luxe {
+    background: linear-gradient(135deg, var(--ivory) 0%, white 60%, var(--light-blue) 100%);
+    border-color: var(--gold-300);
+    position: relative;
+    overflow: hidden;
+  }
+  .card.luxe::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(198,142,14,0.10), transparent 70%);
+  }
+  .card-eyebrow {
+    font-size: 9.5px;
+    font-weight: 800;
+    color: var(--gold);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .card-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 8px;
+    letter-spacing: -0.005em;
+  }
+
+  /* Grids */
+  .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 16px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 16px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 16px; }
+
+  /* Tableaux */
+  .table-wrap {
+    background: white;
+    border: 1px solid var(--navy-100);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  th {
+    background: var(--navy);
+    color: white;
+    text-align: left;
+    padding: 12px 16px;
+    font-weight: 700;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--navy-100);
+    vertical-align: top;
+  }
+  tr:nth-child(even) td { background: rgba(235,241,250,0.4); }
+  tr:last-child td { border-bottom: none; }
+  td strong { color: var(--navy); font-weight: 700; }
+  .tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 9.5px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .tag-done { background: var(--green-bg); color: var(--green-text); }
+  .tag-progress { background: var(--gold-200); color: var(--medium-400); }
+  .tag-todo { background: var(--light-blue); color: var(--navy); }
+  .tag-idea { background: var(--red-bg); color: var(--red-text); }
+  .tag-priority { background: var(--navy); color: white; }
+
+  /* Mermaid containers */
+  .mermaid-container {
+    background: white;
+    border: 1px solid var(--navy-100);
+    border-radius: 10px;
+    padding: 32px;
+    margin: 24px 0;
+    overflow: auto;
+    text-align: center;
+  }
+  .mermaid-container.dark {
+    background: var(--navy);
+  }
+  .mermaid {
+    text-align: center;
+  }
+  .mermaid-caption {
+    font-size: 11px;
+    color: var(--navy-300);
+    text-align: center;
+    margin-top: 12px;
+    font-style: italic;
+    letter-spacing: 0.04em;
+  }
+
+  /* Listes */
+  ul.styled, ol.styled {
+    margin-left: 0;
+    margin-bottom: 16px;
+    padding-left: 0;
+    list-style: none;
+  }
+  ul.styled li, ol.styled li {
+    position: relative;
+    padding-left: 24px;
+    margin-bottom: 8px;
+    line-height: 1.55;
+  }
+  ul.styled li::before {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 9px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--gold);
+  }
+  ol.styled { counter-reset: list-counter; }
+  ol.styled li {
+    counter-increment: list-counter;
+    padding-left: 32px;
+  }
+  ol.styled li::before {
+    content: counter(list-counter, decimal-leading-zero);
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: var(--gold);
+    font-weight: 800;
+    font-size: 12px;
+    letter-spacing: 0.04em;
+  }
+
+  /* Flow boxes (espaces) */
+  .space-cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin: 24px 0;
+  }
+  .space-card {
+    background: white;
+    border: 2px solid var(--navy-100);
+    border-radius: 10px;
+    padding: 20px 18px;
+    text-align: center;
+    transition: all 0.2s ease;
+    cursor: pointer;
+  }
+  .space-card:hover { border-color: var(--gold); box-shadow: 0 4px 14px rgba(198,142,14,0.10); transform: translateY(-3px); }
+  .space-card-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--gold-200);
+    border: 1.5px solid var(--gold-300);
+    margin: 0 auto 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--medium-400);
+  }
+  .space-card-icon svg { width: 24px; height: 24px; }
+  .space-card-num {
+    font-size: 9px;
+    font-weight: 800;
+    color: var(--gold);
+    letter-spacing: 0.18em;
+    margin-bottom: 4px;
+  }
+  .space-card-title {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 4px;
+    line-height: 1.3;
+  }
+  .space-card-meta {
+    font-size: 10.5px;
+    color: var(--navy-300);
+    line-height: 1.4;
+  }
+
+  /* Roles cascade */
+  .role-cascade {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 24px 0;
+  }
+  .role-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 18px;
+    background: white;
+    border: 1px solid var(--navy-100);
+    border-radius: 8px;
+    border-left: 4px solid var(--gold-300);
+    transition: all 0.15s ease;
+  }
+  .role-row:hover { box-shadow: 0 2px 10px rgba(16,45,80,0.04); }
+  .role-row .role-num {
+    background: var(--gold);
+    color: white;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 800;
+    flex-shrink: 0;
+  }
+  .role-name { font-weight: 700; color: var(--navy); font-size: 14px; min-width: 220px; }
+  .role-desc { color: var(--navy-300); font-size: 12.5px; flex: 1; }
+
+  /* KPI / valeurs */
+  .kpis-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin: 24px 0;
+  }
+  .kpi-block {
+    background: white;
+    border: 1px solid var(--navy-100);
+    border-left: 3px solid var(--gold);
+    border-radius: 8px;
+    padding: 18px 20px;
+  }
+  .kpi-label { font-size: 10px; font-weight: 700; color: var(--navy-300); letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 6px; }
+  .kpi-value { font-size: 28px; font-weight: 700; color: var(--navy); letter-spacing: -0.018em; line-height: 1; font-feature-settings: 'tnum' on; }
+  .kpi-meta { font-size: 11px; color: var(--navy-300); margin-top: 6px; }
+  .kpi-meta strong { color: var(--gold); font-weight: 700; }
+
+  /* Note encadré */
+  .note {
+    background: var(--light-blue);
+    border-left: 4px solid var(--navy);
+    padding: 16px 20px;
+    margin: 16px 0;
+    border-radius: 0 6px 6px 0;
+    font-size: 13px;
+    line-height: 1.55;
+  }
+  .note strong { color: var(--navy); font-weight: 700; }
+  .note.gold { background: rgba(198,142,14,0.06); border-left-color: var(--gold); }
+  .note.gold strong { color: var(--gold); }
+
+  /* Print */
+  @media print {
+    .doc-sidebar { display: none; }
+    .doc-layout { grid-template-columns: 1fr; }
+    .doc-main { padding: 24px; max-width: 100%; }
+    section { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<div class="doc-layout">
+
+  <!-- ================================ -->
+  <!-- SIDEBAR DE NAVIGATION             -->
+  <!-- ================================ -->
+  <aside class="doc-sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-brand-mark">A</div>
+      <div>
+        <div class="sidebar-brand-name">ASTRAEOS</div>
+      </div>
+    </div>
+    <div class="sidebar-brand-sub">Document 1 / 6 · Maître</div>
+
+    <nav class="sidebar-nav">
+      <div class="sidebar-section-header">Vue d'ensemble</div>
+      <a href="#executive"><span class="sidebar-nav-num">1</span>Executive Summary</a>
+      <a href="#vision"><span class="sidebar-nav-num">2</span>Vision produit</a>
+      <a href="#modeles-commerciaux"><span class="sidebar-nav-num">⚖</span>2 modèles commerciaux</a>
+
+      <div class="sidebar-section-header">Acteurs</div>
+      <a href="#roles"><span class="sidebar-nav-num">3</span>7 rôles utilisateurs</a>
+      <a href="#permissions"><span class="sidebar-nav-num">4</span>Matrice permissions</a>
+      <a href="#toggle"><span class="sidebar-nav-num">⇄</span>Toggle dirigeant ↔ ingénieur</a>
+
+      <div class="sidebar-section-header">Architecture</div>
+      <a href="#sitemap"><span class="sidebar-nav-num">5</span>Sitemap global</a>
+      <a href="#multitenant"><span class="sidebar-nav-num">6</span>Multi-tenancy</a>
+      <a href="#cascade-financiere"><span class="sidebar-nav-num">💰</span>Cascade financière</a>
+
+      <div class="sidebar-section-header">Workflows</div>
+      <a href="#workflow-prospect"><span class="sidebar-nav-num">7</span>Parcours prospect</a>
+      <a href="#workflow-ia"><span class="sidebar-nav-num">8</span>IA agentique</a>
+      <a href="#workflow-finance"><span class="sidebar-nav-num">9</span>Flux financiers</a>
+      <a href="#workflow-data"><span class="sidebar-nav-num">10</span>Centralisation données</a>
+
+      <div class="sidebar-section-header">📐 Documents fondateurs</div>
+      <a href="00_Master_Dataset.html" target="_blank">📊 Master Dataset</a>
+      <a href="00_Data_Architecture.html" target="_blank">🏗 Data Architecture</a>
+
+      <div class="sidebar-section-header">📚 Documents espaces</div>
+      <a href="02_Architecture_Editeur.html" target="_blank">👑 Doc 2 · Admin éditeur</a>
+      <a href="03_Architecture_Proprietaire.html" target="_blank">🏛 Doc 3 · Propriétaire</a>
+      <a href="04_Architecture_Licencie.html" target="_blank">💼 Doc 4 · Licencié dirigeant</a>
+      <a href="05_Architecture_Ingenieur.html" target="_blank">👤 Doc 5 · Ingénieur ⭐ NOUVEAU</a>
+      <a href="06_Architecture_Client.html" target="_blank">👥 Doc 6 · Client final</a>
+    </nav>
+  </aside>
+
+  <!-- ================================ -->
+  <!-- CONTENU PRINCIPAL                 -->
+  <!-- ================================ -->
+  <main class="doc-main">
+
+    <!-- ============================== -->
+    <!-- HEADER DOCUMENT                 -->
+    <!-- ============================== -->
+    <header class="doc-header">
+      <div class="doc-header-eyebrow">Document maître · 1 / 6</div>
+      <h1 class="doc-title">Architecture <strong>plateforme ASTRAEOS</strong></h1>
+      <p class="doc-subtitle">Document maître de l'architecture plateforme ASTRAEOS — l'éditeur SaaS qui héberge des cabinets d'ingénierie patrimoniale (PRIVEOS Capital étant le premier locataire). Donne la vision d'ensemble (acteurs, permissions, workflows, multi-tenancy, cascades financières) et renvoie vers <strong>5 documents dédiés</strong> qui détaillent chacun un espace utilisateur de la plateforme.</p>
+      <div class="doc-meta">
+        <span><strong>Version</strong> 5.2 — Document maître</span>
+        <span><strong>Date</strong> 02 mai 2026</span>
+        <span><strong>Statut</strong> Document évolutif</span>
+        <span><strong>Documents liés</strong> 5 espaces dédiés</span>
+      </div>
+    </header>
+
+    <!-- ============================== -->
+    <!-- 1. EXECUTIVE SUMMARY            -->
+    <!-- ============================== -->
+    <section id="executive">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">1</span> Synthèse exécutive</div>
+        <h2 class="section-title">Une plateforme tout-en-un pour piloter un réseau d'ingénierie patrimoniale</h2>
+        <p class="section-intro">ASTRAEOS construit une plateforme intégrée qui couvre l'ensemble du cycle de vie d'un dossier patrimonial — de la prospection à la mise en place des préconisations — tout en orchestrant la collaboration entre les acteurs : éditeur, propriétaire de marque, superviseurs, licenciés, ingénieurs et clients finaux.</p>
+      </div>
+
+      <div class="kpis-row">
+        <div class="kpi-block">
+          <div class="kpi-label">Espaces utilisateurs</div>
+          <div class="kpi-value">5</div>
+          <div class="kpi-meta">Éditeur · Propriétaire · Dirigeant · Ingénieur · Client</div>
+        </div>
+        <div class="kpi-block">
+          <div class="kpi-label">Rôles distincts</div>
+          <div class="kpi-value">7</div>
+          <div class="kpi-meta">Du super-admin éditeur au client final</div>
+        </div>
+        <div class="kpi-block">
+          <div class="kpi-label">Étapes pipeline</div>
+          <div class="kpi-value">6</div>
+          <div class="kpi-meta">Prospect → Client en suivi</div>
+        </div>
+        <div class="kpi-block">
+          <div class="kpi-label">Phases IA</div>
+          <div class="kpi-value">5</div>
+          <div class="kpi-meta">Agents pour automatiser l'étude</div>
+        </div>
+      </div>
+
+      <div class="card luxe">
+        <div class="card-eyebrow">Modèle économique cible</div>
+        <h3 style="margin-top:0;">Plateforme multi-tenant — ASTRAEOS héberge plusieurs cabinets, dont PRIVEOS Capital</h3>
+        <p>La plateforme est pensée dès le départ pour accueillir <strong>plusieurs propriétaires de marque</strong> (PRIVEOS Capital comme premier locataire, puis Dupont Patrimoine, Mont-Blanc Conseil…). Chaque marque dispose de son espace cloisonné, de son réseau de licenciés et de sa charte graphique. Toi, en tant qu'éditeur ASTRAEOS, vois et administres l'ensemble des comptes.</p>
+        <p>Cette architecture permet de <strong>commercialiser la plateforme</strong> à d'autres cabinets d'ingénierie patrimoniale, voire à terme à des cabinets d'avocats, notaires ou experts-comptables associés.</p>
+      </div>
+    </section>
+
+    <!-- ============================== -->
+    <!-- 2. VISION PRODUIT               -->
+    <!-- ============================== -->
+    <section id="vision">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">2</span> Vision produit</div>
+        <h2 class="section-title">3 promesses pour 3 perspectives</h2>
+        <p class="section-intro">La plateforme délivre une promesse différente selon le rôle qu'occupe l'utilisateur. Cette segmentation guide la conception de chaque écran.</p>
+      </div>
+
+      <div class="grid-3">
+        <div class="card gold-left">
+          <div class="card-eyebrow">Pour l'éditeur</div>
+          <div class="card-title">Vendre une plateforme clé en main</div>
+          <p style="font-size:13px;">Proposer aux cabinets d'ingénierie patrimoniale un environnement complet — sans dépendances API externes critiques, hautement personnalisable, juridiquement conforme.</p>
+        </div>
+        <div class="card gold-left">
+          <div class="card-eyebrow">Pour le propriétaire</div>
+          <div class="card-title">Animer son réseau d'un seul tableau</div>
+          <p style="font-size:13px;">Voir en temps réel l'activité, la rémunération générée, la performance individuelle et collective des licenciés — avec contrôle granulaire (compliance, supervision, communication).</p>
+        </div>
+        <div class="card gold-left">
+          <div class="card-eyebrow">Pour le licencié</div>
+          <div class="card-title">Tout faire depuis un seul outil</div>
+          <p style="font-size:13px;">Gérer son agenda, mener ses RDV en visio, faire signer ses documents, collecter les pièces, produire ses études assistées par IA, suivre sa rémunération et communiquer avec ses clients — sans changer d'application.</p>
+        </div>
+      </div>
+
+      <div class="note gold">
+        <strong>Principe directeur :</strong> Tout doit être faisable depuis la plateforme, sans ouvrir un autre outil. Les seules exceptions tolérées sont les outils externes spécialisés (visioconférence avec transcription IA, signature électronique <em>Yousign</em>, banque professionnelle <em>Qonto</em>) qui sont intégrés mais non recréés.
+      </div>
+    </section>
+
+    <!-- ============================== -->
+    <!-- 2 MODÈLES COMMERCIAUX           -->
+    <!-- ============================== -->
+    <section id="modeles-commerciaux">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">⚖</span> Architecture commerciale</div>
+        <h2 class="section-title">Les 2 modèles commerciaux d'ASTRAEOS</h2>
+        <p class="section-intro">ASTRAEOS s'adresse à <strong>2 types de clients distincts</strong> avec des modèles économiques différents. Cette dualité structure l'onboarding, la facturation et l'usage de la plateforme. Comprendre cette distinction est essentiel pour la conception produit.</p>
+      </div>
+
+      <div class="grid-2">
+        <div class="card luxe" style="border-color: var(--gold); background: linear-gradient(180deg, white 0%, rgba(198,142,14,0.04) 100%);">
+          <div class="card-eyebrow" style="color: var(--gold);">Modèle 1 · 🏛 Tenant Marque</div>
+          <h3 style="margin-top:0; font-size: 18px;">Propriétaire de marque (réseau)</h3>
+          <p style="font-size:13px;"><strong>Cible :</strong> détenteurs d'un réseau de cabinets en franchise/licence. Ex : PRIVEOS Capital, Dupont Patrimoine, Mont-Blanc Conseil.</p>
+          <ul class="styled" style="font-size:12.5px;">
+            <li>Architecture <strong>complète à 4 niveaux</strong> : ASTRAEOS → Propriétaire → Cabinets licenciés → Ingénieurs → Clients</li>
+            <li><strong>Doc 3 (Espace Propriétaire) activé</strong> : pilotage stratégique du réseau, animation, performance</li>
+            <li><strong>Doc 4 (Cabinet) avec branding imposé</strong> : la charte du propriétaire s'applique aux cabinets</li>
+            <li><strong>Modèle économique pour ASTRAEOS</strong> : abonnement SaaS multi-tenants + features avancées</li>
+            <li><strong>Modèle économique du propriétaire</strong> : il rémunère son réseau (cf. cascade financière) — études + commissions produits paramétrables par cabinet</li>
+            <li><strong>Catalogue produits</strong> : centralisé par le propriétaire, distribué aux cabinets</li>
+          </ul>
+        </div>
+
+        <div class="card luxe" style="border-color: var(--navy);">
+          <div class="card-eyebrow" style="color: var(--navy);">Modèle 2 · 💼 Tenant Cabinet direct</div>
+          <h3 style="margin-top:0; font-size: 18px;">Cabinet indépendant (sans réseau)</h3>
+          <p style="font-size:13px;"><strong>Cible :</strong> les ~3 000 cabinets de gestion de patrimoine indépendants en France qui veulent acheter la solution directement, sans appartenir à un réseau.</p>
+          <ul class="styled" style="font-size:12.5px;">
+            <li>Architecture <strong>simplifiée à 3 niveaux</strong> : ASTRAEOS → Cabinet indépendant → Ingénieurs → Clients</li>
+            <li><strong>Doc 3 (Espace Propriétaire) NON activé</strong> — le cabinet est lui-même le tenant</li>
+            <li><strong>Doc 4 (Cabinet) avec branding personnalisé</strong> : le cabinet utilise sa propre charte (logo, couleurs)</li>
+            <li><strong>Modèle économique pour ASTRAEOS</strong> : <strong>abonnement forfaitaire par utilisateur/mois</strong> (pas de commission produit)</li>
+            <li><strong>Modèle économique du cabinet</strong> : il garde 100% de ses études + 100% de ses commissions produits</li>
+            <li><strong>Catalogue produits</strong> : <strong>construit par le cabinet lui-même</strong>, ou via la <em>Marketplace ASTRAEOS</em> qui propose des packs sectoriels (investissements financiers, biens immobiliers…)</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>Tableau comparatif des 2 modèles</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Critère</th>
+              <th>🏛 Modèle "Marque" (réseau)</th>
+              <th>💼 Modèle "Cabinet direct"</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Cible commerciale</strong></td>
+              <td>Réseaux de cabinets en franchise/licence</td>
+              <td>Cabinets indépendants (3 000 en France)</td>
+            </tr>
+            <tr>
+              <td><strong>Volume potentiel</strong></td>
+              <td>~10-20 réseaux en France</td>
+              <td>~3 000 cabinets en France</td>
+            </tr>
+            <tr>
+              <td><strong>Niveaux hiérarchiques</strong></td>
+              <td>4 niveaux (Propriétaire → Cabinet → Ingénieur → Client)</td>
+              <td>3 niveaux (Cabinet → Ingénieur → Client)</td>
+            </tr>
+            <tr>
+              <td><strong>Doc 3 (Propriétaire)</strong></td>
+              <td>✓ Activé</td>
+              <td>✕ Non activé</td>
+            </tr>
+            <tr>
+              <td><strong>Doc 4 (Cabinet)</strong></td>
+              <td>✓ Activé · branding imposé</td>
+              <td>✓ Activé · branding personnalisé</td>
+            </tr>
+            <tr>
+              <td><strong>Modèle économique ASTRAEOS</strong></td>
+              <td>Abonnement SaaS multi-tenants + features réseau</td>
+              <td><strong>Abonnement forfaitaire par utilisateur/mois</strong></td>
+            </tr>
+            <tr>
+              <td><strong>Rémunération du propriétaire</strong></td>
+              <td>Part fixe + variable sur études + % sur produits placés</td>
+              <td>Aucune (pas de propriétaire)</td>
+            </tr>
+            <tr>
+              <td><strong>Catalogue produits</strong></td>
+              <td>Centralisé par propriétaire</td>
+              <td>Construit par le cabinet · Marketplace ASTRAEOS optionnelle</td>
+            </tr>
+            <tr>
+              <td><strong>Référentiels métier</strong></td>
+              <td>Imposés par le propriétaire</td>
+              <td>Construits par le cabinet · packs ASTRAEOS proposés</td>
+            </tr>
+            <tr>
+              <td><strong>Compliance réseau</strong></td>
+              <td>Suivi par le propriétaire (ORIAS, RC pro, certifications)</td>
+              <td>Géré par le cabinet seul</td>
+            </tr>
+            <tr>
+              <td><strong>Charte graphique</strong></td>
+              <td>Imposée par le propriétaire</td>
+              <td>Personnalisée par le cabinet</td>
+            </tr>
+            <tr>
+              <td><strong>Onboarding</strong></td>
+              <td>Wizard "Création tenant Marque" (Doc 2)</td>
+              <td>Wizard "Création tenant Cabinet direct" (Doc 2)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Marketplace ASTRAEOS (modèle Cabinet direct)</h3>
+      <div class="card luxe">
+        <div class="card-eyebrow">Service à valeur ajoutée pour les tenants "Cabinet direct"</div>
+        <h3 style="margin-top:0;">Une marketplace pour les cabinets indépendants qui ne veulent pas tout construire</h3>
+        <p style="font-size:13px;">Les cabinets indépendants n'ont pas de propriétaire de marque pour leur fournir un catalogue produits centralisé. ASTRAEOS propose une <strong>Marketplace</strong> où le cabinet peut activer des <em>packs sectoriels</em> tout faits :</p>
+        <div class="grid-3" style="margin-top: 14px;">
+          <div class="card gold-left">
+            <div class="card-eyebrow">Pack Financier</div>
+            <p style="font-size:12px;">Catalogue de produits financiers de marché (assurance vie, PER, SCPI, OPCI, structurés…). Mis à jour par ASTRAEOS.</p>
+          </div>
+          <div class="card gold-left">
+            <div class="card-eyebrow">Pack Immobilier</div>
+            <p style="font-size:12px;">Catalogue de biens immobiliers en placement (neuf, ancien, démembrement, LMNP…). Mis à jour par ASTRAEOS.</p>
+          </div>
+          <div class="card gold-left">
+            <div class="card-eyebrow">Pack Référentiels</div>
+            <p style="font-size:12px;">Référentiel DCI (257 questions, 13 catégories, 106 documents) prêt à l'emploi. Cabinet peut surcharger.</p>
+          </div>
+        </div>
+        <p style="font-size:13px; margin-top: 14px;"><em>La Marketplace est optionnelle : un cabinet peut choisir de tout construire lui-même ou d'activer certains packs uniquement. Le pricing est précisé dans le Doc 2 (Espace ASTRAEOS Éditeur).</em></p>
+      </div>
+
+      <div class="note gold">
+        <strong>📌 Pourquoi ce double modèle est stratégique :</strong>
+        <ul style="margin-top: 8px; padding-left: 20px; font-size: 12.5px;">
+          <li><strong>Marché élargi 100x</strong> — les cabinets indépendants représentent un marché 100x plus grand que les réseaux (3 000 vs ~20).</li>
+          <li><strong>Couverture commerciale complète</strong> — ASTRAEOS peut s'adresser aux 2 segments du marché de l'ingénierie patrimoniale française.</li>
+          <li><strong>Évolutivité d'un client</strong> — un cabinet indépendant qui se développe peut basculer vers un modèle "marque" s'il décide de créer son propre réseau (migration tenant).</li>
+          <li><strong>Pas de doublon technique</strong> — les Doc 4 (Cabinet) et Doc 5 (Ingénieur) sont identiques dans les 2 cas, avec des éléments conditionnels (badges "réseau seulement" / "indépendant seulement"). Pas besoin de réécrire les espaces.</li>
+        </ul>
+      </div>
+
+      <div class="note">
+        <strong>🔧 Implémentation technique du double modèle :</strong>
+        <ul style="margin-top: 8px; padding-left: 20px; font-size: 12.5px;">
+          <li><strong>Au niveau base de données</strong> : 2 types de tenants (<code>tenant_type = 'marque'</code> ou <code>tenant_type = 'cabinet_direct'</code>).</li>
+          <li><strong>Au niveau Doc 2 (Éditeur)</strong> : wizard d'onboarding différencié — voir Doc 2.</li>
+          <li><strong>Au niveau Doc 3 (Propriétaire)</strong> : utilisé uniquement par les tenants "marque".</li>
+          <li><strong>Au niveau Doc 4 (Cabinet)</strong> : encarts conditionnels affichés selon le type de tenant — voir Doc 4.</li>
+          <li><strong>Au niveau Doc 5 (Ingénieur)</strong> : interface identique dans les 2 cas — pas d'adaptation nécessaire.</li>
+        </ul>
+      </div>
+    </section>
+    <section id="roles">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">3</span> Acteurs</div>
+        <h2 class="section-title">7 rôles utilisateurs distincts</h2>
+        <p class="section-intro">La plateforme distingue 7 niveaux de droits, du super-administrateur éditeur au client final. Chaque rôle correspond à un périmètre fonctionnel et à un espace d'interface dédié.</p>
+      </div>
+
+      <div class="role-cascade">
+        <div class="role-row" style="border-left-color: var(--gold);">
+          <span class="role-num" style="background: var(--gold);">1</span>
+          <span class="role-name">Admin éditeur <span style="font-size:9.5px;font-weight:800;color:var(--gold);background:rgba(198,142,14,0.10);padding:2px 7px;border-radius:3px;letter-spacing:1px;margin-left:6px;">→ DOC 2</span></span>
+          <span class="role-desc">Toi en tant qu'éditeur de la plateforme (ASTRAEOS). Vois tous les tenants (propriétaires de marque), facture l'outil, supporte les clients propriétaires.</span>
+        </div>
+        <div class="role-row" style="border-left-color: var(--gold);">
+          <span class="role-num" style="background: var(--gold);">2</span>
+          <span class="role-name">Propriétaire de marque <span style="font-size:9.5px;font-weight:800;color:var(--gold);background:rgba(198,142,14,0.10);padding:2px 7px;border-radius:3px;letter-spacing:1px;margin-left:6px;">→ DOC 3</span></span>
+          <span class="role-desc">Détenteur d'un cabinet d'ingénierie patrimoniale (PRIVEOS Capital, Dupont Patrimoine…). Anime son réseau, paramètre ses produits, voit toute son activité.</span>
+        </div>
+        <div class="role-row" style="border-left-color: var(--gold);">
+          <span class="role-num" style="background: var(--gold);">3</span>
+          <span class="role-name">Dirigeant cabinet <span style="font-size:9.5px;font-weight:800;color:var(--gold);background:rgba(198,142,14,0.10);padding:2px 7px;border-radius:3px;letter-spacing:1px;margin-left:6px;">→ DOC 4</span></span>
+          <span class="role-desc">Dirigeant d'un cabinet (licencié d'un réseau OU indépendant). Gère son équipe, sa facturation, sa compliance, ses dossiers. <em>Bénéficie d'un toggle pour basculer en mode "ingénieur" et faire ses propres études.</em></span>
+        </div>
+        <div class="role-row" style="border-left-color: var(--gold);">
+          <span class="role-num" style="background: var(--gold);">4</span>
+          <span class="role-name">Ingénieur patrimonial <span style="font-size:9.5px;font-weight:800;color:white;background:var(--gold);padding:2px 7px;border-radius:3px;letter-spacing:1px;margin-left:6px;">→ DOC 5 ⭐</span></span>
+          <span class="role-desc">Salarié ou collaborateur d'un cabinet (licencié d'un réseau OU indépendant). Mène les RDV, produit les études assistées par IA, gère ses propres clients en autonomie. <em>Espace cloisonné : il ne voit que ses clients.</em></span>
+        </div>
+        <div class="role-row" style="border-left-color: var(--navy);">
+          <span class="role-num" style="background: var(--navy);">5</span>
+          <span class="role-name">Client final <span style="font-size:9.5px;font-weight:800;color:var(--gold);background:rgba(198,142,14,0.10);padding:2px 7px;border-radius:3px;letter-spacing:1px;margin-left:6px;">→ DOC 6</span></span>
+          <span class="role-desc">Personne accompagnée par un ingénieur du cabinet. Espace dédié pour ses documents, simulations, suivi des préconisations, échanges avec son ingénieur.</span>
+        </div>
+        <div class="role-row" style="border-left-color: var(--navy-200); opacity: 0.85;">
+          <span class="role-num" style="background: var(--navy-300);">6</span>
+          <span class="role-name">Superviseur <span style="font-size:9.5px;font-weight:700;color:var(--navy-300);background:var(--navy-100);padding:2px 7px;border-radius:3px;letter-spacing:1px;margin-left:6px;">RÔLE PARAMÉTRABLE</span></span>
+          <span class="role-desc">Rôle transversal paramétré par le propriétaire de marque. Pas d'espace dédié : <strong>utilise l'espace Ingénieur (Doc 5)</strong> avec des permissions étendues définies au cas par cas (consultation dossiers multi-cabinets, validation d'étapes, etc.).</span>
+        </div>
+        <div class="role-row" style="border-left-color: var(--navy-200); opacity: 0.85;">
+          <span class="role-num" style="background: var(--navy-300);">7</span>
+          <span class="role-name">Rôles personnalisés <span style="font-size:9.5px;font-weight:700;color:var(--navy-300);background:var(--navy-100);padding:2px 7px;border-radius:3px;letter-spacing:1px;margin-left:6px;">RÔLE PARAMÉTRABLE</span></span>
+          <span class="role-desc">Assistant·e, comptable, juriste… Pas d'espace dédié : <strong>utilise l'espace Ingénieur (Doc 5)</strong> avec des permissions restreintes définies par le dirigeant (ex : accès factures uniquement, pas aux dossiers).</span>
+        </div>
+      </div>
+
+      <div class="note">
+        <strong>📐 Lecture du tableau :</strong> les <strong>5 premiers rôles</strong> ont un <em>espace utilisateur dédié</em> avec son propre document d'architecture. Les <strong>2 derniers rôles</strong> (Superviseur, Rôles personnalisés) sont des <em>variantes de permissions</em> à l'intérieur de l'espace Ingénieur — c'est le dirigeant ou le propriétaire de marque qui paramètre ce à quoi ils ont accès.
+      </div>
+
+      <div class="note gold">
+        <strong>🔄 Spécificité importante du dirigeant :</strong> dans la majorité des cabinets, le dirigeant est seul (pas d'équipe). Il cumule alors les rôles de <em>licencié dirigeant</em> + <em>ingénieur patrimonial</em>. La plateforme gère cette dualité via un <strong>toggle persistant dans la topbar</strong> (voir section dédiée ci-dessous) qui permet de basculer entre l'Espace Cabinet (vision dirigeant) et l'Espace Ingénieur (vision personnelle) à la demande.
+      </div>
+    </section>
+
+    <!-- ============================== -->
+    <!-- TOGGLE DIRIGEANT ↔ INGÉNIEUR    -->
+    <!-- ============================== -->
+    <section id="toggle">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">⇄</span> Mécanique transverse</div>
+        <h2 class="section-title">Le toggle dirigeant ↔ ingénieur</h2>
+        <p class="section-intro">Le dirigeant d'un cabinet a une <strong>double casquette</strong> : il pilote son cabinet (vision dirigeant) <em>et</em> il peut suivre lui-même certains clients en mode opérationnel (vision ingénieur). Cette dualité est gérée via un toggle persistant dans la topbar — exactement comme l'éditeur peut basculer entre son rôle ASTRAEOS et son rôle Propriétaire de marque (PRIVEOS Capital).</p>
+      </div>
+
+      <div class="card luxe">
+        <div class="card-eyebrow">Schéma fonctionnel</div>
+        <h3 style="margin-top:0;">Comment fonctionne le toggle</h3>
+        <p style="font-size:13px;">Quand un utilisateur a accès aux <strong>deux espaces</strong> (typiquement : un dirigeant qui fait aussi des études, ou toi qui es à la fois ASTRAEOS et PRIVEOS Capital), un bouton <em>persistant dans la topbar</em> permet de basculer instantanément entre les deux contextes.</p>
+        <p style="font-size:13px;">L'utilisateur garde une <strong>session unique</strong> mais navigue entre des <strong>contextes fonctionnels distincts</strong>. Chaque contexte a son propre tableau de bord, son propre CRM, ses propres données.</p>
+
+        <div class="grid-2" style="margin-top: 18px;">
+          <div class="card gold-left" style="background: rgba(198,142,14,0.04);">
+            <div class="card-eyebrow">Mode 💼 Cabinet (dirigeant)</div>
+            <ul style="font-size:12.5px; padding-left:18px; margin: 8px 0 0;">
+              <li>Vision 360° du cabinet</li>
+              <li>Tous les clients de tous les ingénieurs</li>
+              <li>Synthèse financière complète (€)</li>
+              <li>Animation interne · Mon équipe · Paramètres cabinet</li>
+              <li>Possibilité de "voir comme un ingénieur" un membre de l'équipe</li>
+            </ul>
+          </div>
+          <div class="card gold-left" style="background: rgba(198,142,14,0.04);">
+            <div class="card-eyebrow">Mode 👤 Ingénieur (perso)</div>
+            <ul style="font-size:12.5px; padding-left:18px; margin: 8px 0 0;">
+              <li>Vision cloisonnée : MES clients à moi</li>
+              <li>Mon CRM · Mon pipeline · Mes études IA</li>
+              <li>Ma synthèse d'activité (encours apportés, contrats — pas €)</li>
+              <li>Identique pour tous les ingénieurs du cabinet</li>
+              <li>Cloisonné : je ne vois pas les autres ingénieurs</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <h3>Implémentation du toggle</h3>
+      <div class="grid-3">
+        <div class="card">
+          <div class="card-eyebrow">📍 Emplacement</div>
+          <p style="font-size:12.5px;">Bouton <strong>persistant dans la topbar</strong>, à droite à côté du nom d'utilisateur. Toujours visible, toujours accessible.</p>
+        </div>
+        <div class="card">
+          <div class="card-eyebrow">🎨 Visuel</div>
+          <p style="font-size:12.5px;">Bouton stylé type "switch" avec deux états : <strong>💼 Cabinet</strong> et <strong>👤 Ingénieur</strong>. État actif surligné en gold.</p>
+        </div>
+        <div class="card">
+          <div class="card-eyebrow">⚙ Comportement</div>
+          <p style="font-size:12.5px;">Au clic, l'interface bascule immédiatement vers l'autre espace. La session reste ouverte. Un bandeau confirme le contexte actif.</p>
+        </div>
+      </div>
+
+      <div class="note gold">
+        <strong>Cas où ce toggle s'applique :</strong>
+        <ul style="margin-top: 8px; padding-left: 20px; font-size: 12.5px;">
+          <li><strong>Toi (Marvin)</strong> : toggle entre <em>ASTRAEOS</em> (éditeur) et <em>PRIVEOS Capital</em> (propriétaire de marque)</li>
+          <li><strong>Un dirigeant de cabinet seul ou avec équipe</strong> : toggle entre <em>Espace Cabinet</em> et <em>Espace Ingénieur</em></li>
+          <li><strong>Un ingénieur simple</strong> : <em>pas de toggle</em>, il a uniquement accès à l'Espace Ingénieur</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============================== -->
+    <!-- 4. MATRICE PERMISSIONS          -->
+    <!-- ============================== -->
+    <section id="permissions">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">4</span> Matrice de permissions</div>
+        <h2 class="section-title">Qui voit quoi, qui modifie quoi</h2>
+        <p class="section-intro">Cette matrice synthétise les droits de chaque rôle sur les principales ressources de la plateforme. Elle constitue la référence pour le développement du système d'authentification et de contrôle d'accès.</p>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Ressource</th>
+              <th>Admin éditeur</th>
+              <th>Propriétaire</th>
+              <th>Dirigeant</th>
+              <th>Ingénieur</th>
+              <th>Client</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Tous les tenants</strong></td>
+              <td>👁 ✏ 🗑</td><td>—</td><td>—</td><td>—</td><td>—</td>
+            </tr>
+            <tr>
+              <td><strong>Son propre tenant (paramétrage)</strong></td>
+              <td>👁 ✏</td><td>👁 ✏ 🗑</td><td>—</td><td>—</td><td>—</td>
+            </tr>
+            <tr>
+              <td><strong>Tous licenciés du tenant</strong></td>
+              <td>👁</td><td>👁 ✏</td><td>—</td><td>—</td><td>—</td>
+            </tr>
+            <tr>
+              <td><strong>Son propre cabinet (vue agrégée)</strong></td>
+              <td>👁</td><td>👁 ✏</td><td>👁 ✏ 🗑</td><td>—</td><td>—</td>
+            </tr>
+            <tr>
+              <td><strong>Tous les ingénieurs du cabinet</strong></td>
+              <td>👁</td><td>👁</td><td>👁 ✏</td><td>—</td><td>—</td>
+            </tr>
+            <tr>
+              <td><strong>Dossiers de tous les cabinets du tenant</strong></td>
+              <td>👁</td><td>👁 ✏</td><td>—</td><td>—</td><td>—</td>
+            </tr>
+            <tr>
+              <td><strong>Dossiers de son cabinet (tous ingénieurs)</strong></td>
+              <td>👁</td><td>👁 ✏</td><td>👁 ✏ 🗑</td><td>—</td><td>—</td>
+            </tr>
+            <tr style="background: rgba(198,142,14,0.06);">
+              <td><strong>Ses propres dossiers (clients personnels)</strong></td>
+              <td>👁</td><td>👁</td><td>👁 ✏</td><td>👁 ✏ 🗑</td><td>—</td>
+            </tr>
+            <tr>
+              <td><strong>Synthèse financière (€) du cabinet</strong></td>
+              <td>👁</td><td>👁</td><td>👁 ✏</td><td>—</td><td>—</td>
+            </tr>
+            <tr style="background: rgba(198,142,14,0.06);">
+              <td><strong>Synthèse d'activité ingénieur (volumétrie : encours, contrats — sans €)</strong></td>
+              <td>👁</td><td>👁</td><td>👁</td><td>👁 (la sienne)</td><td>—</td>
+            </tr>
+            <tr>
+              <td><strong>"Se connecter en tant que"</strong></td>
+              <td>✓ tous</td><td>✓ ses licenciés</td><td>✓ ses ingénieurs</td><td>—</td><td>—</td>
+            </tr>
+            <tr>
+              <td><strong>Création prospect en autonomie</strong></td>
+              <td>—</td><td>✓ (captation directe)</td><td>✓</td><td>✓ (les siens)</td><td>—</td>
+            </tr>
+            <tr>
+              <td><strong>Réattribution prospect/client</strong></td>
+              <td>—</td><td>✓ (vers cabinet)</td><td>✓ (entre ingénieurs)</td><td>—</td><td>—</td>
+            </tr>
+            <tr>
+              <td><strong>Validation étape pipeline</strong></td>
+              <td>—</td><td>✓</td><td>✓ (cabinet)</td><td>✓ (ses dossiers)</td><td>—</td>
+            </tr>
+            <tr>
+              <td><strong>Toggle Cabinet ↔ Ingénieur</strong></td>
+              <td>—</td><td>—</td><td>✓</td><td>—</td><td>—</td>
+            </tr>
+            <tr>
+              <td><strong>Espace client perso</strong></td>
+              <td>—</td><td>—</td><td>—</td><td>—</td><td>👁 ✏ (son espace)</td>
+            </tr>
+            <tr>
+              <td><strong>Chat avec propriétaire de marque</strong></td>
+              <td>—</td><td>✓</td><td>✓</td><td>—</td><td>—</td>
+            </tr>
+            <tr>
+              <td><strong>Chat avec son ingénieur</strong></td>
+              <td>—</td><td>—</td><td>—</td><td>✓ (avec ses clients)</td><td>✓</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p style="font-size: 11.5px; color: var(--navy-300); margin-top: 12px;"><strong>Légende :</strong> 👁 voir · ✏ modifier · 🗑 supprimer · ✓ action autorisée · — aucun accès · <span style="background: rgba(198,142,14,0.15); padding: 1px 5px; border-radius: 3px;">lignes en or</span> = lignes spécifiques à l'Ingénieur (cloisonnement).</p>
+
+      <div class="note">
+        <strong>📌 Note sur les rôles paramétrables :</strong> les rôles <em>Superviseur</em> et <em>Rôles personnalisés</em> (assistant·e, comptable, juriste…) ne sont pas dans cette matrice car ils utilisent l'<strong>espace Ingénieur</strong> avec des permissions adaptées, définies au cas par cas par le propriétaire de marque ou le dirigeant du cabinet. Leur matrice est donc une <em>variante</em> de la colonne Ingénieur, modulée selon les besoins (accès aux factures sans accès aux dossiers, accès en lecture seule, etc.).
+      </div>
+    </section>
+
+    <!-- ============================== -->
+    <!-- 5. SITEMAP GLOBAL               -->
+    <!-- ============================== -->
+    <section id="sitemap">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">5</span> Architecture · Sitemap</div>
+        <h2 class="section-title">Le plan global de la plateforme</h2>
+        <p class="section-intro">Vue d'ensemble des 4 grands espaces et de leur ramification. Chaque espace est cloisonné mais peut être consulté/modifié par les rôles supérieurs (selon la matrice de permissions).</p>
+      </div>
+
+      <h3>5 espaces principaux</h3>
+      <div class="space-cards" style="grid-template-columns: repeat(5, 1fr);">
+        <div class="space-card">
+          <div class="space-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></div>
+          <div class="space-card-num">ESPACE 1</div>
+          <div class="space-card-title">Admin éditeur</div>
+          <div class="space-card-meta">ASTRAEOS · multi-tenant</div>
+        </div>
+        <div class="space-card">
+          <div class="space-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"><path d="M3 21 v-1 a 5 5 0 0 1 5 -5 h 8 a 5 5 0 0 1 5 5 v 1"/><circle cx="12" cy="8" r="4"/></svg></div>
+          <div class="space-card-num">ESPACE 2</div>
+          <div class="space-card-title">Propriétaire de marque</div>
+          <div class="space-card-meta">PRIVEOS Capital · animation réseau</div>
+        </div>
+        <div class="space-card">
+          <div class="space-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"><polyline points="3 18 9 12 13 16 21 6"/><polyline points="17 6 21 6 21 10"/></svg></div>
+          <div class="space-card-num">ESPACE 3</div>
+          <div class="space-card-title">Licencié dirigeant</div>
+          <div class="space-card-meta">Pilotage cabinet · vue 360°</div>
+        </div>
+        <div class="space-card" style="border-color: var(--gold); background: linear-gradient(180deg, white, rgba(198,142,14,0.04));">
+          <div class="space-card-icon" style="color: var(--gold);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"><circle cx="12" cy="8" r="4"/><path d="M5 21 v-2 a 4 4 0 0 1 4 -4 h 6 a 4 4 0 0 1 4 4 v 2"/></svg></div>
+          <div class="space-card-num" style="color: var(--gold);">ESPACE 4 ⭐ NOUVEAU</div>
+          <div class="space-card-title">Ingénieur patrimonial</div>
+          <div class="space-card-meta">CRM cloisonné · études IA</div>
+        </div>
+        <div class="space-card">
+          <div class="space-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"><path d="M16 21 v-2 a 4 4 0 0 0 -4 -4 H 5 a 4 4 0 0 0 -4 4 v 2"/><circle cx="8.5" cy="7" r="4"/><path d="M20 8 v 6"/><path d="M23 11 h -6"/></svg></div>
+          <div class="space-card-num">ESPACE 5</div>
+          <div class="space-card-title">Client final</div>
+          <div class="space-card-meta">Documents · simulations · suivi</div>
+        </div>
+      </div>
+
+      <h3>Sitemap arborescent (cliquable)</h3>
+      <p style="font-size: 13px; color: var(--navy-300); margin-bottom: 18px;">Cliquez sur l'un des 5 espaces ci-dessous pour accéder à son <strong>inventaire détaillé des pages</strong> (état actuel, à faire, priorités).</p>
+
+      <div class="sitemap-svg-wrap">
+        <svg viewBox="0 0 1700 900" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: auto; max-height: 1000px;">
+
+          <!-- Définitions : gradients et filtres -->
+          <defs>
+            <linearGradient id="navyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#102D50"/>
+              <stop offset="100%" stop-color="#0a1f38"/>
+            </linearGradient>
+            <linearGradient id="goldGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#C68E0E"/>
+              <stop offset="100%" stop-color="#A87A0C"/>
+            </linearGradient>
+            <linearGradient id="goldLightGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#EEDDB6"/>
+              <stop offset="100%" stop-color="#DDBB6E"/>
+            </linearGradient>
+            <linearGradient id="blueGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#EBF1FA"/>
+              <stop offset="100%" stop-color="#DBE0E4"/>
+            </linearGradient>
+            <linearGradient id="ingenieurGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#C68E0E"/>
+              <stop offset="100%" stop-color="#695D30"/>
+            </linearGradient>
+            <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+              <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#102D50" flood-opacity="0.12"/>
+            </filter>
+            <filter id="hoverShadow" x="-20%" y="-20%" width="140%" height="140%">
+              <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#C68E0E" flood-opacity="0.30"/>
+            </filter>
+            <filter id="ingenieurShadow" x="-20%" y="-20%" width="140%" height="140%">
+              <feDropShadow dx="0" dy="3" stdDeviation="6" flood-color="#C68E0E" flood-opacity="0.40"/>
+            </filter>
+          </defs>
+
+          <!-- TITRE CENTRAL : Plateforme ASTRAEOS -->
+          <g transform="translate(850, 40)">
+            <rect x="-160" y="0" width="320" height="60" rx="10" fill="url(#navyGrad)" filter="url(#shadow)"/>
+            <text x="0" y="38" text-anchor="middle" fill="white" font-family="Epilogue, sans-serif" font-weight="700" font-size="18">🌐 Plateforme ASTRAEOS</text>
+          </g>
+
+          <!-- LIGNES VERS LES 5 ESPACES -->
+          <line x1="850" y1="100" x2="160" y2="200" stroke="#A4AEBB" stroke-width="2"/>
+          <line x1="850" y1="100" x2="470" y2="200" stroke="#A4AEBB" stroke-width="2"/>
+          <line x1="850" y1="100" x2="780" y2="200" stroke="#A4AEBB" stroke-width="2"/>
+          <line x1="850" y1="100" x2="1090" y2="200" stroke="#A4AEBB" stroke-width="2"/>
+          <line x1="850" y1="100" x2="1400" y2="200" stroke="#A4AEBB" stroke-width="2"/>
+
+          <!-- ===================================== -->
+          <!-- ESPACE 1 : ADMIN ÉDITEUR              -->
+          <!-- ===================================== -->
+          <a href="02_Architecture_Editeur.html" target="_blank" class="sitemap-link">
+            <g transform="translate(160, 170)">
+              <rect x="-140" y="0" width="280" height="80" rx="10" fill="url(#navyGrad)" filter="url(#shadow)" class="sitemap-node"/>
+              <text x="0" y="34" text-anchor="middle" fill="#DDBB6E" font-family="Epilogue, sans-serif" font-weight="700" font-size="11" letter-spacing="2px">DOCUMENT 2 · OUVRIR →</text>
+              <text x="0" y="58" text-anchor="middle" fill="white" font-family="Epilogue, sans-serif" font-weight="700" font-size="16">👑 Admin éditeur</text>
+            </g>
+          </a>
+
+          <!-- Sous-sections espace 1 -->
+          <line x1="160" y1="250" x2="160" y2="290" stroke="#DBE0E4" stroke-width="1.5" stroke-dasharray="3 3"/>
+          <g transform="translate(30, 290)">
+            <rect x="0" y="0" width="260" height="40" rx="6" fill="white" stroke="#DBE0E4" stroke-width="1"/>
+            <text x="14" y="25" fill="#102D50" font-family="Epilogue, sans-serif" font-weight="600" font-size="12">📊  Tableau de bord global</text>
+          </g>
+          <g transform="translate(30, 340)">
+            <rect x="0" y="0" width="260" height="40" rx="6" fill="white" stroke="#DBE0E4" stroke-width="1"/>
+            <text x="14" y="25" fill="#102D50" font-family="Epilogue, sans-serif" font-weight="600" font-size="12">🏛  Gestion des tenants</text>
+          </g>
+          <g transform="translate(30, 390)">
+            <rect x="0" y="0" width="260" height="40" rx="6" fill="white" stroke="#DBE0E4" stroke-width="1"/>
+            <text x="14" y="25" fill="#102D50" font-family="Epilogue, sans-serif" font-weight="600" font-size="12">💳  Facturation outil</text>
+          </g>
+          <g transform="translate(30, 440)">
+            <rect x="0" y="0" width="260" height="40" rx="6" fill="white" stroke="#DBE0E4" stroke-width="1"/>
+            <text x="14" y="25" fill="#102D50" font-family="Epilogue, sans-serif" font-weight="600" font-size="12">💬  Support &amp; chat</text>
+          </g>
+          <g transform="translate(30, 490)">
+            <rect x="0" y="0" width="260" height="40" rx="6" fill="white" stroke="#DBE0E4" stroke-width="1"/>
+            <text x="14" y="25" fill="#102D50" font-family="Epilogue, sans-serif" font-weight="600" font-size="12">📢  Annonces multi-tenants</text>
+          </g>
+          <g transform="translate(30, 540)">
+            <rect x="0" y="0" width="260" height="40" rx="6" fill="white" stroke="#DBE0E4" stroke-width="1"/>
+            <text x="14" y="25" fill="#102D50" font-family="Epilogue, sans-serif" font-weight="600" font-size="12">🎯  CRM commercial</text>
+          </g>
+
+          <!-- ===================================== -->
+          <!-- ESPACE 2 : PROPRIÉTAIRE DE MARQUE     -->
+          <!-- ===================================== -->
+          <a href="03_Architecture_Proprietaire.html" target="_blank" class="sitemap-link">
+            <g transform="translate(470, 170)">
+              <rect x="-145" y="0" width="290" height="80" rx="10" fill="url(#goldGrad)" filter="url(#shadow)" class="sitemap-node"/>
+              <text x="0" y="34" text-anchor="middle" fill="#FAF8F3" font-family="Epilogue, sans-serif" font-weight="700" font-size="11" letter-spacing="2px">DOCUMENT 3 · OUVRIR →</text>
+              <text x="0" y="58" text-anchor="middle" fill="white" font-family="Epilogue, sans-serif" font-weight="700" font-size="16">🏛 Propriétaire de marque</text>
+            </g>
+          </a>
+
+          <!-- Sous-sections espace 2 -->
+          <line x1="470" y1="250" x2="470" y2="290" stroke="#DBE0E4" stroke-width="1.5" stroke-dasharray="3 3"/>
+          <g transform="translate(330, 290)">
+            <rect x="0" y="0" width="280" height="40" rx="6" fill="white" stroke="#C68E0E" stroke-width="1.5"/>
+            <text x="14" y="25" fill="#102D50" font-family="Epilogue, sans-serif" font-weight="600" font-size="12">📊  Tableau de bord (Accueil)</text>
+            <text x="265" y="25" text-anchor="end" font-size="9" font-weight="800" fill="#1F8A4C" letter-spacing="1px">FAIT</text>
+          </g>
+          <g transform="translate(330, 340)">
+            <rect x="0" y="0" width="280" height="40" rx="6" fill="white" stroke="#C68E0E" stroke-width="1.5"/>
+            <text x="14" y="25" fill="#102D50" font-family="Epilogue, sans-serif" font-weight="600" font-size="12">💰  Synthèse financière du réseau</text>
+            <text x="265" y="25" text-anchor="end" font-size="9" font-weight="800" fill="#1F8A4C" letter-spacing="1px">FAIT</text>
+          </g>
+          <g transform="translate(330, 390)">
+            <rect x="0" y="0" width="280" height="40" rx="6" fill="white" stroke="#C68E0E" stroke-width="1.5"/>
+            <text x="14" y="25" fill="#102D50" font-family="Epilogue, sans-serif" font-weight="600" font-size="12">🏆  Performance des licenciés</text>
+            <text x="265" y="25" text-anchor="end" font-size="9" font-weight="800" fill="#1F8A4C" letter-spacing="1px">FAIT</text>
+          </g>
+          <g transform="translate(330, 440)">
+            <rect x="0" y="0" width="280" height="40" rx="6" fill="white" stroke="#C68E0E" stroke-width="1.5"/>
+            <text x="14" y="25" fill="#102D50" font-family="Epilogue, sans-serif" font-weight="600" font-size="12">🌍  Annuaire des licenciés</text>
+            <text x="265" y="25" text-anchor="end" font-size="9" font-weight="800" fill="#1F8A4C" letter-spacing="1px">FAIT</text>
+          </g>
+          <g transform="translate(330, 490)">
+            <rect x="0" y="0" width="280" height="40" rx="6" fill="white" stroke="#C68E0E" stroke-width="1.5"/>
+            <text x="14" y="25" fill="#102D50" font-family="Epilogue, sans-serif" font-weight="600" font-size="12">📁  Fiche cabinet (6 onglets)</text>
+            <text x="265" y="25" text-anchor="end" font-size="9" font-weight="800" fill="#695D30" letter-spacing="1px">2/6</text>
+          </g>
+          <g transform="translate(330, 540)">
+            <rect x="0" y="0" width="280" height="40" rx="6" fill="white" stroke="#DBE0E4" stroke-width="1"/>
+            <text x="14" y="25" fill="#102D50" font-family="Epilogue, sans-serif" font-weight="600" font-size="12">🚀  Pipeline 6 étapes</text>
+            <text x="265" y="25" text-anchor="end" font-size="9" font-weight="800" fill="#1F8A4C" letter-spacing="1px">FAIT</text>
+          </g>
+          <g transform="translate(330, 590)">
+            <rect x="0" y="0" width="280" height="40" rx="6" fill="white" stroke="#DBE0E4" stroke-width="1"/>
+            <text x="14" y="25" fill="#102D50" font-family="Epilogue, sans-serif" font-weight="600" font-size="12">🎯  CRM réseau ⭐ NOUVEAU</text>
+            <text x="265" y="25" text-anchor="end" font-size="9" font-weight="800" fill="#102D50" letter-spacing="1px">À FAIRE</text>
+          </g>
+          <g transform="translate(330, 640)">
+            <rect x="0" y="0" width="280" height="40" rx="6" fill="white" stroke="#DBE0E4" stroke-width="1"/>
+            <text x="14" y="25" fill="#102D50" font-family="Epilogue, sans-serif" font-weight="600" font-size="12">⚖  Compliance ⭐ NOUVEAU</text>
+            <text x="265" y="25" text-anchor="end" font-size="9" font-weight="800" fill="#102D50" letter-spacing="1px">À FAIRE</text>
+          </g>
+          <g transform="translate(330, 690)">
+            <rect x="0" y="0" width="280" height="40" rx="6" fill="white" stroke="#DBE0E4" stroke-width="1"/>
+            <text x="14" y="25" fill="#102D50" font-family="Epilogue, sans-serif" font-weight="600" font-size="12">📦  Catalogue · 🛠 Outils · …</text>
+            <text x="265" y="25" text-anchor="end" font-size="9" font-weight="800" fill="#102D50" letter-spacing="1px">À FAIRE</text>
+          </g>
+
+          <!-- ===================================== -->
+          <!-- ESPACE 3 : LICENCIÉ DIRIGEANT         -->
+          <!-- ===================================== -->
+          <a href="04_Architecture_Licencie.html" target="_blank" class="sitemap-link">
+            <g transform="translate(780, 170)">
+              <rect x="-145" y="0" width="290" height="80" rx="10" fill="url(#goldLightGrad)" filter="url(#shadow)" class="sitemap-node"/>
+              <text x="0" y="34" text-anchor="middle" fill="#695D30" font-family="Epilogue, sans-serif" font-weight="700" font-size="11" letter-spacing="2px">DOCUMENT 4 · OUVRIR →</text>
+              <text x="0" y="58" text-anchor="middle" fill="#102D50" font-family="Epilogue, sans-serif" font-weight="700" font-size="16">💼 Licencié dirigeant</text>
+            </g>
+          </a>
+
+          <!-- Sous-sections espace 3 -->
+          <line x1="780" y1="250" x2="780" y2="290" stroke="#DBE0E4" stroke-width="1.5" stroke-dasharray="3 3"/>
+          <g transform="translate(640, 290)">
+            <rect x="0" y="0" width="280" height="40" rx="6" fill="white" stroke="#DBE0E4" stroke-width="1"/>
+            <text x="14" y="25" fill="#102D50" font-family="Epilogue, sans-serif" font-weight="600" font-size="12">📊  Tableau de bord cabinet</text>
+          </g>
+          <g transform="translate(640, 340)">
+            <rect x="0" y="0" width="280" height="40" rx="6" fill="white" stroke="#DBE0E4" stroke-width="1"/>
+            <text x="14" y="25" fill="#102D50" font-family="Epilogue, sans-serif" font-weight="600" font-size="12">💰  Synthèse financière (€)</text>
+          </g>
+          <g transform="translate(640, 390)">
+            <rect x="0" y="0" width="280" height="40" rx="6" fill="white" stroke="#DBE0E4" stroke-width="1"/>
+            <text x="14" y="25" fill="#102D50" font-family="Epilogue, sans-serif" font-weight="600" font-size="12">🎯  CRM cabinet (vue dirigeant)</text>
+          </g>
+          <g transform="translate(640, 440)">
+            <rect x="0" y="0" width="280" height="40" rx="6" fill="white" stroke="#DBE0E4" stroke-width="1"/>
+            <text x="14" y="25" fill="#102D50" font-family="Epilogue, sans-serif" font-weight="600" font-size="12">👥  Mon équipe d'ingénieurs</text>
+          </g>
+          <g transform="translate(640, 490)">
+            <rect x="0" y="0" width="280" height="40" rx="6" fill="white" stroke="#DBE0E4" stroke-width="1"/>
+            <text x="14" y="25" fill="#102D50" font-family="Epilogue, sans-serif" font-weight="600" font-size="12">⚖  Compliance &amp; facturation</text>
+          </g>
+          <g transform="translate(640, 540)">
+            <rect x="0" y="0" width="280" height="40" rx="6" fill="white" stroke="#DBE0E4" stroke-width="1"/>
+            <text x="14" y="25" fill="#102D50" font-family="Epilogue, sans-serif" font-weight="600" font-size="12">🏆  Animation interne</text>
+          </g>
+          <g transform="translate(640, 590)">
+            <rect x="0" y="0" width="280" height="40" rx="6" fill="white" stroke="#DBE0E4" stroke-width="1"/>
+            <text x="14" y="25" fill="#102D50" font-family="Epilogue, sans-serif" font-weight="600" font-size="12">⚙  Paramètres cabinet</text>
+          </g>
+          <!-- Toggle dirigeant ↔ ingénieur -->
+          <g transform="translate(640, 645)">
+            <rect x="0" y="0" width="280" height="38" rx="19" fill="rgba(198,142,14,0.10)" stroke="#C68E0E" stroke-width="1.5" stroke-dasharray="4 3"/>
+            <text x="140" y="24" text-anchor="middle" fill="#695D30" font-family="Epilogue, sans-serif" font-weight="700" font-size="11">⇄  Toggle vers Espace Ingénieur</text>
+          </g>
+
+          <!-- ===================================== -->
+          <!-- ESPACE 4 : INGÉNIEUR PATRIMONIAL ⭐    -->
+          <!-- ===================================== -->
+          <a href="05_Architecture_Ingenieur.html" target="_blank" class="sitemap-link">
+            <g transform="translate(1090, 170)">
+              <rect x="-145" y="0" width="290" height="80" rx="10" fill="url(#ingenieurGrad)" filter="url(#ingenieurShadow)" class="sitemap-node"/>
+              <text x="0" y="34" text-anchor="middle" fill="white" font-family="Epilogue, sans-serif" font-weight="800" font-size="11" letter-spacing="2px">DOCUMENT 5 · NOUVEAU ⭐</text>
+              <text x="0" y="58" text-anchor="middle" fill="white" font-family="Epilogue, sans-serif" font-weight="700" font-size="16">👤 Ingénieur patrimonial</text>
+            </g>
+          </a>
+
+          <!-- Sous-sections espace 4 (Ingénieur) -->
+          <line x1="1090" y1="250" x2="1090" y2="290" stroke="#DBE0E4" stroke-width="1.5" stroke-dasharray="3 3"/>
+          <g transform="translate(950, 290)">
+            <rect x="0" y="0" width="280" height="40" rx="6" fill="white" stroke="#C68E0E" stroke-width="1.5"/>
+            <text x="14" y="25" fill="#102D50" font-family="Epilogue, sans-serif" font-weight="600" font-size="12">📊  Mon tableau de bord</text>
+          </g>
+          <g transform="translate(950, 340)">
+            <rect x="0" y="0" width="280" height="40" rx="6" fill="white" stroke="#C68E0E" stroke-width="1.5"/>
+            <text x="14" y="25" fill="#102D50" font-family="Epilogue, sans-serif" font-weight="600" font-size="12">📈  Mon activité (sans €)</text>
+          </g>
+          <g transform="translate(950, 390)">
+            <rect x="0" y="0" width="280" height="40" rx="6" fill="white" stroke="#C68E0E" stroke-width="1.5"/>
+            <text x="14" y="25" fill="#102D50" font-family="Epilogue, sans-serif" font-weight="600" font-size="12">👤  Mon CRM individuel</text>
+          </g>
+          <g transform="translate(950, 440)">
+            <rect x="0" y="0" width="280" height="40" rx="6" fill="white" stroke="#C68E0E" stroke-width="1.5"/>
+            <text x="14" y="25" fill="#102D50" font-family="Epilogue, sans-serif" font-weight="600" font-size="12">🚀  Mon pipeline opérationnel</text>
+          </g>
+          <g transform="translate(950, 490)">
+            <rect x="0" y="0" width="280" height="40" rx="6" fill="white" stroke="#C68E0E" stroke-width="1.5"/>
+            <text x="14" y="25" fill="#102D50" font-family="Epilogue, sans-serif" font-weight="600" font-size="12">📁  Fiches dossiers (mes clients)</text>
+          </g>
+          <g transform="translate(950, 540)">
+            <rect x="0" y="0" width="280" height="40" rx="6" fill="white" stroke="#C68E0E" stroke-width="1.5"/>
+            <text x="14" y="25" fill="#102D50" font-family="Epilogue, sans-serif" font-weight="600" font-size="12">📅  Mon calendrier &amp; visios</text>
+          </g>
+          <g transform="translate(950, 590)">
+            <rect x="0" y="0" width="280" height="40" rx="6" fill="white" stroke="#C68E0E" stroke-width="2"/>
+            <text x="14" y="25" fill="#102D50" font-family="Epilogue, sans-serif" font-weight="700" font-size="12">🤖  Mes études IA ⭐⭐</text>
+          </g>
+          <g transform="translate(950, 640)">
+            <rect x="0" y="0" width="280" height="40" rx="6" fill="white" stroke="#C68E0E" stroke-width="1.5"/>
+            <text x="14" y="25" fill="#102D50" font-family="Epilogue, sans-serif" font-weight="600" font-size="12">📦  Mes outils · ⚖ Compliance</text>
+          </g>
+          <g transform="translate(950, 690)">
+            <rect x="0" y="0" width="280" height="40" rx="6" fill="white" stroke="#C68E0E" stroke-width="1.5"/>
+            <text x="14" y="25" fill="#102D50" font-family="Epilogue, sans-serif" font-weight="600" font-size="12">💬  Mon chat · ⚙ Mon profil</text>
+          </g>
+
+          <!-- ===================================== -->
+          <!-- ESPACE 5 : CLIENT FINAL               -->
+          <!-- ===================================== -->
+          <a href="06_Architecture_Client.html" target="_blank" class="sitemap-link">
+            <g transform="translate(1400, 170)">
+              <rect x="-140" y="0" width="280" height="80" rx="10" fill="url(#blueGrad)" filter="url(#shadow)" stroke="#102D50" stroke-width="1.5" class="sitemap-node"/>
+              <text x="0" y="34" text-anchor="middle" fill="#102D50" font-family="Epilogue, sans-serif" font-weight="700" font-size="11" letter-spacing="2px">DOCUMENT 6 · OUVRIR →</text>
+              <text x="0" y="58" text-anchor="middle" fill="#102D50" font-family="Epilogue, sans-serif" font-weight="700" font-size="16">👥 Client final</text>
+            </g>
+          </a>
+
+          <!-- Sous-sections espace 5 -->
+          <line x1="1400" y1="250" x2="1400" y2="290" stroke="#DBE0E4" stroke-width="1.5" stroke-dasharray="3 3"/>
+          <g transform="translate(1270, 290)">
+            <rect x="0" y="0" width="260" height="40" rx="6" fill="white" stroke="#DBE0E4" stroke-width="1"/>
+            <text x="14" y="25" fill="#102D50" font-family="Epilogue, sans-serif" font-weight="600" font-size="12">🏠  Mon dashboard</text>
+          </g>
+          <g transform="translate(1270, 340)">
+            <rect x="0" y="0" width="260" height="40" rx="6" fill="white" stroke="#DBE0E4" stroke-width="1"/>
+            <text x="14" y="25" fill="#102D50" font-family="Epilogue, sans-serif" font-weight="600" font-size="12">📄  Mes documents signés</text>
+          </g>
+          <g transform="translate(1270, 390)">
+            <rect x="0" y="0" width="260" height="40" rx="6" fill="white" stroke="#DBE0E4" stroke-width="1"/>
+            <text x="14" y="25" fill="#102D50" font-family="Epilogue, sans-serif" font-weight="600" font-size="12">📊  Mon étude patrimoniale</text>
+          </g>
+          <g transform="translate(1270, 440)">
+            <rect x="0" y="0" width="260" height="40" rx="6" fill="white" stroke="#DBE0E4" stroke-width="1"/>
+            <text x="14" y="25" fill="#102D50" font-family="Epilogue, sans-serif" font-weight="600" font-size="12">💼  Mes encours · investissements</text>
+          </g>
+          <g transform="translate(1270, 490)">
+            <rect x="0" y="0" width="260" height="40" rx="6" fill="white" stroke="#DBE0E4" stroke-width="1"/>
+            <text x="14" y="25" fill="#102D50" font-family="Epilogue, sans-serif" font-weight="600" font-size="12">🧮  Simulations</text>
+          </g>
+          <g transform="translate(1270, 540)">
+            <rect x="0" y="0" width="260" height="40" rx="6" fill="white" stroke="#DBE0E4" stroke-width="1"/>
+            <text x="14" y="25" fill="#102D50" font-family="Epilogue, sans-serif" font-weight="600" font-size="12">✅  Suivi de mes actions</text>
+          </g>
+          <g transform="translate(1270, 590)">
+            <rect x="0" y="0" width="260" height="40" rx="6" fill="white" stroke="#DBE0E4" stroke-width="1"/>
+            <text x="14" y="25" fill="#102D50" font-family="Epilogue, sans-serif" font-weight="600" font-size="12">💬  Chat avec mon ingénieur</text>
+          </g>
+          <g transform="translate(1270, 640)">
+            <rect x="0" y="0" width="260" height="40" rx="6" fill="white" stroke="#DBE0E4" stroke-width="1"/>
+            <text x="14" y="25" fill="#102D50" font-family="Epilogue, sans-serif" font-weight="600" font-size="12">📰  Articles &amp; conseils</text>
+          </g>
+          <g transform="translate(1270, 690)">
+            <rect x="0" y="0" width="260" height="40" rx="6" fill="white" stroke="#DBE0E4" stroke-width="1"/>
+            <text x="14" y="25" fill="#102D50" font-family="Epilogue, sans-serif" font-weight="600" font-size="12">📅  Prendre RDV</text>
+          </g>
+
+        </svg>
+      </div>
+      <div class="mermaid-caption">Fig. 1 — Sitemap arborescent : <strong>5 espaces principaux</strong> · ~50 sections principales · cliquables vers détail · ⭐⭐ Espace Ingénieur ajouté en mai 2026</div>
+
+      <style>
+        .sitemap-svg-wrap {
+          background: white;
+          border: 1px solid var(--navy-100);
+          border-radius: 10px;
+          padding: 24px;
+          margin: 24px 0;
+          overflow-x: auto;
+        }
+        .sitemap-link { cursor: pointer; }
+        .sitemap-link .sitemap-node {
+          transition: filter 0.2s ease, transform 0.2s ease;
+          transform-origin: center;
+        }
+        .sitemap-link:hover .sitemap-node {
+          filter: url(#hoverShadow);
+        }
+      </style>
+
+      <h3>Modules transversaux (utilisés par plusieurs espaces)</h3>
+      <div class="grid-4">
+        <div class="card" style="padding:14px 16px;"><div style="font-size:11px;font-weight:800;color:var(--gold);letter-spacing:0.14em;margin-bottom:4px;">📅 INTERNE</div><strong style="font-size:13px;">Agenda</strong><p style="font-size:11.5px;margin-top:4px;color:var(--navy-300);line-height:1.4;">Recréé en interne (façon Calendly). Lien partageable, transferable.</p></div>
+        <div class="card" style="padding:14px 16px;"><div style="font-size:11px;font-weight:800;color:var(--gold);letter-spacing:0.14em;margin-bottom:4px;">📹 EXTERNE</div><strong style="font-size:13px;">Visio + IA</strong><p style="font-size:11.5px;margin-top:4px;color:var(--navy-300);line-height:1.4;">Outil tiers à intégrer (transcript + timecode). Pas Zoom/Meet.</p></div>
+        <div class="card" style="padding:14px 16px;"><div style="font-size:11px;font-weight:800;color:var(--gold);letter-spacing:0.14em;margin-bottom:4px;">✍ EXTERNE</div><strong style="font-size:13px;">Yousign</strong><p style="font-size:11.5px;margin-top:4px;color:var(--navy-300);line-height:1.4;">Signature électronique via API existante. DER, DCI, KYC, LM.</p></div>
+        <div class="card" style="padding:14px 16px;"><div style="font-size:11px;font-weight:800;color:var(--gold);letter-spacing:0.14em;margin-bottom:4px;">💳 EXTERNE</div><strong style="font-size:13px;">Qonto</strong><p style="font-size:11.5px;margin-top:4px;color:var(--navy-300);line-height:1.4;">Banque pro française. Encaissements + flux + facturation centralisés via API.</p></div>
+        <div class="card" style="padding:14px 16px;"><div style="font-size:11px;font-weight:800;color:var(--gold);letter-spacing:0.14em;margin-bottom:4px;">🤖 INTERNE</div><strong style="font-size:13px;">IA agentique</strong><p style="font-size:11.5px;margin-top:4px;color:var(--navy-300);line-height:1.4;">Multi-modèles : Claude (Opus 4.7 / Sonnet 4 / Haiku 4.5), Mistral, Gemini Flash. Routage selon coût/qualité.</p></div>
+        <div class="card" style="padding:14px 16px;"><div style="font-size:11px;font-weight:800;color:var(--gold);letter-spacing:0.14em;margin-bottom:4px;">💬 INTERNE</div><strong style="font-size:13px;">Chat 4 niveaux</strong><p style="font-size:11.5px;margin-top:4px;color:var(--navy-300);line-height:1.4;">Éditeur↔Propr · Propr↔Lic · Propr↔Client · Lic↔Client</p></div>
+        <div class="card" style="padding:14px 16px;"><div style="font-size:11px;font-weight:800;color:var(--gold);letter-spacing:0.14em;margin-bottom:4px;">📁 INTERNE</div><strong style="font-size:13px;">GED</strong><p style="font-size:11.5px;margin-top:4px;color:var(--navy-300);line-height:1.4;">Stockage hiérarchisé (immo / impôts / financier / matrimonial...)</p></div>
+        <div class="card" style="padding:14px 16px;"><div style="font-size:11px;font-weight:800;color:var(--gold);letter-spacing:0.14em;margin-bottom:4px;">🔔 INTERNE</div><strong style="font-size:13px;">Notifications</strong><p style="font-size:11.5px;margin-top:4px;color:var(--navy-300);line-height:1.4;">SMS + email + push. Alertes 48h, J-1, J.</p></div>
+      </div>
+    </section>
+
+    <!-- ============================== -->
+    <!-- 6. MULTI-TENANCY                -->
+    <!-- ============================== -->
+    <section id="multitenant">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">6</span> Architecture multi-tenant</div>
+        <h2 class="section-title">Comment cohabitent plusieurs propriétaires de marque</h2>
+        <p class="section-intro">La plateforme est conçue pour héberger plusieurs propriétaires de marque indépendants, chacun avec son réseau, sa charte graphique et ses paramétrages. Toi, en tant qu'éditeur, tu vois et administres l'ensemble.</p>
+      </div>
+
+      <div class="mermaid-container">
+<pre class="mermaid">
+graph LR
+    classDef editor fill:#102D50,stroke:#102D50,color:#fff
+    classDef tenant1 fill:#C68E0E,stroke:#C68E0E,color:#fff
+    classDef tenant2 fill:#695D30,stroke:#695D30,color:#fff
+    classDef tenant3 fill:#877D59,stroke:#877D59,color:#fff
+    classDef licensee fill:#EEDDB6,stroke:#C68E0E,color:#695D30
+    classDef client fill:#EBF1FA,stroke:#102D50,color:#102D50
+
+    Editor["👑 Admin éditeur ASTRAEOS"]:::editor
+
+    Editor --> T1["🏛 PRIVEOS Capital<br/>tenant 1"]:::tenant1
+    Editor --> T2["🏛 Dupont Patrimoine<br/>tenant 2"]:::tenant2
+    Editor --> T3["🏛 Mont-Blanc Conseil<br/>tenant 3"]:::tenant3
+
+    T1 --> L1["💼 14 cabinets<br/>licenciés"]:::licensee
+    T2 --> L2["💼 6 cabinets<br/>licenciés"]:::licensee
+    T3 --> L3["💼 2 cabinets<br/>licenciés"]:::licensee
+
+    L1 --> C1["👤 Clients<br/>finaux T1"]:::client
+    L2 --> C2["👤 Clients<br/>finaux T2"]:::client
+    L3 --> C3["👤 Clients<br/>finaux T3"]:::client
+</pre>
+      </div>
+      <div class="mermaid-caption">Fig. 2 — Hiérarchie multi-tenant. Les tenants ne se voient jamais entre eux.</div>
+
+      <h3>Principes de cloisonnement</h3>
+      <ul class="styled">
+        <li><strong>Cloisonnement strict entre tenants</strong> — PRIVEOS Capital ne voit jamais les données de Dupont Patrimoine et inversement.</li>
+        <li><strong>Cloisonnement entre licenciés</strong> au sein d'un même tenant — Le cabinet A ne voit pas le cabinet B.</li>
+        <li><strong>Bouton "Se connecter en tant que"</strong> disponible aux niveaux supérieurs pour la supervision.</li>
+        <li><strong>Branding par tenant</strong> — Chaque marque peut personnaliser son logo, ses couleurs, ses domaines.</li>
+        <li><strong>Paramétrage propre</strong> — Chaque tenant définit ses produits, ses pourcentages de redistribution, ses templates de documents.</li>
+      </ul>
+
+      <div class="note gold">
+        <strong>Cas particulier — double casquette du fondateur :</strong> dans le contexte actuel, le fondateur (Marvin) occupe simultanément <em>2 rôles</em> : <strong>admin éditeur ASTRAEOS</strong> (vous développez et possédez la plateforme) + <strong>propriétaire de marque PRIVEOS Capital</strong> (vous l'utilisez aussi pour votre propre réseau). La plateforme doit donc permettre à un même compte de switcher entre ces 2 espaces sans déconnexion. Pour Dupont Patrimoine ou tout autre futur locataire, un seul des deux rôles s'applique.
+      </div>
+    </section>
+
+    <!-- ============================== -->
+    <!-- CASCADE FINANCIÈRE              -->
+    <!-- ============================== -->
+    <section id="cascade-financiere">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">💰</span> Architecture financière transverse</div>
+        <h2 class="section-title">La cascade financière en 4 niveaux</h2>
+        <p class="section-intro">Concept clé qui structure les synthèses financières dans toute la plateforme. À chaque niveau hiérarchique, les chiffres <strong>remontent vers le niveau supérieur</strong> en s'agrégeant, mais avec des <strong>périmètres et niveaux de détail différents</strong>. Comprendre cette cascade est essentiel pour interpréter ce que voit chaque rôle.</p>
+      </div>
+
+      <div class="card luxe">
+        <div class="card-eyebrow">Schéma de la cascade</div>
+        <h3 style="margin-top:0;">Comment les chiffres remontent du terrain au pilotage SaaS</h3>
+
+        <div style="background: white; border-radius: 8px; padding: 24px; margin-top: 18px;">
+          <svg viewBox="0 0 900 540" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: auto; max-height: 600px;">
+            <defs>
+              <linearGradient id="cascNavy" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#102D50"/>
+                <stop offset="100%" stop-color="#0a1f38"/>
+              </linearGradient>
+              <linearGradient id="cascGold" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#C68E0E"/>
+                <stop offset="100%" stop-color="#A87A0C"/>
+              </linearGradient>
+              <linearGradient id="cascGoldLight" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#EEDDB6"/>
+                <stop offset="100%" stop-color="#DDBB6E"/>
+              </linearGradient>
+              <linearGradient id="cascIvory" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#FAF8F3"/>
+                <stop offset="100%" stop-color="#EBF1FA"/>
+              </linearGradient>
+              <filter id="cascShadow" x="-20%" y="-20%" width="140%" height="140%">
+                <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#102D50" flood-opacity="0.15"/>
+              </filter>
+              <marker id="arrowGold" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="#C68E0E"/>
+              </marker>
+            </defs>
+
+            <!-- NIVEAU 4 : INGÉNIEUR (en bas) -->
+            <g transform="translate(450, 460)">
+              <rect x="-280" y="0" width="560" height="60" rx="10" fill="url(#cascIvory)" stroke="#C68E0E" stroke-width="2" filter="url(#cascShadow)"/>
+              <text x="-260" y="24" fill="#C68E0E" font-family="Epilogue, sans-serif" font-weight="800" font-size="11" letter-spacing="2px">NIVEAU 4 · 👤 INGÉNIEUR PATRIMONIAL</text>
+              <text x="-260" y="46" fill="#102D50" font-family="Epilogue, sans-serif" font-weight="600" font-size="13">Synthèse de SES clients · encours apportés, contrats signés <em>(volumétrie, sans €)</em></text>
+            </g>
+
+            <!-- Flèche vers niveau 3 -->
+            <line x1="450" y1="455" x2="450" y2="395" stroke="#C68E0E" stroke-width="2.5" marker-end="url(#arrowGold)"/>
+            <text x="475" y="430" fill="#695D30" font-family="Epilogue, sans-serif" font-weight="700" font-size="11" font-style="italic">remonte vers</text>
+
+            <!-- NIVEAU 3 : CABINET LICENCIÉ -->
+            <g transform="translate(450, 320)">
+              <rect x="-300" y="0" width="600" height="70" rx="10" fill="url(#cascGoldLight)" stroke="#C68E0E" stroke-width="2.5" filter="url(#cascShadow)"/>
+              <text x="-280" y="26" fill="#695D30" font-family="Epilogue, sans-serif" font-weight="800" font-size="11" letter-spacing="2px">NIVEAU 3 · 💼 CABINET LICENCIÉ</text>
+              <text x="-280" y="48" fill="#102D50" font-family="Epilogue, sans-serif" font-weight="600" font-size="13">Synthèse de TOUS les clients du cabinet · encours, rémunération <strong>(€ inclus)</strong></text>
+              <text x="-280" y="64" fill="#695D30" font-family="Epilogue, sans-serif" font-weight="500" font-size="11" font-style="italic">= somme des ingénieurs + clients du dirigeant directs</text>
+            </g>
+
+            <!-- Flèche vers niveau 2 -->
+            <line x1="450" y1="315" x2="450" y2="245" stroke="#C68E0E" stroke-width="2.5" marker-end="url(#arrowGold)"/>
+            <text x="475" y="285" fill="#695D30" font-family="Epilogue, sans-serif" font-weight="700" font-size="11" font-style="italic">remonte vers</text>
+
+            <!-- NIVEAU 2 : PROPRIÉTAIRE DE MARQUE -->
+            <g transform="translate(450, 170)">
+              <rect x="-320" y="0" width="640" height="70" rx="10" fill="url(#cascGold)" filter="url(#cascShadow)"/>
+              <text x="-300" y="26" fill="#FAF8F3" font-family="Epilogue, sans-serif" font-weight="800" font-size="11" letter-spacing="2px">NIVEAU 2 · 🏛 PROPRIÉTAIRE DE MARQUE</text>
+              <text x="-300" y="48" fill="white" font-family="Epilogue, sans-serif" font-weight="600" font-size="13">Synthèse de TOUT le réseau · 4 sources de revenus · ventilation par cabinet</text>
+              <text x="-300" y="64" fill="rgba(255,255,255,0.85)" font-family="Epilogue, sans-serif" font-weight="500" font-size="11" font-style="italic">= somme des cabinets + captation directe (clients PRIVEOS Capital sans licencié)</text>
+            </g>
+
+            <!-- Flèche vers niveau 1 -->
+            <line x1="450" y1="165" x2="450" y2="105" stroke="#C68E0E" stroke-width="2.5" marker-end="url(#arrowGold)"/>
+            <text x="475" y="140" fill="#695D30" font-family="Epilogue, sans-serif" font-weight="700" font-size="11" font-style="italic">remonte vers</text>
+
+            <!-- NIVEAU 1 : ASTRAEOS (au sommet) -->
+            <g transform="translate(450, 30)">
+              <rect x="-340" y="0" width="680" height="70" rx="10" fill="url(#cascNavy)" filter="url(#cascShadow)"/>
+              <text x="-320" y="26" fill="#DDBB6E" font-family="Epilogue, sans-serif" font-weight="800" font-size="11" letter-spacing="2px">NIVEAU 1 · 🌐 ASTRAEOS (ÉDITEUR)</text>
+              <text x="-320" y="48" fill="white" font-family="Epilogue, sans-serif" font-weight="600" font-size="13">Métriques business SaaS · MRR · ARR · LTV · CAC · churn · encours total</text>
+              <text x="-320" y="64" fill="rgba(255,255,255,0.85)" font-family="Epilogue, sans-serif" font-weight="500" font-size="11" font-style="italic">= somme de tous les tenants (PRIVEOS Capital + Dupont Patrimoine + futurs locataires)</text>
+            </g>
+
+          </svg>
+        </div>
+      </div>
+
+      <h3>Détail par niveau · ce que chaque rôle voit</h3>
+      <div class="grid-2">
+        <div class="card gold-left">
+          <div class="card-eyebrow">👤 Niveau 4 · Ingénieur</div>
+          <h4 style="font-size:14px; margin: 0 0 6px;">Volumétrie sans €</h4>
+          <p style="font-size:12.5px;"><strong>Périmètre :</strong> ses clients à lui uniquement (cloisonné).</p>
+          <p style="font-size:12.5px;"><strong>Voit :</strong> encours apportés, nombre de contrats signés, biens immobiliers placés, sociétés immatriculées.</p>
+          <p style="font-size:12.5px;"><strong>Ne voit pas :</strong> les commissions/rémunérations financières en €, ni les chiffres des autres ingénieurs.</p>
+        </div>
+        <div class="card gold-left">
+          <div class="card-eyebrow">💼 Niveau 3 · Cabinet licencié <span style="font-weight:400;font-size:9px;color:var(--navy-300);">(modèle Marque)</span></div>
+          <h4 style="font-size:14px; margin: 0 0 6px;">Synthèse complète du cabinet</h4>
+          <p style="font-size:12.5px;"><strong>Périmètre :</strong> tous les clients du cabinet (tous ingénieurs).</p>
+          <p style="font-size:12.5px;"><strong>Voit :</strong> encours total, rémunération perçue, total reversé à PRIVEOS Capital, ventilation par source (financier · assurance · immo · honoraires) et par ingénieur.</p>
+          <p style="font-size:12.5px;"><strong>Comparaison :</strong> position du cabinet dans le réseau (#X/14) + vs moyenne réseau.</p>
+        </div>
+        <div class="card gold-left">
+          <div class="card-eyebrow">🏛 Niveau 2 · Propriétaire de marque</div>
+          <h4 style="font-size:14px; margin: 0 0 6px;">Pilotage stratégique du réseau</h4>
+          <p style="font-size:12.5px;"><strong>Périmètre :</strong> tout son réseau de licenciés + captation directe.</p>
+          <p style="font-size:12.5px;"><strong>Voit :</strong> 4 sources de revenus consolidées, classement des cabinets, performance par cabinet, captation directe vs réseau, évolution mensuelle/trimestrielle/annuelle.</p>
+          <p style="font-size:12.5px;"><strong>Distinction :</strong> les cabinets ne voient pas la performance des autres cabinets — uniquement la leur + leur position dans le classement.</p>
+        </div>
+        <div class="card gold-left">
+          <div class="card-eyebrow">🌐 Niveau 1 · ASTRAEOS</div>
+          <h4 style="font-size:14px; margin: 0 0 6px;">Métriques business SaaS</h4>
+          <p style="font-size:12.5px;"><strong>Périmètre :</strong> tous les tenants (propriétaires de marque clients d'ASTRAEOS).</p>
+          <p style="font-size:12.5px;"><strong>Voit :</strong> MRR, ARR, LTV par tenant, CAC, churn, taux d'usage, encours total tous tenants confondus, croissance YoY.</p>
+          <p style="font-size:12.5px;"><strong>Ne voit pas (par défaut) :</strong> les détails opérationnels des dossiers individuels (sauf en mode "se connecter en tant que").</p>
+        </div>
+      </div>
+
+      <div class="note gold" style="background: rgba(198,142,14,0.08); border-left-width: 6px;">
+        <strong>⚖ Adaptation pour le modèle "Cabinet direct" (cabinet indépendant) :</strong>
+        <p style="margin: 8px 0; font-size: 12.5px;">Quand le tenant est un <strong>cabinet indépendant</strong> (pas de propriétaire de marque), la cascade financière passe de <strong>4 niveaux à 3 niveaux</strong> :</p>
+        <div style="background: white; padding: 14px 18px; border-radius: 8px; margin: 10px 0; font-family: 'JetBrains Mono', monospace; font-size: 12px; line-height: 1.8;">
+          <span style="color: var(--gold); font-weight: 700;">👤 NIVEAU 3</span> · Ingénieur (volumétrie sans commissions)
+          <br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: var(--gold);">↑ remonte vers</span>
+          <br><span style="color: var(--gold); font-weight: 700;">💼 NIVEAU 2</span> · Cabinet indépendant (€ inclus · 100% des études + commissions)
+          <br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: var(--gold);">↑ remonte vers</span>
+          <br><span style="color: var(--gold); font-weight: 700;">🌐 NIVEAU 1</span> · ASTRAEOS (MRR · ARR · abonnement par utilisateur/mois)
+        </div>
+        <ul style="margin-top: 10px; padding-left: 20px; font-size: 12.5px;">
+          <li><strong>Niveau Propriétaire absent</strong> — pas de reversement, pas de part fixe ni variable.</li>
+          <li><strong>Le cabinet garde 100%</strong> du prix des études et 100% des commissions sur les produits placés.</li>
+          <li><strong>ASTRAEOS facture</strong> uniquement l'abonnement SaaS forfaitaire par utilisateur/mois — pas de commission produit.</li>
+          <li><strong>Niveau 4 (Ingénieur)</strong> reste cloisonné comme dans le modèle "marque" : il voit le prix de ses études + sa volumétrie, pas les commissions cabinet.</li>
+        </ul>
+      </div>
+
+      <div class="note gold">
+        <strong>📌 Pourquoi cette cascade est essentielle :</strong>
+        <ul style="margin-top: 8px; padding-left: 20px; font-size: 12.5px;">
+          <li><strong>Cohérence des chiffres</strong> — un encours apporté par un ingénieur doit remonter à l'identique dans la synthèse cabinet, puis (si applicable) dans la synthèse propriétaire, puis dans les métriques ASTRAEOS.</li>
+          <li><strong>Cloisonnement</strong> — chaque niveau ne voit que ce qui est dans son périmètre. Pas de fuite d'information vers les niveaux inférieurs.</li>
+          <li><strong>Performance technique</strong> — l'agrégation se fait à chaque requête en s'appuyant sur les niveaux inférieurs. Les bases de données doivent être structurées pour permettre ces agrégations rapides.</li>
+          <li><strong>Audit &amp; conformité</strong> — la traçabilité d'un chiffre du niveau 1 vers le niveau le plus bas doit être possible (drill-down systématique).</li>
+          <li><strong>Adaptabilité</strong> — la même architecture supporte les 2 modèles commerciaux (cascade à 4 ou 3 niveaux selon le type de tenant).</li>
+        </ul>
+      </div>
+
+      <h3>Rôle des chiffres dans chaque document</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Document</th>
+              <th>Section synthèse financière</th>
+              <th>Périmètre</th>
+              <th>€ visibles ?</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Doc 2 · Admin éditeur</strong></td>
+              <td>Métriques business SaaS</td>
+              <td>Tous tenants</td>
+              <td>✓ MRR / ARR / LTV / CAC</td>
+            </tr>
+            <tr>
+              <td><strong>Doc 3 · Propriétaire</strong></td>
+              <td>Synthèse financière du réseau</td>
+              <td>Tout son réseau</td>
+              <td>✓ 4 sources de revenus</td>
+            </tr>
+            <tr>
+              <td><strong>Doc 4 · Licencié dirigeant</strong></td>
+              <td>Synthèse financière du cabinet</td>
+              <td>Tous clients du cabinet</td>
+              <td>✓ Encours + rémunération cabinet</td>
+            </tr>
+            <tr style="background: rgba(198,142,14,0.06);">
+              <td><strong>Doc 5 · Ingénieur ⭐</strong></td>
+              <td>Mon activité (volumétrie)</td>
+              <td>Ses propres clients</td>
+              <td>✕ Pas de €, uniquement encours apportés</td>
+            </tr>
+            <tr>
+              <td><strong>Doc 6 · Client final</strong></td>
+              <td>Mes encours · investissements</td>
+              <td>Ses propres avoirs</td>
+              <td>✓ Ses propres montants placés</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============================== -->
+    <!-- 7. PARCOURS PROSPECT            -->
+    <!-- ============================== -->
+    <section id="workflow-prospect">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">7</span> Workflow métier · 1</div>
+        <h2 class="section-title">Le parcours prospect → client en suivi</h2>
+        <p class="section-intro">Le workflow métier critique de la plateforme. De l'ajout du prospect jusqu'à sa fidélisation en tant que client en suivi, en passant par la compliance, la collecte documentaire et l'étude patrimoniale.</p>
+      </div>
+
+      <div class="mermaid-container">
+<pre class="mermaid">
+flowchart TB
+    classDef start fill:#FAF8F3,stroke:#C68E0E,color:#102D50,font-weight:bold
+    classDef step fill:#fff,stroke:#A4AEBB,color:#102D50
+    classDef compliance fill:#EBF1FA,stroke:#102D50,color:#102D50
+    classDef ia fill:#EEDDB6,stroke:#C68E0E,color:#695D30,font-weight:bold
+    classDef validate fill:#E8F3EC,stroke:#1F8A4C,color:#1F8A4C
+    classDef end1 fill:#C68E0E,stroke:#C68E0E,color:#fff,font-weight:bold
+
+    Start["🎯 Création prospect"]:::start
+    Choice{"Mode de création ?"}
+
+    Manual["📝 Manuel<br/>nom · prénom · email · tel"]:::step
+    Calendar["📅 Lien agenda envoyé"]:::step
+
+    EmailAuto["📧 Email automatique au prospect<br/>+ lien agenda<br/>+ lien DCI simplifié + KYC"]:::step
+
+    Folder["📁 Dossier créé<br/>DCI simplifié + KYC à remplir"]:::step
+    Reminder["🔔 Alertes 48h SMS+mail<br/>si DCI non rempli"]:::step
+
+    RDV1["🎥 Visio RDV initial<br/>enregistré"]:::step
+    IA1["🤖 IA produit<br/>synthèse + timecode<br/>+ DCI complet pré-rempli"]:::ia
+
+    Compliance["📋 Phase compliance"]:::compliance
+    Sign["✍ Signature électronique<br/>DER + DCI complet + KYC + LM<br/>+ annexes"]:::compliance
+    Pay["💳 Paiement reçu<br/>via Qonto"]:::compliance
+    Validate["✅ Licencié valide<br/>passage étape suivante"]:::validate
+
+    Space["🔓 Espace client sécurisé ouvert"]:::step
+    Docs["📂 Collecte documents<br/>hiérarchisée par section<br/>(immo / impôts / fin / matrim...)"]:::step
+    Ready["☑ Client : 'j'ai tout fourni'"]:::step
+
+    RDV2["📅 Proposition RDV restitution<br/>4-6 semaines plus tard"]:::step
+    Study["🤖 Phase étude patrimoniale<br/>5 phases IA + validations"]:::ia
+    Chat["💬 Chat client/ingénieur<br/>pendant l'étude"]:::step
+
+    RDV3["🎥 Visio restitution<br/>+ document synthèse<br/>+ étude complète"]:::step
+    Decision{"Client souhaite mettre<br/>en place les préconisations<br/>avec le cabinet ?"}
+
+    Mission["📜 Mission(s) signée(s)<br/>via le propriétaire de marque<br/>(PRIVEOS Capital)"]:::end1
+    Followup["📞 Suivi CRM<br/>contacts réguliers"]:::end1
+    NoMission["🤝 Client met en place<br/>de son côté"]:::step
+
+    Start --> Choice
+    Choice -->|Option 1| Manual
+    Choice -->|Option 2| Calendar
+    Manual --> EmailAuto
+    Calendar --> EmailAuto
+    EmailAuto --> Folder
+    Folder --> Reminder
+    Reminder --> RDV1
+    RDV1 --> IA1
+    IA1 --> Compliance
+    Compliance --> Sign
+    Sign --> Pay
+    Pay --> Validate
+    Validate --> Space
+    Space --> Docs
+    Docs --> Ready
+    Ready --> RDV2
+    RDV2 --> Study
+    Study --> Chat
+    Chat --> RDV3
+    RDV3 --> Decision
+    Decision -->|Oui| Mission
+    Decision -->|Non| NoMission
+    Mission --> Followup
+    NoMission --> Followup
+</pre>
+      </div>
+      <div class="mermaid-caption">Fig. 3 — Workflow complet : 6 étapes pipeline + sous-étapes opérationnelles</div>
+
+      <h3>Validations à chaque étape</h3>
+      <p>Chaque transition d'étape requiert <strong>une validation</strong> (manuelle ou automatique). Cette validation peut être faite par :</p>
+      <ul class="styled">
+        <li>Le <strong>licencié</strong> ou son <strong>ingénieur</strong> en charge du dossier</li>
+        <li>Le <strong>superviseur</strong> (si paramétré)</li>
+        <li>Le <strong>propriétaire de marque</strong> (toujours autorisé)</li>
+        <li>Le <strong>système</strong> automatiquement quand toutes les conditions sont remplies (ex : DCI signé + paiement reçu → étape 03)</li>
+      </ul>
+
+      <div class="note">
+        <strong>Détail régulièrement souligné :</strong> "Chacune des étapes doit être remontée avec une validation manuelle du licencié, et c'est aussi à l'administrateur, à l'ingénieur de suivre que tout est bien fait." → la validation manuelle reste le mode par défaut, l'automatisation vient en complément lorsque toutes les conditions sont objectivement vérifiables.
+      </div>
+    </section>
+
+    <!-- ============================== -->
+    <!-- 8. WORKFLOW IA                  -->
+    <!-- ============================== -->
+    <section id="workflow-ia">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">8</span> Workflow métier · 2</div>
+        <h2 class="section-title">L'IA agentique pour produire l'étude patrimoniale</h2>
+        <p class="section-intro">Le module IA est <strong>le différenciateur produit majeur</strong>. Plusieurs agents IA spécialisés s'enchaînent pour produire l'étude patrimoniale, avec des points de validation manuelle de l'ingénieur. Une exigence de précision chirurgicale dans la traçabilité.</p>
+      </div>
+
+      <div class="mermaid-container">
+<pre class="mermaid">
+flowchart TB
+    classDef input fill:#FAF8F3,stroke:#C68E0E,color:#695D30
+    classDef agent fill:#EEDDB6,stroke:#C68E0E,color:#695D30,font-weight:bold
+    classDef validate fill:#E8F3EC,stroke:#1F8A4C,color:#1F8A4C,font-weight:bold
+    classDef output fill:#C68E0E,stroke:#C68E0E,color:#fff,font-weight:bold
+
+    DCI["📝 DCI<br/>complété"]:::input
+    Visio["🎥 Transcript visio<br/>+ timecodes"]:::input
+    Docs["📂 Documents collectés<br/>(actes, statuts, BIE...)"]:::input
+
+    P1A["🤖 Agent : Patrimoine"]:::agent
+    P1B["🤖 Agent : Immobilier"]:::agent
+    P1C["🤖 Agent : Sociétés"]:::agent
+    P1D["🤖 Agent : Flux financiers"]:::agent
+    Bilan["📊 Bilan patrimonial<br/>= Météo (☀ ⛅ 🌧 ⚡)<br/>+ traçabilité chirurgicale"]:::output
+
+    V1["✅ Validation ingénieur<br/>Bilan correct ?"]:::validate
+
+    P2A["🤖 Agent : Préconisations"]:::agent
+    P2B["🤖 Agent : Stratégies fiscales"]:::agent
+    P2C["🤖 Agent : Optimisations"]:::agent
+    Prec["📋 Préconisations<br/>Format : D'où vous partez →<br/>Proposition → Résultat<br/>+ Étapes + Simulation + Loi"]:::output
+
+    V2["✅ Validation ingénieur<br/>Stratégies pertinentes ?"]:::validate
+
+    P3["🤖 Agent : Tableau de synthèse<br/>3 colonnes"]:::agent
+    Tab["📊 Tableau<br/>Risques | Préconisations | Résultat chiffré"]:::output
+
+    P4["🤖 Agent : Frise chronologique"]:::agent
+    Frise["📅 Plan d'action<br/>séquencé"]:::output
+
+    V3["✅ Validation finale<br/>ingénieur"]:::validate
+
+    P5["🤖 Agent : Mise en forme<br/>charte graphique"]:::agent
+    Final["📄 ÉTUDE COMPLÈTE<br/>+ Document synthèse simplifié"]:::output
+
+    DCI --> P1A
+    DCI --> P1B
+    DCI --> P1C
+    DCI --> P1D
+    Visio --> P1A
+    Visio --> P1B
+    Visio --> P1C
+    Visio --> P1D
+    Docs --> P1A
+    Docs --> P1B
+    Docs --> P1C
+    Docs --> P1D
+
+    P1A --> Bilan
+    P1B --> Bilan
+    P1C --> Bilan
+    P1D --> Bilan
+
+    Bilan --> V1
+    V1 -->|Validé| P2A
+    V1 -->|Validé| P2B
+    V1 -->|Validé| P2C
+    V1 -.->|À corriger| P1A
+
+    P2A --> Prec
+    P2B --> Prec
+    P2C --> Prec
+    Prec --> V2
+    V2 -->|Validé| P3
+    V2 -.->|À corriger| P2A
+
+    P3 --> Tab
+    Tab --> P4
+    P4 --> Frise
+    Frise --> V3
+    V3 -->|Validé| P5
+    V3 -.->|À corriger| P3
+
+    P5 --> Final
+</pre>
+      </div>
+      <div class="mermaid-caption">Fig. 4 — Workflow IA : 5 phases, sous-agents par sujet, 3 points de validation manuelle</div>
+
+      <h3>Les 5 phases de l'IA</h3>
+      <ol class="styled">
+        <li><strong>Phase 1 — Bilan patrimonial.</strong> Plusieurs sous-agents (patrimoine, immobilier, sociétés, flux financiers, etc.) analysent les inputs (DCI, transcript visio, documents). Output : <strong>météo de la situation</strong> (soleil ☀ / nuageux ⛅ / pluie 🌧 / orage ⚡) avec traçabilité chirurgicale (chaque chiffre cliquable → source).</li>
+        <li><strong>Phase 2 — Stratégies & préconisations.</strong> Lancée après validation du bilan. Format obligatoire : <em>D'où vous partez → Proposition → Ce que vous allez atteindre → Étapes → Simulation chiffrée → Textes de loi</em>.</li>
+        <li><strong>Phase 3 — Tableau de synthèse 3 colonnes.</strong> Risques identifiés / Préconisations / Résultats chiffrés attendus.</li>
+        <li><strong>Phase 4 — Frise chronologique.</strong> Plan d'action séquencé avec ordre des étapes.</li>
+        <li><strong>Phase 5 — Mise en forme finale.</strong> Document principal (étude complète) + document de synthèse simplifié, dans la charte graphique de la marque.</li>
+      </ol>
+
+      <h3>Choix des modèles IA (recommandation par tâche)</h3>
+      <p>Chaque agent IA est routé vers le modèle le plus adapté en termes de <strong>qualité / coût / latence</strong>. Les modèles "premium" (Claude Opus 4.7) sont réservés aux tâches qui nécessitent un raisonnement patrimonial complexe ; les modèles "rapides" (Haiku, Mistral, Gemini Flash) absorbent les tâches structurées plus simples.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 22%;">Phase / Agent</th>
+              <th style="width: 24%;">Tâche</th>
+              <th style="width: 26%;">Modèle recommandé</th>
+              <th>Justification &amp; alternatives</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Synthèse visio</strong></td>
+              <td>Transcription + résumé + timecodes</td>
+              <td>Outil tiers visio (Tactiq / Otter / Read AI)</td>
+              <td>Spécialisé, optimisé pour la voix. Évite Zoom / Meet / TLDV / Fireflies (incompatibles avec ton intégration).</td>
+            </tr>
+            <tr>
+              <td><strong>Phase 1a — Bilan global</strong></td>
+              <td>Lecture DCI + docs + visio → vue d'ensemble</td>
+              <td>Claude Opus 4.7</td>
+              <td>Raisonnement patrimonial complexe, longues fenêtres de contexte. <em>Alternative budget : Claude Sonnet 4 (suffisant à 80%).</em></td>
+            </tr>
+            <tr>
+              <td><strong>Phase 1b — Sous-agent Patrimoine</strong></td>
+              <td>Extraction actifs / passifs / valeurs</td>
+              <td>Claude Sonnet 4</td>
+              <td>Extraction structurée. <em>Alternatives : Mistral Large 2 (RGPD-friendly EU), Gemini 1.5 Flash (low cost).</em></td>
+            </tr>
+            <tr>
+              <td><strong>Phase 1c — Sous-agent Immobilier</strong></td>
+              <td>Lecture actes + valorisation + emprunts</td>
+              <td>Claude Sonnet 4</td>
+              <td>Extraction multi-documents, calculs simples. <em>Alternative : Mistral Large 2.</em></td>
+            </tr>
+            <tr>
+              <td><strong>Phase 1d — Sous-agent Sociétés</strong></td>
+              <td>Lecture statuts + bilans + holdings</td>
+              <td>Claude Opus 4.7</td>
+              <td>Compréhension juridique fine (montages SCI, holdings, démembrement).</td>
+            </tr>
+            <tr>
+              <td><strong>Phase 1e — Sous-agent Flux financiers</strong></td>
+              <td>Analyse revenus / charges / capacité d'épargne</td>
+              <td>Claude Sonnet 4</td>
+              <td>Calculs et structuration. <em>Alternative : Mistral Large 2.</em></td>
+            </tr>
+            <tr>
+              <td><strong>Phase 1f — Météo &amp; synthèse</strong></td>
+              <td>Génération météo + scoring urgences</td>
+              <td>Claude Opus 4.7</td>
+              <td>Jugement nuancé requis. La météo conditionne la suite, donc qualité prioritaire.</td>
+            </tr>
+            <tr>
+              <td><strong>Phase 2 — Stratégies / préconisations</strong></td>
+              <td>Format : <em>D'où vous partez → Proposition → Résultat → Étapes → Simulation → Loi</em></td>
+              <td>Claude Opus 4.7</td>
+              <td>Précision réglementaire + références aux textes de loi français exigées. <strong>Pas de compromis sur la qualité.</strong></td>
+            </tr>
+            <tr>
+              <td><strong>Phase 3 — Tableau de synthèse</strong></td>
+              <td>Structuration 3 colonnes : Risques / Préconisations / Résultat chiffré</td>
+              <td>Claude Sonnet 4</td>
+              <td>Tâche structurée à partir des phases 1 et 2. <em>Alternative : Mistral Large 2.</em></td>
+            </tr>
+            <tr>
+              <td><strong>Phase 4 — Frise chronologique</strong></td>
+              <td>Séquençage temporel des actions</td>
+              <td>Claude Sonnet 4</td>
+              <td>Logique séquentielle simple. <em>Alternatives : Mistral Large 2, Gemini 1.5 Flash.</em></td>
+            </tr>
+            <tr>
+              <td><strong>Phase 5 — Mise en forme finale</strong></td>
+              <td>Application charte graphique + templates</td>
+              <td>Claude Haiku 4.5</td>
+              <td>Tâche déterministe, modèle léger suffit. <em>Alternatives : Gemini 1.5 Flash, Mistral Small.</em></td>
+            </tr>
+            <tr>
+              <td><strong>Reprise partielle</strong></td>
+              <td>Modification ciblée d'une section sans tout régénérer</td>
+              <td>Même modèle que la phase concernée</td>
+              <td>Edition contextuelle, on conserve la cohérence stylistique du modèle initial.</td>
+            </tr>
+            <tr>
+              <td><strong>Chat client / ingénieur</strong></td>
+              <td>Q&amp;R rapides sur le dossier en cours</td>
+              <td>Claude Haiku 4.5</td>
+              <td>Faible latence + faible coût pour de la conversation. <em>Alternative : Gemini 1.5 Flash.</em></td>
+            </tr>
+            <tr>
+              <td><strong>Génération de notifications</strong></td>
+              <td>Rédaction d'emails de relance, SMS</td>
+              <td>Claude Haiku 4.5</td>
+              <td>Tâche simple, gros volume. <em>Alternative : Mistral Small.</em></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note gold">
+        <strong>Stratégie d'optimisation des coûts :</strong> en pratique, ~70% des appels IA peuvent être faits par <em>Sonnet 4 / Haiku 4.5 / Mistral / Gemini Flash</em> (modèles à 5-15× moins chers que Opus). On réserve <em>Opus 4.7</em> aux moments critiques (bilan global, météo, stratégies, vérifications réglementaires). Cette logique de routage doit être <strong>configurable dans l'admin</strong> pour ajuster selon le budget de chaque tenant.
+      </div>
+      </div>
+
+      <div class="note gold">
+        <strong>Exigence métier critique :</strong> traçabilité chirurgicale obligatoire. Chaque chiffre / affirmation produite par l'IA doit être cliquable → ouvre directement la source (DCI surligné, document PDF surligné, ou timecode dans la visio). L'ingénieur peut éditer librement les outputs IA, et même demander des reprises partielles (sans tout régénérer).
+      </div>
+    </section>
+
+    <!-- ============================== -->
+    <!-- 9. FLUX FINANCIERS              -->
+    <!-- ============================== -->
+    <section id="workflow-finance">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">9</span> Workflow métier · 3</div>
+        <h2 class="section-title">Les flux financiers de la plateforme</h2>
+        <p class="section-intro">Deux logiques distinctes coexistent : les études (facturation directe par le licencié, reversement à PRIVEOS Capital) et les produits (facturation par PRIVEOS Capital, redistribution au licencié).</p>
+      </div>
+
+      <div class="mermaid-container">
+<pre class="mermaid">
+flowchart LR
+    classDef client fill:#EBF1FA,stroke:#102D50,color:#102D50,font-weight:bold
+    classDef licensee fill:#EEDDB6,stroke:#C68E0E,color:#695D30,font-weight:bold
+    classDef priveos fill:#C68E0E,stroke:#C68E0E,color:#fff,font-weight:bold
+    classDef money fill:#E8F3EC,stroke:#1F8A4C,color:#1F8A4C
+
+    Client["👤 CLIENT"]:::client
+
+    Licensee["💼 LICENCIÉ"]:::licensee
+    Priveos["🏛 PRIVEOS Capital"]:::priveos
+
+    F1["💵 Étude<br/>≤ 3 250 € HT"]:::money
+    F2["💵 500 € fixe<br/>+ variable"]:::money
+    F3["💵 Produits<br/>(commission)"]:::money
+    F4["💵 % rétrocédé<br/>au licencié"]:::money
+    F5["💵 Frais d'entrée<br/>20 000 €"]:::money
+
+    Client -- "facture<br/>étude" --> F1
+    F1 --> Licensee
+    Licensee -- "reverse<br/>part fixe + variable" --> F2
+    F2 --> Priveos
+
+    Client -- "encaissement<br/>commissions" --> F3
+    F3 --> Priveos
+    Priveos -- "redistribution" --> F4
+    F4 --> Licensee
+
+    Licensee -.->|"à l'entrée<br/>du réseau"| F5
+    F5 -.-> Priveos
+</pre>
+      </div>
+      <div class="mermaid-caption">Fig. 5 — Flux financiers : 2 circuits distincts (études vs produits)</div>
+
+      <h3>Détail des flux</h3>
+
+      <div class="grid-2">
+        <div class="card gold-left">
+          <div class="card-eyebrow">Circuit 1</div>
+          <div class="card-title">Études patrimoniales</div>
+          <p style="font-size:13px;"><strong>Le licencié facture le client</strong> (max 3 250 € HT, modulable à la baisse).</p>
+          <ul class="styled" style="font-size:12.5px;">
+            <li>PRIVEOS Capital prend une <strong>part fixe de 500 €</strong> systématiquement (rôle de supervision).</li>
+            <li>Une <strong>part variable</strong> dépend des étapes auxquelles PRIVEOS Capital intervient.</li>
+            <li>Plusieurs scénarios de répartition possibles selon le niveau d'implication.</li>
+          </ul>
+        </div>
+        <div class="card gold-left">
+          <div class="card-eyebrow">Circuit 2</div>
+          <div class="card-title">Produits (financier · immo · assurance · immat. société)</div>
+          <p style="font-size:13px;"><strong>Le licencié apporte le client</strong>, PRIVEOS Capital facture et encaisse.</p>
+          <ul class="styled" style="font-size:12.5px;">
+            <li>Le <strong>% rétrocédé</strong> au licencié est paramétrable par produit.</li>
+            <li>Chaque propriétaire de marque définit ses propres taux.</li>
+            <li>Possibilité de <strong>créer de nouveaux produits</strong> avec leur propre clé de répartition.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="card luxe">
+        <div class="card-eyebrow">Frais d'entrée du réseau</div>
+        <h3 style="margin-top:0;">20 000 € pour rejoindre la licence PRIVEOS</h3>
+        <p>Lorsqu'un nouveau cabinet rejoint le réseau PRIVEOS, il paie un droit d'entrée de 20 000 €. Ce flux doit être tracé dans la plateforme et idéalement géré via Qonto. <em>Ce paramètre est configurable par chaque propriétaire de marque (le tenant Dupont Patrimoine peut fixer un autre montant).</em></p>
+      </div>
+
+      <h3>Module facturation — recommandations</h3>
+      <p>L'idéal est de <strong>se connecter à Qonto</strong> pour gérer l'intégralité des flux dans un seul outil :</p>
+      <ul class="styled">
+        <li>Génération automatique des factures (études, commissions, frais d'entrée)</li>
+        <li>Suivi des encaissements en temps réel</li>
+        <li>Synchronisation avec la comptabilité du licencié</li>
+        <li>Export comptable pour expert-comptable</li>
+      </ul>
+    </section>
+
+    <!-- ============================== -->
+    <!-- 10. CENTRALISATION DONNÉES      -->
+    <!-- ============================== -->
+    <section id="workflow-data">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">10</span> Workflow métier · 4</div>
+        <h2 class="section-title">La centralisation des données : du licencié à l'admin</h2>
+        <p class="section-intro">Le point clé que tu as souligné : <em>"Quand je dis ici 'centralisation', il faut qu'on remonte l'information de chacun des licenciés."</em> Voici comment les données saisies par les licenciés sur le terrain remontent à l'admin et se consolident.</p>
+      </div>
+
+      <div class="mermaid-container">
+<pre class="mermaid">
+flowchart BT
+    classDef source fill:#fff,stroke:#A4AEBB,color:#102D50
+    classDef licensee fill:#EEDDB6,stroke:#C68E0E,color:#695D30,font-weight:bold
+    classDef agg fill:#FAF8F3,stroke:#C68E0E,color:#695D30
+    classDef priveos fill:#C68E0E,stroke:#C68E0E,color:#fff,font-weight:bold
+    classDef editor fill:#102D50,stroke:#102D50,color:#fff,font-weight:bold
+
+    DB[("🗄 Base de données<br/>centrale")]
+
+    P1["Prospects créés"]:::source
+    P2["RDV pris<br/>(initial / suivi / restitution)"]:::source
+    P3["Documents signés<br/>(DER · DCI · KYC · LM)"]:::source
+    P4["Études produites"]:::source
+    P5["Missions signées"]:::source
+    P6["Encours financiers"]:::source
+    P7["Contrats assurance"]:::source
+    P8["Projets immobiliers"]:::source
+    P9["Immat. sociétés (SCI…)"]:::source
+    P10["Honoraires conseil<br/>encaissés"]:::source
+
+    L1["💼 Cabinet A"]:::licensee
+    L2["💼 Cabinet B"]:::licensee
+    L3["💼 Cabinet C"]:::licensee
+    L4["💼 ... 14 cabinets"]:::licensee
+
+    Agg1["📊 Vue agrégée<br/>par cabinet"]:::agg
+    Agg2["📊 Vue agrégée<br/>tenant entier"]:::agg
+
+    Prop["🏛 Propriétaire<br/>PRIVEOS Capital"]:::priveos
+    Editor["👑 Admin éditeur"]:::editor
+
+    P1 --> L1
+    P2 --> L1
+    P3 --> L1
+    P4 --> L1
+    P5 --> L1
+    P6 --> L1
+    P7 --> L1
+    P8 --> L1
+    P9 --> L1
+    P10 --> L1
+
+    L1 --> DB
+    L2 --> DB
+    L3 --> DB
+    L4 --> DB
+
+    DB --> Agg1
+    Agg1 --> Agg2
+    Agg2 --> Prop
+    Prop --> Editor
+</pre>
+      </div>
+      <div class="mermaid-caption">Fig. 6 — Centralisation : les données saisies par chaque licencié remontent en temps réel et alimentent les vues consolidées</div>
+
+      <h3>Les données qui remontent automatiquement</h3>
+      <p>Chaque action effectuée par un licencié dans son espace alimente <strong>en temps réel</strong> les vues consolidées du propriétaire de marque :</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Action licencié</th>
+              <th>Donnée alimentée</th>
+              <th>Vue consolidée propriétaire</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Création d'un prospect</td>
+              <td>+1 prospect</td>
+              <td>Pipeline étape 01 · KPI accueil</td>
+            </tr>
+            <tr>
+              <td>RDV pris (initial / suivi / restitution)</td>
+              <td>+1 RDV planifié</td>
+              <td>Calendrier consolidé · activité</td>
+            </tr>
+            <tr>
+              <td>Compliance signée (DER + DCI + KYC + LM)</td>
+              <td>+1 dossier en compliance validée</td>
+              <td>Pipeline étape 02 · faits saillants</td>
+            </tr>
+            <tr>
+              <td>Documents collectés complets</td>
+              <td>+1 dossier prêt étude</td>
+              <td>Pipeline étape 03</td>
+            </tr>
+            <tr>
+              <td>Étude lancée par IA</td>
+              <td>+1 étude en cours</td>
+              <td>Pipeline étape 04</td>
+            </tr>
+            <tr>
+              <td>Restitution effectuée</td>
+              <td>+1 étude restituée</td>
+              <td>Pipeline étape 05</td>
+            </tr>
+            <tr>
+              <td><strong>Mission souscrite — produit financier</strong></td>
+              <td>+ encours géré · + commission produit</td>
+              <td>Synthèse financière · investissement financier</td>
+            </tr>
+            <tr>
+              <td><strong>Mission souscrite — assurance</strong></td>
+              <td>+1 contrat assurance · + commission</td>
+              <td>Synthèse financière · assurances</td>
+            </tr>
+            <tr>
+              <td><strong>Mission souscrite — projet immobilier</strong></td>
+              <td>+1 projet immo · + commission</td>
+              <td>Synthèse financière · projets immobiliers</td>
+            </tr>
+            <tr>
+              <td><strong>Mission souscrite — immat. société (SCI…)</strong></td>
+              <td>+1 société immatriculée · + honoraires</td>
+              <td>Synthèse financière · honoraires conseil</td>
+            </tr>
+            <tr>
+              <td>Honoraire d'étude encaissé</td>
+              <td>+ rémunération licencié − part fixe + variable PRIVEOS Capital</td>
+              <td>Synthèse financière · honoraires études</td>
+            </tr>
+            <tr>
+              <td>Client en suivi (CRM activé)</td>
+              <td>+1 contact dans portefeuille</td>
+              <td>Pipeline étape 06 · CRM consolidé</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Cloisonnement vs agrégation</h3>
+      <p>Les <strong>licenciés ne se voient jamais entre eux</strong>. Mais leurs données <strong>alimentent toutes les vues consolidées</strong> du propriétaire de marque. C'est cette double logique qui permet :</p>
+      <ul class="styled">
+        <li><strong>Confidentialité commerciale</strong> entre cabinets concurrents au sein d'un même réseau</li>
+        <li><strong>Pilotage global</strong> par le propriétaire (synthèse financière, performance des licenciés, animation réseau)</li>
+        <li><strong>Supervision granulaire</strong> par les superviseurs (accès paramétré à certains licenciés ou certains dossiers)</li>
+      </ul>
+
+      <div class="note gold">
+        <strong>Exemple concret :</strong> ce qu'on a déjà construit dans la page "Performance des licenciés" (tableau de redistribution par cabinet, faits saillants, synthèse du trimestre) est <em>exactement</em> le résultat de cette centralisation. Les colonnes "Encours apporté", "Total reversé", "Performance" sont calculées en temps réel à partir des actions de chaque licencié.
+      </div>
+    </section>
+
+    <!-- ============================== -->
+    <!-- SUITE                           -->
+    <!-- ============================== -->
+    <section id="next">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">→</span> Documents associés</div>
+        <h2 class="section-title">5 documents dédiés par espace utilisateur</h2>
+        <p class="section-intro">Ce document maître pose les fondations partagées de la plateforme. <strong>Chaque espace utilisateur</strong> (Admin éditeur, Propriétaire de marque, Licencié dirigeant, Ingénieur patrimonial, Client final) fait l'objet d'un <strong>document dédié</strong> qui détaille l'arborescence complète de ses pages, ses chemins de navigation et tous les masques visuels.</p>
+      </div>
+
+      <h3>Les 5 documents espaces</h3>
+      <div class="grid-2">
+        <div class="card gold-left">
+          <div class="card-eyebrow">Document 2 / 6</div>
+          <h4 style="font-size:16px;">👑 Espace Admin éditeur (ASTRAEOS)</h4>
+          <p style="font-size:12.5px;">Toi/équipe en tant qu'éditeur de la plateforme. Multi-tenant : tu vois et gères tous les comptes propriétaires de marque (PRIVEOS Capital, Dupont Patrimoine…).</p>
+          <p style="font-size:11.5px;color:var(--navy-300);"><strong>14 sections · ~32 pages</strong> · gestion tenants · facturation outil · support · CRM commercial · métriques SaaS · publicité</p>
+          <a href="02_Architecture_Editeur.html" target="_blank" style="font-size:12px;font-weight:700;color:var(--gold);text-decoration:none;">→ Ouvrir le document</a>
+        </div>
+        <div class="card gold-left">
+          <div class="card-eyebrow">Document 3 / 6 ⭐</div>
+          <h4 style="font-size:16px;">🏛 Espace Propriétaire de marque</h4>
+          <p style="font-size:12.5px;">Le détenteur d'un cabinet d'ingénierie patrimoniale (PRIVEOS Capital). Pilotage stratégique du réseau, consolidation financière, animation, compliance réseau, CRM réseau.</p>
+          <p style="font-size:11.5px;color:var(--navy-300);"><strong>14 sections · ~35-40 pages</strong> · 6 sections terminées · CRM réseau ⭐ · Compliance ⭐ NOUVEAUX</p>
+          <a href="03_Architecture_Proprietaire.html" target="_blank" style="font-size:12px;font-weight:700;color:var(--gold);text-decoration:none;">→ Ouvrir le document</a>
+        </div>
+        <div class="card gold-left">
+          <div class="card-eyebrow">Document 4 / 6</div>
+          <h4 style="font-size:16px;">💼 Espace Cabinet (dirigeant)</h4>
+          <p style="font-size:12.5px;">Le dirigeant d'un cabinet (licencié d'un réseau OU indépendant). Pilotage cabinet, équipe, CRM agrégé, facturation, animation interne, paramètres. <strong>Toggle vers Espace Ingénieur</strong> pour ses propres dossiers.</p>
+          <p style="font-size:11.5px;color:var(--navy-300);"><strong>~14 sections · ~40 pages</strong> · vision dirigeant · gestion équipe · supervision ingénieurs</p>
+          <a href="04_Architecture_Licencie.html" target="_blank" style="font-size:12px;font-weight:700;color:var(--gold);text-decoration:none;">→ Ouvrir le document</a>
+        </div>
+        <div class="card gold-left" style="border-color: var(--gold); background: linear-gradient(180deg, white, rgba(198,142,14,0.04));">
+          <div class="card-eyebrow" style="color: var(--gold); font-weight: 800;">Document 5 / 6 ⭐⭐ NOUVEAU</div>
+          <h4 style="font-size:16px;">👤 Espace Ingénieur patrimonial</h4>
+          <p style="font-size:12.5px;">L'opérationnel quotidien d'un ingénieur : ses clients à lui, son CRM cloisonné, ses études IA, son agenda, ses visios. <strong>Le module IA en 5 phases est ici</strong>. Espace utilisé aussi par les rôles paramétrables (superviseur, assistante, comptable…).</p>
+          <p style="font-size:11.5px;color:var(--navy-300);"><strong>~12 sections · ~30 pages</strong> · CRM individuel · études IA ⭐⭐ · activité volumétrique sans €</p>
+          <a href="05_Architecture_Ingenieur.html" target="_blank" style="font-size:12px;font-weight:700;color:var(--gold);text-decoration:none;">→ Ouvrir le document</a>
+        </div>
+        <div class="card gold-left">
+          <div class="card-eyebrow">Document 6 / 6</div>
+          <h4 style="font-size:16px;">👥 Espace Client final</h4>
+          <p style="font-size:12.5px;">L'espace de la personne accompagnée par un ingénieur. Documents, étude patrimoniale, simulations, suivi des préconisations, chat avec son ingénieur.</p>
+          <p style="font-size:11.5px;color:var(--navy-300);"><strong>~10-15 pages</strong> · UX simple · expérience patrimoniale moderne et rassurante</p>
+          <a href="06_Architecture_Client.html" target="_blank" style="font-size:12px;font-weight:700;color:var(--gold);text-decoration:none;">→ Ouvrir le document</a>
+        </div>
+      </div>
+
+      <h3>Méthode de travail collaborative</h3>
+      <div class="card luxe">
+        <p style="margin-top: 0;"><strong>Comment nous allons utiliser ces documents pour produire les masques HTML :</strong></p>
+        <ol class="styled" style="font-size:13px;">
+          <li><strong>Validation des arborescences</strong> — On parcourt ensemble les 5 documents espaces. Pour chaque page identifiée, tu valides ou ajustes.</li>
+          <li><strong>Identification des éléments cliquables</strong> — Sur chaque page, on détermine ce qui doit être cliquable et où ça doit mener.</li>
+          <li><strong>Création des masques page par page</strong> — On part de la page d'accueil de chaque espace, on la valide, puis on suit chaque clic pour créer la page suivante. Et ainsi de suite jusqu'à avoir tous les masques.</li>
+          <li><strong>Livraison au développeur</strong> — Une fois la bibliothèque complète, ton développeur reçoit tous les masques HTML + tous les chemins de navigation. Il n'a plus qu'à reproduire.</li>
+        </ol>
+      </div>
+
+      <div class="note gold">
+        <strong>📌 Important :</strong> chaque document espace ne contient <strong>que les arborescences et les chemins de navigation</strong> à ce stade. Les <strong>masques visuels détaillés</strong> seront produits page par page lors des sessions suivantes, après validation de l'arborescence.
+      </div>
+
+      <div class="note">
+        <strong>📅 Historique des évolutions du document maître :</strong>
+        <ul style="margin-top: 8px; padding-left: 20px; font-size: 12.5px;">
+          <li><strong>v5.2 (mai 2026)</strong> — Audit de cohérence terminologique : reformulation des descriptions de rôles 3 (Dirigeant cabinet), 4 (Ingénieur patrimonial) et 5 (Client final) pour couvrir explicitement les 2 types de tenants (cabinet licencié d'un réseau OU cabinet indépendant). Précision ajoutée sur la carte "Niveau 3 · Cabinet licencié" pour signaler que cette cascade concerne uniquement le modèle Marque.</li>
+          <li><strong>v5.1 (mai 2026)</strong> — Ajout du <em>double modèle commercial</em> ASTRAEOS : tenant "Marque" (réseau de cabinets — déjà existant) + tenant "Cabinet direct" (cabinet indépendant — nouveau). Nouvelle section dédiée avec tableau comparatif et Marketplace ASTRAEOS. Cascade financière mise à jour pour gérer les 2 cas (4 ou 3 niveaux selon le tenant).</li>
+          <li><strong>v5.0 (mai 2026)</strong> — Ajout de l'<em>Espace Ingénieur patrimonial</em> en tant qu'espace dédié distinct du dirigeant. Ajout des sections <em>Toggle dirigeant ↔ ingénieur</em> et <em>Cascade financière en 4 niveaux</em>. Mise à jour matrice permissions. Passage à 5 espaces / 6 documents.</li>
+          <li><strong>v4.0 (avril 2026)</strong> — Document maître initial avec 4 espaces (Admin · Propriétaire · Licencié · Client).</li>
+        </ul>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+  // Initialiser Mermaid
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'base',
+    themeVariables: {
+      fontFamily: 'Epilogue, sans-serif',
+      fontSize: '13px',
+      primaryColor: '#FAF8F3',
+      primaryTextColor: '#102D50',
+      primaryBorderColor: '#C68E0E',
+      lineColor: '#A4AEBB',
+      secondaryColor: '#EBF1FA',
+      tertiaryColor: '#EEDDB6'
+    },
+    flowchart: {
+      curve: 'basis',
+      padding: 20
+    }
+  });
+
+  // Active link sur scroll
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.sidebar-nav a');
+
+  function updateActiveLink() {
+    let current = '';
+    sections.forEach(section => {
+      const top = section.offsetTop - 100;
+      if (window.scrollY >= top) current = section.id;
+    });
+    navLinks.forEach(link => {
+      link.classList.toggle('active', link.getAttribute('href') === '#' + current);
+    });
+  }
+  window.addEventListener('scroll', updateActiveLink);
+  updateActiveLink();
+</script>
+
+</body>
+</html>

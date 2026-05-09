@@ -1,0 +1,1932 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ASTRAEOS — Architecture · Espace Client final</title>
+<link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #102D50;
+    --navy-300: #708196;
+    --navy-200: #A4AEBB;
+    --navy-100: #DBE0E4;
+    --gold: #C68E0E;
+    --gold-300: #DDBB6E;
+    --gold-200: #EEDDB6;
+    --gold-100: #FAF8F3;
+    --medium-400: #695D30;
+    --medium-300: #877D59;
+    --ivory: #FAF8F3;
+    --light-blue: #EBF1FA;
+    --green-bg: #E8F3EC;
+    --green-text: #1F8A4C;
+    --red-bg: #FCE8E8;
+    --red-text: #B23A3A;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; scroll-padding-top: 24px; }
+  body {
+    font-family: 'Epilogue', -apple-system, sans-serif;
+    background: var(--ivory);
+    color: var(--navy);
+    line-height: 1.6;
+    font-size: 14.5px;
+  }
+
+  .doc-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    min-height: 100vh;
+  }
+
+  .doc-sidebar {
+    background: linear-gradient(180deg, var(--navy) 0%, #0a1f38 100%);
+    color: white;
+    padding: 32px 24px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+  .sidebar-brand { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
+  .sidebar-brand-mark {
+    width: 42px; height: 42px; border-radius: 8px;
+    background: linear-gradient(135deg, var(--gold), var(--medium-400));
+    color: white; font-weight: 800; font-size: 22px;
+    display: grid; place-items: center;
+    box-shadow: 0 4px 12px rgba(198,142,14,0.4);
+  }
+  .sidebar-brand-name { font-size: 17px; font-weight: 800; letter-spacing: 0.04em; }
+  .sidebar-brand-sub { font-size: 10px; color: var(--gold-300); letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 28px; }
+  .sidebar-nav { display: flex; flex-direction: column; gap: 1px; }
+  .sidebar-nav a {
+    color: rgba(255,255,255,0.78);
+    text-decoration: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 12.5px;
+    font-weight: 500;
+    transition: all 0.15s ease;
+  }
+  .sidebar-nav a:hover { background: rgba(255,255,255,0.06); color: white; }
+  .sidebar-nav a.active { background: rgba(198,142,14,0.18); color: var(--gold-300); font-weight: 700; }
+  .sidebar-section-header {
+    font-size: 9.5px;
+    color: var(--gold-300);
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    font-weight: 800;
+    margin: 18px 12px 8px;
+  }
+  .sidebar-section-header::before {
+    content: '';
+    display: inline-block;
+    width: 14px;
+    height: 1.5px;
+    background: var(--gold);
+    vertical-align: middle;
+    margin-right: 8px;
+  }
+
+  .doc-main {
+    padding: 48px 64px 80px;
+    max-width: none;
+  }
+
+  .doc-header {
+    border-bottom: 2px solid var(--navy-100);
+    padding-bottom: 28px;
+    margin-bottom: 40px;
+  }
+  .doc-header-eyebrow { font-size: 10px; font-weight: 700; color: var(--gold); letter-spacing: 0.22em; text-transform: uppercase; margin-bottom: 12px; }
+  .doc-title { font-size: 32px; font-weight: 700; letter-spacing: -0.018em; line-height: 1.18; margin-bottom: 12px; }
+  .doc-title strong { color: var(--gold); }
+  .doc-subtitle { font-size: 14.5px; color: var(--navy-300); line-height: 1.6; max-width: 800px; }
+  .doc-meta {
+    display: flex; flex-wrap: wrap; gap: 16px;
+    margin-top: 18px;
+    font-size: 11.5px;
+    color: var(--navy-300);
+  }
+  .doc-meta strong { color: var(--navy); font-weight: 700; }
+
+  .glossary {
+    background: white;
+    border: 1px solid var(--navy-100);
+    border-radius: 10px;
+    padding: 22px 26px;
+    margin: 28px 0;
+  }
+  .glossary-title {
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--gold);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .glossary-title::before { content: '📖'; font-size: 14px; }
+  .glossary-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px 28px; }
+  .glossary-item { font-size: 12.5px; }
+  .glossary-term {
+    display: inline-block;
+    font-weight: 700;
+    color: var(--navy);
+    border-bottom: 2px solid var(--navy-100);
+    padding-bottom: 1px;
+    margin-bottom: 4px;
+  }
+  .glossary-term.gold { color: var(--gold); border-bottom-color: var(--gold); }
+  .glossary-term.green { color: var(--green-text); border-bottom-color: var(--green-text); }
+  .glossary-def { color: var(--navy-300); line-height: 1.55; }
+
+  .stats-bar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin: 28px 0;
+  }
+  .stat-block {
+    background: white;
+    border: 1px solid var(--navy-100);
+    border-radius: 10px;
+    padding: 18px 20px;
+  }
+  .stat-block.todo { border-left: 4px solid var(--navy); }
+  .stat-block.priority { border-left: 4px solid var(--gold); }
+  .stat-block.public { border-left: 4px solid var(--green-text); background: linear-gradient(135deg, white 50%, rgba(31,138,76,0.04)); }
+  .stat-label { font-size: 10px; font-weight: 700; color: var(--gold); letter-spacing: 0.16em; text-transform: uppercase; margin-bottom: 6px; }
+  .stat-value { font-size: 28px; font-weight: 700; color: var(--navy); line-height: 1; margin-bottom: 6px; }
+  .stat-meta { font-size: 11px; color: var(--navy-300); }
+
+  .legend-bar {
+    background: white;
+    border: 1px solid var(--navy-100);
+    border-radius: 8px;
+    padding: 12px 18px;
+    margin: 18px 0;
+    font-size: 11.5px;
+    color: var(--navy-300);
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    flex-wrap: wrap;
+  }
+
+  .note {
+    background: var(--light-blue);
+    border-left: 4px solid var(--navy);
+    padding: 14px 18px;
+    margin: 18px 0;
+    border-radius: 0 8px 8px 0;
+    font-size: 13px;
+  }
+  .note.gold { background: rgba(198,142,14,0.06); border-left-color: var(--gold); }
+  .note.green { background: var(--green-bg); border-left-color: var(--green-text); }
+
+  .main-section {
+    margin: 60px 0;
+    padding-top: 12px;
+  }
+  .section-header { margin-bottom: 28px; }
+  .section-eyebrow {
+    font-size: 10.5px;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-eyebrow .num {
+    display: inline-block;
+    width: 28px; height: 28px;
+    background: var(--navy);
+    color: white;
+    border-radius: 6px;
+    text-align: center;
+    line-height: 28px;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0;
+  }
+  .section-eyebrow .num.public {
+    background: var(--green-text);
+  }
+  .section-title { font-size: 24px; font-weight: 700; color: var(--navy); margin-bottom: 10px; line-height: 1.2; }
+  .section-intro { font-size: 14px; color: var(--navy-300); max-width: 850px; line-height: 1.6; }
+
+  .page-card {
+    background: white;
+    border: 1px solid var(--navy-100);
+    border-radius: 12px;
+    margin: 16px 0;
+    overflow: hidden;
+  }
+  .page-card.priority { border-left: 4px solid var(--gold); }
+  .page-card.public { border-left: 4px solid var(--green-text); }
+  .pc-header {
+    padding: 18px 22px;
+    background: var(--gold-100);
+    border-bottom: 1px solid var(--navy-100);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .page-card.public .pc-header {
+    background: var(--green-bg);
+  }
+  .pc-icon {
+    width: 44px; height: 44px;
+    background: white;
+    border: 1px solid var(--navy-100);
+    border-radius: 8px;
+    display: grid;
+    place-items: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  .pc-info { flex: 1; }
+  .pc-eyebrow { font-size: 10px; font-weight: 700; color: var(--gold); letter-spacing: 0.16em; text-transform: uppercase; margin-bottom: 3px; }
+  .page-card.public .pc-eyebrow { color: var(--green-text); }
+  .pc-title { font-size: 15px; font-weight: 700; color: var(--navy); margin-bottom: 3px; }
+  .pc-desc { font-size: 12px; color: var(--navy-300); line-height: 1.5; }
+  .pc-status {
+    font-size: 9.5px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+  .pc-status.priority { background: rgba(198,142,14,0.15); color: var(--gold); }
+  .pc-status.public { background: rgba(31,138,76,0.15); color: var(--green-text); }
+  .pc-status.todo { background: var(--navy-100); color: var(--navy); }
+  .pc-body {
+    padding: 18px 22px;
+  }
+  .pc-section-label {
+    font-size: 10.5px;
+    font-weight: 800;
+    color: var(--navy-300);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin: 14px 0 8px;
+  }
+  .pc-section-label:first-child { margin-top: 0; }
+  .pc-tree {
+    background: var(--ivory);
+    border: 1px solid var(--navy-100);
+    border-radius: 8px;
+    padding: 14px 18px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    line-height: 1.85;
+    white-space: pre-line;
+    color: var(--navy);
+  }
+  .pc-tree .b { color: var(--gold); font-weight: 700; }
+  .pc-tree .s { color: var(--navy-300); font-style: italic; font-size: 11px; }
+  .pc-tree .a { color: var(--green-text); font-weight: 700; font-size: 10px; padding: 1px 6px; border: 1px solid var(--green-text); border-radius: 3px; margin-left: 6px; }
+  .pc-tree .c { color: var(--gold); font-weight: 800; }
+  .pc-subpages {
+    display: grid;
+    gap: 6px;
+    margin-top: 4px;
+  }
+  .pc-subpage {
+    background: var(--ivory);
+    border-left: 3px solid var(--gold);
+    padding: 8px 12px;
+    border-radius: 0 6px 6px 0;
+    font-size: 12px;
+    color: var(--navy);
+  }
+  .pc-subpage strong { color: var(--gold); font-weight: 700; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  th, td { padding: 10px 12px; border-bottom: 1px solid var(--navy-100); text-align: left; }
+  th { background: var(--navy); color: white; font-weight: 600; font-size: 11.5px; letter-spacing: 0.05em; }
+  tr:nth-child(even) { background: var(--ivory); }
+
+  .sitemap-svg-wrap {
+    background: white;
+    border: 1px solid var(--navy-100);
+    border-radius: 10px;
+    padding: 24px;
+    margin: 24px 0;
+    overflow-x: auto;
+  }
+  .sitemap-link { cursor: pointer; }
+  .sitemap-link .sitemap-node {
+    transition: filter 0.2s ease;
+  }
+  .sitemap-link:hover .sitemap-node {
+    filter: brightness(1.05);
+  }
+
+  @media (max-width: 1100px) {
+    .doc-layout { grid-template-columns: 1fr; }
+    .doc-sidebar { position: static; height: auto; }
+    .stats-bar { grid-template-columns: repeat(2, 1fr); }
+    .glossary-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="doc-layout">
+
+  <!-- ================================ -->
+  <!-- SIDEBAR DE NAVIGATION             -->
+  <!-- ================================ -->
+  <aside class="doc-sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-brand-mark">C</div>
+      <div>
+        <div class="sidebar-brand-name">CLIENT</div>
+      </div>
+    </div>
+    <div class="sidebar-brand-sub">Document 6 / 6 · Client</div>
+
+    <nav class="sidebar-nav">
+      <div class="sidebar-section-header">Phase 1 · Parcours pré-espace</div>
+      <a href="#onboarding">🌐 0. Parcours d'onboarding (4 pages publiques)</a>
+
+      <div class="sidebar-section-header">Phase 2 · Espace sécurisé · 12 sections</div>
+      <a href="#dashboard">📊 1. Mon tableau de bord</a>
+      <a href="#parcours">🚀 2. Suivi de mon parcours</a>
+      <a href="#documents">📋 3. Mes informations &amp; documents</a>
+      <a href="#etude">📁 4. Mon étude patrimoniale</a>
+      <a href="#encours">💰 5. Mes investissements &amp; encours</a>
+      <a href="#signes">⚖ 6. Mes documents signés</a>
+      <a href="#rdv">📅 7. Prendre RDV avec mon ingénieur</a>
+      <a href="#chat">💬 8. Mon chat avec mon ingénieur</a>
+      <a href="#visios">🎥 9. Mes visios passées</a>
+      <a href="#actions">✅ 10. Suivi de mes actions</a>
+      <a href="#articles">📚 11. Articles &amp; guides</a>
+      <a href="#profil">⚙ 12. Mon profil &amp; sécurité</a>
+
+      <div class="sidebar-section-header">Documents fondateurs</div>
+      <a href="00_Master_Dataset.html">📊 Master Dataset</a>
+      <a href="00_Data_Architecture.html">🏗 Data Architecture</a>
+
+      <div class="sidebar-section-header">Autres documents</div>
+      <a href="01_Architecture_Master.html">📋 Document maître</a>
+      <a href="02_Architecture_Editeur.html">👑 Espace ASTRAEOS</a>
+      <a href="03_Architecture_Proprietaire.html">🏛 Espace Propriétaire</a>
+      <a href="04_Architecture_Licencie.html">💼 Espace Cabinet (dirigeant)</a>
+      <a href="05_Architecture_Ingenieur.html">👤 Espace Ingénieur</a>
+    </nav>
+  </aside>
+
+  <!-- ================================ -->
+  <!-- CONTENU PRINCIPAL                 -->
+  <!-- ================================ -->
+  <main class="doc-main">
+
+    <!-- ============================== -->
+    <!-- HEADER DOCUMENT                 -->
+    <!-- ============================== -->
+    <header class="doc-header">
+      <div class="doc-header-eyebrow">Document 6 / 6 · Espace Client final · L'expérience utilisateur du client</div>
+      <h1 class="doc-title">Espace <strong>Client final</strong> — l'expérience patrimoniale digitale</h1>
+      <p class="doc-subtitle">Détail exhaustif de l'expérience du <strong>client patrimonial</strong> : la personne accompagnée par un ingénieur d'un cabinet. Cet espace est divisé en 2 phases : (1) un <strong>parcours d'onboarding pré-espace</strong> (pages publiques sans connexion : prise RDV, DCI simplifié, KYC) et (2) un <strong>espace sécurisé</strong> activé après le 1<sup>er</sup> RDV et la signature de la lettre de mission. L'UX privilégie la <strong>simplicité, la clarté et la confiance</strong> — tout l'inverse des espaces professionnels denses.</p>
+      <div class="doc-meta">
+        <span><strong>Phase 1</strong> 4 pages publiques (onboarding)</span>
+        <span><strong>Phase 2</strong> 12 sections sécurisées</span>
+        <span><strong>~22 pages</strong> identifiées au total</span>
+        <span><strong>Branding adaptatif</strong> selon le cabinet</span>
+      </div>
+    </header>
+
+    <!-- ============================== -->
+    <!-- GLOSSAIRE                       -->
+    <!-- ============================== -->
+    <div class="glossary">
+      <div class="glossary-title">Glossaire — vocabulaire de cet espace</div>
+      <div class="glossary-grid">
+        <div class="glossary-item">
+          <span class="glossary-term gold">Client final</span>
+          <div class="glossary-def">L'utilisateur principal de cet espace. La personne ou le couple accompagné patrimonialement par un ingénieur d'un cabinet.</div>
+        </div>
+        <div class="glossary-item">
+          <span class="glossary-term gold">Parcours d'onboarding</span>
+          <div class="glossary-def">Le parcours pré-espace : prise RDV → DCI simplifié → questionnaire de qualification → 1<sup>er</sup> RDV en visio → activation espace sécurisé après signature de la lettre de mission.</div>
+        </div>
+        <div class="glossary-item">
+          <span class="glossary-term">DCI simplifié</span>
+          <div class="glossary-def">Document de Collecte d'Informations simplifié — premier questionnaire patrimonial rempli par le client avant le 1<sup>er</sup> RDV. Sera corrigé/enrichi par l'ingénieur pendant la visio.</div>
+        </div>
+        <div class="glossary-item">
+          <span class="glossary-term">KYC / Qualification client</span>
+          <div class="glossary-def">Questionnaire de Know Your Customer / qualification client — obligatoire réglementairement. Identifie le profil de risque et la connaissance financière du client.</div>
+        </div>
+        <div class="glossary-item">
+          <span class="glossary-term gold">Lettre de mission</span>
+          <div class="glossary-def">Document contractuel signé après le 1<sup>er</sup> RDV qui formalise la prestation de l'ingénieur (étude patrimoniale + accompagnement). Inclut la demande d'entrée en relation. Déclenche l'activation de l'espace sécurisé.</div>
+        </div>
+        <div class="glossary-item">
+          <span class="glossary-term">Lien magique</span>
+          <div class="glossary-def">URL d'authentification passwordless envoyée par email. Permet au client de se connecter en un clic sans mot de passe (option recommandée pour la simplicité UX).</div>
+        </div>
+        <div class="glossary-item">
+          <span class="glossary-term gold">Étude patrimoniale</span>
+          <div class="glossary-def">Le livrable principal du cabinet : document de 50-150 pages + annexes, accompagné d'un document de synthèse présenté en visio (restitution). Disponible en PDF + version web interactive.</div>
+        </div>
+        <div class="glossary-item">
+          <span class="glossary-term green">Plan d'action</span>
+          <div class="glossary-def">Liste structurée des actions à mener par le client suite à l'étude. Suivi semi-automatisé dans la section 10.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================== -->
+    <!-- ENCART 2 TYPES DE TENANTS       -->
+    <!-- ============================== -->
+    <div class="note gold" style="border-left-width: 6px; padding: 18px 22px; margin: 24px 0; background: linear-gradient(135deg, rgba(198,142,14,0.08) 0%, rgba(235,241,250,0.4) 100%);">
+      <div style="font-size: 11px; font-weight: 800; color: var(--gold); letter-spacing: 0.16em; text-transform: uppercase; margin-bottom: 10px;">⚖ Mécanique transverse · 2 types de tenants supportés</div>
+      <p style="margin: 0 0 10px; font-size: 13px;"><strong>Cet espace fonctionne pour les clients des 2 types de tenants ASTRAEOS</strong> avec une UX <strong>quasi-identique</strong> :</p>
+      <ul style="margin: 0 0 10px 20px; font-size: 13px; line-height: 1.7;">
+        <li><strong>🏛 Si le cabinet est un tenant Marque</strong> (cabinet licencié type PRIVEOS Capital) : le client voit le branding du <em>propriétaire de marque</em> (logo, couleurs PRIVEOS) dans son espace. Mention "Cabinet [Nom du cabinet], membre du réseau [Nom du propriétaire]".</li>
+        <li><strong>💼 Si le cabinet est un tenant Cabinet direct</strong> (cabinet indépendant) : le client voit le branding <em>personnalisé du cabinet</em> uniquement. Pas de mention de réseau.</li>
+      </ul>
+      <p style="margin: 0; font-size: 12.5px; color: var(--navy-300);"><em>Du point de vue du client, l'expérience fonctionnelle est identique. Seule la <strong>charte graphique</strong> diffère selon le type du cabinet de son ingénieur.</em></p>
+    </div>
+
+    <!-- ============================== -->
+    <!-- ENCART PRINCIPES UX             -->
+    <!-- ============================== -->
+    <div class="note green" style="border-left-width: 6px; padding: 18px 22px; margin: 24px 0;">
+      <div style="font-size: 11px; font-weight: 800; color: var(--green-text); letter-spacing: 0.16em; text-transform: uppercase; margin-bottom: 10px;">🎨 Principes UX · Spécificité de cet espace</div>
+      <p style="margin: 0 0 10px; font-size: 13px;"><strong>L'espace client est radicalement différent des espaces professionnels</strong> (Doc 4 et 5). Il privilégie :</p>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 0 0 10px;">
+        <div style="background: white; padding: 12px 14px; border-radius: 8px;">
+          <div style="font-size: 11px; font-weight: 800; color: var(--green-text); margin-bottom: 6px; text-transform: uppercase;">À FAIRE</div>
+          <ul style="margin: 0; padding-left: 16px; font-size: 12px; line-height: 1.65;">
+            <li>Densité <strong>faible</strong> · espaces aérés</li>
+            <li>Vocabulaire <strong>vulgarisé</strong> (pas de jargon)</li>
+            <li>Cartes visuelles · infographies · pictogrammes</li>
+            <li>Actions <strong>simples et guidées</strong></li>
+            <li>Statuts <strong>clairs et rassurants</strong></li>
+            <li>Branding adaptatif (cabinet du client)</li>
+          </ul>
+        </div>
+        <div style="background: white; padding: 12px 14px; border-radius: 8px;">
+          <div style="font-size: 11px; font-weight: 800; color: var(--red-text); margin-bottom: 6px; text-transform: uppercase;">À ÉVITER</div>
+          <ul style="margin: 0; padding-left: 16px; font-size: 12px; line-height: 1.65;">
+            <li>Tableaux denses · listes à rallonge</li>
+            <li>Termes techniques (KYC, DCI, encours)</li>
+            <li>Multiples actions simultanées</li>
+            <li>Statuts ambigus ("en cours" sans précision)</li>
+            <li>Demandes répétées (re-saisir des informations)</li>
+            <li>Exposition des coulisses techniques</li>
+          </ul>
+        </div>
+      </div>
+      <p style="margin: 0; font-size: 12.5px; color: var(--navy-300);"><em>Le client doit se sentir <strong>en sécurité, accompagné, valorisé</strong>. C'est l'espace où la qualité de la relation patrimoniale se vit.</em></p>
+    </div>
+
+    <!-- ============================== -->
+    <!-- STATS                           -->
+    <!-- ============================== -->
+    <div class="stats-bar">
+      <div class="stat-block public">
+        <div class="stat-label">Phase 1 · Pré-espace</div>
+        <div class="stat-value">4</div>
+        <div class="stat-meta">pages publiques</div>
+      </div>
+      <div class="stat-block todo">
+        <div class="stat-label">Phase 2 · Espace sécurisé</div>
+        <div class="stat-value">12</div>
+        <div class="stat-meta">sections après LM signée</div>
+      </div>
+      <div class="stat-block todo">
+        <div class="stat-label">Pages estimées</div>
+        <div class="stat-value">~22</div>
+        <div class="stat-meta">avec sous-pages</div>
+      </div>
+      <div class="stat-block priority">
+        <div class="stat-label">Priorités MVP</div>
+        <div class="stat-value">7</div>
+        <div class="stat-meta">Onboarding · Dashboard · Parcours · Docs · Étude · RDV · Chat</div>
+      </div>
+    </div>
+
+    <div class="legend-bar">
+      <strong>Légende :</strong>
+      <span class="pc-status public">PUBLIC</span>
+      <span style="color: var(--navy-300);">accessible sans connexion</span>
+      <span class="pc-status priority">PRIORITÉ ⭐</span>
+      <span style="color: var(--navy-300);">critique pour MVP</span>
+      <span class="pc-status todo">À FAIRE</span>
+      <span style="color: var(--navy-300);">spécifié, à concevoir</span>
+    </div>
+
+    <div class="note">
+      <strong>📖 Comment lire ce document :</strong> ce document décrit <em>chronologiquement</em> l'expérience d'un client : <strong>(1) Phase pré-espace</strong> avec 4 pages publiques pour entrer en relation avec le cabinet (Section 0), puis <strong>(2) Espace sécurisé</strong> activé après le 1<sup>er</sup> RDV et la signature de la lettre de mission (12 sections).
+    </div>
+
+    <!-- ============================== -->
+    <!-- SITEMAP VISUEL                  -->
+    <!-- ============================== -->
+    <section class="main-section" id="sitemap">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">🗺</span> Vue d'ensemble</div>
+        <h2 class="section-title">Sitemap de l'Espace Client final</h2>
+        <p class="section-intro">Architecture en 2 phases : pages publiques d'onboarding (vert) puis espace sécurisé organisé en 4 familles (Accueil · Mes données · Interactions · Vie du dossier).</p>
+      </div>
+
+      <div class="sitemap-svg-wrap">
+        <svg viewBox="0 0 1600 660" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: auto; max-height: 760px;">
+          <defs>
+            <linearGradient id="cl-navyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#102D50"/>
+              <stop offset="100%" stop-color="#0a1f38"/>
+            </linearGradient>
+            <linearGradient id="cl-goldGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#C68E0E"/>
+              <stop offset="100%" stop-color="#A87A0C"/>
+            </linearGradient>
+            <linearGradient id="cl-greenGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#1F8A4C"/>
+              <stop offset="100%" stop-color="#1A7440"/>
+            </linearGradient>
+            <linearGradient id="cl-blueGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#EBF1FA"/>
+              <stop offset="100%" stop-color="#DBE0E4"/>
+            </linearGradient>
+            <linearGradient id="cl-greenLight" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#E8F3EC"/>
+              <stop offset="100%" stop-color="#C9E5D2"/>
+            </linearGradient>
+            <filter id="cl-shadow" x="-20%" y="-20%" width="140%" height="140%">
+              <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#102D50" flood-opacity="0.15"/>
+            </filter>
+          </defs>
+
+          <!-- TITRE CENTRAL -->
+          <g transform="translate(800, 30)">
+            <rect x="-220" y="0" width="440" height="60" rx="10" fill="url(#cl-navyGrad)" filter="url(#cl-shadow)"/>
+            <text x="0" y="26" text-anchor="middle" fill="#DDBB6E" font-family="Epilogue" font-weight="700" font-size="10" letter-spacing="3">ESPACE CLIENT FINAL</text>
+            <text x="0" y="46" text-anchor="middle" fill="white" font-family="Epilogue" font-weight="700" font-size="16">2 phases · 4 pages publiques + 12 sections</text>
+          </g>
+
+          <!-- PHASE 1 : PRÉ-ESPACE (vert · pleine largeur en haut) -->
+          <g transform="translate(800, 130)">
+            <rect x="-700" y="0" width="1400" height="42" rx="8" fill="url(#cl-greenGrad)" filter="url(#cl-shadow)"/>
+            <text x="0" y="28" text-anchor="middle" fill="white" font-family="Epilogue" font-weight="700" font-size="13">🌐 PHASE 1 · PARCOURS PRÉ-ESPACE (4 pages publiques · sans connexion)</text>
+          </g>
+          <line x1="800" y1="172" x2="800" y2="200" stroke="#A4AEBB" stroke-width="1.5" stroke-dasharray="3 3"/>
+
+          <!-- Les 4 pages publiques en ligne -->
+          <a href="#onboarding" class="sitemap-link"><g transform="translate(140, 200)" class="sitemap-node"><rect x="0" y="0" width="280" height="56" rx="8" fill="rgba(31,138,76,0.06)" stroke="#1F8A4C" stroke-width="2"/><text x="14" y="22" fill="#1F8A4C" font-family="Epilogue" font-weight="800" font-size="9" letter-spacing="1.5">PAGE 1 · PUBLIC ⭐</text><text x="14" y="44" fill="#102D50" font-family="Epilogue" font-weight="700" font-size="13">📅 Prise de RDV</text></g></a>
+          <a href="#onboarding" class="sitemap-link"><g transform="translate(450, 200)" class="sitemap-node"><rect x="0" y="0" width="280" height="56" rx="8" fill="rgba(31,138,76,0.06)" stroke="#1F8A4C" stroke-width="2"/><text x="14" y="22" fill="#1F8A4C" font-family="Epilogue" font-weight="800" font-size="9" letter-spacing="1.5">PAGE 2 · PUBLIC ⭐</text><text x="14" y="44" fill="#102D50" font-family="Epilogue" font-weight="700" font-size="13">📋 DCI simplifié</text></g></a>
+          <a href="#onboarding" class="sitemap-link"><g transform="translate(760, 200)" class="sitemap-node"><rect x="0" y="0" width="280" height="56" rx="8" fill="rgba(31,138,76,0.06)" stroke="#1F8A4C" stroke-width="2"/><text x="14" y="22" fill="#1F8A4C" font-family="Epilogue" font-weight="800" font-size="9" letter-spacing="1.5">PAGE 3 · PUBLIC ⭐</text><text x="14" y="44" fill="#102D50" font-family="Epilogue" font-weight="700" font-size="13">✅ Questionnaire qualif.</text></g></a>
+          <a href="#onboarding" class="sitemap-link"><g transform="translate(1070, 200)" class="sitemap-node"><rect x="0" y="0" width="280" height="56" rx="8" fill="rgba(31,138,76,0.06)" stroke="#1F8A4C" stroke-width="2"/><text x="14" y="22" fill="#1F8A4C" font-family="Epilogue" font-weight="800" font-size="9" letter-spacing="1.5">PAGE 4 · PUBLIC</text><text x="14" y="44" fill="#102D50" font-family="Epilogue" font-weight="700" font-size="13">🔓 Activation espace</text></g></a>
+
+          <!-- Séparateur visuel -->
+          <line x1="100" y1="290" x2="1500" y2="290" stroke="#DBE0E4" stroke-width="1.5" stroke-dasharray="6 4"/>
+          <text x="800" y="285" text-anchor="middle" fill="#708196" font-family="Epilogue" font-size="11" font-style="italic">↓ après le 1<sup>er</sup> RDV en visio + signature de la lettre de mission · activation espace sécurisé</text>
+
+          <!-- PHASE 2 : ESPACE SÉCURISÉ -->
+          <!-- COLONNE 1 : ACCUEIL & SUIVI -->
+          <g transform="translate(180, 320)">
+            <rect x="-140" y="0" width="280" height="42" rx="8" fill="url(#cl-navyGrad)" filter="url(#cl-shadow)"/>
+            <text x="0" y="28" text-anchor="middle" fill="white" font-family="Epilogue" font-weight="700" font-size="13">📊 ACCUEIL &amp; SUIVI</text>
+          </g>
+          <line x1="180" y1="362" x2="180" y2="385" stroke="#A4AEBB" stroke-width="1.5" stroke-dasharray="3 3"/>
+          <a href="#dashboard" class="sitemap-link"><g transform="translate(40, 385)" class="sitemap-node"><rect x="0" y="0" width="280" height="46" rx="6" fill="white" stroke="#C68E0E" stroke-width="2"/><text x="14" y="20" fill="#C68E0E" font-family="Epilogue" font-weight="700" font-size="9" letter-spacing="1.5">SECTION 1 ⭐</text><text x="14" y="38" fill="#102D50" font-family="Epilogue" font-weight="700" font-size="13">📊 Mon tableau de bord</text></g></a>
+          <a href="#parcours" class="sitemap-link"><g transform="translate(40, 441)" class="sitemap-node"><rect x="0" y="0" width="280" height="46" rx="6" fill="white" stroke="#C68E0E" stroke-width="2"/><text x="14" y="20" fill="#C68E0E" font-family="Epilogue" font-weight="700" font-size="9" letter-spacing="1.5">SECTION 2 ⭐</text><text x="14" y="38" fill="#102D50" font-family="Epilogue" font-weight="700" font-size="13">🚀 Suivi de mon parcours</text></g></a>
+
+          <!-- COLONNE 2 : MES DONNÉES -->
+          <g transform="translate(530, 320)">
+            <rect x="-140" y="0" width="280" height="42" rx="8" fill="url(#cl-goldGrad)" filter="url(#cl-shadow)"/>
+            <text x="0" y="28" text-anchor="middle" fill="white" font-family="Epilogue" font-weight="700" font-size="13">📁 MES DONNÉES</text>
+          </g>
+          <line x1="530" y1="362" x2="530" y2="385" stroke="#A4AEBB" stroke-width="1.5" stroke-dasharray="3 3"/>
+          <a href="#documents" class="sitemap-link"><g transform="translate(390, 385)" class="sitemap-node"><rect x="0" y="0" width="280" height="46" rx="6" fill="white" stroke="#C68E0E" stroke-width="2"/><text x="14" y="20" fill="#C68E0E" font-family="Epilogue" font-weight="700" font-size="9" letter-spacing="1.5">SECTION 3 ⭐</text><text x="14" y="38" fill="#102D50" font-family="Epilogue" font-weight="700" font-size="13">📋 Mes infos &amp; documents</text></g></a>
+          <a href="#etude" class="sitemap-link"><g transform="translate(390, 441)" class="sitemap-node"><rect x="0" y="0" width="280" height="46" rx="6" fill="white" stroke="#C68E0E" stroke-width="2"/><text x="14" y="20" fill="#C68E0E" font-family="Epilogue" font-weight="700" font-size="9" letter-spacing="1.5">SECTION 4 ⭐</text><text x="14" y="38" fill="#102D50" font-family="Epilogue" font-weight="700" font-size="13">📁 Mon étude patrimoniale</text></g></a>
+          <a href="#encours" class="sitemap-link"><g transform="translate(390, 497)" class="sitemap-node"><rect x="0" y="0" width="280" height="46" rx="6" fill="white" stroke="#DBE0E4" stroke-width="1"/><text x="14" y="20" fill="#708196" font-family="Epilogue" font-weight="700" font-size="9" letter-spacing="1.5">SECTION 5</text><text x="14" y="38" fill="#102D50" font-family="Epilogue" font-weight="700" font-size="13">💰 Mes investissements</text></g></a>
+          <a href="#signes" class="sitemap-link"><g transform="translate(390, 553)" class="sitemap-node"><rect x="0" y="0" width="280" height="46" rx="6" fill="white" stroke="#DBE0E4" stroke-width="1"/><text x="14" y="20" fill="#708196" font-family="Epilogue" font-weight="700" font-size="9" letter-spacing="1.5">SECTION 6</text><text x="14" y="38" fill="#102D50" font-family="Epilogue" font-weight="700" font-size="13">⚖ Mes documents signés</text></g></a>
+
+          <!-- COLONNE 3 : INTERACTIONS -->
+          <g transform="translate(880, 320)">
+            <rect x="-140" y="0" width="280" height="42" rx="8" fill="url(#cl-greenLight)" stroke="#1F8A4C" stroke-width="1.5" filter="url(#cl-shadow)"/>
+            <text x="0" y="28" text-anchor="middle" fill="#1F8A4C" font-family="Epilogue" font-weight="700" font-size="13">💬 INTERACTIONS</text>
+          </g>
+          <line x1="880" y1="362" x2="880" y2="385" stroke="#A4AEBB" stroke-width="1.5" stroke-dasharray="3 3"/>
+          <a href="#rdv" class="sitemap-link"><g transform="translate(740, 385)" class="sitemap-node"><rect x="0" y="0" width="280" height="46" rx="6" fill="white" stroke="#C68E0E" stroke-width="2"/><text x="14" y="20" fill="#C68E0E" font-family="Epilogue" font-weight="700" font-size="9" letter-spacing="1.5">SECTION 7 ⭐</text><text x="14" y="38" fill="#102D50" font-family="Epilogue" font-weight="700" font-size="13">📅 Prendre RDV</text></g></a>
+          <a href="#chat" class="sitemap-link"><g transform="translate(740, 441)" class="sitemap-node"><rect x="0" y="0" width="280" height="46" rx="6" fill="white" stroke="#C68E0E" stroke-width="2"/><text x="14" y="20" fill="#C68E0E" font-family="Epilogue" font-weight="700" font-size="9" letter-spacing="1.5">SECTION 8 ⭐</text><text x="14" y="38" fill="#102D50" font-family="Epilogue" font-weight="700" font-size="13">💬 Mon chat</text></g></a>
+          <a href="#visios" class="sitemap-link"><g transform="translate(740, 497)" class="sitemap-node"><rect x="0" y="0" width="280" height="46" rx="6" fill="white" stroke="#DBE0E4" stroke-width="1"/><text x="14" y="20" fill="#708196" font-family="Epilogue" font-weight="700" font-size="9" letter-spacing="1.5">SECTION 9</text><text x="14" y="38" fill="#102D50" font-family="Epilogue" font-weight="700" font-size="13">🎥 Mes visios passées</text></g></a>
+
+          <!-- COLONNE 4 : VIE DU DOSSIER + COMPTE -->
+          <g transform="translate(1230, 320)">
+            <rect x="-140" y="0" width="280" height="42" rx="8" fill="url(#cl-blueGrad)" stroke="#1456A0" stroke-width="1.5" filter="url(#cl-shadow)"/>
+            <text x="0" y="28" text-anchor="middle" fill="#1456A0" font-family="Epilogue" font-weight="700" font-size="13">📚 VIE DU DOSSIER</text>
+          </g>
+          <line x1="1230" y1="362" x2="1230" y2="385" stroke="#A4AEBB" stroke-width="1.5" stroke-dasharray="3 3"/>
+          <a href="#actions" class="sitemap-link"><g transform="translate(1090, 385)" class="sitemap-node"><rect x="0" y="0" width="280" height="46" rx="6" fill="white" stroke="#C68E0E" stroke-width="2"/><text x="14" y="20" fill="#C68E0E" font-family="Epilogue" font-weight="700" font-size="9" letter-spacing="1.5">SECTION 10 ⭐</text><text x="14" y="38" fill="#102D50" font-family="Epilogue" font-weight="700" font-size="13">✅ Suivi de mes actions</text></g></a>
+          <a href="#articles" class="sitemap-link"><g transform="translate(1090, 441)" class="sitemap-node"><rect x="0" y="0" width="280" height="46" rx="6" fill="white" stroke="#DBE0E4" stroke-width="1"/><text x="14" y="20" fill="#708196" font-family="Epilogue" font-weight="700" font-size="9" letter-spacing="1.5">SECTION 11</text><text x="14" y="38" fill="#102D50" font-family="Epilogue" font-weight="700" font-size="13">📚 Articles &amp; guides</text></g></a>
+          <a href="#profil" class="sitemap-link"><g transform="translate(1090, 497)" class="sitemap-node"><rect x="0" y="0" width="280" height="46" rx="6" fill="white" stroke="#DBE0E4" stroke-width="1"/><text x="14" y="20" fill="#708196" font-family="Epilogue" font-weight="700" font-size="9" letter-spacing="1.5">SECTION 12</text><text x="14" y="38" fill="#102D50" font-family="Epilogue" font-weight="700" font-size="13">⚙ Mon profil &amp; sécurité</text></g></a>
+
+          <!-- Lignes de connexion vers titre -->
+          <line x1="800" y1="90" x2="800" y2="130" stroke="#DBE0E4" stroke-width="1.5"/>
+
+          <!-- Légende basse -->
+          <g transform="translate(800, 630)">
+            <text x="0" y="0" text-anchor="middle" fill="#708196" font-family="Epilogue" font-size="11" font-style="italic">⭐ = priorité MVP · vert = page publique sans connexion · or = section sécurisée</text>
+          </g>
+
+        </svg>
+      </div>
+    </section>
+
+    <!-- =============================================== -->
+    <!-- SECTION 0 — PARCOURS D'ONBOARDING (PRÉ-ESPACE)   -->
+    <!-- =============================================== -->
+    <section class="main-section" id="onboarding">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num public">0</span> Phase 1 · Parcours pré-espace · 4 pages publiques · ⭐ Priorité MVP</div>
+        <h2 class="section-title">🌐 Parcours d'onboarding du client</h2>
+        <p class="section-intro">Le parcours <strong>avant</strong> l'activation de l'espace sécurisé. Comment un nouveau client arrive sur la plateforme et entre en relation avec son ingénieur. <strong>4 pages publiques séquentielles</strong> sans nécessiter de mot de passe — l'authentification se fait par <em>lien magique</em> envoyé par email.</p>
+      </div>
+
+      <div class="note green">
+        <strong>📋 Workflow chronologique de l'onboarding :</strong>
+        <ol style="margin: 8px 0 0 20px; font-size: 12.5px; line-height: 1.8;">
+          <li><strong>L'ingénieur crée le prospect</strong> dans son CRM (Doc 5 section 3) → un email automatique part</li>
+          <li><strong>Le prospect reçoit un email avec un lien magique</strong> → il accède aux pages publiques sans mot de passe</li>
+          <li><strong>Page 1</strong> · Il prend RDV avec l'ingénieur (Calendly intégré)</li>
+          <li><strong>Page 2</strong> · Il remplit le DCI simplifié (informations patrimoniales de base)</li>
+          <li><strong>Page 3</strong> · Il remplit le questionnaire de qualification client (KYC obligatoire)</li>
+          <li><strong>RDV en visio</strong> → l'ingénieur conduit l'entretien · transcription IA · DCI corrigé/enrichi en temps réel</li>
+          <li><strong>Après le RDV</strong> · l'ingénieur envoie via Yousign les documents à signer : DCI corrigé + Qualification client + Lettre de mission + Demande d'entrée en relation</li>
+          <li><strong>Page 4</strong> · Activation de l'espace sécurisé après signature de la lettre de mission</li>
+        </ol>
+        <p style="margin-top: 10px; font-size: 12.5px;"><em>⚠ Note importante : <strong>aucun paiement d'acompte n'est demandé à ce stade</strong>. Le paiement intervient après l'activation de l'espace, quand l'ingénieur lance officiellement l'étude patrimoniale.</em></p>
+      </div>
+
+      <!-- PAGE 1 : PRISE DE RDV -->
+      <div class="page-card public">
+        <div class="pc-header">
+          <div class="pc-icon">📅</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Page 1/4 · publique · /rdv/[token-magique]</div>
+            <div class="pc-title">Page de prise de RDV</div>
+            <div class="pc-desc">Première page que voit le prospect après avoir cliqué sur l'email d'invitation. Calendly-like, branding du cabinet adapté.</div>
+          </div>
+          <span class="pc-status public">PUBLIC ⭐</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Composants attendus</div>
+          <div class="pc-tree">
+<span class="b">┌─ HERO PERSONNALISÉ</span>
+│   ├─ Logo + branding du cabinet <span class="s">(adaptatif)</span>
+│   ├─ Photo de l'ingénieur + nom + titre
+│   ├─ Message d'accueil personnalisé <span class="s">(rédigé par l'ingénieur)</span>
+│   └─ Pitch court du cabinet et de l'accompagnement
+
+<span class="b">┌─ SÉLECTEUR DE CRÉNEAU</span>
+│   ├─ Mini calendrier <span class="s">(disponibilités de l'ingénieur)</span>
+│   ├─ Choix d'horaires sur la journée
+│   ├─ Durée par défaut <span class="s">(45 min · 1h)</span>
+│   ├─ Format <span class="s">(visioconférence · téléphone · présentiel si disponible)</span>
+│   └─ Fuseau horaire détecté automatiquement
+
+<span class="b">┌─ FORMULAIRE DE COORDONNÉES</span>
+│   ├─ Prénom · Nom · Email · Téléphone
+│   ├─ Brève raison du RDV <span class="s">(textarea optionnel)</span>
+│   └─ Acceptation des CGU + politique de confidentialité
+
+<span class="b">┌─ CONFIRMATION</span>
+│   ├─ Récap du créneau choisi
+│   ├─ Email de confirmation auto envoyé
+│   ├─ Ajout au calendrier <span class="s">(Google · Outlook · Apple · ICS)</span>
+│   └─ Bouton "Continuer · Étape 2 sur 3" → Page 2 (DCI simplifié)
+
+<span class="b">┌─ TUNNEL DE CONFIANCE</span>
+│   ├─ Bandeau "Données chiffrées · RGPD"
+│   ├─ Témoignages courts du cabinet <span class="s">(optionnel)</span>
+│   └─ FAQ minimaliste <span class="s">(3-4 questions max)</span>
+          </div>
+          <div class="pc-section-label">Comportement attendu</div>
+          <div class="pc-subpages">
+            <div class="pc-subpage"><strong>Synchronisation calendrier ingénieur</strong> · Google/Outlook (cf. Doc 5 section 6)</div>
+            <div class="pc-subpage"><strong>Email auto au prospect</strong> · confirmation RDV + lien direct vers page 2</div>
+            <div class="pc-subpage"><strong>Notification push à l'ingénieur</strong> · "Nouveau RDV pris · [Prospect]"</div>
+            <div class="pc-subpage"><strong>Mise à jour du CRM ingénieur</strong> · le prospect passe automatiquement à l'étape suivante</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PAGE 2 : DCI SIMPLIFIÉ -->
+      <div class="page-card public">
+        <div class="pc-header">
+          <div class="pc-icon">📋</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Page 2/4 · publique · /onboarding/dci-simplifie</div>
+            <div class="pc-title">Document de Collecte d'Informations simplifié</div>
+            <div class="pc-desc">Premier questionnaire patrimonial · vulgarisé · ~15-25 questions essentielles · permet à l'ingénieur de préparer le RDV.</div>
+          </div>
+          <span class="pc-status public">PUBLIC ⭐</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Composants attendus</div>
+          <div class="pc-tree">
+<span class="b">┌─ EN-TÊTE RASSURANT</span>
+│   ├─ Barre de progression visuelle <span class="s">(Étape 2/3)</span>
+│   ├─ Titre : "Pour préparer votre RDV avec [Prénom Ingénieur]"
+│   ├─ Estimation du temps <span class="s">(5-8 minutes)</span>
+│   ├─ Possibilité de sauvegarder et reprendre plus tard
+│   └─ Mention "RGPD · Données chiffrées · Aucun document obligatoire à ce stade"
+
+<span class="b">┌─ FORMULAIRE STRUCTURÉ EN BLOCS</span>
+│   ├─ <span class="i">Bloc 1</span> · Situation personnelle <span class="s">(âge, situation familiale, enfants)</span>
+│   ├─ <span class="i">Bloc 2</span> · Situation professionnelle <span class="s">(profession, statut, revenus approximatifs)</span>
+│   ├─ <span class="i">Bloc 3</span> · Patrimoine immobilier <span class="s">(résidence principale, secondaires, locatif)</span>
+│   ├─ <span class="i">Bloc 4</span> · Patrimoine financier <span class="s">(épargne, placements, fourchettes globales)</span>
+│   ├─ <span class="i">Bloc 5</span> · Charges récurrentes <span class="s">(emprunts en cours, charges fixes)</span>
+│   └─ <span class="i">Bloc 6</span> · Objectifs et préoccupations <span class="s">(textarea libre)</span>
+
+<span class="b">┌─ UX VULGARISÉE</span>
+│   ├─ Tooltips explicatifs sur les termes techniques
+│   ├─ Champs facultatifs clairement marqués
+│   ├─ Sliders de fourchettes plutôt que montants exacts
+│   ├─ Aucun document à uploader à ce stade
+│   └─ Sauvegarde auto à chaque étape
+
+<span class="b">┌─ FOOTER</span>
+│   ├─ Bouton "Continuer · Étape 3 sur 3" → Page 3 (KYC)
+│   ├─ Lien "Terminer plus tard" <span class="s">(envoie un email de reprise)</span>
+│   └─ Mention de confidentialité
+          </div>
+          <div class="pc-section-label">Comportement attendu</div>
+          <div class="pc-subpages">
+            <div class="pc-subpage"><strong>Auto-save</strong> · sauvegarde à chaque modification de champ (1 sec après inactivité)</div>
+            <div class="pc-subpage"><strong>Reprise email</strong> · si abandon, email de relance à J+1, J+3, J+7</div>
+            <div class="pc-subpage"><strong>Visibilité côté ingénieur</strong> · le DCI rempli apparaît dans la fiche dossier (Doc 5 section 5 onglet 3) en temps réel</div>
+            <div class="pc-subpage"><strong>Pré-remplissage IA</strong> · si transcript de visio antérieure existe, propositions de pré-remplissage</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PAGE 3 : KYC QUALIFICATION CLIENT -->
+      <div class="page-card public">
+        <div class="pc-header">
+          <div class="pc-icon">✅</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Page 3/4 · publique · /onboarding/qualification</div>
+            <div class="pc-title">Questionnaire de qualification client (KYC)</div>
+            <div class="pc-desc">Questionnaire réglementaire obligatoire · profil de risque + connaissance financière · structuré et balisé.</div>
+          </div>
+          <span class="pc-status public">PUBLIC ⭐</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Composants attendus</div>
+          <div class="pc-tree">
+<span class="b">┌─ EN-TÊTE</span>
+│   ├─ Barre de progression <span class="s">(Étape 3/3)</span>
+│   ├─ Titre : "Une dernière étape · 5 minutes"
+│   ├─ Mention réglementaire AMF <span class="s">(petite étoile bas de page)</span>
+│   └─ Logo cabinet adaptatif
+
+<span class="b">┌─ QUESTIONNAIRE STRUCTURÉ</span>
+│   ├─ <span class="i">Bloc 1</span> · Connaissance financière <span class="s">(produits connus, expériences passées)</span>
+│   ├─ <span class="i">Bloc 2</span> · Tolérance au risque <span class="s">(scénarios concrets · pédagogie visuelle)</span>
+│   ├─ <span class="i">Bloc 3</span> · Horizon d'investissement <span class="s">(court · moyen · long terme)</span>
+│   ├─ <span class="i">Bloc 4</span> · Capacité d'épargne mensuelle <span class="s">(fourchette)</span>
+│   ├─ <span class="i">Bloc 5</span> · Personne politiquement exposée (PPE) <span class="s">(oui/non · avec explication)</span>
+│   └─ <span class="i">Bloc 6</span> · Origine des fonds principaux <span class="s">(transmission, salaire, vente bien…)</span>
+
+<span class="b">┌─ UX RASSURANTE</span>
+│   ├─ Questions formulées de façon non-anxiogène
+│   ├─ Pédagogie visuelle pour les concepts <span class="s">(graphiques de risque)</span>
+│   ├─ Pas de "bonne réponse" — on cherche l'authenticité
+│   ├─ Score de profil calculé en arrière-plan <span class="s">(pas montré au client)</span>
+│   └─ Estimation visible <span class="s">"Plus que 2 minutes"</span>
+
+<span class="b">┌─ FINALISATION</span>
+│   ├─ Récapitulatif visuel du parcours <span class="s">(3 étapes ✓)</span>
+│   ├─ Message de confirmation : "C'est fait ! Votre RDV est dans votre calendrier"
+│   ├─ Email auto de confirmation finale
+│   ├─ Mention : "[Ingénieur] vous appellera à [Date/Heure]"
+│   └─ Lien vers la page 4 (à venir après le RDV)
+          </div>
+          <div class="pc-section-label">Comportement attendu</div>
+          <div class="pc-subpages">
+            <div class="pc-subpage"><strong>Calcul automatique du profil de risque</strong> · selon les réponses · profil "Prudent / Équilibré / Dynamique" stocké</div>
+            <div class="pc-subpage"><strong>Détection PPE</strong> · si oui, alerte spécifique côté ingénieur (procédure renforcée)</div>
+            <div class="pc-subpage"><strong>Notification ingénieur</strong> · "Onboarding terminé · prêt pour le RDV"</div>
+            <div class="pc-subpage"><strong>Mise à jour CRM</strong> · le prospect passe à l'étape "Compliance pré-RDV validée"</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ENTRE PAGES 3 ET 4 : LE 1ER RDV -->
+      <div class="note">
+        <strong>🎥 Étape intermédiaire · Le 1<sup>er</sup> RDV en visio</strong>
+        <p style="margin: 8px 0 0; font-size: 12.5px;">Entre les pages 3 et 4 du parcours, le client honore son 1<sup>er</sup> RDV avec l'ingénieur. La visio se déroule via l'outil intégré (cf. Doc 5 section 7) avec <strong>transcription IA en temps réel</strong>. L'ingénieur :</p>
+        <ul style="margin: 6px 0 0 20px; font-size: 12px; line-height: 1.65;">
+          <li>Conduit l'entretien de découverte patrimoniale</li>
+          <li>Corrige et enrichit le DCI simplifié pendant la visio</li>
+          <li>Approfondit les zones d'objectif avec le client</li>
+          <li>Présente les modalités de l'accompagnement (étude + suivi)</li>
+        </ul>
+        <p style="margin: 8px 0 0; font-size: 12.5px;"><em>Après le RDV, l'ingénieur envoie depuis son espace (Doc 5 section 10) les documents à signer via Yousign : DCI corrigé + Questionnaire de qualification + Lettre de mission + Demande d'entrée en relation. Le client signe → la page 4 d'activation s'ouvre.</em></p>
+      </div>
+
+      <!-- PAGE 4 : ACTIVATION ESPACE SÉCURISÉ -->
+      <div class="page-card public">
+        <div class="pc-header">
+          <div class="pc-icon">🔓</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Page 4/4 · publique → sécurisée · /activation</div>
+            <div class="pc-title">Activation de l'espace sécurisé</div>
+            <div class="pc-desc">Après signature de la lettre de mission, le client active son espace personnel. Définit son mot de passe (ou conserve l'authentification par lien magique).</div>
+          </div>
+          <span class="pc-status public">PUBLIC</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Composants attendus</div>
+          <div class="pc-tree">
+<span class="b">┌─ EMAIL D'ACTIVATION</span> <span class="s">(déclenché par signature de la LM)</span>
+│   ├─ Objet : "Bienvenue · Votre espace [Cabinet] est prêt"
+│   ├─ Récapitulatif des documents signés
+│   ├─ Lien d'activation unique <span class="s">(token sécurisé · 7 jours de validité)</span>
+│   └─ Expéditeur identifié <span class="s">(adresse cabinet)</span>
+
+<span class="b">┌─ PAGE D'ACTIVATION</span>
+│   ├─ Hero rassurant : "Bienvenue [Prénom], votre espace est prêt"
+│   ├─ Récap visuel du parcours accompli <span class="s">(3 étapes + 1 RDV ✓)</span>
+│   └─ Choix d'authentification :
+│       ├─ Option 1 : <strong>Mot de passe classique</strong> <span class="s">(création + confirmation)</span>
+│       └─ Option 2 : <strong>Lien magique permanent</strong> <span class="s">(authentification sans mot de passe · recommandé pour la simplicité)</span>
+
+<span class="b">┌─ AUTHENTIFICATION 2FA OPTIONNELLE</span>
+│   ├─ Proposition d'activer la double authentification
+│   ├─ Méthodes : SMS · Email · App d'authentification
+│   └─ Aucune obligation à l'activation initiale
+
+<span class="b">┌─ TOUR GUIDÉ DE L'ESPACE</span> <span class="s">(onboarding produit)</span>
+│   ├─ Présentation rapide des 12 sections
+│   ├─ Highlight des 3 sections clés <span class="s">(Tableau de bord · Documents · Étude)</span>
+│   ├─ Mention de la prochaine étape : "Votre étude patrimoniale est en cours"
+│   └─ Bouton "C'est parti !" → Section 1 Mon tableau de bord
+
+<span class="b">┌─ TRANSITION VERS L'ESPACE</span>
+│   ├─ Activation des 12 sections
+│   ├─ Préchargement des documents signés
+│   ├─ Email de bienvenue final avec lien d'accès permanent
+│   └─ Notification ingénieur : "Espace activé par [Client]"
+          </div>
+          <div class="pc-section-label">Sous-pages atteignables</div>
+          <div class="pc-subpages">
+            <div class="pc-subpage"><strong>Page de mot de passe oublié</strong> · si option 1 choisie · lien magique de récupération</div>
+            <div class="pc-subpage"><strong>Page d'expiration du lien d'activation</strong> · si délai dépassé · re-génération du lien</div>
+            <div class="pc-subpage"><strong>Tour guidé interactif</strong> · 4-5 slides éducatives sur l'utilisation</div>
+            <div class="pc-subpage"><strong>FAQ activation</strong> · questions fréquentes (mot de passe perdu, sécurité, etc.)</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== -->
+    <!-- SECTION 1 — MON TABLEAU DE BORD -->
+    <!-- ============================== -->
+    <section class="main-section" id="dashboard">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">1</span> Section 1 / 12 · Accueil &amp; suivi · ⭐ Priorité MVP</div>
+        <h2 class="section-title">📊 Mon tableau de bord</h2>
+        <p class="section-intro">Page d'accueil de l'espace sécurisé. <strong>Vue synthétique et rassurante</strong> de l'avancement de l'accompagnement patrimonial. Pas de jargon, juste l'essentiel pour le client.</p>
+      </div>
+
+      <div class="page-card priority">
+        <div class="pc-header">
+          <div class="pc-icon">🏠</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Page principale · /</div>
+            <div class="pc-title">Accueil personnalisé</div>
+            <div class="pc-desc">Premier écran après connexion. Vision synthétique de la relation avec le cabinet.</div>
+          </div>
+          <span class="pc-status priority">PRIORITÉ ⭐</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Composants attendus</div>
+          <div class="pc-tree">
+<span class="b">┌─ HERO PERSONNALISÉ</span>
+│   ├─ Salutation <span class="s">"Bonjour [Prénom]"</span>
+│   ├─ Photo + nom de l'ingénieur <span class="s">(rappel rassurant)</span>
+│   └─ Date · "Voici le point sur votre accompagnement"
+
+<span class="b">┌─ STATUT DU PARCOURS</span> <span class="s">(le plus important · visuel large)</span>
+│   ├─ Frise visuelle des grandes étapes
+│   ├─ Étape actuelle mise en évidence
+│   ├─ Prochaine action attendue <span class="s">(côté client OU côté ingénieur)</span>
+│   └─ Bouton "Voir le détail" → Section 2
+
+<span class="b">┌─ MES PROCHAINS RENDEZ-VOUS</span>
+│   ├─ Liste des RDV à venir <span class="s">(date · heure · format · lien visio)</span>
+│   ├─ Bouton <strong>[Rejoindre la visio]</strong> <span class="s">(quand applicable)</span>
+│   └─ Bouton "Prendre un nouveau RDV" → Section 7
+
+<span class="b">┌─ ACTIONS À FAIRE</span> <span class="s">(côté client)</span>
+│   ├─ Documents à fournir <span class="s">(liste claire)</span>
+│   ├─ Documents à signer <span class="s">(via Yousign)</span>
+│   ├─ Questionnaires à compléter
+│   └─ Code couleur : urgent · normal · informatif
+
+<span class="b">┌─ DERNIÈRES NOUVELLES</span>
+│   ├─ Étude livrée <span class="s">(quand applicable)</span>
+│   ├─ Nouveau message de l'ingénieur
+│   ├─ Synthèse du dernier RDV <span class="s">(transcript résumé)</span>
+│   └─ Articles patrimoniaux suggérés
+
+<span class="b">┌─ CONTACT RAPIDE</span>
+│   ├─ Bouton <strong>[Envoyer un message]</strong> → Section 8
+│   ├─ Bouton <strong>[Prendre RDV]</strong> → Section 7
+│   └─ Mention : "Réponse en 24h ouvrées"
+          </div>
+          <div class="pc-section-label">Sous-pages atteignables</div>
+          <div class="pc-subpages">
+            <div class="pc-subpage"><strong>Détail d'un RDV</strong> · au clic → infos + lien visio + ajout calendrier</div>
+            <div class="pc-subpage"><strong>Document à signer</strong> · au clic → ouverture Yousign embed</div>
+            <div class="pc-subpage"><strong>Document à fournir</strong> · au clic → upload guidé (section 3)</div>
+            <div class="pc-subpage"><strong>Synthèse RDV</strong> · au clic → résumé du dernier entretien</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== -->
+    <!-- SECTION 2 — SUIVI DE MON PARCOURS -->
+    <!-- ============================== -->
+    <section class="main-section" id="parcours">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">2</span> Section 2 / 12 · Accueil &amp; suivi · ⭐ Priorité MVP</div>
+        <h2 class="section-title">🚀 Suivi de mon parcours</h2>
+        <p class="section-intro">Vue détaillée des <strong>étapes du parcours patrimonial</strong> côté client. Adaptation rassurante des 6 étapes du pipeline professionnel — ici présentées de manière compréhensible et engageante.</p>
+      </div>
+
+      <div class="note gold">
+        <strong>📌 Mapping pipeline professionnel ↔ vue client :</strong>
+        <p style="margin: 6px 0 0; font-size: 12.5px;">Côté ingénieur (Doc 5 section 4), le pipeline a 6 étapes techniques : 01 Prospects · 02 Compliance validée · 03 Collecte docs · 04 Études en cours · 05 Études restituées · 06 Clients en suivi. Côté client, ces étapes sont reformulées de manière <strong>positive et compréhensible</strong>.</p>
+      </div>
+
+      <div class="page-card priority">
+        <div class="pc-header">
+          <div class="pc-icon">🚀</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Page principale · /mon-parcours</div>
+            <div class="pc-title">Mon parcours patrimonial</div>
+            <div class="pc-desc">Frise chronologique visuelle des étapes accomplies, en cours et à venir.</div>
+          </div>
+          <span class="pc-status priority">PRIORITÉ ⭐</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Composants attendus</div>
+          <div class="pc-tree">
+<span class="b">┌─ FRISE VISUELLE PRINCIPALE</span> <span class="s">(timeline horizontale ou verticale)</span>
+│   ├─ <span class="c">Étape 1</span> · 👋 Premier contact <span class="s">(✓ DCI rempli + RDV pris)</span>
+│   ├─ <span class="c">Étape 2</span> · 📝 Mise en relation <span class="s">(✓ documents signés)</span>
+│   ├─ <span class="c">Étape 3</span> · 📁 Collecte de vos documents <span class="s">(en cours)</span>
+│   ├─ <span class="c">Étape 4</span> · 🤖 Réalisation de votre étude <span class="s">(à venir · 4-6 semaines)</span>
+│   ├─ <span class="c">Étape 5</span> · ✨ Restitution de votre étude <span class="s">(à venir)</span>
+│   └─ <span class="c">Étape 6</span> · 💼 Mise en œuvre &amp; suivi <span class="s">(à venir)</span>
+
+<span class="b">┌─ POUR L'ÉTAPE EN COURS</span>
+│   ├─ Description claire de l'étape
+│   ├─ Ce qui est attendu du client
+│   ├─ Ce qui est attendu de l'ingénieur
+│   ├─ Délai estimé
+│   ├─ Avancement visuel <span class="s">(barre de progression · pourcentage)</span>
+│   └─ Bouton d'action principal <span class="s">[Compléter mes documents]</span>
+
+<span class="b">┌─ ÉTAPES PASSÉES</span> <span class="s">(rétrospective)</span>
+│   ├─ Date d'accomplissement
+│   ├─ Documents/livrables associés
+│   └─ Lien vers les détails
+
+<span class="b">┌─ ÉTAPES FUTURES</span> <span class="s">(préparation)</span>
+│   ├─ Estimation temporelle
+│   ├─ Description rassurante
+│   └─ Aucune action requise tant que pas atteinte
+
+<span class="b">┌─ AIDE CONTEXTUELLE</span>
+│   ├─ FAQ par étape
+│   ├─ Vidéos pédagogiques courtes <span class="s">(optionnel)</span>
+│   └─ Bouton "Une question ?" → Section 8 Chat
+          </div>
+          <div class="pc-section-label">Sous-pages atteignables</div>
+          <div class="pc-subpages">
+            <div class="pc-subpage"><strong>Détail d'une étape</strong> · au clic → page dédiée avec tout l'historique</div>
+            <div class="pc-subpage"><strong>FAQ d'étape</strong> · questions fréquentes contextuelles</div>
+            <div class="pc-subpage"><strong>Page d'aide globale</strong> · récap visuel du processus complet</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== -->
+    <!-- SECTION 3 — MES INFOS & DOCUMENTS -->
+    <!-- ============================== -->
+    <section class="main-section" id="documents">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">3</span> Section 3 / 12 · Mes données · ⭐ Priorité MVP</div>
+        <h2 class="section-title">📋 Mes informations &amp; documents</h2>
+        <p class="section-intro">Espace de gestion des <strong>informations patrimoniales</strong> et des <strong>documents à fournir</strong> pour la réalisation de l'étude. C'est ici que le client travaille pendant l'étape "Collecte". Demandes hiérarchisées par l'IA.</p>
+      </div>
+
+      <div class="page-card priority">
+        <div class="pc-header">
+          <div class="pc-icon">📋</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Page principale · /mes-documents</div>
+            <div class="pc-title">Centre de collecte des informations</div>
+            <div class="pc-desc">Interface guidée pour fournir progressivement les informations et documents nécessaires à l'étude.</div>
+          </div>
+          <span class="pc-status priority">PRIORITÉ ⭐</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Composants attendus</div>
+          <div class="pc-tree">
+<span class="b">┌─ TABLEAU DE BORD COLLECTE</span>
+│   ├─ Indice de complétude global <span class="s">(0% → 100% · barre visuelle large)</span>
+│   ├─ Documents fournis · documents en attente
+│   ├─ Estimation : "Plus que [N] documents à fournir"
+│   └─ Encart explicatif rassurant : "Pas de panique, à votre rythme"
+
+<span class="b">┌─ LISTE DES DOCUMENTS DEMANDÉS</span>
+│   ├─ Hiérarchisation par <strong>priorité IA</strong> <span class="s">(les plus impactants en premier)</span>
+│   ├─ Regroupement par catégorie compréhensible
+│   │   ├─ 🏠 Vos biens immobiliers
+│   │   ├─ 💰 Vos avoirs financiers
+│   │   ├─ 💼 Votre activité professionnelle
+│   │   ├─ 🛡 Vos assurances
+│   │   ├─ 📄 Vos documents fiscaux
+│   │   └─ 👨‍👩‍👧 Votre situation familiale
+│   └─ Pour chaque document
+│       ├─ Pictogramme + nom clair
+│       ├─ Description vulgarisée <span class="s">("Vous le trouverez sur...")</span>
+│       ├─ Statut <span class="s">(à fournir · fourni · validé · à compléter)</span>
+│       ├─ Bouton <strong>[Téléverser]</strong> ou <strong>[Voir]</strong>
+│       └─ Optionnel : tag "Important" si bloquant
+
+<span class="b">┌─ UPLOAD INTELLIGENT</span>
+│   ├─ Drag &amp; drop simple
+│   ├─ Upload mobile <span class="s">(photo du document)</span>
+│   ├─ OCR automatique <span class="s">(extraction des données clés)</span>
+│   ├─ Pré-remplissage IA des champs DCI <span class="s">(propose les valeurs détectées)</span>
+│   └─ Validation automatique du format
+
+<span class="b">┌─ COMPLÉTER MES INFORMATIONS</span> <span class="s">(DCI complet)</span>
+│   ├─ Continuer le DCI où je l'avais laissé
+│   ├─ Sections déjà remplies par l'ingénieur <span class="s">(d'après le RDV) — visibles en lecture</span>
+│   ├─ Sections que le client peut compléter
+│   └─ Sauvegarde automatique
+
+<span class="b">┌─ AIDE CONTEXTUELLE</span>
+│   ├─ "Je ne sais pas où trouver ce document" → guide
+│   ├─ "Pourquoi ce document est-il demandé ?" → explication
+│   └─ Bouton "Demander à mon ingénieur" → Section 8 Chat
+
+<span class="b">┌─ ENCART RASSURANT</span>
+│   ├─ Bandeau "Vos données sont chiffrées et protégées"
+│   ├─ Mention RGPD
+│   └─ Possibilité de retirer un document à tout moment
+          </div>
+          <div class="pc-section-label">Sous-pages atteignables</div>
+          <div class="pc-subpages">
+            <div class="pc-subpage"><strong>Détail d'un document fourni</strong> · prévisualisation + métadonnées + suppression</div>
+            <div class="pc-subpage"><strong>Guide "Où trouver ce document ?"</strong> · explications contextuelles</div>
+            <div class="pc-subpage"><strong>Continuer mon DCI</strong> · formulaire complet avec sauvegarde auto</div>
+            <div class="pc-subpage"><strong>Notifications de demande</strong> · l'ingénieur peut demander un document spécifique avec message</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== -->
+    <!-- SECTION 4 — MON ÉTUDE PATRIMONIALE -->
+    <!-- ============================== -->
+    <section class="main-section" id="etude">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">4</span> Section 4 / 12 · Mes données · ⭐ Priorité MVP · LE livrable phare</div>
+        <h2 class="section-title">📁 Mon étude patrimoniale</h2>
+        <p class="section-intro">Le <strong>livrable principal</strong> du cabinet : l'étude patrimoniale finalisée. Plusieurs formats disponibles (étude complète, document de synthèse, version web interactive). Section qui change radicalement selon l'avancement de l'étude.</p>
+      </div>
+
+      <div class="note gold">
+        <strong>📑 3 formats disponibles côté client (après livraison) :</strong>
+        <ul style="margin: 8px 0 0 20px; font-size: 12.5px; line-height: 1.7;">
+          <li><strong>📕 Étude patrimoniale complète</strong> · 50 à 150 pages + annexes · PDF téléchargeable · le document officiel détaillé</li>
+          <li><strong>📗 Document de synthèse de restitution</strong> · 15-25 pages · PDF · présenté en visio par l'ingénieur lors de la restitution</li>
+          <li><strong>🌐 Version web interactive</strong> · navigation par onglet · schémas dynamiques · scénarios consultables · plan d'action cliquable</li>
+        </ul>
+      </div>
+
+      <div class="page-card priority">
+        <div class="pc-header">
+          <div class="pc-icon">📁</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Page principale · /mon-etude · vue adaptative selon statut</div>
+            <div class="pc-title">Mon étude patrimoniale</div>
+            <div class="pc-desc">Vue qui s'adapte selon l'avancement : avant lancement / en cours / livrée.</div>
+          </div>
+          <span class="pc-status priority">PRIORITÉ ⭐</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Cas A · Étude pas encore lancée</div>
+          <div class="pc-tree">
+<span class="b">├─ Bandeau d'information</span> <span class="s">"Votre étude sera lancée dès que la collecte sera complète"</span>
+<span class="b">├─ Avancement de la collecte</span> <span class="s">(rappel section 3)</span>
+<span class="b">├─ Estimation de délai</span> <span class="s">"Étude lancée approximativement le [date estimée]"</span>
+<span class="b">└─ Bouton</span> <span class="s">[Compléter mes documents] → Section 3</span>
+          </div>
+
+          <div class="pc-section-label">Cas B · Étude en cours de réalisation</div>
+          <div class="pc-tree">
+<span class="b">├─ Hero rassurant</span> <span class="s">"Votre étude est entre de bonnes mains"</span>
+<span class="b">├─ Frise des 5 phases</span> <span class="s">(simplifiée pour le client)</span>
+│   ├─ Phase 1 · 📊 Analyse de votre situation
+│   ├─ Phase 2 · 🎯 Identification de vos opportunités
+│   ├─ Phase 3 · 📋 Construction de votre plan
+│   ├─ Phase 4 · 📅 Planification dans le temps
+│   └─ Phase 5 · ✨ Finalisation
+<span class="b">├─ Phase actuelle</span> <span class="s">avec icône animée</span>
+<span class="b">├─ Délai estimé restant</span>
+<span class="b">└─ Mention</span> <span class="s">"Votre ingénieur peut être contacté à tout moment via le chat"</span>
+          </div>
+
+          <div class="pc-section-label">Cas C · Étude livrée (le cas principal une fois en suivi)</div>
+          <div class="pc-tree">
+<span class="b">┌─ HERO ÉTUDE LIVRÉE</span>
+│   ├─ Bandeau de félicitation : "Votre étude patrimoniale est disponible"
+│   ├─ Date de livraison + nom de l'ingénieur
+│   └─ Score de satisfaction Trustpilot <span class="s">(invitation à laisser un avis)</span>
+
+<span class="b">┌─ LES 3 FORMATS DISPONIBLES</span> <span class="a">CLIQUABLES</span>
+│   ├─ <span class="c">📕 ÉTUDE PATRIMONIALE COMPLÈTE</span>
+│   │   ├─ Carte visuelle large · "Votre étude détaillée · 87 pages + annexes"
+│   │   ├─ Boutons : <strong>[Lire en ligne]</strong> <strong>[Télécharger PDF]</strong>
+│   │   └─ Date de mise à jour
+│   │
+│   ├─ <span class="c">📗 DOCUMENT DE SYNTHÈSE</span>
+│   │   ├─ Carte visuelle · "Synthèse de restitution · 22 pages"
+│   │   ├─ Mention : "Présenté lors de votre RDV de restitution"
+│   │   └─ Boutons : <strong>[Lire en ligne]</strong> <strong>[Télécharger PDF]</strong>
+│   │
+│   └─ <span class="c">🌐 VERSION WEB INTERACTIVE</span>
+│       ├─ Carte large · "Votre étude en version interactive"
+│       ├─ Mention : "Naviguez librement · scénarios cliquables"
+│       └─ Bouton <strong>[Ouvrir la version interactive]</strong>
+
+<span class="b">┌─ APERÇU EXÉCUTIF</span> <span class="s">(directement visible sans cliquer)</span>
+│   ├─ Top 3 enjeux identifiés
+│   ├─ Top 3 préconisations principales
+│   ├─ Économies fiscales potentielles chiffrées
+│   └─ "En savoir plus" → ouvre le document complet
+
+<span class="b">┌─ MISES À JOUR</span>
+│   ├─ Si l'étude a été mise à jour <span class="s">(historique des versions)</span>
+│   ├─ Date · résumé des changements
+│   └─ Possibilité de comparer 2 versions
+
+<span class="b">┌─ ACTIONS POST-RESTITUTION</span>
+│   ├─ Bouton <strong>[Voir mon plan d'action]</strong> → Section 10
+│   ├─ Bouton <strong>[Poser une question]</strong> → Section 8 Chat
+│   ├─ Bouton <strong>[Prendre RDV de suivi]</strong> → Section 7
+│   └─ Bouton <strong>[Recommander un proche]</strong> <span class="s">(parrainage · optionnel)</span>
+          </div>
+          <div class="pc-section-label">Sous-pages atteignables</div>
+          <div class="pc-subpages">
+            <div class="pc-subpage"><strong>Visualiseur PDF intégré</strong> · lecture en ligne sans téléchargement</div>
+            <div class="pc-subpage"><strong>Version web interactive</strong> · navigation libre par onglet · scénarios cliquables · plan d'action</div>
+            <div class="pc-subpage"><strong>Téléchargements</strong> · PDFs locaux dans dossier "Mon espace patrimonial"</div>
+            <div class="pc-subpage"><strong>Demande de mise à jour</strong> · le client peut demander une révision si sa situation change</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== -->
+    <!-- SECTION 5 — MES INVESTISSEMENTS -->
+    <!-- ============================== -->
+    <section class="main-section" id="encours">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">5</span> Section 5 / 12 · Mes données</div>
+        <h2 class="section-title">💰 Mes investissements &amp; encours</h2>
+        <p class="section-intro">Vue de tous les <strong>placements et investissements</strong> du client mis en place via le cabinet : produits financiers, assurances, immobilier, sociétés. Vue patrimoniale consolidée et évolutive.</p>
+      </div>
+
+      <div class="page-card">
+        <div class="pc-header">
+          <div class="pc-icon">💰</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Page principale · /mon-patrimoine</div>
+            <div class="pc-title">Mon patrimoine en mouvement</div>
+            <div class="pc-desc">Visualisation consolidée des investissements + suivi de leur évolution.</div>
+          </div>
+          <span class="pc-status todo">À FAIRE</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Composants attendus</div>
+          <div class="pc-tree">
+<span class="b">┌─ HERO PATRIMOINE</span>
+│   ├─ Encours total mis en place via le cabinet
+│   ├─ Évolution YoY <span class="s">(performance globale visualisée)</span>
+│   └─ Date de la dernière mise à jour des valorisations
+
+<span class="b">┌─ RÉPARTITION VISUELLE</span>
+│   ├─ Donut graphique : répartition par catégorie d'actifs
+│   ├─ Catégories : Financier · Immobilier · Assurance · Sociétés · Autres
+│   └─ Code couleur cohérent avec les sections
+
+<span class="b">┌─ DÉTAIL PAR CATÉGORIE</span> <span class="a">CLIQUABLES</span>
+│   ├─ <span class="c">💼 Investissements financiers</span>
+│   │   ├─ Liste des produits <span class="s">(assurance vie · PER · SCPI · OPCI…)</span>
+│   │   ├─ Valeur · performance individuelle · date de souscription
+│   │   └─ Documents associés <span class="s">(contrats · DICI · bulletins)</span>
+│   │
+│   ├─ <span class="c">🏠 Investissements immobiliers</span>
+│   │   ├─ Biens placés via le cabinet
+│   │   ├─ Adresse · type <span class="s">(neuf · ancien · LMNP · démembrement…)</span>
+│   │   └─ Loyers · plus-values latentes
+│   │
+│   ├─ <span class="c">🛡 Mes assurances</span>
+│   │   ├─ Contrats prévoyance · santé · vie de risque
+│   │   └─ Garanties · primes · échéances
+│   │
+│   └─ <span class="c">🏢 Sociétés &amp; structures</span>
+│       ├─ SCI · SARL · holding immatriculées via le cabinet
+│       └─ Documents juridiques
+
+<span class="b">┌─ ÉVOLUTION TEMPORELLE</span>
+│   ├─ Graphique courbe sur N années
+│   ├─ Toggle vue par catégorie
+│   └─ Annotations des événements clés <span class="s">(souscription · arbitrage…)</span>
+
+<span class="b">┌─ NOTE IMPORTANTE</span>
+│   ├─ Mention : "Cette vue concerne uniquement les actifs mis en place via le cabinet"
+│   └─ "Pour une vision globale (incluant vos autres actifs), consultez votre étude patrimoniale"
+          </div>
+          <div class="pc-section-label">Sous-pages atteignables</div>
+          <div class="pc-subpages">
+            <div class="pc-subpage"><strong>Détail d'un produit</strong> · fiche complète + documents + historique</div>
+            <div class="pc-subpage"><strong>Documents contractuels</strong> · accès aux contrats signés (lien section 6)</div>
+            <div class="pc-subpage"><strong>Demande d'arbitrage</strong> · pour les contrats financiers · vers chat ingénieur</div>
+            <div class="pc-subpage"><strong>Performance détaillée</strong> · graphique avec benchmarks</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== -->
+    <!-- SECTION 6 — MES DOCUMENTS SIGNÉS -->
+    <!-- ============================== -->
+    <section class="main-section" id="signes">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">6</span> Section 6 / 12 · Mes données</div>
+        <h2 class="section-title">⚖ Mes documents signés</h2>
+        <p class="section-intro">Coffre-fort numérique de tous les <strong>documents officiels signés</strong> par le client : lettre de mission, KYC, contrats, mandats, lettres de souscription. Tout l'historique réglementaire conservé.</p>
+      </div>
+
+      <div class="page-card">
+        <div class="pc-header">
+          <div class="pc-icon">⚖</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Page principale · /mes-documents-signes</div>
+            <div class="pc-title">Coffre-fort numérique</div>
+            <div class="pc-desc">Centralisation de tous les documents signés via Yousign + valeur juridique conservée.</div>
+          </div>
+          <span class="pc-status todo">À FAIRE</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Composants attendus</div>
+          <div class="pc-tree">
+<span class="b">┌─ EN-TÊTE</span>
+│   ├─ Nombre total de documents signés
+│   ├─ Filtres rapides <span class="s">(par type · par date · par signataire)</span>
+│   └─ Recherche par mot-clé
+
+<span class="b">┌─ LISTE DES DOCUMENTS</span> <span class="a">CLIQUABLES</span>
+│   ├─ Regroupement par catégorie
+│   │   ├─ 📜 Documents contractuels <span class="s">(lettre de mission · mandat)</span>
+│   │   ├─ ✅ Documents réglementaires <span class="s">(KYC · DCI · DER)</span>
+│   │   ├─ 📝 Contrats produits <span class="s">(souscriptions financières · immobilières)</span>
+│   │   └─ 📂 Autres documents
+│   └─ Pour chaque document
+│       ├─ Pictogramme + nom complet
+│       ├─ Date de signature + horodatage horodaté
+│       ├─ Statut · "Signé" · "En attente de signature"
+│       ├─ Bouton <strong>[Voir]</strong> + <strong>[Télécharger PDF]</strong>
+│       └─ Certificat de signature électronique <span class="s">(Yousign · valeur probante)</span>
+
+<span class="b">┌─ DOCUMENTS EN ATTENTE</span> <span class="s">(en haut · bandeau alerte)</span>
+│   ├─ Documents envoyés par l'ingénieur à signer
+│   ├─ Bouton <strong>[Signer maintenant]</strong> → ouverture Yousign embed
+│   └─ Date limite de signature
+
+<span class="b">┌─ TIMELINE DOCUMENTAIRE</span>
+│   ├─ Vue chronologique des signatures
+│   ├─ Permet de retracer le parcours juridique
+│   └─ Export possible en PDF synthétique
+
+<span class="b">┌─ INFORMATIONS LÉGALES</span>
+│   ├─ Mention valeur probante des signatures électroniques
+│   ├─ Durée de conservation <span class="s">(au moins 5 ans · réglementaire)</span>
+│   └─ Demande de récupération en cas de besoin
+          </div>
+          <div class="pc-section-label">Sous-pages atteignables</div>
+          <div class="pc-subpages">
+            <div class="pc-subpage"><strong>Visualiseur PDF</strong> · lecture en ligne</div>
+            <div class="pc-subpage"><strong>Certificat de signature</strong> · preuve juridique téléchargeable</div>
+            <div class="pc-subpage"><strong>Signature en cours</strong> · ouverture Yousign embed pour signer</div>
+            <div class="pc-subpage"><strong>Demande de copie certifiée</strong> · si besoin pour démarche externe</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== -->
+    <!-- SECTION 7 — PRENDRE RDV         -->
+    <!-- ============================== -->
+    <section class="main-section" id="rdv">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">7</span> Section 7 / 12 · Interactions · ⭐ Priorité MVP</div>
+        <h2 class="section-title">📅 Prendre RDV avec mon ingénieur</h2>
+        <p class="section-intro">Interface de prise de rendez-vous simplifiée pour le client. <strong>Calendly intégré</strong> avec les disponibilités de l'ingénieur. Permet de prendre des RDV de suivi, des points d'étape, ou des questions ponctuelles.</p>
+      </div>
+
+      <div class="page-card priority">
+        <div class="pc-header">
+          <div class="pc-icon">📅</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Page principale · /prendre-rdv</div>
+            <div class="pc-title">Prise de RDV simplifiée</div>
+            <div class="pc-desc">Calendrier intégré avec disponibilités de l'ingénieur en temps réel.</div>
+          </div>
+          <span class="pc-status priority">PRIORITÉ ⭐</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Composants attendus</div>
+          <div class="pc-tree">
+<span class="b">┌─ HERO</span>
+│   ├─ Photo + nom de l'ingénieur <span class="s">(continuité visuelle)</span>
+│   ├─ Disponibilité affichée <span class="s">("Prochain créneau disponible le [date]")</span>
+│   └─ Mention rassurante : "Vous pouvez modifier ou annuler à tout moment"
+
+<span class="b">┌─ TYPES DE RDV PROPOSÉS</span>
+│   ├─ <span class="i">Point d'étape</span> <span class="s">(30 min · général)</span>
+│   ├─ <span class="i">Question patrimoniale</span> <span class="s">(30 min · ciblé)</span>
+│   ├─ <span class="i">Restitution d'étude</span> <span class="s">(1h30 · présentation officielle · proposé par ingénieur)</span>
+│   ├─ <span class="i">Suivi annuel</span> <span class="s">(1h · revue annuelle)</span>
+│   └─ <span class="i">Urgence</span> <span class="s">(15 min · si situation imprévue · selon dispo)</span>
+
+<span class="b">┌─ SÉLECTEUR DE CRÉNEAU</span>
+│   ├─ Mini calendrier avec disponibilités <span class="s">(synchro Google/Outlook ingénieur)</span>
+│   ├─ Choix du créneau
+│   ├─ Format : Visio · Téléphone · Présentiel <span class="s">(si disponible)</span>
+│   └─ Fuseau horaire détecté automatiquement
+
+<span class="b">┌─ MOTIF DU RDV</span> <span class="s">(optionnel mais utile)</span>
+│   ├─ Textarea libre
+│   ├─ Suggestions IA basées sur l'étape du parcours
+│   └─ Documents à partager avant le RDV <span class="s">(upload optionnel)</span>
+
+<span class="b">┌─ CONFIRMATION</span>
+│   ├─ Récap visuel du créneau
+│   ├─ Email de confirmation auto
+│   ├─ Ajout au calendrier <span class="s">(Google · Outlook · Apple · ICS)</span>
+│   ├─ SMS de rappel optionnel
+│   └─ Lien visio généré automatiquement
+
+<span class="b">┌─ MES PROCHAINS RDV</span>
+│   ├─ Liste des RDV à venir
+│   ├─ Bouton <strong>[Modifier]</strong> ou <strong>[Annuler]</strong>
+│   ├─ Bouton <strong>[Rejoindre la visio]</strong> <span class="s">(activé H-15 min)</span>
+│   └─ Documents à préparer pour le RDV <span class="s">(si applicable)</span>
+          </div>
+          <div class="pc-section-label">Sous-pages atteignables</div>
+          <div class="pc-subpages">
+            <div class="pc-subpage"><strong>Confirmation de RDV</strong> · récap + ajout calendrier + email auto</div>
+            <div class="pc-subpage"><strong>Modification d'un RDV</strong> · choix nouveau créneau · email notif ingénieur</div>
+            <div class="pc-subpage"><strong>Annulation</strong> · avec motif optionnel · email notif ingénieur</div>
+            <div class="pc-subpage"><strong>Page de visio embed</strong> · à H-15 min · entrée directe sans téléchargement</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== -->
+    <!-- SECTION 8 — MON CHAT            -->
+    <!-- ============================== -->
+    <section class="main-section" id="chat">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">8</span> Section 8 / 12 · Interactions · ⭐ Priorité MVP</div>
+        <h2 class="section-title">💬 Mon chat avec mon ingénieur</h2>
+        <p class="section-intro">Messagerie ouverte en permanence avec l'ingénieur. <strong>SLA visible</strong> ("Réponse en 24h ouvrées") + bouton "Prendre RDV" pour les urgences. Équilibre entre disponibilité client et protection de l'agenda ingénieur.</p>
+      </div>
+
+      <div class="note">
+        <strong>📌 Principe du chat client :</strong>
+        <ul style="margin-top: 6px; padding-left: 20px; font-size: 12.5px; line-height: 1.65;">
+          <li><strong>Ouvert en permanence</strong> — le client peut écrire à tout moment</li>
+          <li><strong>SLA visible</strong> — "Réponse en 24h ouvrées" affiché clairement (gestion des attentes)</li>
+          <li><strong>Bouton "Prendre RDV"</strong> — toujours visible pour les questions plus complexes</li>
+          <li><strong>Suggestions IA</strong> — propositions de questions fréquentes pour faciliter la communication</li>
+          <li><strong>Pas de canal direct au cabinet ou à l'éditeur</strong> — le client communique uniquement avec son ingénieur référent</li>
+        </ul>
+      </div>
+
+      <div class="page-card priority">
+        <div class="pc-header">
+          <div class="pc-icon">💬</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Page principale · /chat</div>
+            <div class="pc-title">Conversation avec mon ingénieur</div>
+            <div class="pc-desc">Interface de messagerie 1:1 simple et rassurante.</div>
+          </div>
+          <span class="pc-status priority">PRIORITÉ ⭐</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Composants attendus</div>
+          <div class="pc-tree">
+<span class="b">┌─ HEADER CONVERSATION</span>
+│   ├─ Photo + nom de l'ingénieur
+│   ├─ Statut "En ligne" / "Hors ligne · Réponse sous 24h ouvrées"
+│   ├─ Bouton <strong>[📅 Prendre RDV]</strong> <span class="s">(toujours visible)</span>
+│   └─ Bouton <strong>[📞 Appel d'urgence]</strong> <span class="s">(si activé par cabinet)</span>
+
+<span class="b">┌─ FIL DE MESSAGES</span>
+│   ├─ Bulles type messagerie moderne
+│   ├─ Horodatage groupé par jour
+│   ├─ Statuts <span class="s">(envoyé · livré · lu)</span>
+│   ├─ Pièces jointes <span class="s">(images · documents)</span>
+│   └─ Preview liens · embeds vidéo si applicable
+
+<span class="b">┌─ COMPOSEUR DE MESSAGE</span>
+│   ├─ Éditeur simple <span class="s">(pas de markdown complexe)</span>
+│   ├─ Bouton pièce jointe <span class="s">(photo/document)</span>
+│   ├─ Bouton emoji <span class="s">(léger · pas de surcharge)</span>
+│   └─ Bouton envoyer <span class="s">(clavier ↵)</span>
+
+<span class="b">┌─ SUGGESTIONS IA</span> <span class="s">(au-dessus du composeur)</span>
+│   ├─ "Quelle est la situation de mon dossier ?"
+│   ├─ "Quand puis-je avoir un nouveau RDV ?"
+│   ├─ "J'ai une question sur l'étude"
+│   └─ Adaptatif selon l'étape du parcours
+
+<span class="b">┌─ INFORMATIONS UTILES</span> <span class="s">(zone latérale ou collapsible)</span>
+│   ├─ Synthèse du dernier RDV <span class="s">(transcript IA résumé)</span>
+│   ├─ Documents partagés récemment
+│   ├─ Échéances importantes
+│   └─ Bouton "Voir mon dossier" → tableau de bord
+
+<span class="b">┌─ MESSAGE D'ABSENCE</span> <span class="s">(si applicable)</span>
+│   ├─ "Votre ingénieur est absent jusqu'au [date]"
+│   ├─ "Pour une urgence, contactez [Personne référente du cabinet]"
+│   └─ Confirmation que le message sera lu au retour
+          </div>
+          <div class="pc-section-label">Sous-pages atteignables</div>
+          <div class="pc-subpages">
+            <div class="pc-subpage"><strong>Détail d'un message</strong> · click sur message → voir contexte étendu</div>
+            <div class="pc-subpage"><strong>Pièce jointe</strong> · click → ouverture preview ou téléchargement</div>
+            <div class="pc-subpage"><strong>Synthèse de RDV</strong> · click → ouverture résumé du dernier entretien</div>
+            <div class="pc-subpage"><strong>Notifications</strong> · push mobile + email + SMS si non lu après 24h</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== -->
+    <!-- SECTION 9 — MES VISIOS PASSÉES -->
+    <!-- ============================== -->
+    <section class="main-section" id="visios">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">9</span> Section 9 / 12 · Interactions</div>
+        <h2 class="section-title">🎥 Mes visios passées</h2>
+        <p class="section-intro">Historique des visioconférences avec l'ingénieur. <strong>Synthèses IA générées</strong> à partir des transcripts. Permet au client de retrouver facilement ce qui a été discuté.</p>
+      </div>
+
+      <div class="page-card">
+        <div class="pc-header">
+          <div class="pc-icon">🎥</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Page principale · /mes-visios</div>
+            <div class="pc-title">Historique des visioconférences</div>
+            <div class="pc-desc">Liste de toutes les visios passées avec accès aux synthèses IA.</div>
+          </div>
+          <span class="pc-status todo">À FAIRE</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Composants attendus</div>
+          <div class="pc-tree">
+<span class="b">┌─ LISTE CHRONOLOGIQUE</span>
+│   ├─ Pour chaque visio
+│   │   ├─ Date · heure · durée
+│   │   ├─ Type d'entretien <span class="s">(découverte · DCI · restitution · suivi)</span>
+│   │   ├─ Synthèse courte IA <span class="s">(3-5 lignes · auto-générée)</span>
+│   │   └─ Bouton <strong>[Voir le détail]</strong>
+│   └─ Filtres <span class="s">(par type · par date · par mots-clés)</span>
+
+<span class="b">┌─ DÉTAIL D'UNE VISIO</span>
+│   ├─ Synthèse IA structurée
+│   │   ├─ Points clés discutés
+│   │   ├─ Décisions prises
+│   │   ├─ Actions identifiées
+│   │   └─ Prochaines étapes
+│   ├─ Documents partagés pendant le RDV
+│   ├─ Lien vers le replay <span class="s">(si activé par cabinet · sinon synthèse seule)</span>
+│   └─ Note du client <span class="s">(possibilité d'ajouter ses notes personnelles)</span>
+
+<span class="b">┌─ FONCTIONNALITÉS</span>
+│   ├─ Export PDF de la synthèse
+│   ├─ Recherche dans l'historique <span class="s">(plein texte)</span>
+│   └─ Notification quand une synthèse est disponible <span class="s">(quelques minutes après le RDV)</span>
+
+<span class="b">┌─ NOTE</span>
+│   ├─ Mention "Synthèses générées par IA · présentées pour faciliter votre suivi"
+│   └─ Possibilité de signaler une erreur dans la synthèse
+          </div>
+          <div class="pc-section-label">Sous-pages atteignables</div>
+          <div class="pc-subpages">
+            <div class="pc-subpage"><strong>Synthèse complète d'une visio</strong> · vue détaillée + export PDF</div>
+            <div class="pc-subpage"><strong>Replay vidéo</strong> · si activé · sinon synthèse seule</div>
+            <div class="pc-subpage"><strong>Documents partagés</strong> · ouverture des documents échangés pendant le RDV</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== -->
+    <!-- SECTION 10 — SUIVI DES ACTIONS -->
+    <!-- ============================== -->
+    <section class="main-section" id="actions">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">10</span> Section 10 / 12 · Vie du dossier · ⭐ Priorité MVP · post-étude</div>
+        <h2 class="section-title">✅ Suivi de mes actions</h2>
+        <p class="section-intro">Le <strong>plan d'action issu de l'étude patrimoniale</strong>, présenté de façon vivante au client. <strong>Suivi semi-automatisé</strong> : certaines actions sont validées automatiquement (signature détectée, virement reçu), d'autres sont cochables manuellement par le client. Relances IA pour maintenir la dynamique.</p>
+      </div>
+
+      <div class="note green">
+        <strong>🎯 Pourquoi cette section est centrale :</strong> elle transforme une étude statique (PDF) en <strong>accompagnement vivant</strong>. Elle démontre la valeur récurrente du cabinet et maintient l'engagement du client dans le temps.
+      </div>
+
+      <div class="page-card priority">
+        <div class="pc-header">
+          <div class="pc-icon">✅</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Page principale · /mon-plan-action</div>
+            <div class="pc-title">Plan d'action patrimonial</div>
+            <div class="pc-desc">Suivi vivant et semi-automatisé des actions issues de l'étude.</div>
+          </div>
+          <span class="pc-status priority">PRIORITÉ ⭐</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Composants attendus</div>
+          <div class="pc-tree">
+<span class="b">┌─ HERO</span>
+│   ├─ Avancement global du plan d'action <span class="s">(barre de progression · %)</span>
+│   ├─ Actions complétées · en cours · à venir
+│   ├─ Échéance globale <span class="s">(horizon défini avec l'ingénieur)</span>
+│   └─ Message motivant : "Vous avez accompli [X] actions sur [Y] cette année"
+
+<span class="b">┌─ FRISE CHRONOLOGIQUE</span> <span class="s">(timeline visuelle des actions)</span>
+│   ├─ Vue par mois/trimestre
+│   ├─ Code couleur par catégorie
+│   │   ├─ 💼 Financier
+│   │   ├─ 🏠 Immobilier
+│   │   ├─ 🛡 Assurance
+│   │   ├─ ⚖ Juridique
+│   │   ├─ 💰 Fiscal
+│   │   └─ 👨‍👩‍👧 Successoral
+│   ├─ Statuts visuels <span class="s">(✓ fait · 🔄 en cours · ⏳ à venir · ⚠ en retard)</span>
+│   └─ Drag &amp; drop pour réorganiser <span class="s">(à valider avec l'ingénieur)</span>
+
+<span class="b">┌─ LISTE DÉTAILLÉE DES ACTIONS</span>
+│   ├─ Pour chaque action
+│   │   ├─ Titre clair + catégorie
+│   │   ├─ Description vulgarisée <span class="s">(pourquoi c'est important · impact attendu)</span>
+│   │   ├─ Acteur principal <span class="s">(moi · ingénieur · notaire · banque…)</span>
+│   │   ├─ Échéance prévue
+│   │   ├─ Statut + comportement
+│   │   │   ├─ <span class="i">Auto-validation</span> · "Signature détectée le [date]" · "Virement reçu"
+│   │   │   ├─ <span class="i">Validation manuelle</span> · case à cocher par le client
+│   │   │   └─ <span class="i">Validation par ingénieur</span> · pour certaines actions complexes
+│   │   ├─ Documents associés <span class="s">(à signer · à fournir · livrables)</span>
+│   │   └─ Sous-actions intermédiaires <span class="s">(si applicable)</span>
+
+<span class="b">┌─ AUTO-VALIDATION SEMI-AUTOMATISÉE</span>
+│   ├─ Détection signature Yousign <span class="s">(action liée auto-validée)</span>
+│   ├─ Détection virement Qonto <span class="s">(paiement détecté)</span>
+│   ├─ Détection souscription contrat <span class="s">(via API partenaire si applicable)</span>
+│   └─ Notification au client : "Bravo ! Action [X] validée"
+
+<span class="b">┌─ RELANCES IA</span>
+│   ├─ Si action en retard · message bienveillant
+│   ├─ Suggestions de prise de RDV avec ingénieur
+│   ├─ Rappels personnalisés selon le profil client
+│   └─ Pas de pression · ton encourageant
+
+<span class="b">┌─ INTERACTIONS</span>
+│   ├─ Bouton <strong>[J'ai fait cette action]</strong> <span class="s">(pour validation manuelle)</span>
+│   ├─ Bouton <strong>[Demander de l'aide]</strong> → Section 8 Chat
+│   ├─ Bouton <strong>[Reprogrammer]</strong> <span class="s">(décaler l'échéance · avec validation ingénieur)</span>
+│   └─ Bouton <strong>[Voir le détail dans l'étude]</strong> → Section 4
+
+<span class="b">┌─ MISE À JOUR DE L'ÉTUDE</span>
+│   ├─ Si beaucoup d'actions accomplies · proposition de mise à jour de l'étude
+│   ├─ Notifications pour les revues annuelles
+│   └─ Lien vers prise de RDV de suivi
+          </div>
+          <div class="pc-section-label">Sous-pages atteignables</div>
+          <div class="pc-subpages">
+            <div class="pc-subpage"><strong>Détail d'une action</strong> · contexte complet + ressources + statut</div>
+            <div class="pc-subpage"><strong>Validation manuelle</strong> · pop-up de confirmation</div>
+            <div class="pc-subpage"><strong>Reprogrammation</strong> · workflow avec validation ingénieur</div>
+            <div class="pc-subpage"><strong>Demande d'aide</strong> · pré-remplit un message dans le chat</div>
+            <div class="pc-subpage"><strong>Historique des actions accomplies</strong> · vue de tous les succès passés</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== -->
+    <!-- SECTION 11 — ARTICLES & GUIDES -->
+    <!-- ============================== -->
+    <section class="main-section" id="articles">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">11</span> Section 11 / 12 · Vie du dossier</div>
+        <h2 class="section-title">📚 Articles &amp; guides patrimoniaux</h2>
+        <p class="section-intro">Contenu éditorial du cabinet : <strong>articles patrimoniaux</strong>, <strong>guides pratiques</strong>, <strong>actualités fiscales</strong>. Permet de cultiver la relation et démontrer l'expertise du cabinet entre 2 RDV.</p>
+      </div>
+
+      <div class="page-card">
+        <div class="pc-header">
+          <div class="pc-icon">📚</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Page principale · /articles</div>
+            <div class="pc-title">Contenu éditorial du cabinet</div>
+            <div class="pc-desc">Articles, guides, actualités · sélection adaptée au profil patrimonial du client.</div>
+          </div>
+          <span class="pc-status todo">À FAIRE</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Composants attendus</div>
+          <div class="pc-tree">
+<span class="b">┌─ HOMEPAGE ÉDITORIALE</span>
+│   ├─ Articles à la une <span class="s">(sélectionnés par le cabinet)</span>
+│   ├─ Articles recommandés pour le client <span class="s">(IA selon profil patrimonial)</span>
+│   └─ Catégories visuelles <span class="s">(Fiscal · Investissement · Immobilier · Succession · Retraite…)</span>
+
+<span class="b">┌─ LISTE DES ARTICLES</span>
+│   ├─ Pour chaque article
+│   │   ├─ Vignette + titre + catégorie
+│   │   ├─ Auteur <span class="s">(ingénieur du cabinet ou expert invité)</span>
+│   │   ├─ Date · temps de lecture
+│   │   ├─ Pitch court
+│   │   └─ Statut <span class="s">(non lu · lu · favori)</span>
+│   └─ Filtres et recherche
+
+<span class="b">┌─ LECTURE D'UN ARTICLE</span>
+│   ├─ Mise en page éditoriale soignée
+│   ├─ Possibilité de surligner · annoter
+│   ├─ Boutons partage <span class="s">(email · réseaux sociaux limités)</span>
+│   ├─ Articles connexes en bas
+│   └─ Bouton <strong>[Poser une question à mon ingénieur]</strong> → chat avec contexte article
+
+<span class="b">┌─ NEWSLETTER</span>
+│   ├─ Inscription/désinscription
+│   ├─ Cadence configurable <span class="s">(mensuelle · trimestrielle)</span>
+│   └─ Préférences thématiques
+
+<span class="b">┌─ CONTENU ÉDITORIAL DU CABINET</span> <span class="s">(géré côté pro)</span>
+│   ├─ Les articles sont publiés par l'ingénieur ou le cabinet <span class="s">(via Doc 4 · à venir)</span>
+│   ├─ Recommandations IA selon profil <span class="s">(situation, étape, intérêts)</span>
+│   └─ Notifications de nouveaux articles pertinents
+          </div>
+          <div class="pc-section-label">Sous-pages atteignables</div>
+          <div class="pc-subpages">
+            <div class="pc-subpage"><strong>Lecture d'un article</strong> · page de lecture immersive</div>
+            <div class="pc-subpage"><strong>Recherche</strong> · plein texte avec suggestions</div>
+            <div class="pc-subpage"><strong>Mes favoris</strong> · articles sauvegardés par le client</div>
+            <div class="pc-subpage"><strong>Mon profil de lecture</strong> · préférences thématiques · cadence newsletter</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== -->
+    <!-- SECTION 12 — MON PROFIL & SÉCURITÉ -->
+    <!-- ============================== -->
+    <section class="main-section" id="profil">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">12</span> Section 12 / 12 · Compte</div>
+        <h2 class="section-title">⚙ Mon profil &amp; sécurité</h2>
+        <p class="section-intro">Paramètres du compte client : informations personnelles, sécurité, notifications, données. Section dédiée au <strong>contrôle du client sur son espace</strong> et ses données.</p>
+      </div>
+
+      <div class="page-card">
+        <div class="pc-header">
+          <div class="pc-icon">⚙</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Page principale · /mon-profil</div>
+            <div class="pc-title">Mes paramètres personnels</div>
+            <div class="pc-desc">Configuration du compte et préférences.</div>
+          </div>
+          <span class="pc-status todo">À FAIRE</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Composants attendus</div>
+          <div class="pc-tree">
+<span class="b">┌─ MES INFORMATIONS</span>
+│   ├─ Photo de profil <span class="s">(optionnelle)</span>
+│   ├─ Identité <span class="s">(prénom · nom · date de naissance)</span>
+│   ├─ Coordonnées <span class="s">(email · téléphone · adresse)</span>
+│   ├─ Conjoint <span class="s">(si applicable)</span>
+│   └─ Bouton <strong>[Modifier]</strong> · validation par l'ingénieur pour certains champs sensibles
+
+<span class="b">┌─ SÉCURITÉ</span>
+│   ├─ Méthode d'authentification <span class="s">(mot de passe / lien magique)</span>
+│   ├─ Changement de mot de passe
+│   ├─ Authentification 2FA <span class="s">(SMS · email · app)</span>
+│   ├─ Sessions actives <span class="s">(déconnecter à distance)</span>
+│   └─ Historique de connexions
+
+<span class="b">┌─ NOTIFICATIONS</span>
+│   ├─ Préférences email <span class="s">(messages · documents · RDV · articles)</span>
+│   ├─ Préférences SMS <span class="s">(rappels RDV · alertes critiques)</span>
+│   ├─ Notifications push mobile <span class="s">(si app)</span>
+│   └─ Récap hebdomadaire <span class="s">(synthèse de l'avancement · oui/non)</span>
+
+<span class="b">┌─ MES DONNÉES (RGPD)</span>
+│   ├─ Bouton <strong>[Exporter toutes mes données]</strong> <span class="s">(droit à la portabilité)</span>
+│   ├─ Bouton <strong>[Demander la suppression de mes données]</strong> <span class="s">(droit à l'oubli · avec délai légal)</span>
+│   ├─ Politique de confidentialité <span class="s">(lien)</span>
+│   ├─ Cookies et traceurs · gestion préférences
+│   └─ Information sur la durée de conservation
+
+<span class="b">┌─ MON CABINET</span>
+│   ├─ Cabinet rattaché <span class="s">(non modifiable directement par le client)</span>
+│   ├─ Mon ingénieur référent <span class="s">(photo · nom · contact)</span>
+│   ├─ Demande de changement d'ingénieur <span class="s">(si tenant Marque · validation propriétaire)</span>
+│   └─ Demande de changement de cabinet <span class="s">(workflow spécial · libération)</span>
+
+<span class="b">┌─ AIDE &amp; SUPPORT</span>
+│   ├─ FAQ générale
+│   ├─ Centre d'aide · base de connaissance
+│   ├─ Contact en cas de problème technique <span class="s">(non patrimonial · vers ASTRAEOS)</span>
+│   └─ Mention : pour question patrimoniale → Section 8 Chat avec ingénieur
+          </div>
+          <div class="pc-section-label">Sous-pages atteignables</div>
+          <div class="pc-subpages">
+            <div class="pc-subpage"><strong>Modification d'informations</strong> · formulaire avec validation</div>
+            <div class="pc-subpage"><strong>Configuration 2FA</strong> · workflow d'activation</div>
+            <div class="pc-subpage"><strong>Export de données</strong> · génération PDF/JSON · email d'envoi</div>
+            <div class="pc-subpage"><strong>Suppression de compte</strong> · workflow avec délai légal de conservation</div>
+            <div class="pc-subpage"><strong>FAQ technique</strong> · aide sur l'utilisation de l'espace</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== -->
+    <!-- RÉCAPITULATIF                   -->
+    <!-- ============================== -->
+    <section class="main-section" id="recap">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">📋</span> Récapitulatif</div>
+        <h2 class="section-title">Synthèse Espace Client final</h2>
+        <p class="section-intro">Vue d'ensemble des 4 pages d'onboarding + 12 sections de l'espace sécurisé et de leur priorité pour le développement.</p>
+      </div>
+
+      <div class="note green">
+        <strong>🌐 Phase 1 · Parcours pré-espace (4 pages publiques) :</strong>
+        <table style="width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 12.5px;">
+          <thead>
+            <tr style="background: rgba(31,138,76,0.10);">
+              <th style="text-align: left; padding: 8px 10px; font-weight: 700;">Page</th>
+              <th style="text-align: left; padding: 8px 10px; font-weight: 700;">Fonction</th>
+              <th style="text-align: left; padding: 8px 10px; font-weight: 700;">Statut</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td style="padding: 6px 10px;">1</td><td style="padding: 6px 10px;">📅 Page de prise de RDV (Calendly)</td><td style="padding: 6px 10px; color: var(--green-text); font-weight: 700;">PUBLIC ⭐</td></tr>
+            <tr><td style="padding: 6px 10px;">2</td><td style="padding: 6px 10px;">📋 DCI simplifié (questionnaire patrimonial)</td><td style="padding: 6px 10px; color: var(--green-text); font-weight: 700;">PUBLIC ⭐</td></tr>
+            <tr><td style="padding: 6px 10px;">3</td><td style="padding: 6px 10px;">✅ Questionnaire de qualification client (KYC)</td><td style="padding: 6px 10px; color: var(--green-text); font-weight: 700;">PUBLIC ⭐</td></tr>
+            <tr><td style="padding: 6px 10px;">4</td><td style="padding: 6px 10px;">🔓 Activation de l'espace sécurisé</td><td style="padding: 6px 10px; color: var(--green-text); font-weight: 700;">PUBLIC</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note gold">
+        <strong>🔐 Phase 2 · Espace sécurisé (12 sections après signature LM) :</strong>
+        <table style="width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 12.5px;">
+          <thead>
+            <tr style="background: rgba(198,142,14,0.10);">
+              <th style="text-align: left; padding: 8px 10px; font-weight: 700;">#</th>
+              <th style="text-align: left; padding: 8px 10px; font-weight: 700;">Section</th>
+              <th style="text-align: left; padding: 8px 10px; font-weight: 700;">Famille</th>
+              <th style="text-align: left; padding: 8px 10px; font-weight: 700;">Statut</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td style="padding: 6px 10px;">1</td><td style="padding: 6px 10px;">📊 Mon tableau de bord</td><td style="padding: 6px 10px;">Accueil &amp; suivi</td><td style="padding: 6px 10px; color: var(--gold); font-weight: 700;">PRIORITÉ ⭐</td></tr>
+            <tr><td style="padding: 6px 10px;">2</td><td style="padding: 6px 10px;">🚀 Suivi de mon parcours</td><td style="padding: 6px 10px;">Accueil &amp; suivi</td><td style="padding: 6px 10px; color: var(--gold); font-weight: 700;">PRIORITÉ ⭐</td></tr>
+            <tr><td style="padding: 6px 10px;">3</td><td style="padding: 6px 10px;">📋 Mes informations &amp; documents</td><td style="padding: 6px 10px;">Mes données</td><td style="padding: 6px 10px; color: var(--gold); font-weight: 700;">PRIORITÉ ⭐</td></tr>
+            <tr style="background: rgba(198,142,14,0.10);"><td style="padding: 6px 10px;"><strong>4</strong></td><td style="padding: 6px 10px;"><strong>📁 Mon étude patrimoniale (3 formats)</strong></td><td style="padding: 6px 10px;">Mes données</td><td style="padding: 6px 10px; color: var(--gold); font-weight: 800;">PRIORITÉ ⭐ LIVRABLE PHARE</td></tr>
+            <tr><td style="padding: 6px 10px;">5</td><td style="padding: 6px 10px;">💰 Mes investissements &amp; encours</td><td style="padding: 6px 10px;">Mes données</td><td style="padding: 6px 10px; color: var(--navy); font-weight: 700;">À FAIRE</td></tr>
+            <tr><td style="padding: 6px 10px;">6</td><td style="padding: 6px 10px;">⚖ Mes documents signés</td><td style="padding: 6px 10px;">Mes données</td><td style="padding: 6px 10px; color: var(--navy); font-weight: 700;">À FAIRE</td></tr>
+            <tr><td style="padding: 6px 10px;">7</td><td style="padding: 6px 10px;">📅 Prendre RDV avec mon ingénieur</td><td style="padding: 6px 10px;">Interactions</td><td style="padding: 6px 10px; color: var(--gold); font-weight: 700;">PRIORITÉ ⭐</td></tr>
+            <tr><td style="padding: 6px 10px;">8</td><td style="padding: 6px 10px;">💬 Mon chat avec mon ingénieur</td><td style="padding: 6px 10px;">Interactions</td><td style="padding: 6px 10px; color: var(--gold); font-weight: 700;">PRIORITÉ ⭐</td></tr>
+            <tr><td style="padding: 6px 10px;">9</td><td style="padding: 6px 10px;">🎥 Mes visios passées</td><td style="padding: 6px 10px;">Interactions</td><td style="padding: 6px 10px; color: var(--navy); font-weight: 700;">À FAIRE</td></tr>
+            <tr style="background: rgba(198,142,14,0.10);"><td style="padding: 6px 10px;"><strong>10</strong></td><td style="padding: 6px 10px;"><strong>✅ Suivi de mes actions (semi-auto)</strong></td><td style="padding: 6px 10px;">Vie du dossier</td><td style="padding: 6px 10px; color: var(--gold); font-weight: 800;">PRIORITÉ ⭐ post-étude</td></tr>
+            <tr><td style="padding: 6px 10px;">11</td><td style="padding: 6px 10px;">📚 Articles &amp; guides</td><td style="padding: 6px 10px;">Vie du dossier</td><td style="padding: 6px 10px; color: var(--navy); font-weight: 700;">À FAIRE</td></tr>
+            <tr><td style="padding: 6px 10px;">12</td><td style="padding: 6px 10px;">⚙ Mon profil &amp; sécurité</td><td style="padding: 6px 10px;">Compte</td><td style="padding: 6px 10px; color: var(--navy); font-weight: 700;">À FAIRE</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note gold">
+        <strong>⭐ Priorités MVP (8 éléments critiques au démarrage) :</strong>
+        <ol style="margin-top: 8px; padding-left: 20px; font-size: 12.5px;">
+          <li><strong>Onboarding pré-espace (4 pages publiques)</strong> — point d'entrée critique pour les nouveaux clients</li>
+          <li><strong>Section 1 — Mon tableau de bord</strong> · point d'entrée quotidien dans l'espace</li>
+          <li><strong>Section 2 — Suivi de mon parcours</strong> · vue rassurante de l'avancement</li>
+          <li><strong>Section 3 — Mes informations &amp; documents</strong> · LE travail que le client doit fournir</li>
+          <li><strong>Section 4 — Mon étude patrimoniale</strong> · LE livrable phare avec 3 formats (PDF complet · synthèse · web interactive)</li>
+          <li><strong>Section 7 — Prendre RDV avec mon ingénieur</strong> · accès facile à l'agenda</li>
+          <li><strong>Section 8 — Mon chat avec mon ingénieur</strong> · communication ouverte avec SLA visible</li>
+          <li><strong>Section 10 — Suivi de mes actions</strong> · transformation de l'étude en accompagnement vivant (semi-automatisé)</li>
+        </ol>
+      </div>
+
+      <div class="note">
+        <strong>🎨 Principes UX rappel :</strong>
+        <ul style="margin-top: 8px; padding-left: 20px; font-size: 12.5px;">
+          <li><strong>Simplicité radicale</strong> — densité faible, espace, clarté visuelle</li>
+          <li><strong>Vocabulaire vulgarisé</strong> — pas de jargon (KYC → "qualification client", DCI → "informations patrimoniales", encours → "investissements")</li>
+          <li><strong>Branding adaptatif</strong> — affichage du logo et des couleurs du cabinet du client (PRIVEOS si tenant Marque · charte cabinet si Cabinet direct)</li>
+          <li><strong>Statuts rassurants</strong> — toujours expliquer où en est le client, ce qui est fait, ce qui reste</li>
+          <li><strong>Pas de surcharge</strong> — actions simples, guidées, une chose à la fois</li>
+          <li><strong>Mobile-friendly</strong> — l'espace client doit être parfaitement utilisable sur mobile (consultation, prise RDV, chat)</li>
+        </ul>
+      </div>
+
+      <div class="note gold" style="background: rgba(198,142,14,0.10); border-left-width: 6px;">
+        <strong>⚖ Compatibilité 2 types de tenants :</strong>
+        <p style="margin: 6px 0 0; font-size: 12.5px;">L'espace client est <strong>identique fonctionnellement</strong> pour les clients des 2 types de tenants. Seul le <strong>branding visuel</strong> change : un client suivi par un cabinet PRIVEOS Capital voit la charte PRIVEOS · un client suivi par un cabinet indépendant voit la charte personnalisée du cabinet. Les fonctionnalités, les workflows, les notifications sont strictement identiques.</p>
+      </div>
+
+      <div class="note">
+        <strong>🔗 Phase 1 d'architecture · Statut :</strong>
+        <p style="margin: 6px 0 0; font-size: 12.5px;">Avec ce Document 6, l'architecture des 6 espaces est <strong>complète</strong> :</p>
+        <ul style="margin-top: 6px; padding-left: 20px; font-size: 12.5px;">
+          <li>✅ Doc 1 Master (architecture globale)</li>
+          <li>✅ Doc 2 ASTRAEOS Éditeur (15 sections + Marketplace)</li>
+          <li>✅ Doc 3 Propriétaire de marque (14 sections · réservé tenants Marque)</li>
+          <li>✅ Doc 4 Cabinet (13 sections · double modèle commercial)</li>
+          <li>✅ Doc 5 Ingénieur (12 sections · module IA en 5 phases)</li>
+          <li>✅ Doc 6 Client final (4 pages publiques + 12 sections sécurisées)</li>
+        </ul>
+        <p style="margin: 8px 0 0; font-size: 12.5px;"><em>La phase 1 (architecture) est terminée. La <strong>phase 2</strong> consistera à transformer ces arborescences en <strong>masques HTML page par page</strong> (wireframes haute fidélité avec interactions complètes).</em></p>
+      </div>
+
+      <div class="note">
+        <strong>📅 Création du document :</strong>
+        <ul style="margin-top: 6px; padding-left: 20px; font-size: 12px;">
+          <li><strong>v1.1 (mai 2026)</strong> — Audit de cohérence terminologique : harmonisation du sidebar-brand-sub (Document 6 · Architecture → Document 6 / 6 · Client) pour cohérence avec les autres documents.</li>
+          <li><strong>v1.0 (mai 2026)</strong> — Création initiale du Document 6 finalisant l'architecture des 6 espaces. Structure en 2 phases : parcours pré-espace (4 pages publiques avec onboarding séquentiel : RDV → DCI simplifié → KYC → activation après LM signée) et espace sécurisé (12 sections). Étude patrimoniale en 3 formats (PDF complet · synthèse de restitution · version web interactive). Chat avec SLA visible (24h ouvrées) et bouton "Prendre RDV". Suivi des actions semi-automatisé (auto-validation Yousign/Qonto + validation manuelle). UX simplifiée et vocabulaire vulgarisé. Branding adaptatif aux 2 types de tenants.</li>
+        </ul>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.sidebar-nav a[href^="#"]');
+
+  function updateActiveLink() {
+    let current = '';
+    sections.forEach(section => {
+      const top = section.offsetTop - 100;
+      if (window.scrollY >= top) current = section.id;
+    });
+    navLinks.forEach(link => {
+      link.classList.toggle('active', link.getAttribute('href') === '#' + current);
+    });
+  }
+  window.addEventListener('scroll', updateActiveLink);
+  updateActiveLink();
+</script>
+
+</body>
+</html>

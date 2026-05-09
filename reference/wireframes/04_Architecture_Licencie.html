@@ -1,0 +1,2118 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ASTRAEOS — Architecture · Espace Cabinet</title>
+<link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #102D50;
+    --navy-300: #708196;
+    --navy-200: #A4AEBB;
+    --navy-100: #DBE0E4;
+    --gold: #C68E0E;
+    --gold-300: #DDBB6E;
+    --gold-200: #EEDDB6;
+    --gold-100: #FAF8F3;
+    --medium-400: #695D30;
+    --medium-300: #877D59;
+    --ivory: #FAF8F3;
+    --light-blue: #EBF1FA;
+    --green-bg: #E8F3EC;
+    --green-text: #1F8A4C;
+    --red-bg: #FCE8E8;
+    --red-text: #B23A3A;
+    --yellow-bg: #FFF4DC;
+    --yellow-text: #8A6500;
+    --blue-bg: #E6F0FB;
+    --blue-text: #1456A0;
+    --purple-bg: #F0E8F8;
+    --purple-text: #5B3A8C;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; scroll-padding-top: 24px; }
+  body {
+    font-family: 'Epilogue', -apple-system, sans-serif;
+    background: var(--ivory);
+    color: var(--navy);
+    line-height: 1.6;
+    font-size: 14.5px;
+  }
+
+  .doc-layout { display: grid; grid-template-columns: 280px 1fr; min-height: 100vh; }
+  .doc-sidebar {
+    background: linear-gradient(180deg, var(--navy) 0%, #0a1f38 100%);
+    color: white;
+    padding: 28px 22px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+  .doc-sidebar::-webkit-scrollbar { width: 4px; }
+  .doc-sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+  .sidebar-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+  .sidebar-brand-mark {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: linear-gradient(135deg, var(--gold), var(--medium-400));
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-weight: 800; font-size: 13px;
+  }
+  .sidebar-brand-name { font-size: 14px; font-weight: 800; letter-spacing: 0.04em; }
+  .sidebar-brand-sub { font-size: 9.5px; color: var(--gold-300); letter-spacing: 0.18em; text-transform: uppercase; font-weight: 700; margin-top: 5px; margin-bottom: 22px; }
+
+  .back-link {
+    display: flex; align-items: center; gap: 6px;
+    color: var(--gold-300);
+    font-size: 11.5px;
+    text-decoration: none;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    margin-bottom: 22px;
+    padding: 8px 10px;
+    border-radius: 5px;
+    background: rgba(198,142,14,0.12);
+    transition: all 0.15s ease;
+  }
+  .back-link:hover { background: rgba(198,142,14,0.20); color: white; }
+
+  .sidebar-nav { display: flex; flex-direction: column; gap: 1px; }
+  .sidebar-nav a {
+    color: rgba(255,255,255,0.75);
+    text-decoration: none;
+    font-size: 11.5px;
+    padding: 6px 10px;
+    border-radius: 4px;
+    transition: all 0.15s ease;
+    line-height: 1.35;
+  }
+  .sidebar-nav a:hover { background: rgba(255,255,255,0.06); color: white; }
+  .sidebar-nav a.active { background: rgba(198,142,14,0.18); color: var(--gold-300); font-weight: 700; }
+  .sidebar-section-header {
+    font-size: 9px; font-weight: 800; color: var(--gold);
+    letter-spacing: 0.20em; text-transform: uppercase;
+    margin-top: 18px; margin-bottom: 6px;
+    padding: 0 10px;
+    display: flex; align-items: center; gap: 7px;
+  }
+  .sidebar-section-header::before {
+    content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--gold);
+  }
+
+  .doc-main { padding: 40px 50px 80px; max-width: 1300px; }
+  .doc-header { margin-bottom: 40px; padding-bottom: 28px; border-bottom: 1px solid var(--navy-100); }
+  .doc-header-eyebrow { font-size: 10px; font-weight: 700; color: var(--gold); letter-spacing: 0.22em; text-transform: uppercase; margin-bottom: 12px; }
+  .doc-title { font-size: 32px; font-weight: 700; letter-spacing: -0.018em; line-height: 1.18; margin-bottom: 12px; }
+  .doc-title strong { color: var(--gold); }
+  .doc-subtitle { font-size: 14.5px; color: var(--navy-300); line-height: 1.6; max-width: 800px; }
+  .doc-meta { display: flex; gap: 24px; margin-top: 22px; padding-top: 18px; border-top: 1px dashed var(--navy-100); font-size: 11px; color: var(--navy-300); flex-wrap: wrap; }
+  .doc-meta strong { color: var(--navy); font-weight: 700; }
+
+  .glossary {
+    background: white;
+    border: 1px solid var(--gold-300);
+    border-left: 4px solid var(--gold);
+    border-radius: 8px;
+    padding: 18px 22px;
+    margin-bottom: 32px;
+  }
+  .glossary-title {
+    font-size: 11px; font-weight: 800; color: var(--gold);
+    letter-spacing: 0.16em; text-transform: uppercase;
+    margin-bottom: 12px; display: flex; align-items: center; gap: 10px;
+  }
+  .glossary-title::before { content: '📖'; font-size: 14px; }
+  .glossary-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px 28px; }
+  .glossary-item { display: flex; gap: 12px; align-items: flex-start; }
+  .glossary-term {
+    background: var(--navy); color: white;
+    padding: 4px 10px; border-radius: 4px;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.04em;
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .glossary-term.gold { background: var(--gold); }
+  .glossary-term.green { background: var(--green-text); }
+  .glossary-def { font-size: 12.5px; color: var(--navy); line-height: 1.5; }
+
+  .stats-bar {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 12px; margin: 24px 0 36px;
+  }
+  .stat-block {
+    background: white;
+    border: 1px solid var(--navy-100);
+    border-left: 3px solid var(--gold);
+    border-radius: 6px; padding: 14px 16px;
+  }
+  .stat-block.done { border-left-color: var(--green-text); }
+  .stat-block.todo { border-left-color: var(--navy); }
+  .stat-block.priority { border-left-color: var(--gold); }
+  .stat-block.idea { border-left-color: var(--red-text); }
+  .stat-label { font-size: 9px; font-weight: 700; color: var(--navy-300); letter-spacing: 0.16em; text-transform: uppercase; margin-bottom: 6px; }
+  .stat-value { font-size: 24px; font-weight: 700; color: var(--navy); letter-spacing: -0.018em; line-height: 1; }
+  .stat-meta { font-size: 11px; color: var(--navy-300); margin-top: 4px; }
+
+  .sitemap-container {
+    background: white;
+    border: 1px solid var(--navy-100);
+    border-radius: 12px;
+    padding: 28px 30px;
+    margin-bottom: 40px;
+    overflow-x: auto;
+  }
+  .sitemap-svg-wrap { overflow-x: auto; }
+  .sitemap-link { cursor: pointer; }
+  .sitemap-link .sitemap-node { transition: filter 0.2s ease; }
+  .sitemap-link:hover .sitemap-node {
+    filter: drop-shadow(0 4px 8px rgba(198,142,14,0.30));
+  }
+
+  section.main-section { margin-bottom: 56px; scroll-margin-top: 24px; }
+  .section-header {
+    margin-bottom: 22px;
+    padding-bottom: 14px;
+    border-bottom: 2px solid var(--gold);
+  }
+  .section-eyebrow {
+    font-size: 10px; font-weight: 700; color: var(--gold);
+    letter-spacing: 0.22em; text-transform: uppercase;
+    margin-bottom: 8px; display: flex; align-items: center; gap: 12px;
+  }
+  .section-eyebrow .num {
+    background: var(--gold); color: white;
+    width: 26px; height: 26px; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 800;
+  }
+  .section-title {
+    font-size: 26px; font-weight: 600;
+    letter-spacing: -0.012em; color: var(--navy);
+    line-height: 1.22; margin-bottom: 6px;
+  }
+  .section-intro {
+    font-size: 13.5px; color: var(--navy-300);
+    line-height: 1.6; max-width: 820px;
+  }
+
+  .page-card {
+    background: white;
+    border: 1px solid var(--navy-100);
+    border-radius: 10px;
+    margin-bottom: 14px;
+    overflow: hidden;
+    transition: box-shadow 0.2s ease;
+  }
+  .page-card:hover { box-shadow: 0 4px 14px rgba(16,45,80,0.06); }
+  .page-card.priority { border-color: var(--gold-300); border-left: 4px solid var(--gold); }
+  .page-card.done { border-left: 4px solid var(--green-text); }
+  .page-card.flagship {
+    border: 2px solid var(--gold);
+    box-shadow: 0 4px 16px rgba(198,142,14,0.15);
+    background: linear-gradient(180deg, white 0%, rgba(250,248,243,0.5) 100%);
+  }
+
+  .pc-header {
+    background: linear-gradient(135deg, var(--ivory) 0%, white 100%);
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--navy-100);
+    display: flex; align-items: flex-start; gap: 12px;
+  }
+  .page-card.flagship .pc-header {
+    background: linear-gradient(135deg, rgba(198,142,14,0.10) 0%, white 100%);
+  }
+  .pc-icon {
+    font-size: 22px; width: 38px; height: 38px;
+    background: white;
+    border: 1px solid var(--navy-100);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .pc-info { flex: 1; min-width: 0; }
+  .pc-eyebrow {
+    font-size: 9px; font-weight: 800; color: var(--navy-300);
+    letter-spacing: 0.16em; text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .pc-title {
+    font-size: 16px; font-weight: 700; color: var(--navy);
+    letter-spacing: -0.005em; margin-bottom: 4px;
+  }
+  .pc-desc { font-size: 12.5px; color: var(--navy-300); line-height: 1.5; }
+  .pc-status {
+    flex-shrink: 0; padding: 5px 11px; border-radius: 4px;
+    font-size: 9px; font-weight: 800;
+    letter-spacing: 0.10em; text-transform: uppercase;
+    align-self: flex-start;
+  }
+  .pc-status.done { background: var(--green-text); color: white; }
+  .pc-status.todo { background: var(--navy); color: white; }
+  .pc-status.priority { background: var(--gold); color: white; }
+  .pc-status.flagship { background: linear-gradient(135deg, var(--gold), var(--medium-400)); color: white; }
+  .pc-status.idea { background: var(--red-text); color: white; }
+
+  .pc-body { padding: 14px 20px 18px; }
+  .pc-section-label {
+    font-size: 9.5px; font-weight: 800; color: var(--gold);
+    letter-spacing: 0.14em; text-transform: uppercase;
+    margin: 12px 0 8px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .pc-section-label::before { content: '▸'; font-size: 11px; }
+  .pc-section-label:first-child { margin-top: 0; }
+
+  .pc-tree {
+    background: var(--ivory);
+    border: 1px solid var(--gold-300);
+    border-radius: 6px;
+    padding: 12px 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    line-height: 1.85;
+    color: var(--navy);
+    white-space: pre;
+    overflow-x: auto;
+  }
+  .pc-tree .b { font-weight: 700; color: var(--medium-400); }
+  .pc-tree .s { color: var(--navy-300); font-style: italic; font-size: 11px; }
+  .pc-tree .i { color: var(--gold); font-weight: 700; }
+  .pc-tree .c { color: var(--green-text); font-weight: 700; }
+  .pc-tree .a { background: rgba(198,142,14,0.15); padding: 1px 4px; border-radius: 3px; }
+
+  .pc-subpages { display: flex; flex-direction: column; gap: 8px; }
+  .pc-subpage {
+    background: var(--ivory);
+    border-left: 3px solid var(--gold-300);
+    padding: 9px 14px;
+    border-radius: 0 5px 5px 0;
+    font-size: 12.5px; color: var(--navy);
+    line-height: 1.5;
+  }
+  .pc-subpage strong { color: var(--medium-400); font-weight: 700; }
+  .pc-subpage .meta {
+    font-size: 11px; color: var(--navy-300);
+    font-style: italic; margin-top: 2px;
+  }
+
+  .pc-interactions {
+    display: grid; grid-template-columns: repeat(2, 1fr);
+    gap: 6px; margin-top: 6px;
+  }
+  .pc-interaction {
+    padding: 7px 12px;
+    background: var(--light-blue);
+    border-left: 3px solid var(--blue-text);
+    border-radius: 0 4px 4px 0;
+    font-size: 11.5px; color: var(--navy);
+  }
+  .pc-interaction strong { font-weight: 700; }
+
+  .note {
+    background: var(--light-blue);
+    border-left: 4px solid var(--navy);
+    padding: 14px 18px;
+    margin: 16px 0;
+    border-radius: 0 6px 6px 0;
+    font-size: 12.5px; line-height: 1.6;
+  }
+  .note.gold { background: rgba(198,142,14,0.06); border-left-color: var(--gold); }
+  .note strong { color: var(--navy); font-weight: 700; }
+
+  .legend-bar {
+    display: flex; align-items: center; gap: 16px;
+    padding: 14px 20px;
+    background: white;
+    border: 1px solid var(--navy-100);
+    border-radius: 8px;
+    margin-bottom: 28px;
+    flex-wrap: wrap; font-size: 11.5px;
+  }
+  .legend-bar strong { font-weight: 700; color: var(--navy); }
+
+  @media print {
+    .doc-sidebar { display: none; }
+    .doc-layout { grid-template-columns: 1fr; }
+    .doc-main { padding: 24px; max-width: 100%; }
+    .page-card { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<div class="doc-layout">
+
+  <aside class="doc-sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-brand-mark">L</div>
+      <div><div class="sidebar-brand-name">Cabinet</div></div>
+    </div>
+    <div class="sidebar-brand-sub">Document 4 / 6 · Cabinet</div>
+
+    <a class="back-link" href="01_Architecture_Master.html">← Document maître</a>
+
+    <nav class="sidebar-nav">
+      <div class="sidebar-section-header">13 sections de cet espace</div>
+      <a href="#dashboard">📊 1. Tableau de bord cabinet</a>
+      <a href="#financier">💰 2. Synthèse financière cabinet</a>
+      <a href="#animation">🏆 3. Animation interne</a>
+      <a href="#equipe">🌍 4. Mon équipe</a>
+      <a href="#crm-cabinet">🎯 5. CRM cabinet (vue 360°)</a>
+      <a href="#pipeline">🚀 6. Pipeline cabinet</a>
+      <a href="#dossier">📁 7. Fiche dossier client</a>
+      <a href="#calendrier">📅 8. Calendrier &amp; RDV</a>
+      <a href="#visio">🎥 9. Visioconférence</a>
+      <a href="#outils">📦 10. Outils &amp; simulateurs</a>
+      <a href="#compliance">⚖ 11. Compliance &amp; facturation</a>
+      <a href="#chat">💬 12. Chat &amp; messagerie</a>
+      <a href="#parametres">⚙ 13. Paramètres cabinet</a>
+
+      <div class="sidebar-section-header">⇄ Toggle disponible</div>
+      <a href="05_Architecture_Ingenieur.html" style="color: var(--gold-300); font-weight: 700;">👤 Basculer en mode Ingénieur →</a>
+
+      <div class="sidebar-section-header">Documents fondateurs</div>
+      <a href="00_Master_Dataset.html">📊 Master Dataset</a>
+      <a href="00_Data_Architecture.html">🏗 Data Architecture</a>
+
+      <div class="sidebar-section-header">Autres documents</div>
+      <a href="01_Architecture_Master.html">📋 Document maître</a>
+      <a href="02_Architecture_Editeur.html">👑 Espace ASTRAEOS</a>
+      <a href="03_Architecture_Proprietaire.html">🏛 Espace Propriétaire</a>
+      <a href="05_Architecture_Ingenieur.html">👤 Espace Ingénieur ⭐ NOUVEAU</a>
+      <a href="06_Architecture_Client.html">👥 Espace Client final</a>
+    </nav>
+  </aside>
+
+  <main class="doc-main">
+
+    <header class="doc-header">
+      <div class="doc-header-eyebrow">Document 4 / 6 · Espace Cabinet · 2 types de tenants supportés</div>
+      <h1 class="doc-title">Espace <strong>Cabinet</strong> — pilotage du dirigeant</h1>
+      <p class="doc-subtitle">Détail exhaustif de l'espace de pilotage du dirigeant cabinet. <strong>Cet espace est utilisé par les 2 types de tenants ASTRAEOS</strong> : (1) cabinets licenciés d'un propriétaire de marque (réseau type PRIVEOS Capital), et (2) cabinets indépendants qui achètent ASTRAEOS directement (sans réseau). L'interface est identique dans les 2 cas, avec des <strong>éléments conditionnels</strong> selon le type. Le dirigeant peut basculer vers l'<strong>Espace Ingénieur (Doc 5)</strong> via un toggle persistant pour gérer ses propres dossiers.</p>
+      <div class="doc-meta">
+        <span><strong>13 sections principales</strong></span>
+        <span><strong>~38 pages</strong> identifiées</span>
+        <span><strong>2 types de tenants</strong> Marque + Cabinet direct</span>
+        <span><strong>Toggle vers Espace Ingénieur</strong> ⇄ disponible</span>
+      </div>
+    </header>
+
+    <div class="glossary">
+      <div class="glossary-title">Glossaire — vocabulaire de cet espace</div>
+      <div class="glossary-grid">
+        <div class="glossary-item">
+          <span class="glossary-term gold">Dirigeant cabinet</span>
+          <div class="glossary-def">L'utilisateur principal de cet espace. Pilote son cabinet, voit tous les ingénieurs et tous les clients du cabinet, gère la facturation et la compliance.</div>
+        </div>
+        <div class="glossary-item">
+          <span class="glossary-term gold">🏛 Tenant Marque</span>
+          <div class="glossary-def">Cabinet licencié partenaire d'un propriétaire de marque (ex : cabinet PRIVEOS Capital). Branding imposé par le propriétaire. Cascade financière à 4 niveaux. Catalogue centralisé. <code>tenant_type = 'marque'</code>.</div>
+        </div>
+        <div class="glossary-item">
+          <span class="glossary-term gold">💼 Tenant Cabinet direct</span>
+          <div class="glossary-def">Cabinet indépendant qui achète ASTRAEOS directement, sans appartenir à un réseau. Branding 100% personnalisé. Cascade financière à 3 niveaux (pas de propriétaire). Catalogue construit par le cabinet ou via Marketplace ASTRAEOS. <code>tenant_type = 'cabinet_direct'</code>.</div>
+        </div>
+        <div class="glossary-item">
+          <span class="glossary-term">Ingénieur patrimonial</span>
+          <div class="glossary-def">Collaborateur du cabinet qui suit ses propres clients. <strong>Possède son espace dédié → Doc 5</strong>. Le dirigeant peut basculer en mode ingénieur depuis cet espace.</div>
+        </div>
+        <div class="glossary-item">
+          <span class="glossary-term gold">⇄ Toggle</span>
+          <div class="glossary-def">Bouton dans la topbar permettant au dirigeant de basculer entre cet <strong>Espace Cabinet (Doc 4)</strong> et l'<strong>Espace Ingénieur (Doc 5)</strong> pour gérer ses propres dossiers. Toggle bidirectionnel.</div>
+        </div>
+        <div class="glossary-item">
+          <span class="glossary-term green">Client final</span>
+          <div class="glossary-def">La personne accompagnée patrimonialement. Suivie par un ingénieur du cabinet (ou par le dirigeant en mode ingénieur).</div>
+        </div>
+        <div class="glossary-item">
+          <span class="glossary-term">Cascade financière</span>
+          <div class="glossary-def">Les chiffres remontent : ingénieur (volumétrie) → cabinet (€ inclus) → [propriétaire de marque si tenant Marque] → ASTRAEOS. Voir le Master pour le détail des 2 cas.</div>
+        </div>
+        <div class="glossary-item">
+          <span class="glossary-term gold">🛒 Marketplace ASTRAEOS</span>
+          <div class="glossary-def">Service réservé aux <em>tenants Cabinet direct</em> : packs sectoriels (Pack Financier, Pack Immobilier, Pack Référentiels) que le cabinet peut activer pour bénéficier de catalogues prêts à l'emploi.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stats-bar">
+      <div class="stat-block todo">
+        <div class="stat-label">Sections principales</div>
+        <div class="stat-value">13</div>
+        <div class="stat-meta">vue dirigeant</div>
+      </div>
+      <div class="stat-block todo">
+        <div class="stat-label">Pages estimées</div>
+        <div class="stat-value">~38</div>
+        <div class="stat-meta">avec sous-pages</div>
+      </div>
+      <div class="stat-block priority">
+        <div class="stat-label">⇄ Toggle vers Doc 5</div>
+        <div class="stat-value">↗</div>
+        <div class="stat-meta">Espace Ingénieur</div>
+      </div>
+      <div class="stat-block priority">
+        <div class="stat-label">Priorités MVP</div>
+        <div class="stat-value">6</div>
+        <div class="stat-meta">CRM · Pipeline · Dossier · Calendrier · Compliance · Équipe</div>
+      </div>
+    </div>
+
+    <div class="legend-bar">
+      <strong>Légende :</strong>
+      <span class="pc-status priority">PRIORITÉ ⭐</span>
+      <span style="color: var(--navy-300);">critique pour MVP</span>
+      <span class="pc-status todo">À FAIRE</span>
+      <span style="color: var(--navy-300);">spécifié, à concevoir</span>
+    </div>
+
+    <!-- Encart pédagogique sur les 2 types de tenants -->
+    <div class="note gold" style="border-left-width: 6px; padding: 18px 22px; margin: 24px 0; background: linear-gradient(135deg, rgba(198,142,14,0.08) 0%, rgba(235,241,250,0.4) 100%);">
+      <div style="font-size: 11px; font-weight: 800; color: var(--gold); letter-spacing: 0.16em; text-transform: uppercase; margin-bottom: 10px;">⚖ Mécanique transverse · 2 types de tenants supportés</div>
+      <p style="margin: 0 0 12px; font-size: 13px;"><strong>Cet espace est utilisé par 2 types de cabinets</strong>, avec une interface identique mais des éléments conditionnels selon le type :</p>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 0 0 12px;">
+        <div style="background: white; padding: 12px 14px; border-radius: 8px; border-left: 3px solid var(--gold);">
+          <div style="font-size: 11px; font-weight: 800; color: var(--gold); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 6px;">🏛 TENANT MARQUE</div>
+          <ul style="margin: 0; padding-left: 16px; font-size: 12px; line-height: 1.65;">
+            <li>Cabinet licencié d'un propriétaire de marque (réseau type PRIVEOS Capital)</li>
+            <li>Branding <strong>imposé</strong> par le propriétaire</li>
+            <li>Catalogue produits <strong>centralisé</strong> par le propriétaire</li>
+            <li>Cascade financière à <strong>4 niveaux</strong> (avec reversement à PRIVEOS Capital)</li>
+            <li>Chat avec PRIVEOS Capital activé</li>
+            <li>Annonces du propriétaire visibles</li>
+          </ul>
+        </div>
+        <div style="background: white; padding: 12px 14px; border-radius: 8px; border-left: 3px solid var(--navy);">
+          <div style="font-size: 11px; font-weight: 800; color: var(--navy); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 6px;">💼 TENANT CABINET DIRECT</div>
+          <ul style="margin: 0; padding-left: 16px; font-size: 12px; line-height: 1.65;">
+            <li>Cabinet indépendant qui achète ASTRAEOS directement</li>
+            <li>Branding <strong>100% personnalisé</strong> du cabinet</li>
+            <li>Catalogue produits <strong>construit par le cabinet</strong> ou via Marketplace ASTRAEOS</li>
+            <li>Cascade financière à <strong>3 niveaux</strong> (pas de propriétaire)</li>
+            <li>Pas de canal PRIVEOS Capital</li>
+            <li>Pas d'annonces propriétaire</li>
+          </ul>
+        </div>
+      </div>
+      <p style="margin: 0; font-size: 12px; color: var(--navy-300);"><em>Dans tout le document, les blocs marqués <strong style="color: var(--gold);">🏛 RÉSEAU SEULEMENT</strong> ne s'affichent que si <code>tenant_type = 'marque'</code>. Les blocs marqués <strong style="color: var(--navy);">💼 INDÉPENDANT SEULEMENT</strong> ne s'affichent que si <code>tenant_type = 'cabinet_direct'</code>.</em></p>
+    </div>
+
+    <!-- Encart pédagogique sur le toggle -->
+    <div class="note gold" style="border-left-width: 6px; padding: 18px 22px; margin: 24px 0;">
+      <div style="font-size: 11px; font-weight: 800; color: var(--gold); letter-spacing: 0.16em; text-transform: uppercase; margin-bottom: 10px;">⇄ Mécanique transverse · Toggle dirigeant ↔ ingénieur</div>
+      <p style="margin: 0 0 10px; font-size: 13px;"><strong>Le dirigeant a une double casquette.</strong> Cet espace (Doc 4) lui donne la <em>vision dirigeant</em> : pilotage 360° du cabinet, supervision des ingénieurs, synthèse financière complète (€).</p>
+      <p style="margin: 0 0 10px; font-size: 13px;">Quand il veut <em>faire ses propres études</em> (suivre ses propres clients comme un ingénieur), il bascule via un <strong>bouton persistant dans la topbar</strong> vers l'<strong>Espace Ingénieur (Doc 5)</strong>. Sa session reste ouverte, il navigue simplement entre 2 contextes fonctionnels distincts.</p>
+      <p style="margin: 0; font-size: 12.5px; color: var(--navy-300);"><em>Schéma comparable à toi-même qui bascules entre ASTRAEOS (éditeur) et PRIVEOS Capital (propriétaire de marque).</em></p>
+    </div>
+
+    <div class="note">
+      <strong>📖 Comment lire ce document :</strong> chaque section présente une <em>fonction métier</em> du dirigeant cabinet avec ses pages et sous-pages. Le <strong>module IA en 5 phases</strong> (production des études patrimoniales) <em>n'apparaît pas dans cet espace</em> : il est utilisé uniquement par les ingénieurs et donc spécifié dans le <strong>Doc 5 (Espace Ingénieur)</strong>. Le dirigeant accède aux études via la <strong>Section 6 (Pipeline cabinet)</strong> — étapes "04 Études en cours" et "05 Études restituées" — et la <strong>Section 7 (Fiche dossier)</strong> — onglet 4 "Étude patrimoniale".
+    </div>
+
+    <!-- ============================== -->
+    <!-- SITEMAP VISUEL                  -->
+    <!-- ============================== -->
+    <section class="main-section" id="sitemap">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">🗺</span> Vue d'ensemble</div>
+        <h2 class="section-title">Sitemap visuel de l'Espace Cabinet</h2>
+        <p class="section-intro">Les 13 sections regroupées en 4 familles fonctionnelles : Pilotage cabinet · CRM &amp; Clients · Outils opérationnels · Gestion.</p>
+      </div>
+
+      <div class="sitemap-container">
+        <div class="sitemap-svg-wrap">
+          <svg viewBox="0 0 1600 1000" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: auto; min-width: 1300px;">
+
+            <defs>
+              <linearGradient id="li-navyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#102D50"/>
+                <stop offset="100%" stop-color="#0a1f38"/>
+              </linearGradient>
+              <linearGradient id="li-goldGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#C68E0E"/>
+                <stop offset="100%" stop-color="#A87A0C"/>
+              </linearGradient>
+              <linearGradient id="li-blueGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#EBF1FA"/>
+                <stop offset="100%" stop-color="#DBE0E4"/>
+              </linearGradient>
+              <linearGradient id="li-greenGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#E8F3EC"/>
+                <stop offset="100%" stop-color="#C7E5D0"/>
+              </linearGradient>
+              <linearGradient id="li-flagshipGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#C68E0E"/>
+                <stop offset="100%" stop-color="#695D30"/>
+              </linearGradient>
+              <filter id="li-shadow">
+                <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#102D50" flood-opacity="0.12"/>
+              </filter>
+              <filter id="li-flagshipShadow">
+                <feDropShadow dx="0" dy="3" stdDeviation="6" flood-color="#C68E0E" flood-opacity="0.40"/>
+              </filter>
+            </defs>
+
+            <!-- TITRE CENTRAL -->
+            <g transform="translate(800, 30)">
+              <rect x="-220" y="0" width="440" height="60" rx="10" fill="url(#li-navyGrad)" filter="url(#li-shadow)"/>
+              <text x="0" y="26" text-anchor="middle" fill="#DDBB6E" font-family="Epilogue" font-weight="700" font-size="10" letter-spacing="3">ESPACE CABINET LICENCIÉ · DIRIGEANT</text>
+              <text x="0" y="46" text-anchor="middle" fill="white" font-family="Epilogue" font-weight="700" font-size="16">13 sections · vue 360° du cabinet</text>
+            </g>
+
+            <!-- COLONNE 1 : PILOTAGE CABINET -->
+            <g transform="translate(180, 130)">
+              <rect x="-140" y="0" width="280" height="42" rx="8" fill="url(#li-navyGrad)" filter="url(#li-shadow)"/>
+              <text x="0" y="28" text-anchor="middle" fill="white" font-family="Epilogue" font-weight="700" font-size="13">📊 PILOTAGE CABINET</text>
+            </g>
+            <line x1="180" y1="172" x2="180" y2="200" stroke="#A4AEBB" stroke-width="1.5" stroke-dasharray="3 3"/>
+            <a href="#dashboard" class="sitemap-link"><g transform="translate(40, 200)" class="sitemap-node"><rect x="0" y="0" width="280" height="46" rx="6" fill="white" stroke="#C68E0E" stroke-width="2"/><text x="14" y="20" fill="#C68E0E" font-family="Epilogue" font-weight="700" font-size="9" letter-spacing="1.5">SECTION 1 ⭐</text><text x="14" y="38" fill="#102D50" font-family="Epilogue" font-weight="700" font-size="13">📊 Tableau de bord cabinet</text></g></a>
+            <a href="#financier" class="sitemap-link"><g transform="translate(40, 256)" class="sitemap-node"><rect x="0" y="0" width="280" height="46" rx="6" fill="white" stroke="#DBE0E4" stroke-width="1"/><text x="14" y="20" fill="#708196" font-family="Epilogue" font-weight="700" font-size="9" letter-spacing="1.5">SECTION 2</text><text x="14" y="38" fill="#102D50" font-family="Epilogue" font-weight="700" font-size="13">💰 Synthèse financière</text></g></a>
+            <a href="#animation" class="sitemap-link"><g transform="translate(40, 312)" class="sitemap-node"><rect x="0" y="0" width="280" height="46" rx="6" fill="white" stroke="#DBE0E4" stroke-width="1"/><text x="14" y="20" fill="#708196" font-family="Epilogue" font-weight="700" font-size="9" letter-spacing="1.5">SECTION 3 · OPTIONNEL</text><text x="14" y="38" fill="#102D50" font-family="Epilogue" font-weight="700" font-size="13">🏆 Animation interne</text></g></a>
+            <a href="#equipe" class="sitemap-link"><g transform="translate(40, 368)" class="sitemap-node"><rect x="0" y="0" width="280" height="46" rx="6" fill="white" stroke="#DBE0E4" stroke-width="1"/><text x="14" y="20" fill="#708196" font-family="Epilogue" font-weight="700" font-size="9" letter-spacing="1.5">SECTION 4</text><text x="14" y="38" fill="#102D50" font-family="Epilogue" font-weight="700" font-size="13">🌍 Mon équipe</text></g></a>
+
+            <!-- COLONNE 2 : CRM & CLIENTS -->
+            <g transform="translate(530, 130)">
+              <rect x="-140" y="0" width="280" height="42" rx="8" fill="url(#li-goldGrad)" filter="url(#li-shadow)"/>
+              <text x="0" y="28" text-anchor="middle" fill="white" font-family="Epilogue" font-weight="700" font-size="13">🎯 CRM &amp; CLIENTS</text>
+            </g>
+            <line x1="530" y1="172" x2="530" y2="200" stroke="#A4AEBB" stroke-width="1.5" stroke-dasharray="3 3"/>
+            <a href="#crm-cabinet" class="sitemap-link"><g transform="translate(390, 200)" class="sitemap-node"><rect x="0" y="0" width="280" height="46" rx="6" fill="white" stroke="#C68E0E" stroke-width="2"/><text x="14" y="20" fill="#C68E0E" font-family="Epilogue" font-weight="700" font-size="9" letter-spacing="1.5">SECTION 5 ⭐</text><text x="14" y="38" fill="#102D50" font-family="Epilogue" font-weight="700" font-size="13">🎯 CRM cabinet (vue 360°)</text></g></a>
+            <a href="#pipeline" class="sitemap-link"><g transform="translate(390, 256)" class="sitemap-node"><rect x="0" y="0" width="280" height="46" rx="6" fill="white" stroke="#C68E0E" stroke-width="2"/><text x="14" y="20" fill="#C68E0E" font-family="Epilogue" font-weight="700" font-size="9" letter-spacing="1.5">SECTION 6 ⭐</text><text x="14" y="38" fill="#102D50" font-family="Epilogue" font-weight="700" font-size="13">🚀 Pipeline cabinet</text></g></a>
+            <a href="#dossier" class="sitemap-link"><g transform="translate(390, 312)" class="sitemap-node"><rect x="0" y="0" width="280" height="46" rx="6" fill="white" stroke="#C68E0E" stroke-width="2"/><text x="14" y="20" fill="#C68E0E" font-family="Epilogue" font-weight="700" font-size="9" letter-spacing="1.5">SECTION 7 ⭐</text><text x="14" y="38" fill="#102D50" font-family="Epilogue" font-weight="700" font-size="13">📁 Fiche dossier client</text></g></a>
+            <!-- Encart toggle vers Doc 5 -->
+            <a href="05_Architecture_Ingenieur.html" class="sitemap-link" target="_blank"><g transform="translate(390, 372)" class="sitemap-node"><rect x="0" y="0" width="280" height="42" rx="21" fill="rgba(198,142,14,0.10)" stroke="#C68E0E" stroke-width="1.5" stroke-dasharray="4 3"/><text x="140" y="20" text-anchor="middle" fill="#695D30" font-family="Epilogue" font-weight="800" font-size="9" letter-spacing="1.5">⇄ TOGGLE</text><text x="140" y="34" text-anchor="middle" fill="#695D30" font-family="Epilogue" font-weight="700" font-size="11">Vers Espace Ingénieur (Doc 5)</text></g></a>
+
+            <!-- COLONNE 3 : OUTILS OPÉRATIONNELS -->
+            <g transform="translate(880, 130)">
+              <rect x="-140" y="0" width="280" height="42" rx="8" fill="url(#li-greenGrad)" stroke="#1F8A4C" stroke-width="1.5" filter="url(#li-shadow)"/>
+              <text x="0" y="28" text-anchor="middle" fill="#1F8A4C" font-family="Epilogue" font-weight="700" font-size="13">🤖 OUTILS OPÉRATIONNELS</text>
+            </g>
+            <line x1="880" y1="172" x2="880" y2="200" stroke="#A4AEBB" stroke-width="1.5" stroke-dasharray="3 3"/>
+            <a href="#calendrier" class="sitemap-link"><g transform="translate(740, 200)" class="sitemap-node"><rect x="0" y="0" width="280" height="46" rx="6" fill="white" stroke="#C68E0E" stroke-width="2"/><text x="14" y="20" fill="#C68E0E" font-family="Epilogue" font-weight="700" font-size="9" letter-spacing="1.5">SECTION 8 ⭐</text><text x="14" y="38" fill="#102D50" font-family="Epilogue" font-weight="700" font-size="13">📅 Calendrier &amp; RDV</text></g></a>
+            <a href="#visio" class="sitemap-link"><g transform="translate(740, 256)" class="sitemap-node"><rect x="0" y="0" width="280" height="46" rx="6" fill="white" stroke="#DBE0E4" stroke-width="1"/><text x="14" y="20" fill="#708196" font-family="Epilogue" font-weight="700" font-size="9" letter-spacing="1.5">SECTION 9</text><text x="14" y="38" fill="#102D50" font-family="Epilogue" font-weight="700" font-size="13">🎥 Visioconférence</text></g></a>
+            <a href="#outils" class="sitemap-link"><g transform="translate(740, 312)" class="sitemap-node"><rect x="0" y="0" width="280" height="46" rx="6" fill="white" stroke="#DBE0E4" stroke-width="1"/><text x="14" y="20" fill="#708196" font-family="Epilogue" font-weight="700" font-size="9" letter-spacing="1.5">SECTION 10</text><text x="14" y="38" fill="#102D50" font-family="Epilogue" font-weight="700" font-size="13">📦 Outils &amp; simulateurs</text></g></a>
+
+            <!-- COLONNE 4 : GESTION -->
+            <g transform="translate(1230, 130)">
+              <rect x="-140" y="0" width="280" height="42" rx="8" fill="url(#li-blueGrad)" stroke="#1456A0" stroke-width="1.5" filter="url(#li-shadow)"/>
+              <text x="0" y="28" text-anchor="middle" fill="#1456A0" font-family="Epilogue" font-weight="700" font-size="13">⚙ GESTION</text>
+            </g>
+            <line x1="1230" y1="172" x2="1230" y2="200" stroke="#A4AEBB" stroke-width="1.5" stroke-dasharray="3 3"/>
+            <a href="#compliance" class="sitemap-link"><g transform="translate(1090, 200)" class="sitemap-node"><rect x="0" y="0" width="280" height="46" rx="6" fill="white" stroke="#C68E0E" stroke-width="2"/><text x="14" y="20" fill="#C68E0E" font-family="Epilogue" font-weight="700" font-size="9" letter-spacing="1.5">SECTION 11 ⭐</text><text x="14" y="38" fill="#102D50" font-family="Epilogue" font-weight="700" font-size="13">⚖ Compliance &amp; facturation</text></g></a>
+            <a href="#chat" class="sitemap-link"><g transform="translate(1090, 256)" class="sitemap-node"><rect x="0" y="0" width="280" height="46" rx="6" fill="white" stroke="#DBE0E4" stroke-width="1"/><text x="14" y="20" fill="#708196" font-family="Epilogue" font-weight="700" font-size="9" letter-spacing="1.5">SECTION 12</text><text x="14" y="38" fill="#102D50" font-family="Epilogue" font-weight="700" font-size="13">💬 Chat &amp; messagerie</text></g></a>
+            <a href="#parametres" class="sitemap-link"><g transform="translate(1090, 312)" class="sitemap-node"><rect x="0" y="0" width="280" height="46" rx="6" fill="white" stroke="#DBE0E4" stroke-width="1"/><text x="14" y="20" fill="#708196" font-family="Epilogue" font-weight="700" font-size="9" letter-spacing="1.5">SECTION 13</text><text x="14" y="38" fill="#102D50" font-family="Epilogue" font-weight="700" font-size="13">⚙ Paramètres cabinet</text></g></a>
+
+            <!-- Lignes de connexion -->
+            <line x1="800" y1="90" x2="180" y2="130" stroke="#DBE0E4" stroke-width="1.5"/>
+            <line x1="800" y1="90" x2="530" y2="130" stroke="#DBE0E4" stroke-width="1.5"/>
+            <line x1="800" y1="90" x2="880" y2="130" stroke="#DBE0E4" stroke-width="1.5"/>
+            <line x1="800" y1="90" x2="1230" y2="130" stroke="#DBE0E4" stroke-width="1.5"/>
+
+            <!-- Légende basse -->
+            <g transform="translate(800, 510)">
+              <text x="0" y="0" text-anchor="middle" fill="#708196" font-family="Epilogue" font-size="11" font-style="italic">⭐ = priorité MVP · ⇄ = toggle vers Espace Ingénieur · cliquez sur une section pour voir le détail ↓</text>
+            </g>
+
+          </svg>
+        </div>
+      </div>
+    </section>
+    <!-- ================================== -->
+    <!-- SECTION 1 — TABLEAU DE BORD CABINET -->
+    <!-- ================================== -->
+    <section class="main-section" id="dashboard">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">1</span> Section 1 / 13 · Pilotage cabinet · ⭐ Priorité MVP</div>
+        <h2 class="section-title">📊 Tableau de bord cabinet</h2>
+        <p class="section-intro">Page d'atterrissage du dirigeant cabinet (licencié ou indépendant). Vue 360° de l'activité du cabinet : KPIs, pipeline interne, activité de l'équipe, alertes, prochaines échéances.</p>
+      </div>
+
+      <div class="page-card priority">
+        <div class="pc-header">
+          <div class="pc-icon">📊</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Page principale · /</div>
+            <div class="pc-title">Accueil cabinet</div>
+            <div class="pc-desc">Premier écran après connexion. Adaptable selon le rôle (dirigeant voit tout, ingénieur voit son périmètre).</div>
+          </div>
+          <span class="pc-status priority">PRIORITÉ ⭐</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Composants attendus</div>
+          <div class="pc-tree">
+<span class="b">┌─ TOPBAR</span>
+│   ├─ Brand <span class="s">Cabinet Dupont &amp; Associés</span>
+│   ├─ Search bar <span class="s">avec raccourci ⌘K</span>
+│   ├─ Icon notifications <span class="s">avec badge</span>
+│   └─ User pill <span class="s">avatar + nom utilisateur</span>
+
+<span class="b">┌─ HERO PERSONNALISÉ</span>
+│   ├─ Salutation + date du jour
+│   └─ Period control <span class="s">(M / T / A · années antérieures)</span>
+
+<span class="b">┌─ KPIS CABINET</span> <span class="s">(4-6 KPIs en ligne)</span>
+│   ├─ Encours total apporté
+│   ├─ Clients actifs en suivi
+│   ├─ Études en cours
+│   ├─ RDV planifiés cette semaine
+│   ├─ Tâches en retard <span class="s">(alertes)</span>
+│   └─ Performance vs réseau <span class="s">(badge classement #X/14)</span>
+
+<span class="b">┌─ ALERTES &amp; URGENCES</span> <span class="s">(en haut, visible immédiatement)</span> <span class="a">CLIQUABLES</span>
+│   ├─ Dossiers à valider <span class="s">(transition d'étape pipeline)</span>
+│   ├─ Documents clients en attente
+│   ├─ Compliance à finaliser
+│   └─ Échéances RC pro / formations
+</div>
+
+          <div class="pc-section-label">Composants centraux</div>
+          <div class="pc-tree">
+<span class="b">┌─ PIPELINE OPÉRATIONNEL DU CABINET</span> <span class="s">(les 6 étapes — interne au cabinet)</span> <span class="a">CLIQUABLES</span>
+│   ├─ <span class="c">01</span> Prospects actifs
+│   ├─ <span class="c">02</span> Compliance validée
+│   ├─ <span class="c">03</span> Collecte docs &amp; infos
+│   ├─ <span class="c">04</span> Études en cours
+│   ├─ <span class="c">05</span> Études restituées
+│   └─ <span class="c">06</span> Clients en suivi
+
+<span class="b">┌─ ACTIVITÉ DE L'ÉQUIPE</span> <span class="s">(uniquement vue dirigeant)</span>
+│   ├─ Mini-graphique 7 derniers jours
+│   ├─ Charge de travail par ingénieur
+│   └─ Actions de la journée
+
+<span class="b">┌─ AGENDA DU JOUR</span>
+│   ├─ Prochains RDV <span class="s">(avec lien direct vers visio)</span>
+│   ├─ Tâches du jour
+│   └─ Actions à valider
+
+<span class="b">┌─ DERNIÈRES ACTIONS</span>
+│   └─ Timeline des 5 derniers événements
+</div>
+
+          <div class="pc-section-label">Variations selon rôle</div>
+          <div class="pc-subpages">
+            <div class="pc-subpage"><strong>Vue Dirigeant</strong> : voit tous les KPIs cabinet, pipeline complet, charge équipe, performance comparative</div>
+            <div class="pc-subpage"><strong>Vue Ingénieur</strong> : voit uniquement ses clients, son pipeline, ses RDV, sa charge personnelle</div>
+            <div class="pc-subpage"><strong>Vue Assistante / Comptable</strong> : voit uniquement les éléments de son périmètre (RDV à organiser, factures à émettre)</div>
+          </div>
+
+          <div class="pc-section-label">Variations selon le type de tenant ⚖</div>
+          <div class="note gold" style="margin: 8px 0; padding: 14px 18px;">
+            <p style="margin: 0 0 8px; font-size: 12.5px;"><strong style="color: var(--gold);">🏛 RÉSEAU SEULEMENT</strong> (tenant_type = 'marque') :</p>
+            <ul style="margin: 0 0 12px 20px; font-size: 12px; line-height: 1.65;">
+              <li>KPI <em>"Performance vs réseau (badge classement #X/Y)"</em> visible</li>
+              <li>Bandeau <em>"Annonces du propriétaire de marque"</em> visible (broadcasts de PRIVEOS Capital)</li>
+              <li>Comparatif avec moyenne réseau dans tous les KPIs disponibles</li>
+            </ul>
+            <p style="margin: 0 0 8px; font-size: 12.5px;"><strong style="color: var(--navy);">💼 INDÉPENDANT SEULEMENT</strong> (tenant_type = 'cabinet_direct') :</p>
+            <ul style="margin: 0 0 0 20px; font-size: 12px; line-height: 1.65;">
+              <li>KPI <em>"Performance vs réseau"</em> remplacé par <em>"Évolution YoY"</em> (comparaison avec sa propre année précédente)</li>
+              <li>Bandeau <em>"Annonces propriétaire"</em> masqué (pas de propriétaire)</li>
+              <li>À la place : bandeau <em>"Notifications ASTRAEOS"</em> (mises à jour produit, nouveautés Marketplace)</li>
+            </ul>
+          </div>
+
+          <div class="pc-section-label">Sous-pages atteignables</div>
+          <div class="pc-subpages">
+            <div class="pc-subpage"><strong>→ Pipeline étape 01-06</strong> · 6 sous-pages opérationnelles · section 7</div>
+            <div class="pc-subpage"><strong>→ Synthèse financière cabinet</strong> · section 2</div>
+            <div class="pc-subpage"><strong>→ Détail alerte</strong> · ouvre la fiche concernée</div>
+            <div class="pc-subpage"><strong>→ Notifications</strong> · panel latéral</div>
+            <div class="pc-subpage"><strong>→ Calendrier complet</strong> · section 9</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== -->
+    <!-- SECTION 2 — SYNTHÈSE FINANCIÈRE-->
+    <!-- ============================== -->
+    <section class="main-section" id="financier">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">2</span> Section 2 / 13 · Pilotage cabinet</div>
+        <h2 class="section-title">💰 Synthèse financière du cabinet</h2>
+        <p class="section-intro">Mini-réplique de la section "Synthèse financière du réseau" de PRIVEOS Capital, mais à l'échelle du cabinet : encours apporté, rémunération perçue, ventilation par source de revenu.</p>
+      </div>
+
+      <div class="page-card">
+        <div class="pc-header">
+          <div class="pc-icon">💰</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Page principale · /financier</div>
+            <div class="pc-title">Synthèse financière du cabinet</div>
+            <div class="pc-desc">Vue financière dédiée au cabinet : ce qu'il a généré, ventilé par source et par mois.</div>
+          </div>
+          <span class="pc-status todo">À FAIRE</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Wireframe proposé</div>
+          <div class="pc-tree">
+<span class="b">┌─ HERO</span>
+│   ├─ Eyebrow <span class="s">"Activité financière · cabinet Dupont &amp; Associés"</span>
+│   ├─ Titre <span class="s">"Synthèse financière du cabinet"</span>
+│   └─ Period Control
+
+<span class="b">┌─ SYNTHESIS-CARD</span> <span class="s">(encadré navy)</span>
+│   ├─ Total perçu par le cabinet · YTD
+│   ├─ Total reversé à PRIVEOS Capital
+│   ├─ Net cabinet
+│   └─ Volume total généré
+
+<span class="b">┌─ CHARTS-SECTION</span> <span class="s">(2 graphiques)</span>
+│   ├─ <span class="i">CHART 1</span> Évolution mensuelle du cabinet
+│   │   └─ Courbe 12 mois
+│   └─ <span class="i">CHART 2</span> Répartition par source
+│       └─ Donut 4 sources <span class="s">(financier · assurance · immobilier · honoraires)</span>
+
+<span class="b">┌─ DÉTAIL PAR SOURCE</span> <span class="a">CLIQUABLES</span>
+│   ├─ Source 1 — Investissement financier
+│   │   ├─ Encours sous gestion · cabinet
+│   │   ├─ Rémunération
+│   │   └─ Liste produits souscrits
+│   ├─ Source 2 — Assurances <span class="s">(structure identique)</span>
+│   ├─ Source 3 — Projets immobiliers
+│   └─ Source 4 — Honoraires de conseil
+
+<span class="b">┌─ COMPARAISON RÉSEAU</span>
+│   ├─ Position du cabinet dans le réseau <span class="s">(#X/14)</span>
+│   ├─ Performance vs moyenne réseau
+│   └─ Évolution YoY
+          </div>
+
+          <div class="pc-section-label">Variations selon le type de tenant ⚖</div>
+          <div class="note gold" style="margin: 8px 0; padding: 14px 18px;">
+            <p style="margin: 0 0 8px; font-size: 12.5px;"><strong style="color: var(--gold);">🏛 RÉSEAU SEULEMENT</strong> (tenant_type = 'marque') :</p>
+            <ul style="margin: 0 0 12px 20px; font-size: 12px; line-height: 1.65;">
+              <li>SYNTHESIS-CARD complète : <em>Total perçu</em> + <em>Total reversé à PRIVEOS Capital</em> + <em>Net cabinet</em></li>
+              <li>Bloc "COMPARAISON RÉSEAU" affiché (positionnement vs autres cabinets du réseau)</li>
+              <li>Détail des reversements par produit (part fixe + variable) selon les règles paramétrées par PRIVEOS Capital</li>
+            </ul>
+            <p style="margin: 0 0 8px; font-size: 12.5px;"><strong style="color: var(--navy);">💼 INDÉPENDANT SEULEMENT</strong> (tenant_type = 'cabinet_direct') :</p>
+            <ul style="margin: 0 0 0 20px; font-size: 12px; line-height: 1.65;">
+              <li>SYNTHESIS-CARD simplifiée : <em>Total perçu par le cabinet</em> = <em>Net cabinet</em> (pas de reversement)</li>
+              <li>Bloc "COMPARAISON RÉSEAU" remplacé par <em>"Évolution dans le temps"</em> (graphiques YoY enrichis)</li>
+              <li>Ligne <em>"Abonnement ASTRAEOS"</em> ajoutée dans les charges (forfaitaire par utilisateur/mois + Marketplace si activée)</li>
+              <li>Cascade financière à 3 niveaux : Ingénieur → Cabinet → ASTRAEOS</li>
+            </ul>
+          </div>
+
+          <div class="pc-section-label">Sous-pages atteignables</div>
+          <div class="pc-subpages">
+            <div class="pc-subpage"><strong>Drill-down Source 1</strong> · liste des produits financiers + clients souscripteurs du cabinet</div>
+            <div class="pc-subpage"><strong>Drill-down Source 2</strong> · contrats assurance par client</div>
+            <div class="pc-subpage"><strong>Drill-down Source 3</strong> · projets immobiliers en cours</div>
+            <div class="pc-subpage"><strong>Drill-down Source 4</strong> · missions conseil et SCI/SARL immatriculées</div>
+            <div class="pc-subpage"><strong>Vue par ingénieur</strong> · qui a généré combien (vue dirigeant uniquement)</div>
+            <div class="pc-subpage"><strong>Export PDF/Excel</strong> · pour comptabilité / comité du cabinet</div>
+            <div class="pc-subpage"><strong>Comparaison vs N-1</strong> · graphique année actuelle / précédente</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================== -->
+    <!-- SECTION 3 — ANIMATION INTERNE      -->
+    <!-- ================================== -->
+    <section class="main-section" id="animation">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">3</span> Section 3 / 13 · Pilotage cabinet · OPTIONNEL</div>
+        <h2 class="section-title">🏆 Animation interne — Performance des ingénieurs</h2>
+        <p class="section-intro">Section <strong>optionnelle</strong> et activable par le dirigeant. Permet aux ingénieurs du cabinet de voir leurs performances entre eux dans une logique de stimulation/concours, <strong>sans exposer les chiffres d'affaires individuels ni les clés clients</strong>.</p>
+      </div>
+
+      <div class="note">
+        <strong>🔒 Confidentialité importante :</strong> les ingénieurs voient les <em>rangs et badges</em> entre eux, mais <strong>pas</strong> les chiffres d'affaires individuels, ni les détails clients, ni les encours par ingénieur. Le dirigeant voit tout. Cette section peut être <strong>activée ou désactivée</strong> par le dirigeant dans les paramètres.
+      </div>
+
+      <div class="page-card">
+        <div class="pc-header">
+          <div class="pc-icon">🏆</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Page principale · /animation</div>
+            <div class="pc-title">Animation interne (concours d'équipe)</div>
+            <div class="pc-desc">Tableau de bord d'animation interne avec KPIs anonymisés ou agrégés selon le rôle.</div>
+          </div>
+          <span class="pc-status todo">À FAIRE</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Wireframe proposé</div>
+          <div class="pc-tree">
+<span class="b">┌─ HERO</span>
+│   ├─ Eyebrow <span class="s">"Performance d'équipe · esprit de concours"</span>
+│   └─ Titre <span class="s">"Notre cabinet en mouvement"</span>
+
+<span class="b">┌─ KPIS COLLECTIFS</span> <span class="s">(visibles par tous)</span>
+│   ├─ Nombre de prospects total cabinet
+│   ├─ Nombre de RDV cette semaine
+│   ├─ Nombre d'études livrées ce mois
+│   └─ Objectif collectif du trimestre <span class="s">(jauge)</span>
+
+<span class="b">┌─ CLASSEMENT INGÉNIEURS</span> <span class="s">(données anonymisées ou en rang)</span>
+│   └─ Tableau / Cards
+│       ├─ Avatar + prénom <span class="s">(pas le nom complet)</span>
+│       ├─ Score / points <span class="s">(pas €)</span>
+│       ├─ Badges <span class="s">(top performer · plus actif · etc.)</span>
+│       └─ Évolution rang vs mois précédent
+
+<span class="b">┌─ CHALLENGES EN COURS</span>
+│   ├─ Challenge du mois <span class="s">(ex : "Plus de RDV qualifiés")</span>
+│   ├─ Récompenses
+│   └─ Progression individuelle
+
+<span class="b">┌─ HISTORIQUE</span>
+│   └─ Anciens classements + récompenses gagnées
+          </div>
+          <div class="pc-section-label">Variations selon rôle</div>
+          <div class="pc-subpages">
+            <div class="pc-subpage"><strong>Vue Dirigeant</strong> : voit tout, y compris les chiffres d'affaires détaillés par ingénieur, les clés clients, etc.</div>
+            <div class="pc-subpage"><strong>Vue Ingénieur</strong> : voit son rang et celui des autres en mode anonymisé/badges, ses propres chiffres en détail</div>
+          </div>
+          <div class="pc-section-label">Sous-pages atteignables</div>
+          <div class="pc-subpages">
+            <div class="pc-subpage"><strong>Configuration challenges</strong> · création de défis personnalisés (vue dirigeant)</div>
+            <div class="pc-subpage"><strong>Détail performance d'un ingénieur (vue dirigeant)</strong> · données complètes</div>
+            <div class="pc-subpage"><strong>Activation/désactivation de la section</strong> · dans les paramètres cabinet</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================== -->
+    <!-- SECTION 4 — MON ÉQUIPE             -->
+    <!-- ================================== -->
+    <section class="main-section" id="equipe">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">4</span> Section 4 / 13 · Pilotage cabinet</div>
+        <h2 class="section-title">🌍 Mon équipe (ingénieurs &amp; collaborateurs)</h2>
+        <p class="section-intro">Annuaire interne du cabinet : ingénieurs patrimoniaux, dirigeant, collaborateurs (assistante, comptable, juriste...). Avec leurs rôles, leurs profils, leur charge de travail.</p>
+      </div>
+
+      <div class="page-card">
+        <div class="pc-header">
+          <div class="pc-icon">👥</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Page principale · /equipe</div>
+            <div class="pc-title">Annuaire de l'équipe du cabinet</div>
+            <div class="pc-desc">Liste de tous les membres du cabinet avec leurs rôles, profils et accès rapide.</div>
+          </div>
+          <span class="pc-status todo">À FAIRE</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Wireframe proposé</div>
+          <div class="pc-tree">
+<span class="b">┌─ KPIS ÉQUIPE</span>
+│   ├─ Nombre total de collaborateurs
+│   ├─ Ingénieurs patrimoniaux
+│   ├─ Collaborateurs support <span class="s">(assistante · comptable · juriste...)</span>
+│   └─ Postes ouverts <span class="s">(si applicable)</span>
+
+<span class="b">┌─ FILTRES</span>
+│   ├─ Rôle <span class="s">(dirigeant · ingénieur · assistante · comptable · juriste · autre)</span>
+│   ├─ Statut <span class="s">(actif · en congé · suspendu)</span>
+│   └─ Charge de travail
+
+<span class="b">┌─ GRILLE OU TABLEAU</span> <span class="a">CLIQUABLES</span>
+│   └─ Pour chaque membre :
+│       ├─ Photo / Avatar
+│       ├─ Nom complet
+│       ├─ Rôle / Titre
+│       ├─ Email + tél
+│       ├─ Date d'arrivée dans le cabinet
+│       ├─ Charge actuelle <span class="s">(jauge · nombre de clients suivis)</span>
+│       └─ Statut <span class="s">(actif / en congé / etc.)</span>
+
+<span class="b">┌─ CTAS DIRIGEANT</span> <span class="s">(si vue dirigeant)</span>
+│   ├─ <span class="a">[+ Inviter un nouveau collaborateur]</span>
+│   └─ <span class="a">[Créer un rôle personnalisé]</span>
+          </div>
+          <div class="pc-section-label">Sous-pages atteignables</div>
+          <div class="pc-subpages">
+            <div class="pc-subpage"><strong>Fiche profil collaborateur</strong> · au clic d'une ligne · profil complet, bio, spécialisations, certifs, clients suivis (si applicable selon rôle)</div>
+            <div class="pc-subpage"><strong>Invitation nouveau collaborateur</strong> · workflow d'invitation par email + choix de rôle</div>
+            <div class="pc-subpage"><strong>Édition rôles &amp; permissions</strong> · matrice permissions (vue dirigeant)</div>
+            <div class="pc-subpage"><strong>Historique des collaborations</strong> · qui est passé dans le cabinet</div>
+            <div class="pc-subpage"><strong>Statistiques équipe</strong> · charge moyenne, productivité, etc.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="page-card">
+        <div class="pc-header">
+          <div class="pc-icon">👤</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Sous-page · /equipe/:id</div>
+            <div class="pc-title">Fiche profil collaborateur</div>
+            <div class="pc-desc">Profil complet d'un membre du cabinet.</div>
+          </div>
+          <span class="pc-status todo">À FAIRE</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Wireframe proposé</div>
+          <div class="pc-tree">
+<span class="b">┌─ HEADER PROFIL</span>
+│   ├─ Photo / Avatar
+│   ├─ Nom + titre + rôle
+│   ├─ Statut + actions <span class="s">[Message · Connexion-as · Édition]</span>
+│   └─ Stats clés <span class="s">(ancienneté · charge · perf)</span>
+
+<span class="b">┌─ ONGLETS</span>
+│   ├─ <span class="c">1</span> Bio &amp; spécialisations
+│   ├─ <span class="c">2</span> Clients suivis <span class="s">(si ingénieur · selon vue)</span>
+│   ├─ <span class="c">3</span> Activité récente
+│   ├─ <span class="c">4</span> Performance <span class="s">(vue dirigeant)</span>
+│   ├─ <span class="c">5</span> Compliance personnelle <span class="s">(formations · certifs)</span>
+│   └─ <span class="c">6</span> Documents RH
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- ================================== -->
+    <!-- SECTION 5 — CRM CABINET (DIRIGEANT) -->
+    <!-- ================================== -->
+    <section class="main-section" id="crm-cabinet">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">5</span> Section 5 / 13 · CRM &amp; Clients · ⭐ Priorité MVP · Vue dirigeant</div>
+        <h2 class="section-title">🎯 Mon CRM (vue dirigeant cabinet)</h2>
+        <p class="section-intro">CRM <strong>du cabinet</strong> : vue agrégée de TOUS les clients du cabinet, à toutes les étapes. Permet au dirigeant de piloter l'ensemble du portefeuille et de <strong>réattribuer</strong> les prospects/clients entre les ingénieurs.</p>
+      </div>
+
+      <div class="note">
+        <strong>🎯 Distinction importante :</strong> ce CRM est différent du CRM individuel de l'ingénieur (section 6). Ici, le dirigeant voit la <strong>vue agrégée</strong> du cabinet. Les ingénieurs ont chacun leur CRM personnel à eux dans la section suivante.
+      </div>
+
+      <div class="page-card priority">
+        <div class="pc-header">
+          <div class="pc-icon">🎯</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Page principale · /crm</div>
+            <div class="pc-title">Vue d'ensemble CRM cabinet</div>
+            <div class="pc-desc">Tableau de bord consolidé : tous les prospects et clients du cabinet, à toutes les étapes, avec ventilation par ingénieur.</div>
+          </div>
+          <span class="pc-status priority">PRIORITÉ ⭐</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Composants attendus</div>
+          <div class="pc-tree">
+<span class="b">┌─ HERO</span>
+│   ├─ Eyebrow <span class="s">"CRM cabinet · vue consolidée"</span>
+│   └─ Titre <span class="s">"Tous les prospects et clients du cabinet"</span>
+
+<span class="b">┌─ KPIS GLOBAUX CABINET</span>
+│   ├─ Nombre total de prospects/clients
+│   ├─ Conversion globale (prospect → client)
+│   ├─ LTV moyenne par client du cabinet
+│   └─ Charge moyenne par ingénieur
+
+<span class="b">┌─ FILTRES AVANCÉS</span>
+│   ├─ Étape pipeline <span class="s">(01-06)</span>
+│   ├─ Ingénieur en charge <span class="s">(filtre par membre du cabinet)</span>
+│   ├─ Origine <span class="s">(Réseau / Direct PRIVEOS / Captation cabinet)</span>
+│   ├─ Type de profil <span class="s">(jeune actif · cadre · entrepreneur · retraité…)</span>
+│   ├─ Volume d'encours
+│   ├─ Région
+│   └─ Statut <span class="s">(Actif · Inactif · Perdu)</span>
+
+<span class="b">┌─ DEUX VUES POSSIBLES</span> <span class="s">(toggle)</span>
+│   ├─ <span class="i">VUE TABLEAU</span>
+│   │   └─ Liste filtrable triable · pagination
+│   └─ <span class="i">VUE KANBAN</span>
+│       └─ 6 colonnes (étapes pipeline) · drag &amp; drop pour passage étape
+
+<span class="b">┌─ ACTIONS DIRIGEANT</span>
+│   ├─ <span class="a">Créer prospect en captation cabinet</span>
+│   ├─ <span class="a">Réattribuer prospect entre ingénieurs</span>
+│   ├─ Export CSV/Excel
+│   └─ Actions groupées <span class="s">(envoyer email à plusieurs prospects, etc.)</span>
+          </div>
+
+          <div class="pc-section-label">Sous-pages atteignables</div>
+          <div class="pc-subpages">
+            <div class="pc-subpage"><strong>Fiche dossier client complète</strong> · section 8 de ce document</div>
+            <div class="pc-subpage"><strong>Workflow "Création prospect cabinet"</strong> · le cabinet entre un prospect en direct (sans passer par le réseau global)</div>
+            <div class="pc-subpage"><strong>⭐ Workflow "Réattribuer entre ingénieurs"</strong> · réattribution intra-cabinet · feature critique</div>
+            <div class="pc-subpage"><strong>Vue par ingénieur</strong> · drill-down sur l'activité d'un ingénieur du cabinet</div>
+            <div class="pc-subpage"><strong>Recherche avancée</strong> · multi-critères + sauvegarde de recherche</div>
+            <div class="pc-subpage"><strong>Segments dynamiques</strong> · création de segments réutilisables</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="page-card priority">
+        <div class="pc-header">
+          <div class="pc-icon">🔄</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Sous-page · /crm/contact/:id/reattribuer-interne</div>
+            <div class="pc-title">Réattribuer un prospect/client entre ingénieurs du cabinet</div>
+            <div class="pc-desc">⭐ Feature critique : le dirigeant rééquilibre la charge entre ses ingénieurs ou réattribue un client suite à un départ d'ingénieur.</div>
+          </div>
+          <span class="pc-status priority">PRIORITÉ ⭐</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Wireframe proposé</div>
+          <div class="pc-tree">
+<span class="b">┌─ CONTEXTE</span>
+│   ├─ Synthèse du dossier <span class="s">(profil · étape · ingénieur actuel)</span>
+│   └─ Motif de réattribution <span class="s">(rééquilibrage charge · départ ingénieur · spécialisation)</span>
+
+<span class="b">┌─ SUGGESTIONS D'INGÉNIEURS</span> <span class="s">(IA-assistée)</span>
+│   ├─ Suggestions basées sur :
+│   │   ├─ Charge actuelle de chaque ingénieur
+│   │   ├─ Spécialisation
+│   │   ├─ Affinité géographique
+│   │   └─ Profil ingénieur vs profil client
+│   └─ Score de matching
+
+<span class="b">┌─ SÉLECTION FINALE</span>
+│   ├─ Choix nouvel ingénieur
+│   ├─ Date effective
+│   └─ Message de transmission
+
+<span class="b">┌─ TRANSFERT</span>
+│   ├─ Récap final
+│   ├─ Confirmation
+│   ├─ Notification au nouvel ingénieur
+│   ├─ Email facultatif au client <span class="s">("votre conseiller a changé")</span>
+│   └─ Mise à jour audit trail
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================== -->
+    <!-- SECTION 6 — PIPELINE CABINET       -->
+    <!-- ================================== -->
+    <section class="main-section" id="pipeline">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">6</span> Section 6 / 13 · CRM &amp; Clients · ⭐ Priorité MVP</div>
+        <h2 class="section-title">🚀 Pipeline cabinet — 6 étapes</h2>
+        <p class="section-intro">Vue par étape du pipeline patrimonial pour <strong>tous les dossiers du cabinet</strong>. Le dirigeant supervise les passages d'étape, identifie les blocages, peut intervenir sur n'importe quel dossier. <em>L'ingénieur a le même pipeline mais cloisonné à ses seuls dossiers — voir Doc 5.</em></p>
+      </div>
+
+      <div class="page-card priority">
+        <div class="pc-header">
+          <div class="pc-icon">🚀</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Structure commune des 6 pages</div>
+            <div class="pc-title">Pipeline opérationnel 01-06</div>
+            <div class="pc-desc">Mêmes 6 étapes que dans l'espace PRIVEOS Capital, mais en mode action avec validations manuelles et déclenchement de workflows.</div>
+          </div>
+          <span class="pc-status priority">PRIORITÉ ⭐</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Composants partagés aux 6 pages</div>
+          <div class="pc-tree">
+<span class="b">┌─ HERO</span>
+│   ├─ Eyebrow <span class="s">"Pipeline opérationnel · étape XX/06"</span>
+│   ├─ Titre <span class="s">spécifique à l'étape</span>
+│   └─ Filtres <span class="s">(mes dossiers / tous les dossiers du cabinet selon vue)</span>
+
+<span class="b">┌─ STEPPER UNIFIÉ</span> <span class="a">CLIQUABLE</span>
+│   └─ Les 6 étapes en ligne <span class="s">(étape active surbrillée)</span>
+
+<span class="b">┌─ KPIS ÉTAPE</span>
+│   ├─ Nombre de dossiers à cette étape
+│   ├─ Délai moyen sur l'étape
+│   ├─ Mes dossiers vs dossiers cabinet
+│   └─ Taux de passage à l'étape suivante
+
+<span class="b">┌─ GRILLE DE DOSSIERS</span> <span class="s">(cards ou tableau · toggle)</span> <span class="a">CLIQUABLES</span>
+│   └─ Pour chaque dossier
+│       ├─ Photo client + nom
+│       ├─ Ingénieur en charge
+│       ├─ Date d'entrée dans l'étape
+│       ├─ Score qualité IA <span class="s">(météo)</span>
+│       ├─ Actions urgentes <span class="s">(badges)</span>
+│       └─ <span class="i">CTA validation passage étape suivante</span>
+
+<span class="b">┌─ ACTIONS GLOBALES</span>
+│   ├─ Validation groupée <span class="s">(passage étape suivante en lot)</span>
+│   ├─ Filtrage avancé
+│   └─ Export CSV
+</div>
+
+          <div class="pc-section-label">Spécificités par étape</div>
+          <div class="pc-tree">
+<span class="b">Étape 01 — Prospects actifs</span>
+│   └─ Spécifique : qualification du prospect · attribution à un ingénieur · 1er RDV à planifier
+
+<span class="b">Étape 02 — Compliance validée</span>
+│   └─ Spécifique : déclenchement workflow Yousign <span class="s">(DER · DCI · KYC · LM)</span> · réception paiement Qonto
+
+<span class="b">Étape 03 — Collecte docs &amp; infos</span>
+│   └─ Spécifique : sections hiérarchisées <span class="s">(13 catégories · 257 questions)</span> · alertes 48h SMS+mail · indicateur d'avancement
+
+<span class="b">Étape 04 — Études en cours</span>
+│   └─ Spécifique : <span class="i">module IA en 5 phases</span> · validations manuelles ingénieur · chat IA
+
+<span class="b">Étape 05 — Études restituées</span>
+│   └─ Spécifique : visio restitution · décision client (mise en place avec le cabinet ou non) · proposition de mission
+
+<span class="b">Étape 06 — Clients en suivi</span>
+│   └─ Spécifique : CRM long terme · derniers contacts · relances annuelles · revue de patrimoine
+          </div>
+
+          <div class="pc-section-label">Sous-pages atteignables</div>
+          <div class="pc-subpages">
+            <div class="pc-subpage"><strong>Fiche dossier client (vue complète)</strong> · section 8 · au clic d'une carte</div>
+            <div class="pc-subpage"><strong>Workflow validation manuelle passage étape</strong> · modal de confirmation avec checklist</div>
+            <div class="pc-subpage"><strong>Workflow compliance (étape 02)</strong> · déclenche Yousign + Qonto</div>
+            <div class="pc-subpage"><strong>Workflow collecte (étape 03)</strong> · arborescence dynamique · 13 sections</div>
+            <div class="pc-subpage"><strong>Workflow étude IA (étape 04)</strong> · vers section 11</div>
+            <div class="pc-subpage"><strong>Workflow restitution (étape 05)</strong> · visio + décision client + proposition mission</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================== -->
+    <!-- SECTION 8 — FICHE DOSSIER CLIENT   -->
+    <!-- ================================== -->
+    <section class="main-section" id="dossier">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">7</span> Section 7 / 13 · CRM &amp; Clients · ⭐ Priorité MVP · LA fiche centrale</div>
+        <h2 class="section-title">📁 Fiche dossier client (vue complète)</h2>
+        <p class="section-intro">La page la <strong>plus consultée</strong> au quotidien : dossier patrimonial complet d'un client. DCI, documents, étude, encours, RDV, communications, actions à venir. C'est le point d'entrée vers tous les autres modules.</p>
+      </div>
+
+      <div class="page-card priority">
+        <div class="pc-header">
+          <div class="pc-icon">📁</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Page conteneur · /client/:id</div>
+            <div class="pc-title">Fiche dossier client — Header + 8 onglets</div>
+            <div class="pc-desc">Vue 360° complète d'un client. Header persistant + navigation par onglets thématiques.</div>
+          </div>
+          <span class="pc-status priority">PRIORITÉ ⭐</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Header commun (persistant à tous les onglets)</div>
+          <div class="pc-tree">
+<span class="b">┌─ CLIENT-HEADER</span>
+│   ├─ Photo + identité <span class="s">(prénom · nom · âge · situation matrimoniale)</span>
+│   ├─ Statut pipeline <span class="s">(badge étape 01-06)</span>
+│   ├─ Météo dossier IA <span class="s">(☀⛅🌧⚡)</span>
+│   ├─ Ingénieur en charge
+│   ├─ Origine dossier <span class="s">(Cabinet / Réattribué par PRIVEOS / Réseau)</span>
+│   └─ Actions rapides <span class="s">[Message · RDV · Notes · Archiver]</span>
+
+<span class="b">┌─ TABS-NAV</span> <span class="s">(8 onglets)</span> <span class="a">CLIQUABLES</span>
+│   ├─ <span class="c">1</span> Vue d'ensemble
+│   ├─ <span class="c">2</span> Identité &amp; situation familiale
+│   ├─ <span class="c">3</span> DCI &amp; documents
+│   ├─ <span class="c">4</span> Étude patrimoniale <span class="s">(consultation · ⇄ toggle vers Doc 5 si modif)</span>
+│   ├─ <span class="c">5</span> Investissements &amp; encours
+│   ├─ <span class="c">6</span> Activité &amp; communications
+│   ├─ <span class="c">7</span> Compliance &amp; signature
+│   └─ <span class="c">8</span> Notes &amp; tâches
+          </div>
+        </div>
+      </div>
+
+      <!-- Onglet 1 -->
+      <div class="page-card">
+        <div class="pc-header">
+          <div class="pc-icon">1️⃣</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Onglet 1/8</div>
+            <div class="pc-title">Vue d'ensemble du dossier</div>
+            <div class="pc-desc">Synthèse visuelle du dossier patrimonial : situation actuelle, étape pipeline, prochaines actions.</div>
+          </div>
+          <span class="pc-status todo">À FAIRE</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-tree">
+<span class="b">├─ Situation patrimoniale en un coup d'œil</span> <span class="s">(jauges · patrimoine net · revenus · charges)</span>
+<span class="b">├─ Étape pipeline + progression</span>
+<span class="b">├─ Météo dossier IA</span> <span class="s">avec breakdown par dimension (immo, fin, soc, flux)</span>
+<span class="b">├─ Prochaines actions</span> <span class="s">(timeline 30 jours)</span>
+<span class="b">├─ Derniers événements</span> <span class="s">(timeline)</span>
+<span class="b">└─ Indicateurs clés</span> <span class="s">(LTV estimée · marge cabinet · risques)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Onglet 2 -->
+      <div class="page-card">
+        <div class="pc-header">
+          <div class="pc-icon">2️⃣</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Onglet 2/8</div>
+            <div class="pc-title">Identité &amp; situation familiale</div>
+            <div class="pc-desc">Tout ce qui concerne l'identité du client et sa famille (catégorie 1 du référentiel collecte).</div>
+          </div>
+          <span class="pc-status todo">À FAIRE</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-tree">
+<span class="b">├─ Identité du client</span> <span class="s">(état civil · pièces ID · profession)</span>
+<span class="b">├─ Conjoint(e)</span> <span class="s">(si applicable)</span>
+<span class="b">├─ Régime matrimonial</span> <span class="s">(contrat de mariage · PACS · etc.)</span>
+<span class="b">├─ Enfants &amp; ayants droit</span>
+<span class="b">└─ Arbre familial visuel</span> <span class="s">(générateur arbre généalogique)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Onglet 3 -->
+      <div class="page-card priority">
+        <div class="pc-header">
+          <div class="pc-icon">3️⃣</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Onglet 3/8 · ⭐ Critique</div>
+            <div class="pc-title">DCI &amp; documents</div>
+            <div class="pc-desc">Document de Collecte d'Informations + collecte hiérarchisée des documents (13 catégories, 257 questions, 106 documents).</div>
+          </div>
+          <span class="pc-status priority">PRIORITÉ ⭐</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-tree">
+<span class="b">┌─ DCI (Document de Collecte d'Informations)</span>
+│   ├─ DCI simplifié <span class="s">(rempli avant 1er RDV)</span>
+│   ├─ DCI complet <span class="s">(257 questions · pré-rempli par IA après visio)</span>
+│   └─ Toggle entre vue formulaire / vue synthèse
+
+<span class="b">┌─ ARBORESCENCE COLLECTE DOCS</span> <span class="s">(13 catégories · ouverture intelligente)</span>
+│   ├─ <span class="c">01</span> Identité et situation familiale
+│   ├─ <span class="c">02</span> Immobilier <span class="s">(64 questions)</span>
+│   ├─ <span class="c">03</span> Immobilier-cible
+│   ├─ <span class="c">04</span> Parts SCPI
+│   ├─ <span class="c">05</span> Actifs financiers <span class="s">(46 questions)</span>
+│   ├─ <span class="c">06</span> Passifs hors immo
+│   ├─ <span class="c">07</span> Budget
+│   ├─ <span class="c">08</span> Fiscalité
+│   ├─ <span class="c">09</span> Sociétés <span class="s">(46 questions)</span>
+│   ├─ <span class="c">10</span> Retraite
+│   ├─ <span class="c">11</span> Mutuelle &amp; Prévoyance
+│   ├─ <span class="c">12</span> Succession &amp; Donation
+│   └─ <span class="c">13</span> Conseils &amp; partenaires
+
+<span class="b">┌─ POUR CHAQUE CATÉGORIE</span>
+│   ├─ % de complétude
+│   ├─ Documents fournis / attendus
+│   ├─ Questions ouvertes restantes
+│   └─ Bouton upload + drag&amp;drop multi-fichiers
+
+<span class="b">┌─ ALERTES INTELLIGENTES</span>
+│   ├─ Sections ouvertes automatiquement <span class="s">(IA détecte besoin)</span>
+│   ├─ Documents manquants prioritaires <span class="s">(indice de régularité)</span>
+│   └─ Bouton "Demander ces documents au client" <span class="s">(envoi auto email)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Onglet 4 -->
+      <div class="page-card priority">
+        <div class="pc-header">
+          <div class="pc-icon">4️⃣</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Onglet 4/8 · vue dirigeant adaptative · ⇄ toggle vers Doc 5 si modification</div>
+            <div class="pc-title">Étude patrimoniale</div>
+            <div class="pc-desc">Vue de consultation pour le dirigeant. L'affichage s'adapte selon l'état de l'étude. La production effective de l'étude (module IA en 5 phases) se fait dans l'Espace Ingénieur (Doc 5).</div>
+          </div>
+          <span class="pc-status priority">PRIORITÉ ⭐</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Affichage adaptatif selon l'état de l'étude</div>
+          <div class="pc-tree">
+<span class="b">┌─ EN-TÊTE</span>
+│   ├─ Statut de l'étude <span class="s">(non démarrée · en cours phase X/5 · livrée le DD/MM/YYYY)</span>
+│   ├─ Ingénieur en charge
+│   ├─ Date de démarrage · Date de livraison <span class="s">(si applicable)</span>
+│   └─ Type d'accompagnement <span class="s">(complet · partiel · suivi annuel…)</span>
+
+<span class="b">┌─ CAS A · ÉTUDE LIVRÉE ✓</span> <span class="a">consultation lecture seule</span>
+│   ├─ Score Trustpilot client <span class="s">(si récolté)</span>
+│   ├─ <strong>Téléchargement PDF complet</strong> <span class="s">(version officielle finalisée)</span>
+│   ├─ <strong>Téléchargement version simplifiée</strong> <span class="s">(version client)</span>
+│   ├─ Aperçu inline du PDF <span class="s">(viewer intégré)</span>
+│   ├─ Historique des versions <span class="s">(si plusieurs livrables)</span>
+│   └─ Notes finales de l'ingénieur
+
+<span class="b">┌─ CAS B · ÉTUDE EN COURS ⏳</span> <span class="a">consultation lecture seule</span>
+│   ├─ Progression visuelle <span class="s">(barre 5 phases avec phase active)</span>
+│   ├─ Délai écoulé vs délai prévu <span class="s">(alerte si en retard)</span>
+│   ├─ <strong>Vue lecture seule du contenu en cours</strong>
+│   │   ├─ Bilan patrimonial provisoire <span class="s">(phase 1)</span>
+│   │   ├─ Préconisations en cours d'élaboration <span class="s">(phase 2)</span>
+│   │   ├─ Tableau de synthèse provisoire <span class="s">(phase 3)</span>
+│   │   └─ Frise chronologique provisoire <span class="s">(phase 4)</span>
+│   ├─ <strong>Ajustements de l'ingénieur</strong> <span class="s">(diff entre sortie IA brute et version ajustée)</span>
+│   │   ├─ Liste des modifications phase par phase
+│   │   ├─ Commentaires/justifications de l'ingénieur
+│   │   └─ Visualisation des ajouts/suppressions
+│   └─ Notes &amp; commentaires de l'ingénieur sur le dossier
+
+<span class="b">┌─ CAS C · ÉTUDE NON DÉMARRÉE ○</span>
+│   ├─ Indication "aucune étude démarrée pour ce dossier"
+│   ├─ Vérification des prérequis <span class="s">(KYC signé · DCI rempli · paiement reçu)</span>
+│   └─ Bouton ⇄ <strong>"Démarrer l'étude (mode ingénieur)"</strong> <span class="s">(bascule automatique vers Doc 5)</span>
+
+<span class="b">┌─ ACTIONS DU DIRIGEANT</span>
+│   ├─ <strong>[Réattribuer à un autre ingénieur]</strong> <span class="s">(en cas de surcharge ou départ)</span>
+│   ├─ <strong>[Valider l'étude pour livraison]</strong> <span class="s">(si workflow validation activé · paramétrable)</span>
+│   ├─ <strong>[Ajouter une note interne]</strong> <span class="s">(visible uniquement par le cabinet, pas par le client)</span>
+│   └─ <strong>[⇄ Basculer en mode ingénieur pour intervenir]</strong> <span class="s">(toggle vers Doc 5 · si le dirigeant veut modifier l'étude)</span>
+          </div>
+
+          <div class="note gold" style="margin-top: 12px;">
+            <strong>📌 Important sur le périmètre dirigeant :</strong>
+            <ul style="margin-top: 6px; padding-left: 20px; font-size: 12.5px;">
+              <li><strong>Le dirigeant ne voit JAMAIS l'interface IA</strong> (sous-agents, prompts, chat IA, exécution des phases) dans cet onglet — il voit uniquement le <em>résultat</em>.</li>
+              <li>Pour produire ou modifier l'étude lui-même, il bascule en <strong>mode ingénieur</strong> via le toggle. Le module IA en 5 phases avec édition complète est exclusivement dans le <strong>Doc 5</strong>.</li>
+              <li>Le bouton <em>"Valider l'étude"</em> est <strong>paramétrable par cabinet</strong> : certains dirigeants veulent valider chaque étude avant livraison client, d'autres laissent l'autonomie totale aux ingénieurs.</li>
+            </ul>
+          </div>
+
+          <div class="pc-section-label">Sous-pages atteignables</div>
+          <div class="pc-subpages">
+            <div class="pc-subpage"><strong>Téléchargement PDF</strong> · si étude livrée</div>
+            <div class="pc-subpage"><strong>Visualisation des ajustements</strong> · diff entre sortie IA et version finale</div>
+            <div class="pc-subpage"><strong>Modal réattribution</strong> · liste des ingénieurs du cabinet · charge actuelle de chacun</div>
+            <div class="pc-subpage"><strong>Espace Ingénieur (Doc 5)</strong> · au clic du toggle · ouverture en mode édition complète</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Onglet 5 -->
+      <div class="page-card">
+        <div class="pc-header">
+          <div class="pc-icon">5️⃣</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Onglet 5/8</div>
+            <div class="pc-title">Investissements &amp; encours</div>
+            <div class="pc-desc">Tous les produits souscrits par le client : financier, assurance, immobilier, sociétés.</div>
+          </div>
+          <span class="pc-status todo">À FAIRE</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-tree">
+<span class="b">├─ Synthèse encours total</span>
+<span class="b">├─ Investissement financier</span> <span class="s">(produits financiers souscrits)</span>
+<span class="b">├─ Assurances souscrites</span>
+<span class="b">├─ Projets immobiliers</span>
+<span class="b">├─ Sociétés immatriculées</span>
+<span class="b">├─ Évolution dans le temps</span>
+<span class="b">└─ Performance par produit</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Onglet 6 -->
+      <div class="page-card">
+        <div class="pc-header">
+          <div class="pc-icon">6️⃣</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Onglet 6/8</div>
+            <div class="pc-title">Activité &amp; communications</div>
+            <div class="pc-desc">Timeline complète des interactions : RDV, emails, messages, événements, transitions d'étape.</div>
+          </div>
+          <span class="pc-status todo">À FAIRE</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-tree">
+<span class="b">├─ Timeline chronologique</span>
+<span class="b">├─ RDV passés &amp; à venir</span>
+<span class="b">├─ Emails envoyés/reçus</span>
+<span class="b">├─ Messages chat</span>
+<span class="b">├─ Documents échangés</span>
+<span class="b">└─ Événements système</span> <span class="s">(transitions étape · validations · etc.)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Onglet 7 -->
+      <div class="page-card">
+        <div class="pc-header">
+          <div class="pc-icon">7️⃣</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Onglet 7/8</div>
+            <div class="pc-title">Compliance &amp; signature</div>
+            <div class="pc-desc">DER · DCI · KYC · LM signés et envoyés via Yousign. Archive des documents de conformité.</div>
+          </div>
+          <span class="pc-status todo">À FAIRE</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-tree">
+<span class="b">├─ DER (Document d'Entrée en Relation)</span>
+<span class="b">├─ Lettre de Mission</span>
+<span class="b">├─ Documents KYC</span>
+<span class="b">├─ Annexes obligatoires</span>
+<span class="b">├─ Statut signatures Yousign</span>
+<span class="b">├─ Historique des avenants</span>
+<span class="b">└─ Workflow signature électronique</span> <span class="s">(déclenchement)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Onglet 8 -->
+      <div class="page-card">
+        <div class="pc-header">
+          <div class="pc-icon">8️⃣</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Onglet 8/8</div>
+            <div class="pc-title">Notes &amp; tâches</div>
+            <div class="pc-desc">Notes internes ingénieur (non visibles par le client) et tâches à effectuer sur le dossier.</div>
+          </div>
+          <span class="pc-status todo">À FAIRE</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-tree">
+<span class="b">├─ Notes internes</span> <span class="s">(privées au cabinet, jamais visibles client)</span>
+<span class="b">├─ Tâches à faire</span> <span class="s">(checklist · deadlines · responsables)</span>
+<span class="b">├─ Tâches automatiques</span> <span class="s">(générées par l'IA selon l'étude)</span>
+<span class="b">└─ Historique des notes</span> <span class="s">(qui a écrit quoi quand)</span>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- ================================== -->
+    <!-- SECTION 9 — CALENDRIER & RDV       -->
+    <!-- ================================== -->
+    <section class="main-section" id="calendrier">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">8</span> Section 8 / 13 · Outils opérationnels · ⭐ Priorité MVP</div>
+        <h2 class="section-title">📅 Calendrier &amp; RDV</h2>
+        <p class="section-intro">Agenda interne du cabinet façon Calendly + intégration Google Calendar / Outlook pour synchronisation. Permet aux clients de prendre RDV directement depuis leur espace.</p>
+      </div>
+
+      <div class="page-card priority">
+        <div class="pc-header">
+          <div class="pc-icon">📅</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Page principale · /calendrier</div>
+            <div class="pc-title">Mon calendrier</div>
+            <div class="pc-desc">Vue calendrier complète de l'ingénieur ou du cabinet (selon rôle).</div>
+          </div>
+          <span class="pc-status priority">PRIORITÉ ⭐</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Composants attendus</div>
+          <div class="pc-tree">
+<span class="b">┌─ HEADER CALENDRIER</span>
+│   ├─ Sélecteur de vue <span class="s">(Jour · Semaine · Mois · Liste)</span>
+│   ├─ Filtres <span class="s">(Mes RDV / Cabinet / Type RDV)</span>
+│   ├─ Recherche
+│   └─ <span class="a">[+ Nouveau RDV]</span>
+
+<span class="b">┌─ VUE PRINCIPALE</span>
+│   └─ Grille calendrier interactive
+│       ├─ Codes couleur par type RDV <span class="s">(initial · suivi · restitution · interne)</span>
+│       ├─ Codes couleur par ingénieur <span class="s">(vue cabinet)</span>
+│       └─ Drag &amp; drop pour replanifier
+
+<span class="b">┌─ SIDEBAR DROITE</span>
+│   ├─ <span class="i">Disponibilités configurables</span>
+│   │   ├─ Plages horaires de réception
+│   │   ├─ Jours travaillés
+│   │   └─ Buffer entre RDV
+│   ├─ <span class="i">Types de RDV configurables</span>
+│   │   ├─ RDV initial <span class="s">(60 min)</span>
+│   │   ├─ RDV suivi <span class="s">(45 min)</span>
+│   │   ├─ RDV restitution <span class="s">(90 min)</span>
+│   │   └─ RDV interne équipe
+│   └─ <span class="i">Lien public de prise de RDV</span> <span class="s">(à partager au client)</span>
+
+<span class="b">┌─ INTÉGRATIONS</span>
+│   ├─ Synchro Google Calendar <span class="s">(bidirectionnelle)</span>
+│   ├─ Synchro Outlook
+│   └─ Statut de la dernière synchro
+          </div>
+          <div class="pc-section-label">Sous-pages atteignables</div>
+          <div class="pc-subpages">
+            <div class="pc-subpage"><strong>Détail RDV</strong> · au clic d'un événement · liens visio + dossier client + notes pré-RDV</div>
+            <div class="pc-subpage"><strong>Création RDV</strong> · workflow guidé · sélection client · type · invitation auto</div>
+            <div class="pc-subpage"><strong>Configuration disponibilités</strong> · paramétrage des créneaux ouverts à la réservation client</div>
+            <div class="pc-subpage"><strong>Lien public de RDV</strong> · interface façon Calendly que le client voit</div>
+            <div class="pc-subpage"><strong>Configuration synchros</strong> · OAuth Google/Outlook · règles de synchro</div>
+            <div class="pc-subpage"><strong>RDV passés</strong> · archive avec compte-rendu et transcript IA</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="page-card">
+        <div class="pc-header">
+          <div class="pc-icon">🎫</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Sous-page · /calendrier/rdv/:id</div>
+            <div class="pc-title">Détail RDV (avant / pendant / après)</div>
+            <div class="pc-desc">Fiche RDV complète avec tous les éléments contextuels.</div>
+          </div>
+          <span class="pc-status todo">À FAIRE</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-tree">
+<span class="b">┌─ HEADER RDV</span>
+│   ├─ Date · heure · durée
+│   ├─ Type de RDV
+│   ├─ Lien visio <span class="s">(bouton de lancement)</span>
+│   ├─ Statut <span class="s">(à venir · en cours · passé · annulé)</span>
+│   └─ Actions <span class="s">[Replanifier · Annuler · Notes]</span>
+
+<span class="b">┌─ INFOS CLIENT</span>
+│   ├─ Photo + identité
+│   ├─ Lien rapide vers fiche dossier
+│   ├─ Étape pipeline actuelle
+│   └─ Météo dossier IA
+
+<span class="b">┌─ PRÉPARATION DU RDV</span> <span class="s">(avant)</span>
+│   ├─ Briefing IA <span class="s">(synthèse points-clés à aborder)</span>
+│   ├─ Documents pertinents
+│   └─ Ordre du jour <span class="s">(suggéré ou personnalisé)</span>
+
+<span class="b">┌─ PENDANT LE RDV</span>
+│   ├─ Bouton "Lancer la visio" <span class="s">(section 10)</span>
+│   └─ Notes en direct
+
+<span class="b">┌─ APRÈS LE RDV</span>
+│   ├─ Compte-rendu auto IA <span class="s">(transcript + synthèse)</span>
+│   ├─ DCI complet pré-rempli <span class="s">(suite RDV initial)</span>
+│   ├─ Tâches générées
+│   └─ Validation par ingénieur <span class="s">(édition libre)</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================== -->
+    <!-- SECTION 10 — VISIOCONFÉRENCE       -->
+    <!-- ================================== -->
+    <section class="main-section" id="visio">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">9</span> Section 9 / 13 · Outils opérationnels</div>
+        <h2 class="section-title">🎥 Visioconférence</h2>
+        <p class="section-intro">Lancement et gestion des visioconférences avec les clients. Outil tiers à définir au moment du développement, mais l'enregistrement automatique avec transcription IA est obligatoire (alimente le DCI complet et l'étude).</p>
+      </div>
+
+      <div class="note">
+        <strong>📌 Outil tiers à choisir :</strong> on intègre un outil tiers de visio (à définir au moment du développement). <em>Sont exclus : Zoom · Meet · TLDV · Fireflies (pour des raisons d'incompatibilité avec l'intégration souhaitée).</em>
+      </div>
+
+      <div class="page-card">
+        <div class="pc-header">
+          <div class="pc-icon">🎥</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Page principale · /visio</div>
+            <div class="pc-title">Hub Visioconférence</div>
+            <div class="pc-desc">Liste des visios passées + outil de lancement.</div>
+          </div>
+          <span class="pc-status todo">À FAIRE</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-tree">
+<span class="b">┌─ KPIS VISIO</span>
+│   ├─ Visios cette semaine
+│   ├─ Heures totales en visio mois
+│   └─ Transcripts générés
+
+<span class="b">┌─ VISIO À VENIR</span>
+│   └─ Liste avec bouton "Lancer" <span class="s">(quand l'heure approche)</span>
+
+<span class="b">┌─ VISIOS PASSÉES</span> <span class="a">CLIQUABLES</span>
+│   └─ Liste avec :
+│       ├─ Date
+│       ├─ Client / participants
+│       ├─ Durée
+│       ├─ Transcript généré
+│       └─ Points-clés détectés par IA
+          </div>
+          <div class="pc-section-label">Sous-pages atteignables</div>
+          <div class="pc-subpages">
+            <div class="pc-subpage"><strong>Salle de visio active</strong> · interface pendant la visio (vidéo + notes + transcript live)</div>
+            <div class="pc-subpage"><strong>Détail visio passée</strong> · transcript complet · synthèse IA · timecodes · extraits</div>
+            <div class="pc-subpage"><strong>Configuration outil tiers</strong> · paramètres techniques (à définir lors du choix de l'outil)</div>
+            <div class="pc-subpage"><strong>Pré-RDV check technique</strong> · test caméra/micro avant RDV</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ================================== -->
+    <!-- SECTION 12 — MES OUTILS            -->
+    <!-- ================================== -->
+    <section class="main-section" id="outils">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">10</span> Section 10 / 13 · Outils opérationnels</div>
+        <h2 class="section-title">📦 Mes outils &amp; simulateurs</h2>
+        <p class="section-intro">Accès aux outils opérationnels du cabinet : <strong>catalogue produits commerciaux</strong> (gestion variable selon le type de tenant), simulateurs (succession, fiscalité, retraite, capacité d'investissement, démembrement), workflow d'immatriculation de société.</p>
+      </div>
+
+      <div class="page-card">
+        <div class="pc-header">
+          <div class="pc-icon">📦</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Page principale · /outils</div>
+            <div class="pc-title">Hub des outils</div>
+            <div class="pc-desc">Catalogue produits + simulateurs patrimoniaux + workflows.</div>
+          </div>
+          <span class="pc-status todo">À FAIRE</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-tree">
+<span class="b">┌─ 4 GRANDES FAMILLES D'OUTILS</span> <span class="a">CLIQUABLES</span>
+│   ├─ <span class="i">CATALOGUE COMMERCIAL</span>
+│   │   └─ Présentation client des produits
+│   ├─ <span class="i">CRÉATION DE PORTEFEUILLE</span>
+│   │   └─ Outil de simulation patrimoniale
+│   ├─ <span class="i">SIMULATEURS &amp; CALCULATEURS</span>
+│   │   ├─ Succession
+│   │   ├─ Fiscalité (IR · IFI · plus-values)
+│   │   ├─ Retraite
+│   │   ├─ Capacité d'investissement
+│   │   └─ Démembrement de propriété
+│   └─ <span class="i">IMMATRICULATION DE SOCIÉTÉ</span>
+│       └─ Workflow guidé SCI / SARL / SAS / SELARL
+          </div>
+
+          <div class="pc-section-label">Variations selon le type de tenant ⚖</div>
+          <div class="note gold" style="margin: 8px 0; padding: 14px 18px;">
+            <p style="margin: 0 0 8px; font-size: 12.5px;"><strong style="color: var(--gold);">🏛 RÉSEAU SEULEMENT</strong> (tenant_type = 'marque') :</p>
+            <ul style="margin: 0 0 12px 20px; font-size: 12px; line-height: 1.65;">
+              <li><strong>Catalogue commercial centralisé</strong> par PRIVEOS Capital — le licencié l'utilise mais ne peut pas l'éditer (paramétrage côté propriétaire dans le Doc 3)</li>
+              <li>Sélection des produits visibles paramétrée par PRIVEOS Capital</li>
+              <li>Tarifications et règles commerciales imposées par le réseau</li>
+              <li>Pas de Marketplace ASTRAEOS accessible</li>
+            </ul>
+            <p style="margin: 0 0 8px; font-size: 12.5px;"><strong style="color: var(--navy);">💼 INDÉPENDANT SEULEMENT</strong> (tenant_type = 'cabinet_direct') :</p>
+            <ul style="margin: 0 0 0 20px; font-size: 12px; line-height: 1.65;">
+              <li><strong>Catalogue commercial 100% géré par le cabinet</strong> — le dirigeant ajoute/modifie/supprime ses propres produits via la section <em>Paramètres cabinet</em> (section 13)</li>
+              <li><strong>OU activation de la Marketplace ASTRAEOS</strong> — packs sectoriels prêts à l'emploi (Pack Financier, Pack Immobilier, Pack Référentiels) maintenus par ASTRAEOS</li>
+              <li>Bouton <em>"+ Ajouter un produit"</em> visible dans le catalogue (autonomie totale)</li>
+              <li>Bouton <em>"Activer un pack Marketplace"</em> visible dans le catalogue (raccourci vers la souscription)</li>
+              <li>Mix possible : packs Marketplace activés + produits personnalisés du cabinet</li>
+            </ul>
+          </div>
+
+          <div class="pc-section-label">Sous-pages — chaque outil = sa propre page</div>
+          <div class="pc-subpages">
+            <div class="pc-subpage"><strong>Catalogue commercial</strong> · présentation produits (lecture si Marque · édition si Cabinet direct)</div>
+            <div class="pc-subpage"><strong>Création portefeuille</strong> · assistant 5 étapes</div>
+            <div class="pc-subpage"><strong>Simulateur succession</strong> · arbre familial + calcul droits + optimisation</div>
+            <div class="pc-subpage"><strong>Simulateur fiscalité IR/IFI</strong> · saisie + scénarios optimisation</div>
+            <div class="pc-subpage"><strong>Simulateur retraite</strong> · projection + gap financement + solutions</div>
+            <div class="pc-subpage"><strong>Simulateur capacité d'investissement</strong> · épargne + endettement</div>
+            <div class="pc-subpage"><strong>Simulateur démembrement</strong> · usufruit/nue-propriété</div>
+            <div class="pc-subpage"><strong>Workflow création SCI/SARL/SAS</strong> · saisie + génération statuts</div>
+            <div class="pc-subpage"><strong>Historique simulations par client</strong> · rattachement aux dossiers</div>
+            <div class="pc-subpage"><strong>Marketplace ASTRAEOS</strong> · réservé tenants Cabinet direct · activation des packs</div>
+          </div>
+          <div class="note">
+            <strong>📌 Note pour les simulateurs :</strong> les simulateurs (succession, fiscalité, retraite, etc.) sont fournis par ASTRAEOS dans les 2 cas — ils ne dépendent pas du type de tenant. Seul le <strong>catalogue produits commerciaux</strong> diffère selon le tenant.
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- ================================== -->
+    <!-- SECTION 13 — COMPLIANCE & FACTURATION -->
+    <!-- ================================== -->
+    <section class="main-section" id="compliance">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">11</span> Section 11 / 13 · Gestion · ⭐ Priorité MVP</div>
+        <h2 class="section-title">⚖ Compliance &amp; facturation</h2>
+        <p class="section-intro">Gestion de la conformité documentaire des dossiers clients (DER, DCI, KYC, LM via Yousign) et de la facturation client (via Qonto). Cœur du suivi administratif quotidien.</p>
+      </div>
+
+      <div class="page-card priority">
+        <div class="pc-header">
+          <div class="pc-icon">⚖</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Page principale · /compliance</div>
+            <div class="pc-title">Tableau de bord Compliance &amp; facturation</div>
+            <div class="pc-desc">Vue d'ensemble : signatures en attente, factures à émettre/encaisser, alertes réglementaires.</div>
+          </div>
+          <span class="pc-status priority">PRIORITÉ ⭐</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Composants attendus</div>
+          <div class="pc-tree">
+<span class="b">┌─ KPIS COMPLIANCE</span>
+│   ├─ Signatures en attente <span class="s">(Yousign)</span>
+│   ├─ Documents non finalisés
+│   ├─ Factures impayées
+│   └─ Alertes réglementaires
+
+<span class="b">┌─ ALERTES PRIORITAIRES</span> <span class="a">CLIQUABLES</span>
+│   ├─ DER non signés
+│   ├─ DCI à finaliser
+│   ├─ KYC manquants
+│   └─ Lettres de mission en attente
+
+<span class="b">┌─ DEUX BLOCS PRINCIPAUX</span>
+
+<span class="b">├─ BLOC 1 : COMPLIANCE DOCUMENTAIRE</span>
+│   ├─ Documents par client <span class="s">(tableau filtrable)</span>
+│   ├─ Statut signature Yousign
+│   ├─ Workflow déclenchement signature
+│   └─ Archive signée <span class="s">(historique)</span>
+
+<span class="b">└─ BLOC 2 : FACTURATION</span>
+    ├─ Factures en cours
+    ├─ Factures impayées <span class="s">(avec relances)</span>
+    ├─ Encaissements via Qonto
+    └─ Génération nouvelle facture
+          </div>
+
+          <div class="pc-section-label">Sous-pages atteignables</div>
+          <div class="pc-subpages">
+            <div class="pc-subpage"><strong>Liste compliance par client</strong> · qui a quoi signé · qui doit signer quoi</div>
+            <div class="pc-subpage"><strong>Workflow signature électronique</strong> · déclenchement Yousign · template DER · suivi</div>
+            <div class="pc-subpage"><strong>Templates documents</strong> · DER · LM · annexes · personnalisables (selon paramétrage PRIVEOS Capital)</div>
+            <div class="pc-subpage"><strong>Archive documents signés</strong> · accessible client + cabinet · audit trail</div>
+            <div class="pc-subpage"><strong>Liste factures</strong> · émises · en attente · payées · impayées</div>
+            <div class="pc-subpage"><strong>Génération nouvelle facture</strong> · workflow · client · type d'honoraires · échéancier</div>
+            <div class="pc-subpage"><strong>Détail facture</strong> · lignes · TVA · paiement · relances</div>
+            <div class="pc-subpage"><strong>Encaissements Qonto</strong> · vue des paiements reçus · réconciliation</div>
+            <div class="pc-subpage"><strong>Workflow relance impayés</strong> · relance auto à J+15, J+30, J+45</div>
+            <div class="pc-subpage"><strong>Mes documents conformité personnels</strong> · ORIAS · formations · RC pro <span class="s">(consultable par PRIVEOS Capital)</span></div>
+          </div>
+
+          <div class="note">
+            <strong>📌 Distinction importante :</strong> cette section gère <em>(1)</em> la compliance des dossiers clients (DER/DCI/KYC/LM) et <em>(2)</em> la facturation client. La compliance professionnelle du cabinet lui-même (ORIAS, formations CIF/IAS, RC pro) est gérée également ici, avec une visibilité variable selon le tenant.
+          </div>
+
+          <div class="pc-section-label">Variations selon le type de tenant ⚖</div>
+          <div class="note gold" style="margin: 8px 0; padding: 14px 18px;">
+            <p style="margin: 0 0 8px; font-size: 12.5px;"><strong style="color: var(--gold);">🏛 RÉSEAU SEULEMENT</strong> (tenant_type = 'marque') :</p>
+            <ul style="margin: 0 0 12px 20px; font-size: 12px; line-height: 1.65;">
+              <li>Documents compliance professionnelle <strong>visibles aussi côté PRIVEOS Capital</strong> (Doc 3) — le propriétaire de marque supervise la conformité de tout son réseau</li>
+              <li>Modèles de lettres de mission <strong>imposés par PRIVEOS Capital</strong></li>
+              <li>Renouvellement RC pro coordonné par le réseau (négociation groupée possible)</li>
+              <li>Encaissements via Qonto avec <strong>règles de reversement automatiques</strong> à PRIVEOS Capital (selon paramètres du contrat de licence)</li>
+              <li>Facturation des études : montant max 3 250 € HT imposé par PRIVEOS Capital (paramétrable)</li>
+            </ul>
+            <p style="margin: 0 0 8px; font-size: 12.5px;"><strong style="color: var(--navy);">💼 INDÉPENDANT SEULEMENT</strong> (tenant_type = 'cabinet_direct') :</p>
+            <ul style="margin: 0 0 0 20px; font-size: 12px; line-height: 1.65;">
+              <li>Documents compliance professionnelle <strong>visibles uniquement par le cabinet</strong> (pas de propriétaire qui supervise)</li>
+              <li>Modèles de lettres de mission <strong>personnalisables par le cabinet</strong> (ou modèles génériques fournis par ASTRAEOS)</li>
+              <li>Renouvellement RC pro géré seul par le cabinet</li>
+              <li>Encaissements via Qonto <strong>directs au cabinet</strong> (100% conservé · pas de reversement)</li>
+              <li>Facturation des études <strong>libre</strong> (aucun plafond imposé · le cabinet fixe ses propres tarifs)</li>
+              <li>Ligne supplémentaire : <strong>"Charges ASTRAEOS"</strong> (abonnement par utilisateur/mois + Marketplace si activée) à comptabiliser</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================== -->
+    <!-- SECTION 14 — CHAT & MESSAGERIE     -->
+    <!-- ================================== -->
+    <section class="main-section" id="chat">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">12</span> Section 12 / 13 · Gestion</div>
+        <h2 class="section-title">💬 Chat &amp; messagerie</h2>
+        <p class="section-intro">Canaux de communication pour le dirigeant cabinet : <strong>3 canaux pour les tenants Marque</strong> (PRIVEOS Capital + clients finaux + équipe interne) ou <strong>2 canaux pour les tenants Cabinet direct</strong> (clients finaux + équipe interne — pas de canal propriétaire).</p>
+      </div>
+
+      <div class="note">
+        <strong>🔒 Cloisonnement strict :</strong> les cabinets ne communiquent <strong>pas</strong> entre eux via cette messagerie. Au sein d'un même cabinet en revanche, dirigeant + ingénieurs + collaborateurs peuvent discuter librement.
+      </div>
+
+      <div class="page-card">
+        <div class="pc-header">
+          <div class="pc-icon">💬</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Page principale · /chat</div>
+            <div class="pc-title">Messagerie unifiée</div>
+            <div class="pc-desc">Layout 3 colonnes type Slack/Intercom : nav canaux + liste conversations + thread actif.</div>
+          </div>
+          <span class="pc-status todo">À FAIRE</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Wireframe proposé</div>
+          <div class="pc-tree">
+<span class="b">┌─ LAYOUT 3 COLONNES</span> <span class="s">(240px / 320px / 1fr)</span>
+
+<span class="b">├─ COLONNE 1 : Navigation des canaux</span>
+│   ├─ <span class="i">🏛 Avec PRIVEOS Capital</span> <span class="s">(uniquement si tenant Marque)</span>
+│   │   └─ Échanges avec le propriétaire de marque
+│   ├─ <span class="i">👤 Avec mes clients finaux</span>
+│   │   └─ Liste des conversations clients
+│   └─ <span class="i">👥 Équipe interne du cabinet</span>
+│       ├─ Channels publics du cabinet
+│       └─ DM entre collaborateurs
+
+<span class="b">├─ COLONNE 2 : Liste des conversations</span>
+│   ├─ Filtres <span class="s">(non lus · épinglés · archive)</span>
+│   ├─ Search bar
+│   └─ Liste threads <span class="s">(avatar + nom + preview + timestamp + badge)</span>
+
+<span class="b">└─ COLONNE 3 : Thread actif</span>
+    ├─ Header thread <span class="s">(avatar + nom + actions : épingler · archiver · @mentions)</span>
+    ├─ Messages bulles
+    │   ├─ Avatar + horodatage
+    │   ├─ Texte / fichiers / liens cliquables
+    │   └─ Statuts <span class="s">(envoyé · livré · lu)</span>
+    └─ Composer en bas <span class="s">(éditeur riche · pièces jointes · emojis · @mentions)</span>
+          </div>
+
+          <div class="pc-section-label">Variations selon le type de tenant ⚖</div>
+          <div class="note gold" style="margin: 8px 0; padding: 14px 18px;">
+            <p style="margin: 0 0 8px; font-size: 12.5px;"><strong style="color: var(--gold);">🏛 RÉSEAU SEULEMENT</strong> (tenant_type = 'marque') · <strong>3 canaux</strong> :</p>
+            <ul style="margin: 0 0 12px 20px; font-size: 12px; line-height: 1.65;">
+              <li>Canal <strong>"Avec PRIVEOS Capital"</strong> visible — chat 1:1 avec le propriétaire de marque (questions techniques, conformité, négociations)</li>
+              <li>Réception des <strong>annonces de PRIVEOS Capital</strong> (broadcasts vers tout le réseau)</li>
+              <li>Canal "Avec mes clients finaux" visible</li>
+              <li>Canal "Équipe interne du cabinet" visible</li>
+            </ul>
+            <p style="margin: 0 0 8px; font-size: 12.5px;"><strong style="color: var(--navy);">💼 INDÉPENDANT SEULEMENT</strong> (tenant_type = 'cabinet_direct') · <strong>2 canaux</strong> :</p>
+            <ul style="margin: 0 0 0 20px; font-size: 12px; line-height: 1.65;">
+              <li>Canal <strong>"Avec PRIVEOS Capital"</strong> <strong>masqué</strong> (pas de propriétaire)</li>
+              <li>À la place : possibilité d'un canal <strong>"Support ASTRAEOS"</strong> pour les questions sur la plateforme (vers Section 5 du Doc 2)</li>
+              <li>Pas d'annonces propriétaire — à la place, les notifications produit ASTRAEOS</li>
+              <li>Canal "Avec mes clients finaux" visible</li>
+              <li>Canal "Équipe interne du cabinet" visible</li>
+            </ul>
+          </div>
+
+          <div class="pc-section-label">Interactions clés</div>
+          <div class="pc-interactions">
+            <div class="pc-interaction"><strong>@mention</strong> — notifie l'utilisateur cité (équipe interne)</div>
+            <div class="pc-interaction"><strong>Pièce jointe</strong> — upload + preview inline</div>
+            <div class="pc-interaction"><strong>Notifications</strong> — SMS+email si non lu après 24h (clients)</div>
+            <div class="pc-interaction"><strong>Recherche</strong> — dans tous les threads</div>
+            <div class="pc-interaction"><strong>Archivage</strong> — auto après 6 mois sans activité</div>
+            <div class="pc-interaction"><strong>Lien fiche dossier</strong> — au clic d'un client → ouvre sa fiche</div>
+          </div>
+          <div class="pc-section-label">Sous-pages atteignables</div>
+          <div class="pc-subpages">
+            <div class="pc-subpage"><strong>Création channel interne cabinet</strong> · canal d'équipe (général · projet · commercial...)</div>
+            <div class="pc-subpage"><strong>Détail message</strong> · modal avec actions (signaler · répondre · transférer)</div>
+            <div class="pc-subpage"><strong>Paramètres notifications</strong> · règles par canal et par client</div>
+            <div class="pc-subpage"><strong>Archive conversations</strong> · accès aux conversations archivées</div>
+            <div class="pc-subpage"><strong>Threads épinglés</strong> · accès rapide</div>
+            <div class="pc-subpage"><strong>Annonces reçues PRIVEOS Capital</strong> · historique des broadcasts du propriétaire de marque</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================== -->
+    <!-- SECTION 15 — PARAMÈTRES CABINET    -->
+    <!-- ================================== -->
+    <section class="main-section" id="parametres">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">13</span> Section 13 / 13 · Gestion</div>
+        <h2 class="section-title">⚙ Paramètres cabinet</h2>
+        <p class="section-intro">Paramétrage du cabinet : informations légales, immatriculations, intégrations techniques, préférences. <strong>Le branding et le catalogue produits varient fortement selon le type de tenant.</strong></p>
+      </div>
+
+      <div class="page-card">
+        <div class="pc-header">
+          <div class="pc-icon">⚙</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Page principale · /parametres</div>
+            <div class="pc-title">Hub paramètres cabinet</div>
+            <div class="pc-desc">Catégories de paramètres, dont certaines spécifiques au type de tenant.</div>
+          </div>
+          <span class="pc-status todo">À FAIRE</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Wireframe proposé</div>
+          <div class="pc-tree">
+<span class="b">┌─ BLOCS DE PARAMÈTRES</span> <span class="a">CLIQUABLES</span>
+│   ├─ <span class="i">INFORMATIONS LÉGALES DU CABINET</span>
+│   │   ├─ Raison sociale · forme juridique
+│   │   ├─ SIREN · adresse · contact
+│   │   ├─ Dirigeant
+│   │   └─ Date de création / date d'entrée dans le réseau <span class="s">(si tenant Marque)</span>
+│   ├─ <span class="i">IMMATRICULATIONS &amp; CERTIFICATIONS</span>
+│   │   ├─ ORIAS <span class="s">(catégories : CIF · IAS · IOBSP · MIA…)</span>
+│   │   ├─ Formations professionnelles <span class="s">(CIF · IAS · IOBSP)</span>
+│   │   ├─ Responsabilité Civile Pro <span class="s">(compagnie · contrat · plafond)</span>
+│   │   └─ Documents juridiques <span class="s">(statuts · Kbis · convention licence si tenant Marque)</span>
+│   ├─ <span class="i">UTILISATEURS &amp; PERMISSIONS</span>
+│   │   ├─ Liste collaborateurs <span class="s">(vers section 4)</span>
+│   │   ├─ Création nouveau collaborateur
+│   │   ├─ Rôles personnalisés
+│   │   └─ Audit logs accès
+│   ├─ <span class="i">INTÉGRATIONS TECHNIQUES</span>
+│   │   ├─ Yousign <span class="s">(statut · API key)</span>
+│   │   ├─ Qonto <span class="s">(connexion banque)</span>
+│   │   ├─ Outil visio <span class="s">(connexion)</span>
+│   │   ├─ Synchros calendrier <span class="s">(Google · Outlook)</span>
+│   │   └─ Routing IA <span class="s">(modèles utilisés)</span>
+│   ├─ <span class="i">BRANDING DU CABINET</span> <span class="s">(comportement variable selon le tenant)</span>
+│   ├─ <span class="i">CATALOGUE PRODUITS</span> <span class="s">(visible uniquement si tenant Cabinet direct)</span>
+│   ├─ <span class="i">MARKETPLACE ASTRAEOS</span> <span class="s">(visible uniquement si tenant Cabinet direct)</span>
+│   └─ <span class="i">PRÉFÉRENCES CABINET</span>
+│       ├─ Activation animation interne (section 3)
+│       ├─ Templates emails personnalisés
+│       ├─ Disponibilités défaut <span class="s">(calendrier)</span>
+│       ├─ Notifications par défaut
+│       └─ Politique de confidentialité interne
+          </div>
+
+          <div class="pc-section-label">Variations selon le type de tenant ⚖</div>
+          <div class="note gold" style="margin: 8px 0; padding: 14px 18px;">
+            <p style="margin: 0 0 8px; font-size: 12.5px;"><strong style="color: var(--gold);">🏛 RÉSEAU SEULEMENT</strong> (tenant_type = 'marque') :</p>
+            <ul style="margin: 0 0 12px 20px; font-size: 12px; line-height: 1.65;">
+              <li><strong>Branding</strong> : <em>imposé par PRIVEOS Capital</em> — logo, couleurs, charte ne sont <strong>pas modifiables</strong>. Seules les <em>informations identitaires</em> du cabinet (nom, adresse) sont éditables.</li>
+              <li><strong>Catalogue produits</strong> : non éditable — géré centralement par PRIVEOS Capital (Doc 3)</li>
+              <li><strong>Marketplace ASTRAEOS</strong> : non disponible</li>
+              <li>Convention de licence PRIVEOS Capital visible (durée, conditions de sortie, frais d'entrée payés)</li>
+              <li>Notifications automatiques au propriétaire de marque sur les changements de paramètres sensibles (ex : changement d'ORIAS)</li>
+            </ul>
+            <p style="margin: 0 0 8px; font-size: 12.5px;"><strong style="color: var(--navy);">💼 INDÉPENDANT SEULEMENT</strong> (tenant_type = 'cabinet_direct') :</p>
+            <ul style="margin: 0 0 0 20px; font-size: 12px; line-height: 1.65;">
+              <li><strong>Branding 100% personnalisé</strong> : logo, couleurs, charte graphique entièrement éditables · le cabinet utilise sa propre identité visuelle</li>
+              <li><strong>Catalogue produits</strong> : <strong>section dédiée d'édition</strong> — le cabinet ajoute/modifie/supprime ses propres produits financiers, immobiliers, assurances</li>
+              <li><strong>Marketplace ASTRAEOS</strong> : <strong>section dédiée</strong> — activation/désactivation des packs (Pack Financier, Pack Immobilier, Pack Référentiels) avec tarifs et abonnement</li>
+              <li><strong>Domaine personnalisé</strong> activable (ex : <code>app.cabinet-dupont.fr</code>)</li>
+              <li><strong>Templates emails</strong> 100% personnalisables (signature, header, footer)</li>
+              <li>Pas de notifications réseau — autonomie totale</li>
+              <li>Section <strong>"Mon abonnement ASTRAEOS"</strong> : voir/modifier le nombre d'utilisateurs, les packs Marketplace activés, mode de paiement</li>
+            </ul>
+          </div>
+
+          <div class="pc-section-label">Sous-pages atteignables</div>
+          <div class="pc-subpages">
+            <div class="pc-subpage"><strong>Édition informations légales</strong> · formulaire avec validation</div>
+            <div class="pc-subpage"><strong>Upload nouvelle ORIAS</strong> · workflow (avec notification au propriétaire si tenant Marque)</div>
+            <div class="pc-subpage"><strong>Renouvellement formation</strong> · upload attestation · alerte automatique avant expiration</div>
+            <div class="pc-subpage"><strong>Renouvellement RC pro</strong> · upload nouveau contrat · suivi expiration</div>
+            <div class="pc-subpage"><strong>Configuration Yousign</strong> · API · templates par défaut</div>
+            <div class="pc-subpage"><strong>Configuration Qonto</strong> · OAuth banque · règles de réconciliation</div>
+            <div class="pc-subpage"><strong>Synchros calendrier</strong> · OAuth Google/Outlook · règles de synchro</div>
+            <div class="pc-subpage"><strong>Édition branding</strong> · si tenant Cabinet direct uniquement</div>
+            <div class="pc-subpage"><strong>Gestion catalogue produits</strong> · si tenant Cabinet direct uniquement · CRUD produits</div>
+            <div class="pc-subpage"><strong>Marketplace ASTRAEOS</strong> · si tenant Cabinet direct uniquement · activation packs</div>
+            <div class="pc-subpage"><strong>Mon abonnement ASTRAEOS</strong> · si tenant Cabinet direct · gestion utilisateurs &amp; facturation</div>
+            <div class="pc-subpage"><strong>Mon profil personnel</strong> · pour l'utilisateur connecté</div>
+            <div class="pc-subpage"><strong>Logs &amp; audit accès</strong> · qui a accédé à quoi quand</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== -->
+    <!-- RÉCAPITULATIF                   -->
+    <!-- ============================== -->
+    <section class="main-section" id="recap">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">📋</span> Récapitulatif</div>
+        <h2 class="section-title">Synthèse Espace Cabinet — vue dirigeant</h2>
+        <p class="section-intro">Vue d'ensemble des 13 sections de l'espace dirigeant et de leur priorité pour le développement.</p>
+      </div>
+
+      <div class="note gold">
+        <strong>🎯 État des 13 sections :</strong>
+        <table style="width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 12.5px;">
+          <thead>
+            <tr style="background: rgba(198,142,14,0.10);">
+              <th style="text-align: left; padding: 8px 10px; font-weight: 700;">#</th>
+              <th style="text-align: left; padding: 8px 10px; font-weight: 700;">Section</th>
+              <th style="text-align: left; padding: 8px 10px; font-weight: 700;">Famille</th>
+              <th style="text-align: left; padding: 8px 10px; font-weight: 700;">Statut</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td style="padding: 6px 10px;">1</td><td style="padding: 6px 10px;">📊 Tableau de bord cabinet</td><td style="padding: 6px 10px;">Pilotage</td><td style="padding: 6px 10px; color: var(--gold); font-weight: 700;">PRIORITÉ ⭐</td></tr>
+            <tr><td style="padding: 6px 10px;">2</td><td style="padding: 6px 10px;">💰 Synthèse financière (€)</td><td style="padding: 6px 10px;">Pilotage</td><td style="padding: 6px 10px; color: var(--navy); font-weight: 700;">À FAIRE</td></tr>
+            <tr><td style="padding: 6px 10px;">3</td><td style="padding: 6px 10px;">🏆 Animation interne</td><td style="padding: 6px 10px;">Pilotage</td><td style="padding: 6px 10px; color: var(--navy); font-weight: 700;">OPTIONNEL</td></tr>
+            <tr><td style="padding: 6px 10px;">4</td><td style="padding: 6px 10px;">🌍 Mon équipe</td><td style="padding: 6px 10px;">Pilotage</td><td style="padding: 6px 10px; color: var(--navy); font-weight: 700;">À FAIRE</td></tr>
+            <tr><td style="padding: 6px 10px;">5</td><td style="padding: 6px 10px;">🎯 CRM cabinet (vue 360°)</td><td style="padding: 6px 10px;">CRM</td><td style="padding: 6px 10px; color: var(--gold); font-weight: 700;">PRIORITÉ ⭐</td></tr>
+            <tr><td style="padding: 6px 10px;">6</td><td style="padding: 6px 10px;">🚀 Pipeline cabinet</td><td style="padding: 6px 10px;">CRM</td><td style="padding: 6px 10px; color: var(--gold); font-weight: 700;">PRIORITÉ ⭐</td></tr>
+            <tr><td style="padding: 6px 10px;">7</td><td style="padding: 6px 10px;">📁 Fiche dossier client</td><td style="padding: 6px 10px;">CRM</td><td style="padding: 6px 10px; color: var(--gold); font-weight: 700;">PRIORITÉ ⭐</td></tr>
+            <tr><td style="padding: 6px 10px;">8</td><td style="padding: 6px 10px;">📅 Calendrier &amp; RDV</td><td style="padding: 6px 10px;">Outils opé.</td><td style="padding: 6px 10px; color: var(--gold); font-weight: 700;">PRIORITÉ ⭐</td></tr>
+            <tr><td style="padding: 6px 10px;">9</td><td style="padding: 6px 10px;">🎥 Visioconférence</td><td style="padding: 6px 10px;">Outils opé.</td><td style="padding: 6px 10px; color: var(--navy); font-weight: 700;">À FAIRE</td></tr>
+            <tr><td style="padding: 6px 10px;">10</td><td style="padding: 6px 10px;">📦 Outils &amp; simulateurs</td><td style="padding: 6px 10px;">Outils opé.</td><td style="padding: 6px 10px; color: var(--navy); font-weight: 700;">À FAIRE</td></tr>
+            <tr><td style="padding: 6px 10px;">11</td><td style="padding: 6px 10px;">⚖ Compliance &amp; facturation</td><td style="padding: 6px 10px;">Gestion</td><td style="padding: 6px 10px; color: var(--gold); font-weight: 700;">PRIORITÉ ⭐</td></tr>
+            <tr><td style="padding: 6px 10px;">12</td><td style="padding: 6px 10px;">💬 Chat &amp; messagerie</td><td style="padding: 6px 10px;">Gestion</td><td style="padding: 6px 10px; color: var(--navy); font-weight: 700;">À FAIRE</td></tr>
+            <tr><td style="padding: 6px 10px;">13</td><td style="padding: 6px 10px;">⚙ Paramètres cabinet</td><td style="padding: 6px 10px;">Gestion</td><td style="padding: 6px 10px; color: var(--navy); font-weight: 700;">À FAIRE</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note gold">
+        <strong>⭐ Priorités MVP (6 sections critiques pour démarrer la vue dirigeant) :</strong>
+        <ol style="margin-top: 8px; padding-left: 20px; font-size: 12.5px;">
+          <li><strong>Section 1 — Tableau de bord cabinet</strong> · point d'entrée du dirigeant</li>
+          <li><strong>Section 5 — CRM cabinet (vue 360°)</strong> · pilotage portefeuille global du cabinet</li>
+          <li><strong>Section 6 — Pipeline cabinet</strong> · supervision du flux pour tous les ingénieurs · vue par étape (incluant études en cours / restituées)</li>
+          <li><strong>Section 7 — Fiche dossier client</strong> · LA page centrale du métier · onglet 4 "Étude patrimoniale" pour consulter les rendus</li>
+          <li><strong>Section 8 — Calendrier &amp; RDV</strong> · agenda + intégration Google/Outlook</li>
+          <li><strong>Section 11 — Compliance &amp; facturation</strong> · Yousign + Qonto</li>
+        </ol>
+      </div>
+
+      <div class="note gold" style="background: rgba(198,142,14,0.10); border-left-width: 6px;">
+        <strong>⇄ Mode opérationnel — bascule vers Espace Ingénieur (Doc 5) :</strong>
+        <p style="margin: 6px 0 0; font-size: 12.5px;">Quand le dirigeant veut <em>produire ses propres études</em> ou <em>gérer ses propres clients</em> en mode opérationnel quotidien, il bascule via le toggle vers l'<a href="05_Architecture_Ingenieur.html" target="_blank" style="color: var(--gold); font-weight: 700;">Espace Ingénieur (Doc 5)</a>. C'est là qu'il accède au <strong>module IA en 5 phases en mode complet</strong> (édition, validation, chat IA, export, mise à disposition espace client) et à son CRM cloisonné. Sa session reste ouverte, il navigue entre 2 contextes.</p>
+      </div>
+
+      <div class="note">
+        <strong>📊 Comment le dirigeant suit les études du cabinet :</strong>
+        <ul style="margin-top: 6px; padding-left: 20px; font-size: 12.5px;">
+          <li><strong>Pour voir les études en cours du cabinet</strong> → Section 6 Pipeline cabinet → étape "04 Études en cours" (tableau filtré avec progression, ingénieur, dates, avancement)</li>
+          <li><strong>Pour voir les études livrées du cabinet</strong> → Section 6 Pipeline cabinet → étape "05 Études restituées" (tableau filtré avec rendu final + Trustpilot)</li>
+          <li><strong>Pour consulter une étude précise</strong> → Click sur une ligne du pipeline → Section 7 Fiche dossier client → onglet 4 "Étude patrimoniale" (PDF complet si livrée · progression + ajustements ingénieur si en cours)</li>
+          <li><strong>Pour modifier/produire une étude lui-même</strong> → Bouton ⇄ "Basculer en mode ingénieur" depuis la fiche dossier → Doc 5</li>
+        </ul>
+      </div>
+
+      <div class="note gold" style="background: rgba(198,142,14,0.08); border-left-width: 6px;">
+        <strong>⚖ Synthèse des variations selon le type de tenant :</strong>
+        <table style="width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px;">
+          <thead>
+            <tr style="background: rgba(198,142,14,0.10);">
+              <th style="text-align: left; padding: 6px 8px;">Élément</th>
+              <th style="text-align: left; padding: 6px 8px;">🏛 Tenant Marque</th>
+              <th style="text-align: left; padding: 6px 8px;">💼 Tenant Cabinet direct</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td style="padding: 5px 8px;">Dashboard · Performance vs réseau</td><td style="padding: 5px 8px;">✓ Visible</td><td style="padding: 5px 8px;">✗ Remplacé par Évolution YoY</td></tr>
+            <tr><td style="padding: 5px 8px;">Annonces propriétaire</td><td style="padding: 5px 8px;">✓ Visible (PRIVEOS Capital)</td><td style="padding: 5px 8px;">✗ Remplacé par notifications ASTRAEOS</td></tr>
+            <tr><td style="padding: 5px 8px;">Synthèse financière · reversement</td><td style="padding: 5px 8px;">✓ Reverse à propriétaire</td><td style="padding: 5px 8px;">✗ 100% gardé · charge ASTRAEOS</td></tr>
+            <tr><td style="padding: 5px 8px;">Catalogue produits</td><td style="padding: 5px 8px;">Centralisé · lecture seule</td><td style="padding: 5px 8px;">Construit par cabinet · OU Marketplace</td></tr>
+            <tr><td style="padding: 5px 8px;">Marketplace ASTRAEOS</td><td style="padding: 5px 8px;">✗ Non disponible</td><td style="padding: 5px 8px;">✓ Activable (packs sectoriels)</td></tr>
+            <tr><td style="padding: 5px 8px;">Compliance pro · visibilité</td><td style="padding: 5px 8px;">Cabinet + propriétaire</td><td style="padding: 5px 8px;">Cabinet seul</td></tr>
+            <tr><td style="padding: 5px 8px;">Modèles lettres de mission</td><td style="padding: 5px 8px;">Imposés</td><td style="padding: 5px 8px;">Personnalisables</td></tr>
+            <tr><td style="padding: 5px 8px;">Plafond facturation études</td><td style="padding: 5px 8px;">3 250 € HT (paramétrable propriétaire)</td><td style="padding: 5px 8px;">Libre</td></tr>
+            <tr><td style="padding: 5px 8px;">Chat avec PRIVEOS Capital</td><td style="padding: 5px 8px;">✓ Activé · 3 canaux</td><td style="padding: 5px 8px;">✗ Masqué · 2 canaux + support ASTRAEOS</td></tr>
+            <tr><td style="padding: 5px 8px;">Branding</td><td style="padding: 5px 8px;">Imposé par propriétaire</td><td style="padding: 5px 8px;">100% personnalisé</td></tr>
+            <tr><td style="padding: 5px 8px;">Domaine personnalisé</td><td style="padding: 5px 8px;">✗ Non</td><td style="padding: 5px 8px;">✓ Activable</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note">
+        <strong>🔗 Prochaine étape collaborative :</strong> tu valides cette adaptation du Doc 4 pour les 2 types de tenants. Une fois validée, on passe au <strong>Document 3 — Espace Propriétaire de marque</strong> pour mettre à jour l'header (/5 → /6), ajouter les liens vers le Doc 5 Ingénieur et préciser que ce document concerne uniquement les tenants Marque.
+      </div>
+
+      <div class="note">
+        <strong>📅 Historique des évolutions :</strong>
+        <ul style="margin-top: 6px; padding-left: 20px; font-size: 12px;">
+          <li><strong>v2.3 (mai 2026)</strong> — Audit de cohérence terminologique : correction du title HTML (PRIVEOS → ASTRAEOS), de la sidebar (Document 4 / 5 → Document 4 / 6 · brand-name "Cabinet licencié" → "Cabinet"), du titre sitemap, de la synthèse récap et de la page d'atterrissage pour utiliser une terminologie générique cohérente avec le double modèle commercial (cabinet licencié OU indépendant).</li>
+          <li><strong>v2.2 (mai 2026)</strong> — Adaptation pour le <em>double modèle commercial</em> ASTRAEOS. Ajout d'encarts conditionnels "🏛 RÉSEAU SEULEMENT" / "💼 INDÉPENDANT SEULEMENT" dans 6 sections (Dashboard, Synthèse financière, Outils &amp; catalogue, Compliance &amp; facturation, Chat, Paramètres). Le Doc 4 supporte désormais les 2 types de tenants : tenants Marque (réseau type PRIVEOS Capital) et tenants Cabinet direct (cabinets indépendants).</li>
+          <li><strong>v2.1 (mai 2026)</strong> — Suppression de la section "Études IA (supervision)" (redondante avec Section 6 Pipeline + Section 7 Fiche dossier). Le dirigeant accède aux études via le pipeline cabinet et la fiche dossier client. L'IA reste exclusivement dans le Doc 5 (Ingénieur). Passage de 14 à 13 sections.</li>
+          <li><strong>v2.0 (mai 2026)</strong> — Recentrage sur la vue dirigeant. Suppression de la section "CRM individuel ingénieur" (migrée vers Doc 5). Ajout encart toggle. Passage de 15 à 14 sections.</li>
+          <li><strong>v1.0 (mai 2026)</strong> — Document initial avec 15 sections (incluant CRM ingénieur et IA en mode opérationnel).</li>
+        </ul>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+  const sections = document.querySelectorAll('section.main-section[id]');
+  const navLinks = document.querySelectorAll('.sidebar-nav a[href^="#"]');
+  function updateActiveLink() {
+    let current = '';
+    sections.forEach(section => {
+      const top = section.offsetTop - 100;
+      if (window.scrollY >= top) current = section.id;
+    });
+    navLinks.forEach(link => {
+      link.classList.toggle('active', link.getAttribute('href') === '#' + current);
+    });
+  }
+  window.addEventListener('scroll', updateActiveLink);
+  updateActiveLink();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,2887 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ASTRAEOS — Master Dataset · Données fictives partagées des wireframes</title>
+<link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #102D50;
+    --navy-300: #708196;
+    --navy-200: #A4AEBB;
+    --navy-100: #DBE0E4;
+    --gold: #C68E0E;
+    --gold-300: #DDBB6E;
+    --gold-200: #EEDDB6;
+    --gold-100: #FAF8F3;
+    --medium-400: #695D30;
+    --ivory: #FAF8F3;
+    --light-blue: #EBF1FA;
+    --green-bg: #E8F3EC;
+    --green-text: #1F8A4C;
+    --red-bg: #FCE8E8;
+    --red-text: #B23A3A;
+    --yellow-bg: #FFF8E1;
+    --yellow-text: #8A6500;
+    --purple-bg: #EFE4F5;
+    --purple-text: #6B3A8C;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; scroll-padding-top: 24px; }
+  body {
+    font-family: 'Epilogue', -apple-system, sans-serif;
+    background: var(--ivory);
+    color: var(--navy);
+    line-height: 1.6;
+    font-size: 14.5px;
+  }
+  .doc-layout { display: grid; grid-template-columns: 280px 1fr; min-height: 100vh; }
+  .doc-sidebar {
+    background: linear-gradient(180deg, var(--navy) 0%, #0a1f38 100%);
+    color: white;
+    padding: 32px 24px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+  .sidebar-brand { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
+  .sidebar-brand-mark {
+    width: 42px; height: 42px; border-radius: 8px;
+    background: linear-gradient(135deg, var(--gold), var(--medium-400));
+    color: white; font-weight: 800; font-size: 20px;
+    display: grid; place-items: center;
+    box-shadow: 0 4px 12px rgba(198,142,14,0.4);
+  }
+  .sidebar-brand-name { font-size: 14px; font-weight: 800; letter-spacing: 0.04em; line-height: 1.3; }
+  .sidebar-brand-sub { font-size: 9.5px; color: var(--gold-300); letter-spacing: 0.18em; text-transform: uppercase; font-weight: 700; margin-top: 5px; margin-bottom: 22px; }
+  .sidebar-nav { display: flex; flex-direction: column; gap: 1px; }
+  .sidebar-nav a {
+    color: rgba(255,255,255,0.78);
+    text-decoration: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 12.5px;
+    font-weight: 500;
+    transition: all 0.15s ease;
+  }
+  .sidebar-nav a:hover { background: rgba(255,255,255,0.06); color: white; }
+  .sidebar-nav a.active { background: rgba(198,142,14,0.18); color: var(--gold-300); font-weight: 700; }
+  .sidebar-section-header {
+    font-size: 9.5px;
+    color: var(--gold-300);
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    font-weight: 800;
+    margin: 18px 12px 8px;
+  }
+  .sidebar-section-header::before {
+    content: '';
+    display: inline-block;
+    width: 14px;
+    height: 1.5px;
+    background: var(--gold);
+    vertical-align: middle;
+    margin-right: 8px;
+  }
+
+  .doc-main { padding: 48px 64px 80px; max-width: none; }
+
+  .doc-header {
+    border-bottom: 2px solid var(--navy-100);
+    padding-bottom: 28px;
+    margin-bottom: 40px;
+  }
+  .doc-header-eyebrow { font-size: 10px; font-weight: 700; color: var(--gold); letter-spacing: 0.22em; text-transform: uppercase; margin-bottom: 12px; }
+  .doc-title { font-size: 32px; font-weight: 700; letter-spacing: -0.018em; line-height: 1.18; margin-bottom: 12px; }
+  .doc-title strong { color: var(--gold); }
+  .doc-subtitle { font-size: 14.5px; color: var(--navy-300); line-height: 1.6; max-width: 850px; }
+  .doc-meta {
+    display: flex; flex-wrap: wrap; gap: 16px;
+    margin-top: 18px;
+    font-size: 11.5px;
+    color: var(--navy-300);
+  }
+  .doc-meta strong { color: var(--navy); font-weight: 700; }
+
+  .stats-bar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin: 28px 0;
+  }
+  .stat-block {
+    background: white;
+    border: 1px solid var(--navy-100);
+    border-radius: 10px;
+    padding: 18px 20px;
+    border-left: 4px solid var(--gold);
+  }
+  .stat-label { font-size: 10px; font-weight: 700; color: var(--gold); letter-spacing: 0.16em; text-transform: uppercase; margin-bottom: 6px; }
+  .stat-value { font-size: 28px; font-weight: 700; color: var(--navy); line-height: 1; margin-bottom: 6px; }
+  .stat-meta { font-size: 11px; color: var(--navy-300); }
+
+  .note {
+    background: var(--light-blue);
+    border-left: 4px solid var(--navy);
+    padding: 14px 18px;
+    margin: 18px 0;
+    border-radius: 0 8px 8px 0;
+    font-size: 13px;
+  }
+  .note.gold { background: rgba(198,142,14,0.06); border-left-color: var(--gold); }
+  .note.green { background: var(--green-bg); border-left-color: var(--green-text); }
+  .note.red { background: var(--red-bg); border-left-color: var(--red-text); }
+
+  .main-section { margin: 60px 0; padding-top: 12px; }
+  .section-header { margin-bottom: 28px; }
+  .section-eyebrow {
+    font-size: 10.5px;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-eyebrow .num {
+    display: inline-block;
+    width: 28px; height: 28px;
+    background: var(--navy);
+    color: white;
+    border-radius: 6px;
+    text-align: center;
+    line-height: 28px;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0;
+  }
+  .section-title { font-size: 24px; font-weight: 700; color: var(--navy); margin-bottom: 10px; line-height: 1.2; }
+  .section-intro { font-size: 14px; color: var(--navy-300); max-width: 850px; line-height: 1.6; }
+
+  /* Tableaux dataset */
+  table.dataset {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border: 1px solid var(--navy-100);
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 18px 0;
+    font-size: 12px;
+  }
+  table.dataset th {
+    background: var(--navy);
+    color: white;
+    padding: 11px 12px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--navy);
+  }
+  table.dataset td {
+    padding: 9px 12px;
+    border-bottom: 1px solid var(--navy-100);
+    vertical-align: middle;
+  }
+  table.dataset tr:nth-child(even) { background: var(--ivory); }
+  table.dataset tr:hover { background: var(--gold-100); }
+  table.dataset tr.fil-rouge {
+    background: rgba(198,142,14,0.08) !important;
+    border-left: 3px solid var(--gold);
+  }
+  table.dataset tr.fil-rouge:hover { background: rgba(198,142,14,0.13) !important; }
+  table.dataset td.num { font-family: 'JetBrains Mono', monospace; text-align: right; }
+  table.dataset td.center { text-align: center; }
+  table.dataset .badge-mvp { display: inline-block; background: var(--gold); color: white; padding: 2px 6px; border-radius: 3px; font-size: 9px; font-weight: 800; letter-spacing: 0.05em; }
+  table.dataset .badge-imp { display: inline-block; background: var(--navy); color: white; padding: 2px 6px; border-radius: 3px; font-size: 9px; font-weight: 800; letter-spacing: 0.05em; }
+
+  /* Profil-card */
+  .profil-card {
+    background: white;
+    border: 1px solid var(--navy-100);
+    border-radius: 12px;
+    margin: 16px 0;
+    overflow: hidden;
+  }
+  .profil-card.fil-rouge { border: 2px solid var(--gold); box-shadow: 0 4px 16px rgba(198,142,14,0.15); }
+  .profil-header {
+    padding: 18px 22px;
+    background: linear-gradient(135deg, var(--gold-100) 0%, white 100%);
+    border-bottom: 1px solid var(--navy-100);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .profil-card.fil-rouge .profil-header {
+    background: linear-gradient(135deg, rgba(198,142,14,0.10) 0%, rgba(198,142,14,0.04) 100%);
+  }
+  .profil-icon {
+    width: 56px; height: 56px;
+    background: white;
+    border: 2px solid var(--navy-100);
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-size: 24px;
+    flex-shrink: 0;
+  }
+  .profil-card.fil-rouge .profil-icon { border-color: var(--gold); background: var(--gold-100); }
+  .profil-info { flex: 1; }
+  .profil-eyebrow { font-size: 10px; font-weight: 800; color: var(--gold); letter-spacing: 0.16em; text-transform: uppercase; margin-bottom: 4px; }
+  .profil-card.fil-rouge .profil-eyebrow { color: var(--gold); }
+  .profil-title { font-size: 17px; font-weight: 700; color: var(--navy); margin-bottom: 2px; }
+  .profil-desc { font-size: 12.5px; color: var(--navy-300); line-height: 1.5; }
+  .profil-tag {
+    font-size: 9.5px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 4px;
+    background: var(--purple-bg);
+    color: var(--purple-text);
+    flex-shrink: 0;
+  }
+  .profil-tag.fil-rouge {
+    background: var(--gold);
+    color: white;
+  }
+  .profil-body { padding: 18px 22px; }
+  .profil-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px;
+    margin: 14px 0;
+  }
+  .profil-data-block {
+    background: var(--ivory);
+    padding: 12px 14px;
+    border-radius: 8px;
+    border-left: 3px solid var(--navy-100);
+  }
+  .profil-data-block.gold-block { border-left-color: var(--gold); }
+  .profil-data-block.navy-block { border-left-color: var(--navy); }
+  .profil-data-label {
+    font-size: 9.5px;
+    font-weight: 800;
+    color: var(--navy-300);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .profil-data-value { font-size: 13px; color: var(--navy); font-weight: 600; line-height: 1.5; }
+  .profil-data-value strong { color: var(--gold); }
+  .profil-section-label {
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--navy-300);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin: 16px 0 8px;
+  }
+  .profil-tree {
+    background: var(--ivory);
+    border: 1px solid var(--navy-100);
+    border-radius: 8px;
+    padding: 14px 18px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    line-height: 1.85;
+    white-space: pre-line;
+    color: var(--navy);
+  }
+  .profil-tree .b { color: var(--gold); font-weight: 700; }
+  .profil-tree .s { color: var(--navy-300); font-style: italic; font-size: 11px; }
+  .profil-tree .num { color: var(--green-text); font-weight: 700; }
+  .profil-tree .montage { color: var(--purple-text); font-weight: 700; }
+
+  /* Map de France SVG */
+  .france-map-wrap {
+    background: white;
+    border: 1px solid var(--navy-100);
+    border-radius: 10px;
+    padding: 20px;
+    margin: 18px 0;
+  }
+  .france-map-wrap svg { width: 100%; max-width: 700px; display: block; margin: 0 auto; }
+
+  /* Cards générales */
+  .card-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 14px;
+    margin: 14px 0;
+  }
+  .info-card {
+    background: white;
+    border: 1px solid var(--navy-100);
+    border-radius: 10px;
+    padding: 16px 18px;
+  }
+  .info-card.gold { border-left: 4px solid var(--gold); }
+  .info-card.navy { border-left: 4px solid var(--navy); }
+  .info-card-title { font-size: 11px; font-weight: 800; color: var(--gold); letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 10px; }
+  .info-card-content { font-size: 12.5px; color: var(--navy); line-height: 1.6; }
+  .info-card-content code { background: var(--ivory); padding: 2px 6px; border-radius: 3px; font-size: 11px; }
+
+  @media (max-width: 1100px) {
+    .doc-layout { grid-template-columns: 1fr; }
+    .doc-sidebar { position: static; height: auto; }
+    .stats-bar { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<div class="doc-layout">
+
+  <aside class="doc-sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-brand-mark">D</div>
+      <div><div class="sidebar-brand-name">DATASET</div></div>
+    </div>
+    <div class="sidebar-brand-sub">Master Dataset · Wireframes</div>
+
+    <nav class="sidebar-nav">
+      <div class="sidebar-section-header">Sommaire du dataset</div>
+      <a href="#intro">📖 Introduction &amp; conventions</a>
+      <a href="#network">🏛 Réseau PRIVEOS Capital · 30 cabinets</a>
+      <a href="#engineers">👤 Ingénieurs (~80 personnes)</a>
+      <a href="#client-reference">⭐ Client &amp; Cliente REFERENCE (fil rouge)</a>
+      <a href="#profiles">🧑‍🤝‍🧑 10 profils-clients détaillés</a>
+      <a href="#products">💼 Catalogue produits financiers</a>
+      <a href="#pipeline">🚀 Pipeline en action (15+ dossiers)</a>
+      <a href="#kpis">📊 KPIs cohérents et calculés</a>
+      <a href="#calendar">📅 Calendrier d'événements</a>
+      <a href="#dev-note">📝 Note pour le développeur</a>
+
+      <div class="sidebar-section-header">Documents architecture</div>
+      <a href="00_Data_Architecture.html">🏗 Data Architecture</a>
+      <a href="01_Architecture_Master.html">📋 Document maître</a>
+      <a href="02_Architecture_Editeur.html">👑 Espace ASTRAEOS</a>
+      <a href="03_Architecture_Proprietaire.html">🏛 Espace Propriétaire</a>
+      <a href="04_Architecture_Licencie.html">💼 Espace Cabinet</a>
+      <a href="05_Architecture_Ingenieur.html">👤 Espace Ingénieur</a>
+      <a href="06_Architecture_Client.html">👥 Espace Client</a>
+    </nav>
+  </aside>
+
+  <main class="doc-main">
+
+    <header class="doc-header">
+      <div class="doc-header-eyebrow">Phase 2 · Wireframes · Document fondateur 1/2 · Master Dataset</div>
+      <h1 class="doc-title">Master <strong>Dataset</strong> — Données fictives partagées</h1>
+      <p class="doc-subtitle">Document de référence qui définit <strong>l'ensemble des données fictives</strong> utilisées dans tous les wireframes ASTRAEOS. Chaque client, chaque cabinet, chaque ingénieur, chaque dossier de cette base se retrouvera <strong>de manière cohérente à travers les 5 espaces utilisateurs</strong>. Le développeur doit pouvoir tracer un même client (Client REFERENCE par exemple) à travers le pipeline propriétaire, la fiche cabinet, le module IA ingénieur, le chat, et l'espace client final.</p>
+      <div class="doc-meta">
+        <span><strong>30 cabinets</strong> du réseau PRIVEOS Capital</span>
+        <span><strong>~80 ingénieurs</strong> dont 1 héros (Ingénieur REFERENCE)</span>
+        <span><strong>10 profils-clients détaillés</strong> + 1 fil rouge</span>
+        <span><strong>15+ dossiers</strong> dans le pipeline</span>
+      </div>
+    </header>
+
+    <!-- ============================== -->
+    <!-- INTRODUCTION & CONVENTIONS      -->
+    <!-- ============================== -->
+    <section class="main-section" id="intro">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">📖</span> Introduction</div>
+        <h2 class="section-title">Conventions de nommage et principes</h2>
+        <p class="section-intro">Comment lire ce dataset, et quelles règles s'appliquent aux données fictives.</p>
+      </div>
+
+      <div class="note gold">
+        <strong>🎯 Principe fondateur — La cohérence cross-espaces :</strong>
+        <p style="margin: 8px 0 0; font-size: 12.5px;">Un même <em>client</em>, <em>cabinet</em> ou <em>ingénieur</em> doit apparaître <strong>à l'identique</strong> dans tous les wireframes des 5 espaces. Si <em>Client REFERENCE</em> est dans l'étape 04 du pipeline côté PRIVEOS Capital (Doc 3), il doit aussi apparaître dans le CRM de l'<em>Ingénieur REFERENCE</em> (Doc 5), dans la fiche cabinet (Doc 4), et dans son propre espace client (Doc 6). <strong>Toutes les références à ses données patrimoniales, son DCI, son étude, ses RDV doivent être identiques partout</strong>.</p>
+      </div>
+
+      <div class="card-row">
+        <div class="info-card gold">
+          <div class="info-card-title">⭐ Conventions des noms-pivots</div>
+          <div class="info-card-content">
+            <strong>Client REFERENCE &amp; Cliente REFERENCE</strong> = le fil rouge des wireframes (couple de cadres parisiens, étape 04 du pipeline)<br><br>
+            <strong>Ingénieur REFERENCE</strong> = le héros des wireframes côté pro (Cabinet Paris Étoile)<br><br>
+            <strong>Cabinet REFERENCE</strong> = synonyme de Cabinet Paris Étoile (le cabinet où exerce l'Ingénieur REFERENCE)<br><br>
+            <em>Le développeur peut chercher ces termes pour identifier rapidement les éléments-pivots.</em>
+          </div>
+        </div>
+        <div class="info-card navy">
+          <div class="info-card-title">🏛 Réseau PRIVEOS Capital</div>
+          <div class="info-card-content">
+            <strong>30 cabinets</strong> en franchise/licence couvrant la France métropolitaine.<br><br>
+            <strong>4 cabinets nommés</strong> par initiales (SK, AJ, SB, GG) + <strong>26 cabinets inventés</strong> avec mix initiales + noms régionaux.<br><br>
+            Au sein de chaque cabinet : <strong>1 dirigeant + 1 à 5 ingénieurs</strong>.<br><br>
+            <em>Le tenant Marque illustré ici est PRIVEOS Capital. La même structure est applicable aux futurs propriétaires de marque (Dupont Patrimoine, Mont-Blanc Conseil…).</em>
+          </div>
+        </div>
+        <div class="info-card gold">
+          <div class="info-card-title">💼 Tenant Cabinet direct</div>
+          <div class="info-card-content">
+            Le dataset inclut aussi <strong>2 cabinets indépendants</strong> (tenants Cabinet direct) pour illustrer le 2<sup>ème</sup> modèle commercial d'ASTRAEOS.<br><br>
+            Ces cabinets utilisent les Doc 4, 5, 6 mais <strong>pas le Doc 3</strong> (pas de propriétaire de marque au-dessus d'eux).<br><br>
+            <em>Branding personnalisé · pas de cascade de reversement.</em>
+          </div>
+        </div>
+      </div>
+
+      <div class="note">
+        <strong>📐 Règles de nommage des entités :</strong>
+        <ul style="margin: 8px 0 0 20px; font-size: 12.5px; line-height: 1.7;">
+          <li><strong>Identifiants techniques (IDs)</strong> : tous les enregistrements ont un ID unique au format <code>type-XXXX</code> (ex : <code>cli-0001</code> pour client, <code>cab-0001</code> pour cabinet, <code>ing-0001</code> pour ingénieur, <code>dos-0001</code> pour dossier, <code>prd-0001</code> pour produit). Le développeur réutilisera ces IDs comme clé primaire.</li>
+          <li><strong>Dates</strong> : toutes les dates sont au format <code>YYYY-MM-DD</code>. Les wireframes représentent <strong>l'état du système au 03 mai 2026</strong> (date d'aujourd'hui).</li>
+          <li><strong>Montants financiers</strong> : en euros, format français avec espaces fines (ex : <code>125 000 €</code>) sauf mention contraire.</li>
+          <li><strong>Pourcentages</strong> : format français avec virgule décimale (ex : <code>4,5 %</code>).</li>
+          <li><strong>Téléphones</strong> : format français (ex : <code>06 12 34 56 78</code>).</li>
+          <li><strong>Emails</strong> : tous les emails fictifs utilisent le domaine <code>@email-test.fr</code> pour éviter toute collision avec de vrais comptes.</li>
+        </ul>
+      </div>
+
+      <div class="note green">
+        <strong>✅ Règle de cohérence financière :</strong>
+        <p style="margin: 8px 0 0; font-size: 12.5px;">Les chiffres sont <strong>calculés et cohérents entre eux</strong>. Si <em>Client REFERENCE</em> a un encours de 120 000 € (somme de ses contrats), alors la somme de toutes les commissions générées par ce client doit correspondre, et la quote-part remontée à PRIVEOS Capital aussi. Le développeur peut utiliser ce dataset pour vérifier la justesse des calculs dans son code (KPIs, agrégats, totaux).</p>
+      </div>
+    </section>
+
+    <!-- ============================================ -->
+    <!-- SECTION : RÉSEAU PRIVEOS CAPITAL · 30 CABINETS -->
+    <!-- ============================================ -->
+    <section class="main-section" id="network">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">🏛</span> Réseau PRIVEOS Capital</div>
+        <h2 class="section-title">Les 30 cabinets du réseau · couverture France</h2>
+        <p class="section-intro">Les 30 cabinets licenciés constituant le réseau PRIVEOS Capital. Ils sont répartis sur l'ensemble du territoire métropolitain, avec une présence particulière en IDF, AURA, PACA et Nouvelle-Aquitaine. Le <strong>Cabinet Paris Étoile (cab-0003)</strong> est le <em>Cabinet REFERENCE</em> où exerce l'<em>Ingénieur REFERENCE</em>.</p>
+      </div>
+
+      <div class="stats-bar">
+        <div class="stat-block">
+          <div class="stat-label">Cabinets réseau</div>
+          <div class="stat-value">30</div>
+          <div class="stat-meta">licenciés PRIVEOS Capital</div>
+        </div>
+        <div class="stat-block">
+          <div class="stat-label">Régions couvertes</div>
+          <div class="stat-value">12/13</div>
+          <div class="stat-meta">métropole · sauf Corse</div>
+        </div>
+        <div class="stat-block">
+          <div class="stat-label">Encours total réseau</div>
+          <div class="stat-value">847 M€</div>
+          <div class="stat-meta">cumulé tous cabinets</div>
+        </div>
+        <div class="stat-block">
+          <div class="stat-label">Cabinets directs</div>
+          <div class="stat-value">2</div>
+          <div class="stat-meta">tenants Cabinet direct (hors réseau)</div>
+        </div>
+      </div>
+
+      <div class="note gold">
+        <strong>🗺 Carte de France stylisée :</strong> répartition géographique des 30 cabinets du réseau (le <strong>Cabinet REFERENCE</strong> est mis en évidence en or à Paris).
+      </div>
+
+      <!-- Carte de France SVG stylisée -->
+      <div class="france-map-wrap">
+        <svg viewBox="0 0 700 700" xmlns="http://www.w3.org/2000/svg" style="background: var(--ivory); border-radius: 8px;">
+          <defs>
+            <radialGradient id="cab-glow" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#C68E0E" stop-opacity="0.35"/>
+              <stop offset="100%" stop-color="#C68E0E" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+
+          <!-- Contour France stylisé -->
+          <path d="M 320 80 Q 360 75 400 95 L 440 110 Q 470 130 490 170 L 520 220 Q 540 270 535 330 L 525 400 Q 530 460 510 510 L 480 560 Q 440 600 380 615 L 320 620 Q 250 615 200 590 L 160 555 Q 130 510 130 460 L 135 400 Q 145 340 175 290 L 215 230 Q 250 180 280 140 Q 300 105 320 80 Z"
+                fill="white" stroke="#A4AEBB" stroke-width="2" opacity="0.85"/>
+
+          <!-- Titre -->
+          <text x="350" y="55" text-anchor="middle" fill="#102D50" font-family="Epilogue" font-weight="700" font-size="16">Répartition des 30 cabinets PRIVEOS Capital</text>
+          <text x="350" y="72" text-anchor="middle" fill="#708196" font-family="Epilogue" font-style="italic" font-size="11">⭐ Cabinet REFERENCE = Paris Étoile</text>
+
+          <!-- IDF (Paris) - 5 cabinets -->
+          <circle cx="335" cy="200" r="40" fill="url(#cab-glow)"/>
+          <g>
+            <!-- Cabinet REFERENCE - mis en évidence -->
+            <circle cx="335" cy="200" r="14" fill="#C68E0E" stroke="white" stroke-width="3" filter="drop-shadow(0 2px 6px rgba(198,142,14,0.5))"/>
+            <text x="335" y="205" text-anchor="middle" fill="white" font-weight="800" font-size="11">⭐</text>
+            <circle cx="320" cy="220" r="6" fill="#102D50"/>
+            <circle cx="350" cy="220" r="6" fill="#102D50"/>
+            <circle cx="320" cy="185" r="6" fill="#102D50"/>
+            <circle cx="350" cy="185" r="6" fill="#102D50"/>
+            <text x="385" y="195" fill="#102D50" font-family="Epilogue" font-weight="700" font-size="11">IDF · 5 cabinets</text>
+            <text x="385" y="208" fill="#708196" font-family="Epilogue" font-size="10" font-style="italic">Paris Étoile (REF) · IDF Patrimoine · …</text>
+          </g>
+
+          <!-- Hauts-de-France (Lille) - 2 cabinets -->
+          <g>
+            <circle cx="350" cy="115" r="6" fill="#102D50"/>
+            <circle cx="365" cy="115" r="6" fill="#102D50"/>
+            <text x="380" y="120" fill="#102D50" font-family="Epilogue" font-weight="600" font-size="11">Hauts-de-France · 2</text>
+          </g>
+
+          <!-- Grand Est (Strasbourg) - 2 cabinets -->
+          <g>
+            <circle cx="475" cy="170" r="6" fill="#102D50"/>
+            <circle cx="495" cy="170" r="6" fill="#102D50"/>
+            <text x="490" y="155" fill="#102D50" font-family="Epilogue" font-weight="600" font-size="11">Grand Est · 2</text>
+          </g>
+
+          <!-- Normandie (Caen/Rouen) - 1 cabinet -->
+          <g>
+            <circle cx="240" cy="155" r="6" fill="#102D50"/>
+            <text x="180" y="150" fill="#102D50" font-family="Epilogue" font-weight="600" font-size="11">Normandie · 1</text>
+          </g>
+
+          <!-- Bretagne (Rennes) - 1 cabinet -->
+          <g>
+            <circle cx="180" cy="220" r="6" fill="#102D50"/>
+            <text x="100" y="215" fill="#102D50" font-family="Epilogue" font-weight="600" font-size="11">Bretagne · 1</text>
+          </g>
+
+          <!-- Pays de la Loire (Nantes) - 2 cabinets -->
+          <g>
+            <circle cx="200" cy="290" r="6" fill="#102D50"/>
+            <circle cx="220" cy="295" r="6" fill="#102D50"/>
+            <text x="80" y="295" fill="#102D50" font-family="Epilogue" font-weight="600" font-size="11">Pays Loire · 2</text>
+          </g>
+
+          <!-- Centre-Val de Loire - 1 cabinet -->
+          <g>
+            <circle cx="295" cy="270" r="6" fill="#102D50"/>
+            <text x="305" y="265" fill="#102D50" font-family="Epilogue" font-weight="600" font-size="11">Centre · 1</text>
+          </g>
+
+          <!-- Nouvelle-Aquitaine (Bordeaux) - 4 cabinets -->
+          <g>
+            <circle cx="200" cy="430" r="6" fill="#102D50"/>
+            <circle cx="220" cy="435" r="6" fill="#102D50"/>
+            <circle cx="240" cy="425" r="6" fill="#102D50"/>
+            <circle cx="220" cy="455" r="6" fill="#102D50"/>
+            <text x="80" y="430" fill="#102D50" font-family="Epilogue" font-weight="600" font-size="11">N-Aquitaine · 4</text>
+          </g>
+
+          <!-- Occitanie (Toulouse, Montpellier) - 3 cabinets -->
+          <g>
+            <circle cx="295" cy="500" r="6" fill="#102D50"/>
+            <circle cx="320" cy="510" r="6" fill="#102D50"/>
+            <circle cx="345" cy="495" r="6" fill="#102D50"/>
+            <text x="200" y="540" fill="#102D50" font-family="Epilogue" font-weight="600" font-size="11">Occitanie · 3</text>
+          </g>
+
+          <!-- AURA (Lyon, Grenoble) - 5 cabinets -->
+          <g>
+            <circle cx="430" cy="370" r="6" fill="#102D50"/>
+            <circle cx="450" cy="365" r="6" fill="#102D50"/>
+            <circle cx="445" cy="385" r="6" fill="#102D50"/>
+            <circle cx="465" cy="385" r="6" fill="#102D50"/>
+            <circle cx="425" cy="395" r="6" fill="#102D50"/>
+            <text x="490" y="380" fill="#102D50" font-family="Epilogue" font-weight="600" font-size="11">AURA · 5</text>
+          </g>
+
+          <!-- BFC (Dijon) - 1 cabinet -->
+          <g>
+            <circle cx="420" cy="280" r="6" fill="#102D50"/>
+            <text x="430" y="275" fill="#102D50" font-family="Epilogue" font-weight="600" font-size="11">BFC · 1</text>
+          </g>
+
+          <!-- PACA (Marseille, Nice) - 3 cabinets -->
+          <g>
+            <circle cx="450" cy="490" r="6" fill="#102D50"/>
+            <circle cx="475" cy="495" r="6" fill="#102D50"/>
+            <circle cx="495" cy="475" r="6" fill="#102D50"/>
+            <text x="510" y="495" fill="#102D50" font-family="Epilogue" font-weight="600" font-size="11">PACA · 3</text>
+          </g>
+
+          <!-- Légende -->
+          <g transform="translate(40, 640)">
+            <circle cx="10" cy="0" r="6" fill="#C68E0E"/>
+            <text x="22" y="4" fill="#102D50" font-family="Epilogue" font-weight="600" font-size="11">⭐ Cabinet REFERENCE</text>
+            <circle cx="170" cy="0" r="6" fill="#102D50"/>
+            <text x="182" y="4" fill="#102D50" font-family="Epilogue" font-weight="600" font-size="11">Cabinets du réseau (29 autres)</text>
+            <text x="380" y="4" fill="#708196" font-family="Epilogue" font-style="italic" font-size="10">Total : 30 cabinets · 12/13 régions</text>
+          </g>
+        </svg>
+      </div>
+
+      <!-- Tableau des 30 cabinets -->
+      <h3 style="margin-top: 32px; font-size: 18px; color: var(--navy);">📋 Tableau exhaustif des 30 cabinets du réseau</h3>
+      <p style="font-size: 12.5px; color: var(--navy-300); margin: 6px 0 14px;">Triés par ID. Les <strong>4 cabinets imposés par toi</strong> (SK, AJ, SB, GG) sont aux IDs <code>cab-0001</code>, <code>cab-0002</code>, <code>cab-0007</code>, <code>cab-0014</code>. Le <strong>Cabinet REFERENCE</strong> (Paris Étoile) est <code>cab-0003</code>.</p>
+
+      <table class="dataset">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nom du cabinet</th>
+            <th>Dirigeant</th>
+            <th>Ville</th>
+            <th>Région</th>
+            <th class="num">Ingés</th>
+            <th class="num">Encours</th>
+            <th class="num">Anciennté</th>
+            <th class="center">Rang</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>cab-0001</code></td>
+            <td><strong>SK Conseil</strong></td>
+            <td>Sébastien KIEFFER</td>
+            <td>Strasbourg</td>
+            <td>Grand Est</td>
+            <td class="num">4</td>
+            <td class="num">42 M€</td>
+            <td class="num">8 ans</td>
+            <td class="center">#3</td>
+          </tr>
+          <tr>
+            <td><code>cab-0002</code></td>
+            <td><strong>Cabinet AJ</strong></td>
+            <td>Jordan AGNESSENS</td>
+            <td>Lille</td>
+            <td>Hauts-de-France</td>
+            <td class="num">3</td>
+            <td class="num">31 M€</td>
+            <td class="num">6 ans</td>
+            <td class="center">#7</td>
+          </tr>
+          <tr class="fil-rouge">
+            <td><code>cab-0003</code></td>
+            <td><strong>⭐ Cabinet Paris Étoile</strong> <span class="badge-mvp">REFERENCE</span></td>
+            <td>Marc CHAMBON</td>
+            <td>Paris (8<sup>e</sup>)</td>
+            <td>Île-de-France</td>
+            <td class="num">5</td>
+            <td class="num">68 M€</td>
+            <td class="num">7 ans</td>
+            <td class="center">#1</td>
+          </tr>
+          <tr>
+            <td><code>cab-0004</code></td>
+            <td>Cabinet IDF Patrimoine</td>
+            <td>Caroline THIBAULT</td>
+            <td>Neuilly-sur-Seine</td>
+            <td>Île-de-France</td>
+            <td class="num">4</td>
+            <td class="num">52 M€</td>
+            <td class="num">5 ans</td>
+            <td class="center">#2</td>
+          </tr>
+          <tr>
+            <td><code>cab-0005</code></td>
+            <td>Cabinet Provence Patrimoine</td>
+            <td>Henri RAMBERT</td>
+            <td>Marseille</td>
+            <td>PACA</td>
+            <td class="num">3</td>
+            <td class="num">38 M€</td>
+            <td class="num">9 ans</td>
+            <td class="center">#5</td>
+          </tr>
+          <tr>
+            <td><code>cab-0006</code></td>
+            <td>Cabinet Lyon Conseil</td>
+            <td>Pierre MARÉCHAL</td>
+            <td>Lyon</td>
+            <td>AURA</td>
+            <td class="num">3</td>
+            <td class="num">35 M€</td>
+            <td class="num">6 ans</td>
+            <td class="center">#6</td>
+          </tr>
+          <tr>
+            <td><code>cab-0007</code></td>
+            <td><strong>Cabinet SB</strong></td>
+            <td>Sébastien BOURRIEL</td>
+            <td>Toulouse</td>
+            <td>Occitanie</td>
+            <td class="num">3</td>
+            <td class="num">28 M€</td>
+            <td class="num">4 ans</td>
+            <td class="center">#10</td>
+          </tr>
+          <tr>
+            <td><code>cab-0008</code></td>
+            <td>Cabinet Atlantic Patrimoine</td>
+            <td>Sophie MOREAU</td>
+            <td>Nantes</td>
+            <td>Pays de la Loire</td>
+            <td class="num">2</td>
+            <td class="num">22 M€</td>
+            <td class="num">3 ans</td>
+            <td class="center">#15</td>
+          </tr>
+          <tr>
+            <td><code>cab-0009</code></td>
+            <td>Cabinet Aquitaine Conseil</td>
+            <td>Pierre GOMEZ</td>
+            <td>Bordeaux</td>
+            <td>Nouvelle-Aquitaine</td>
+            <td class="num">3</td>
+            <td class="num">29 M€</td>
+            <td class="num">5 ans</td>
+            <td class="center">#9</td>
+          </tr>
+          <tr>
+            <td><code>cab-0010</code></td>
+            <td>Cabinet Riviera Patrimoine</td>
+            <td>François LEROUX</td>
+            <td>Nice</td>
+            <td>PACA</td>
+            <td class="num">3</td>
+            <td class="num">33 M€</td>
+            <td class="num">7 ans</td>
+            <td class="center">#8</td>
+          </tr>
+          <tr>
+            <td><code>cab-0011</code></td>
+            <td>Cabinet MR Gestion</td>
+            <td>Marine ROUSSEAU</td>
+            <td>Versailles</td>
+            <td>Île-de-France</td>
+            <td class="num">2</td>
+            <td class="num">19 M€</td>
+            <td class="num">3 ans</td>
+            <td class="center">#18</td>
+          </tr>
+          <tr>
+            <td><code>cab-0012</code></td>
+            <td>Cabinet Alpes Conseil</td>
+            <td>Julien DELACROIX</td>
+            <td>Grenoble</td>
+            <td>AURA</td>
+            <td class="num">2</td>
+            <td class="num">17 M€</td>
+            <td class="num">4 ans</td>
+            <td class="center">#20</td>
+          </tr>
+          <tr>
+            <td><code>cab-0013</code></td>
+            <td>Cabinet PL Patrimoine</td>
+            <td>Pascal LAURENT</td>
+            <td>Annecy</td>
+            <td>AURA</td>
+            <td class="num">3</td>
+            <td class="num">26 M€</td>
+            <td class="num">5 ans</td>
+            <td class="center">#11</td>
+          </tr>
+          <tr>
+            <td><code>cab-0014</code></td>
+            <td><strong>Cabinet GG</strong></td>
+            <td>Gauvain LEGAULOIS</td>
+            <td>Rennes</td>
+            <td>Bretagne</td>
+            <td class="num">2</td>
+            <td class="num">21 M€</td>
+            <td class="num">4 ans</td>
+            <td class="center">#16</td>
+          </tr>
+          <tr>
+            <td><code>cab-0015</code></td>
+            <td>Cabinet Normandie Patrimoine</td>
+            <td>Claire VINCENT</td>
+            <td>Rouen</td>
+            <td>Normandie</td>
+            <td class="num">2</td>
+            <td class="num">18 M€</td>
+            <td class="num">3 ans</td>
+            <td class="center">#19</td>
+          </tr>
+          <tr>
+            <td><code>cab-0016</code></td>
+            <td>Cabinet Bourgogne Conseil</td>
+            <td>Antoine MARTIN</td>
+            <td>Dijon</td>
+            <td>Bourgogne-FC</td>
+            <td class="num">2</td>
+            <td class="num">15 M€</td>
+            <td class="num">2 ans</td>
+            <td class="center">#22</td>
+          </tr>
+          <tr>
+            <td><code>cab-0017</code></td>
+            <td>Cabinet AM Gestion</td>
+            <td>Audrey MARCHAL</td>
+            <td>Bordeaux</td>
+            <td>Nouvelle-Aquitaine</td>
+            <td class="num">3</td>
+            <td class="num">24 M€</td>
+            <td class="num">4 ans</td>
+            <td class="center">#13</td>
+          </tr>
+          <tr>
+            <td><code>cab-0018</code></td>
+            <td>Cabinet Loire Patrimoine</td>
+            <td>Vincent BOUVIER</td>
+            <td>Angers</td>
+            <td>Pays de la Loire</td>
+            <td class="num">2</td>
+            <td class="num">16 M€</td>
+            <td class="num">3 ans</td>
+            <td class="center">#21</td>
+          </tr>
+          <tr>
+            <td><code>cab-0019</code></td>
+            <td>Cabinet ED Conseil</td>
+            <td>Émilie DUMONT</td>
+            <td>Lyon</td>
+            <td>AURA</td>
+            <td class="num">3</td>
+            <td class="num">25 M€</td>
+            <td class="num">5 ans</td>
+            <td class="center">#12</td>
+          </tr>
+          <tr>
+            <td><code>cab-0020</code></td>
+            <td>Cabinet Méditerranée Conseil</td>
+            <td>Laurent FOURNIER</td>
+            <td>Montpellier</td>
+            <td>Occitanie</td>
+            <td class="num">2</td>
+            <td class="num">19 M€</td>
+            <td class="num">4 ans</td>
+            <td class="center">#17</td>
+          </tr>
+          <tr>
+            <td><code>cab-0021</code></td>
+            <td>Cabinet TR Gestion</td>
+            <td>Thierry RICHARD</td>
+            <td>Toulouse</td>
+            <td>Occitanie</td>
+            <td class="num">2</td>
+            <td class="num">14 M€</td>
+            <td class="num">2 ans</td>
+            <td class="center">#23</td>
+          </tr>
+          <tr>
+            <td><code>cab-0022</code></td>
+            <td>Cabinet Centre Patrimoine</td>
+            <td>Béatrice ROCHE</td>
+            <td>Tours</td>
+            <td>Centre-Val-Loire</td>
+            <td class="num">2</td>
+            <td class="num">13 M€</td>
+            <td class="num">3 ans</td>
+            <td class="center">#25</td>
+          </tr>
+          <tr>
+            <td><code>cab-0023</code></td>
+            <td>Cabinet JM Patrimoine</td>
+            <td>Jean-Marc DUVAL</td>
+            <td>Strasbourg</td>
+            <td>Grand Est</td>
+            <td class="num">3</td>
+            <td class="num">23 M€</td>
+            <td class="num">4 ans</td>
+            <td class="center">#14</td>
+          </tr>
+          <tr>
+            <td><code>cab-0024</code></td>
+            <td>Cabinet Côte d'Argent</td>
+            <td>Christophe PETIT</td>
+            <td>Biarritz</td>
+            <td>Nouvelle-Aquitaine</td>
+            <td class="num">2</td>
+            <td class="num">17 M€</td>
+            <td class="num">3 ans</td>
+            <td class="center">#20</td>
+          </tr>
+          <tr>
+            <td><code>cab-0025</code></td>
+            <td>Cabinet OB Conseil</td>
+            <td>Olivier BLANC</td>
+            <td>Aix-en-Provence</td>
+            <td>PACA</td>
+            <td class="num">2</td>
+            <td class="num">18 M€</td>
+            <td class="num">2 ans</td>
+            <td class="center">#19</td>
+          </tr>
+          <tr>
+            <td><code>cab-0026</code></td>
+            <td>Cabinet Vendée Conseil</td>
+            <td>Pierre-Henri GAUDIN</td>
+            <td>La Roche-sur-Yon</td>
+            <td>Pays de la Loire</td>
+            <td class="num">2</td>
+            <td class="num">12 M€</td>
+            <td class="num">2 ans</td>
+            <td class="center">#26</td>
+          </tr>
+          <tr>
+            <td><code>cab-0027</code></td>
+            <td>Cabinet HV Patrimoine</td>
+            <td>Hervé VIGNON</td>
+            <td>Paris (16<sup>e</sup>)</td>
+            <td>Île-de-France</td>
+            <td class="num">3</td>
+            <td class="num">27 M€</td>
+            <td class="num">5 ans</td>
+            <td class="center">#10</td>
+          </tr>
+          <tr>
+            <td><code>cab-0028</code></td>
+            <td>Cabinet Sud-Ouest Conseil</td>
+            <td>Mathilde GIRARD</td>
+            <td>Pau</td>
+            <td>Nouvelle-Aquitaine</td>
+            <td class="num">2</td>
+            <td class="num">14 M€</td>
+            <td class="num">3 ans</td>
+            <td class="center">#24</td>
+          </tr>
+          <tr>
+            <td><code>cab-0029</code></td>
+            <td>Cabinet PB Gestion</td>
+            <td>Patrick BERTRAND</td>
+            <td>Paris (15<sup>e</sup>)</td>
+            <td>Île-de-France</td>
+            <td class="num">3</td>
+            <td class="num">22 M€</td>
+            <td class="num">3 ans</td>
+            <td class="center">#15</td>
+          </tr>
+          <tr>
+            <td><code>cab-0030</code></td>
+            <td>Cabinet Pyrénées Patrimoine</td>
+            <td>Charles MERCIER</td>
+            <td>Toulouse</td>
+            <td>Occitanie</td>
+            <td class="num">2</td>
+            <td class="num">11 M€</td>
+            <td class="num">2 ans</td>
+            <td class="center">#27</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Cabinets directs (hors réseau) -->
+      <h3 style="margin-top: 40px; font-size: 18px; color: var(--navy);">💼 Tenants Cabinet direct (hors réseau PRIVEOS)</h3>
+      <p style="font-size: 12.5px; color: var(--navy-300); margin: 6px 0 14px;">Pour illustrer le 2<sup>ème</sup> modèle commercial d'ASTRAEOS, le dataset inclut <strong>2 cabinets indépendants</strong>. Ces cabinets utilisent les Doc 4 (Cabinet), Doc 5 (Ingénieur), Doc 6 (Client) mais <strong>n'ont pas de propriétaire de marque</strong> au-dessus d'eux. Branding personnalisé. Cascade financière à 3 niveaux uniquement.</p>
+
+      <table class="dataset">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nom du cabinet</th>
+            <th>Dirigeant</th>
+            <th>Ville</th>
+            <th>Région</th>
+            <th class="num">Ingés</th>
+            <th class="num">Encours</th>
+            <th class="num">Type ASTRAEOS</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>cab-9001</code></td>
+            <td>Patrimoine &amp; Conseil Indépendant</td>
+            <td>Géraldine FOURNEAU</td>
+            <td>Paris (7<sup>e</sup>)</td>
+            <td>Île-de-France</td>
+            <td class="num">2</td>
+            <td class="num">15 M€</td>
+            <td class="num"><span class="badge-imp">cabinet_direct</span></td>
+          </tr>
+          <tr>
+            <td><code>cab-9002</code></td>
+            <td>Cabinet Lyonnais d'Investissement</td>
+            <td>Bertrand FAVRE</td>
+            <td>Lyon</td>
+            <td>AURA</td>
+            <td class="num">3</td>
+            <td class="num">23 M€</td>
+            <td class="num"><span class="badge-imp">cabinet_direct</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="note">
+        <strong>📌 Cohérence cross-espaces :</strong> ces 2 cabinets directs ont leur propre <em>Espace Cabinet</em> (Doc 4) et <em>Espace Ingénieur</em> (Doc 5) <em>customisés à leur charte</em>. Les wireframes Doc 4 et Doc 5 illustreront ces 2 cas (tenant Marque <em>vs</em> tenant Cabinet direct) avec des encarts visuels conditionnels.
+      </div>
+    </section>
+
+    <!-- ============================================ -->
+    <!-- SECTION : INGÉNIEURS                            -->
+    <!-- ============================================ -->
+    <section class="main-section" id="engineers">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">👤</span> Les ingénieurs du réseau</div>
+        <h2 class="section-title">~80 ingénieurs · focus sur l'Ingénieur REFERENCE</h2>
+        <p class="section-intro">Le réseau PRIVEOS Capital compte environ 80 ingénieurs patrimoniaux répartis dans les 30 cabinets (1 à 5 ingénieurs par cabinet). L'<strong>Ingénieur REFERENCE</strong> exerce au Cabinet Paris Étoile et est le héros des wireframes côté professionnel — son écran est l'écran de référence du Doc 5.</p>
+      </div>
+
+      <!-- Focus Ingénieur REFERENCE -->
+      <div class="profil-card fil-rouge">
+        <div class="profil-header">
+          <div class="profil-icon">👤</div>
+          <div class="profil-info">
+            <div class="profil-eyebrow">⭐ Ingénieur REFERENCE · ing-0001</div>
+            <div class="profil-title">Julien VASSEUR — Ingénieur patrimonial senior</div>
+            <div class="profil-desc">Le héros du Doc 5 (Espace Ingénieur). C'est son interface qui sera modélisée dans tous les wireframes côté ingénieur. Il suit personnellement le couple <strong>Client REFERENCE &amp; Cliente REFERENCE</strong> ainsi que ~30 autres clients.</div>
+          </div>
+          <span class="profil-tag fil-rouge">⭐ HÉROS</span>
+        </div>
+        <div class="profil-body">
+          <div class="profil-grid">
+            <div class="profil-data-block gold-block">
+              <div class="profil-data-label">Identité</div>
+              <div class="profil-data-value">Julien VASSEUR<br><span style="font-size:11px;color:var(--navy-300);font-weight:400;">32 ans · Diplômé Master 2 Gestion de Patrimoine (Dauphine, 2017)</span></div>
+            </div>
+            <div class="profil-data-block">
+              <div class="profil-data-label">Cabinet de rattachement</div>
+              <div class="profil-data-value">Cabinet Paris Étoile<br><span style="font-size:11px;color:var(--navy-300);font-weight:400;">cab-0003 · Dirigeant : Marc CHAMBON</span></div>
+            </div>
+            <div class="profil-data-block">
+              <div class="profil-data-label">Ancienneté ASTRAEOS</div>
+              <div class="profil-data-value">4 ans<br><span style="font-size:11px;color:var(--navy-300);font-weight:400;">depuis mai 2022</span></div>
+            </div>
+            <div class="profil-data-block navy-block">
+              <div class="profil-data-label">Nombre de clients suivis</div>
+              <div class="profil-data-value"><strong>32 clients actifs</strong><br><span style="font-size:11px;color:var(--navy-300);font-weight:400;">+ 8 prospects en cours · + 12 en suivi annuel</span></div>
+            </div>
+            <div class="profil-data-block navy-block">
+              <div class="profil-data-label">Encours géré</div>
+              <div class="profil-data-value"><strong>15,8 M€</strong><br><span style="font-size:11px;color:var(--navy-300);font-weight:400;">soit ~23 % de l'encours du cabinet</span></div>
+            </div>
+            <div class="profil-data-block navy-block">
+              <div class="profil-data-label">Spécialités déclarées</div>
+              <div class="profil-data-value">Optimisation IR · IFI · transmission · immobilier locatif neuf<br><span style="font-size:11px;color:var(--navy-300);font-weight:400;">Certifications : CIF · IAS · IOBSP</span></div>
+            </div>
+          </div>
+
+          <div class="profil-section-label">Contact &amp; identifiants</div>
+          <div class="profil-tree">
+<span class="b">Email pro</span> · julien.vasseur@cabinet-paris-etoile.email-test.fr
+<span class="b">Téléphone</span> · 06 47 82 19 36
+<span class="b">Bureau</span> · Cabinet Paris Étoile · 12 avenue de l'Opéra · 75001 Paris
+<span class="b">N° ORIAS personnel</span> · 22 002 481
+<span class="b">ID utilisateur</span> · ing-0001
+<span class="b">Compte ASTRAEOS</span> · julien.vasseur · MFA activé
+<span class="b">Photo de profil</span> · présente <span class="s">(à mocker dans les wireframes par avatar circulaire avec initiales JV)</span>
+          </div>
+
+          <div class="profil-section-label">KPIs personnels (au 03 mai 2026)</div>
+          <div class="profil-tree">
+<span class="b">Période YTD 2026</span> <span class="s">(janvier → mai)</span>
+│   ├─ Encours apporté · <span class="num">2,4 M€</span>
+│   ├─ Études livrées · <span class="num">7</span>
+│   ├─ Études en cours · <span class="num">5</span> <span class="s">(dont Client REFERENCE en phase 3)</span>
+│   ├─ Nouveaux prospects · <span class="num">11</span>
+│   ├─ Taux de conversion prospect → client · <span class="num">68%</span>
+│   ├─ Score qualité IA moyen · <span class="num">8,4 / 10</span>
+│   ├─ Délai moyen restitution · <span class="num">5,2 semaines</span>
+│   └─ NPS clients · <span class="num">+72</span>
+
+<span class="b">Position dans le cabinet</span>
+│   ├─ Rang sur 5 ingés du cabinet · <span class="num">#2</span> <span class="s">(par encours apporté YTD)</span>
+│   ├─ Rang sur 80 ingés du réseau · <span class="num">#7</span>
+│   └─ Top 10 % du réseau
+
+<span class="b">Disponibilité agenda</span>
+│   ├─ Horaires bureau · 8h30 → 19h30
+│   ├─ Visio possible · oui (intégrée à l'app)
+│   └─ Prochain créneau libre · 06 mai 2026 · 14h00
+          </div>
+        </div>
+      </div>
+
+      <!-- Tous les ingénieurs du Cabinet Paris Étoile -->
+      <h3 style="margin-top: 40px; font-size: 18px; color: var(--navy);">🏢 Les 5 ingénieurs du Cabinet Paris Étoile (cab-0003)</h3>
+      <p style="font-size: 12.5px; color: var(--navy-300); margin: 6px 0 14px;">Le Cabinet REFERENCE compte 5 ingénieurs (équipe la plus importante du réseau). Tous les wireframes Doc 4 (vue dirigeant Marc CHAMBON) et Doc 5 (vue ingénieur) montreront cette équipe.</p>
+
+      <table class="dataset">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nom</th>
+            <th>Âge</th>
+            <th>Ancienneté</th>
+            <th class="num">Clients</th>
+            <th class="num">Encours géré</th>
+            <th>Spécialité principale</th>
+            <th class="center">Rang cabinet</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="fil-rouge">
+            <td><code>ing-0001</code></td>
+            <td><strong>⭐ Julien VASSEUR</strong> <span class="badge-mvp">REFERENCE</span></td>
+            <td>32 ans</td>
+            <td>4 ans</td>
+            <td class="num">32</td>
+            <td class="num">15,8 M€</td>
+            <td>Optimisation fiscale &amp; immobilier</td>
+            <td class="center">#2</td>
+          </tr>
+          <tr>
+            <td><code>ing-0002</code></td>
+            <td>Camille BERTHOUX</td>
+            <td>38 ans</td>
+            <td>6 ans</td>
+            <td class="num">41</td>
+            <td class="num">22,3 M€</td>
+            <td>Transmission &amp; entrepreneurs</td>
+            <td class="center">#1</td>
+          </tr>
+          <tr>
+            <td><code>ing-0003</code></td>
+            <td>Lucas MARTINELLI</td>
+            <td>29 ans</td>
+            <td>2 ans</td>
+            <td class="num">18</td>
+            <td class="num">8,2 M€</td>
+            <td>Jeunes actifs &amp; primo-investisseurs</td>
+            <td class="center">#5</td>
+          </tr>
+          <tr>
+            <td><code>ing-0004</code></td>
+            <td>Hélène SAUVAGE</td>
+            <td>45 ans</td>
+            <td>7 ans</td>
+            <td class="num">38</td>
+            <td class="num">14,1 M€</td>
+            <td>Retraite &amp; succession</td>
+            <td class="center">#3</td>
+          </tr>
+          <tr>
+            <td><code>ing-0005</code></td>
+            <td>Théo GIRAULT</td>
+            <td>34 ans</td>
+            <td>3 ans</td>
+            <td class="num">26</td>
+            <td class="num">9,7 M€</td>
+            <td>Professions libérales</td>
+            <td class="center">#4</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Échantillon ingénieurs autres cabinets -->
+      <h3 style="margin-top: 40px; font-size: 18px; color: var(--navy);">🌍 Échantillon des ingénieurs des autres cabinets (10 sur ~75)</h3>
+      <p style="font-size: 12.5px; color: var(--navy-300); margin: 6px 0 14px;">Pour les wireframes des autres cabinets, voici un échantillon représentatif. Le développeur peut générer des données similaires pour les ~65 ingénieurs restants en suivant ce schéma.</p>
+
+      <table class="dataset">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nom</th>
+            <th>Cabinet</th>
+            <th>Âge</th>
+            <th class="num">Clients</th>
+            <th class="num">Encours</th>
+            <th>Spécialité</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>ing-0010</code></td>
+            <td>Anaïs GERMAIN</td>
+            <td>SK Conseil (cab-0001)</td>
+            <td>36 ans</td>
+            <td class="num">35</td>
+            <td class="num">12,4 M€</td>
+            <td>Patrimoine global</td>
+          </tr>
+          <tr>
+            <td><code>ing-0011</code></td>
+            <td>Maxime DULAC</td>
+            <td>SK Conseil (cab-0001)</td>
+            <td>41 ans</td>
+            <td class="num">42</td>
+            <td class="num">15,2 M€</td>
+            <td>Dirigeants &amp; cession</td>
+          </tr>
+          <tr>
+            <td><code>ing-0015</code></td>
+            <td>Sophie TRINQUART</td>
+            <td>Cabinet AJ (cab-0002)</td>
+            <td>33 ans</td>
+            <td class="num">28</td>
+            <td class="num">10,1 M€</td>
+            <td>Familles recomposées</td>
+          </tr>
+          <tr>
+            <td><code>ing-0020</code></td>
+            <td>Antoine CALMETTES</td>
+            <td>Cabinet IDF Patrimoine (cab-0004)</td>
+            <td>39 ans</td>
+            <td class="num">37</td>
+            <td class="num">18,7 M€</td>
+            <td>Cadres dirigeants &amp; expatriés</td>
+          </tr>
+          <tr>
+            <td><code>ing-0025</code></td>
+            <td>Lucie PERRIN</td>
+            <td>Cabinet Provence Patrimoine (cab-0005)</td>
+            <td>30 ans</td>
+            <td class="num">22</td>
+            <td class="num">9,4 M€</td>
+            <td>Investisseurs immobiliers</td>
+          </tr>
+          <tr>
+            <td><code>ing-0030</code></td>
+            <td>Damien VIALLON</td>
+            <td>Cabinet Lyon Conseil (cab-0006)</td>
+            <td>44 ans</td>
+            <td class="num">40</td>
+            <td class="num">17,3 M€</td>
+            <td>Arbitrage &amp; lombard</td>
+          </tr>
+          <tr>
+            <td><code>ing-0035</code></td>
+            <td>Naïma BENALI</td>
+            <td>Cabinet SB (cab-0007)</td>
+            <td>35 ans</td>
+            <td class="num">31</td>
+            <td class="num">11,8 M€</td>
+            <td>Professions libérales</td>
+          </tr>
+          <tr>
+            <td><code>ing-0042</code></td>
+            <td>Romain GUILBERT</td>
+            <td>Cabinet Aquitaine Conseil (cab-0009)</td>
+            <td>40 ans</td>
+            <td class="num">36</td>
+            <td class="num">14,9 M€</td>
+            <td>Prêt hypothécaire &amp; structuration</td>
+          </tr>
+          <tr>
+            <td><code>ing-0050</code></td>
+            <td>Pauline ETIENNE</td>
+            <td>Cabinet Riviera Patrimoine (cab-0010)</td>
+            <td>37 ans</td>
+            <td class="num">29</td>
+            <td class="num">13,6 M€</td>
+            <td>Expatriés &amp; international</td>
+          </tr>
+          <tr>
+            <td><code>ing-0060</code></td>
+            <td>Sébastien BARRAUD</td>
+            <td>Cabinet GG (cab-0014)</td>
+            <td>43 ans</td>
+            <td class="num">33</td>
+            <td class="num">12,1 M€</td>
+            <td>Transmission &amp; succession</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="note">
+        <strong>📌 Convention pour les wireframes :</strong> dans toutes les vues côté pro (Doc 4 et Doc 5), <em>Julien VASSEUR</em> est l'utilisateur connecté par défaut. Quand on illustre une vue dirigeant cabinet (Doc 4), c'est <em>Marc CHAMBON</em> (dirigeant du Cabinet Paris Étoile) qui est l'utilisateur connecté.
+      </div>
+    </section>
+
+    <!-- ============================================ -->
+    <!-- SECTION : CLIENT REFERENCE - LE FIL ROUGE     -->
+    <!-- ============================================ -->
+    <section class="main-section" id="client-reference">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">⭐</span> Le fil rouge des wireframes</div>
+        <h2 class="section-title">Client REFERENCE &amp; Cliente REFERENCE — couple détaillé</h2>
+        <p class="section-intro">Le couple fil-rouge des wireframes. Ce dossier sera <strong>visible à l'identique dans les 5 espaces utilisateurs</strong> : pipeline propriétaire (Doc 3), fiche cabinet (Doc 4), CRM ingénieur (Doc 5), espace client final (Doc 6), et facturation (Doc 4 dirigeant). Le développeur peut tracer ce dossier de bout en bout pour vérifier la cohérence des données.</p>
+      </div>
+
+      <div class="profil-card fil-rouge">
+        <div class="profil-header">
+          <div class="profil-icon">⭐</div>
+          <div class="profil-info">
+            <div class="profil-eyebrow">⭐ Client REFERENCE &amp; Cliente REFERENCE · cli-0001</div>
+            <div class="profil-title">Bertrand DUPONT &amp; Monique TOPIN — Cadres supérieurs Paris</div>
+            <div class="profil-desc">Le couple-pivot des wireframes. Suivi par Julien VASSEUR (Ingénieur REFERENCE) au Cabinet Paris Étoile. Étape pipeline : <strong>04 — Études en cours</strong>, phase 3 du module IA en cours de finalisation.</div>
+          </div>
+          <span class="profil-tag fil-rouge">⭐ FIL ROUGE</span>
+        </div>
+        <div class="profil-body">
+
+          <div class="profil-section-label">📇 Identités &amp; situation familiale</div>
+          <div class="profil-grid">
+            <div class="profil-data-block gold-block">
+              <div class="profil-data-label">Lui — Client REFERENCE</div>
+              <div class="profil-data-value">Bertrand DUPONT<br><span style="font-size:11px;color:var(--navy-300);font-weight:400;">38 ans · né le 14/03/1988 à Lyon · cli-0001-h</span></div>
+            </div>
+            <div class="profil-data-block gold-block">
+              <div class="profil-data-label">Elle — Cliente REFERENCE</div>
+              <div class="profil-data-value">Monique TOPIN<br><span style="font-size:11px;color:var(--navy-300);font-weight:400;">36 ans · née le 22/09/1989 à Paris · cli-0001-f</span></div>
+            </div>
+            <div class="profil-data-block">
+              <div class="profil-data-label">Régime matrimonial</div>
+              <div class="profil-data-value">Communauté réduite aux acquêts<br><span style="font-size:11px;color:var(--navy-300);font-weight:400;">Mariage civil 12/06/2018 · Mairie Paris 15<sup>e</sup></span></div>
+            </div>
+            <div class="profil-data-block">
+              <div class="profil-data-label">Enfants à charge</div>
+              <div class="profil-data-value">2 enfants<br><span style="font-size:11px;color:var(--navy-300);font-weight:400;">Léo (6 ans · né 2019) · Emma (3 ans · née 2022)</span></div>
+            </div>
+            <div class="profil-data-block">
+              <div class="profil-data-label">Adresse résidence principale</div>
+              <div class="profil-data-value">42 rue de Tolbiac<br>75013 Paris<br><span style="font-size:11px;color:var(--navy-300);font-weight:400;">Achetée en 2020 · 3 chambres · 92 m²</span></div>
+            </div>
+            <div class="profil-data-block">
+              <div class="profil-data-label">Contact principal</div>
+              <div class="profil-data-value">bertrand.dupont@email-test.fr<br>06 78 45 21 09<br><span style="font-size:11px;color:var(--navy-300);font-weight:400;">Cliente : monique.topin@email-test.fr</span></div>
+            </div>
+          </div>
+
+          <div class="profil-section-label">💼 Situation professionnelle</div>
+          <div class="profil-tree">
+<span class="b">Bertrand DUPONT (lui)</span>
+│   ├─ Profession · Directeur Marketing
+│   ├─ Employeur · Société NEXT FRANCE SA <span class="s">(éditeur logiciel)</span>
+│   ├─ Statut · Cadre dirigeant assimilé
+│   ├─ Salaire brut annuel · <span class="num">98 000 €</span> + variable <span class="num">15 000 €</span>
+│   ├─ Stock-options vestées · <span class="num">~45 000 €</span>
+│   └─ Ancienneté · 8 ans dans l'entreprise
+
+<span class="b">Monique TOPIN (elle)</span>
+│   ├─ Profession · Avocate associée
+│   ├─ Employeur · SCP Lambert &amp; Associés <span class="s">(droit des affaires)</span>
+│   ├─ Statut · Profession libérale (TNS)
+│   ├─ Bénéfices nets annuels · <span class="num">~115 000 €</span>
+│   └─ Inscrite Barreau de Paris depuis 2014
+          </div>
+
+          <div class="profil-section-label">💰 Revenus consolidés du foyer</div>
+          <div class="profil-tree">
+<span class="b">Revenus salariaux</span>
+│   ├─ Salaire net Bertrand · <span class="num">~5 600 € / mois</span>
+│   ├─ Variable Bertrand · <span class="num">~10 000 € / an</span>
+│   ├─ Stock-options vestées · <span class="num">~45 000 € total</span> <span class="s">(à exercer)</span>
+│   └─ Sous-total salarial · <span class="num">~85 200 € / an</span>
+
+<span class="b">Revenus libéraux</span>
+│   └─ BNC Monique · <span class="num">~115 000 € / an</span>
+
+<span class="b">Revenus fonciers</span>
+│   ├─ Studio locatif Paris 19<sup>e</sup> · <span class="num">11 400 € / an</span> bruts <span class="s">(950 € / mois)</span>
+│   └─ Charges déductibles · <span class="num">~3 200 € / an</span>
+
+<span class="b">Total revenus bruts foyer 2025</span>
+│   └─ <span class="num montage">~211 600 €</span> <span class="s">(estimation)</span>
+
+<span class="b">TMI 2025</span>
+│   └─ Tranche 41 % <span class="s">(IFI dépassé pour 2025 · 1 296 € à payer)</span>
+          </div>
+
+          <div class="profil-section-label">🏠 Patrimoine immobilier</div>
+          <div class="profil-tree">
+<span class="b">Résidence principale</span> <span class="s">(achat 2020)</span>
+│   ├─ Adresse · 42 rue de Tolbiac · 75013 Paris
+│   ├─ Surface · 92 m² · 3 chambres · 4<sup>e</sup> étage
+│   ├─ Prix d'achat · <span class="num">740 000 €</span> + <span class="num">52 000 €</span> frais
+│   ├─ Valeur estimée 2026 · <span class="num">810 000 €</span>
+│   ├─ Crédit en cours · <span class="num">512 000 €</span> capital restant dû
+│   ├─ Mensualité · <span class="num">2 940 € / mois</span> <span class="s">(taux 1,15 % · 22 ans restants)</span>
+│   └─ Plus-value latente · <span class="num">~70 000 €</span>
+
+<span class="b">Studio locatif</span> <span class="s">(achat 2017 par Monique avant mariage)</span>
+│   ├─ Adresse · 18 rue Manin · 75019 Paris
+│   ├─ Surface · 22 m²
+│   ├─ Prix d'achat · <span class="num">195 000 €</span>
+│   ├─ Valeur estimée 2026 · <span class="num">235 000 €</span>
+│   ├─ Crédit · <span class="num">SOLDÉ en 2024</span>
+│   ├─ Loyer mensuel HC · <span class="num">950 €</span>
+│   ├─ Régime fiscal · LMNP réel
+│   └─ Statut · Bien propre de Monique
+          </div>
+
+          <div class="profil-section-label">💵 Patrimoine financier</div>
+          <div class="profil-tree">
+<span class="b">Liquidités</span>
+│   ├─ Compte courant joint Crédit Agricole · <span class="num">~12 000 €</span>
+│   ├─ Livret A Bertrand · <span class="num">22 000 €</span> <span class="s">(plafond)</span>
+│   ├─ Livret A Monique · <span class="num">22 000 €</span> <span class="s">(plafond)</span>
+│   ├─ LDDS Bertrand · <span class="num">12 000 €</span> <span class="s">(plafond)</span>
+│   └─ LDDS Monique · <span class="num">8 500 €</span>
+
+<span class="b">Épargne moyen terme</span>
+│   ├─ PEA Bertrand <span class="s">(BoursoBank)</span> · <span class="num">38 000 €</span> · ouvert 2019
+│   └─ PEA Monique <span class="s">(BoursoBank)</span> · <span class="num">26 000 €</span> · ouvert 2020
+
+<span class="b">Assurance vie existante</span>
+│   ├─ Linxea Avenir 2 (Bertrand) · <span class="num">42 000 €</span>
+│   └─ ING Vie (Monique) · <span class="num">19 000 €</span>
+
+<span class="b">Total liquidités + financier</span>
+│   └─ <span class="num montage">~201 500 €</span>
+          </div>
+
+          <div class="profil-section-label">📊 Bilan patrimonial synthétique</div>
+          <div class="profil-tree">
+<span class="b">ACTIF BRUT</span>
+│   ├─ Immobilier · <span class="num">1 045 000 €</span> <span class="s">(810k + 235k)</span>
+│   ├─ Financier · <span class="num">201 500 €</span>
+│   ├─ Stock-options non levées · <span class="num">45 000 €</span>
+│   └─ <strong>Total brut · <span class="num montage">1 291 500 €</span></strong>
+
+<span class="b">PASSIF</span>
+│   └─ Crédit RP · <span class="num">512 000 €</span>
+
+<span class="b">PATRIMOINE NET</span>
+│   └─ <strong><span class="num montage">779 500 €</span></strong>
+
+<span class="b">Capacité d'épargne mensuelle</span>
+│   ├─ Revenus nets foyer · <span class="num">~13 800 € / mois</span>
+│   ├─ Charges fixes · <span class="num">~6 200 € / mois</span> <span class="s">(crédit RP, charges, vie courante)</span>
+│   ├─ Impôts · <span class="num">~2 800 € / mois</span> <span class="s">(provisionné)</span>
+│   └─ <strong>Capacité épargne · <span class="num montage">~4 800 € / mois</span></strong> <span class="s">(non utilisée actuellement)</span>
+          </div>
+
+          <div class="profil-section-label">🎯 Objectifs &amp; préoccupations exprimés au RDV</div>
+          <div class="profil-tree">
+<span class="b">Préoccupations principales</span>
+│   ├─ <span class="num">1.</span> "On a une grosse capacité d'épargne mais on ne sait pas où la mettre"
+│   ├─ <span class="num">2.</span> "Notre TMI est à 41 % · on cherche à optimiser fiscalement"
+│   ├─ <span class="num">3.</span> "On veut commencer à préparer la retraite (PER ?)"
+│   ├─ <span class="num">4.</span> "On voudrait peut-être un investissement immobilier locatif neuf"
+│   └─ <span class="num">5.</span> "Anticiper la transmission pour Léo &amp; Emma"
+
+<span class="b">Horizon d'investissement</span>
+│   └─ Long terme <span class="s">(15-20 ans · retraite estimée à 67 ans)</span>
+
+<span class="b">Tolérance au risque</span>
+│   └─ Modérée à dynamique <span class="s">(profil "Équilibré +" · score KYC 6/10)</span>
+
+<span class="b">Disponibilité des fonds</span>
+│   └─ Aucun besoin de liquidité avant 8-10 ans
+
+<span class="b">Connaissance financière</span>
+│   ├─ Bertrand · niveau intermédiaire <span class="s">(connaît AV, PER, SCPI)</span>
+│   └─ Monique · niveau intermédiaire <span class="s">(connaît AV et fiscalité)</span>
+          </div>
+
+          <div class="profil-section-label">🚀 Statut dans le pipeline (au 03 mai 2026)</div>
+          <div class="profil-tree">
+<span class="b">Identifiant dossier</span> · dos-0001
+<span class="b">Étape pipeline actuelle</span> · <strong>04 — Études en cours</strong>
+<span class="b">Date d'entrée pipeline</span> · 12 février 2026
+<span class="b">Cabinet attribué</span> · Cabinet Paris Étoile (cab-0003)
+<span class="b">Ingénieur en charge</span> · Julien VASSEUR (ing-0001)
+<span class="b">Origine du dossier</span> · Recommandation client existant <span class="s">(parrainé par cli-0024)</span>
+
+<span class="b">Avancement timeline</span>
+│   ├─ <span class="num">12/02/2026</span> · Premier contact · email + lien magique
+│   ├─ <span class="num">15/02/2026</span> · DCI simplifié rempli · KYC validé
+│   ├─ <span class="num">18/02/2026</span> · 1<sup>er</sup> RDV visio découverte (45 min) · transcription IA
+│   ├─ <span class="num">20/02/2026</span> · Lettre de mission signée Yousign
+│   ├─ <span class="num">25/02/2026</span> · Activation espace sécurisé client
+│   ├─ <span class="num">28/02/2026</span> · Collecte documents <span class="s">(95% complétude au 15 mars)</span>
+│   ├─ <span class="num">17/03/2026</span> · Étape 04 démarrée · IA Phase 1 lancée
+│   ├─ <span class="num">22/03/2026</span> · IA Phase 1 validée par Julien
+│   ├─ <span class="num">28/03/2026</span> · IA Phase 2 lancée
+│   ├─ <span class="num">05/04/2026</span> · IA Phase 2 validée
+│   ├─ <span class="num">10/04/2026</span> · IA Phase 3 lancée <strong>(en cours)</strong>
+│   └─ <span class="num">~30/05/2026</span> · Restitution prévisionnelle
+
+<span class="b">Indice de complétude DCI</span> · <span class="num">95 %</span>
+<span class="b">Score qualité IA</span> · <span class="num">8,7 / 10</span> <span class="s">(météo ☀)</span>
+<span class="b">Phase IA en cours</span> · Phase 3 (Tableau de synthèse) · 60 % avancement
+          </div>
+
+          <div class="profil-section-label">📅 Prochain RDV programmé</div>
+          <div class="profil-tree">
+<span class="b">Type</span> · Restitution étude patrimoniale
+<span class="b">Date</span> · 30 mai 2026 · 10h00 → 11h30
+<span class="b">Format</span> · Visioconférence intégrée ASTRAEOS
+<span class="b">Participants</span> · Julien VASSEUR + Bertrand &amp; Monique
+<span class="b">Préparation</span> · Étude complète + synthèse 22 pages livrées 48h avant
+<span class="b">Statut</span> · Confirmé <span class="s">(reminders auto J-7 J-3 J-1)</span>
+          </div>
+
+          <div class="profil-section-label">💰 Flux financiers prévisionnels (issus de l'étude IA en cours)</div>
+          <div class="profil-tree">
+<span class="b">Préconisations IA Phase 2 validées</span>
+│   ├─ Souscription PER Madelin Bertrand · <span class="num">8 000 € / an</span> <span class="s">(économie IR : 3 280 €)</span>
+│   ├─ Souscription PER Monique · <span class="num">6 500 € / an</span> <span class="s">(économie IR : 2 665 €)</span>
+│   ├─ Investissement SCPI Pinel · <span class="num">220 000 €</span> <span class="s">(à crédit · réduction IR 12 % sur 9 ans)</span>
+│   ├─ Versement AV Linxea Spirit 2 · <span class="num">15 000 €</span> initial + <span class="num">800 € / mois</span>
+│   └─ Démembrement temporaire SCPI Corum Origin <span class="s">(en réflexion)</span>
+
+<span class="b">Estimation honoraires d'étude</span>
+│   └─ <span class="num">3 500 € HT</span> · <span class="num">4 200 € TTC</span> <span class="s">(à facturer à la restitution)</span>
+
+<span class="b">Estimation commissions futures (sur 12 mois)</span>
+│   ├─ Commission SCPI · <span class="num">~17 600 €</span> <span class="s">(8 % de 220 000 €)</span>
+│   ├─ Commission AV · <span class="num">~750 €</span> <span class="s">(3 % de 24 600 € de versements)</span>
+│   ├─ Commission PER · <span class="num">~580 €</span>
+│   └─ <strong>Total commissions estimées · <span class="num montage">~18 930 €</span></strong>
+│   <span class="s">    dont quote-part PRIVEOS Capital : ~50 % · cabinet : ~50 %</span>
+          </div>
+
+          <div class="profil-section-label">🔗 Cohérence cross-espaces — où retrouve-t-on ce dossier ?</div>
+          <div class="info-card-content" style="background: rgba(198,142,14,0.04); border-radius: 8px; padding: 14px 16px; font-size: 12.5px; line-height: 1.7;">
+            <strong>📋 Doc 3 — Espace Propriétaire de marque (PRIVEOS Capital) :</strong>
+            <ul style="margin: 4px 0 8px 20px;">
+              <li>Section 6 Pipeline · Étape 04 · Carte cliquable du couple</li>
+              <li>Section 7 CRM réseau · Fiche prospect/client en lecture-pilotage</li>
+              <li>Fiche dossier client (6 onglets) · vue complète éditable</li>
+              <li>Section 5 Fiche cabinet (Paris Étoile) · onglet Études &amp; dossiers · ligne du dossier</li>
+            </ul>
+
+            <strong>💼 Doc 4 — Espace Cabinet (vue dirigeant Marc CHAMBON) :</strong>
+            <ul style="margin: 4px 0 8px 20px;">
+              <li>Tableau CRM agrégé du cabinet · 1 ligne par ingénieur · ligne Julien VASSEUR mentionne Bertrand &amp; Monique</li>
+              <li>Synthèse financière prévisionnelle · les ~18 930 € de commissions estimées y sont visibles</li>
+              <li>Compliance &amp; facturation · les 4 200 € TTC d'honoraires y figurent en facturation prévue</li>
+            </ul>
+
+            <strong>👤 Doc 5 — Espace Ingénieur (Julien VASSEUR) :</strong>
+            <ul style="margin: 4px 0 8px 20px;">
+              <li>Section 4 Pipeline personnel · Étape 04 · Carte du couple en évidence</li>
+              <li>Section 5 Fiche dossier client · 6 onglets complets éditables (DCI, docs, étude, etc.)</li>
+              <li>Section 8 Module IA · étude en cours Phase 3 · interface IA active</li>
+              <li>Section 11 Chat · conversation avec le couple</li>
+            </ul>
+
+            <strong>👥 Doc 6 — Espace Client final (Bertrand DUPONT connecté) :</strong>
+            <ul style="margin: 4px 0 8px 20px;">
+              <li>Section 1 Tableau de bord · barre d'avancement parcours étape 04</li>
+              <li>Section 2 Suivi parcours · frise visuelle du parcours patrimonial</li>
+              <li>Section 4 Mon étude patrimoniale · cas B (en cours · phase 3)</li>
+              <li>Section 7 Prendre RDV · prochain RDV restitution du 30 mai</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="note green">
+        <strong>✅ Vérification de cohérence (à faire par le développeur) :</strong>
+        <p style="margin: 8px 0 0; font-size: 12.5px;">Le développeur doit pouvoir, en consultant ce dataset, valider que <strong>les chiffres affichés dans tous les wireframes côté pro et côté client correspondent</strong>. Par exemple, si le dashboard de Julien VASSEUR montre "32 clients suivis dont 5 études en cours", la liste détaillée des 5 études doit inclure Bertrand &amp; Monique. Si la fiche cabinet de Paris Étoile montre 68 M€ d'encours, c'est la somme des encours gérés par les 5 ingénieurs (15,8 + 22,3 + 8,2 + 14,1 + 9,7 ≈ 70,1 M€ — l'écart vient des dossiers en transition).</p>
+      </div>
+    </section>
+
+    <!-- ============================================ -->
+    <!-- SECTION : LES 9 AUTRES PROFILS-CLIENTS DÉTAILLÉS -->
+    <!-- ============================================ -->
+    <section class="main-section" id="profiles">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">🧑‍🤝‍🧑</span> Les 9 autres profils-clients</div>
+        <h2 class="section-title">Profils-types représentatifs · cas métier détaillés</h2>
+        <p class="section-intro">9 profils-clients supplémentaires couvrant des cas patrimoniaux réels et complexes. Chaque profil est détaillé avec <strong>montages financiers explicites</strong> (chiffres, taux, scénarios) pour que le développeur comprenne la complexité métier qu'il devra modéliser. Ces profils alimentent les wireframes : pipeline, CRM, études IA, etc.</p>
+      </div>
+
+      <!-- ===== PROFIL 2 : INVESTISSEUR IMMOBILIER EN ARBITRAGE ===== -->
+      <div class="profil-card">
+        <div class="profil-header">
+          <div class="profil-icon">🏘</div>
+          <div class="profil-info">
+            <div class="profil-eyebrow">Profil 2 · cli-0002 · Cas patrimonial complexe</div>
+            <div class="profil-title">Famille MARCHAND — Arbitrage immobilier vers AV Lux + Lombard</div>
+            <div class="profil-desc">Investisseur immobilier qui veut équilibrer son patrimoine en cédant 2 biens locatifs pour investir en assurance vie de droit luxembourgeois adossée à un crédit lombard.</div>
+          </div>
+          <span class="profil-tag">📌 ARBITRAGE</span>
+        </div>
+        <div class="profil-body">
+          <div class="profil-grid">
+            <div class="profil-data-block gold-block">
+              <div class="profil-data-label">Identités</div>
+              <div class="profil-data-value">Henri MARCHAND (54 ans) &amp; Sylvie LANDREAU (51 ans)<br><span style="font-size:11px;color:var(--navy-300);font-weight:400;">Mariés régime communauté · 2 enfants majeurs</span></div>
+            </div>
+            <div class="profil-data-block">
+              <div class="profil-data-label">Localisation</div>
+              <div class="profil-data-value">Bordeaux<br><span style="font-size:11px;color:var(--navy-300);font-weight:400;">Cabinet Aquitaine Conseil (cab-0009) · Ing. Pierre GOMEZ</span></div>
+            </div>
+            <div class="profil-data-block">
+              <div class="profil-data-label">Étape pipeline</div>
+              <div class="profil-data-value"><span class="badge-mvp">02 — Compliance validée</span><br><span style="font-size:11px;color:var(--navy-300);font-weight:400;">Lettre mission signée · KYC validé</span></div>
+            </div>
+          </div>
+
+          <div class="profil-section-label">🏠 Patrimoine actuel (concentré immobilier)</div>
+          <div class="profil-tree">
+<span class="b">Patrimoine immobilier</span>
+│   ├─ Résidence principale Bordeaux <span class="s">(maison T6 · 220 m²)</span> · <span class="num">1 200 000 €</span>
+│   ├─ <strong>Bien locatif n°1 à arbitrer</strong> · immeuble Pessac · 6 lots · <span class="num">920 000 €</span>
+│   ├─ <strong>Bien locatif n°2 à arbitrer</strong> · 4 appartements Bordeaux centre · <span class="num">680 000 €</span>
+│   ├─ Bien à conserver · maison Cap-Ferret (résidence secondaire) · <span class="num">850 000 €</span>
+│   └─ Studio étudiant Toulouse · <span class="num">160 000 €</span>
+
+<span class="b">Patrimoine financier</span>
+│   ├─ AV Generali Espace Liberté · <span class="num">85 000 €</span>
+│   ├─ PEA bertrand · <span class="num">42 000 €</span>
+│   └─ Liquidités · <span class="num">120 000 €</span>
+
+<span class="b">Total patrimoine brut</span> · <span class="num montage">4 057 000 €</span>
+<span class="b">Dette restante</span> · <span class="num">230 000 €</span> <span class="s">(crédit RP)</span>
+<span class="b">PATRIMOINE NET</span> · <span class="num montage">3 827 000 €</span>
+<span class="b">⚠ Assujetti IFI</span> · base imposable <span class="num">~3,2 M€</span> · IFI dû ~<span class="num">25 800 € / an</span>
+          </div>
+
+          <div class="profil-section-label">🎯 Objectif client : équilibrage patrimoine</div>
+          <div class="profil-tree">
+<span class="b">Constat actuel</span>
+│   ├─ Patrimoine concentré à 95 % en immobilier
+│   ├─ IFI lourd · 25 800 € / an
+│   ├─ Faible liquidité financière
+│   └─ Loyers déclarés en foncier · TMI 41 % + PS 17,2 % = 58,2 % de fiscalité
+
+<span class="b">Souhait</span>
+│   ├─ Vendre les 2 biens locatifs <span class="s">(Pessac + Bordeaux centre)</span>
+│   ├─ Disponibilité de cash net · <span class="num">~1 380 000 €</span> <span class="s">(après PV et frais)</span>
+│   └─ Réinvestir dans une stratégie financière sortie d'IFI
+          </div>
+
+          <div class="profil-section-label">💡 Montage proposé par l'ingénieur (étude IA Phase 2)</div>
+          <div class="profil-tree">
+<span class="b montage">SCÉNARIO RETENU · Assurance Vie Luxembourgeoise + Crédit Lombard adossé</span>
+
+<span class="b">Étape 1 · Cession des 2 biens locatifs</span>
+│   ├─ Vente Pessac · <span class="num">920 000 €</span>
+│   ├─ Vente Bordeaux centre · <span class="num">680 000 €</span>
+│   ├─ Total brut · <span class="num">1 600 000 €</span>
+│   ├─ Plus-value imposable estimée · <span class="num">~280 000 €</span>
+│   ├─ Impôt PV (avec abattement durée) · <span class="num">~52 000 €</span>
+│   ├─ Frais notariés et agence · <span class="num">~48 000 €</span>
+│   └─ <strong>Cash disponible net · <span class="num montage">~1 500 000 €</span></strong>
+
+<span class="b">Étape 2 · Souscription AV Lux</span>
+│   ├─ Compagnie · OneLife Luxembourg <span class="s">(Wealth Insurance Italia / OneLife)</span>
+│   ├─ Versement initial · <span class="num">1 500 000 €</span>
+│   ├─ Allocation · 60 % obligataire EUR / 30 % actions diversifiées / 10 % alternatif
+│   ├─ Frais entrée · <span class="num">2,5 %</span> <span class="s">(soit 37 500 €)</span>
+│   ├─ Frais de gestion · <span class="num">0,8 % / an</span>
+│   └─ Performance objectif · <span class="num">3,5 % à 5 % net / an</span>
+
+<span class="b">Étape 3 · Mise en place crédit lombard adossé</span>
+│   ├─ Banque · BNP Paribas Wealth Management
+│   ├─ Nantissement · le contrat AV Lux <span class="s">(1 500 000 €)</span>
+│   ├─ Quotité de financement · <span class="num">60 %</span>
+│   ├─ Crédit accordé · <span class="num">900 000 €</span>
+│   ├─ Taux · Euribor 3M + 1,5 % · soit ~<span class="num">5,2 %</span> en 2026
+│   ├─ Durée · 7 ans renouvelable
+│   ├─ Type de remboursement · in fine <span class="s">(intérêts seulement durant la durée)</span>
+│   └─ Coût intérêts annuel · <span class="num">~46 800 €</span>
+
+<span class="b">Étape 4 · Investissement immobilier locatif neuf</span>
+│   ├─ Programme Pinel + Bordeaux Métropole <span class="s">(éligible 12 %)</span>
+│   ├─ Acquisition · 3 lots · <span class="num">900 000 €</span> via le crédit lombard
+│   ├─ Loyers attendus · <span class="num">38 400 € / an</span> bruts
+│   ├─ Réduction d'impôt Pinel · <span class="num">12 %</span> sur 9 ans = <span class="num">12 000 € / an</span>
+│   └─ Effet IFI · les 900 k€ d'immo sortent de l'IFI <span class="s">(dette lombard déductible)</span>
+
+<span class="b montage">RÉSULTAT NET ANNUEL ATTENDU</span>
+│   ├─ Performance AV Lux · <span class="num">+45 000 €</span> <span class="s">(3 % net)</span>
+│   ├─ Loyers Pinel · <span class="num">+38 400 €</span>
+│   ├─ Réduction IR Pinel · <span class="num">+12 000 €</span>
+│   ├─ Économies IFI · <span class="num">+11 200 €</span> <span class="s">(IFI passe de 25,8 k€ à 14,6 k€)</span>
+│   ├─ Coût intérêts lombard · <span class="num">−46 800 €</span>
+│   ├─ Charges immo + fiscalité loyers · <span class="num">−18 200 €</span>
+│   └─ <strong>Gain net annuel · <span class="num montage">+41 600 €</span></strong>
+          </div>
+
+          <div class="profil-section-label">📈 Honoraires &amp; commissions générées (estimation)</div>
+          <div class="profil-tree">
+<span class="b">Honoraires d'étude</span> · <span class="num">8 500 € HT</span>
+<span class="b">Commission AV Lux (entrée)</span> · <span class="num">~25 000 €</span>
+<span class="b">Commission immobilier neuf Pinel</span> · <span class="num">~36 000 €</span>
+<span class="b">Apporteur d'affaires lombard</span> · <span class="num">~9 000 €</span>
+<span class="b">Total commissions générées</span> · <span class="num montage">~78 500 €</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== PROFIL 3 : DIRIGEANT EN TRANSMISSION SOCIÉTÉ ===== -->
+      <div class="profil-card">
+        <div class="profil-header">
+          <div class="profil-icon">🏢</div>
+          <div class="profil-info">
+            <div class="profil-eyebrow">Profil 3 · cli-0003 · Cas patrimonial très complexe</div>
+            <div class="profil-title">Pierre LAMBERT — Cession de société + apport-cession 150-0 B ter</div>
+            <div class="profil-desc">Dirigeant fondateur d'une SAS (technologie B2B) qui souhaite céder son entreprise. Montage 150-0 B ter avec apport-cession et engagement de réinvestissement.</div>
+          </div>
+          <span class="profil-tag">📌 TRANSMISSION</span>
+        </div>
+        <div class="profil-body">
+          <div class="profil-grid">
+            <div class="profil-data-block gold-block">
+              <div class="profil-data-label">Identité</div>
+              <div class="profil-data-value">Pierre LAMBERT (58 ans)<br><span style="font-size:11px;color:var(--navy-300);font-weight:400;">Marié · Sylvie MARCHAND (52 ans) · 3 enfants 18-25 ans</span></div>
+            </div>
+            <div class="profil-data-block">
+              <div class="profil-data-label">Localisation</div>
+              <div class="profil-data-value">Lyon<br><span style="font-size:11px;color:var(--navy-300);font-weight:400;">Cabinet Lyon Conseil (cab-0006) · Damien VIALLON (ing-0030)</span></div>
+            </div>
+            <div class="profil-data-block">
+              <div class="profil-data-label">Étape pipeline</div>
+              <div class="profil-data-value"><span class="badge-mvp">04 — Études en cours</span><br><span style="font-size:11px;color:var(--navy-300);font-weight:400;">Phase IA 2 · scénarios de cession</span></div>
+            </div>
+          </div>
+
+          <div class="profil-section-label">🏢 Société à céder</div>
+          <div class="profil-tree">
+<span class="b">Société · LAMBERT TECH SAS</span>
+│   ├─ Activité · Édition logiciels gestion industrielle
+│   ├─ Création · 2008 par Pierre LAMBERT (fondateur)
+│   ├─ Détention · Pierre LAMBERT 95 % · Sylvie MARCHAND 5 %
+│   ├─ Effectif · 45 salariés
+│   ├─ CA 2025 · <span class="num">11,2 M€</span>
+│   ├─ EBITDA 2025 · <span class="num">3,4 M€</span> <span class="s">(marge 30 %)</span>
+│   ├─ Trésorerie nette · <span class="num">2,1 M€</span>
+│   └─ Valorisation pré-cession · <span class="num">22-26 M€</span> <span class="s">(multiple 7x EBITDA + tréso)</span>
+
+<span class="b">Acquéreur identifié</span>
+│   ├─ Fonds · MIDCAP CAPITAL III <span class="s">(LBO secondaire)</span>
+│   ├─ Offre indicative · <span class="num">24 000 000 €</span>
+│   ├─ Structure · 100 % cash + earn-out 1 an
+│   └─ Closing prévu · 30 juin 2026
+          </div>
+
+          <div class="profil-section-label">💡 Montage 150-0 B ter (apport-cession)</div>
+          <div class="profil-tree">
+<span class="b montage">SCÉNARIO RETENU · Apport-cession à holding personnelle</span>
+
+<span class="b">Étape 1 · Création de la holding patrimoniale</span>
+│   ├─ Forme · SAS unipersonnelle <span class="s">(holding « LAMBERT PATRIMOINE »)</span>
+│   ├─ Capital · 1 000 € symbolique
+│   ├─ Date création · 15 mai 2026
+│   ├─ Objet · gestion de patrimoine + investissements éligibles 150-0 B ter
+│   └─ Direction · Pierre LAMBERT (président)
+
+<span class="b">Étape 2 · Apport des titres LAMBERT TECH à la holding</span>
+│   ├─ Apport · 95 % des titres LAMBERT TECH
+│   ├─ Valeur d'apport · <span class="num">22 800 000 €</span> <span class="s">(95 % de 24 M€)</span>
+│   ├─ Plus-value latente apportée · <span class="num">~22 700 000 €</span> <span class="s">(prix de revient quasi-nul)</span>
+│   └─ <strong>PV en sursis (régime 150-0 B ter)</strong> · pas d'imposition immédiate
+
+<span class="b">Étape 3 · Cession par la holding au fonds</span>
+│   ├─ Vente des titres par la holding · <span class="num">22 800 000 €</span>
+│   ├─ Cash dans la holding · <span class="num">22 800 000 €</span>
+│   └─ Plus-value taxable au niveau holding · <span class="num">~22 700 000 €</span>
+
+<span class="b">Étape 4 · Engagement de réinvestissement (60 % minimum)</span>
+│   ├─ Obligation · réinvestir <span class="num">60 % du produit</span> dans 24 mois
+│   ├─ Montant à réinvestir · <span class="num">~13 680 000 €</span>
+│   ├─ Investissements éligibles ·
+│   │   ├─ Activité économique nouvelle <span class="s">(création d'entreprise)</span>
+│   │   ├─ Achat parts FCPR / FPCI / SLP <span class="s">(fonds éligibles)</span>
+│   │   └─ Souscription au capital de PME éligibles
+│   └─ Engagement de conservation · 5 ans minimum
+          </div>
+
+          <div class="profil-section-label">💼 Allocation d'investissement proposée par l'IA</div>
+          <div class="profil-tree">
+<span class="b">Quote 60 % réinvestissement (13 680 000 €)</span>
+│   ├─ FPCI institutionnel · ARDIAN Buyout VII · <span class="num">5 000 000 €</span> <span class="s">(rendement cible 12 %/an)</span>
+│   ├─ FPCI immobilier · CARMIGNAC Real Estate · <span class="num">3 000 000 €</span> <span class="s">(rendement cible 7 %/an)</span>
+│   ├─ FPCI infrastructure · AMUNDI Megatrends · <span class="num">2 500 000 €</span>
+│   ├─ Croissance externe via acquisition PME · <span class="num">3 180 000 €</span> <span class="s">(en cours d'identification)</span>
+│   └─ <strong>Total éligible · <span class="num">13 680 000 €</span> ✓</strong>
+
+<span class="b">Quote 40 % libre (9 120 000 €)</span>
+│   ├─ AV Luxembourgeoise · <span class="num">5 000 000 €</span>
+│   ├─ Compte-titres ordinaire <span class="s">(actions cotées)</span> · <span class="num">2 500 000 €</span>
+│   ├─ SCPI démembrement · <span class="num">1 200 000 €</span> <span class="s">(usufruit 5 ans)</span>
+│   └─ Liquidités stratégiques · <span class="num">420 000 €</span>
+          </div>
+
+          <div class="profil-section-label">📊 Économie fiscale du montage</div>
+          <div class="profil-tree">
+<span class="b">Sans montage 150-0 B ter (cession directe)</span>
+│   ├─ Plus-value · <span class="num">22 700 000 €</span>
+│   ├─ Flat tax 30 % · <span class="num">−6 810 000 €</span>
+│   ├─ Surtaxe haut revenu 4 % · <span class="num">−908 000 €</span>
+│   └─ <strong>Cash net après impôt · <span class="num">15 082 000 €</span></strong>
+
+<span class="b">Avec montage 150-0 B ter</span>
+│   ├─ PV en sursis · pas d'imposition immédiate
+│   ├─ Cash dans holding · <span class="num">22 800 000 €</span> intégral
+│   ├─ Disponible immédiatement pour investissement
+│   └─ <strong>Gain de trésorerie · <span class="num montage">+7 718 000 €</span> à investir</strong>
+
+<span class="b">Risque · purge progressive du sursis</span>
+│   └─ Si cession holding ou non-réinvestissement → fiscalité différée à payer
+          </div>
+
+          <div class="profil-section-label">📈 Honoraires &amp; commissions</div>
+          <div class="profil-tree">
+<span class="b">Honoraires d'étude (montage complexe)</span> · <span class="num">35 000 € HT</span>
+<span class="b">Honoraires structuration holding</span> · <span class="num">12 000 € HT</span>
+<span class="b">Commission FPCI sélectionnés</span> · <span class="num">~85 000 €</span> <span class="s">(rétrocession upfront 0,8 %)</span>
+<span class="b">Commission AV Lux</span> · <span class="num">~125 000 €</span>
+<span class="b">Total commissions générées</span> · <span class="num montage">~257 000 €</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== PROFIL 4 : INVESTISSEUR PRÊT HYPOTHÉCAIRE ===== -->
+      <div class="profil-card">
+        <div class="profil-header">
+          <div class="profil-icon">🏦</div>
+          <div class="profil-info">
+            <div class="profil-eyebrow">Profil 4 · cli-0004 · Optimisation par effet de levier</div>
+            <div class="profil-title">Famille DUPONT-DELORME — Crédit lombard hypothécaire</div>
+            <div class="profil-desc">Investisseur immobilier confirmé qui veut générer du cash sans vendre, via un crédit hypothécaire adossé à ses biens existants pour réinvestir dans des actifs financiers.</div>
+          </div>
+          <span class="profil-tag">📌 LEVIER</span>
+        </div>
+        <div class="profil-body">
+          <div class="profil-grid">
+            <div class="profil-data-block gold-block">
+              <div class="profil-data-label">Identité</div>
+              <div class="profil-data-value">Christian DUPONT-DELORME (61 ans) &amp; Marie-Pierre LASCOMBES (58 ans)<br><span style="font-size:11px;color:var(--navy-300);font-weight:400;">Mariés séparation de biens · 2 enfants majeurs</span></div>
+            </div>
+            <div class="profil-data-block">
+              <div class="profil-data-label">Localisation</div>
+              <div class="profil-data-value">Aix-en-Provence<br><span style="font-size:11px;color:var(--navy-300);font-weight:400;">Cabinet OB Conseil (cab-0025) · Olivier BLANC</span></div>
+            </div>
+            <div class="profil-data-block">
+              <div class="profil-data-label">Étape pipeline</div>
+              <div class="profil-data-value"><span class="badge-mvp">05 — Études restituées</span><br><span style="font-size:11px;color:var(--navy-300);font-weight:400;">Restitution faite le 22 avril · phase mise en œuvre</span></div>
+            </div>
+          </div>
+
+          <div class="profil-section-label">🏘 Patrimoine actuel (très immobilier)</div>
+          <div class="profil-tree">
+<span class="b">Patrimoine immobilier (libre de toute dette)</span>
+│   ├─ Résidence principale Aix · <span class="num">1 600 000 €</span>
+│   ├─ Maison de vacances Cassis · <span class="num">980 000 €</span>
+│   ├─ Immeuble locatif Marseille (8 lots) · <span class="num">2 100 000 €</span>
+│   ├─ 2 commerces Aix (loués) · <span class="num">720 000 €</span>
+│   └─ <strong>Total immobilier · <span class="num">5 400 000 €</span></strong> <span class="s">tous biens libres de crédit</span>
+
+<span class="b">Patrimoine financier</span>
+│   ├─ AV Generali · <span class="num">220 000 €</span>
+│   └─ Liquidités · <span class="num">85 000 €</span>
+
+<span class="b">Total patrimoine net</span> · <span class="num montage">5 705 000 €</span>
+<span class="b">⚠ IFI lourd</span> · <span class="num">~58 000 € / an</span>
+          </div>
+
+          <div class="profil-section-label">🎯 Souhait : générer du cash sans vendre</div>
+          <div class="profil-tree">
+<span class="b">Constat</span>
+│   ├─ Patrimoine immobilier important mais peu liquide
+│   ├─ Refus catégorique de vendre <span class="s">(attachement aux biens · transmission)</span>
+│   ├─ Capacité d'épargne nette mensuelle · <span class="num">~7 800 €</span>
+│   └─ Souhaite "faire travailler" 1,5 M€ sans diminuer son patrimoine
+
+<span class="b">Cible</span>
+│   ├─ Mobiliser <span class="num">1 500 000 €</span> via prêt
+│   ├─ Réinvestir en actifs financiers diversifiés
+│   └─ Optimiser fiscalité IFI <span class="s">(la dette diminue l'assiette)</span>
+          </div>
+
+          <div class="profil-section-label">💡 Montage : crédit lombard hypothécaire</div>
+          <div class="profil-tree">
+<span class="b montage">SCÉNARIO RETENU · Hypothèque sur immeuble Marseille</span>
+
+<span class="b">Étape 1 · Mise en place hypothèque</span>
+│   ├─ Bien hypothéqué · Immeuble Marseille (valeur 2 100 000 €)
+│   ├─ Quotité de financement · <span class="num">70 %</span>
+│   ├─ Capital emprunté · <span class="num">1 470 000 €</span> <span class="s">(arrondi 1,5 M€)</span>
+│   ├─ Banque · Banque Privée 1818 (Crédit Mutuel)
+│   ├─ Taux · 3,85 % fixe sur 15 ans
+│   ├─ Type · amortissement progressif
+│   ├─ Mensualité · <span class="num">10 740 € / mois</span>
+│   ├─ Coût total intérêts · <span class="num">~452 000 €</span> sur 15 ans
+│   └─ Frais de mise en place · <span class="num">~38 000 €</span> <span class="s">(notaire + frais hypothèque)</span>
+
+<span class="b">Étape 2 · Réinvestissement des fonds</span>
+│   ├─ AV multisupport (Generali Espace Performance) · <span class="num">800 000 €</span>
+│   ├─ SCPI démembrement temporaire 10 ans <span class="s">(nue-propriété)</span> · <span class="num">400 000 €</span>
+│   ├─ Compte-titres diversifié <span class="s">(ETF mondiaux)</span> · <span class="num">200 000 €</span>
+│   └─ Liquidités tactiques · <span class="num">100 000 €</span>
+
+<span class="b">Étape 3 · Effet sur l'IFI</span>
+│   ├─ Avant montage · base IFI <span class="num">5,4 M€</span> · IFI <span class="num">58 000 €</span>
+│   ├─ Après montage · base <span class="num">5,4 M€ - 1,47 M€ dette</span> = <span class="num">3,93 M€</span>
+│   ├─ IFI nouveau · <span class="num">~32 000 €</span>
+│   └─ <strong>Économie IFI · <span class="num">+26 000 € / an</span></strong>
+          </div>
+
+          <div class="profil-section-label">📊 Calcul rendement net attendu</div>
+          <div class="profil-tree">
+<span class="b">Revenus annuels du nouveau dispositif</span>
+│   ├─ Performance AV (4 % net moy.) · <span class="num">+32 000 €</span>
+│   ├─ Décote SCPI nue-propriété · <span class="num">+24 000 €</span> <span class="s">(36 % décote sur 10 ans)</span>
+│   ├─ Compte-titres ETF (5 % attendu) · <span class="num">+10 000 €</span>
+│   ├─ Économie IFI · <span class="num">+26 000 €</span>
+│   ├─ Coût intérêts crédit · <span class="num">−47 000 €</span> <span class="s">(année 1 · décroissant)</span>
+│   └─ <strong>Gain net annuel · <span class="num montage">+45 000 €</span></strong>
+
+<span class="b">Couverture mensualité</span>
+│   ├─ Mensualité · 10 740 €
+│   ├─ Capacité d'épargne actuelle du client · 7 800 € / mois
+│   ├─ Loyers immeuble Marseille · <span class="num">8 200 € / mois</span>
+│   └─ <strong>Couverture totale · 16 000 € / mois &gt; 10 740 € ✓</strong>
+          </div>
+
+          <div class="profil-section-label">📈 Honoraires &amp; commissions</div>
+          <div class="profil-tree">
+<span class="b">Honoraires d'étude</span> · <span class="num">12 000 € HT</span>
+<span class="b">Apporteur d'affaires bancaire</span> · <span class="num">~22 000 €</span> <span class="s">(1,5 % du crédit)</span>
+<span class="b">Commission AV (entrée 1,5 %)</span> · <span class="num">~12 000 €</span>
+<span class="b">Commission SCPI (8 % sur 400 k€)</span> · <span class="num">~32 000 €</span>
+<span class="b">Total commissions générées</span> · <span class="num montage">~78 000 €</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== PROFIL 5 : ENTREPRENEUR 50 ans · holding pro/perso ===== -->
+      <div class="profil-card">
+        <div class="profil-header">
+          <div class="profil-icon">💼</div>
+          <div class="profil-info">
+            <div class="profil-eyebrow">Profil 5 · cli-0005 · Structuration patrimoniale</div>
+            <div class="profil-title">François LE FRANC — Entrepreneur en pleine activité, holding patrimoniale</div>
+            <div class="profil-desc">Dirigeant 50 ans à la tête d'une PME industrielle prospère. Veut séparer son patrimoine pro et perso, structurer une holding pour accumuler les bénéfices et préparer la transmission future.</div>
+          </div>
+          <span class="profil-tag">📌 STRUCTURATION</span>
+        </div>
+        <div class="profil-body">
+          <div class="profil-grid">
+            <div class="profil-data-block gold-block">
+              <div class="profil-data-label">Identité</div>
+              <div class="profil-data-value">François LE FRANC (50 ans) &amp; Catherine VIEL (47 ans)<br><span style="font-size:11px;color:var(--navy-300);font-weight:400;">Communauté · 3 enfants 8-15 ans</span></div>
+            </div>
+            <div class="profil-data-block">
+              <div class="profil-data-label">Localisation</div>
+              <div class="profil-data-value">Strasbourg<br><span style="font-size:11px;color:var(--navy-300);font-weight:400;">SK Conseil (cab-0001) · Sébastien KIEFFER</span></div>
+            </div>
+            <div class="profil-data-block">
+              <div class="profil-data-label">Étape pipeline</div>
+              <div class="profil-data-value"><span class="badge-mvp">06 — Clients en suivi</span><br><span style="font-size:11px;color:var(--navy-300);font-weight:400;">Étude livrée 2024 · suivi annuel</span></div>
+            </div>
+          </div>
+
+          <div class="profil-section-label">🏭 Activité professionnelle</div>
+          <div class="profil-tree">
+<span class="b">Société d'exploitation · LE FRANC INDUSTRIE SAS</span>
+│   ├─ Activité · Pièces métalliques de précision (auto · ferroviaire)
+│   ├─ CA 2025 · <span class="num">8,2 M€</span>
+│   ├─ EBITDA · <span class="num">1,1 M€</span>
+│   ├─ Effectif · 32 salariés
+│   ├─ Détention actuelle · François 80 % · Catherine 20 %
+│   └─ Valorisation estimée · <span class="num">5,5 M€</span>
+
+<span class="b">Rémunération annuelle François</span>
+│   ├─ Salaire dirigeant · <span class="num">120 000 € brut</span>
+│   ├─ Dividendes · <span class="num">~80 000 € net</span> <span class="s">(variable)</span>
+│   └─ Total revenu net · <span class="num">~145 000 €</span>
+          </div>
+
+          <div class="profil-section-label">💡 Montage : holding patrimoniale + dispositifs</div>
+          <div class="profil-tree">
+<span class="b montage">STRATÉGIE · Restructuration via holding LE FRANC HOLDING SAS</span>
+
+<span class="b">Étape 1 · Apport titres LE FRANC INDUSTRIE à holding</span>
+│   ├─ Apport-cession régime <span class="num">150-0 B ter</span> partiel
+│   ├─ Holding détient 100 % de LE FRANC INDUSTRIE
+│   └─ François détient 100 % de la holding
+
+<span class="b">Étape 2 · Optimisation fiscale flux holding-fille</span>
+│   ├─ Régime mère-fille <span class="s">(95 % d'exonération sur dividendes)</span>
+│   ├─ Remontée annuelle des bénéfices à la holding · <span class="num">~700 000 €/an</span>
+│   ├─ Fiscalité effective · <span class="num">5 % × 25 %</span> = <span class="num">1,25 %</span>
+│   └─ Avant : flat tax 30 % · économie <span class="num">~28 000 € / an</span>
+
+<span class="b">Étape 3 · Investissement dans la holding</span>
+│   ├─ AV Lux Capitalisation <span class="s">(personne morale)</span> · <span class="num">500 000 €</span>
+│   ├─ SCPI dans la holding · <span class="num">400 000 €</span>
+│   ├─ Compte-titres holding · <span class="num">300 000 €</span>
+│   └─ Trésorerie d'attente · <span class="num">200 000 €</span>
+
+<span class="b">Étape 4 · Pacte Dutreil pour la transmission</span>
+│   ├─ Engagement collectif 2 ans + individuel 4 ans
+│   ├─ Abattement <span class="num">75 %</span> sur les droits de donation/succession
+│   ├─ Économie potentielle (sur valorisation 5,5 M€) · <span class="num">~1 200 000 €</span>
+│   └─ Donation prévue dans 8-10 ans aux 3 enfants
+          </div>
+
+          <div class="profil-section-label">📈 Honoraires &amp; commissions</div>
+          <div class="profil-tree">
+<span class="b">Honoraires d'étude (montage complexe)</span> · <span class="num">22 000 € HT</span>
+<span class="b">Honoraires structuration holding</span> · <span class="num">8 500 € HT</span>
+<span class="b">Suivi annuel · 6 000 €/an</span>
+<span class="b">Commission AV Lux capitalisation</span> · <span class="num">~14 000 €</span>
+<span class="b">Commission SCPI</span> · <span class="num">~32 000 €</span>
+<span class="b">Total commissions générées (initial)</span> · <span class="num montage">~82 500 €</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== PROFIL 6 : JEUNE RETRAITÉ - TRANSMISSION ===== -->
+      <div class="profil-card">
+        <div class="profil-header">
+          <div class="profil-icon">👴</div>
+          <div class="profil-info">
+            <div class="profil-eyebrow">Profil 6 · cli-0006 · Transmission &amp; succession</div>
+            <div class="profil-title">Couple BRUNET — Jeunes retraités, transmission anticipée</div>
+            <div class="profil-desc">Couple récemment retraité avec capital constitué. Préoccupation principale : optimiser la transmission aux 4 enfants tout en conservant les revenus nécessaires pour vivre.</div>
+          </div>
+          <span class="profil-tag">📌 TRANSMISSION</span>
+        </div>
+        <div class="profil-body">
+          <div class="profil-grid">
+            <div class="profil-data-block gold-block">
+              <div class="profil-data-label">Identité</div>
+              <div class="profil-data-value">Jean-Claude BRUNET (66 ans) &amp; Catherine ROLLAND (64 ans)<br><span style="font-size:11px;color:var(--navy-300);font-weight:400;">Mariés communauté · 4 enfants majeurs · 6 petits-enfants</span></div>
+            </div>
+            <div class="profil-data-block">
+              <div class="profil-data-label">Localisation</div>
+              <div class="profil-data-value">Bordeaux<br><span style="font-size:11px;color:var(--navy-300);font-weight:400;">Cabinet AM Gestion (cab-0017) · Audrey MARCHAL</span></div>
+            </div>
+            <div class="profil-data-block">
+              <div class="profil-data-label">Étape pipeline</div>
+              <div class="profil-data-value"><span class="badge-mvp">04 — Études en cours</span><br><span style="font-size:11px;color:var(--navy-300);font-weight:400;">Phase IA 4 · scénarios de donation</span></div>
+            </div>
+          </div>
+
+          <div class="profil-section-label">📋 Patrimoine actuel</div>
+          <div class="profil-tree">
+<span class="b">Immobilier</span>
+│   ├─ Résidence principale Bordeaux · <span class="num">680 000 €</span>
+│   ├─ Maison familiale Arcachon · <span class="num">920 000 €</span>
+│   └─ 3 appartements locatifs Bordeaux · <span class="num">1 100 000 €</span>
+
+<span class="b">Financier</span>
+│   ├─ AV multiples (5 contrats) · <span class="num">1 850 000 €</span>
+│   ├─ PEA + Compte-titres · <span class="num">340 000 €</span>
+│   └─ Liquidités · <span class="num">120 000 €</span>
+
+<span class="b">Total patrimoine</span> · <span class="num montage">5 010 000 €</span>
+<span class="b">⚠ IFI</span> · <span class="num">~38 000 €/an</span>
+          </div>
+
+          <div class="profil-section-label">💡 Stratégie de transmission</div>
+          <div class="profil-tree">
+<span class="b montage">SCÉNARIO RETENU · Donations + démembrement + AV optimisée</span>
+
+<span class="b">Étape 1 · Donation-partage des biens immobiliers en démembrement</span>
+│   ├─ Maison Arcachon · donation NP aux 4 enfants <span class="s">(quote-part 230 000 € chacun)</span>
+│   ├─ Conservation usufruit par les parents
+│   ├─ Valeur fiscale NP <span class="s">(barème art. 669 CGI · âge 66 ans = 60 %)</span> · <span class="num">552 000 €</span> total
+│   ├─ Abattement parents-enfants · <span class="num">100 000 € × 4 × 2</span> = <span class="num">800 000 €</span> ✓
+│   └─ <strong>Aucun droit à payer · transmission de 920 000 € en exonération</strong>
+
+<span class="b">Étape 2 · Donation-partage 3 appartements locatifs</span>
+│   ├─ 1 appartement par enfant <span class="s">(330-380 k€ chacun)</span>
+│   ├─ Démembrement même schéma <span class="s">(NP aux enfants · UF aux parents)</span>
+│   └─ Loyers conservés par les parents <span class="s">(usufruitiers)</span>
+
+<span class="b">Étape 3 · Restructuration AV pour transmission optimale</span>
+│   ├─ Réajustement clauses bénéficiaires · 4 enfants à parts égales
+│   ├─ Ouverture nouvelle AV Lux pour mère <span class="s">(début capitalisation après 70 ans)</span>
+│   ├─ Versements complémentaires · <span class="num">200 000 €</span> avant 70 ans <span class="s">(art. 990 I)</span>
+│   └─ Abattement par bénéficiaire · <span class="num">152 500 €</span> chacun
+
+<span class="b montage">RÉSULTAT</span>
+│   ├─ Patrimoine transmis sans droits · <span class="num">~2 020 000 €</span>
+│   ├─ Économie de droits estimée · <span class="num">~580 000 €</span>
+│   └─ Couple conserve revenus locatifs et résidences
+          </div>
+
+          <div class="profil-section-label">📈 Honoraires &amp; commissions</div>
+          <div class="profil-tree">
+<span class="b">Honoraires d'étude</span> · <span class="num">14 500 € HT</span>
+<span class="b">Honoraires actes notariés</span> · facturé directement par notaire
+<span class="b">Commission nouvelle AV Lux</span> · <span class="num">~5 000 €</span>
+<span class="b">Total commissions générées</span> · <span class="num montage">~19 500 €</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== PROFIL 7 : PROFESSION LIBÉRALE ===== -->
+      <div class="profil-card">
+        <div class="profil-header">
+          <div class="profil-icon">⚕</div>
+          <div class="profil-info">
+            <div class="profil-eyebrow">Profil 7 · cli-0007 · Profession libérale</div>
+            <div class="profil-title">Dr. Anne FAVRE — Médecin libérale, retraite Madelin/PER</div>
+            <div class="profil-desc">Médecin généraliste 47 ans, exerce en libéral. Revenus irréguliers, fiscalité lourde, retraite faible si rien n'est fait. Stratégie centrée sur PER, Madelin et investissement immobilier.</div>
+          </div>
+          <span class="profil-tag">📌 LIBÉRALE</span>
+        </div>
+        <div class="profil-body">
+          <div class="profil-grid">
+            <div class="profil-data-block gold-block">
+              <div class="profil-data-label">Identité</div>
+              <div class="profil-data-value">Dr. Anne FAVRE (47 ans)<br><span style="font-size:11px;color:var(--navy-300);font-weight:400;">Célibataire · 1 enfant à charge (Lucas, 12 ans)</span></div>
+            </div>
+            <div class="profil-data-block">
+              <div class="profil-data-label">Localisation</div>
+              <div class="profil-data-value">Lille<br><span style="font-size:11px;color:var(--navy-300);font-weight:400;">Cabinet AJ (cab-0002) · Sophie TRINQUART (ing-0015)</span></div>
+            </div>
+            <div class="profil-data-block">
+              <div class="profil-data-label">Étape pipeline</div>
+              <div class="profil-data-value"><span class="badge-mvp">03 — Collecte docs</span><br><span style="font-size:11px;color:var(--navy-300);font-weight:400;">Indice complétude DCI · 70 %</span></div>
+            </div>
+          </div>
+
+          <div class="profil-section-label">📋 Situation actuelle</div>
+          <div class="profil-tree">
+<span class="b">Activité libérale</span>
+│   ├─ Médecin généraliste · cabinet de groupe (3 médecins) · Lille
+│   ├─ BNC déclaré 2025 · <span class="num">142 000 €</span>
+│   ├─ Charges sociales TNS (URSSAF + CARMF) · <span class="num">~38 000 €</span>
+│   ├─ Cotisations RC pro · <span class="num">3 200 €</span>
+│   └─ Revenus nets après charges · <span class="num">~104 000 €</span> + retraite obligatoire
+
+<span class="b">Patrimoine actuel</span>
+│   ├─ Résidence principale Lille (T5) · <span class="num">420 000 €</span> <span class="s">(crédit 180 k€ restant)</span>
+│   ├─ AV (faiblement abondée) · <span class="num">28 000 €</span>
+│   ├─ PEA · <span class="num">15 000 €</span>
+│   └─ Liquidités · <span class="num">42 000 €</span>
+
+<span class="b">⚠ Problématiques</span>
+│   ├─ TMI 41 % · IR à payer ~<span class="num">31 000 €/an</span>
+│   ├─ Prévoyance insuffisante <span class="s">(arrêt travail · invalidité)</span>
+│   ├─ Retraite future estimée · <span class="num">~3 800 € net/mois</span> <span class="s">(retraite obligatoire CARMF seule)</span>
+│   └─ Pas d'épargne retraite complémentaire
+          </div>
+
+          <div class="profil-section-label">💡 Stratégie patrimoniale globale</div>
+          <div class="profil-tree">
+<span class="b montage">SCÉNARIO RETENU · Triptyque PER + LMNP + prévoyance Madelin</span>
+
+<span class="b">Volet 1 · Versement maximum PER (Madelin nouveau)</span>
+│   ├─ Plafond Madelin/PER 2026 · <span class="num">~32 000 €</span>
+│   ├─ Versement annuel programmé · <span class="num">25 000 €</span>
+│   ├─ Économie d'IR (TMI 41 %) · <span class="num">+10 250 €/an</span>
+│   ├─ Sortie en rente ou capital fractionné à 65 ans
+│   └─ Capital constitué en 18 ans · <span class="num">~720 000 €</span> <span class="s">(perf. 4 %)</span>
+
+<span class="b">Volet 2 · Investissement immobilier locatif LMNP</span>
+│   ├─ Achat 2 studios LMNP <span class="s">(EHPAD ou résidence étudiante)</span>
+│   ├─ Investissement total · <span class="num">320 000 €</span>
+│   ├─ Crédit · <span class="num">280 000 €</span> sur 20 ans <span class="s">(taux 3,8 %)</span>
+│   ├─ Loyers attendus nets · <span class="num">17 600 €/an</span>
+│   ├─ Régime fiscal LMNP réel <span class="s">(amortissement)</span>
+│   ├─ Imposition · proche de zéro pendant 15+ ans
+│   └─ Patrimoine et complément retraite à terme
+
+<span class="b">Volet 3 · Prévoyance Madelin renforcée</span>
+│   ├─ Garantie incapacité · <span class="num">5 000 €/mois</span> (90 jours franchise)
+│   ├─ Garantie invalidité · <span class="num">5 500 €/mois</span> à vie
+│   ├─ Capital décès · <span class="num">350 000 €</span> (au profit du fils)
+│   ├─ Prime annuelle · <span class="num">~5 200 €</span> <span class="s">(déductible BNC)</span>
+│   └─ Économie d'IR sur primes · <span class="num">~2 130 €</span>
+
+<span class="b montage">RÉSULTAT NET ANNUEL</span>
+│   ├─ Économies d'impôt · <span class="num">+12 380 €</span>
+│   ├─ Capital retraite constitué (PER) en 18 ans · <span class="num">+720 000 €</span>
+│   ├─ Capital LMNP libre de dette en 20 ans · <span class="num">+460 000 €</span>
+│   └─ Couverture prévoyance complète
+          </div>
+
+          <div class="profil-section-label">📈 Honoraires &amp; commissions</div>
+          <div class="profil-tree">
+<span class="b">Honoraires d'étude</span> · <span class="num">4 800 € HT</span>
+<span class="b">Commission immobilier LMNP</span> · <span class="num">~22 000 €</span> <span class="s">(7 % de 320 k€)</span>
+<span class="b">Commission PER (1<sup>re</sup> année)</span> · <span class="num">~750 €</span>
+<span class="b">Commission prévoyance Madelin</span> · <span class="num">~1 040 €</span>
+<span class="b">Total commissions générées</span> · <span class="num montage">~28 590 €</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== PROFIL 8 : COUPLE JEUNE ACTIF ===== -->
+      <div class="profil-card">
+        <div class="profil-header">
+          <div class="profil-icon">👶</div>
+          <div class="profil-info">
+            <div class="profil-eyebrow">Profil 8 · cli-0008 · Premier patrimoine</div>
+            <div class="profil-title">Couple GIRARDIN — Jeunes actifs, démarrage patrimoine</div>
+            <div class="profil-desc">Couple 30/31 ans en début de carrière, qui veut poser les bases de son patrimoine : résidence principale, premier investissement, projet enfant, optimisation simple.</div>
+          </div>
+          <span class="profil-tag">📌 PRIMO</span>
+        </div>
+        <div class="profil-body">
+          <div class="profil-grid">
+            <div class="profil-data-block gold-block">
+              <div class="profil-data-label">Identité</div>
+              <div class="profil-data-value">Thomas GIRARDIN (33 ans) &amp; Léa BERNARD (31 ans)<br><span style="font-size:11px;color:var(--navy-300);font-weight:400;">PACS · projet de mariage 2027 · pas d'enfant (projet en cours)</span></div>
+            </div>
+            <div class="profil-data-block">
+              <div class="profil-data-label">Localisation</div>
+              <div class="profil-data-value">Nantes<br><span style="font-size:11px;color:var(--navy-300);font-weight:400;">Cabinet Atlantic Patrimoine (cab-0008) · Sophie MOREAU</span></div>
+            </div>
+            <div class="profil-data-block">
+              <div class="profil-data-label">Étape pipeline</div>
+              <div class="profil-data-value"><span class="badge-mvp">01 — Prospects</span><br><span style="font-size:11px;color:var(--navy-300);font-weight:400;">Premier RDV programmé · 15/05/2026</span></div>
+            </div>
+          </div>
+
+          <div class="profil-section-label">📋 Situation actuelle</div>
+          <div class="profil-tree">
+<span class="b">Revenus</span>
+│   ├─ Thomas (ingénieur informatique salarié) · <span class="num">52 000 € brut/an</span>
+│   ├─ Léa (chargée de communication CDI) · <span class="num">42 000 € brut/an</span>
+│   └─ Net foyer · <span class="num">~5 800 €/mois</span>
+
+<span class="b">Patrimoine actuel</span>
+│   ├─ Locataires d'un T3 · <span class="num">980 €/mois</span>
+│   ├─ Livrets A Thomas + Léa · <span class="num">23 000 €</span>
+│   ├─ PEL Thomas · <span class="num">18 000 €</span>
+│   ├─ AV jeune (Boursorama) · <span class="num">8 500 €</span>
+│   └─ Liquidités · <span class="num">12 000 €</span>
+
+<span class="b">Capacité d'épargne actuelle</span> · <span class="num">~1 500 €/mois</span> <span class="s">(non utilisée systématiquement)</span>
+<span class="b">Projets exprimés</span> · achat RP, enfants, premier investissement
+          </div>
+
+          <div class="profil-section-label">💡 Stratégie : préparer les fondations</div>
+          <div class="profil-tree">
+<span class="b montage">SCÉNARIO RETENU · Achat RP + AV + commencement épargne retraite</span>
+
+<span class="b">Volet 1 · Achat résidence principale</span>
+│   ├─ Budget cible · <span class="num">380 000 €</span> <span class="s">(T4 Nantes)</span>
+│   ├─ Apport · <span class="num">45 000 €</span> <span class="s">(épargne mobilisée)</span>
+│   ├─ Crédit · <span class="num">335 000 €</span> sur 25 ans
+│   ├─ Taux · <span class="num">3,5 %</span> · mensualité <span class="num">1 680 €/mois</span>
+│   └─ PTZ éligibilité à étudier <span class="s">(zone B1 + 1<sup>er</sup> achat)</span>
+
+<span class="b">Volet 2 · Mise en place AV multisupport diversifiée</span>
+│   ├─ Versement initial · <span class="num">5 000 €</span>
+│   ├─ Versement programmé · <span class="num">300 €/mois</span>
+│   ├─ Allocation · 30 % fonds €/70 % UC <span class="s">(profil dynamique)</span>
+│   ├─ Horizon · 15-20 ans
+│   └─ Capital projeté · <span class="num">~135 000 €</span> à 50 ans
+
+<span class="b">Volet 3 · Ouverture PER (chacun)</span>
+│   ├─ Versement · <span class="num">100 €/mois</span> chacun <span class="s">(2 400 €/an pour le couple)</span>
+│   ├─ Économie IR · <span class="num">~720 €/an</span>
+│   └─ Capital retraite à 65 ans · <span class="num">~115 000 €</span>
+
+<span class="b">Volet 4 · Préparer la naissance</span>
+│   ├─ Prévoyance Décès Thomas · capital <span class="num">200 000 €</span>
+│   ├─ Prime · <span class="num">~22 €/mois</span>
+│   └─ Garde de revenus si arrêt longue durée
+          </div>
+
+          <div class="profil-section-label">📈 Honoraires &amp; commissions</div>
+          <div class="profil-tree">
+<span class="b">Honoraires d'étude</span> · <span class="num">2 200 € HT</span> <span class="s">(forfait jeune actif)</span>
+<span class="b">Commission AV ouverture</span> · <span class="num">~150 €</span>
+<span class="b">Commission PER ouverture</span> · <span class="num">~120 €</span>
+<span class="b">Commission prévoyance Décès</span> · <span class="num">~50 €</span>
+<span class="b">Total commissions générées</span> · <span class="num montage">~2 520 €</span> <span class="s">(LTV à long terme · 25 ans+)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== PROFIL 9 : FAMILLE RECOMPOSÉE ===== -->
+      <div class="profil-card">
+        <div class="profil-header">
+          <div class="profil-icon">👨‍👩‍👦‍👦</div>
+          <div class="profil-info">
+            <div class="profil-eyebrow">Profil 9 · cli-0009 · Famille recomposée patrimoine complexe</div>
+            <div class="profil-title">Gilles ROUX &amp; Émilie MAILHOT — Familles recomposées et patrimoine multi-héritiers</div>
+            <div class="profil-desc">Couple à la 2ème union avec enfants des 2 lits. Régime de séparation des biens. Patrimoine venant des 2 côtés. Forte préoccupation : équilibre transmission entre tous les enfants et conjoint survivant.</div>
+          </div>
+          <span class="profil-tag">📌 RECOMPOSÉE</span>
+        </div>
+        <div class="profil-body">
+          <div class="profil-grid">
+            <div class="profil-data-block gold-block">
+              <div class="profil-data-label">Identité</div>
+              <div class="profil-data-value">Gilles ROUX (55 ans) &amp; Émilie MAILHOT (49 ans)<br><span style="font-size:11px;color:var(--navy-300);font-weight:400;">Mariés 2018 · séparation de biens · 2 enfants Gilles (1ère union) · 1 enfant Émilie (1ère union) · 1 enfant commun</span></div>
+            </div>
+            <div class="profil-data-block">
+              <div class="profil-data-label">Localisation</div>
+              <div class="profil-data-value">Nice<br><span style="font-size:11px;color:var(--navy-300);font-weight:400;">Cabinet Riviera Patrimoine (cab-0010) · Pauline ETIENNE (ing-0050)</span></div>
+            </div>
+            <div class="profil-data-block">
+              <div class="profil-data-label">Étape pipeline</div>
+              <div class="profil-data-value"><span class="badge-mvp">04 — Études en cours</span><br><span style="font-size:11px;color:var(--navy-300);font-weight:400;">Phase IA 2 · scénarios transmission</span></div>
+            </div>
+          </div>
+
+          <div class="profil-section-label">📋 Patrimoine ventilé par origine</div>
+          <div class="profil-tree">
+<span class="b">Patrimoine de Gilles (issu de 1ère union)</span>
+│   ├─ Maison Nice (résidence principale du couple) · <span class="num">980 000 €</span>
+│   ├─ Studio locatif Cannes · <span class="num">320 000 €</span>
+│   ├─ AV reçue par succession (mère décédée 2020) · <span class="num">280 000 €</span>
+│   └─ Compte-titres · <span class="num">120 000 €</span>
+
+<span class="b">Patrimoine d'Émilie (avant mariage)</span>
+│   ├─ Appartement Paris (loué meublé) · <span class="num">490 000 €</span>
+│   ├─ AV personnelle · <span class="num">95 000 €</span>
+│   └─ Bijoux/œuvres d'art · <span class="num">~80 000 €</span>
+
+<span class="b">Patrimoine du couple (acquêts séparation)</span>
+│   ├─ Bateau · <span class="num">85 000 €</span>
+│   └─ Liquidités joint · <span class="num">35 000 €</span>
+
+<span class="b">Total patrimoine global du couple</span> · <span class="num montage">2 485 000 €</span>
+          </div>
+
+          <div class="profil-section-label">💡 Stratégie : équilibre transmission complexe</div>
+          <div class="profil-tree">
+<span class="b montage">SCÉNARIO RETENU · Donations ciblées + clauses bénéficiaires sur-mesure</span>
+
+<span class="b">Volet 1 · Sécurisation du conjoint survivant</span>
+│   ├─ Donation entre époux <span class="s">(donation au dernier vivant)</span>
+│   ├─ Quotité disponible spéciale · usufruit total ou 1/4 PP + 3/4 UF
+│   ├─ Aménagement testament · attribution préférentielle du logement
+│   └─ AV cross-clauses · le conjoint reste bénéficiaire prioritaire
+
+<span class="b">Volet 2 · Préservation des enfants des 1ères unions</span>
+│   ├─ Donation-partage immédiate aux 2 enfants Gilles · 1<sup>re</sup> union
+│   │   └─ NP du studio Cannes (160 k€ chacun · valeur fiscale ~96 k€)
+│   ├─ Donation-partage à l'enfant Émilie · NP appartement Paris <span class="s">(245 k€ · fiscal ~147 k€)</span>
+│   └─ Abattements 100 000 € chacun ✓
+
+<span class="b">Volet 3 · Équilibrage avec l'enfant commun (15 ans)</span>
+│   ├─ AV cross dédiée · clauses bénéficiaires nominales
+│   ├─ Versements croisés · 50/50 sur AV de chaque parent
+│   ├─ Abattement 152 500 € disponible <span class="s">(art. 990 I)</span>
+│   └─ Garantir une part équivalente
+
+<span class="b">Volet 4 · Pacte successoral + clauses adaptées</span>
+│   ├─ Pacte de famille · accord entre tous les enfants <span class="s">(éviter conflit succession)</span>
+│   ├─ Clauses bénéficiaires AV démembrement <span class="s">(usufruit à conjoint, NP aux enfants)</span>
+│   └─ Mandat à effet posthume <span class="s">(gestion AV pour mineurs si besoin)</span>
+          </div>
+
+          <div class="profil-section-label">📈 Honoraires &amp; commissions</div>
+          <div class="profil-tree">
+<span class="b">Honoraires d'étude</span> · <span class="num">9 800 € HT</span> <span class="s">(montage complexe famille recomposée)</span>
+<span class="b">Frais notariés (donations)</span> · facturés directement par le notaire
+<span class="b">Commission restructuration AV</span> · <span class="num">~2 800 €</span>
+<span class="b">Total commissions générées</span> · <span class="num montage">~12 600 €</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== PROFIL 10 : EXPATRIÉ ===== -->
+      <div class="profil-card">
+        <div class="profil-header">
+          <div class="profil-icon">🌍</div>
+          <div class="profil-info">
+            <div class="profil-eyebrow">Profil 10 · cli-0010 · International / expatrié</div>
+            <div class="profil-title">Vincent OUDOT — Expatrié à Singapour, biens en France</div>
+            <div class="profil-desc">Cadre dirigeant 45 ans expatrié à Singapour depuis 4 ans. Détient des biens immobiliers en France. Optimisation fiscale internationale, retour potentiel à 60 ans, transmission internationale.</div>
+          </div>
+          <span class="profil-tag">📌 EXPATRIÉ</span>
+        </div>
+        <div class="profil-body">
+          <div class="profil-grid">
+            <div class="profil-data-block gold-block">
+              <div class="profil-data-label">Identité</div>
+              <div class="profil-data-value">Vincent OUDOT (45 ans) &amp; Mei-Lin CHAN (38 ans)<br><span style="font-size:11px;color:var(--navy-300);font-weight:400;">Mariés contrat séparation de biens · 1 enfant (8 ans) · résidence fiscale Singapour</span></div>
+            </div>
+            <div class="profil-data-block">
+              <div class="profil-data-label">Localisation</div>
+              <div class="profil-data-value">Singapour (résidence) / France (biens)<br><span style="font-size:11px;color:var(--navy-300);font-weight:400;">Cabinet Riviera Patrimoine (cab-0010) · Pauline ETIENNE</span></div>
+            </div>
+            <div class="profil-data-block">
+              <div class="profil-data-label">Étape pipeline</div>
+              <div class="profil-data-value"><span class="badge-mvp">06 — Clients en suivi</span><br><span style="font-size:11px;color:var(--navy-300);font-weight:400;">Étude livrée 2025 · suivi semestriel visio</span></div>
+            </div>
+          </div>
+
+          <div class="profil-section-label">📋 Patrimoine et résidence fiscale</div>
+          <div class="profil-tree">
+<span class="b">Statut fiscal</span>
+│   ├─ Résidence fiscale principale · Singapour <span class="s">(depuis 2021)</span>
+│   ├─ Imposition revenus mondiaux à Singapour <span class="s">(taux marginaux faibles · max 22 %)</span>
+│   ├─ Convention fiscale France-Singapour <span class="s">(évite double imposition)</span>
+│   └─ Statut "non-résident fiscal français" depuis 2021
+
+<span class="b">Patrimoine en France</span>
+│   ├─ Maison familiale Cap-Ferret <span class="s">(habitation à dispo)</span> · <span class="num">1 850 000 €</span>
+│   ├─ Appartement Paris 7<sup>e</sup> (loué meublé) · <span class="num">980 000 €</span>
+│   ├─ AV française (Crédit Mutuel) · <span class="num">320 000 €</span>
+│   └─ Compte-titres France <span class="s">(actions cotées)</span> · <span class="num">180 000 €</span>
+
+<span class="b">Patrimoine à Singapour</span>
+│   ├─ Appartement Singapour <span class="s">(résidence principale)</span> · équivalent <span class="num">1 200 000 €</span>
+│   ├─ Compte-titres Singapour · <span class="num">450 000 €</span>
+│   ├─ AV de droit luxembourgeois · <span class="num">680 000 €</span>
+│   └─ Liquidités multi-devises · <span class="num">90 000 €</span>
+
+<span class="b">Total patrimoine mondial</span> · <span class="num montage">~5 750 000 €</span>
+<span class="b">Revenu annuel (USD converti €)</span> · <span class="num">~280 000 €</span> <span class="s">(salaire dirigeant + variable + dividendes)</span>
+          </div>
+
+          <div class="profil-section-label">💡 Stratégie internationale</div>
+          <div class="profil-tree">
+<span class="b montage">SCÉNARIO RETENU · Optimisation cross-frontières + préparation retour France</span>
+
+<span class="b">Volet 1 · IFI sur biens français uniquement</span>
+│   ├─ Base IFI · 2 830 000 € <span class="s">(immo français + AV en UC immo)</span>
+│   ├─ IFI annuel · <span class="num">~21 500 €</span>
+│   ├─ Optimisation possible · usufruit temporaire à un proche ?
+│   └─ <strong>Étude impact démembrement temporaire en cours</strong>
+
+<span class="b">Volet 2 · Imposition revenus fonciers français</span>
+│   ├─ Loyers Paris (meublé non pro) · imposés en France <span class="s">(retenue à la source)</span>
+│   ├─ Convention France-Singapour · pas de double imposition
+│   ├─ Taux minimum non-résident · <span class="num">20 %</span> jusqu'à 26 070 € puis <span class="num">30 %</span>
+│   └─ Optimisation · LMP/LMNP régime réel
+
+<span class="b">Volet 3 · AV Lux comme épine dorsale</span>
+│   ├─ Versement annuel programmé · <span class="num">120 000 €</span>
+│   ├─ Multidevise (€ / USD / SGD)
+│   ├─ Allocation cross-monde
+│   └─ Outil idéal pour transmission internationale <span class="s">(droit luxembourgeois)</span>
+
+<span class="b">Volet 4 · Préparation retour France à 60 ans</span>
+│   ├─ Anticipation d'un retour fiscal en 2041 <span class="s">(15 ans)</span>
+│   ├─ Souscription "exit tax compliance"
+│   ├─ Pré-positionnement biens hors IFI <span class="s">(holding luxembourgeoise ?)</span>
+│   └─ Stratégie SCI familiale au moment du retour
+
+<span class="b">Volet 5 · Transmission internationale enfant unique</span>
+│   ├─ Loi successorale française <span class="s">(résidence des biens immobiliers en France)</span>
+│   ├─ Donation NP appartement Paris à 12 ans Marc <span class="s">(programmée)</span>
+│   ├─ Conservation usufruit
+│   └─ Abattement 100 000 € + barème 669 CGI optimisé
+          </div>
+
+          <div class="profil-section-label">📈 Honoraires &amp; commissions</div>
+          <div class="profil-tree">
+<span class="b">Honoraires d'étude initiale</span> · <span class="num">14 000 € HT</span>
+<span class="b">Suivi semestriel international</span> · <span class="num">4 000 €/semestre</span>
+<span class="b">Commission AV Lux (versement annuel)</span> · <span class="num">~3 600 €/an</span>
+<span class="b">Total commissions générées (initial)</span> · <span class="num montage">~22 000 €</span>
+<span class="b">Total LTV estimé</span> · <span class="num montage">~85 000 € sur 15 ans</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Note finale -->
+      <div class="note green">
+        <strong>📌 Comment réutiliser ces profils dans les wireframes :</strong>
+        <p style="margin: 8px 0 0; font-size: 12.5px;">Chaque wireframe qui montre une <em>liste de clients</em> (pipeline, CRM, dashboards) affiche ces 10 clients (Client REFERENCE + 9 profils). Chaque wireframe qui montre <em>la fiche d'un client en détail</em> reprend les chiffres exacts de ce dataset. Le développeur peut faire un <strong>copier-coller direct</strong> de ces données dans son code de seed (données initiales de la base de test).</p>
+      </div>
+    </section>
+
+    <!-- ============================================ -->
+    <!-- SECTION : CATALOGUE PRODUITS                   -->
+    <!-- ============================================ -->
+    <section class="main-section" id="products">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">💼</span> Catalogue produits</div>
+        <h2 class="section-title">8 produits financiers utilisés dans les wireframes</h2>
+        <p class="section-intro">Catalogue PRIVEOS Capital des produits commercialisables. Tous les produits utilisés dans les souscriptions des 10 profils-clients viennent de cette liste. Le développeur peut réutiliser ces fiches pour seeder la base de produits.</p>
+      </div>
+
+      <table class="dataset">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nom du produit</th>
+            <th>Catégorie</th>
+            <th>Partenaire</th>
+            <th class="num">Comm. PRIVEOS</th>
+            <th class="num">Rétroc. cabinet</th>
+            <th class="num">Ticket min.</th>
+            <th>Statut</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>prd-0001</code></td>
+            <td>Linxea Spirit 2</td>
+            <td>Assurance Vie multisupport</td>
+            <td>Spirica</td>
+            <td class="num">2,5 %</td>
+            <td class="num">1,5 %</td>
+            <td class="num">500 €</td>
+            <td><span class="badge-mvp">ACTIF</span></td>
+          </tr>
+          <tr>
+            <td><code>prd-0002</code></td>
+            <td>Generali Espace Performance</td>
+            <td>Assurance Vie multisupport</td>
+            <td>Generali Vie</td>
+            <td class="num">2,8 %</td>
+            <td class="num">1,8 %</td>
+            <td class="num">1 000 €</td>
+            <td><span class="badge-mvp">ACTIF</span></td>
+          </tr>
+          <tr>
+            <td><code>prd-0003</code></td>
+            <td>OneLife Wealth Insurance</td>
+            <td>AV Luxembourgeoise</td>
+            <td>OneLife (Lux)</td>
+            <td class="num">3,5 %</td>
+            <td class="num">2,2 %</td>
+            <td class="num">250 000 €</td>
+            <td><span class="badge-mvp">ACTIF</span></td>
+          </tr>
+          <tr>
+            <td><code>prd-0004</code></td>
+            <td>PER Madelin Pro</td>
+            <td>Plan Épargne Retraite</td>
+            <td>Generali</td>
+            <td class="num">2,0 %</td>
+            <td class="num">1,2 %</td>
+            <td class="num">300 €</td>
+            <td><span class="badge-mvp">ACTIF</span></td>
+          </tr>
+          <tr>
+            <td><code>prd-0005</code></td>
+            <td>SCPI Pinel + Bordeaux</td>
+            <td>SCPI immobilier neuf</td>
+            <td>Sofidy</td>
+            <td class="num">8,0 %</td>
+            <td class="num">5,0 %</td>
+            <td class="num">5 000 €</td>
+            <td><span class="badge-mvp">ACTIF</span></td>
+          </tr>
+          <tr>
+            <td><code>prd-0006</code></td>
+            <td>Corum Origin (démembrement)</td>
+            <td>SCPI internationale</td>
+            <td>Corum AM</td>
+            <td class="num">9,0 %</td>
+            <td class="num">5,5 %</td>
+            <td class="num">10 000 €</td>
+            <td><span class="badge-mvp">ACTIF</span></td>
+          </tr>
+          <tr>
+            <td><code>prd-0007</code></td>
+            <td>FPCI Ardian Buyout VII</td>
+            <td>Fonds private equity</td>
+            <td>Ardian</td>
+            <td class="num">1,0 %</td>
+            <td class="num">0,6 %</td>
+            <td class="num">100 000 €</td>
+            <td><span class="badge-mvp">ACTIF</span></td>
+          </tr>
+          <tr>
+            <td><code>prd-0008</code></td>
+            <td>Madelin Prévoyance Pro</td>
+            <td>Prévoyance TNS</td>
+            <td>April</td>
+            <td class="num">25 %/an</td>
+            <td class="num">15 %/an</td>
+            <td class="num">—</td>
+            <td><span class="badge-mvp">ACTIF</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ============================================ -->
+    <!-- SECTION : PIPELINE EN ACTION                   -->
+    <!-- ============================================ -->
+    <section class="main-section" id="pipeline">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">🚀</span> Pipeline en action</div>
+        <h2 class="section-title">Répartition des 10 dossiers dans le pipeline 6 étapes</h2>
+        <p class="section-intro">Vue d'ensemble du <em>pipeline de l'Ingénieur REFERENCE et de quelques autres dossiers du réseau</em> pour alimenter les wireframes du pipeline (Doc 3 et Doc 5). Le développeur peut s'appuyer sur ces dossiers pour les vues en kanban.</p>
+      </div>
+
+      <table class="dataset">
+        <thead>
+          <tr>
+            <th>ID dossier</th>
+            <th>Client</th>
+            <th>Étape</th>
+            <th>Cabinet</th>
+            <th>Ingénieur</th>
+            <th>Date entrée</th>
+            <th>Score IA</th>
+            <th>Statut détaillé</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>dos-0008</code></td>
+            <td>Couple GIRARDIN (cli-0008)</td>
+            <td><span class="badge-imp">01 — Prospects</span></td>
+            <td>Atlantic (cab-0008)</td>
+            <td>S. MOREAU</td>
+            <td>25/04/2026</td>
+            <td>—</td>
+            <td>RDV 1<sup>er</sup> contact 15/05</td>
+          </tr>
+          <tr>
+            <td><code>dos-0002</code></td>
+            <td>Famille MARCHAND (cli-0002)</td>
+            <td><span class="badge-imp">02 — Compliance</span></td>
+            <td>Aquitaine (cab-0009)</td>
+            <td>P. GOMEZ</td>
+            <td>10/04/2026</td>
+            <td>—</td>
+            <td>LM signée 28/04 · KYC OK</td>
+          </tr>
+          <tr>
+            <td><code>dos-0007</code></td>
+            <td>Dr. Anne FAVRE (cli-0007)</td>
+            <td><span class="badge-imp">03 — Collecte</span></td>
+            <td>AJ (cab-0002)</td>
+            <td>S. TRINQUART</td>
+            <td>12/03/2026</td>
+            <td>—</td>
+            <td>DCI 70 % complet · 5 docs en attente</td>
+          </tr>
+          <tr class="fil-rouge">
+            <td><code>dos-0001</code></td>
+            <td><strong>⭐ Bertrand &amp; Monique (cli-0001)</strong></td>
+            <td><span class="badge-mvp">04 — Études</span></td>
+            <td>Paris Étoile</td>
+            <td>J. VASSEUR</td>
+            <td>12/02/2026</td>
+            <td>8,7 ☀</td>
+            <td>IA Phase 3 · 60 % avancement</td>
+          </tr>
+          <tr>
+            <td><code>dos-0003</code></td>
+            <td>Pierre LAMBERT (cli-0003)</td>
+            <td><span class="badge-mvp">04 — Études</span></td>
+            <td>Lyon Conseil (cab-0006)</td>
+            <td>D. VIALLON</td>
+            <td>05/03/2026</td>
+            <td>9,2 ☀</td>
+            <td>IA Phase 2 · scénarios cession</td>
+          </tr>
+          <tr>
+            <td><code>dos-0006</code></td>
+            <td>Couple BRUNET (cli-0006)</td>
+            <td><span class="badge-mvp">04 — Études</span></td>
+            <td>AM Gestion (cab-0017)</td>
+            <td>A. MARCHAL</td>
+            <td>20/03/2026</td>
+            <td>8,1 ☀</td>
+            <td>IA Phase 4 · scénarios donation</td>
+          </tr>
+          <tr>
+            <td><code>dos-0009</code></td>
+            <td>ROUX-MAILHOT (cli-0009)</td>
+            <td><span class="badge-mvp">04 — Études</span></td>
+            <td>Riviera (cab-0010)</td>
+            <td>P. ETIENNE</td>
+            <td>02/04/2026</td>
+            <td>7,8 ⛅</td>
+            <td>IA Phase 2 · transmission complexe</td>
+          </tr>
+          <tr>
+            <td><code>dos-0004</code></td>
+            <td>DUPONT-DELORME (cli-0004)</td>
+            <td><span class="badge-imp">05 — Restituées</span></td>
+            <td>OB Conseil (cab-0025)</td>
+            <td>O. BLANC</td>
+            <td>15/01/2026</td>
+            <td>9,0 ☀</td>
+            <td>Étude livrée 22/04 · mise en œuvre</td>
+          </tr>
+          <tr>
+            <td><code>dos-0005</code></td>
+            <td>François LE FRANC (cli-0005)</td>
+            <td><span class="badge-imp">06 — Suivi</span></td>
+            <td>SK Conseil (cab-0001)</td>
+            <td>S. KIEFFER</td>
+            <td>10/03/2024</td>
+            <td>9,1 ☀</td>
+            <td>RDV annuel prévu 28/06/2026</td>
+          </tr>
+          <tr>
+            <td><code>dos-0010</code></td>
+            <td>Vincent OUDOT (cli-0010)</td>
+            <td><span class="badge-imp">06 — Suivi</span></td>
+            <td>Riviera (cab-0010)</td>
+            <td>P. ETIENNE</td>
+            <td>05/06/2025</td>
+            <td>8,9 ☀</td>
+            <td>RDV semestriel visio · 12/06/2026</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="note">
+        <strong>📌 Pipeline plus large pour Cabinet Paris Étoile :</strong> en plus de Bertrand &amp; Monique (dos-0001), l'Ingénieur REFERENCE Julien VASSEUR a 4 autres études en cours (dos-0011, dos-0012, dos-0013, dos-0014) à différentes phases. Le détail de ces dossiers fictifs sera ajouté au moment de wireframer la fiche pipeline du Doc 5.
+      </div>
+    </section>
+
+    <!-- ============================================ -->
+    <!-- SECTION : KPIs CALCULÉS                        -->
+    <!-- ============================================ -->
+    <section class="main-section" id="kpis">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">📊</span> KPIs cohérents</div>
+        <h2 class="section-title">Données chiffrées remontées dans les wireframes</h2>
+        <p class="section-intro">Les chiffres affichés dans les dashboards des 5 espaces doivent être <strong>cohérents avec ce dataset</strong>. Voici les KPIs principaux qu'il faudra retrouver à l'identique dans les wireframes.</p>
+      </div>
+
+      <h3 style="margin-top: 18px; font-size: 16px; color: var(--navy);">📊 KPIs PRIVEOS Capital (Doc 3 — vue propriétaire de marque)</h3>
+      <table class="dataset">
+        <thead>
+          <tr><th>KPI</th><th class="num">Valeur YTD 2026</th><th>Source du calcul</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Encours total réseau</td><td class="num">847 M€</td><td>Somme encours des 30 cabinets</td></tr>
+          <tr><td>Nombre de clients actifs</td><td class="num">~2 850</td><td>Cumul tous cabinets</td></tr>
+          <tr><td>Études livrées YTD</td><td class="num">142</td><td>Pipeline étapes 5+6</td></tr>
+          <tr><td>Études en cours</td><td class="num">87</td><td>Pipeline étape 4</td></tr>
+          <tr><td>Taux de conversion prospect→client</td><td class="num">62 %</td><td>Pipeline 01→04 sur 12 mois</td></tr>
+          <tr><td>Délai moyen restitution</td><td class="num">5,8 sem.</td><td>Moyenne études livrées</td></tr>
+          <tr><td>Commissions perçues YTD</td><td class="num">12,4 M€</td><td>Quote-part PRIVEOS Capital</td></tr>
+          <tr><td>Revenu généré par cabinet (top 3)</td><td class="num">Paris Étoile · IDF Patrimoine · Provence</td><td>Classement par commissions</td></tr>
+        </tbody>
+      </table>
+
+      <h3 style="margin-top: 32px; font-size: 16px; color: var(--navy);">💼 KPIs Cabinet Paris Étoile (Doc 4 — vue dirigeant Marc CHAMBON)</h3>
+      <table class="dataset">
+        <thead>
+          <tr><th>KPI</th><th class="num">Valeur YTD 2026</th><th>Source du calcul</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Encours géré cabinet</td><td class="num">68 M€</td><td>Somme encours des 5 ingénieurs</td></tr>
+          <tr><td>Nombre clients actifs</td><td class="num">155</td><td>Somme clients des 5 ingénieurs</td></tr>
+          <tr><td>Études en cours</td><td class="num">14</td><td>Tous ingénieurs</td></tr>
+          <tr><td>Études livrées YTD</td><td class="num">32</td><td>Tous ingénieurs YTD</td></tr>
+          <tr><td>Position dans le réseau</td><td class="num">#1</td><td>Sur 30 cabinets · top encours</td></tr>
+          <tr><td>Commissions perçues YTD</td><td class="num">1,2 M€</td><td>Quote-part cabinet (50 % de 2,4 M€ générés)</td></tr>
+          <tr><td>Reversement à PRIVEOS YTD</td><td class="num">1,2 M€</td><td>Quote-part propriétaire</td></tr>
+        </tbody>
+      </table>
+
+      <h3 style="margin-top: 32px; font-size: 16px; color: var(--navy);">👤 KPIs Ingénieur REFERENCE Julien VASSEUR (Doc 5)</h3>
+      <table class="dataset">
+        <thead>
+          <tr><th>KPI</th><th class="num">Valeur YTD 2026</th><th>Source du calcul</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Clients suivis</td><td class="num">32 actifs + 8 prospects</td><td>Périmètre personnel cloisonné</td></tr>
+          <tr><td>Encours géré personnel</td><td class="num">15,8 M€</td><td>Somme contrats clients suivis</td></tr>
+          <tr><td>Études en cours personnelles</td><td class="num">5</td><td>Dont dos-0001 fil rouge en phase 3</td></tr>
+          <tr><td>Encours apporté YTD</td><td class="num">2,4 M€</td><td>Souscriptions année</td></tr>
+          <tr><td>Études livrées YTD</td><td class="num">7</td><td>Étapes 5+6 personnelles</td></tr>
+          <tr><td>Score qualité IA moyen</td><td class="num">8,4 / 10</td><td>Moyenne études</td></tr>
+          <tr><td>NPS clients</td><td class="num">+72</td><td>Sondages post-restitution</td></tr>
+          <tr><td>Rang cabinet</td><td class="num">#2 / 5</td><td>Par encours apporté YTD</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ============================================ -->
+    <!-- SECTION : CALENDRIER D'ÉVÉNEMENTS              -->
+    <!-- ============================================ -->
+    <section class="main-section" id="calendar">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">📅</span> Calendrier</div>
+        <h2 class="section-title">Événements clés du fil rouge (Bertrand &amp; Monique)</h2>
+        <p class="section-intro">Toutes les dates et événements liés au dossier dos-0001 (le fil rouge). Ces dates seront affichées dans les wireframes des timelines, agendas, notifications et historiques.</p>
+      </div>
+
+      <div class="profil-tree">
+<span class="b">📅 PASSÉ — Onboarding et démarrage</span>
+│   ├─ <span class="num">12/02/2026</span> · Email d'invitation envoyé par Julien VASSEUR · création prospect
+│   ├─ <span class="num">13/02/2026</span> · Bertrand prend RDV via lien magique · créneau 18/02 14h
+│   ├─ <span class="num">15/02/2026</span> · DCI simplifié rempli par Bertrand <span class="s">(durée 12 min)</span>
+│   ├─ <span class="num">16/02/2026</span> · KYC rempli par Bertrand · profil "Équilibré +" · score 6/10
+│   ├─ <span class="num">18/02/2026</span> · 1<sup>er</sup> RDV visio découverte 14h-14h45 <span class="s">(transcription IA générée)</span>
+│   ├─ <span class="num">19/02/2026</span> · Lettre de mission envoyée Yousign + DCI corrigé + KYC
+│   ├─ <span class="num">20/02/2026</span> · Lettre de mission signée par Bertrand puis Monique
+│   └─ <span class="num">25/02/2026</span> · Activation espace sécurisé client <span class="s">(authentification lien magique)</span>
+
+<span class="b">📅 PASSÉ — Collecte et étude</span>
+│   ├─ <span class="num">28/02/2026</span> · Collecte démarrée · 21 documents demandés
+│   ├─ <span class="num">15/03/2026</span> · Indice de complétude DCI · 95 %
+│   ├─ <span class="num">17/03/2026</span> · Étape pipeline 04 (Études) démarrée · IA Phase 1 lancée
+│   ├─ <span class="num">22/03/2026</span> · IA Phase 1 (Bilan patrimonial) validée par Julien
+│   ├─ <span class="num">28/03/2026</span> · IA Phase 2 (Stratégies) lancée
+│   ├─ <span class="num">05/04/2026</span> · IA Phase 2 validée · 3 scénarios proposés · scénario "PER + Pinel + AV" retenu
+│   └─ <span class="num">10/04/2026</span> · IA Phase 3 (Tableau de synthèse) lancée
+
+<span class="b">📅 AUJOURD'HUI · 03/05/2026</span>
+│   ├─ Étude en Phase 3 · 60 % avancement
+│   ├─ 14 documents fournis sur 21 demandés · 95 % complétude
+│   ├─ 3 messages chat échangés cette semaine
+│   └─ <strong>Prochaine étape : finalisation Phase 3 prévue ~12/05</strong>
+
+<span class="b">📅 FUTUR · prochains événements</span>
+│   ├─ <span class="num">~12/05/2026</span> · IA Phase 3 finalisation
+│   ├─ <span class="num">~18/05/2026</span> · IA Phase 4 (Frise chronologique) lancée
+│   ├─ <span class="num">~25/05/2026</span> · IA Phase 5 (Mise en forme) · livraison étude prévue
+│   ├─ <span class="num">28/05/2026</span> · Étude finalisée envoyée au client (PDF + web interactif)
+│   ├─ <span class="num">30/05/2026</span> · <strong>RDV de restitution</strong> · 10h-11h30 · visio
+│   ├─ <span class="num">15/06/2026</span> · Signature dispositifs (PER + AV) · Yousign
+│   ├─ <span class="num">30/06/2026</span> · Souscription SCPI Pinel (220 000 €) · Yousign
+│   ├─ <span class="num">31/07/2026</span> · Premier virement PER programmé · Qonto
+│   └─ <span class="num">~30/05/2027</span> · RDV bilan annuel · suivi
+      </div>
+    </section>
+
+    <!-- ============================================ -->
+    <!-- SECTION : NOTE DÉVELOPPEUR                     -->
+    <!-- ============================================ -->
+    <section class="main-section" id="dev-note">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">📝</span> Note pour le développeur</div>
+        <h2 class="section-title">Comment utiliser ce dataset</h2>
+        <p class="section-intro">Note synthétique transmissible au développeur pour qu'il comprenne comment exploiter le Master Dataset dans son code.</p>
+      </div>
+
+      <div class="note gold" style="background: white; border: 1px solid var(--navy-100); padding: 24px;">
+        <h3 style="font-size: 16px; color: var(--navy); margin-bottom: 14px;">📋 Note transmissible (à copier/coller)</h3>
+
+        <p style="font-size: 13px; line-height: 1.7; margin-bottom: 14px;"><strong>1. Objectif du Master Dataset</strong></p>
+        <p style="font-size: 12.5px; line-height: 1.65; margin-bottom: 14px;">Ce document définit l'ensemble des données fictives <em>cohérentes</em> qui sont utilisées dans les wireframes des 5 espaces utilisateurs ASTRAEOS. Toi, développeur, peux utiliser ces données pour :</p>
+        <ul style="font-size: 12.5px; line-height: 1.65; margin: 0 0 18px 24px;">
+          <li>Créer un script de seed pour ta base de données de test/staging</li>
+          <li>Vérifier la cohérence des calculs et agrégats dans ton code</li>
+          <li>Reproduire les exemples affichés dans les wireframes lors de tes démos</li>
+          <li>Tester les scénarios métier (étapes pipeline, calculs commissions, etc.)</li>
+        </ul>
+
+        <p style="font-size: 13px; line-height: 1.7; margin-bottom: 14px;"><strong>2. Conventions clés à retenir</strong></p>
+        <ul style="font-size: 12.5px; line-height: 1.65; margin: 0 0 18px 24px;">
+          <li><strong>IDs</strong> : format <code>type-XXXX</code> (cli-0001, cab-0001, ing-0001, dos-0001, prd-0001)</li>
+          <li><strong>Dates</strong> : ISO 8601 <code>YYYY-MM-DD</code></li>
+          <li><strong>Date système wireframes</strong> : 03 mai 2026 (état du système)</li>
+          <li><strong>Email fictif</strong> : tous les emails sont en <code>@email-test.fr</code></li>
+          <li><strong>Données financières</strong> : tous les calculs (encours, commissions, agrégats) sont vérifiables et cohérents</li>
+        </ul>
+
+        <p style="font-size: 13px; line-height: 1.7; margin-bottom: 14px;"><strong>3. Les éléments-pivots à connaître</strong></p>
+        <ul style="font-size: 12.5px; line-height: 1.65; margin: 0 0 18px 24px;">
+          <li><strong>Client REFERENCE &amp; Cliente REFERENCE</strong> = Bertrand DUPONT &amp; Monique TOPIN (cli-0001) — couple fil-rouge présent dans tous les wireframes</li>
+          <li><strong>Ingénieur REFERENCE</strong> = Julien VASSEUR (ing-0001) — héros côté ingénieur · suit le fil rouge</li>
+          <li><strong>Cabinet REFERENCE</strong> = Cabinet Paris Étoile (cab-0003) — cabinet du REFERENCE · 5 ingénieurs · #1 réseau</li>
+          <li><strong>Dossier REFERENCE</strong> = dos-0001 (étape pipeline 04 · IA Phase 3)</li>
+        </ul>
+
+        <p style="font-size: 13px; line-height: 1.7; margin-bottom: 14px;"><strong>4. Cohérence cross-espaces</strong></p>
+        <p style="font-size: 12.5px; line-height: 1.65; margin-bottom: 14px;">Le couple fil-rouge doit apparaître <em>à l'identique</em> dans les 5 espaces (Doc 2 à Doc 6). Quand tu codes le pipeline du Doc 3 (PRIVEOS Capital), tu dois retrouver les mêmes informations sur ce couple que dans la fiche dossier du Doc 5 (Ingénieur). Toutes les données du couple sont décrites dans la section <em>"Client REFERENCE &amp; Cliente REFERENCE"</em> de ce dataset.</p>
+
+        <p style="font-size: 13px; line-height: 1.7; margin-bottom: 14px;"><strong>5. Comment vérifier ta base de données après seed</strong></p>
+        <ul style="font-size: 12.5px; line-height: 1.65; margin: 0 0 18px 24px;">
+          <li>Ton total encours réseau doit faire ~847 M€ (somme des 30 cabinets)</li>
+          <li>L'encours du Cabinet Paris Étoile doit faire 68 M€ (somme des 5 ingénieurs : 15,8 + 22,3 + 8,2 + 14,1 + 9,7 ≈ 70,1 M€ avec écart toléré pour transitions)</li>
+          <li>Bertrand DUPONT doit avoir un patrimoine net affiché de ~779 500 €</li>
+          <li>Le pipeline doit avoir 1 dossier en étape 01, 1 en 02, 1 en 03, 4 en 04, 1 en 05, 2 en 06 = 10 dossiers</li>
+        </ul>
+
+        <p style="font-size: 13px; line-height: 1.7; margin-bottom: 14px;"><strong>6. Les profils complexes à modéliser</strong></p>
+        <p style="font-size: 12.5px; line-height: 1.65;">Les profils 2, 3, 4 et 9 (arbitrage, transmission société, prêt hypothécaire, famille recomposée) impliquent des montages financiers complexes (régime 150-0 B ter, AV Lux, lombard, démembrement, Pacte Dutreil…). Ces montages sont détaillés avec chiffres dans le dataset pour que tu puisses les implémenter dans le module IA. Les wireframes du Doc 5 (Module IA) montreront ces scénarios calculés.</p>
+
+      </div>
+
+      <div class="note">
+        <strong>🔗 Étape suivante :</strong> avec le Master Dataset finalisé, on passe à l'étape 2 : <strong>la Data Architecture</strong> (où sont stockées les données et comment elles remontent). Puis étape 3 : <strong>la page-pilote Module IA Phase 1</strong> qui fera émerger le design system.
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.sidebar-nav a[href^="#"]');
+  function updateActiveLink() {
+    let current = '';
+    sections.forEach(section => {
+      const top = section.offsetTop - 100;
+      if (window.scrollY >= top) current = section.id;
+    });
+    navLinks.forEach(link => {
+      link.classList.toggle('active', link.getAttribute('href') === '#' + current);
+    });
+  }
+  window.addEventListener('scroll', updateActiveLink);
+  updateActiveLink();
+</script>
+
+</body>
+</html>

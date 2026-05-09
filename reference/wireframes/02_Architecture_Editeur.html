@@ -1,0 +1,1807 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ASTRAEOS — Architecture · Espace Éditeur</title>
+<link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #102D50;
+    --navy-300: #708196;
+    --navy-200: #A4AEBB;
+    --navy-100: #DBE0E4;
+    --gold: #C68E0E;
+    --gold-300: #DDBB6E;
+    --gold-200: #EEDDB6;
+    --gold-100: #FAF8F3;
+    --medium-400: #695D30;
+    --medium-300: #877D59;
+    --ivory: #FAF8F3;
+    --light-blue: #EBF1FA;
+    --green-bg: #E8F3EC;
+    --green-text: #1F8A4C;
+    --red-bg: #FCE8E8;
+    --red-text: #B23A3A;
+    --yellow-bg: #FFF4DC;
+    --yellow-text: #8A6500;
+    --blue-bg: #E6F0FB;
+    --blue-text: #1456A0;
+    --purple-bg: #F0E8F8;
+    --purple-text: #5B3A8C;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; scroll-padding-top: 24px; }
+  body {
+    font-family: 'Epilogue', -apple-system, sans-serif;
+    background: var(--ivory);
+    color: var(--navy);
+    line-height: 1.6;
+    font-size: 14.5px;
+  }
+
+  /* Layout 2 colonnes */
+  .doc-layout { display: grid; grid-template-columns: 280px 1fr; min-height: 100vh; }
+  .doc-sidebar {
+    background: linear-gradient(180deg, var(--navy) 0%, #0a1f38 100%);
+    color: white;
+    padding: 28px 22px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+  .doc-sidebar::-webkit-scrollbar { width: 4px; }
+  .doc-sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+  .sidebar-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+  .sidebar-brand-mark {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: linear-gradient(135deg, var(--gold), var(--medium-400));
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-weight: 800; font-size: 13px;
+  }
+  .sidebar-brand-name { font-size: 14px; font-weight: 800; letter-spacing: 0.04em; }
+  .sidebar-brand-sub { font-size: 9.5px; color: var(--gold-300); letter-spacing: 0.18em; text-transform: uppercase; font-weight: 700; margin-top: 5px; margin-bottom: 22px; }
+
+  .back-link {
+    display: flex; align-items: center; gap: 6px;
+    color: var(--gold-300);
+    font-size: 11.5px;
+    text-decoration: none;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    margin-bottom: 22px;
+    padding: 8px 10px;
+    border-radius: 5px;
+    background: rgba(198,142,14,0.12);
+    transition: all 0.15s ease;
+  }
+  .back-link:hover { background: rgba(198,142,14,0.20); color: white; }
+
+  .sidebar-nav { display: flex; flex-direction: column; gap: 1px; }
+  .sidebar-nav a {
+    color: rgba(255,255,255,0.75);
+    text-decoration: none;
+    font-size: 11.5px;
+    padding: 6px 10px;
+    border-radius: 4px;
+    transition: all 0.15s ease;
+    line-height: 1.35;
+  }
+  .sidebar-nav a:hover { background: rgba(255,255,255,0.06); color: white; }
+  .sidebar-nav a.active { background: rgba(198,142,14,0.18); color: var(--gold-300); font-weight: 700; }
+  .sidebar-section-header {
+    font-size: 9px; font-weight: 800; color: var(--gold);
+    letter-spacing: 0.20em; text-transform: uppercase;
+    margin-top: 18px; margin-bottom: 6px;
+    padding: 0 10px;
+    display: flex; align-items: center; gap: 7px;
+  }
+  .sidebar-section-header::before {
+    content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--gold);
+  }
+
+  .doc-main { padding: 40px 50px 80px; max-width: 1300px; }
+
+  /* Header doc */
+  .doc-header { margin-bottom: 40px; padding-bottom: 28px; border-bottom: 1px solid var(--navy-100); }
+  .doc-header-eyebrow { font-size: 10px; font-weight: 700; color: var(--gold); letter-spacing: 0.22em; text-transform: uppercase; margin-bottom: 12px; }
+  .doc-title { font-size: 32px; font-weight: 700; letter-spacing: -0.018em; line-height: 1.18; margin-bottom: 12px; }
+  .doc-title strong { color: var(--gold); }
+  .doc-subtitle { font-size: 14.5px; color: var(--navy-300); line-height: 1.6; max-width: 800px; }
+  .doc-meta { display: flex; gap: 24px; margin-top: 22px; padding-top: 18px; border-top: 1px dashed var(--navy-100); font-size: 11px; color: var(--navy-300); flex-wrap: wrap; }
+  .doc-meta strong { color: var(--navy); font-weight: 700; }
+
+  /* Glossaire en haut */
+  .glossary {
+    background: white;
+    border: 1px solid var(--gold-300);
+    border-left: 4px solid var(--gold);
+    border-radius: 8px;
+    padding: 18px 22px;
+    margin-bottom: 32px;
+  }
+  .glossary-title {
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--gold);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .glossary-title::before { content: '📖'; font-size: 14px; }
+  .glossary-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px 28px;
+  }
+  .glossary-item {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .glossary-term {
+    background: var(--navy);
+    color: white;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .glossary-term.gold { background: var(--gold); }
+  .glossary-def { font-size: 12.5px; color: var(--navy); line-height: 1.5; }
+
+  /* Stats globales */
+  .stats-bar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin: 24px 0 36px;
+  }
+  .stat-block {
+    background: white;
+    border: 1px solid var(--navy-100);
+    border-left: 3px solid var(--gold);
+    border-radius: 6px;
+    padding: 14px 16px;
+  }
+  .stat-block.todo { border-left-color: var(--navy); }
+  .stat-block.idea { border-left-color: var(--red-text); }
+  .stat-label { font-size: 9px; font-weight: 700; color: var(--navy-300); letter-spacing: 0.16em; text-transform: uppercase; margin-bottom: 6px; }
+  .stat-value { font-size: 24px; font-weight: 700; color: var(--navy); letter-spacing: -0.018em; line-height: 1; }
+  .stat-meta { font-size: 11px; color: var(--navy-300); margin-top: 4px; }
+
+  /* Sitemap visuel */
+  .sitemap-container {
+    background: white;
+    border: 1px solid var(--navy-100);
+    border-radius: 12px;
+    padding: 28px 30px;
+    margin-bottom: 40px;
+    overflow-x: auto;
+  }
+  .sitemap-svg-wrap {
+    overflow-x: auto;
+  }
+  .sitemap-link { cursor: pointer; }
+  .sitemap-link .sitemap-node {
+    transition: filter 0.2s ease;
+  }
+  .sitemap-link:hover .sitemap-node {
+    filter: drop-shadow(0 4px 8px rgba(198,142,14,0.30));
+  }
+
+  /* Sections principales */
+  section.main-section { margin-bottom: 56px; scroll-margin-top: 24px; }
+  .section-header {
+    margin-bottom: 22px;
+    padding-bottom: 14px;
+    border-bottom: 2px solid var(--gold);
+  }
+  .section-eyebrow {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-eyebrow .num {
+    background: var(--gold);
+    color: white;
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 800;
+  }
+  .section-title {
+    font-size: 26px;
+    font-weight: 600;
+    letter-spacing: -0.012em;
+    color: var(--navy);
+    line-height: 1.22;
+    margin-bottom: 6px;
+  }
+  .section-intro {
+    font-size: 13.5px;
+    color: var(--navy-300);
+    line-height: 1.6;
+    max-width: 820px;
+  }
+
+  /* Cards de pages dans une section */
+  .page-card {
+    background: white;
+    border: 1px solid var(--navy-100);
+    border-radius: 10px;
+    margin-bottom: 14px;
+    overflow: hidden;
+    transition: box-shadow 0.2s ease;
+  }
+  .page-card:hover { box-shadow: 0 4px 14px rgba(16,45,80,0.06); }
+  .page-card.priority { border-color: var(--gold-300); border-left: 4px solid var(--gold); }
+
+  .pc-header {
+    background: linear-gradient(135deg, var(--ivory) 0%, white 100%);
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--navy-100);
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .pc-icon {
+    font-size: 22px;
+    width: 38px;
+    height: 38px;
+    background: white;
+    border: 1px solid var(--navy-100);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .pc-info { flex: 1; min-width: 0; }
+  .pc-eyebrow {
+    font-size: 9px;
+    font-weight: 800;
+    color: var(--navy-300);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .pc-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--navy);
+    letter-spacing: -0.005em;
+    margin-bottom: 4px;
+  }
+  .pc-desc {
+    font-size: 12.5px;
+    color: var(--navy-300);
+    line-height: 1.5;
+  }
+  .pc-status {
+    flex-shrink: 0;
+    padding: 5px 11px;
+    border-radius: 4px;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    align-self: flex-start;
+  }
+  .pc-status.todo { background: var(--navy); color: white; }
+  .pc-status.idea { background: var(--red-text); color: white; }
+  .pc-status.priority { background: var(--gold); color: white; }
+
+  .pc-body { padding: 14px 20px 18px; }
+
+  .pc-section-label {
+    font-size: 9.5px;
+    font-weight: 800;
+    color: var(--gold);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin: 12px 0 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .pc-section-label::before { content: '▸'; font-size: 11px; }
+  .pc-section-label:first-child { margin-top: 0; }
+
+  /* Sub-pages list */
+  .pc-subpages {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .pc-subpage {
+    background: var(--ivory);
+    border-left: 3px solid var(--gold-300);
+    padding: 9px 14px;
+    border-radius: 0 5px 5px 0;
+    font-size: 12.5px;
+    color: var(--navy);
+    line-height: 1.5;
+  }
+  .pc-subpage strong { color: var(--medium-400); font-weight: 700; }
+  .pc-subpage .meta {
+    font-size: 11px;
+    color: var(--navy-300);
+    font-style: italic;
+    margin-top: 2px;
+  }
+
+  /* Tree (pour modules complexes) */
+  .pc-tree {
+    background: var(--ivory);
+    border: 1px solid var(--gold-300);
+    border-radius: 6px;
+    padding: 12px 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    line-height: 1.85;
+    color: var(--navy);
+    white-space: pre;
+    overflow-x: auto;
+  }
+  .pc-tree .b { font-weight: 700; color: var(--medium-400); }
+  .pc-tree .s { color: var(--navy-300); font-style: italic; font-size: 11px; }
+  .pc-tree .i { color: var(--gold); font-weight: 700; }
+  .pc-tree .c { color: var(--green-text); font-weight: 700; }
+
+  /* Note */
+  .note {
+    background: var(--light-blue);
+    border-left: 4px solid var(--navy);
+    padding: 14px 18px;
+    margin: 16px 0;
+    border-radius: 0 6px 6px 0;
+    font-size: 12.5px;
+    line-height: 1.6;
+  }
+  .note.gold { background: rgba(198,142,14,0.06); border-left-color: var(--gold); }
+  .note strong { color: var(--navy); font-weight: 700; }
+
+  /* Légende */
+  .legend-bar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 20px;
+    background: white;
+    border: 1px solid var(--navy-100);
+    border-radius: 8px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+    font-size: 11.5px;
+  }
+  .legend-bar strong { font-weight: 700; color: var(--navy); }
+
+  @media print {
+    .doc-sidebar { display: none; }
+    .doc-layout { grid-template-columns: 1fr; }
+    .doc-main { padding: 24px; max-width: 100%; }
+    .page-card { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<div class="doc-layout">
+
+  <aside class="doc-sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-brand-mark">A</div>
+      <div><div class="sidebar-brand-name">ASTRAEOS</div></div>
+    </div>
+    <div class="sidebar-brand-sub">Document 2 / 6 · Éditeur</div>
+
+    <a class="back-link" href="01_Architecture_Master.html">← Document maître</a>
+
+    <nav class="sidebar-nav">
+      <div class="sidebar-section-header">15 sections de cet espace</div>
+      <a href="#dashboard">📊 1. Tableau de bord</a>
+      <a href="#tenants">🏛 2. Gestion des locataires</a>
+      <a href="#facturation">💳 3. Facturation outil</a>
+      <a href="#marketplace">🛒 4. Marketplace ASTRAEOS ⭐ NOUVEAU</a>
+      <a href="#support">💬 5. Support &amp; tickets</a>
+      <a href="#annonces">📢 6. Annonces multi-locataires</a>
+      <a href="#stats">📊 7. Statistiques d'usage</a>
+      <a href="#logs">📋 8. Logs &amp; audit</a>
+      <a href="#parametres">⚙ 9. Paramètres plateforme</a>
+      <a href="#publicite">📣 10. Publicité &amp; acquisition</a>
+      <a href="#metriques">📈 11. Métriques business / SaaS</a>
+      <a href="#crm">🎯 12. CRM commercial</a>
+      <a href="#roadmap">🗺 13. Roadmap produit</a>
+      <a href="#ia-revenus">🤖 14. Centre de revenus IA</a>
+      <a href="#api">🔌 15. Documentation API</a>
+
+      <div class="sidebar-section-header">Documents fondateurs</div>
+      <a href="00_Master_Dataset.html">📊 Master Dataset</a>
+      <a href="00_Data_Architecture.html">🏗 Data Architecture</a>
+
+      <div class="sidebar-section-header">Autres documents</div>
+      <a href="01_Architecture_Master.html">📋 Document maître</a>
+      <a href="03_Architecture_Proprietaire.html">🏛 Espace Propriétaire</a>
+      <a href="04_Architecture_Licencie.html">💼 Espace Cabinet (dirigeant)</a>
+      <a href="05_Architecture_Ingenieur.html">👤 Espace Ingénieur ⭐ NOUVEAU</a>
+      <a href="06_Architecture_Client.html">👥 Espace Client final</a>
+    </nav>
+  </aside>
+
+  <main class="doc-main">
+
+    <header class="doc-header">
+      <div class="doc-header-eyebrow">Document 2 / 6 · Espace Éditeur</div>
+      <h1 class="doc-title">Espace <strong>ASTRAEOS</strong> — Éditeur du logiciel</h1>
+      <p class="doc-subtitle">Détail exhaustif de toutes les pages de l'espace ASTRAEOS — l'éditeur du logiciel SaaS qui commercialise la plateforme selon <strong>2 modèles commerciaux</strong> : (1) à des <em>propriétaires de marque</em> qui animent un réseau (PRIVEOS Capital, Dupont Patrimoine…), et (2) à des <em>cabinets indépendants</em> qui achètent directement la solution (~3 000 CGP en France). Cet espace pilote la plateforme dans son ensemble : locataires, facturation, marketplace, métriques business, support, publicité et roadmap produit.</p>
+      <div class="doc-meta">
+        <span><strong>15 sections principales</strong></span>
+        <span><strong>~32 pages</strong> identifiées</span>
+        <span><strong>2 modèles commerciaux</strong> Marque + Cabinet direct</span>
+        <span><strong>Multi-tenant</strong> oui (vue globale)</span>
+      </div>
+    </header>
+
+    <!-- Glossaire -->
+    <div class="glossary">
+      <div class="glossary-title">Glossaire — vocabulaire à appliquer dans tous les documents</div>
+      <div class="glossary-grid">
+        <div class="glossary-item">
+          <span class="glossary-term gold">ASTRAEOS</span>
+          <div class="glossary-def">L'éditeur du logiciel SaaS (toi). Le propriétaire de la plateforme. Commercialise selon 2 modèles.</div>
+        </div>
+        <div class="glossary-item">
+          <span class="glossary-term">Tenant</span>
+          <div class="glossary-def">Un environnement isolé dans la base. Synonyme de locataire. <strong>2 types possibles</strong> : <code>tenant_type = 'marque'</code> ou <code>tenant_type = 'cabinet_direct'</code>.</div>
+        </div>
+        <div class="glossary-item">
+          <span class="glossary-term gold">🏛 Tenant Marque</span>
+          <div class="glossary-def">Modèle 1 — Propriétaire de marque qui anime un réseau de cabinets en franchise/licence. Ex : PRIVEOS Capital. Active Doc 3 + Doc 4.</div>
+        </div>
+        <div class="glossary-item">
+          <span class="glossary-term gold">💼 Tenant Cabinet direct</span>
+          <div class="glossary-def">Modèle 2 — Cabinet indépendant qui achète ASTRAEOS directement, sans réseau. Active uniquement Doc 4. Abonnement par utilisateur/mois.</div>
+        </div>
+        <div class="glossary-item">
+          <span class="glossary-term">Propriétaire de marque</span>
+          <div class="glossary-def">Le détenteur d'un cabinet de réseau (tenant Marque). Ex : PRIVEOS Capital. N'existe que dans le Modèle 1.</div>
+        </div>
+        <div class="glossary-item">
+          <span class="glossary-term">Licencié</span>
+          <div class="glossary-def">Un cabinet partenaire d'un propriétaire de marque (tenant Marque uniquement). Pas client direct d'ASTRAEOS.</div>
+        </div>
+        <div class="glossary-item">
+          <span class="glossary-term gold">🛒 Marketplace ASTRAEOS</span>
+          <div class="glossary-def">Service à valeur ajoutée pour les tenants Cabinet direct : packs sectoriels (Pack Financier, Pack Immobilier, Pack Référentiels). Voir section 4.</div>
+        </div>
+        <div class="glossary-item">
+          <span class="glossary-term">Prospect commercial</span>
+          <div class="glossary-def">Futur tenant qu'ASTRAEOS démarche (réseau OU cabinet indépendant). Géré dans le CRM commercial (section 12).</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats globales -->
+    <div class="stats-bar">
+      <div class="stat-block todo">
+        <div class="stat-label">Sections principales</div>
+        <div class="stat-value">15</div>
+        <div class="stat-meta">tout à concevoir</div>
+      </div>
+      <div class="stat-block todo">
+        <div class="stat-label">Pages estimées</div>
+        <div class="stat-value">~32</div>
+        <div class="stat-meta">avec sous-pages</div>
+      </div>
+      <div class="stat-block todo">
+        <div class="stat-label">Modules clés</div>
+        <div class="stat-value">6</div>
+        <div class="stat-meta">CRM · Pub · Métriques · IA · API · Marketplace</div>
+      </div>
+      <div class="stat-block idea">
+        <div class="stat-label">Priorité MVP</div>
+        <div class="stat-value">4</div>
+        <div class="stat-meta">Tenants · Stats · Support · Marketplace</div>
+      </div>
+    </div>
+
+    <div class="legend-bar">
+      <strong>Légende :</strong>
+      <span class="pc-status priority">PRIORITÉ MVP</span>
+      <span style="color: var(--navy-300);">essentiel pour démarrer</span>
+      <span class="pc-status todo">À FAIRE</span>
+      <span style="color: var(--navy-300);">spécifié, à concevoir</span>
+      <span class="pc-status idea">PHASE 2</span>
+      <span style="color: var(--navy-300);">peut attendre</span>
+    </div>
+
+    <div class="note gold">
+      <strong>📖 Comment lire ce document :</strong> chaque section décrit une <em>fonction métier</em> de l'espace ASTRAEOS, avec les <em>pages à créer</em> et leurs <em>sous-pages</em> (chemins de navigation). Ce document est l'arborescence détaillée. Les <strong>masques HTML précis</strong> seront produits ensuite, page par page, selon notre méthode collaborative.
+    </div>
+    <!-- ============================== -->
+    <!-- SITEMAP VISUEL ASTRAEOS         -->
+    <!-- ============================== -->
+    <section class="main-section" id="sitemap">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">🗺</span> Vue d'ensemble</div>
+        <h2 class="section-title">Sitemap visuel de l'espace ASTRAEOS</h2>
+        <p class="section-intro">Les 15 sections de l'espace éditeur, regroupées par domaine fonctionnel : Pilotage, Commercial, Technique, Support.</p>
+      </div>
+
+      <div class="sitemap-container">
+        <div class="sitemap-svg-wrap">
+          <svg viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: auto; min-width: 1200px;">
+
+            <defs>
+              <linearGradient id="ed-navyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#102D50"/>
+                <stop offset="100%" stop-color="#0a1f38"/>
+              </linearGradient>
+              <linearGradient id="ed-goldGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#C68E0E"/>
+                <stop offset="100%" stop-color="#A87A0C"/>
+              </linearGradient>
+              <linearGradient id="ed-blueGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#EBF1FA"/>
+                <stop offset="100%" stop-color="#DBE0E4"/>
+              </linearGradient>
+              <linearGradient id="ed-greenGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#E8F3EC"/>
+                <stop offset="100%" stop-color="#C7E5D0"/>
+              </linearGradient>
+              <filter id="ed-shadow">
+                <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#102D50" flood-opacity="0.12"/>
+              </filter>
+            </defs>
+
+            <!-- TITRE CENTRAL -->
+            <g transform="translate(800, 30)">
+              <rect x="-200" y="0" width="400" height="60" rx="10" fill="url(#ed-navyGrad)" filter="url(#ed-shadow)"/>
+              <text x="0" y="26" text-anchor="middle" fill="#DDBB6E" font-family="Epilogue" font-weight="700" font-size="10" letter-spacing="3">ESPACE ÉDITEUR · ASTRAEOS</text>
+              <text x="0" y="46" text-anchor="middle" fill="white" font-family="Epilogue" font-weight="700" font-size="16">15 sections fonctionnelles</text>
+            </g>
+
+            <!-- 4 COLONNES THÉMATIQUES -->
+
+            <!-- Colonne 1 : PILOTAGE (navy) -->
+            <g transform="translate(180, 130)">
+              <rect x="-140" y="0" width="280" height="42" rx="8" fill="url(#ed-navyGrad)" filter="url(#ed-shadow)"/>
+              <text x="0" y="28" text-anchor="middle" fill="white" font-family="Epilogue" font-weight="700" font-size="13">📊 PILOTAGE</text>
+            </g>
+            <line x1="180" y1="172" x2="180" y2="200" stroke="#A4AEBB" stroke-width="1.5" stroke-dasharray="3 3"/>
+
+            <!-- Section 1 -->
+            <a href="#dashboard" class="sitemap-link">
+              <g transform="translate(40, 200)" class="sitemap-node">
+                <rect x="0" y="0" width="280" height="48" rx="6" fill="white" stroke="#C68E0E" stroke-width="1.5"/>
+                <text x="14" y="20" fill="#C68E0E" font-family="Epilogue" font-weight="700" font-size="9" letter-spacing="1.5">SECTION 1 ⭐</text>
+                <text x="14" y="38" fill="#102D50" font-family="Epilogue" font-weight="700" font-size="13">📊 Tableau de bord global</text>
+              </g>
+            </a>
+            <!-- Section 7 -->
+            <a href="#stats" class="sitemap-link">
+              <g transform="translate(40, 260)" class="sitemap-node">
+                <rect x="0" y="0" width="280" height="48" rx="6" fill="white" stroke="#DBE0E4" stroke-width="1"/>
+                <text x="14" y="20" fill="#708196" font-family="Epilogue" font-weight="700" font-size="9" letter-spacing="1.5">SECTION 7</text>
+                <text x="14" y="38" fill="#102D50" font-family="Epilogue" font-weight="700" font-size="13">📊 Statistiques d'usage</text>
+              </g>
+            </a>
+            <!-- Section 8 -->
+            <a href="#logs" class="sitemap-link">
+              <g transform="translate(40, 320)" class="sitemap-node">
+                <rect x="0" y="0" width="280" height="48" rx="6" fill="white" stroke="#DBE0E4" stroke-width="1"/>
+                <text x="14" y="20" fill="#708196" font-family="Epilogue" font-weight="700" font-size="9" letter-spacing="1.5">SECTION 8</text>
+                <text x="14" y="38" fill="#102D50" font-family="Epilogue" font-weight="700" font-size="13">📋 Logs &amp; audit</text>
+              </g>
+            </a>
+            <!-- Section 11 -->
+            <a href="#metriques" class="sitemap-link">
+              <g transform="translate(40, 380)" class="sitemap-node">
+                <rect x="0" y="0" width="280" height="48" rx="6" fill="white" stroke="#DBE0E4" stroke-width="1"/>
+                <text x="14" y="20" fill="#708196" font-family="Epilogue" font-weight="700" font-size="9" letter-spacing="1.5">SECTION 11</text>
+                <text x="14" y="38" fill="#102D50" font-family="Epilogue" font-weight="700" font-size="13">📈 Métriques business / SaaS</text>
+              </g>
+            </a>
+
+            <!-- Colonne 2 : COMMERCIAL (gold) -->
+            <g transform="translate(530, 130)">
+              <rect x="-140" y="0" width="280" height="42" rx="8" fill="url(#ed-goldGrad)" filter="url(#ed-shadow)"/>
+              <text x="0" y="28" text-anchor="middle" fill="white" font-family="Epilogue" font-weight="700" font-size="13">🎯 COMMERCIAL</text>
+            </g>
+            <line x1="530" y1="172" x2="530" y2="200" stroke="#A4AEBB" stroke-width="1.5" stroke-dasharray="3 3"/>
+
+            <!-- Section 2 -->
+            <a href="#tenants" class="sitemap-link">
+              <g transform="translate(390, 200)" class="sitemap-node">
+                <rect x="0" y="0" width="280" height="48" rx="6" fill="white" stroke="#C68E0E" stroke-width="1.5"/>
+                <text x="14" y="20" fill="#C68E0E" font-family="Epilogue" font-weight="700" font-size="9" letter-spacing="1.5">SECTION 2 ⭐</text>
+                <text x="14" y="38" fill="#102D50" font-family="Epilogue" font-weight="700" font-size="13">🏛 Gestion des locataires</text>
+              </g>
+            </a>
+            <!-- Section 3 -->
+            <a href="#facturation" class="sitemap-link">
+              <g transform="translate(390, 260)" class="sitemap-node">
+                <rect x="0" y="0" width="280" height="48" rx="6" fill="white" stroke="#DBE0E4" stroke-width="1"/>
+                <text x="14" y="20" fill="#708196" font-family="Epilogue" font-weight="700" font-size="9" letter-spacing="1.5">SECTION 3</text>
+                <text x="14" y="38" fill="#102D50" font-family="Epilogue" font-weight="700" font-size="13">💳 Facturation outil</text>
+              </g>
+            </a>
+            <!-- Section 4 — MARKETPLACE NOUVEAU -->
+            <a href="#marketplace" class="sitemap-link">
+              <g transform="translate(390, 320)" class="sitemap-node">
+                <rect x="0" y="0" width="280" height="48" rx="6" fill="rgba(198,142,14,0.06)" stroke="#C68E0E" stroke-width="2"/>
+                <text x="14" y="20" fill="#C68E0E" font-family="Epilogue" font-weight="800" font-size="9" letter-spacing="1.5">SECTION 4 ⭐ NOUVEAU</text>
+                <text x="14" y="38" fill="#102D50" font-family="Epilogue" font-weight="700" font-size="13">🛒 Marketplace ASTRAEOS</text>
+              </g>
+            </a>
+            <!-- Section 12 -->
+            <a href="#crm" class="sitemap-link">
+              <g transform="translate(390, 380)" class="sitemap-node">
+                <rect x="0" y="0" width="280" height="48" rx="6" fill="white" stroke="#C68E0E" stroke-width="1.5"/>
+                <text x="14" y="20" fill="#C68E0E" font-family="Epilogue" font-weight="700" font-size="9" letter-spacing="1.5">SECTION 12 ⭐</text>
+                <text x="14" y="38" fill="#102D50" font-family="Epilogue" font-weight="700" font-size="13">🎯 CRM commercial</text>
+              </g>
+            </a>
+            <!-- Section 10 -->
+            <a href="#publicite" class="sitemap-link">
+              <g transform="translate(390, 440)" class="sitemap-node">
+                <rect x="0" y="0" width="280" height="48" rx="6" fill="white" stroke="#DBE0E4" stroke-width="1"/>
+                <text x="14" y="20" fill="#708196" font-family="Epilogue" font-weight="700" font-size="9" letter-spacing="1.5">SECTION 10</text>
+                <text x="14" y="38" fill="#102D50" font-family="Epilogue" font-weight="700" font-size="13">📣 Publicité &amp; acquisition</text>
+              </g>
+            </a>
+
+            <!-- Colonne 3 : TECHNIQUE -->
+            <g transform="translate(880, 130)">
+              <rect x="-140" y="0" width="280" height="42" rx="8" fill="url(#ed-greenGrad)" stroke="#1F8A4C" stroke-width="1.5" filter="url(#ed-shadow)"/>
+              <text x="0" y="28" text-anchor="middle" fill="#1F8A4C" font-family="Epilogue" font-weight="700" font-size="13">⚙ TECHNIQUE</text>
+            </g>
+            <line x1="880" y1="172" x2="880" y2="200" stroke="#A4AEBB" stroke-width="1.5" stroke-dasharray="3 3"/>
+
+            <!-- Section 9 -->
+            <a href="#parametres" class="sitemap-link">
+              <g transform="translate(740, 200)" class="sitemap-node">
+                <rect x="0" y="0" width="280" height="48" rx="6" fill="white" stroke="#DBE0E4" stroke-width="1"/>
+                <text x="14" y="20" fill="#708196" font-family="Epilogue" font-weight="700" font-size="9" letter-spacing="1.5">SECTION 9</text>
+                <text x="14" y="38" fill="#102D50" font-family="Epilogue" font-weight="700" font-size="13">⚙ Paramètres plateforme</text>
+              </g>
+            </a>
+            <!-- Section 14 -->
+            <a href="#ia-revenus" class="sitemap-link">
+              <g transform="translate(740, 260)" class="sitemap-node">
+                <rect x="0" y="0" width="280" height="48" rx="6" fill="white" stroke="#DBE0E4" stroke-width="1"/>
+                <text x="14" y="20" fill="#708196" font-family="Epilogue" font-weight="700" font-size="9" letter-spacing="1.5">SECTION 14</text>
+                <text x="14" y="38" fill="#102D50" font-family="Epilogue" font-weight="700" font-size="13">🤖 Centre de revenus IA</text>
+              </g>
+            </a>
+            <!-- Section 15 -->
+            <a href="#api" class="sitemap-link">
+              <g transform="translate(740, 320)" class="sitemap-node">
+                <rect x="0" y="0" width="280" height="48" rx="6" fill="white" stroke="#DBE0E4" stroke-width="1"/>
+                <text x="14" y="20" fill="#708196" font-family="Epilogue" font-weight="700" font-size="9" letter-spacing="1.5">SECTION 15</text>
+                <text x="14" y="38" fill="#102D50" font-family="Epilogue" font-weight="700" font-size="13">🔌 Documentation API</text>
+              </g>
+            </a>
+            <!-- Section 13 -->
+            <a href="#roadmap" class="sitemap-link">
+              <g transform="translate(740, 380)" class="sitemap-node">
+                <rect x="0" y="0" width="280" height="48" rx="6" fill="white" stroke="#DBE0E4" stroke-width="1"/>
+                <text x="14" y="20" fill="#708196" font-family="Epilogue" font-weight="700" font-size="9" letter-spacing="1.5">SECTION 13</text>
+                <text x="14" y="38" fill="#102D50" font-family="Epilogue" font-weight="700" font-size="13">🗺 Roadmap produit</text>
+              </g>
+            </a>
+
+            <!-- Colonne 4 : SUPPORT & COM -->
+            <g transform="translate(1230, 130)">
+              <rect x="-140" y="0" width="280" height="42" rx="8" fill="url(#ed-blueGrad)" stroke="#1456A0" stroke-width="1.5" filter="url(#ed-shadow)"/>
+              <text x="0" y="28" text-anchor="middle" fill="#1456A0" font-family="Epilogue" font-weight="700" font-size="13">💬 SUPPORT &amp; COM</text>
+            </g>
+            <line x1="1230" y1="172" x2="1230" y2="200" stroke="#A4AEBB" stroke-width="1.5" stroke-dasharray="3 3"/>
+
+            <!-- Section 5 -->
+            <a href="#support" class="sitemap-link">
+              <g transform="translate(1090, 200)" class="sitemap-node">
+                <rect x="0" y="0" width="280" height="48" rx="6" fill="white" stroke="#C68E0E" stroke-width="1.5"/>
+                <text x="14" y="20" fill="#C68E0E" font-family="Epilogue" font-weight="700" font-size="9" letter-spacing="1.5">SECTION 5 ⭐</text>
+                <text x="14" y="38" fill="#102D50" font-family="Epilogue" font-weight="700" font-size="13">💬 Support &amp; tickets</text>
+              </g>
+            </a>
+            <!-- Section 6 -->
+            <a href="#annonces" class="sitemap-link">
+              <g transform="translate(1090, 260)" class="sitemap-node">
+                <rect x="0" y="0" width="280" height="48" rx="6" fill="white" stroke="#DBE0E4" stroke-width="1"/>
+                <text x="14" y="20" fill="#708196" font-family="Epilogue" font-weight="700" font-size="9" letter-spacing="1.5">SECTION 6</text>
+                <text x="14" y="38" fill="#102D50" font-family="Epilogue" font-weight="700" font-size="13">📢 Annonces multi-locataires</text>
+              </g>
+            </a>
+
+            <!-- Lignes de connexion vers le titre central -->
+            <line x1="800" y1="90" x2="180" y2="130" stroke="#DBE0E4" stroke-width="1.5"/>
+            <line x1="800" y1="90" x2="530" y2="130" stroke="#DBE0E4" stroke-width="1.5"/>
+            <line x1="800" y1="90" x2="880" y2="130" stroke="#DBE0E4" stroke-width="1.5"/>
+            <line x1="800" y1="90" x2="1230" y2="130" stroke="#DBE0E4" stroke-width="1.5"/>
+
+            <!-- Légende basse -->
+            <g transform="translate(800, 530)">
+              <text x="0" y="0" text-anchor="middle" fill="#708196" font-family="Epilogue" font-size="11" font-style="italic">⭐ = priorités MVP · cliquez sur une section pour voir le détail ↓</text>
+            </g>
+
+          </svg>
+        </div>
+      </div>
+    </section>
+    <!-- ====================================================== -->
+    <!-- SECTION 1 — TABLEAU DE BORD GLOBAL                      -->
+    <!-- ====================================================== -->
+    <section class="main-section" id="dashboard">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">1</span> Section 1 / 15 · ⭐ Priorité MVP</div>
+        <h2 class="section-title">📊 Tableau de bord global</h2>
+        <p class="section-intro">Page d'atterrissage d'ASTRAEOS. Vue agrégée de l'activité de la plateforme : tous les locataires, métriques business, alertes critiques, support, IA. C'est le poste de pilotage central.</p>
+      </div>
+
+      <div class="page-card priority">
+        <div class="pc-header">
+          <div class="pc-icon">📊</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Page principale · /astraeos</div>
+            <div class="pc-title">Accueil ASTRAEOS</div>
+            <div class="pc-desc">Dashboard d'arrivée pour l'éditeur. Vue 360° de la plateforme.</div>
+          </div>
+          <span class="pc-status priority">PRIORITÉ MVP</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Composants attendus</div>
+          <div class="pc-tree">
+<span class="b">┌─ HERO PERSONNALISÉ</span>
+│   ├─ Salutation éditeur <span class="s">(toi + équipe)</span>
+│   └─ Period control <span class="s">(M / T / A · années antérieures)</span>
+
+<span class="b">┌─ KPIS PLATEFORME</span> <span class="s">(4-6 KPIs en ligne)</span>
+│   ├─ Nombre de locataires actifs
+│   ├─ MRR <span class="s">(revenu récurrent mensuel)</span>
+│   ├─ Encours total géré <span class="s">(somme tous tenants)</span>
+│   └─ Sessions actives en temps réel
+
+<span class="b">┌─ ALERTES CRITIQUES</span> <span class="s">(en haut, visible immédiatement)</span> <span class="i">CLIQUABLES</span>
+│   ├─ Pannes / incidents en cours
+│   ├─ Locataires en impayé
+│   └─ Locataires en consommation IA anormale
+
+<span class="b">┌─ ACTIVITÉ MULTI-LOCATAIRES</span> <span class="s">(timeline)</span>
+│   └─ Derniers événements de tous les tenants
+
+<span class="b">┌─ SHORTCUTS</span> <span class="s">(accès rapides)</span>
+│   ├─ Tickets support en attente
+│   ├─ Prospects commerciaux chauds
+│   └─ Tâches urgentes
+          </div>
+
+          <div class="pc-section-label">Sous-pages atteignables depuis cette page</div>
+          <div class="pc-subpages">
+            <div class="pc-subpage"><strong>→ Détail alerte critique</strong> · ouvre la fiche de l'alerte avec actions correctives possibles</div>
+            <div class="pc-subpage"><strong>→ Liste des locataires</strong> · au clic sur "Locataires actifs"</div>
+            <div class="pc-subpage"><strong>→ Détail MRR</strong> · drill-down sur le revenu (vers Métriques business)</div>
+            <div class="pc-subpage"><strong>→ Tickets en attente</strong> · vers Support &amp; tickets</div>
+            <div class="pc-subpage"><strong>→ Prospects chauds</strong> · vers CRM commercial</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================== -->
+    <!-- SECTION 2 — GESTION DES LOCATAIRES                      -->
+    <!-- ====================================================== -->
+    <section class="main-section" id="tenants">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">2</span> Section 2 / 15 · ⭐ Priorité MVP</div>
+        <h2 class="section-title">🏛 Gestion des locataires</h2>
+        <p class="section-intro">Gestion des tenants (locataires) qui louent ASTRAEOS. <strong>2 types de tenants</strong> coexistent : <em>Tenants Marque</em> (propriétaires de réseau type PRIVEOS Capital) et <em>Tenants Cabinet direct</em> (cabinets indépendants — segment ~3 000 CGP en France). L'onboarding et la facturation diffèrent selon le type.</p>
+      </div>
+
+      <div class="note gold">
+        <strong>📌 2 types de tenants — rappel :</strong>
+        <ul style="margin-top: 8px; padding-left: 20px; font-size: 12.5px;">
+          <li><strong>🏛 Tenant Marque</strong> — Propriétaire de marque qui anime un réseau de cabinets en franchise/licence. Active Doc 3 + Doc 4. Ex : PRIVEOS Capital.</li>
+          <li><strong>💼 Tenant Cabinet direct</strong> — Cabinet indépendant qui achète directement la solution. Active uniquement Doc 4. Modèle économique : abonnement par utilisateur/mois.</li>
+        </ul>
+        <p style="margin-top: 8px; font-size: 12.5px;"><em>Voir Doc 1 Master · section "Les 2 modèles commerciaux d'ASTRAEOS" pour le détail.</em></p>
+      </div>
+
+      <div class="page-card priority">
+        <div class="pc-header">
+          <div class="pc-icon">📋</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Page principale · /astraeos/locataires</div>
+            <div class="pc-title">Liste des locataires</div>
+            <div class="pc-desc">Tableau de tous les locataires actifs avec KPIs essentiels par locataire.</div>
+          </div>
+          <span class="pc-status priority">PRIORITÉ MVP</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Composants attendus</div>
+          <div class="pc-tree">
+<span class="b">┌─ HEADER + filtres</span>
+│   ├─ Search bar <span class="s">(par nom de locataire)</span>
+│   ├─ Filtres <span class="s">(actif · suspendu · onboarding · archivé)</span>
+│   └─ CTA <span class="s">[+ Nouveau locataire]</span>
+
+<span class="b">┌─ STATS</span>
+│   ├─ Nombre total · répartition par statut
+│   └─ MRR moyen par locataire
+
+<span class="b">┌─ TABLEAU LOCATAIRES</span> <span class="i">CHAQUE LIGNE CLIQUABLE</span>
+│   ├─ Logo / nom <span class="s">(ex : PRIVEOS Capital)</span>
+│   ├─ Plan d'abonnement
+│   ├─ Date d'entrée
+│   ├─ Nombre de licenciés
+│   ├─ Nombre de clients finaux
+│   ├─ MRR généré
+│   ├─ Consommation IA <span class="s">(jauge)</span>
+│   └─ Statut + actions <span class="s">[Connexion-as · Suspendre]</span>
+          </div>
+
+          <div class="pc-section-label">Sous-pages atteignables</div>
+          <div class="pc-subpages">
+            <div class="pc-subpage"><strong>→ Fiche locataire (5 onglets)</strong> · au clic ligne</div>
+            <div class="pc-subpage"><strong>→ Création nouveau locataire</strong> · workflow d'onboarding · CTA</div>
+            <div class="pc-subpage"><strong>→ Connexion en tant que locataire</strong> · action de la ligne</div>
+            <div class="pc-subpage"><strong>→ Archive locataires anciens</strong> · filtre statut</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="page-card">
+        <div class="pc-header">
+          <div class="pc-icon">📁</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Sous-page · /astraeos/locataires/:id</div>
+            <div class="pc-title">Fiche locataire (5 onglets)</div>
+            <div class="pc-desc">Détail complet d'un locataire avec navigation par onglets.</div>
+          </div>
+          <span class="pc-status todo">À FAIRE</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">5 onglets de la fiche</div>
+          <div class="pc-subpages">
+            <div class="pc-subpage"><strong>1. Vue d'ensemble</strong> · identité, plan d'abonnement, dates clés, KPIs principaux<div class="meta">santé du compte, échéances, équipe</div></div>
+            <div class="pc-subpage"><strong>2. Activité &amp; usage</strong> · sessions, modules utilisés, fonctionnalités préférées<div class="meta">timeline d'activité 30 jours</div></div>
+            <div class="pc-subpage"><strong>3. Facturation</strong> · plan, factures, paiements, impayés, prochaine échéance<div class="meta">historique complet + relances</div></div>
+            <div class="pc-subpage"><strong>4. Modules optionnels</strong> · activer / désactiver les modules pour ce locataire<div class="meta">ex : un locataire qui n'utilise pas l'IA peut la désactiver</div></div>
+            <div class="pc-subpage"><strong>5. Support &amp; historique</strong> · tickets ouverts/fermés, notes internes, contacts<div class="meta">qui parle à qui chez le locataire</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="page-card priority">
+        <div class="pc-header">
+          <div class="pc-icon">➕</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Sous-page · /astraeos/locataires/nouveau · ⭐ Wizard différencié</div>
+            <div class="pc-title">Création nouveau tenant (workflow guidé en 6 étapes)</div>
+            <div class="pc-desc">Wizard d'onboarding qui s'adapte au type de tenant : <strong>Marque (réseau)</strong> ou <strong>Cabinet direct (indépendant)</strong>.</div>
+          </div>
+          <span class="pc-status priority">PRIORITÉ MVP</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Étape clé · Le choix du type de tenant</div>
+          <div class="pc-tree">
+<span class="b">┌─ ÉTAPE 1 — TYPE DE STRUCTURE (question initiale)</span>
+│   ├─ <strong>Quelle est votre structure ?</strong>
+│   │   ├─ <span class="b">○ 🏛 Je suis un propriétaire de marque</span>
+│   │   │   <span class="s">→ "J'anime un réseau de cabinets en franchise/licence"</span>
+│   │   │   <span class="s">→ Tenant type = 'marque'</span>
+│   │   │   <span class="s">→ Active Doc 3 (Espace Propriétaire) + Doc 4 (Cabinet)</span>
+│   │   │
+│   │   └─ <span class="b">○ 💼 Je suis un cabinet indépendant</span>
+│   │       <span class="s">→ "J'achète ASTRAEOS pour mon propre cabinet, sans réseau"</span>
+│   │       <span class="s">→ Tenant type = 'cabinet_direct'</span>
+│   │       <span class="s">→ Active uniquement Doc 4 (Cabinet)</span>
+│   └─ Le wizard adapte ensuite ses étapes selon le choix
+          </div>
+
+          <div class="pc-section-label">Étapes communes aux 2 types</div>
+          <div class="pc-tree">
+<span class="b">┌─ ÉTAPE 2 — IDENTITÉ DU TENANT</span>
+│   ├─ Nom commercial · raison sociale · SIREN
+│   ├─ Pays · adresse · numéro ORIAS
+│   └─ Logo + couleurs branding initiales
+
+<span class="b">┌─ ÉTAPE 3 — COMPTE ADMINISTRATEUR INITIAL</span>
+│   ├─ Email du référent <span class="s">(dirigeant pour cabinet · admin réseau pour marque)</span>
+│   ├─ Création du mot de passe initial
+│   └─ Envoi email d'onboarding
+
+<span class="b">┌─ ÉTAPE 6 — VALIDATION &amp; PROVISIONING</span>
+│   ├─ Récap des choix
+│   ├─ Création de l'environnement tenant <span class="s">(tenant_type stocké en BDD)</span>
+│   ├─ Activation des bons documents/espaces selon le type
+│   └─ Email de bienvenue automatique
+          </div>
+
+          <div class="pc-section-label">Étapes spécifiques au tenant Marque 🏛</div>
+          <div class="pc-tree">
+<span class="b">┌─ ÉTAPE 4 (Marque) — PLAN D'ABONNEMENT MULTI-TENANT</span>
+│   ├─ Choix du plan <span class="s">(Réseau Starter · Pro · Enterprise)</span>
+│   ├─ Capacité <span class="s">(nb max de cabinets licenciés inclus)</span>
+│   ├─ Modules optionnels <span class="s">(publicité avancée, IA premium, etc.)</span>
+│   └─ Engagement et tarifs
+
+<span class="b">┌─ ÉTAPE 5 (Marque) — PARAMÈTRES RÉSEAU</span>
+│   ├─ Frais d'entrée pour licenciés <span class="s">(défaut 20 000 € · paramétrable)</span>
+│   ├─ Catalogue produits initial <span class="s">(à construire ensuite dans Doc 3)</span>
+│   ├─ Référentiel DCI initial <span class="s">(à charger ensuite dans Doc 3)</span>
+│   ├─ Charte graphique imposée aux cabinets
+│   └─ Templates emails personnalisés du réseau
+          </div>
+
+          <div class="pc-section-label">Étapes spécifiques au tenant Cabinet direct 💼</div>
+          <div class="pc-tree">
+<span class="b">┌─ ÉTAPE 4 (Cabinet direct) — ABONNEMENT PAR UTILISATEUR</span>
+│   ├─ <strong>Tarif forfaitaire par utilisateur/mois</strong> <span class="s">(ex : 49€/mois/utilisateur)</span>
+│   ├─ Nombre d'utilisateurs initial
+│   ├─ Engagement <span class="s">(mensuel · annuel avec remise)</span>
+│   └─ Pas de commission sur produits placés <span class="s">(différence majeure avec tenant Marque)</span>
+
+<span class="b">┌─ ÉTAPE 5 (Cabinet direct) — MARKETPLACE &amp; AUTONOMIE</span>
+│   ├─ Choix d'activation des packs Marketplace <span class="s">(Pack Financier · Pack Immobilier · Pack Référentiels)</span>
+│   ├─ <strong>OU</strong> autonomie totale <span class="s">(le cabinet construit son propre catalogue produits)</span>
+│   ├─ Charte graphique 100% personnalisée <span class="s">(logo, couleurs propres)</span>
+│   └─ Tarif des packs si activés <span class="s">(facturation séparée de l'abonnement principal)</span>
+          </div>
+
+          <div class="pc-section-label">Différences techniques en sortie de wizard</div>
+          <div class="pc-tree">
+<span class="b">┌─ TENANT MARQUE</span>
+│   ├─ Doc 3 (Espace Propriétaire) → ACTIVÉ
+│   ├─ Doc 4 (Cabinet) → ACTIVÉ avec branding marque imposé
+│   ├─ Doc 5 (Ingénieur) → ACTIVÉ
+│   ├─ Section Compliance dans Doc 3 → ACTIVE <span class="s">(suivi réseau)</span>
+│   └─ Catalogue/Référentiels → centralisé par le propriétaire
+
+<span class="b">┌─ TENANT CABINET DIRECT</span>
+│   ├─ Doc 3 (Espace Propriétaire) → DÉSACTIVÉ
+│   ├─ Doc 4 (Cabinet) → ACTIVÉ avec branding personnalisé du cabinet
+│   ├─ Doc 5 (Ingénieur) → ACTIVÉ
+│   ├─ Encarts dans Doc 4 montrent les fonctionnalités "réseau" comme désactivées
+│   └─ Catalogue/Référentiels → construit par le cabinet OU pack Marketplace
+          </div>
+
+          <div class="pc-section-label">Sous-pages atteignables</div>
+          <div class="pc-subpages">
+            <div class="pc-subpage"><strong>Étape 1 du wizard</strong> · choix du type</div>
+            <div class="pc-subpage"><strong>Étapes 2-6 du wizard</strong> · adaptées au type choisi</div>
+            <div class="pc-subpage"><strong>Marketplace ASTRAEOS</strong> · si tenant Cabinet direct → étape 5 → vers section 4</div>
+            <div class="pc-subpage"><strong>Page récapitulative finale</strong> · validation avant création tenant</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="page-card">
+        <div class="pc-header">
+          <div class="pc-icon">🔧</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Sous-page · /astraeos/locataires/:id/connexion-as</div>
+            <div class="pc-title">Connexion en tant que locataire</div>
+            <div class="pc-desc">Mode "impersonification" : tu navigues dans l'espace propriétaire de marque comme si tu étais l'utilisateur, pour debug ou support.</div>
+          </div>
+          <span class="pc-status todo">À FAIRE</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Composants</div>
+          <div class="pc-subpages">
+            <div class="pc-subpage"><strong>Bandeau persistant en haut</strong> · "Vous êtes connecté en tant que [Nom locataire] · [Quitter]"</div>
+            <div class="pc-subpage"><strong>Logs automatiques</strong> · toutes les actions sont loggées dans audit pour traçabilité</div>
+            <div class="pc-subpage"><strong>Restrictions</strong> · certaines actions sont interdites en mode connexion-as <em>(suppression définitive, modification de paiement)</em></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================== -->
+    <!-- SECTION 3 — FACTURATION OUTIL                           -->
+    <!-- ====================================================== -->
+    <section class="main-section" id="facturation">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">3</span> Section 3 / 15</div>
+        <h2 class="section-title">💳 Facturation outil</h2>
+        <p class="section-intro">Gestion des abonnements payés à ASTRAEOS par les tenants. <strong>2 modes de facturation distincts</strong> selon le type de tenant. À ne pas confondre avec les flux financiers internes (gérés par chaque tenant dans son propre espace).</p>
+      </div>
+
+      <div class="note gold">
+        <strong>💰 2 modes de facturation ASTRAEOS :</strong>
+        <table style="width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12.5px;">
+          <thead>
+            <tr style="background: rgba(198,142,14,0.10);">
+              <th style="text-align: left; padding: 8px 10px; font-weight: 700;">Critère</th>
+              <th style="text-align: left; padding: 8px 10px; font-weight: 700;">🏛 Tenant Marque</th>
+              <th style="text-align: left; padding: 8px 10px; font-weight: 700;">💼 Tenant Cabinet direct</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="padding: 6px 10px;"><strong>Modèle de pricing</strong></td>
+              <td style="padding: 6px 10px;">Plan multi-tenants par capacité (nb max licenciés)</td>
+              <td style="padding: 6px 10px;">Forfaitaire <strong>par utilisateur/mois</strong></td>
+            </tr>
+            <tr>
+              <td style="padding: 6px 10px;"><strong>Variables de tarif</strong></td>
+              <td style="padding: 6px 10px;">Capacité réseau · modules optionnels · features avancées</td>
+              <td style="padding: 6px 10px;">Nombre d'utilisateurs · packs Marketplace activés · engagement</td>
+            </tr>
+            <tr>
+              <td style="padding: 6px 10px;"><strong>Commission produit ?</strong></td>
+              <td style="padding: 6px 10px;">Non (ASTRAEOS facture l'outil, le propriétaire gère son réseau)</td>
+              <td style="padding: 6px 10px;">Non (le cabinet garde 100% de ses commissions)</td>
+            </tr>
+            <tr>
+              <td style="padding: 6px 10px;"><strong>Facturation Marketplace</strong></td>
+              <td style="padding: 6px 10px;">N/A</td>
+              <td style="padding: 6px 10px;">Oui (séparée par pack activé)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="page-card">
+        <div class="pc-header">
+          <div class="pc-icon">💰</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Page principale · /astraeos/facturation</div>
+            <div class="pc-title">Vue d'ensemble facturation</div>
+            <div class="pc-desc">Synthèse des revenus récurrents, paiements, impayés.</div>
+          </div>
+          <span class="pc-status todo">À FAIRE</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Sous-pages</div>
+          <div class="pc-subpages">
+            <div class="pc-subpage"><strong>Plans d'abonnement</strong> · paramétrage des plans (Starter · Pro · Enterprise) + add-ons modulaires</div>
+            <div class="pc-subpage"><strong>Factures émises</strong> · liste de toutes les factures avec statut (payée · en attente · impayée)</div>
+            <div class="pc-subpage"><strong>Détail facture</strong> · au clic d'une ligne · télécharger PDF, marquer payée, relancer</div>
+            <div class="pc-subpage"><strong>Paiements reçus</strong> · historique des encaissements avec ventilation par locataire</div>
+            <div class="pc-subpage"><strong>Impayés &amp; relances</strong> · liste des factures en retard + workflow de relance automatique</div>
+            <div class="pc-subpage"><strong>Add-ons consommés</strong> · facturation à l'usage (IA en plus, stockage en plus, utilisateurs additionnels)</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================== -->
+    <!-- SECTION 4 — MARKETPLACE ASTRAEOS ⭐ NOUVEAU             -->
+    <!-- ====================================================== -->
+    <section class="main-section" id="marketplace">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">4</span> Section 4 / 15 · ⭐ Priorité MVP · NOUVEAU</div>
+        <h2 class="section-title">🛒 Marketplace ASTRAEOS</h2>
+        <p class="section-intro">Service à valeur ajoutée pour les <strong>tenants Cabinet direct</strong> qui n'ont pas de propriétaire de marque pour leur fournir un catalogue centralisé. ASTRAEOS propose des <strong>packs sectoriels prêts à l'emploi</strong> que les cabinets indépendants peuvent activer à la demande, en complément de leur abonnement principal.</p>
+      </div>
+
+      <div class="note gold">
+        <strong>📌 Positionnement de la Marketplace :</strong>
+        <ul style="margin-top: 8px; padding-left: 20px; font-size: 12.5px;">
+          <li><strong>Ciblé tenants Cabinet direct uniquement</strong> — les tenants Marque ont leur propre catalogue centralisé géré par le propriétaire de marque (Doc 3).</li>
+          <li><strong>Optionnel et modulaire</strong> — un cabinet peut activer un seul pack, plusieurs, ou aucun (autonomie totale possible).</li>
+          <li><strong>Facturation séparée</strong> — chaque pack activé génère un revenu additionnel pour ASTRAEOS, indépendant de l'abonnement principal.</li>
+          <li><strong>Mis à jour par ASTRAEOS</strong> — les contenus des packs (produits, référentiels) sont maintenus à jour par l'éditeur (vrai service récurrent).</li>
+        </ul>
+      </div>
+
+      <div class="page-card priority">
+        <div class="pc-header">
+          <div class="pc-icon">🛒</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Page principale · /astraeos/marketplace</div>
+            <div class="pc-title">Catalogue des packs ASTRAEOS</div>
+            <div class="pc-desc">Vue d'ensemble des packs disponibles + statistiques d'adoption + revenus générés.</div>
+          </div>
+          <span class="pc-status priority">PRIORITÉ MVP</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Composants attendus</div>
+          <div class="pc-tree">
+<span class="b">┌─ HEADER + KPIS</span>
+│   ├─ Nombre de packs disponibles
+│   ├─ Cabinets utilisateurs <span class="s">(répartition par pack)</span>
+│   ├─ Revenu mensuel total Marketplace <span class="s">(MRR additionnel)</span>
+│   └─ Taux d'adoption par pack
+
+<span class="b">┌─ LISTE DES PACKS DISPONIBLES</span>
+│   ├─ <strong>📈 Pack Financier</strong>
+│   │   ├─ Catalogue de produits financiers <span class="s">(assurance vie, PER, SCPI, OPCI, structurés...)</span>
+│   │   ├─ Fiches techniques + DICI à jour
+│   │   ├─ Argumentaires commerciaux
+│   │   ├─ Tarif suggéré <span class="s">(à définir : ex 99€/mois)</span>
+│   │   └─ Mise à jour mensuelle par ASTRAEOS
+│   │
+│   ├─ <strong>🏠 Pack Immobilier</strong>
+│   │   ├─ Catalogue de biens en placement <span class="s">(neuf, ancien, démembrement, LMNP, Pinel...)</span>
+│   │   ├─ Fiches techniques + simulateurs intégrés
+│   │   ├─ Workflow de réservation
+│   │   ├─ Tarif suggéré <span class="s">(à définir : ex 149€/mois)</span>
+│   │   └─ Partenariats promoteurs / opérateurs gérés par ASTRAEOS
+│   │
+│   ├─ <strong>📚 Pack Référentiels</strong>
+│   │   ├─ Référentiel DCI complet <span class="s">(257 questions · 13 catégories · 106 documents)</span>
+│   │   ├─ Logique conditionnelle d'ouverture intelligente
+│   │   ├─ Indices de régularité par catégorie
+│   │   ├─ Tarif suggéré <span class="s">(à définir : ex 49€/mois)</span>
+│   │   └─ Mises à jour réglementaires automatiques
+│   │
+│   └─ <strong>Packs futurs envisageables</strong>
+│       ├─ Pack Assurance <span class="s">(prévoyance, santé, vie de marché)</span>
+│       ├─ Pack Compliance <span class="s">(modèles juridiques, lettres de mission, KYC)</span>
+│       ├─ Pack Communication <span class="s">(emails clients, articles patrimoniaux, posts sociaux)</span>
+│       └─ Pack IA Premium <span class="s">(modèles plus puissants, traitement prioritaire)</span>
+
+<span class="b">┌─ POUR CHAQUE PACK</span>
+│   ├─ Bouton <strong>[Voir le détail]</strong>
+│   ├─ Statistiques d'adoption
+│   ├─ Avis cabinets utilisateurs
+│   └─ Roadmap des prochaines mises à jour
+          </div>
+          <div class="pc-section-label">Sous-pages atteignables</div>
+          <div class="pc-subpages">
+            <div class="pc-subpage"><strong>Détail d'un pack</strong> · contenu exhaustif + tarif + activation</div>
+            <div class="pc-subpage"><strong>Tableau des adoptions</strong> · quels cabinets utilisent quels packs</div>
+            <div class="pc-subpage"><strong>Gestion des contenus de pack</strong> · interface admin pour mettre à jour les catalogues</div>
+            <div class="pc-subpage"><strong>Stats financières Marketplace</strong> · MRR par pack, churn, lifetime value</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="page-card">
+        <div class="pc-header">
+          <div class="pc-icon">📦</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Sous-page · /astraeos/marketplace/packs/:id</div>
+            <div class="pc-title">Gestion d'un pack (back-office ASTRAEOS)</div>
+            <div class="pc-desc">Interface pour gérer le contenu d'un pack : ajouter/modifier les produits, mettre à jour les fiches, gérer la tarification.</div>
+          </div>
+          <span class="pc-status todo">À FAIRE</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-tree">
+<span class="b">├─ Fiche d'identité du pack</span>
+<span class="b">├─ Liste des produits/items inclus</span>
+│   ├─ Ajout · modification · suppression
+│   └─ Versionning
+<span class="b">├─ Tarification</span>
+│   ├─ Prix mensuel · annuel
+│   ├─ Remises éventuelles <span class="s">(packs combinés)</span>
+│   └─ Période d'essai gratuit
+<span class="b">├─ Roadmap du pack</span>
+│   ├─ Prochaines mises à jour
+│   └─ Suggestions des cabinets utilisateurs
+<span class="b">└─ Communication</span>
+│   ├─ Email d'annonce de mise à jour aux cabinets activés
+│   └─ Notifications dans l'app
+          </div>
+        </div>
+      </div>
+
+      <div class="page-card">
+        <div class="pc-header">
+          <div class="pc-icon">📊</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Sous-page · /astraeos/marketplace/stats</div>
+            <div class="pc-title">Statistiques Marketplace</div>
+            <div class="pc-desc">Analyse de la performance commerciale de la Marketplace.</div>
+          </div>
+          <span class="pc-status todo">À FAIRE</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-tree">
+<span class="b">├─ MRR total Marketplace</span>
+<span class="b">├─ MRR par pack</span> <span class="s">(évolution)</span>
+<span class="b">├─ Taux d'adoption par pack</span> <span class="s">(% des cabinets directs activés)</span>
+<span class="b">├─ Lifetime value moyenne</span> <span class="s">(combien un cabinet rapporte sur la Marketplace en moyenne)</span>
+<span class="b">├─ Churn par pack</span>
+<span class="b">└─ Top cabinets utilisateurs</span> <span class="s">(qui dépense le plus en packs)</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================== -->
+    <!-- SECTION 5 — SUPPORT & TICKETS                           -->
+    <!-- ====================================================== -->
+    <section class="main-section" id="support">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">5</span> Section 5 / 15 · ⭐ Priorité MVP</div>
+        <h2 class="section-title">💬 Support &amp; tickets</h2>
+        <p class="section-intro">Helpdesk pour les tenants (Marque + Cabinet direct). Gestion des demandes, priorisation, résolution, base de connaissance.</p>
+      </div>
+
+      <div class="page-card priority">
+        <div class="pc-header">
+          <div class="pc-icon">🎫</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Page principale · /astraeos/support</div>
+            <div class="pc-title">Inbox tickets</div>
+            <div class="pc-desc">Liste des tickets ouverts, priorisés. Façon Intercom / Zendesk simplifié.</div>
+          </div>
+          <span class="pc-status priority">PRIORITÉ MVP</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Composants attendus</div>
+          <div class="pc-tree">
+<span class="b">┌─ FILTRES</span> <span class="s">(par statut · priorité · locataire · agent)</span>
+<span class="b">┌─ KPIS SUPPORT</span>
+│   ├─ Tickets ouverts · en cours · résolus 7j
+│   ├─ Temps de première réponse moyen
+│   └─ Satisfaction (NPS support)
+
+<span class="b">┌─ LISTE TICKETS</span> <span class="i">CLIQUABLES</span>
+│   ├─ Sujet · locataire · priorité · agent assigné · âge
+</div>
+
+          <div class="pc-section-label">Sous-pages</div>
+          <div class="pc-subpages">
+            <div class="pc-subpage"><strong>Détail ticket</strong> · conversation, pièces jointes, notes internes, historique, actions (assigner, statut, prio, résoudre)</div>
+            <div class="pc-subpage"><strong>Base de connaissance interne</strong> · articles d'aide pour les agents support</div>
+            <div class="pc-subpage"><strong>Stats support</strong> · temps de résolution, satisfaction, charge par agent</div>
+            <div class="pc-subpage"><strong>Macros &amp; templates de réponse</strong> · réponses pré-rédigées</div>
+            <div class="pc-subpage"><strong>Configuration SLA</strong> · délais de réponse selon plan d'abonnement</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================== -->
+    <!-- SECTION 5 — ANNONCES MULTI-LOCATAIRES                   -->
+    <!-- ====================================================== -->
+    <section class="main-section" id="annonces">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">6</span> Section 6 / 15</div>
+        <h2 class="section-title">📢 Annonces multi-locataires</h2>
+        <p class="section-intro">Communication globale d'ASTRAEOS vers ses locataires : nouvelles fonctionnalités, maintenance prévue, changements importants.</p>
+      </div>
+
+      <div class="page-card">
+        <div class="pc-header">
+          <div class="pc-icon">📣</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Page principale · /astraeos/annonces</div>
+            <div class="pc-title">Annonces &amp; communications</div>
+            <div class="pc-desc">Rédaction et diffusion d'annonces vers les locataires.</div>
+          </div>
+          <span class="pc-status todo">À FAIRE</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Sous-pages</div>
+          <div class="pc-subpages">
+            <div class="pc-subpage"><strong>Liste des annonces</strong> · planifiées, envoyées, brouillons, archivées</div>
+            <div class="pc-subpage"><strong>Composer une annonce</strong> · éditeur riche, sélecteur de cible, planification</div>
+            <div class="pc-subpage"><strong>Cible &amp; segmentation</strong> · tous les locataires / segment (par plan, par taille…) / un seul</div>
+            <div class="pc-subpage"><strong>Statistiques d'engagement</strong> · taux d'ouverture, clics, lectures par locataire</div>
+            <div class="pc-subpage"><strong>Templates d'annonces</strong> · maintenance, nouvelle feature, changement tarif…</div>
+            <div class="pc-subpage"><strong>Canal de diffusion</strong> · in-app banner / email / push / les 3</div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- ====================================================== -->
+    <!-- SECTION 6 — STATISTIQUES D'USAGE                        -->
+    <!-- ====================================================== -->
+    <section class="main-section" id="stats">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">7</span> Section 7 / 15</div>
+        <h2 class="section-title">📊 Statistiques d'usage</h2>
+        <p class="section-intro">Métriques techniques de la plateforme : utilisation, performance, consommation. Distinct des métriques business (section 10).</p>
+      </div>
+
+      <div class="page-card">
+        <div class="pc-header">
+          <div class="pc-icon">📊</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Page principale · /astraeos/stats</div>
+            <div class="pc-title">Vue d'ensemble usage technique</div>
+            <div class="pc-desc">Tableau de bord d'usage : sessions, MAU/DAU, modules les plus utilisés, performance.</div>
+          </div>
+          <span class="pc-status todo">À FAIRE</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Sous-pages</div>
+          <div class="pc-subpages">
+            <div class="pc-subpage"><strong>Vue d'ensemble</strong> · KPIs globaux (MAU, DAU, sessions, durée moyenne)</div>
+            <div class="pc-subpage"><strong>Usage par locataire</strong> · ranking des locataires par activité, anomalies (locataire qui ne se connecte plus)</div>
+            <div class="pc-subpage"><strong>Usage par module</strong> · quels modules sont le plus utilisés (CRM, IA, agenda, etc.)</div>
+            <div class="pc-subpage"><strong>Performance technique</strong> · temps de réponse, uptime, erreurs, alertes</div>
+            <div class="pc-subpage"><strong>Stockage</strong> · documents stockés par locataire, total, prévisions de coût</div>
+            <div class="pc-subpage"><strong>Fonctionnalités les plus appréciées</strong> · heatmaps, événements, parcours utilisateurs</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================== -->
+    <!-- SECTION 7 — LOGS & AUDIT                                -->
+    <!-- ====================================================== -->
+    <section class="main-section" id="logs">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">8</span> Section 8 / 15</div>
+        <h2 class="section-title">📋 Logs &amp; audit</h2>
+        <p class="section-intro">Traçabilité complète des actions critiques sur la plateforme. Indispensable pour la sécurité, le RGPD, et le debug.</p>
+      </div>
+
+      <div class="page-card">
+        <div class="pc-header">
+          <div class="pc-icon">🔍</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Page principale · /astraeos/logs</div>
+            <div class="pc-title">Centre de logs</div>
+            <div class="pc-desc">Recherche puissante dans les logs avec filtres avancés.</div>
+          </div>
+          <span class="pc-status todo">À FAIRE</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Sous-pages / vues</div>
+          <div class="pc-subpages">
+            <div class="pc-subpage"><strong>Logs de connexion</strong> · qui se connecte d'où, anomalies de localisation, MFA</div>
+            <div class="pc-subpage"><strong>Actions critiques</strong> · suppressions, modifications de permission, paiements, exports massifs</div>
+            <div class="pc-subpage"><strong>Logs IA</strong> · appels modèles, tokens consommés, erreurs, anomalies</div>
+            <div class="pc-subpage"><strong>Audit RGPD</strong> · accès aux données personnelles, export, suppression, consentements</div>
+            <div class="pc-subpage"><strong>Logs sécurité</strong> · tentatives d'intrusion, comportements anormaux, alertes</div>
+            <div class="pc-subpage"><strong>Export logs</strong> · pour audit externe, RGPD, conformité</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================== -->
+    <!-- SECTION 8 — PARAMÈTRES PLATEFORME                       -->
+    <!-- ====================================================== -->
+    <section class="main-section" id="parametres">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">9</span> Section 9 / 15</div>
+        <h2 class="section-title">⚙ Paramètres plateforme</h2>
+        <p class="section-intro">Configuration globale d'ASTRAEOS : versions, fonctionnalités, IA, intégrations. Pas de paramétrage par locataire ici (ça se fait par tenant).</p>
+      </div>
+
+      <div class="page-card">
+        <div class="pc-header">
+          <div class="pc-icon">⚙</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Page principale · /astraeos/parametres</div>
+            <div class="pc-title">Hub paramètres</div>
+            <div class="pc-desc">Toutes les configurations transverses de la plateforme.</div>
+          </div>
+          <span class="pc-status todo">À FAIRE</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Sous-pages</div>
+          <div class="pc-subpages">
+            <div class="pc-subpage"><strong>Versions &amp; déploiement</strong> · version actuelle, historique, rollback, environnements</div>
+            <div class="pc-subpage"><strong>Feature flags</strong> · activer / désactiver fonctionnalités globalement ou par segment</div>
+            <div class="pc-subpage"><strong>Configuration IA globale</strong> · clés API (Anthropic, Mistral, Gemini), modèles disponibles, routing par défaut, limites de coût</div>
+            <div class="pc-subpage"><strong>Modules optionnels disponibles</strong> · catalogue des modules que les locataires peuvent activer (IA, agenda, immat société, etc.)</div>
+            <div class="pc-subpage"><strong>Intégrations partenaires</strong> · Yousign, Qonto, outil visio, configuration globale</div>
+            <div class="pc-subpage"><strong>Templates par défaut</strong> · emails système, SMS système, templates qu'on fournit aux locataires comme base</div>
+            <div class="pc-subpage"><strong>Sécurité &amp; conformité</strong> · politique de mots de passe, MFA obligatoire, durées de session</div>
+            <div class="pc-subpage"><strong>Sauvegardes &amp; restauration</strong> · planning des backups, tester une restauration</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================== -->
+    <!-- SECTION 9 — PUBLICITÉ & ACQUISITION                     -->
+    <!-- ====================================================== -->
+    <section class="main-section" id="publicite">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">10</span> Section 10 / 15 · Option B retenue</div>
+        <h2 class="section-title">📣 Publicité &amp; acquisition</h2>
+        <p class="section-intro">Gestion complète des campagnes publicitaires depuis ASTRAEOS : Google Ads, Meta Ads, LinkedIn Ads. Création, édition, suivi, budgets.</p>
+      </div>
+
+      <div class="page-card">
+        <div class="pc-header">
+          <div class="pc-icon">📊</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Page principale · /astraeos/publicite</div>
+            <div class="pc-title">Tableau de bord publicité</div>
+            <div class="pc-desc">Vue agrégée des campagnes sur les 3 plateformes (Google, Meta, LinkedIn).</div>
+          </div>
+          <span class="pc-status todo">À FAIRE</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Composants attendus</div>
+          <div class="pc-tree">
+<span class="b">┌─ KPIS GLOBAUX</span>
+│   ├─ Budget total dépensé · MTD / YTD
+│   ├─ Coût d'acquisition <span class="s">(CAC)</span>
+│   ├─ ROAS <span class="s">(retour sur dépense)</span>
+│   └─ Conversions (signatures locataires) générées
+
+<span class="b">┌─ RÉPARTITION PAR PLATEFORME</span>
+│   ├─ Google Ads · Meta Ads · LinkedIn Ads
+│   └─ Comparaison performance
+
+<span class="b">┌─ CAMPAGNES ACTIVES</span> <span class="i">CLIQUABLES</span>
+│   └─ Liste avec budget, dépensé, conversions
+          </div>
+
+          <div class="pc-section-label">Sous-pages</div>
+          <div class="pc-subpages">
+            <div class="pc-subpage"><strong>Comptes connectés</strong> · gestion des connexions Google Ads, Meta Business Manager, LinkedIn Campaign Manager (auth OAuth)</div>
+            <div class="pc-subpage"><strong>Liste des campagnes</strong> · toutes plateformes confondues avec filtres</div>
+            <div class="pc-subpage"><strong>Détail campagne</strong> · KPIs, audiences, créatives, budget</div>
+            <div class="pc-subpage"><strong>Création campagne</strong> · workflow guidé multi-plateforme</div>
+            <div class="pc-subpage"><strong>Bibliothèque créatives</strong> · visuels, vidéos, copies, A/B tests</div>
+            <div class="pc-subpage"><strong>Audiences &amp; ciblage</strong> · création de segments, lookalike, retargeting</div>
+            <div class="pc-subpage"><strong>Budgets &amp; allocation</strong> · répartition par plateforme, alertes de budget</div>
+            <div class="pc-subpage"><strong>Attribution &amp; ROI</strong> · suivi du parcours prospect → locataire signé</div>
+            <div class="pc-subpage"><strong>Rapports &amp; exports</strong> · génération de rapports périodiques</div>
+          </div>
+
+          <div class="note gold">
+            <strong>📌 Complexité technique :</strong> recréer Google Ads / Meta Ads dans ASTRAEOS est ambitieux. À l'<strong>MVP</strong>, je recommande l'<strong>Option A</strong> (agrégation + redirection vers les outils natifs). L'<strong>Option B complète</strong> peut être un objectif <strong>Phase 2</strong> du développement.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================== -->
+    <!-- SECTION 10 — MÉTRIQUES BUSINESS / SaaS                  -->
+    <!-- ====================================================== -->
+    <section class="main-section" id="metriques">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">11</span> Section 11 / 15</div>
+        <h2 class="section-title">📈 Métriques business / SaaS</h2>
+        <p class="section-intro">Métriques de pilotage business : MRR, ARR, LTV, churn, encours sous gestion via la plateforme. Pour piloter ASTRAEOS comme un vrai SaaS B2B.</p>
+      </div>
+
+      <div class="page-card">
+        <div class="pc-header">
+          <div class="pc-icon">📈</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Page principale · /astraeos/metriques</div>
+            <div class="pc-title">Vue d'ensemble business</div>
+            <div class="pc-desc">Le poste de pilotage SaaS d'ASTRAEOS.</div>
+          </div>
+          <span class="pc-status todo">À FAIRE</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Composants attendus</div>
+          <div class="pc-tree">
+<span class="b">┌─ KPIS PRINCIPAUX</span>
+│   ├─ <span class="i">MRR</span> <span class="s">(Monthly Recurring Revenue)</span>
+│   ├─ <span class="i">ARR</span> <span class="s">(Annual Recurring Revenue)</span>
+│   ├─ Croissance MoM · YoY
+│   ├─ Nombre de locataires actifs
+│   ├─ Churn rate <span class="s">(% de locataires perdus / mois)</span>
+│   ├─ <span class="i">LTV</span> <span class="s">(Lifetime Value moyen d'un locataire)</span>
+│   └─ <span class="i">CAC</span> <span class="s">(Coût d'acquisition)</span>
+
+<span class="b">┌─ MÉTRIQUES "PROFONDEUR D'USAGE"</span>
+│   ├─ Nb total d'ingénieurs patrimoniaux <span class="s">(tous locataires)</span>
+│   ├─ Nb total de licenciés <span class="s">(tous locataires)</span>
+│   ├─ Nb total de clients finaux
+│   └─ Encours total géré via la plateforme
+
+<span class="b">┌─ COHORTES</span>
+│   └─ Rétention par cohorte d'entrée
+          </div>
+
+          <div class="pc-section-label">Sous-pages</div>
+          <div class="pc-subpages">
+            <div class="pc-subpage"><strong>Détail MRR / ARR</strong> · décomposition par plan, évolution mensuelle, projections</div>
+            <div class="pc-subpage"><strong>Analyse churn</strong> · qui part, pourquoi, segments à risque, alertes prédictives</div>
+            <div class="pc-subpage"><strong>LTV par segment</strong> · calcul de la valeur vie selon plan / taille locataire</div>
+            <div class="pc-subpage"><strong>CAC &amp; ROI canaux</strong> · coût par canal d'acquisition (organique, ads, partenariats)</div>
+            <div class="pc-subpage"><strong>Encours sous gestion</strong> · évolution de l'encours total qui transite par la plateforme</div>
+            <div class="pc-subpage"><strong>Cohortes &amp; rétention</strong> · cohortes mensuelles avec courbes de rétention</div>
+            <div class="pc-subpage"><strong>Forecast &amp; objectifs</strong> · projections 6/12 mois, suivi des objectifs trimestriels</div>
+            <div class="pc-subpage"><strong>Export rapports investisseurs</strong> · génération automatique de pitch decks chiffrés</div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- ====================================================== -->
+    <!-- SECTION 11 — CRM COMMERCIAL                             -->
+    <!-- ====================================================== -->
+    <section class="main-section" id="crm">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">12</span> Section 12 / 15 · ⭐ Priorité MVP · Option B retenue</div>
+        <h2 class="section-title">🎯 CRM commercial</h2>
+        <p class="section-intro">Le CRM <strong>d'ASTRAEOS</strong> pour démarcher de futurs locataires (Dupont Patrimoine, Mont-Blanc Conseil…). À ne pas confondre avec le CRM de chaque locataire (qui gère leurs propres clients finaux).</p>
+      </div>
+
+      <div class="page-card priority">
+        <div class="pc-header">
+          <div class="pc-icon">🎯</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Page principale · /astraeos/crm</div>
+            <div class="pc-title">Pipeline commercial</div>
+            <div class="pc-desc">Vue Kanban du pipeline : lead → qualifié → demo → négociation → signé / perdu.</div>
+          </div>
+          <span class="pc-status priority">PRIORITÉ MVP</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Composants attendus</div>
+          <div class="pc-tree">
+<span class="b">┌─ KPIS COMMERCIAUX</span>
+│   ├─ Pipeline total <span class="s">(€ valeur potentielle)</span>
+│   ├─ Conversions du mois
+│   ├─ Taux de conversion par étape
+│   └─ Cycle de vente moyen <span class="s">(jours)</span>
+
+<span class="b">┌─ KANBAN PIPELINE</span> <span class="i">DRAG &amp; DROP</span>
+│   ├─ <span class="c">01</span> Lead nouveau
+│   ├─ <span class="c">02</span> Lead qualifié
+│   ├─ <span class="c">03</span> Demo planifiée
+│   ├─ <span class="c">04</span> Négociation
+│   ├─ <span class="c">05</span> Signé ✓
+│   └─ <span class="c">06</span> Perdu
+
+<span class="b">┌─ ACTIVITÉ DU JOUR</span>
+│   ├─ RDV à venir
+│   ├─ Relances à effectuer
+│   └─ Tâches en retard
+
+<span class="b">┌─ FILTRES</span>
+│   └─ Par owner · source · taille · budget
+          </div>
+
+          <div class="pc-section-label">Sous-pages</div>
+          <div class="pc-subpages">
+            <div class="pc-subpage"><strong>Fiche prospect</strong> · identité (cabinet, contact, taille), historique des interactions, documents échangés, notes, prochaine action</div>
+            <div class="pc-subpage"><strong>Création prospect</strong> · formulaire ou import (CSV, LinkedIn, etc.)</div>
+            <div class="pc-subpage"><strong>Templates d'emails</strong> · bibliothèque de templates pour chaque étape (intro, follow-up, démo, etc.)</div>
+            <div class="pc-subpage"><strong>Séquences automatiques</strong> · workflows automatisés <em>(ex : si prospect en stade 2 depuis 7 jours → email auto)</em></div>
+            <div class="pc-subpage"><strong>Scoring &amp; lead qualification</strong> · règles de scoring, qualification BANT, signaux d'achat</div>
+            <div class="pc-subpage"><strong>Reporting commercial</strong> · performance par commercial, par source, par mois, prévisions</div>
+            <div class="pc-subpage"><strong>Sources de leads</strong> · suivi par source (organique, ads, partenariat, recommandation)</div>
+            <div class="pc-subpage"><strong>Calendrier RDV</strong> · vue agenda des démos planifiées, intégration agenda</div>
+            <div class="pc-subpage"><strong>Documents &amp; propositions</strong> · génération de propositions commerciales, contrats</div>
+            <div class="pc-subpage"><strong>Workflow signature</strong> · une fois "Signé", déclenchement automatique de la création du tenant (vers section 2)</div>
+          </div>
+
+          <div class="note gold">
+            <strong>🔗 Lien important :</strong> à la fin du pipeline (étape "Signé"), le bouton <em>[Créer le tenant]</em> bascule directement vers le workflow de la <strong>Section 2 — Création nouveau locataire</strong>. Les données du prospect (nom, contact, taille) sont pré-remplies.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================== -->
+    <!-- SECTION 12 — ROADMAP PRODUIT + BOÎTE À IDÉES            -->
+    <!-- ====================================================== -->
+    <section class="main-section" id="roadmap">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">13</span> Section 13 / 15</div>
+        <h2 class="section-title">🗺 Roadmap produit + boîte à idées</h2>
+        <p class="section-intro">Roadmap publique des futures fonctionnalités d'ASTRAEOS + boîte à idées où les locataires votent et proposent. Outil de fidélisation et de transparence.</p>
+      </div>
+
+      <div class="page-card">
+        <div class="pc-header">
+          <div class="pc-icon">🗺</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Page principale · /astraeos/roadmap</div>
+            <div class="pc-title">Roadmap produit</div>
+            <div class="pc-desc">Visible côté éditeur (édition) et côté locataire (lecture/votes).</div>
+          </div>
+          <span class="pc-status todo">À FAIRE</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Sous-pages</div>
+          <div class="pc-subpages">
+            <div class="pc-subpage"><strong>Vue trimestres</strong> · Now / Next / Later — features classées par horizon</div>
+            <div class="pc-subpage"><strong>Détail feature</strong> · description, statut, votes, commentaires des locataires, dates estimées</div>
+            <div class="pc-subpage"><strong>Édition roadmap</strong> · création / modification / publication des items roadmap (côté éditeur)</div>
+            <div class="pc-subpage"><strong>Boîte à idées</strong> · suggestions des locataires, votes, commentaires, statut de traitement</div>
+            <div class="pc-subpage"><strong>Annonces de release</strong> · changelog publique, lien automatique vers la section Annonces</div>
+            <div class="pc-subpage"><strong>Stats engagement roadmap</strong> · features les plus votées, prospects influencés par la roadmap</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================== -->
+    <!-- SECTION 13 — CENTRE DE REVENUS IA                       -->
+    <!-- ====================================================== -->
+    <section class="main-section" id="ia-revenus">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">14</span> Section 14 / 15</div>
+        <h2 class="section-title">🤖 Centre de revenus IA</h2>
+        <p class="section-intro">Suivi de la consommation IA (tokens, coûts) par locataire et calcul de la marge entre ce qu'ASTRAEOS paie aux modèles et ce qu'il facture aux locataires.</p>
+      </div>
+
+      <div class="page-card">
+        <div class="pc-header">
+          <div class="pc-icon">🤖</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Page principale · /astraeos/ia-revenus</div>
+            <div class="pc-title">Vue d'ensemble revenus IA</div>
+            <div class="pc-desc">Le P&amp;L IA : combien ça coûte, combien ça rapporte, par locataire et global.</div>
+          </div>
+          <span class="pc-status todo">À FAIRE</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Composants attendus</div>
+          <div class="pc-tree">
+<span class="b">┌─ P&amp;L IA GLOBAL</span>
+│   ├─ Coûts modèles <span class="s">(Anthropic, Mistral, Gemini)</span>
+│   ├─ Revenus IA facturés aux locataires
+│   └─ Marge nette IA <span class="s">(% et €)</span>
+
+<span class="b">┌─ CONSOMMATION PAR LOCATAIRE</span>
+│   ├─ Tokens Opus / Sonnet / Haiku par locataire
+│   ├─ Coût direct
+│   └─ Marge sur ce locataire
+          </div>
+
+          <div class="pc-section-label">Sous-pages</div>
+          <div class="pc-subpages">
+            <div class="pc-subpage"><strong>Consommation par locataire</strong> · classement, anomalies (locataire qui explose son budget)</div>
+            <div class="pc-subpage"><strong>Consommation par tâche</strong> · ventilation par phase IA (Bilan, Stratégies, Phase 5...)</div>
+            <div class="pc-subpage"><strong>Coûts par modèle</strong> · ventilation par fournisseur (Anthropic, Mistral, Gemini)</div>
+            <div class="pc-subpage"><strong>Tarification IA</strong> · paramétrage des forfaits IA (inclus dans plan / à l'usage / packs additionnels)</div>
+            <div class="pc-subpage"><strong>Alertes &amp; quotas</strong> · alertes consommation anormale, quotas par locataire</div>
+            <div class="pc-subpage"><strong>Optimisation routing</strong> · recommandations pour réduire les coûts (basculer plus de tâches vers Haiku/Mistral)</div>
+            <div class="pc-subpage"><strong>Forecast IA</strong> · projection coûts IA selon croissance locataires</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================== -->
+    <!-- SECTION 14 — DOCUMENTATION API                          -->
+    <!-- ====================================================== -->
+    <section class="main-section" id="api">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">15</span> Section 15 / 15</div>
+        <h2 class="section-title">🔌 Documentation API &amp; intégrations</h2>
+        <p class="section-intro">Pour les locataires qui veulent connecter leurs propres outils à ASTRAEOS. Gestion des clés API, webhooks, documentation.</p>
+      </div>
+
+      <div class="page-card">
+        <div class="pc-header">
+          <div class="pc-icon">🔌</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Page principale · /astraeos/api</div>
+            <div class="pc-title">Hub API &amp; intégrations</div>
+            <div class="pc-desc">Tableau de bord des intégrations actives, gestion des clés.</div>
+          </div>
+          <span class="pc-status todo">À FAIRE</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Sous-pages</div>
+          <div class="pc-subpages">
+            <div class="pc-subpage"><strong>Documentation publique</strong> · documentation technique des endpoints, exemples, SDK</div>
+            <div class="pc-subpage"><strong>Clés API par locataire</strong> · génération, rotation, suspension de clés API</div>
+            <div class="pc-subpage"><strong>Webhooks</strong> · configuration des webhooks pour notifier des outils tiers</div>
+            <div class="pc-subpage"><strong>Logs API</strong> · historique des appels API, erreurs, rate limiting</div>
+            <div class="pc-subpage"><strong>Versions de l'API</strong> · gestion des versions (v1, v2…), deprecation policy</div>
+            <div class="pc-subpage"><strong>Sandbox</strong> · environnement de test pour les intégrateurs</div>
+            <div class="pc-subpage"><strong>Marketplace d'intégrations</strong> · liste des intégrations préconçues (Zapier, Make, n8n, intégrations natives)</div>
+          </div>
+
+          <div class="note">
+            <strong>📌 Note priorité :</strong> ce module n'est pas critique au MVP. Il prend tout son sens quand des locataires plus matures techniquement intégreront ASTRAEOS dans leur stack existant. <em>Phase 2 du développement.</em>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================== -->
+    <!-- RÉCAPITULATIF                                           -->
+    <!-- ====================================================== -->
+    <section class="main-section" id="recap">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">📋</span> Récapitulatif</div>
+        <h2 class="section-title">Synthèse Espace ASTRAEOS</h2>
+        <p class="section-intro">Vue d'ensemble des 15 sections et de leur priorité pour le développement.</p>
+      </div>
+
+      <div class="note gold">
+        <strong>🎯 État des 15 sections :</strong>
+        <table style="width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 12.5px;">
+          <thead>
+            <tr style="background: rgba(198,142,14,0.10);">
+              <th style="text-align: left; padding: 8px 10px; font-weight: 700;">#</th>
+              <th style="text-align: left; padding: 8px 10px; font-weight: 700;">Section</th>
+              <th style="text-align: left; padding: 8px 10px; font-weight: 700;">Famille</th>
+              <th style="text-align: left; padding: 8px 10px; font-weight: 700;">Statut</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td style="padding: 6px 10px;">1</td><td style="padding: 6px 10px;">📊 Tableau de bord global</td><td style="padding: 6px 10px;">Pilotage</td><td style="padding: 6px 10px; color: var(--gold); font-weight: 700;">PRIORITÉ ⭐</td></tr>
+            <tr><td style="padding: 6px 10px;">2</td><td style="padding: 6px 10px;">🏛 Gestion des locataires (wizard 2 types)</td><td style="padding: 6px 10px;">Commercial</td><td style="padding: 6px 10px; color: var(--gold); font-weight: 700;">PRIORITÉ ⭐</td></tr>
+            <tr><td style="padding: 6px 10px;">3</td><td style="padding: 6px 10px;">💳 Facturation outil (2 modes)</td><td style="padding: 6px 10px;">Commercial</td><td style="padding: 6px 10px; color: var(--navy); font-weight: 700;">À FAIRE</td></tr>
+            <tr style="background: rgba(198,142,14,0.10);"><td style="padding: 6px 10px;"><strong>4</strong></td><td style="padding: 6px 10px;"><strong>🛒 Marketplace ASTRAEOS</strong></td><td style="padding: 6px 10px;">Commercial</td><td style="padding: 6px 10px; color: var(--gold); font-weight: 800;">PRIORITÉ ⭐ NOUVEAU</td></tr>
+            <tr><td style="padding: 6px 10px;">5</td><td style="padding: 6px 10px;">💬 Support &amp; tickets</td><td style="padding: 6px 10px;">Support &amp; Com</td><td style="padding: 6px 10px; color: var(--gold); font-weight: 700;">PRIORITÉ ⭐</td></tr>
+            <tr><td style="padding: 6px 10px;">6</td><td style="padding: 6px 10px;">📢 Annonces multi-locataires</td><td style="padding: 6px 10px;">Support &amp; Com</td><td style="padding: 6px 10px; color: var(--navy); font-weight: 700;">À FAIRE</td></tr>
+            <tr><td style="padding: 6px 10px;">7</td><td style="padding: 6px 10px;">📊 Statistiques d'usage</td><td style="padding: 6px 10px;">Pilotage</td><td style="padding: 6px 10px; color: var(--navy); font-weight: 700;">À FAIRE</td></tr>
+            <tr><td style="padding: 6px 10px;">8</td><td style="padding: 6px 10px;">📋 Logs &amp; audit</td><td style="padding: 6px 10px;">Pilotage</td><td style="padding: 6px 10px; color: var(--navy); font-weight: 700;">À FAIRE</td></tr>
+            <tr><td style="padding: 6px 10px;">9</td><td style="padding: 6px 10px;">⚙ Paramètres plateforme</td><td style="padding: 6px 10px;">Technique</td><td style="padding: 6px 10px; color: var(--navy); font-weight: 700;">À FAIRE</td></tr>
+            <tr><td style="padding: 6px 10px;">10</td><td style="padding: 6px 10px;">📣 Publicité &amp; acquisition</td><td style="padding: 6px 10px;">Commercial</td><td style="padding: 6px 10px; color: var(--navy); font-weight: 700;">PHASE 2</td></tr>
+            <tr><td style="padding: 6px 10px;">11</td><td style="padding: 6px 10px;">📈 Métriques business / SaaS</td><td style="padding: 6px 10px;">Pilotage</td><td style="padding: 6px 10px; color: var(--navy); font-weight: 700;">À FAIRE</td></tr>
+            <tr><td style="padding: 6px 10px;">12</td><td style="padding: 6px 10px;">🎯 CRM commercial (prospects 2 types)</td><td style="padding: 6px 10px;">Commercial</td><td style="padding: 6px 10px; color: var(--gold); font-weight: 700;">PRIORITÉ ⭐</td></tr>
+            <tr><td style="padding: 6px 10px;">13</td><td style="padding: 6px 10px;">🗺 Roadmap produit</td><td style="padding: 6px 10px;">Technique</td><td style="padding: 6px 10px; color: var(--navy); font-weight: 700;">À FAIRE</td></tr>
+            <tr><td style="padding: 6px 10px;">14</td><td style="padding: 6px 10px;">🤖 Centre de revenus IA</td><td style="padding: 6px 10px;">Technique</td><td style="padding: 6px 10px; color: var(--navy); font-weight: 700;">PHASE 2</td></tr>
+            <tr><td style="padding: 6px 10px;">15</td><td style="padding: 6px 10px;">🔌 Documentation API</td><td style="padding: 6px 10px;">Technique</td><td style="padding: 6px 10px; color: var(--navy); font-weight: 700;">PHASE 2</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note gold">
+        <strong>🎯 Priorités MVP (5 sections critiques au démarrage) :</strong>
+        <ol style="margin-top: 8px; padding-left: 20px; font-size: 12.5px;">
+          <li><strong>Section 1 — Tableau de bord global</strong> · point d'entrée éditeur</li>
+          <li><strong>Section 2 — Gestion des locataires</strong> · cœur du métier éditeur · <em>wizard différencié 2 types de tenants</em></li>
+          <li><strong>Section 4 — Marketplace ASTRAEOS</strong> · NOUVEAU · revenus additionnels pour les tenants Cabinet direct</li>
+          <li><strong>Section 5 — Support &amp; tickets</strong> · relation client indispensable</li>
+          <li><strong>Section 12 — CRM commercial</strong> · acquisition des 2 types de prospects (réseau et indépendants)</li>
+        </ol>
+      </div>
+
+      <div class="note">
+        <strong>📅 À développer en Phase 2 :</strong> Sections 10 (Publicité — option B complète), 14 (Centre IA — quand volume tenants augmente), 15 (API — quand tenants matures techniquement).
+      </div>
+
+      <div class="note gold" style="background: rgba(198,142,14,0.10); border-left-width: 6px;">
+        <strong>⚖ 2 modèles commerciaux — rappel pour l'éditeur :</strong>
+        <p style="margin: 6px 0 0; font-size: 12.5px;">L'Espace ASTRAEOS gère <strong>2 segments de marché</strong> via la même infrastructure :</p>
+        <ul style="margin-top: 6px; padding-left: 20px; font-size: 12.5px;">
+          <li><strong>Tenants Marque</strong> (~10-20 réseaux en France) — modèle plus complexe (Doc 3 + Doc 4 activés), revenu plus élevé par tenant.</li>
+          <li><strong>Tenants Cabinet direct</strong> (~3 000 cabinets en France) — modèle simplifié (Doc 4 seul), revenu par utilisateur/mois + Marketplace.</li>
+        </ul>
+        <p style="margin: 6px 0 0; font-size: 12.5px;"><em>Le wizard de la section 2 s'adapte au type, le CRM commercial (section 12) gère les 2 pipelines de prospection, et la Marketplace (section 4) génère du revenu additionnel sur les tenants Cabinet direct.</em></p>
+      </div>
+
+      <div class="note">
+        <strong>🔗 Prochaine étape collaborative :</strong> tu valides cette arborescence Espace Éditeur (15 sections). Une fois validée, on passe à l'adaptation du <strong>Document 4 — Cabinet</strong> avec les encarts conditionnels "réseau" vs "indépendant".
+      </div>
+
+      <div class="note">
+        <strong>📅 Historique des évolutions :</strong>
+        <ul style="margin-top: 6px; padding-left: 20px; font-size: 12px;">
+          <li><strong>v2.0 (mai 2026)</strong> — Ajout du double modèle commercial : wizard d'onboarding différencié pour les 2 types de tenants (Marque + Cabinet direct), nouvelle <em>Section 4 Marketplace ASTRAEOS</em>, refonte de la Section 3 Facturation pour 2 modes, mise à jour glossaire avec <code>tenant_type</code>. Passage de 14 à 15 sections.</li>
+          <li><strong>v1.0 (mai 2026)</strong> — Document initial avec 14 sections.</li>
+        </ul>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+  const sections = document.querySelectorAll('section.main-section[id]');
+  const navLinks = document.querySelectorAll('.sidebar-nav a[href^="#"]');
+  function updateActiveLink() {
+    let current = '';
+    sections.forEach(section => {
+      const top = section.offsetTop - 100;
+      if (window.scrollY >= top) current = section.id;
+    });
+    navLinks.forEach(link => {
+      link.classList.toggle('active', link.getAttribute('href') === '#' + current);
+    });
+  }
+  window.addEventListener('scroll', updateActiveLink);
+  updateActiveLink();
+</script>
+
+</body>
+</html>

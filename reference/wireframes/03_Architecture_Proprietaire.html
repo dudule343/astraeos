@@ -1,0 +1,2531 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ASTRAEOS — Architecture · Espace Propriétaire de marque</title>
+<link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #102D50;
+    --navy-300: #708196;
+    --navy-200: #A4AEBB;
+    --navy-100: #DBE0E4;
+    --gold: #C68E0E;
+    --gold-300: #DDBB6E;
+    --gold-200: #EEDDB6;
+    --gold-100: #FAF8F3;
+    --medium-400: #695D30;
+    --medium-300: #877D59;
+    --ivory: #FAF8F3;
+    --light-blue: #EBF1FA;
+    --green-bg: #E8F3EC;
+    --green-text: #1F8A4C;
+    --red-bg: #FCE8E8;
+    --red-text: #B23A3A;
+    --yellow-bg: #FFF4DC;
+    --yellow-text: #8A6500;
+    --blue-bg: #E6F0FB;
+    --blue-text: #1456A0;
+    --purple-bg: #F0E8F8;
+    --purple-text: #5B3A8C;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; scroll-padding-top: 24px; }
+  body {
+    font-family: 'Epilogue', -apple-system, sans-serif;
+    background: var(--ivory);
+    color: var(--navy);
+    line-height: 1.6;
+    font-size: 14.5px;
+  }
+
+  .doc-layout { display: grid; grid-template-columns: 280px 1fr; min-height: 100vh; }
+  .doc-sidebar {
+    background: linear-gradient(180deg, var(--navy) 0%, #0a1f38 100%);
+    color: white;
+    padding: 28px 22px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+  .doc-sidebar::-webkit-scrollbar { width: 4px; }
+  .doc-sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+  .sidebar-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+  .sidebar-brand-mark {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: linear-gradient(135deg, var(--gold), var(--medium-400));
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-weight: 800; font-size: 13px;
+  }
+  .sidebar-brand-name { font-size: 11.5px; font-weight: 800; letter-spacing: 0.04em; line-height: 1.3; }
+  .sidebar-brand-sub { font-size: 9.5px; color: var(--gold-300); letter-spacing: 0.18em; text-transform: uppercase; font-weight: 700; margin-top: 5px; margin-bottom: 22px; }
+
+  .back-link {
+    display: flex; align-items: center; gap: 6px;
+    color: var(--gold-300);
+    font-size: 11.5px;
+    text-decoration: none;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    margin-bottom: 22px;
+    padding: 8px 10px;
+    border-radius: 5px;
+    background: rgba(198,142,14,0.12);
+    transition: all 0.15s ease;
+  }
+  .back-link:hover { background: rgba(198,142,14,0.20); color: white; }
+
+  .sidebar-nav { display: flex; flex-direction: column; gap: 1px; }
+  .sidebar-nav a {
+    color: rgba(255,255,255,0.75);
+    text-decoration: none;
+    font-size: 11.5px;
+    padding: 6px 10px;
+    border-radius: 4px;
+    transition: all 0.15s ease;
+    line-height: 1.35;
+  }
+  .sidebar-nav a:hover { background: rgba(255,255,255,0.06); color: white; }
+  .sidebar-nav a.active { background: rgba(198,142,14,0.18); color: var(--gold-300); font-weight: 700; }
+  .sidebar-section-header {
+    font-size: 9px; font-weight: 800; color: var(--gold);
+    letter-spacing: 0.20em; text-transform: uppercase;
+    margin-top: 18px; margin-bottom: 6px;
+    padding: 0 10px;
+    display: flex; align-items: center; gap: 7px;
+  }
+  .sidebar-section-header::before {
+    content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--gold);
+  }
+
+  .doc-main { padding: 40px 50px 80px; max-width: 1300px; }
+  .doc-header { margin-bottom: 40px; padding-bottom: 28px; border-bottom: 1px solid var(--navy-100); }
+  .doc-header-eyebrow { font-size: 10px; font-weight: 700; color: var(--gold); letter-spacing: 0.22em; text-transform: uppercase; margin-bottom: 12px; }
+  .doc-title { font-size: 32px; font-weight: 700; letter-spacing: -0.018em; line-height: 1.18; margin-bottom: 12px; }
+  .doc-title strong { color: var(--gold); }
+  .doc-subtitle { font-size: 14.5px; color: var(--navy-300); line-height: 1.6; max-width: 800px; }
+  .doc-meta { display: flex; gap: 24px; margin-top: 22px; padding-top: 18px; border-top: 1px dashed var(--navy-100); font-size: 11px; color: var(--navy-300); flex-wrap: wrap; }
+  .doc-meta strong { color: var(--navy); font-weight: 700; }
+
+  .glossary {
+    background: white;
+    border: 1px solid var(--gold-300);
+    border-left: 4px solid var(--gold);
+    border-radius: 8px;
+    padding: 18px 22px;
+    margin-bottom: 32px;
+  }
+  .glossary-title {
+    font-size: 11px; font-weight: 800; color: var(--gold);
+    letter-spacing: 0.16em; text-transform: uppercase;
+    margin-bottom: 12px; display: flex; align-items: center; gap: 10px;
+  }
+  .glossary-title::before { content: '📖'; font-size: 14px; }
+  .glossary-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px 28px; }
+  .glossary-item { display: flex; gap: 12px; align-items: flex-start; }
+  .glossary-term {
+    background: var(--navy); color: white;
+    padding: 4px 10px; border-radius: 4px;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.04em;
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .glossary-term.gold { background: var(--gold); }
+  .glossary-term.green { background: var(--green-text); }
+  .glossary-def { font-size: 12.5px; color: var(--navy); line-height: 1.5; }
+
+  .stats-bar {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 12px; margin: 24px 0 36px;
+  }
+  .stat-block {
+    background: white;
+    border: 1px solid var(--navy-100);
+    border-left: 3px solid var(--gold);
+    border-radius: 6px; padding: 14px 16px;
+  }
+  .stat-block.done { border-left-color: var(--green-text); }
+  .stat-block.progress { border-left-color: var(--yellow-text); }
+  .stat-block.todo { border-left-color: var(--navy); }
+  .stat-block.idea { border-left-color: var(--red-text); }
+  .stat-label { font-size: 9px; font-weight: 700; color: var(--navy-300); letter-spacing: 0.16em; text-transform: uppercase; margin-bottom: 6px; }
+  .stat-value { font-size: 24px; font-weight: 700; color: var(--navy); letter-spacing: -0.018em; line-height: 1; }
+  .stat-meta { font-size: 11px; color: var(--navy-300); margin-top: 4px; }
+
+  .sitemap-container {
+    background: white;
+    border: 1px solid var(--navy-100);
+    border-radius: 12px;
+    padding: 28px 30px;
+    margin-bottom: 40px;
+    overflow-x: auto;
+  }
+  .sitemap-svg-wrap { overflow-x: auto; }
+  .sitemap-link { cursor: pointer; }
+  .sitemap-link .sitemap-node { transition: filter 0.2s ease; }
+  .sitemap-link:hover .sitemap-node {
+    filter: drop-shadow(0 4px 8px rgba(198,142,14,0.30));
+  }
+
+  section.main-section { margin-bottom: 56px; scroll-margin-top: 24px; }
+  .section-header {
+    margin-bottom: 22px;
+    padding-bottom: 14px;
+    border-bottom: 2px solid var(--gold);
+  }
+  .section-eyebrow {
+    font-size: 10px; font-weight: 700; color: var(--gold);
+    letter-spacing: 0.22em; text-transform: uppercase;
+    margin-bottom: 8px; display: flex; align-items: center; gap: 12px;
+  }
+  .section-eyebrow .num {
+    background: var(--gold); color: white;
+    width: 26px; height: 26px; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 800;
+  }
+  .section-title {
+    font-size: 26px; font-weight: 600;
+    letter-spacing: -0.012em; color: var(--navy);
+    line-height: 1.22; margin-bottom: 6px;
+  }
+  .section-intro {
+    font-size: 13.5px; color: var(--navy-300);
+    line-height: 1.6; max-width: 820px;
+  }
+
+  .page-card {
+    background: white;
+    border: 1px solid var(--navy-100);
+    border-radius: 10px;
+    margin-bottom: 14px;
+    overflow: hidden;
+    transition: box-shadow 0.2s ease;
+  }
+  .page-card:hover { box-shadow: 0 4px 14px rgba(16,45,80,0.06); }
+  .page-card.priority { border-color: var(--gold-300); border-left: 4px solid var(--gold); }
+  .page-card.done { border-left: 4px solid var(--green-text); }
+  .page-card.progress { border-left: 4px solid var(--yellow-text); }
+
+  .pc-header {
+    background: linear-gradient(135deg, var(--ivory) 0%, white 100%);
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--navy-100);
+    display: flex; align-items: flex-start; gap: 12px;
+  }
+  .pc-icon {
+    font-size: 22px; width: 38px; height: 38px;
+    background: white;
+    border: 1px solid var(--navy-100);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .pc-info { flex: 1; min-width: 0; }
+  .pc-eyebrow {
+    font-size: 9px; font-weight: 800; color: var(--navy-300);
+    letter-spacing: 0.16em; text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .pc-title {
+    font-size: 16px; font-weight: 700; color: var(--navy);
+    letter-spacing: -0.005em; margin-bottom: 4px;
+  }
+  .pc-desc { font-size: 12.5px; color: var(--navy-300); line-height: 1.5; }
+  .pc-status {
+    flex-shrink: 0; padding: 5px 11px; border-radius: 4px;
+    font-size: 9px; font-weight: 800;
+    letter-spacing: 0.10em; text-transform: uppercase;
+    align-self: flex-start;
+  }
+  .pc-status.done { background: var(--green-text); color: white; }
+  .pc-status.progress { background: var(--yellow-text); color: white; }
+  .pc-status.todo { background: var(--navy); color: white; }
+  .pc-status.priority { background: var(--gold); color: white; }
+  .pc-status.idea { background: var(--red-text); color: white; }
+
+  .pc-body { padding: 14px 20px 18px; }
+  .pc-section-label {
+    font-size: 9.5px; font-weight: 800; color: var(--gold);
+    letter-spacing: 0.14em; text-transform: uppercase;
+    margin: 12px 0 8px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .pc-section-label::before { content: '▸'; font-size: 11px; }
+  .pc-section-label:first-child { margin-top: 0; }
+
+  .pc-tree {
+    background: var(--ivory);
+    border: 1px solid var(--gold-300);
+    border-radius: 6px;
+    padding: 12px 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    line-height: 1.85;
+    color: var(--navy);
+    white-space: pre;
+    overflow-x: auto;
+  }
+  .pc-tree .b { font-weight: 700; color: var(--medium-400); }
+  .pc-tree .s { color: var(--navy-300); font-style: italic; font-size: 11px; }
+  .pc-tree .i { color: var(--gold); font-weight: 700; }
+  .pc-tree .c { color: var(--green-text); font-weight: 700; }
+  .pc-tree .a { background: rgba(198,142,14,0.15); padding: 1px 4px; border-radius: 3px; }
+
+  .pc-subpages { display: flex; flex-direction: column; gap: 8px; }
+  .pc-subpage {
+    background: var(--ivory);
+    border-left: 3px solid var(--gold-300);
+    padding: 9px 14px;
+    border-radius: 0 5px 5px 0;
+    font-size: 12.5px; color: var(--navy);
+    line-height: 1.5;
+  }
+  .pc-subpage strong { color: var(--medium-400); font-weight: 700; }
+  .pc-subpage .meta {
+    font-size: 11px; color: var(--navy-300);
+    font-style: italic; margin-top: 2px;
+  }
+
+  .pc-interactions {
+    display: grid; grid-template-columns: repeat(2, 1fr);
+    gap: 6px; margin-top: 6px;
+  }
+  .pc-interaction {
+    padding: 7px 12px;
+    background: var(--light-blue);
+    border-left: 3px solid var(--blue-text);
+    border-radius: 0 4px 4px 0;
+    font-size: 11.5px; color: var(--navy);
+  }
+  .pc-interaction strong { font-weight: 700; }
+
+  .note {
+    background: var(--light-blue);
+    border-left: 4px solid var(--navy);
+    padding: 14px 18px;
+    margin: 16px 0;
+    border-radius: 0 6px 6px 0;
+    font-size: 12.5px; line-height: 1.6;
+  }
+  .note.gold { background: rgba(198,142,14,0.06); border-left-color: var(--gold); }
+  .note strong { color: var(--navy); font-weight: 700; }
+
+  .legend-bar {
+    display: flex; align-items: center; gap: 16px;
+    padding: 14px 20px;
+    background: white;
+    border: 1px solid var(--navy-100);
+    border-radius: 8px;
+    margin-bottom: 28px;
+    flex-wrap: wrap; font-size: 11.5px;
+  }
+  .legend-bar strong { font-weight: 700; color: var(--navy); }
+
+  @media print {
+    .doc-sidebar { display: none; }
+    .doc-layout { grid-template-columns: 1fr; }
+    .doc-main { padding: 24px; max-width: 100%; }
+    .page-card { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<div class="doc-layout">
+
+  <aside class="doc-sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-brand-mark">P</div>
+      <div><div class="sidebar-brand-name">PROPRIÉTAIRE DE LA MARQUE (PRIVEOS CAPITAL)</div></div>
+    </div>
+    <div class="sidebar-brand-sub">Document 3 / 6 · Propriétaire</div>
+
+    <a class="back-link" href="01_Architecture_Master.html">← Document maître</a>
+
+    <nav class="sidebar-nav">
+      <div class="sidebar-section-header">14 sections de cet espace</div>
+      <a href="#dashboard">📊 1. Tableau de bord</a>
+      <a href="#financier">💰 2. Synthèse financière</a>
+      <a href="#performance">🏆 3. Performance licenciés</a>
+      <a href="#annuaire">🌍 4. Annuaire licenciés</a>
+      <a href="#cabinet">📁 5. Fiche cabinet (6 onglets)</a>
+      <a href="#pipeline">🚀 6. Pipeline 6 étapes</a>
+      <a href="#crm">🎯 7. CRM réseau ⭐</a>
+      <a href="#produits">📦 8. Catalogue produits</a>
+      <a href="#referentiel">📚 9. Référentiel &amp; documents</a>
+      <a href="#outils">🛠 10. Outils</a>
+      <a href="#compliance">⚖ 11. Compliance ⭐</a>
+      <a href="#animation">📢 12. Animation réseau</a>
+      <a href="#admin">⚙ 13. Administration</a>
+      <a href="#chat">💬 14. Chat &amp; messagerie</a>
+
+      <div class="sidebar-section-header">Documents fondateurs</div>
+      <a href="00_Master_Dataset.html">📊 Master Dataset</a>
+      <a href="00_Data_Architecture.html">🏗 Data Architecture</a>
+
+      <div class="sidebar-section-header">Autres documents</div>
+      <a href="01_Architecture_Master.html">📋 Document maître</a>
+      <a href="02_Architecture_Editeur.html">👑 Espace ASTRAEOS</a>
+      <a href="04_Architecture_Licencie.html">💼 Espace Cabinet (dirigeant)</a>
+      <a href="05_Architecture_Ingenieur.html">👤 Espace Ingénieur ⭐ NOUVEAU</a>
+      <a href="06_Architecture_Client.html">👥 Espace Client final</a>
+    </nav>
+  </aside>
+
+  <main class="doc-main">
+
+    <header class="doc-header">
+      <div class="doc-header-eyebrow">Document 3 / 6 · Espace Propriétaire de marque · 🏛 Tenants Marque uniquement</div>
+      <h1 class="doc-title">Espace <strong>PRIVEOS Capital</strong> — Propriétaire de marque</h1>
+      <p class="doc-subtitle">Détail exhaustif de toutes les pages de l'espace du <strong>propriétaire de marque</strong> qui pilote un réseau de cabinets licenciés. PRIVEOS Capital est le 1er locataire d'ASTRAEOS de ce type. Cet espace est <strong>réservé aux tenants de type "Marque"</strong> — il n'est PAS activé pour les tenants "Cabinet direct" (cabinets indépendants qui achètent ASTRAEOS directement). Cet espace sert aussi de modèle de référence pour les futurs propriétaires de marque (Dupont Patrimoine, Mont-Blanc Conseil…).</p>
+      <div class="doc-meta">
+        <span><strong>14 sections principales</strong></span>
+        <span><strong>~40 pages</strong> spécifiées</span>
+        <span><strong>Réservé aux tenants Marque</strong> (tenant_type = 'marque')</span>
+        <span><strong>7 priorités MVP · 4 phase 2</strong></span>
+      </div>
+    </header>
+
+    <div class="glossary">
+      <div class="glossary-title">Glossaire — vocabulaire de cet espace</div>
+      <div class="glossary-grid">
+        <div class="glossary-item">
+          <span class="glossary-term gold">PRIVEOS Capital</span>
+          <div class="glossary-def">Propriétaire de marque · 1er <strong>tenant Marque</strong> d'ASTRAEOS. Le cabinet qui pilote son réseau de licenciés. <code>tenant_type = 'marque'</code>.</div>
+        </div>
+        <div class="glossary-item">
+          <span class="glossary-term gold">🏛 Tenant Marque</span>
+          <div class="glossary-def">Modèle 1 d'ASTRAEOS : un propriétaire de marque qui anime un réseau de cabinets en franchise/licence. <strong>Cet espace (Doc 3) est l'espace dédié de ce type de tenant.</strong> Ex : PRIVEOS Capital.</div>
+        </div>
+        <div class="glossary-item">
+          <span class="glossary-term">💼 Tenant Cabinet direct</span>
+          <div class="glossary-def">Modèle 2 d'ASTRAEOS : cabinet indépendant qui achète directement la solution (sans réseau). <strong>Ce Doc 3 n'est PAS activé pour ce type de tenant</strong> — voir Doc 4 pour leurs spécificités.</div>
+        </div>
+        <div class="glossary-item">
+          <span class="glossary-term">Licencié</span>
+          <div class="glossary-def">Un cabinet partenaire de PRIVEOS Capital, indépendant juridiquement (sa propre structure ORIAS). Représenté par son dirigeant dans le Doc 4.</div>
+        </div>
+        <div class="glossary-item">
+          <span class="glossary-term">Ingénieur patrimonial</span>
+          <div class="glossary-def">Un collaborateur d'un cabinet licencié. Suit ses propres clients dans son <strong>espace dédié (Doc 5)</strong>. Cloisonné aux clients qui lui sont attribués.</div>
+        </div>
+        <div class="glossary-item">
+          <span class="glossary-term green">Client final</span>
+          <div class="glossary-def">Le client patrimonial accompagné. Géré par un licencié, mais visible dans le CRM réseau de PRIVEOS Capital. Possède son propre espace (Doc 6).</div>
+        </div>
+        <div class="glossary-item">
+          <span class="glossary-term">Captation directe</span>
+          <div class="glossary-def">Prospect/client entré directement chez PRIVEOS Capital sans passer par un licencié. Peut être réattribué à un licencié ensuite.</div>
+        </div>
+        <div class="glossary-item">
+          <span class="glossary-term">Réseau</span>
+          <div class="glossary-def">L'ensemble des cabinets licenciés + leurs ingénieurs + leurs clients. PRIVEOS Capital pilote le tout via cet espace.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stats-bar">
+      <div class="stat-block done">
+        <div class="stat-label">Pages existantes</div>
+        <div class="stat-value">11</div>
+        <div class="stat-meta">en HTML statique</div>
+      </div>
+      <div class="stat-block progress">
+        <div class="stat-label">Wireframes définis</div>
+        <div class="stat-value">~30</div>
+        <div class="stat-meta">spécifications complètes</div>
+      </div>
+      <div class="stat-block todo">
+        <div class="stat-label">Priorités MVP</div>
+        <div class="stat-value">7</div>
+        <div class="stat-meta">sections critiques au démarrage</div>
+      </div>
+      <div class="stat-block idea">
+        <div class="stat-label">Phase 2</div>
+        <div class="stat-value">4</div>
+        <div class="stat-meta">sections après MVP</div>
+      </div>
+    </div>
+
+    <div class="legend-bar">
+      <strong>Légende :</strong>
+      <span class="pc-status done">FAIT</span>
+      <span style="color: var(--navy-300);">page existante en HTML</span>
+      <span class="pc-status progress">EN COURS</span>
+      <span style="color: var(--navy-300);">développement partiel</span>
+      <span class="pc-status todo">À FAIRE</span>
+      <span style="color: var(--navy-300);">spécifié, à coder</span>
+      <span class="pc-status priority">PRIORITÉ</span>
+      <span style="color: var(--navy-300);">critique pour MVP</span>
+    </div>
+
+    <div class="note gold">
+      <strong>📖 Comment lire ce document :</strong> chaque section présente une <em>fonction métier</em> avec ses pages et sous-pages. Pour les <strong>pages existantes</strong>, l'arborescence des composants est extraite du HTML réel. Pour les <strong>pages à concevoir</strong>, l'arborescence est la <em>spécification proposée</em>.
+    </div>
+
+    <!-- Encart pédagogique : document réservé tenants Marque -->
+    <div class="note gold" style="border-left-width: 6px; padding: 18px 22px; margin: 24px 0; background: linear-gradient(135deg, rgba(198,142,14,0.08) 0%, rgba(235,241,250,0.4) 100%);">
+      <div style="font-size: 11px; font-weight: 800; color: var(--gold); letter-spacing: 0.16em; text-transform: uppercase; margin-bottom: 10px;">⚖ Périmètre du document · Tenants Marque uniquement</div>
+      <p style="margin: 0 0 10px; font-size: 13px;"><strong>Cet espace est réservé aux tenants de type "Marque"</strong> — c'est-à-dire les propriétaires d'un réseau de cabinets en franchise/licence (PRIVEOS Capital, et demain Dupont Patrimoine, Mont-Blanc Conseil…).</p>
+      <p style="margin: 0 0 10px; font-size: 13px;">Pour les <strong>tenants de type "Cabinet direct"</strong> (cabinets indépendants qui achètent ASTRAEOS sans appartenir à un réseau · ~3 000 CGP en France) :</p>
+      <ul style="margin: 0 0 10px 20px; font-size: 12.5px; line-height: 1.65;">
+        <li><strong>Le Doc 3 n'est PAS activé</strong> — ils n'ont pas de niveau "propriétaire de marque" au-dessus d'eux.</li>
+        <li>Leur architecture se simplifie en 3 niveaux : ASTRAEOS → Cabinet → Ingénieurs → Clients.</li>
+        <li>Ils utilisent uniquement les Doc 4 (Cabinet) + Doc 5 (Ingénieur) + Doc 6 (Client).</li>
+        <li>Leur catalogue produits, référentiels et outils sont gérés <em>directement par le cabinet</em> ou via la <strong>Marketplace ASTRAEOS</strong> (cf. Doc 2 section 4).</li>
+      </ul>
+      <p style="margin: 0; font-size: 12.5px; color: var(--navy-300);"><em>Voir Doc 1 Master · section "Les 2 modèles commerciaux d'ASTRAEOS" pour le détail complet.</em></p>
+    </div>
+
+    <!-- ============================== -->
+    <!-- SITEMAP VISUEL                  -->
+    <!-- ============================== -->
+    <section class="main-section" id="sitemap">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">🗺</span> Vue d'ensemble</div>
+        <h2 class="section-title">Sitemap visuel de l'espace PRIVEOS Capital</h2>
+        <p class="section-intro">Les 14 sections regroupées par domaine fonctionnel : Pilotage du réseau · CRM &amp; clients · Outils &amp; ressources · Animation &amp; gestion.</p>
+      </div>
+
+      <div class="sitemap-container">
+        <div class="sitemap-svg-wrap">
+          <svg viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: auto; min-width: 1200px;">
+
+            <defs>
+              <linearGradient id="pr-navyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#102D50"/>
+                <stop offset="100%" stop-color="#0a1f38"/>
+              </linearGradient>
+              <linearGradient id="pr-goldGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#C68E0E"/>
+                <stop offset="100%" stop-color="#A87A0C"/>
+              </linearGradient>
+              <linearGradient id="pr-blueGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#EBF1FA"/>
+                <stop offset="100%" stop-color="#DBE0E4"/>
+              </linearGradient>
+              <linearGradient id="pr-greenGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#E8F3EC"/>
+                <stop offset="100%" stop-color="#C7E5D0"/>
+              </linearGradient>
+              <filter id="pr-shadow">
+                <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#102D50" flood-opacity="0.12"/>
+              </filter>
+            </defs>
+
+            <!-- TITRE CENTRAL -->
+            <g transform="translate(800, 30)">
+              <rect x="-220" y="0" width="440" height="60" rx="10" fill="url(#pr-goldGrad)" filter="url(#pr-shadow)"/>
+              <text x="0" y="26" text-anchor="middle" fill="white" font-family="Epilogue" font-weight="700" font-size="10" letter-spacing="3">ESPACE PROPRIÉTAIRE DE MARQUE</text>
+              <text x="0" y="46" text-anchor="middle" fill="white" font-family="Epilogue" font-weight="700" font-size="16">PRIVEOS Capital · 14 sections</text>
+            </g>
+
+            <!-- COLONNE 1 : PILOTAGE RÉSEAU -->
+            <g transform="translate(180, 130)">
+              <rect x="-140" y="0" width="280" height="42" rx="8" fill="url(#pr-navyGrad)" filter="url(#pr-shadow)"/>
+              <text x="0" y="28" text-anchor="middle" fill="white" font-family="Epilogue" font-weight="700" font-size="13">📊 PILOTAGE RÉSEAU</text>
+            </g>
+            <line x1="180" y1="172" x2="180" y2="200" stroke="#A4AEBB" stroke-width="1.5" stroke-dasharray="3 3"/>
+            <a href="#dashboard" class="sitemap-link"><g transform="translate(40, 200)" class="sitemap-node"><rect x="0" y="0" width="280" height="46" rx="6" fill="white" stroke="#1F8A4C" stroke-width="2"/><text x="14" y="20" fill="#1F8A4C" font-family="Epilogue" font-weight="700" font-size="9" letter-spacing="1.5">SECTION 1 · FAIT ✓</text><text x="14" y="38" fill="#102D50" font-family="Epilogue" font-weight="700" font-size="13">📊 Tableau de bord</text></g></a>
+            <a href="#financier" class="sitemap-link"><g transform="translate(40, 256)" class="sitemap-node"><rect x="0" y="0" width="280" height="46" rx="6" fill="white" stroke="#1F8A4C" stroke-width="2"/><text x="14" y="20" fill="#1F8A4C" font-family="Epilogue" font-weight="700" font-size="9" letter-spacing="1.5">SECTION 2 · FAIT ✓</text><text x="14" y="38" fill="#102D50" font-family="Epilogue" font-weight="700" font-size="13">💰 Synthèse financière</text></g></a>
+            <a href="#performance" class="sitemap-link"><g transform="translate(40, 312)" class="sitemap-node"><rect x="0" y="0" width="280" height="46" rx="6" fill="white" stroke="#1F8A4C" stroke-width="2"/><text x="14" y="20" fill="#1F8A4C" font-family="Epilogue" font-weight="700" font-size="9" letter-spacing="1.5">SECTION 3 · FAIT ✓</text><text x="14" y="38" fill="#102D50" font-family="Epilogue" font-weight="700" font-size="13">🏆 Performance licenciés</text></g></a>
+            <a href="#annuaire" class="sitemap-link"><g transform="translate(40, 368)" class="sitemap-node"><rect x="0" y="0" width="280" height="46" rx="6" fill="white" stroke="#1F8A4C" stroke-width="2"/><text x="14" y="20" fill="#1F8A4C" font-family="Epilogue" font-weight="700" font-size="9" letter-spacing="1.5">SECTION 4 · FAIT ✓</text><text x="14" y="38" fill="#102D50" font-family="Epilogue" font-weight="700" font-size="13">🌍 Annuaire licenciés</text></g></a>
+            <a href="#cabinet" class="sitemap-link"><g transform="translate(40, 424)" class="sitemap-node"><rect x="0" y="0" width="280" height="46" rx="6" fill="white" stroke="#8A6500" stroke-width="2"/><text x="14" y="20" fill="#8A6500" font-family="Epilogue" font-weight="700" font-size="9" letter-spacing="1.5">SECTION 5 · 2/6 ONGLETS</text><text x="14" y="38" fill="#102D50" font-family="Epilogue" font-weight="700" font-size="13">📁 Fiche cabinet</text></g></a>
+
+            <!-- COLONNE 2 : CRM & CLIENTS -->
+            <g transform="translate(530, 130)">
+              <rect x="-140" y="0" width="280" height="42" rx="8" fill="url(#pr-goldGrad)" filter="url(#pr-shadow)"/>
+              <text x="0" y="28" text-anchor="middle" fill="white" font-family="Epilogue" font-weight="700" font-size="13">🎯 CRM &amp; CLIENTS</text>
+            </g>
+            <line x1="530" y1="172" x2="530" y2="200" stroke="#A4AEBB" stroke-width="1.5" stroke-dasharray="3 3"/>
+            <a href="#pipeline" class="sitemap-link"><g transform="translate(390, 200)" class="sitemap-node"><rect x="0" y="0" width="280" height="46" rx="6" fill="white" stroke="#1F8A4C" stroke-width="2"/><text x="14" y="20" fill="#1F8A4C" font-family="Epilogue" font-weight="700" font-size="9" letter-spacing="1.5">SECTION 6 · FAIT ✓</text><text x="14" y="38" fill="#102D50" font-family="Epilogue" font-weight="700" font-size="13">🚀 Pipeline 6 étapes</text></g></a>
+            <a href="#crm" class="sitemap-link"><g transform="translate(390, 256)" class="sitemap-node"><rect x="0" y="0" width="280" height="46" rx="6" fill="white" stroke="#C68E0E" stroke-width="2.5"/><text x="14" y="20" fill="#C68E0E" font-family="Epilogue" font-weight="700" font-size="9" letter-spacing="1.5">SECTION 7 · ⭐ NOUVEAU</text><text x="14" y="38" fill="#102D50" font-family="Epilogue" font-weight="700" font-size="13">🎯 CRM réseau</text></g></a>
+
+            <!-- COLONNE 3 : OUTILS & RESSOURCES -->
+            <g transform="translate(880, 130)">
+              <rect x="-140" y="0" width="280" height="42" rx="8" fill="url(#pr-greenGrad)" stroke="#1F8A4C" stroke-width="1.5" filter="url(#pr-shadow)"/>
+              <text x="0" y="28" text-anchor="middle" fill="#1F8A4C" font-family="Epilogue" font-weight="700" font-size="13">🛠 OUTILS &amp; RESSOURCES</text>
+            </g>
+            <line x1="880" y1="172" x2="880" y2="200" stroke="#A4AEBB" stroke-width="1.5" stroke-dasharray="3 3"/>
+            <a href="#produits" class="sitemap-link"><g transform="translate(740, 200)" class="sitemap-node"><rect x="0" y="0" width="280" height="46" rx="6" fill="white" stroke="#DBE0E4" stroke-width="1"/><text x="14" y="20" fill="#708196" font-family="Epilogue" font-weight="700" font-size="9" letter-spacing="1.5">SECTION 8</text><text x="14" y="38" fill="#102D50" font-family="Epilogue" font-weight="700" font-size="13">📦 Catalogue produits</text></g></a>
+            <a href="#referentiel" class="sitemap-link"><g transform="translate(740, 256)" class="sitemap-node"><rect x="0" y="0" width="280" height="46" rx="6" fill="white" stroke="#DBE0E4" stroke-width="1"/><text x="14" y="20" fill="#708196" font-family="Epilogue" font-weight="700" font-size="9" letter-spacing="1.5">SECTION 9</text><text x="14" y="38" fill="#102D50" font-family="Epilogue" font-weight="700" font-size="13">📚 Référentiel &amp; documents</text></g></a>
+            <a href="#outils" class="sitemap-link"><g transform="translate(740, 312)" class="sitemap-node"><rect x="0" y="0" width="280" height="46" rx="6" fill="white" stroke="#DBE0E4" stroke-width="1"/><text x="14" y="20" fill="#708196" font-family="Epilogue" font-weight="700" font-size="9" letter-spacing="1.5">SECTION 10</text><text x="14" y="38" fill="#102D50" font-family="Epilogue" font-weight="700" font-size="13">🛠 Outils &amp; simulateurs</text></g></a>
+            <a href="#compliance" class="sitemap-link"><g transform="translate(740, 368)" class="sitemap-node"><rect x="0" y="0" width="280" height="46" rx="6" fill="white" stroke="#C68E0E" stroke-width="2.5"/><text x="14" y="20" fill="#C68E0E" font-family="Epilogue" font-weight="700" font-size="9" letter-spacing="1.5">SECTION 11 · ⭐ NOUVEAU</text><text x="14" y="38" fill="#102D50" font-family="Epilogue" font-weight="700" font-size="13">⚖ Compliance &amp; conformité</text></g></a>
+
+            <!-- COLONNE 4 : ANIMATION & GESTION -->
+            <g transform="translate(1230, 130)">
+              <rect x="-140" y="0" width="280" height="42" rx="8" fill="url(#pr-blueGrad)" stroke="#1456A0" stroke-width="1.5" filter="url(#pr-shadow)"/>
+              <text x="0" y="28" text-anchor="middle" fill="#1456A0" font-family="Epilogue" font-weight="700" font-size="13">📢 ANIMATION &amp; GESTION</text>
+            </g>
+            <line x1="1230" y1="172" x2="1230" y2="200" stroke="#A4AEBB" stroke-width="1.5" stroke-dasharray="3 3"/>
+            <a href="#animation" class="sitemap-link"><g transform="translate(1090, 200)" class="sitemap-node"><rect x="0" y="0" width="280" height="46" rx="6" fill="white" stroke="#DBE0E4" stroke-width="1"/><text x="14" y="20" fill="#708196" font-family="Epilogue" font-weight="700" font-size="9" letter-spacing="1.5">SECTION 12</text><text x="14" y="38" fill="#102D50" font-family="Epilogue" font-weight="700" font-size="13">📢 Animation réseau</text></g></a>
+            <a href="#admin" class="sitemap-link"><g transform="translate(1090, 256)" class="sitemap-node"><rect x="0" y="0" width="280" height="46" rx="6" fill="white" stroke="#DBE0E4" stroke-width="1"/><text x="14" y="20" fill="#708196" font-family="Epilogue" font-weight="700" font-size="9" letter-spacing="1.5">SECTION 13</text><text x="14" y="38" fill="#102D50" font-family="Epilogue" font-weight="700" font-size="13">⚙ Administration</text></g></a>
+            <a href="#chat" class="sitemap-link"><g transform="translate(1090, 312)" class="sitemap-node"><rect x="0" y="0" width="280" height="46" rx="6" fill="white" stroke="#DBE0E4" stroke-width="1"/><text x="14" y="20" fill="#708196" font-family="Epilogue" font-weight="700" font-size="9" letter-spacing="1.5">SECTION 14</text><text x="14" y="38" fill="#102D50" font-family="Epilogue" font-weight="700" font-size="13">💬 Chat &amp; messagerie</text></g></a>
+
+            <!-- Lignes de connexion -->
+            <line x1="800" y1="90" x2="180" y2="130" stroke="#DBE0E4" stroke-width="1.5"/>
+            <line x1="800" y1="90" x2="530" y2="130" stroke="#DBE0E4" stroke-width="1.5"/>
+            <line x1="800" y1="90" x2="880" y2="130" stroke="#DBE0E4" stroke-width="1.5"/>
+            <line x1="800" y1="90" x2="1230" y2="130" stroke="#DBE0E4" stroke-width="1.5"/>
+
+            <!-- Légende basse -->
+            <g transform="translate(800, 510)">
+              <text x="0" y="0" text-anchor="middle" fill="#708196" font-family="Epilogue" font-size="11" font-style="italic">⭐ = nouvelles sections · vert = pages existantes en HTML · cliquez sur une section pour voir le détail ↓</text>
+            </g>
+
+          </svg>
+        </div>
+      </div>
+    </section>
+    <!-- ============================== -->
+    <!-- SECTION 1 — TABLEAU DE BORD     -->
+    <!-- ============================== -->
+    <section class="main-section" id="dashboard">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">1</span> Section 1 / 14 · Pilotage Réseau</div>
+        <h2 class="section-title">📊 Tableau de bord — Accueil</h2>
+        <p class="section-intro">Page d'atterrissage de PRIVEOS Capital après connexion. Vue 360° de l'activité du réseau : synthèse financière, pipeline, assets par source.</p>
+      </div>
+
+      <div class="page-card done">
+        <div class="pc-header">
+          <div class="pc-icon">📊</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Page principale · /</div>
+            <div class="pc-title">Accueil Espace Administrateur</div>
+            <div class="pc-desc">HTML existant : 00_-_Accueil_Espace_Admisnitrateur.html</div>
+          </div>
+          <span class="pc-status done">FAIT</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Composants existants (extraits du HTML réel)</div>
+          <div class="pc-tree">
+<span class="b">┌─ TOPBAR (sticky)</span>
+│   ├─ Brand <span class="s">PRIVEOS Capital</span>
+│   ├─ Search bar <span class="s">avec raccourci ⌘K</span>
+│   ├─ Icon notifications <span class="s">avec badge dot</span>
+│   └─ User pill <span class="s">avatar + Marvin Mouton</span>
+
+<span class="b">┌─ HERO PERSONNALISÉ</span>
+│   ├─ Eyebrow <span class="s">"Bonjour Marvin · Mardi 28 avril 2026"</span>
+│   ├─ Titre <span class="s">"Bienvenue dans votre espace administrateur"</span>
+│   └─ <span class="i">PERIOD CONTROL</span> <span class="s">(date picker à droite)</span>
+│       ├─ Périodes courantes <span class="s">(M courant · T courant · Total)</span>
+│       └─ Années antérieures <span class="s">(2026 · 2025 · 2024)</span>
+
+<span class="b">┌─ SECTION 1 : Synthèse PRIVEOS</span> <span class="s">(encadré navy)</span>
+│   ├─ Eyebrow <span class="s">"Argent perçu sur l'activité · période sélectionnée"</span>
+│   ├─ Titre <span class="s">"Toutes sources · réseau + capté en direct"</span>
+│   └─ Cellules
+│       ├─ Total perçu sur la période <span class="s">grand chiffre</span>
+│       ├─ Par mois
+│       ├─ Par trimestre
+│       └─ Par an
+
+<span class="b">┌─ SECTION 2 : L'activité du réseau</span>
+│   ├─ Eyebrow <span class="s">"Pipeline Patrimonial · 14 cabinets"</span>
+│   ├─ Titre <span class="s">"Pipeline Patrimonial"</span>
+│   └─ <span class="i">PIPELINE-GRID 6 étapes</span> <span class="a">CLIQUABLES</span>
+│       ├─ <span class="c">01</span> Prospects actifs
+│       ├─ <span class="c">02</span> Compliance validée
+│       ├─ <span class="c">03</span> Collecte docs &amp; infos
+│       ├─ <span class="c">04</span> Études en cours
+│       ├─ <span class="c">05</span> Études restituées
+│       └─ <span class="c">06</span> Clients en suivi
+
+<span class="b">┌─ SECTION 3 : Assets PRIVEOS Capital</span> <span class="s">(4 cartes)</span>
+│   ├─ Eyebrow <span class="s">"Synthèse par source · indicateurs sur la période"</span>
+│   └─ <span class="i">ASSET CARDS</span> <span class="a">CLIQUABLES</span>
+│       ├─ Investissement financier
+│       ├─ Assurances
+│       ├─ Projets immobiliers
+│       └─ Honoraires de conseil
+
+<span class="b">┌─ SIDEBAR GAUCHE</span>
+│   ├─ Section "Assets PRIVEOS Capital"
+│   │   ├─ Synthèse financière du réseau
+│   │   └─ Performance des licenciés
+│   └─ Section navigation principale
+          </div>
+
+          <div class="pc-section-label">Interactions utilisateur</div>
+          <div class="pc-interactions">
+            <div class="pc-interaction"><strong>Period Control</strong> — date picker recalcule tous les KPIs</div>
+            <div class="pc-interaction"><strong>Hover Asset Card</strong> — élévation + ombrage gold</div>
+            <div class="pc-interaction"><strong>Click pipeline étape</strong> → ouvre la sous-page de l'étape</div>
+            <div class="pc-interaction"><strong>Click asset card</strong> → drill-down dans la synthèse financière</div>
+          </div>
+
+          <div class="pc-section-label">Sous-pages atteignables depuis cette page</div>
+          <div class="pc-subpages">
+            <div class="pc-subpage"><strong>→ Pipeline étape 01-06</strong> · 6 sous-pages (déjà faites — section 6 de ce doc)</div>
+            <div class="pc-subpage"><strong>→ Synthèse financière</strong> · section 2 (déjà faite)</div>
+            <div class="pc-subpage"><strong>→ Performance licenciés</strong> · section 3 (déjà faite)</div>
+            <div class="pc-subpage"><strong>→ Drill-down par asset</strong> · vers sources de la synthèse financière</div>
+            <div class="pc-subpage"><strong>→ Notifications</strong> · panel latéral (à concevoir)</div>
+            <div class="pc-subpage"><strong>→ Profil utilisateur</strong> · au clic avatar (à concevoir)</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== -->
+    <!-- SECTION 2 — SYNTHÈSE FINANCIÈRE -->
+    <!-- ============================== -->
+    <section class="main-section" id="financier">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">2</span> Section 2 / 14 · Pilotage Réseau</div>
+        <h2 class="section-title">💰 Synthèse financière du réseau</h2>
+        <p class="section-intro">Vue financière agrégée de la rémunération de PRIVEOS Capital, ventilée selon les 4 sources de revenus (financier · assurance · immobilier · honoraires).</p>
+      </div>
+
+      <div class="page-card done">
+        <div class="pc-header">
+          <div class="pc-icon">💰</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Page principale · /financier</div>
+            <div class="pc-title">Synthèse financière du réseau</div>
+            <div class="pc-desc">HTML existant : 21_-_synthese_financiere_v1.html</div>
+          </div>
+          <span class="pc-status done">FAIT</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Composants existants (extraits du HTML réel)</div>
+          <div class="pc-tree">
+<span class="b">┌─ HERO</span>
+│   ├─ Eyebrow <span class="s">"Vue consolidée · pilotage financier"</span>
+│   ├─ Titre <span class="s">"Synthèse financière du réseau"</span>
+│   └─ Period Control
+
+<span class="b">┌─ SYNTHESIS-CARD</span> <span class="s">(encadré navy avec dégradé)</span>
+│   ├─ Label <span class="s">"Synthèse PRIVEOS Capital · 2026"</span>
+│   ├─ PRIVEOS Capital · total perçu <span class="s">grand chiffre</span>
+│   ├─ Split
+│   │   ├─ Via le réseau licenciés
+│   │   └─ Captés en direct
+│   ├─ Réseau licenciés · total perçu
+│   ├─ Volume total généré
+│   └─ Cabinets contributeurs
+
+<span class="b">┌─ CHARTS-SECTION</span> <span class="s">(2 graphiques)</span>
+│   ├─ <span class="i">CHART 1</span> Évolution mensuelle
+│   │   ├─ Eyebrow "Évolution mensuelle"
+│   │   ├─ Titre "PRIVEOS Capital · 12 derniers mois"
+│   │   └─ Footer stats
+│   │       ├─ Mois en cours
+│   │       ├─ Croissance YoY
+│   │       └─ Moyenne mensuelle
+│   └─ <span class="i">CHART 2</span> Répartition par source
+│       ├─ Bar stacked horizontale
+│       └─ Légende 4 sources
+│           ├─ Investissement financier
+│           ├─ Assurances
+│           ├─ Projets immobiliers
+│           └─ Honoraires de conseil
+
+<span class="b">┌─ SOURCES-STEPPER</span> <span class="s">(navigation 4 sources)</span> <span class="a">CLIQUABLES</span>
+│   └─ Titre "Détail par source de revenu"
+│       ├─ <span class="c">01</span> Investissement financier
+│       ├─ <span class="c">02</span> Assurances
+│       ├─ <span class="c">03</span> Projets immobiliers
+│       └─ <span class="c">04</span> Honoraires de conseil
+
+<span class="b">┌─ 4 SECTIONS DETAIL PAR SOURCE</span> <span class="s">(scroll vers ancres)</span>
+│   ├─ Source 1 — Investissement financier
+│   │   ├─ Capital-light <span class="s">(volume sous gestion)</span>
+│   │   ├─ Rem-section <span class="s">(rémunération)</span>
+│   │   └─ Direct-note
+│   ├─ Source 2 — Assurances <span class="s">(structure identique)</span>
+│   ├─ Source 3 — Projets immobiliers
+│   └─ Source 4 — Honoraires de conseil
+          </div>
+
+          <div class="pc-section-label">Interactions utilisateur</div>
+          <div class="pc-interactions">
+            <div class="pc-interaction"><strong>Click stepper source</strong> → scroll smooth vers section</div>
+            <div class="pc-interaction"><strong>Hover stepper</strong> — bordure gold + ombrage</div>
+            <div class="pc-interaction"><strong>Period control</strong> — recalcule tous les chiffres</div>
+            <div class="pc-interaction"><strong>Tooltip charts</strong> — au hover du graphique</div>
+          </div>
+
+          <div class="pc-section-label">Sous-pages à concevoir ⚠</div>
+          <div class="pc-subpages">
+            <div class="pc-subpage"><strong>Drill-down Source 1</strong> · liste détaillée des produits financiers + clients souscripteurs<div class="meta">au clic d'un total ou d'une ligne capital-light</div></div>
+            <div class="pc-subpage"><strong>Drill-down Source 2</strong> · liste des contrats d'assurance par cabinet + clients</div>
+            <div class="pc-subpage"><strong>Drill-down Source 3</strong> · liste des projets immobiliers en cours + statut</div>
+            <div class="pc-subpage"><strong>Drill-down Source 4</strong> · liste des missions conseil et SCI/SARL immatriculées</div>
+            <div class="pc-subpage"><strong>Export PDF/Excel</strong> · export de la synthèse pour comité, comptabilité, investisseurs</div>
+            <div class="pc-subpage"><strong>Vue annuelle complète</strong> · vs vue période sélectionnée (P&amp;L annuel)</div>
+            <div class="pc-subpage"><strong>Comparaison vs N-1</strong> · graphique comparatif année actuelle / année précédente</div>
+          </div>
+
+          <div class="note gold">
+            <strong>📌 À approfondir :</strong> chaque <em>capital-light</em> et chaque <em>rem-section</em> pourrait devenir cliquable pour ouvrir une <em>sous-page de drill-down</em> (ex : la liste détaillée des contrats d'assurance qui composent les XXX € de la source 2). C'est l'enrichissement principal à prévoir pour cette section.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== -->
+    <!-- SECTION 3 — PERFORMANCE         -->
+    <!-- ============================== -->
+    <section class="main-section" id="performance">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">3</span> Section 3 / 14 · Pilotage Réseau</div>
+        <h2 class="section-title">🏆 Performance des licenciés</h2>
+        <p class="section-intro">Vue tournée acteurs : classement des 14 cabinets, faits saillants du trimestre, synthèse qualitative. Complément de la synthèse financière (qui est tournée argent).</p>
+      </div>
+
+      <div class="page-card done">
+        <div class="pc-header">
+          <div class="pc-icon">🏆</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Page principale · /performance</div>
+            <div class="pc-title">Performance des licenciés</div>
+            <div class="pc-desc">HTML existant : 22_-_performance_licencies_v1.html</div>
+          </div>
+          <span class="pc-status done">FAIT</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Composants existants (extraits du HTML réel)</div>
+          <div class="pc-tree">
+<span class="b">┌─ HERO</span>
+│   ├─ Eyebrow <span class="s">"Pilotage du réseau · classement"</span>
+│   ├─ Titre <span class="s">"Performance des licenciés"</span>
+│   └─ Period Control
+
+<span class="b">┌─ REDISTRIBUTION-TABLE-SECTION</span>
+│   ├─ Eyebrow <span class="s">"Classement réseau · Année 2026"</span>
+│   ├─ Titre <span class="s">"Redistribution par cabinet licencié"</span>
+│   ├─ Sort control <span class="s">(tri par colonne)</span>
+│   └─ Tableau <span class="s">14 lignes</span> <span class="a">CLIQUABLE PAR LIGNE</span>
+│       ├─ Avatar cabinet
+│       ├─ Nom · Localisation
+│       ├─ Encours apporté
+│       ├─ Total reversé à PRIVEOS
+│       ├─ Performance
+│       └─ Statut
+
+<span class="b">┌─ HIGHLIGHTS-SECTION</span> <span class="s">(encadré gold)</span>
+│   ├─ Eyebrow <span class="s">"Synthèse qualitative · trimestre en cours"</span>
+│   ├─ Titre <span class="s">"Faits saillants"</span>
+│   └─ 3 cartes
+│       ├─ <span class="c">Top performer</span> Mouton Patrimoine
+│       ├─ <span class="c">Milestone</span> Cap des 11 M€ franchi
+│       └─ <span class="c">À surveiller</span> Honoraires de conseil en retrait
+
+<span class="b">┌─ TAKEAWAYS-SECTION</span> <span class="s">(encadré gold)</span>
+│   ├─ Eyebrow <span class="s">"Synthèse finale · Année 2026"</span>
+│   ├─ Titre <span class="s">"Synthèse du trimestre"</span>
+│   └─ 3 cartes (Performance · Structure · Perspective)
+│       ├─ Réseau en croissance soutenue
+│       ├─ L'investissement financier domine
+│       └─ Mobilisation à parfaire (12/14)
+          </div>
+
+          <div class="pc-section-label">Interactions utilisateur</div>
+          <div class="pc-interactions">
+            <div class="pc-interaction"><strong>Click ligne tableau</strong> → ouvre fiche cabinet</div>
+            <div class="pc-interaction"><strong>Tri par colonne</strong> — sort control au header</div>
+            <div class="pc-interaction"><strong>Hover ligne</strong> — surbrillance + scale avatar</div>
+            <div class="pc-interaction"><strong>Period control</strong> — change la période d'analyse</div>
+          </div>
+
+          <div class="pc-section-label">Sous-pages à concevoir ⚠</div>
+          <div class="pc-subpages">
+            <div class="pc-subpage"><strong>→ Fiche cabinet</strong> · existe déjà · section 5 de ce document</div>
+            <div class="pc-subpage"><strong>Détail "Top performer"</strong> · ouvre la fiche cabinet de Mouton Patrimoine</div>
+            <div class="pc-subpage"><strong>Filtres avancés</strong> · panel filtre (région, statut, taille, période)</div>
+            <div class="pc-subpage"><strong>Export classement</strong> · PDF avec branding · pour réunions trimestrielles</div>
+            <div class="pc-subpage"><strong>Comparaison réseaux</strong> · benchmarks externes (vs marché CGP français)</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== -->
+    <!-- SECTION 4 — ANNUAIRE LICENCIÉS  -->
+    <!-- ============================== -->
+    <section class="main-section" id="annuaire">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">4</span> Section 4 / 14 · Pilotage Réseau</div>
+        <h2 class="section-title">🌍 Annuaire des licenciés</h2>
+        <p class="section-intro">Vue cartographique et tabulaire des 14 cabinets du réseau, avec carte de France interactive, filtres par région et tri.</p>
+      </div>
+
+      <div class="page-card done">
+        <div class="pc-header">
+          <div class="pc-icon">🌍</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Page principale · /annuaire</div>
+            <div class="pc-title">Annuaire — Liste &amp; carte</div>
+            <div class="pc-desc">HTML existant : 11_-_Espace_licencie__priveos_admin_licencies_v3.html</div>
+          </div>
+          <span class="pc-status done">FAIT</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Composants existants (extraits du HTML réel)</div>
+          <div class="pc-tree">
+<span class="b">┌─ HERO</span>
+│   ├─ Eyebrow <span class="s">"Pilotage du réseau · cabinets licenciés"</span>
+│   ├─ Titre <span class="s">"Le réseau PRIVEOS sur le territoire"</span>
+│   └─ Period Control
+
+<span class="b">┌─ KPI-ROW</span> <span class="s">(4 KPIs réactifs aux filtres)</span>
+│   ├─ Cabinets licenciés
+│   ├─ Couverture territoriale
+│   ├─ Encours apporté
+│   └─ Performance moyenne
+
+<span class="b">┌─ ACTUALITÉ DU RÉSEAU</span> <span class="s">(2 colonnes)</span>
+│   ├─ <span class="i">EVOLUTION-CHART</span> Évolution du réseau
+│   │   ├─ Cabinets dans le réseau
+│   │   ├─ Cabinets actifs · Régions couvertes · Croissance an.
+│   │   └─ Courbe inscrits
+│   └─ <span class="i">RECENT-EVENTS</span> Derniers événements <span class="s">(timeline)</span>
+│       ├─ Bonnard &amp; Souchet franchit le cap des 5 M€ d'encours
+│       ├─ Nouveau cabinet en onboarding : Atelier Patrimonial
+│       ├─ Vidal Gestion : meilleure progression du trimestre
+│       ├─ Lefebvre Finance : aucun nouveau prospect depuis 3 semaines
+│       ├─ Roussel Lefèvre signe son 50e client
+│       ├─ Bertrand Conseil obtient note Trustpilot 4,9/5
+│       └─ Vidal Gestion recrute son 4e ingénieur
+
+<span class="b">┌─ MAILLAGE TERRITORIAL</span>
+│   ├─ Map-card-title <span class="s">"France métropolitaine"</span>
+│   ├─ <span class="i">CARTE SVG France</span> <span class="s">(13 régions)</span> <span class="a">CLIQUABLES</span>
+│   │   └─ Au clic région → filtre tableau + zoom
+│   └─ Regions-panel <span class="s">"Répartition par région"</span>
+
+<span class="b">┌─ TABLEAU DES CABINETS</span>
+│   ├─ Filter-bar <span class="s">(région active + reset)</span>
+│   ├─ Sort controls
+│   └─ Tableau 14 lignes <span class="a">CLIQUABLE PAR LIGNE</span>
+│       ├─ Avatar cabinet
+│       ├─ Nom / Dirigeant / Région
+│       ├─ Date d'entrée
+│       ├─ Encours apporté
+│       ├─ Performance
+│       └─ Statut
+          </div>
+
+          <div class="pc-section-label">Interactions utilisateur</div>
+          <div class="pc-interactions">
+            <div class="pc-interaction"><strong>Click région SVG</strong> → filtre tableau + KPIs réactifs + zoom</div>
+            <div class="pc-interaction"><strong>Hover région</strong> — opacité 0.6 + tooltip nb cabinets</div>
+            <div class="pc-interaction"><strong>Click ligne tableau</strong> → fiche cabinet</div>
+            <div class="pc-interaction"><strong>Tri colonnes</strong> — Encours · Performance · Date entrée</div>
+            <div class="pc-interaction"><strong>Reset filtre</strong> — bouton retour vue globale</div>
+            <div class="pc-interaction"><strong>Click event timeline</strong> → ouvre détail événement</div>
+          </div>
+
+          <div class="pc-section-label">Sous-pages à concevoir ⚠</div>
+          <div class="pc-subpages">
+            <div class="pc-subpage"><strong>→ Fiche cabinet</strong> · au clic ligne · section 5 de ce document</div>
+            <div class="pc-subpage"><strong>Vue par région (filtre actif)</strong> · zoom carte + tableau filtré</div>
+            <div class="pc-subpage"><strong>Ajouter nouveau licencié</strong> · workflow d'onboarding (à concevoir)</div>
+            <div class="pc-subpage"><strong>Liste onboarding en cours</strong> · cabinets en cours d'intégration</div>
+            <div class="pc-subpage"><strong>Détail événement timeline</strong> · modal au clic d'un événement</div>
+            <div class="pc-subpage"><strong>Carte mondiale (futur)</strong> · si réseau s'étend hors France</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== -->
+    <!-- SECTION 5 — FICHE CABINET       -->
+    <!-- ============================== -->
+    <section class="main-section" id="cabinet">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">5</span> Section 5 / 14 · Pilotage Réseau · ⭐ Page la plus dense</div>
+        <h2 class="section-title">📁 Fiche cabinet (6 onglets)</h2>
+        <p class="section-intro">Détail complet d'un cabinet, accessible depuis l'annuaire ou depuis le tableau de redistribution. <strong>2 onglets sur 6 sont terminés</strong>. C'est l'écran le plus dense de l'espace.</p>
+      </div>
+
+      <div class="page-card progress">
+        <div class="pc-header">
+          <div class="pc-icon">📁</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Page conteneur · /cabinet/:id</div>
+            <div class="pc-title">Fiche cabinet — Header commun + 6 onglets</div>
+            <div class="pc-desc">HTML existant : 110_-_Licencie__priveos_admin_cabinet_v2.html</div>
+          </div>
+          <span class="pc-status progress">EN COURS</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Header commun à tous les onglets</div>
+          <div class="pc-tree">
+<span class="b">┌─ CABINET-HEADER</span>
+│   ├─ Avatar cabinet <span class="s">(grande initiale gold)</span>
+│   ├─ Identité <span class="s">nom · dirigeant · région · date d'entrée</span>
+│   ├─ KPIs en ligne
+│   │   ├─ Encours apporté
+│   │   ├─ Total reversé
+│   │   ├─ Prospects actifs
+│   │   ├─ Études en cours
+│   │   ├─ Engagement
+│   │   └─ Ancienneté
+│   └─ Actions rapides <span class="s">[Connexion-as] [Message] [Export]</span>
+
+<span class="b">┌─ TABS-NAV</span> <span class="s">(navigation 6 onglets)</span> <span class="a">CLIQUABLES</span>
+│   ├─ <span class="c">1</span> Vue d'ensemble        <span class="s">[FAIT]</span>
+│   ├─ <span class="c">2</span> Activité               <span class="s">[FAIT]</span>
+│   ├─ <span class="c">3</span> Études &amp; dossiers     <span class="s">[À FAIRE]</span>
+│   ├─ <span class="c">4</span> Génération financière  <span class="s">[À FAIRE]</span>
+│   ├─ <span class="c">5</span> Documents              <span class="s">[À FAIRE]</span>
+│   └─ <span class="c">6</span> Accès &amp; droits        <span class="s">[À FAIRE]</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Onglet 1 : Vue d'ensemble -->
+      <div class="page-card done">
+        <div class="pc-header">
+          <div class="pc-icon">1️⃣</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Onglet 1/6</div>
+            <div class="pc-title">Vue d'ensemble du cabinet</div>
+            <div class="pc-desc">Synthèse complète : pipeline interne, santé du dossier, échéances, équipe, dernière activité.</div>
+          </div>
+          <span class="pc-status done">FAIT</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-tree">
+<span class="b">├─ Pipeline Patrimonial du cabinet</span> <span class="s">(activité du cabinet · année 2026)</span>
+│   └─ "Activité de Dupont &amp; Associés" + 6 étapes pipeline propres
+<span class="b">├─ Performance par source</span>
+│   ├─ Encours apporté <span class="s">(big value)</span>
+│   ├─ Total reversé
+│   └─ Détail par source · 2026
+<span class="b">├─ Santé du dossier</span>
+│   ├─ Engagement réseau
+│   └─ Contrat de licence
+<span class="b">├─ Échéances à venir</span> <span class="s">(timeline 30 jours)</span>
+<span class="b">├─ Composition équipe</span> <span class="s">(ingénieurs + rôles)</span>
+<span class="b">└─ Dernière activité</span> <span class="s">(5 derniers événements)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Onglet 2 : Activité -->
+      <div class="page-card done">
+        <div class="pc-header">
+          <div class="pc-icon">2️⃣</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Onglet 2/6</div>
+            <div class="pc-title">Activité du cabinet</div>
+            <div class="pc-desc">Timeline chronologique, KPIs activité, mini graphique 7j, faits marquants, comparaison réseau.</div>
+          </div>
+          <span class="pc-status done">FAIT</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-tree">
+<span class="b">┌─ ACTIVITY-KPIS</span> <span class="s">(4 KPIs)</span>
+│   ├─ Actions ce mois
+│   ├─ Cette semaine
+│   ├─ Nouveaux prospects
+│   └─ vs réseau
+
+<span class="b">┌─ ACTIVITY-LAYOUT (2 colonnes)</span>
+│   ├─ <span class="i">COL GAUCHE : Timeline chronologique</span>
+│   │   ├─ Filtres par type <span class="s">(Tout · Prospects · Pipeline · Études · RDV)</span>
+│   │   └─ Timeline groupée par jour
+│   └─ <span class="i">COL DROITE : Stats (sticky)</span>
+│       ├─ Mini graphique 7j
+│       ├─ Faits marquants 7j
+│       └─ Comparaison réseau
+          </div>
+        </div>
+      </div>
+
+      <!-- Onglet 3 : Études & dossiers -->
+      <div class="page-card priority">
+        <div class="pc-header">
+          <div class="pc-icon">3️⃣</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Onglet 3/6 · à concevoir</div>
+            <div class="pc-title">Études &amp; dossiers du cabinet</div>
+            <div class="pc-desc">Liste exhaustive des dossiers en cours et clôturés sur lesquels travaille le cabinet.</div>
+          </div>
+          <span class="pc-status priority">PRIORITÉ ⭐ MVP</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Wireframe proposé</div>
+          <div class="pc-tree">
+<span class="b">┌─ STATS HEADER</span>
+│   ├─ Total études · 47 (32 actives · 15 clôturées)
+│   ├─ En cours par étape <span class="s">(répartition pipeline)</span>
+│   └─ Délai moyen de traitement
+
+<span class="b">┌─ FILTRES</span>
+│   ├─ Statut <span class="s">(Toutes · Actives · Clôturées · Échec)</span>
+│   ├─ Étape pipeline <span class="s">(01-06)</span>
+│   ├─ Ingénieur en charge
+│   ├─ Période
+│   └─ Type d'étude
+
+<span class="b">┌─ TABLEAU DOSSIERS</span> <span class="a">CLIQUABLE PAR LIGNE</span>
+│   ├─ Avatar client (prénom + nom)
+│   ├─ Type de dossier
+│   ├─ Étape pipeline actuelle <span class="s">(badge coloré)</span>
+│   ├─ Ingénieur en charge
+│   ├─ Date entrée pipeline
+│   ├─ Deadline restitution
+│   ├─ Score qualité IA <span class="s">(météo ☀⛅🌧⚡)</span>
+│   └─ Action <span class="s">[Voir détail]</span>
+          </div>
+          <div class="pc-section-label">Sous-pages atteignables</div>
+          <div class="pc-subpages">
+            <div class="pc-subpage"><strong>Détail dossier client</strong> · mini-fiche dossier patrimonial</div>
+            <div class="pc-subpage"><strong>Étude patrimoniale complète</strong> · ouvre l'étude finalisée</div>
+            <div class="pc-subpage"><strong>Réassigner dossier</strong> · changer d'ingénieur en charge</div>
+            <div class="pc-subpage"><strong>Export liste filtrée</strong> · CSV/PDF</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Onglet 4 : Génération financière -->
+      <div class="page-card priority">
+        <div class="pc-header">
+          <div class="pc-icon">4️⃣</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Onglet 4/6 · à concevoir</div>
+            <div class="pc-title">Génération financière du cabinet</div>
+            <div class="pc-desc">Vue financière dédiée au cabinet : ce qu'il a généré, ventilé par source et par mois.</div>
+          </div>
+          <span class="pc-status priority">PRIORITÉ ⭐ MVP</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Wireframe proposé</div>
+          <div class="pc-tree">
+<span class="b">┌─ KPIS FINANCIERS</span>
+│   ├─ Total reversé à PRIVEOS · YTD
+│   ├─ Total commission produits · YTD
+│   ├─ Honoraires études · YTD
+│   └─ Position dans le réseau · #X/14
+
+<span class="b">┌─ ÉVOLUTION TEMPORELLE</span>
+│   ├─ Graphique courbe 12 mois <span class="s">par source</span>
+│   └─ Toggle <span class="s">(Mensuel · Trimestriel · Annuel)</span>
+
+<span class="b">┌─ RÉPARTITION PAR SOURCE</span>
+│   ├─ Source 1 — Investissement financier
+│   ├─ Source 2 — Assurances
+│   ├─ Source 3 — Projets immobiliers
+│   └─ Source 4 — Honoraires conseil
+
+<span class="b">┌─ DÉTAIL DES MISSIONS</span> <span class="a">CLIQUABLES</span>
+│   └─ Tableau missions générées
+│       ├─ Date
+│       ├─ Client
+│       ├─ Type
+│       ├─ Montant
+│       └─ Statut
+
+<span class="b">┌─ COMPARAISON RÉSEAU</span>
+│   └─ Cabinet vs moyenne réseau <span class="s">par source</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Onglet 5 : Documents -->
+      <div class="page-card priority">
+        <div class="pc-header">
+          <div class="pc-icon">5️⃣</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Onglet 5/6 · à concevoir</div>
+            <div class="pc-title">Documents partagés avec le cabinet</div>
+            <div class="pc-desc">Documents PRIVEOS Capital partagés avec ce cabinet : contrats, formations, support marketing, etc.</div>
+          </div>
+          <span class="pc-status priority">PHASE 2</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Wireframe proposé</div>
+          <div class="pc-tree">
+<span class="b">┌─ CATÉGORIES</span> <span class="s">(arborescence repliable)</span>
+│   ├─ <span class="i">CADRE CONTRACTUEL</span>
+│   │   ├─ Convention de licence signée
+│   │   ├─ Avenants
+│   │   └─ Conditions générales
+│   ├─ <span class="i">FORMATION</span>
+│   │   ├─ Modules réalisés
+│   │   └─ Certificats
+│   ├─ <span class="i">SUPPORT MARKETING</span>
+│   │   ├─ Templates client (DCI, KYC...)
+│   │   ├─ Logos haute définition
+│   │   └─ Templates études
+│   └─ <span class="i">COMPLIANCE</span>
+│       └─ Modèles DER, DCI, KYC, LM
+
+<span class="b">┌─ ACTIONS</span>
+│   ├─ Bouton "Partager nouveau document"
+│   └─ Historique des envois
+          </div>
+        </div>
+      </div>
+
+      <!-- Onglet 6 : Accès & droits -->
+      <div class="page-card priority">
+        <div class="pc-header">
+          <div class="pc-icon">6️⃣</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Onglet 6/6 · à concevoir</div>
+            <div class="pc-title">Accès &amp; droits du cabinet</div>
+            <div class="pc-desc">Gestion des comptes du cabinet (dirigeant, ingénieurs, rôles personnalisés). Bouton "Connexion en tant que".</div>
+          </div>
+          <span class="pc-status priority">PHASE 2</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Wireframe proposé</div>
+          <div class="pc-tree">
+<span class="b">┌─ TABLEAU UTILISATEURS</span> <span class="a">CLIQUABLE PAR LIGNE</span>
+│   ├─ Avatar utilisateur
+│   ├─ Nom + email
+│   ├─ Rôle <span class="s">(Dirigeant · Ingénieur · Comptable · Assistant·e)</span>
+│   ├─ Date dernière connexion
+│   ├─ Statut
+│   └─ Actions <span class="s">[Connexion-as · Suspendre · Modifier rôle]</span>
+
+<span class="b">┌─ MATRICE DES PERMISSIONS</span>
+│   └─ Tableau croisé Rôle x Ressource <span class="s">(éditable)</span>
+
+<span class="b">┌─ INVITATIONS EN COURS</span>
+│   └─ Liste des invitations envoyées non acceptées
+
+<span class="b">┌─ CTA</span>
+│   ├─ Bouton "Inviter un nouvel utilisateur"
+│   └─ Bouton "Créer un rôle personnalisé"
+          </div>
+          <div class="pc-section-label">Sous-pages atteignables</div>
+          <div class="pc-subpages">
+            <div class="pc-subpage"><strong>Connexion en tant que</strong> · impersonification ingénieur du cabinet</div>
+            <div class="pc-subpage"><strong>Création nouveau rôle</strong> · matrice permissions personnalisable</div>
+            <div class="pc-subpage"><strong>Modification permissions</strong> · ajustement rôle existant</div>
+            <div class="pc-subpage"><strong>Logs d'audit utilisateur</strong> · historique d'actions par utilisateur</div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- ============================== -->
+    <!-- SECTION 6 — PIPELINE 6 ÉTAPES   -->
+    <!-- ============================== -->
+    <section class="main-section" id="pipeline">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">6</span> Section 6 / 14 · CRM &amp; clients</div>
+        <h2 class="section-title">🚀 Pipeline 6 étapes</h2>
+        <p class="section-intro">Vue par étape du cycle prospect → client en suivi, à l'échelle du réseau entier (tous cabinets confondus). 6 pages, une par étape pipeline.</p>
+      </div>
+
+      <div class="page-card done">
+        <div class="pc-header">
+          <div class="pc-icon">🚀</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Structure commune des 6 pages</div>
+            <div class="pc-title">Composants partagés Pipeline 01-06</div>
+            <div class="pc-desc">Chacune des 6 pages partage la même structure : stepper unifié + KPIs étape + cartes-couples + actions globales.</div>
+          </div>
+          <span class="pc-status done">FAIT</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Composants communs aux 6 pages</div>
+          <div class="pc-tree">
+<span class="b">┌─ HERO</span>
+│   ├─ Eyebrow <span class="s">"Pipeline patrimonial · étape XX/06"</span>
+│   ├─ Titre <span class="s">spécifique à l'étape</span>
+│   └─ Period control
+
+<span class="b">┌─ STEPPER UNIFIÉ</span> <span class="s">(les 6 étapes en ligne)</span> <span class="a">CLIQUABLE</span>
+│   ├─ <span class="c">01</span> Prospects actifs
+│   ├─ <span class="c">02</span> Compliance validée
+│   ├─ <span class="c">03</span> Collecte docs &amp; infos
+│   ├─ <span class="c">04</span> Études en cours
+│   ├─ <span class="c">05</span> Études restituées
+│   └─ <span class="c">06</span> Clients en suivi
+
+<span class="b">┌─ KPIS ÉTAPE</span> <span class="s">(4 KPIs spécifiques)</span>
+│   ├─ Nombre de dossiers
+│   ├─ Évolution vs période précédente
+│   ├─ Délai moyen sur l'étape
+│   └─ Taux de passage à l'étape suivante
+
+<span class="b">┌─ FILTRES</span>
+│   ├─ Cabinet
+│   ├─ Région
+│   ├─ Période
+│   └─ Trier par <span class="s">(récent · ancien · alphabétique)</span>
+
+<span class="b">┌─ GRILLE COUPLES</span> <span class="s">(prospects/clients en cartes 2 lignes)</span> <span class="a">CLIQUABLES</span>
+│   └─ Chaque carte : photo + prénoms + cabinet + score
+
+<span class="b">┌─ ACTIONS GLOBALES</span>
+│   ├─ Export CSV
+│   └─ Validation groupée <span class="s">(passage étape suivante)</span>
+          </div>
+
+          <div class="pc-section-label">Variations par étape</div>
+          <div class="pc-tree">
+<span class="b">Étape 01 — Prospects actifs</span> <span class="s">[FAIT]</span>
+│   ├─ HTML : 011_-_Prospects.html
+│   └─ Spécifique : 39 couples · source de la prospection · qualification
+
+<span class="b">Étape 02 — Compliance validée</span> <span class="s">[FAIT]</span>
+│   ├─ HTML : 012_-_Compliance_valide_e.html
+│   └─ Spécifique : DER/DCI/KYC/LM signés · paiement reçu
+
+<span class="b">Étape 03 — Collecte docs &amp; infos</span> <span class="s">[FAIT]</span>
+│   ├─ HTML : 013_Collecte_Docs.html
+│   └─ Spécifique : sections hiérarchisées · % complétude par dossier
+
+<span class="b">Étape 04 — Études en cours</span> <span class="s">[FAIT]</span>
+│   ├─ HTML : 014_-_Etude_en_cours_.html
+│   └─ Spécifique : phase IA · validation ingénieur · deadline restitution
+
+<span class="b">Étape 05 — Études restituées</span> <span class="s">[FAIT]</span>
+│   ├─ HTML : 015_-_Etudes_restitue_es.html
+│   └─ Spécifique : décision client · missions signées
+
+<span class="b">Étape 06 — Clients en suivi</span> <span class="s">[FAIT]</span>
+│   ├─ HTML : 016_-_Clients_en_suivi.html
+│   └─ Spécifique : CRM · derniers contacts · prochaines actions
+          </div>
+
+          <div class="pc-section-label">Sous-pages à concevoir ⚠</div>
+          <div class="pc-subpages">
+            <div class="pc-subpage"><strong>⭐ Détail couple/client (fiche complète)</strong> · à concevoir absolument · ouverte au clic d'une carte couple<div class="meta">Probablement la plus importante : fiche dossier patrimonial complet</div></div>
+            <div class="pc-subpage"><strong>Workflow validation passage étape</strong> · modal/page de validation manuelle de transition d'étape</div>
+            <div class="pc-subpage"><strong>Vue ingénieur (kanban personnel)</strong> · chaque ingénieur voit ses dossiers à lui en kanban</div>
+            <div class="pc-subpage"><strong>Historique modifications</strong> · qui a fait quoi sur le dossier (audit)</div>
+            <div class="pc-subpage"><strong>Réassignation dossier</strong> · changer d'ingénieur ou de cabinet</div>
+          </div>
+
+          <div class="note gold">
+            <strong>📌 Lien vers la fiche dossier détaillée :</strong> chaque <em>carte couple</em> dans la grille est cliquable et ouvre une <em>fiche dossier complète</em> avec 6 onglets (page dédiée immersive). Voir la sous-page <strong>"Fiche dossier client (vue complète éditable)"</strong> ci-dessous, qui spécifie cette page exhaustivement.
+          </div>
+        </div>
+      </div>
+
+      <!-- =================================================== -->
+      <!-- FICHE DOSSIER CLIENT/COUPLE (SOUS-PAGE PIPELINE)    -->
+      <!-- =================================================== -->
+      <div class="page-card priority">
+        <div class="pc-header">
+          <div class="pc-icon">📁</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Sous-page · /dossier/:id · ⭐ Page la plus dense de l'espace</div>
+            <div class="pc-title">Fiche dossier client (vue complète éditable)</div>
+            <div class="pc-desc">Vue 360° d'un dossier client/couple, ouverte au clic d'une carte dans le pipeline ou le CRM. <strong>Page complète dédiée avec 6 onglets immersifs</strong>. PRIVEOS Capital dispose d'une vue complète éditable (lecture + actions de pilotage + édition) sur tous les dossiers du réseau.</div>
+          </div>
+          <span class="pc-status priority">PRIORITÉ ⭐ MVP</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Niveau d'accès — vue complète éditable</div>
+          <div class="note">
+            <strong>🔓 Pouvoir de pilotage maximal :</strong> en tant que propriétaire de marque, PRIVEOS Capital dispose du <strong>plus haut niveau de droits</strong> sur les dossiers de son réseau :
+            <ul style="margin: 8px 0 0 20px; font-size: 12.5px; line-height: 1.65;">
+              <li>✅ <strong>Consultation</strong> de tous les dossiers du réseau</li>
+              <li>✅ <strong>Édition</strong> directe possible sur les fiches clients (corrections, ajouts d'informations)</li>
+              <li>✅ <strong>Actions de pilotage</strong> : réassigner dossier, déclencher revue compliance, escalader, mettre en pause</li>
+              <li>✅ <strong>Connexion en tant que</strong> l'ingénieur en charge (impersonification pour intervention)</li>
+              <li>✅ <strong>Modification du statut pipeline</strong> (passage forcé entre étapes si justifié)</li>
+              <li>✅ <strong>Audit trail</strong> complet : toute action est tracée avec horodatage</li>
+            </ul>
+            <p style="margin: 8px 0 0; font-size: 12px; color: var(--navy-300);"><em>L'idée n'est pas de microgérer mais de <strong>pouvoir intervenir en cas de problème</strong> (ingénieur absent, dossier bloqué, alerte compliance, etc.).</em></p>
+          </div>
+
+          <div class="pc-section-label">Header commun à tous les onglets</div>
+          <div class="pc-tree">
+<span class="b">┌─ HEADER FICHE DOSSIER</span>
+│   ├─ Photo + identité <span class="s">(prénom · nom · âge · situation matrimoniale)</span>
+│   ├─ Si couple : 2 photos + 2 identités côte à côte
+│   ├─ Statut pipeline <span class="s">(badge étape 01-06 · cliquable pour changer)</span>
+│   ├─ Cabinet attribué + ingénieur en charge <span class="s">(cliquable → fiche cabinet)</span>
+│   ├─ Origine <span class="s">(Réseau / Captation directe PRIVEOS / Réattribué)</span>
+│   ├─ Score qualité IA <span class="s">(météo ☀⛅🌧⚡)</span>
+│   ├─ Indice de complétude DCI <span class="s">(barre de progression)</span>
+│   └─ Actions rapides
+│       ├─ <span class="c">[🔄 Réassigner]</span> <span class="s">(changer ingénieur/cabinet)</span>
+│       ├─ <span class="c">[👤 Connexion en tant que]</span> <span class="s">(impersonification)</span>
+│       ├─ <span class="c">[💬 Message à l'ingénieur]</span>
+│       ├─ <span class="c">[⚖ Déclencher revue compliance]</span>
+│       ├─ <span class="c">[⏸ Mettre en pause]</span>
+│       ├─ <span class="c">[📝 Notes internes]</span>
+│       └─ <span class="c">[📤 Export PDF dossier]</span>
+
+<span class="b">┌─ TABS-NAV (6 onglets)</span> <span class="s">(navigation · état persistant)</span> <span class="a">CLIQUABLES</span>
+│   ├─ <span class="c">1</span> Vue d'ensemble       <span class="s">(synthèse + alertes)</span>
+│   ├─ <span class="c">2</span> Identité &amp; DCI       <span class="s">(infos patrimoniales détaillées)</span>
+│   ├─ <span class="c">3</span> Documents             <span class="s">(collecte + signés)</span>
+│   ├─ <span class="c">4</span> Étude patrimoniale    <span class="s">(PDF · web · synthèse)</span>
+│   ├─ <span class="c">5</span> Investissements       <span class="s">(encours par catégorie)</span>
+│   └─ <span class="c">6</span> Activité &amp; timeline   <span class="s">(RDV · échanges · IA logs)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ONGLET 1 : VUE D'ENSEMBLE -->
+      <div class="page-card priority">
+        <div class="pc-header">
+          <div class="pc-icon">1️⃣</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Onglet 1/6 · /dossier/:id (par défaut)</div>
+            <div class="pc-title">Vue d'ensemble — synthèse &amp; alertes</div>
+            <div class="pc-desc">Synthèse rapide du dossier · LE dashboard de pilotage du dossier pour PRIVEOS.</div>
+          </div>
+          <span class="pc-status priority">PRIORITÉ ⭐ MVP</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Wireframe proposé</div>
+          <div class="pc-tree">
+<span class="b">┌─ ALERTES CRITIQUES</span> <span class="s">(top de page · visibles immédiatement)</span> <span class="a">CLIQUABLES</span>
+│   ├─ Délai dépassé sur étape pipeline <span class="s">(ex : "Étude en cours depuis 8 sem · objectif 4-6 sem")</span>
+│   ├─ Document manquant bloquant
+│   ├─ Aucune activité depuis &gt; 30 jours
+│   ├─ Compliance non validée
+│   └─ Risque détecté par l'IA <span class="s">(profil incohérent · incohérence DCI · etc.)</span>
+
+<span class="b">┌─ KPIS DOSSIER</span>
+│   ├─ Encours total <span class="s">(consolidé tous produits)</span>
+│   ├─ Revenu généré pour le réseau <span class="s">(commissions + études · à date)</span>
+│   ├─ Investissements potentiels <span class="s">(estimation IA selon profil)</span>
+│   └─ Engagement global <span class="s">(score basé sur fréquence interactions)</span>
+
+<span class="b">┌─ FRISE PIPELINE INTERACTIVE</span>
+│   ├─ Position actuelle dans les 6 étapes <span class="s">(visualisation grand format)</span>
+│   ├─ Date d'entrée dans l'étape actuelle
+│   ├─ Délai moyen pour passer à l'étape suivante <span class="s">(benchmark réseau)</span>
+│   └─ Bouton <strong>[Forcer le passage à l'étape suivante]</strong> <span class="s">(action de pilotage)</span>
+
+<span class="b">┌─ SYNTHÈSE PATRIMONIALE</span> <span class="s">(résumé visuel)</span>
+│   ├─ Donut : répartition actifs <span class="s">(financier · immo · pro · liquidités)</span>
+│   ├─ Total patrimoine net
+│   ├─ Capacité d'épargne mensuelle
+│   ├─ Dette globale
+│   └─ Objectifs principaux <span class="s">(retraite · transmission · optimisation fiscale…)</span>
+
+<span class="b">┌─ DERNIÈRE ACTIVITÉ</span> <span class="s">(timeline 7 derniers jours)</span>
+│   ├─ Dernier RDV <span class="s">(date · type · synthèse IA)</span>
+│   ├─ Derniers messages <span class="s">(client ↔ ingénieur)</span>
+│   ├─ Derniers documents uploadés
+│   └─ Dernières actions IA <span class="s">(génération étude · synthèse · etc.)</span>
+
+<span class="b">┌─ ACTIONS RECOMMANDÉES IA</span>
+│   ├─ Suggestions de prochaines étapes
+│   ├─ Opportunités détectées <span class="s">(ex : "Optimisation IFI possible · économie estimée 12k€")</span>
+│   └─ Risques à anticiper
+
+<span class="b">┌─ NOTES INTERNES PRIVEOS</span> <span class="s">(invisibles côté licencié · privées au propriétaire)</span>
+│   └─ Zone de notes libre <span class="s">(annotations stratégiques sur le dossier)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ONGLET 2 : IDENTITÉ & DCI -->
+      <div class="page-card priority">
+        <div class="pc-header">
+          <div class="pc-icon">2️⃣</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Onglet 2/6 · /dossier/:id/identite</div>
+            <div class="pc-title">Identité &amp; DCI — informations patrimoniales détaillées</div>
+            <div class="pc-desc">Le DCI complet du client/couple · 13 catégories · 257 questions · éditable par PRIVEOS.</div>
+          </div>
+          <span class="pc-status priority">PRIORITÉ ⭐ MVP</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Wireframe proposé</div>
+          <div class="pc-tree">
+<span class="b">┌─ HEADER ONGLET</span>
+│   ├─ Indice de complétude DCI <span class="s">(barre de progression · % par catégorie)</span>
+│   ├─ Date de dernière mise à jour
+│   ├─ Auteur dernière modif <span class="s">(client · ingénieur · IA · PRIVEOS)</span>
+│   └─ Bouton <strong>[Forcer mise à jour DCI]</strong> <span class="s">(envoie une demande au client)</span>
+
+<span class="b">┌─ NAVIGATION DCI</span> <span class="s">(13 catégories pliables · accordion)</span> <span class="a">CLIQUABLES</span>
+│   ├─ <span class="c">1.</span> Identité civile &amp; familiale <span class="s">(complétude X%)</span>
+│   ├─ <span class="c">2.</span> Activité professionnelle
+│   ├─ <span class="c">3.</span> Revenus &amp; charges
+│   ├─ <span class="c">4.</span> Patrimoine immobilier
+│   ├─ <span class="c">5.</span> Patrimoine financier
+│   ├─ <span class="c">6.</span> Patrimoine professionnel <span class="s">(sociétés détenues)</span>
+│   ├─ <span class="c">7.</span> Patrimoine d'usage <span class="s">(véhicules · objets de valeur)</span>
+│   ├─ <span class="c">8.</span> Endettement
+│   ├─ <span class="c">9.</span> Couverture &amp; prévoyance
+│   ├─ <span class="c">10.</span> Fiscalité
+│   ├─ <span class="c">11.</span> Régime matrimonial &amp; succession
+│   ├─ <span class="c">12.</span> Objectifs &amp; préoccupations
+│   └─ <span class="c">13.</span> Connaissance financière (KYC)
+
+<span class="b">┌─ DÉTAIL PAR CATÉGORIE</span> <span class="s">(au déploiement d'une catégorie)</span>
+│   ├─ Liste des questions de la catégorie
+│   ├─ Réponses du client + édition possible
+│   ├─ Champs vides surlignés en rouge
+│   ├─ Documents associés <span class="s">(fiche de paie · avis d'imposition · etc.)</span>
+│   ├─ Annotations IA <span class="s">(détection d'incohérences entre réponses)</span>
+│   └─ Historique des modifications par champ
+
+<span class="b">┌─ ACTIONS PRIVEOS</span>
+│   ├─ Bouton <strong>[Modifier directement]</strong> <span class="s">(édition inline)</span>
+│   ├─ Bouton <strong>[Demander précision au client]</strong> <span class="s">(message ciblé)</span>
+│   ├─ Bouton <strong>[Marquer comme validé]</strong>
+│   └─ Bouton <strong>[Demander document à uploader]</strong> <span class="s">(notification client)</span>
+
+<span class="b">┌─ EXPORT</span>
+│   ├─ Export PDF du DCI complet
+│   ├─ Export catégorie par catégorie
+│   └─ Comparaison avec version précédente
+          </div>
+          <div class="pc-section-label">Référence</div>
+          <div class="note">
+            <strong>📚 Référentiel DCI :</strong> les 13 catégories et 257 questions sont issues du référentiel commun PRIVEOS Capital (cf. Section 9 Référentiel &amp; documents). Ce référentiel est aussi utilisé par les ingénieurs (Doc 5) et accessible aux clients (Doc 6).
+          </div>
+        </div>
+      </div>
+
+      <!-- ONGLET 3 : DOCUMENTS -->
+      <div class="page-card priority">
+        <div class="pc-header">
+          <div class="pc-icon">3️⃣</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Onglet 3/6 · /dossier/:id/documents</div>
+            <div class="pc-title">Documents — collecte + signés</div>
+            <div class="pc-desc">Tous les documents du dossier · ceux fournis par le client + ceux signés via Yousign.</div>
+          </div>
+          <span class="pc-status priority">PRIORITÉ ⭐ MVP</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Wireframe proposé</div>
+          <div class="pc-tree">
+<span class="b">┌─ KPIS DOCUMENTS</span>
+│   ├─ Total documents fournis <span class="s">(X / Y attendus)</span>
+│   ├─ Documents validés
+│   ├─ Documents en attente
+│   └─ Indice de complétude global
+
+<span class="b">┌─ DEUX BLOCS PRINCIPAUX</span>
+
+<span class="b">├─ BLOC 1 : DOCUMENTS DE COLLECTE</span> <span class="s">(fournis par le client)</span>
+│   ├─ Regroupement par catégorie
+│   │   ├─ 🏠 Immobilier <span class="s">(actes · taxes · loyers)</span>
+│   │   ├─ 💰 Financier <span class="s">(relevés · contrats · DICI)</span>
+│   │   ├─ 💼 Professionnel <span class="s">(fiches de paie · K-bis · bilans)</span>
+│   │   ├─ 🛡 Assurance <span class="s">(contrats prévoyance · santé)</span>
+│   │   ├─ 📄 Fiscal <span class="s">(avis d'imposition · IFI · 2042…)</span>
+│   │   └─ 👨‍👩‍👧 Famille <span class="s">(livret de famille · contrat mariage)</span>
+│   └─ Pour chaque document
+│       ├─ Pictogramme + nom
+│       ├─ Date d'upload
+│       ├─ Auteur upload <span class="s">(client · ingénieur · PRIVEOS)</span>
+│       ├─ Statut <span class="s">(en attente · validé · à compléter)</span>
+│       ├─ OCR données extraites <span class="s">(prévisualisation IA)</span>
+│       └─ Actions <span class="s">[Voir · Télécharger · Valider · Demander correction · Supprimer]</span>
+
+<span class="b">└─ BLOC 2 : DOCUMENTS SIGNÉS</span> <span class="s">(via Yousign · valeur juridique)</span>
+    ├─ DCI signé <span class="s">(version corrigée après visio · daté)</span>
+    ├─ Questionnaire de qualification client (KYC) signé
+    ├─ Lettre de mission signée
+    ├─ Demande d'entrée en relation
+    ├─ Mandats spécifiques <span class="s">(gestion · arbitrage · etc.)</span>
+    ├─ Contrats produits souscrits
+    └─ Pour chaque
+        ├─ Date de signature + horodatage
+        ├─ Certificat Yousign <span class="s">(téléchargeable)</span>
+        └─ Bouton <strong>[Voir document signé]</strong>
+
+<span class="b">┌─ ACTIONS PRIVEOS</span>
+│   ├─ Bouton <strong>[Demander un document spécifique]</strong>
+│   ├─ Bouton <strong>[Lancer une relance globale]</strong> <span class="s">(documents manquants)</span>
+│   ├─ Bouton <strong>[Forcer validation]</strong> <span class="s">(en cas de blocage technique)</span>
+│   └─ Bouton <strong>[Export ZIP de tous les documents]</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- ONGLET 4 : ÉTUDE PATRIMONIALE -->
+      <div class="page-card priority">
+        <div class="pc-header">
+          <div class="pc-icon">4️⃣</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Onglet 4/6 · /dossier/:id/etude</div>
+            <div class="pc-title">Étude patrimoniale — PDF · web · synthèse</div>
+            <div class="pc-desc">Visualisation de l'étude patrimoniale dans ses 3 formats · accès aux versions intermédiaires (par phase IA).</div>
+          </div>
+          <span class="pc-status priority">PRIORITÉ ⭐ MVP</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Wireframe proposé · vue adaptative selon statut</div>
+          <div class="pc-tree">
+<span class="b">┌─ STATUT DE L'ÉTUDE</span>
+│   ├─ <span class="i">Cas A</span> · Pas encore lancée <span class="s">(collecte en cours)</span>
+│   ├─ <span class="i">Cas B</span> · En cours de réalisation <span class="s">(phase IA visible)</span>
+│   ├─ <span class="i">Cas C</span> · Restituée au client <span class="s">(date · transcript visio)</span>
+│   └─ <span class="i">Cas D</span> · Mise à jour en cours <span class="s">(nouvelle version)</span>
+
+<span class="b">┌─ CAS A · ÉTUDE PAS ENCORE LANCÉE</span>
+│   ├─ Raison du non-démarrage <span class="s">(ex : "Indice complétude DCI &lt; 80%")</span>
+│   ├─ Estimation date de lancement
+│   └─ Bouton <strong>[Forcer le lancement de l'étude]</strong> <span class="s">(action critique · log)</span>
+
+<span class="b">┌─ CAS B · ÉTUDE EN COURS</span>
+│   ├─ Frise des 5 phases du module IA
+│   │   ├─ Phase 1 · Bilan patrimonial <span class="s">(✓ ou en cours)</span>
+│   │   ├─ Phase 2 · Stratégies &amp; préconisations
+│   │   ├─ Phase 3 · Tableau de synthèse
+│   │   ├─ Phase 4 · Frise chronologique
+│   │   └─ Phase 5 · Mise en forme finale
+│   ├─ Phase actuelle + statut détaillé
+│   ├─ Délai estimé restant
+│   ├─ Brouillons consultables par phase <span class="s">(versions intermédiaires)</span>
+│   ├─ Logs IA <span class="s">(modèles utilisés · prompts · coûts)</span>
+│   └─ Actions
+│       ├─ Bouton <strong>[Consulter brouillon en cours]</strong>
+│       ├─ Bouton <strong>[Forcer passage phase suivante]</strong>
+│       └─ Bouton <strong>[Mettre l'étude en pause]</strong>
+
+<span class="b">┌─ CAS C · ÉTUDE RESTITUÉE</span>
+│   ├─ Date de restitution + transcript visio
+│   ├─ Présence des 3 formats
+│   │   ├─ 📕 Étude patrimoniale complète <span class="s">(50-150 pages PDF)</span> · <strong>[Voir]</strong> · <strong>[Télécharger]</strong>
+│   │   ├─ 📗 Synthèse de restitution <span class="s">(15-25 pages PDF)</span> · idem
+│   │   └─ 🌐 Version web interactive · <strong>[Ouvrir]</strong>
+│   ├─ Annexes <span class="s">(simulations · graphiques · scénarios)</span>
+│   ├─ Score de satisfaction client <span class="s">(si recueilli)</span>
+│   └─ Décision client <span class="s">(actions retenues · à mettre en œuvre)</span>
+
+<span class="b">┌─ CAS D · MISE À JOUR EN COURS</span>
+│   ├─ Version précédente <span class="s">(consultable)</span>
+│   ├─ Version en cours
+│   └─ Comparateur de versions <span class="s">(diff intelligent)</span>
+
+<span class="b">┌─ HISTORIQUE DES VERSIONS</span>
+│   ├─ Toutes les versions de l'étude <span class="s">(timeline)</span>
+│   └─ Possibilité de consulter chaque version
+
+<span class="b">┌─ ACTIONS PRIVEOS</span>
+│   ├─ Bouton <strong>[Demander révision de l'étude]</strong>
+│   ├─ Bouton <strong>[Annoter l'étude]</strong> <span class="s">(notes pour l'ingénieur)</span>
+│   └─ Bouton <strong>[Renvoyer au client par email]</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- ONGLET 5 : INVESTISSEMENTS -->
+      <div class="page-card">
+        <div class="pc-header">
+          <div class="pc-icon">5️⃣</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Onglet 5/6 · /dossier/:id/investissements</div>
+            <div class="pc-title">Investissements &amp; encours</div>
+            <div class="pc-desc">Tous les placements et investissements mis en place via le réseau pour ce client.</div>
+          </div>
+          <span class="pc-status priority">PHASE 2</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Wireframe proposé</div>
+          <div class="pc-tree">
+<span class="b">┌─ KPIS ENCOURS</span>
+│   ├─ Encours total client
+│   ├─ Encours apporté via le réseau <span class="s">(mis en place par l'ingénieur)</span>
+│   ├─ Performance globale <span class="s">(YoY)</span>
+│   └─ Date dernière valorisation
+
+<span class="b">┌─ RÉPARTITION VISUELLE</span>
+│   └─ Donut : par catégorie d'actifs
+
+<span class="b">┌─ DÉTAIL PAR CATÉGORIE</span> <span class="a">CLIQUABLES</span>
+│   ├─ <span class="c">💼 Investissements financiers</span>
+│   │   ├─ Liste produits <span class="s">(AV · PER · SCPI · OPCI · structurés…)</span>
+│   │   ├─ Valeur · performance · date souscription
+│   │   ├─ Commission générée <span class="s">(pour PRIVEOS Capital)</span>
+│   │   └─ Documents associés
+│   ├─ <span class="c">🏠 Investissements immobiliers</span>
+│   │   ├─ Biens placés <span class="s">(neuf · ancien · LMNP · démembrement…)</span>
+│   │   ├─ Adresse · type · valeur
+│   │   └─ Loyers · plus-values latentes
+│   ├─ <span class="c">🛡 Assurances</span>
+│   └─ <span class="c">🏢 Sociétés &amp; structures</span>
+
+<span class="b">┌─ COMMISSIONS GÉNÉRÉES</span> <span class="s">(vue PRIVEOS · pas vue client)</span>
+│   ├─ Total commissions perçues sur ce dossier
+│   ├─ Ventilation par produit
+│   ├─ Part PRIVEOS Capital · part licencié
+│   └─ LTV estimée du client
+
+<span class="b">┌─ ACTIONS PRIVEOS</span>
+│   ├─ Bouton <strong>[Suggérer arbitrage]</strong> <span class="s">(notification ingénieur)</span>
+│   └─ Bouton <strong>[Audit du portefeuille]</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- ONGLET 6 : ACTIVITÉ & TIMELINE -->
+      <div class="page-card">
+        <div class="pc-header">
+          <div class="pc-icon">6️⃣</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Onglet 6/6 · /dossier/:id/activite</div>
+            <div class="pc-title">Activité &amp; timeline — RDV · échanges · IA logs</div>
+            <div class="pc-desc">Historique exhaustif et chronologique de tout ce qui s'est passé sur le dossier.</div>
+          </div>
+          <span class="pc-status priority">PHASE 2</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Wireframe proposé</div>
+          <div class="pc-tree">
+<span class="b">┌─ TIMELINE CHRONOLOGIQUE</span> <span class="s">(ordre antéchronologique par défaut)</span>
+│   ├─ Filtres par type
+│   │   ├─ 📅 RDV
+│   │   ├─ 💬 Messages
+│   │   ├─ 📁 Documents
+│   │   ├─ ⚖ Signatures
+│   │   ├─ 💰 Transactions <span class="s">(virements détectés)</span>
+│   │   ├─ 🤖 Actions IA <span class="s">(génération étude · synthèse…)</span>
+│   │   ├─ ✅ Validations <span class="s">(passages d'étape)</span>
+│   │   └─ 🔄 Réassignations
+│   └─ Filtres par auteur
+│       ├─ Client
+│       ├─ Ingénieur en charge
+│       ├─ Cabinet (autres collaborateurs)
+│       ├─ PRIVEOS Capital <span class="s">(actions de pilotage)</span>
+│       └─ IA / Système
+
+<span class="b">┌─ POUR CHAQUE ÉVÉNEMENT</span>
+│   ├─ Date + horodatage précis
+│   ├─ Type d'événement <span class="s">(pictogramme + couleur)</span>
+│   ├─ Auteur
+│   ├─ Description courte
+│   ├─ Détails étendus <span class="s">(au déploiement)</span>
+│   └─ Actions associées <span class="s">[Voir · Télécharger · Annoter]</span>
+
+<span class="b">┌─ RÉSUMÉS IA AUTOMATIQUES</span>
+│   ├─ Synthèse mensuelle de l'activité
+│   ├─ Synthèse par phase pipeline
+│   └─ Détection d'anomalies <span class="s">(périodes d'inactivité · escalades nécessaires)</span>
+
+<span class="b">┌─ AUDIT TRAIL PRIVEOS</span>
+│   ├─ Toutes les actions de PRIVEOS sur ce dossier <span class="s">(audit interne)</span>
+│   ├─ Justifications des actions <span class="s">(motif · contexte)</span>
+│   └─ Export pour audit AMF si demandé
+
+<span class="b">┌─ ACTIONS</span>
+│   ├─ Bouton <strong>[Export timeline complète]</strong> <span class="s">(PDF chronologique)</span>
+│   ├─ Bouton <strong>[Ajouter une note datée]</strong>
+│   └─ Bouton <strong>[Programmer une action]</strong>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================== -->
+    <!-- SECTION 7 — CRM RÉSEAU (NOUVEAU)                              -->
+    <!-- =========================================================== -->
+    <section class="main-section" id="crm">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">7</span> Section 7 / 14 · CRM &amp; clients · ⭐ NOUVEAU</div>
+        <h2 class="section-title">🎯 CRM réseau</h2>
+        <p class="section-intro">Le CRM <strong>de PRIVEOS Capital</strong> : vue consolidée de TOUS les prospects et clients du réseau (tous cabinets), incluant les prospects rentrés en captation directe par PRIVEOS Capital. Permet le pilotage global et la réattribution.</p>
+      </div>
+
+      <div class="note">
+        <strong>🎯 Distinction importante :</strong> ce CRM est <em>différent</em> du CRM individuel de chaque ingénieur (qui est au niveau du licencié). Ici, PRIVEOS Capital voit la <strong>vue agrégée</strong>. Les ingénieurs ont chacun leur CRM dans leur espace licencié (document 4).
+      </div>
+
+      <div class="page-card priority">
+        <div class="pc-header">
+          <div class="pc-icon">🎯</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Page principale · /crm</div>
+            <div class="pc-title">Vue d'ensemble CRM réseau</div>
+            <div class="pc-desc">Tableau de bord consolidé : tous les prospects et clients du réseau, à toutes les étapes, avec ventilation par cabinet et par origine (réseau / direct).</div>
+          </div>
+          <span class="pc-status priority">PRIORITÉ ⭐</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Composants attendus</div>
+          <div class="pc-tree">
+<span class="b">┌─ HERO</span>
+│   ├─ Eyebrow <span class="s">"CRM réseau · vue consolidée"</span>
+│   └─ Titre <span class="s">"Tous les prospects et clients du réseau"</span>
+
+<span class="b">┌─ KPIS GLOBAUX</span>
+│   ├─ Nombre total de prospects/clients du réseau
+│   ├─ Captation directe PRIVEOS Capital <span class="s">(% du total)</span>
+│   ├─ Conversion globale (prospect → client)
+│   └─ LTV moyenne par client
+
+<span class="b">┌─ FILTRES AVANCÉS</span>
+│   ├─ Étape pipeline <span class="s">(01-06)</span>
+│   ├─ Origine <span class="s">(Réseau / Direct PRIVEOS / Réattribué)</span>
+│   ├─ Cabinet <span class="s">(14 options)</span>
+│   ├─ Ingénieur en charge
+│   ├─ Région
+│   ├─ Type de profil <span class="s">(jeune actif · cadre supérieur · entrepreneur · retraité…)</span>
+│   ├─ Volume d'encours
+│   └─ Statut <span class="s">(Actif · Inactif · Perdu)</span>
+
+<span class="b">┌─ DEUX VUES POSSIBLES</span> <span class="s">(toggle)</span>
+│   ├─ <span class="i">VUE TABLEAU</span>
+│   │   └─ Liste filtrable triable · pagination
+│   └─ <span class="i">VUE KANBAN</span>
+│       └─ 6 colonnes (étapes pipeline) · drag &amp; drop pour passage étape
+
+<span class="b">┌─ ACTIONS GLOBALES</span>
+│   ├─ <span class="a">Créer prospect en direct</span> <span class="s">(captation PRIVEOS)</span>
+│   ├─ Réattribuer prospect à un licencié
+│   ├─ Export CSV/Excel
+│   └─ Actions groupées <span class="s">(envoyer email à plusieurs prospects, etc.)</span>
+          </div>
+
+          <div class="pc-section-label">Sous-pages atteignables</div>
+          <div class="pc-subpages">
+            <div class="pc-subpage"><strong>Fiche prospect/client complète</strong> · au clic d'une ligne · vue 360° du dossier patrimonial</div>
+            <div class="pc-subpage"><strong>Workflow "Création prospect direct"</strong> · PRIVEOS rentre un prospect en captation directe<div class="meta">Formulaire d'identité + DCI simplifié + premier RDV</div></div>
+            <div class="pc-subpage"><strong>Workflow "Réattribuer à un licencié"</strong> · ⭐ feature critique<div class="meta">Sélection cabinet + ingénieur · raison · transmission auto du dossier</div></div>
+            <div class="pc-subpage"><strong>Vue par cabinet</strong> · drill-down sur un cabinet spécifique<div class="meta">Renvoie vers la fiche cabinet · onglet Études &amp; dossiers</div></div>
+            <div class="pc-subpage"><strong>Vue par origine</strong> · captation directe vs réseau (analyse stratégique)</div>
+            <div class="pc-subpage"><strong>Recherche avancée</strong> · multi-critères + sauvegarde de recherche</div>
+            <div class="pc-subpage"><strong>Segments dynamiques</strong> · création de segments réutilisables (ex : "clients premium 50+")</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sous-page : Fiche prospect/client -->
+      <div class="page-card priority">
+        <div class="pc-header">
+          <div class="pc-icon">👤</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Sous-page · /crm/contact/:id</div>
+            <div class="pc-title">Fiche prospect / client (vue PRIVEOS Capital)</div>
+            <div class="pc-desc">Vue 360° d'un contact : identité, situation patrimoniale, historique, dossier en cours, actions à venir.</div>
+          </div>
+          <span class="pc-status priority">PRIORITÉ ⭐ MVP</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Wireframe proposé (5 onglets)</div>
+          <div class="pc-tree">
+<span class="b">┌─ HEADER FICHE</span>
+│   ├─ Photo + identité <span class="s">(prénom · nom · âge · situation matrimoniale)</span>
+│   ├─ Statut pipeline <span class="s">(badge étape 01-06)</span>
+│   ├─ Cabinet attribué + ingénieur en charge
+│   ├─ Origine <span class="s">(Réseau / Direct / Réattribué)</span>
+│   └─ Actions rapides <span class="s">[Réattribuer · Message · Notes · Archiver]</span>
+
+<span class="b">┌─ TABS-NAV (5 onglets)</span>
+│   ├─ <span class="c">1</span> Vue d'ensemble <span class="s">(synthèse patrimoniale)</span>
+│   ├─ <span class="c">2</span> Dossier patrimonial <span class="s">(DCI · documents · étude)</span>
+│   ├─ <span class="c">3</span> Activité <span class="s">(timeline interactions)</span>
+│   ├─ <span class="c">4</span> Investissements <span class="s">(produits souscrits)</span>
+│   └─ <span class="c">5</span> Notes &amp; communication
+          </div>
+        </div>
+      </div>
+
+      <!-- Sous-page : Création prospect direct -->
+      <div class="page-card priority">
+        <div class="pc-header">
+          <div class="pc-icon">➕</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Sous-page · /crm/nouveau-prospect</div>
+            <div class="pc-title">Création prospect en captation directe</div>
+            <div class="pc-desc">PRIVEOS Capital rentre directement un nouveau prospect (sans passer par un licencié). Formulaire identité + déclenchement de l'envoi du DCI simplifié + lien agenda.</div>
+          </div>
+          <span class="pc-status priority">PRIORITÉ ⭐ MVP</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Wireframe proposé</div>
+          <div class="pc-tree">
+<span class="b">Étape 1 — Mode de création</span>
+│   ├─ <span class="i">Option A</span> Création manuelle <span class="s">(form rapide)</span>
+│   └─ <span class="i">Option B</span> Envoi lien agenda <span class="s">(le prospect remplit lui-même)</span>
+
+<span class="b">Étape 2 — Formulaire identité</span>
+│   ├─ Civilité · prénom · nom · email · téléphone
+│   ├─ Source de la prospection <span class="s">(recommandation · pub · site · événement…)</span>
+│   ├─ Profil estimé <span class="s">(jeune actif · cadre · entrepreneur…)</span>
+│   └─ Notes de qualification
+
+<span class="b">Étape 3 — Choix d'attribution</span>
+│   ├─ <span class="i">Option A</span> Garder en captation directe PRIVEOS
+│   ├─ <span class="i">Option B</span> Attribuer à un licencié <span class="s">(sélection cabinet + ingénieur)</span>
+│   └─ <span class="i">Option C</span> Décider plus tard <span class="s">(prospect en pool)</span>
+
+<span class="b">Étape 4 — Validation &amp; déclenchement</span>
+│   ├─ Récap des choix
+│   ├─ Email automatique au prospect <span class="s">(lien agenda + DCI simplifié)</span>
+│   └─ Notification à l'ingénieur attribué <span class="s">(si applicable)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sous-page : Réattribuer -->
+      <div class="page-card priority">
+        <div class="pc-header">
+          <div class="pc-icon">🔄</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Sous-page · /crm/contact/:id/reattribuer</div>
+            <div class="pc-title">Réattribuer un prospect/client à un licencié</div>
+            <div class="pc-desc">⭐ Feature critique : PRIVEOS rentre un prospect en direct, fait l'entretien, et le bascule vers un licencié pour le suivi. Transfert complet du dossier.</div>
+          </div>
+          <span class="pc-status priority">PRIORITÉ ⭐</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Wireframe proposé</div>
+          <div class="pc-tree">
+<span class="b">┌─ CONTEXTE</span>
+│   ├─ Synthèse du dossier actuel <span class="s">(profil · étape · investissements potentiels)</span>
+│   └─ Pourquoi réattribuer <span class="s">(motif sélectionnable)</span>
+
+<span class="b">┌─ SUGGESTIONS DE LICENCIÉS</span> <span class="s">(IA-assistée)</span>
+│   ├─ Suggestions basées sur :
+│   │   ├─ Région du client
+│   │   ├─ Spécialisation du licencié
+│   │   ├─ Charge de travail des ingénieurs
+│   │   └─ Profil du licencié vs profil du client
+│   └─ Score de matching <span class="s">(% adéquation)</span>
+
+<span class="b">┌─ SÉLECTION FINALE</span>
+│   ├─ Choix cabinet
+│   ├─ Choix ingénieur du cabinet
+│   ├─ Modalités <span class="s">(commission de réattribution si applicable)</span>
+│   └─ Message à l'ingénieur
+
+<span class="b">┌─ TRANSFERT</span>
+│   ├─ Récap final
+│   ├─ Confirmation
+│   ├─ Notification au licencié + ingénieur
+│   ├─ Email de présentation au client <span class="s">("votre nouveau conseiller dédié")</span>
+│   └─ Mise à jour du dossier (origine = "Réattribué par PRIVEOS")
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- ============================== -->
+    <!-- SECTION 8 — CATALOGUE PRODUITS  -->
+    <!-- ============================== -->
+    <section class="main-section" id="produits">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">8</span> Section 8 / 14 · Outils &amp; ressources</div>
+        <h2 class="section-title">📦 Catalogue produits</h2>
+        <p class="section-intro">Paramétrage des produits commercialisés par le réseau et de leurs taux de rétrocession aux licenciés. Section entièrement à concevoir.</p>
+      </div>
+
+      <div class="page-card priority">
+        <div class="pc-header">
+          <div class="pc-icon">📦</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Page principale · /produits</div>
+            <div class="pc-title">Catalogue produits PRIVEOS Capital</div>
+            <div class="pc-desc">Liste de tous les produits commercialisables, organisés par catégorie (financier, assurance, immo, immat. société).</div>
+          </div>
+          <span class="pc-status priority">PRIORITÉ ⭐ MVP</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Wireframe proposé</div>
+          <div class="pc-tree">
+<span class="b">┌─ HERO</span>
+│   ├─ Titre <span class="s">"Catalogue produits"</span>
+│   ├─ Sous-titre <span class="s">"Paramétrez les produits commercialisés et leurs taux de rétrocession"</span>
+│   └─ CTA <span class="s">[+ Nouveau produit]</span>
+
+<span class="b">┌─ ONGLETS PAR CATÉGORIE</span>
+│   ├─ <span class="c">1</span> Investissement financier
+│   ├─ <span class="c">2</span> Assurances
+│   ├─ <span class="c">3</span> Projets immobiliers
+│   └─ <span class="c">4</span> Honoraires &amp; services <span class="s">(SCI, SARL, audit…)</span>
+
+<span class="b">┌─ GRILLE PRODUITS</span> <span class="s">(cartes 3 colonnes)</span> <span class="a">CLIQUABLES</span>
+│   └─ Chaque carte produit
+│       ├─ Logo / picto produit
+│       ├─ Nom du produit
+│       ├─ Partenaire <span class="s">(ex : Generali, AXA…)</span>
+│       ├─ Commission perçue par PRIVEOS · X%
+│       ├─ Rétrocession licencié · X%
+│       ├─ Statut <span class="s">(Actif · En test · Archivé)</span>
+│       └─ Volume YTD
+
+<span class="b">┌─ STATS GLOBALES</span>
+│   └─ Total produits · YTD volume · Top produit
+          </div>
+          <div class="pc-section-label">Sous-pages atteignables</div>
+          <div class="pc-subpages">
+            <div class="pc-subpage"><strong>Fiche produit (détail + paramétrage)</strong> · au clic d'une carte</div>
+            <div class="pc-subpage"><strong>Création nouveau produit</strong> · workflow guidé</div>
+            <div class="pc-subpage"><strong>Historique commissions par produit</strong> · graphique évolution</div>
+            <div class="pc-subpage"><strong>Comparateur produits similaires</strong> · pour aide à la souscription</div>
+            <div class="pc-subpage"><strong>Archive produits anciens</strong> · produits non commercialisés mais avec encours résiduels</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="page-card priority">
+        <div class="pc-header">
+          <div class="pc-icon">📦</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Sous-page · /produits/:id</div>
+            <div class="pc-title">Fiche produit (détail)</div>
+            <div class="pc-desc">Détail complet d'un produit, son paramétrage, ses partenaires, son historique de souscription.</div>
+          </div>
+          <span class="pc-status priority">PRIORITÉ ⭐ MVP</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Wireframe proposé</div>
+          <div class="pc-tree">
+<span class="b">├─ Identité produit</span> <span class="s">(nom · catégorie · partenaire · description)</span>
+<span class="b">├─ Conditions commerciales</span> <span class="s">(% PRIVEOS · % licencié · frais de gestion)</span>
+<span class="b">├─ Conditions techniques</span> <span class="s">(ticket min · plafond · durée · sortie)</span>
+<span class="b">├─ Cible client</span> <span class="s">(profil · objectifs · adéquation MIF II)</span>
+<span class="b">├─ Documents associés</span> <span class="s">(brochure · DIC · contrat type)</span>
+<span class="b">├─ Performance historique</span> <span class="s">(graphique · TR par millésime)</span>
+<span class="b">└─ Souscriptions YTD</span> <span class="s">(tableau clients souscripteurs)</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== -->
+    <!-- SECTION 9 — RÉFÉRENTIEL & DOCS  -->
+    <!-- ============================== -->
+    <section class="main-section" id="referentiel">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">9</span> Section 9 / 14 · Outils &amp; ressources</div>
+        <h2 class="section-title">📚 Référentiel &amp; documents partagés</h2>
+        <p class="section-intro">Hub centralisé de toute la documentation de référence partagée avec le réseau (méthodologie, compliance, supports marketing, nomenclatures patrimoniales).</p>
+      </div>
+
+      <div class="page-card priority">
+        <div class="pc-header">
+          <div class="pc-icon">📚</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Page principale · /referentiel</div>
+            <div class="pc-title">Hub Référentiel</div>
+            <div class="pc-desc">Documentation de référence consultable et partageable avec les licenciés.</div>
+          </div>
+          <span class="pc-status priority">PRIORITÉ ⭐ MVP</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Wireframe proposé</div>
+          <div class="pc-tree">
+<span class="b">┌─ 4 GRANDS BLOCS</span> <span class="a">CLIQUABLES</span>
+│   ├─ <span class="i">CADRE CONTRACTUEL</span>
+│   │   ├─ Convention de licence type
+│   │   ├─ Conditions générales
+│   │   └─ Avenants types
+│   ├─ <span class="i">PROCESS &amp; MÉTHODOLOGIE</span>
+│   │   ├─ Workflow patrimoniaux
+│   │   ├─ Scripts d'entretien
+│   │   └─ Bonnes pratiques métier
+│   ├─ <span class="i">DOCUMENTATION COMPLIANCE</span>
+│   │   ├─ Modèles DER · DCI · KYC · LM
+│   │   ├─ Annexes obligatoires
+│   │   └─ Documents de conformité PRIVEOS Capital <span class="s">(consultables par les licenciés)</span>
+│   └─ <span class="i">NOMENCLATURES PATRIMONIALES</span>
+│       ├─ 13 catégories de collecte documentaire
+│       ├─ 257 questions DCI
+│       ├─ 106 documents avec indices de régularité
+│       └─ Listes déroulantes <span class="s">(immobilier · financier · alternatif)</span>
+
+<span class="b">┌─ RECHERCHE GLOBALE</span> <span class="s">dans toute la base documentaire</span>
+<span class="b">┌─ MISES À JOUR RÉCENTES</span> <span class="s">(timeline)</span>
+<span class="b">┌─ GESTION DES PARTAGES</span>
+│   ├─ Partager un nouveau document avec le réseau
+│   └─ Historique des partages
+          </div>
+          <div class="pc-section-label">Sous-pages atteignables</div>
+          <div class="pc-subpages">
+            <div class="pc-subpage"><strong>13 catégories de documents</strong> · détaillé dans le futur livrable Référentiels</div>
+            <div class="pc-subpage"><strong>257 questions DCI</strong> · navigation par catégorie · logique conditionnelle</div>
+            <div class="pc-subpage"><strong>Indices de régularité</strong> · paramétrage des règles d'ouverture intelligente</div>
+            <div class="pc-subpage"><strong>Nomenclatures immobilier</strong> · types de biens, modes de détention</div>
+            <div class="pc-subpage"><strong>Nomenclatures financier</strong> · épargne, investissements, alternatif</div>
+            <div class="pc-subpage"><strong>Édition modèle DER/DCI/KYC</strong> · personnalisation des templates pour le réseau</div>
+            <div class="pc-subpage"><strong>Workflow de partage</strong> · partager un nouveau document avec sélection segments licenciés</div>
+          </div>
+          <div class="note">
+            <strong>📌 Lien important :</strong> ce hub référence les <strong>nomenclatures patrimoniales</strong> qui seront détaillées dans un livrable dédié (le futur <em>06_Architecture_Referentiels.html</em>). Les licenciés y accèdent en lecture, pas en édition.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== -->
+    <!-- SECTION 10 — OUTILS             -->
+    <!-- ============================== -->
+    <section class="main-section" id="outils">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">10</span> Section 10 / 14 · Outils &amp; ressources</div>
+        <h2 class="section-title">🛠 Outils &amp; simulateurs</h2>
+        <p class="section-intro">Boîte à outils mis à disposition du réseau (catalogue commercial, simulateurs patrimoniaux, calculateurs, immat. société).</p>
+      </div>
+
+      <div class="page-card">
+        <div class="pc-header">
+          <div class="pc-icon">🛠</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Page principale · /outils</div>
+            <div class="pc-title">Hub Outils</div>
+            <div class="pc-desc">4 grandes familles d'outils accessibles depuis cette page hub.</div>
+          </div>
+          <span class="pc-status priority">PHASE 2</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Wireframe proposé</div>
+          <div class="pc-tree">
+<span class="b">┌─ 4 CARTES OUTILS</span> <span class="a">CLIQUABLES</span>
+│   ├─ <span class="i">CATALOGUE COMMERCIAL</span>
+│   │   └─ Présentation client des produits du réseau
+│   ├─ <span class="i">CRÉATION DE PORTEFEUILLE</span>
+│   │   └─ Outil de simulation patrimoniale (typologies)
+│   ├─ <span class="i">SIMULATEURS &amp; CALCULATEURS</span>
+│   │   ├─ Succession
+│   │   ├─ Fiscalité (IR · IFI · plus-values)
+│   │   ├─ Retraite
+│   │   ├─ Capacité d'investissement
+│   │   └─ Démembrement de propriété
+│   └─ <span class="i">IMMATRICULATION DE SOCIÉTÉ</span>
+│       └─ Workflow guidé SCI / SARL / SAS / SELARL
+          </div>
+          <div class="pc-section-label">Sous-pages à imaginer (chaque outil = sa propre page complexe)</div>
+          <div class="pc-subpages">
+            <div class="pc-subpage"><strong>Catalogue commercial</strong> · vue propriétaire des produits<div class="meta">À distinguer de la section 8 qui est le paramétrage interne</div></div>
+            <div class="pc-subpage"><strong>Création portefeuille</strong> · assistant 5 étapes (profil · objectifs · contraintes · simulation · proposition)</div>
+            <div class="pc-subpage"><strong>Simulateur succession</strong> · arbre familial · calcul droits · optimisation</div>
+            <div class="pc-subpage"><strong>Simulateur fiscalité IR/IFI</strong> · saisie revenus + patrimoine · calcul + scénarios optimisation</div>
+            <div class="pc-subpage"><strong>Simulateur retraite</strong> · projection retraite · gap financement · solutions PER/AV</div>
+            <div class="pc-subpage"><strong>Simulateur capacité d'investissement</strong> · épargne disponible · capacité d'endettement</div>
+            <div class="pc-subpage"><strong>Simulateur démembrement</strong> · usufruit/nue-propriété · valorisation · optimisation</div>
+            <div class="pc-subpage"><strong>Workflow création SCI</strong> · saisie associés · capital · génération statuts</div>
+            <div class="pc-subpage"><strong>Workflow création SARL/SAS</strong> · variantes selon forme juridique</div>
+            <div class="pc-subpage"><strong>Génération automatique statuts</strong> · production PDF prêt à signer</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================== -->
+    <!-- SECTION 11 — COMPLIANCE & CONFORMITÉ (NOUVEAU)                -->
+    <!-- =========================================================== -->
+    <section class="main-section" id="compliance">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">11</span> Section 11 / 14 · Outils &amp; ressources · ⭐ NOUVEAU</div>
+        <h2 class="section-title">⚖ Compliance &amp; conformité</h2>
+        <p class="section-intro">Gestion de la conformité réglementaire <strong>de PRIVEOS Capital lui-même</strong> + <strong>suivi de la conformité du réseau de licenciés</strong> (ORIAS, formations CIF/IAS, RC pro, renouvellements).</p>
+      </div>
+
+      <div class="note">
+        <strong>🎯 Distinction importante :</strong> cette section a 2 angles : <em>(1)</em> les documents de conformité de PRIVEOS Capital lui-même (consultables par les licenciés en lecture seule) et <em>(2)</em> le pilotage de la conformité de chaque licencié (qui a sa propre structure juridique).
+      </div>
+
+      <div class="page-card priority">
+        <div class="pc-header">
+          <div class="pc-icon">⚖</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Page principale · /compliance</div>
+            <div class="pc-title">Tableau de bord Compliance</div>
+            <div class="pc-desc">Vue d'ensemble de la conformité : alertes, échéances, taux de conformité du réseau.</div>
+          </div>
+          <span class="pc-status priority">PRIORITÉ ⭐</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Wireframe proposé</div>
+          <div class="pc-tree">
+<span class="b">┌─ HERO</span>
+│   ├─ Eyebrow <span class="s">"Conformité réglementaire · PRIVEOS Capital + réseau"</span>
+│   └─ Titre <span class="s">"Compliance &amp; conformité"</span>
+
+<span class="b">┌─ ALERTES CRITIQUES</span> <span class="s">(en haut, visible immédiatement)</span> <span class="a">CLIQUABLES</span>
+│   ├─ Cabinets avec ORIAS expirant &lt; 30 jours
+│   ├─ Formations CIF non renouvelées
+│   ├─ RC pro à renouveler
+│   └─ Documents PRIVEOS Capital expirés
+
+<span class="b">┌─ KPIS CONFORMITÉ</span>
+│   ├─ Taux de conformité réseau <span class="s">(% cabinets parfaitement à jour)</span>
+│   ├─ Cabinets en alerte
+│   ├─ Échéances 30 jours
+│   └─ Documents PRIVEOS à jour
+
+<span class="b">┌─ DEUX BLOCS PRINCIPAUX</span>
+
+<span class="b">├─ BLOC 1 : MES DOCUMENTS</span> <span class="s">(PRIVEOS Capital lui-même)</span>
+│   ├─ ORIAS PRIVEOS Capital
+│   ├─ Statuts juridiques
+│   ├─ Convention licence type
+│   ├─ Politique de confidentialité &amp; RGPD
+│   ├─ DER PRIVEOS Capital
+│   ├─ Politique de gestion des conflits d'intérêts
+│   └─ Documents de conformité <span class="s">(consultables par licenciés en lecture)</span>
+
+<span class="b">└─ BLOC 2 : SUIVI CONFORMITÉ DU RÉSEAU</span> <span class="s">⭐ feature critique</span>
+    └─ Tableau des 14 cabinets <span class="a">CLIQUABLE PAR LIGNE</span>
+        ├─ Avatar + nom cabinet
+        ├─ ORIAS <span class="s">(date validité · statut · alerte si expire bientôt)</span>
+        ├─ Formation CIF <span class="s">(date dernière formation · date renouvellement)</span>
+        ├─ Formation IAS <span class="s">(idem)</span>
+        ├─ Formation IOBSP <span class="s">(idem)</span>
+        ├─ RC pro <span class="s">(compagnie · date validité · plafond)</span>
+        └─ Statut global <span class="s">(✓ Conforme / ⚠ À renouveler / ✕ Non conforme)</span>
+          </div>
+
+          <div class="pc-section-label">Sous-pages atteignables</div>
+          <div class="pc-subpages">
+            <div class="pc-subpage"><strong>Détail conformité d'un cabinet</strong> · au clic d'une ligne du tableau<div class="meta">Page complète avec tous les documents du cabinet · uploads · alertes</div></div>
+            <div class="pc-subpage"><strong>Édition document PRIVEOS Capital</strong> · upload nouvelle version · historique versions</div>
+            <div class="pc-subpage"><strong>Workflow demande de renouvellement</strong> · envoi automatique au licencié pour renouveler son ORIAS, sa formation, etc.</div>
+            <div class="pc-subpage"><strong>Calendrier des renouvellements</strong> · vue calendrier 12 mois avec toutes les échéances</div>
+            <div class="pc-subpage"><strong>Export rapport conformité</strong> · pour audit AMF/ACPR ou DGCCRF</div>
+            <div class="pc-subpage"><strong>Templates de documents conformité</strong> · DER, lettre de mission, mentions obligatoires</div>
+            <div class="pc-subpage"><strong>Bibliothèque réglementaire</strong> · accès aux textes de loi, circulaires, FAQ</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="page-card priority">
+        <div class="pc-header">
+          <div class="pc-icon">📋</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Sous-page · /compliance/cabinet/:id</div>
+            <div class="pc-title">Détail conformité d'un cabinet licencié</div>
+            <div class="pc-desc">Page complète avec tous les documents et certifications d'un cabinet : uploads, dates, alertes.</div>
+          </div>
+          <span class="pc-status priority">PRIORITÉ ⭐</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Wireframe proposé</div>
+          <div class="pc-tree">
+<span class="b">┌─ HEADER CABINET</span>
+│   ├─ Identité <span class="s">(nom · dirigeant · forme juridique · SIREN)</span>
+│   ├─ Statut global conformité <span class="s">(badge ✓ / ⚠ / ✕)</span>
+│   └─ Actions <span class="s">[Demander renouvellement · Message au cabinet]</span>
+
+<span class="b">┌─ SECTIONS DOCUMENTS</span>
+
+<span class="b">├─ Immatriculation ORIAS</span>
+│   ├─ N° ORIAS
+│   ├─ Catégories <span class="s">(CIF · IAS · IOBSP · MIA…)</span>
+│   ├─ Date validité
+│   ├─ Document scanné <span class="s">(téléchargeable)</span>
+│   └─ Alerte si expire &lt; 90 jours
+
+<span class="b">├─ Formations professionnelles</span>
+│   ├─ Formation CIF <span class="s">(date · durée · attestation)</span>
+│   ├─ Formation IAS
+│   ├─ Formation IOBSP
+│   ├─ Heures de formation continue annuelles
+│   └─ Alerte si renouvellement à venir
+
+<span class="b">├─ Responsabilité Civile Professionnelle</span>
+│   ├─ Compagnie d'assurance
+│   ├─ N° contrat
+│   ├─ Date validité
+│   ├─ Plafond garanti
+│   ├─ Document <span class="s">(téléchargeable)</span>
+│   └─ Alerte si expire &lt; 60 jours
+
+<span class="b">├─ Statuts &amp; documents juridiques</span>
+│   ├─ Statuts à jour
+│   ├─ Extrait Kbis récent
+│   └─ Convention de licence avec PRIVEOS Capital
+
+<span class="b">└─ Historique des renouvellements</span>
+    └─ Timeline des dates clés (audit trail)
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- ============================== -->
+    <!-- SECTION 12 — ANIMATION RÉSEAU   -->
+    <!-- ============================== -->
+    <section class="main-section" id="animation">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">12</span> Section 12 / 14 · Animation &amp; gestion</div>
+        <h2 class="section-title">📢 Animation réseau</h2>
+        <p class="section-intro">Espace de stimulation et d'animation du réseau de licenciés (boîte à idées, articles, annonces, formation continue).</p>
+      </div>
+
+      <div class="page-card">
+        <div class="pc-header">
+          <div class="pc-icon">📢</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Page principale · /animation</div>
+            <div class="pc-title">Hub Animation réseau</div>
+            <div class="pc-desc">4 grandes fonctions pour animer le réseau.</div>
+          </div>
+          <span class="pc-status priority">PHASE 2</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Wireframe proposé</div>
+          <div class="pc-tree">
+<span class="b">┌─ 4 GRANDES FONCTIONS</span> <span class="a">CLIQUABLES</span>
+│   ├─ <span class="i">BOÎTE À IDÉES</span>
+│   │   ├─ Liste suggestions licenciés
+│   │   ├─ Votes
+│   │   └─ Statut de traitement <span class="s">(à étudier · en cours · validée · rejetée)</span>
+│   ├─ <span class="i">ARTICLES &amp; BLOG</span>
+│   │   ├─ Production éditoriale interne
+│   │   └─ Distribution licenciés + clients finaux
+│   ├─ <span class="i">ANNONCES GROUPÉES</span>
+│   │   ├─ Composer annonce <span class="s">(éditeur riche)</span>
+│   │   ├─ Cible <span class="s">(tous licenciés / segment / un cabinet)</span>
+│   │   └─ Historique des annonces
+│   └─ <span class="i">FORMATION CONTINUE</span>
+│       ├─ Modules en ligne
+│       └─ Suivi avancement par licencié
+          </div>
+          <div class="pc-section-label">Sous-pages à imaginer</div>
+          <div class="pc-subpages">
+            <div class="pc-subpage"><strong>Détail idée</strong> · commentaires · vote · statut traitement</div>
+            <div class="pc-subpage"><strong>Composer un article</strong> · éditeur riche · catégorisation · diffusion</div>
+            <div class="pc-subpage"><strong>Composer une annonce</strong> · éditeur · cible · planification</div>
+            <div class="pc-subpage"><strong>Module formation</strong> · player vidéo + quiz + certificat</div>
+            <div class="pc-subpage"><strong>Tableau de suivi formation par cabinet</strong> · qui a fait quoi</div>
+            <div class="pc-subpage"><strong>Catalogue des modules</strong> · liste des formations disponibles</div>
+            <div class="pc-subpage"><strong>Stats engagement réseau</strong> · qui consomme · qui ignore</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== -->
+    <!-- SECTION 13 — ADMINISTRATION     -->
+    <!-- ============================== -->
+    <section class="main-section" id="admin">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">13</span> Section 13 / 14 · Animation &amp; gestion</div>
+        <h2 class="section-title">⚙ Administration</h2>
+        <p class="section-intro">Paramétrage global de l'espace PRIVEOS Capital : comptes, permissions, branding, intégrations partenaires.</p>
+      </div>
+
+      <div class="page-card">
+        <div class="pc-header">
+          <div class="pc-icon">⚙</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Page principale · /admin</div>
+            <div class="pc-title">Hub Administration</div>
+            <div class="pc-desc">6 grands paramétrages globaux du tenant PRIVEOS Capital.</div>
+          </div>
+          <span class="pc-status priority">PHASE 2</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Wireframe proposé</div>
+          <div class="pc-tree">
+<span class="b">┌─ 6 BLOCS DE PARAMÉTRAGE</span> <span class="a">CLIQUABLES</span>
+│   ├─ <span class="i">COMPTES LICENCIÉS</span>
+│   │   ├─ Liste cabinets actifs
+│   │   ├─ Onboarding en cours
+│   │   ├─ Création nouveau licencié
+│   │   └─ Frais d'entrée 20 000 € <span class="s">(paramétrable)</span>
+│   ├─ <span class="i">SUPERVISEURS &amp; PERMISSIONS</span>
+│   │   ├─ Liste superviseurs
+│   │   ├─ Périmètre paramétrable
+│   │   └─ Création rôles personnalisés
+│   ├─ <span class="i">BRANDING TENANT</span>
+│   │   ├─ Logo · Couleurs · Charte
+│   │   ├─ Domaine personnalisé
+│   │   └─ Templates email
+│   ├─ <span class="i">INTÉGRATIONS EXTERNES</span>
+│   │   ├─ Yousign · API key + statut
+│   │   ├─ Visio (outil + IA transcription)
+│   │   ├─ Qonto · API banque
+│   │   └─ Modèles IA actifs <span class="s">(routing par tâche)</span>
+│   ├─ <span class="i">LOGS &amp; AUDIT</span>
+│   │   ├─ Connexions
+│   │   ├─ Actions critiques
+│   │   └─ Export pour compliance
+│   └─ <span class="i">ONBOARDING NOUVEAUX UTILISATEURS</span>
+│       ├─ Parcours licencié
+│       ├─ Parcours client
+│       └─ Personnalisation des écrans d'accueil
+          </div>
+          <div class="pc-section-label">Sous-pages à imaginer</div>
+          <div class="pc-subpages">
+            <div class="pc-subpage"><strong>Création nouveau licencié</strong> · workflow d'onboarding cabinet</div>
+            <div class="pc-subpage"><strong>Création superviseur</strong> · rôle transverse paramétré par PRIVEOS Capital</div>
+            <div class="pc-subpage"><strong>Édition rôle personnalisé</strong> · matrice permissions granulaire</div>
+            <div class="pc-subpage"><strong>Configuration branding</strong> · live preview · couleurs · typo · logos</div>
+            <div class="pc-subpage"><strong>Configuration Yousign</strong> · clés API · templates de signature</div>
+            <div class="pc-subpage"><strong>Configuration Qonto</strong> · connexion banque · règles de facturation</div>
+            <div class="pc-subpage"><strong>Configuration routing IA</strong> · quel modèle pour quelle tâche</div>
+            <div class="pc-subpage"><strong>Détail log</strong> · modal au clic d'une action critique</div>
+            <div class="pc-subpage"><strong>Designer parcours onboarding</strong> · personnaliser les écrans d'accueil par rôle</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== -->
+    <!-- SECTION 14 — CHAT & MESSAGERIE  -->
+    <!-- ============================== -->
+    <section class="main-section" id="chat">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">14</span> Section 14 / 14 · Animation &amp; gestion</div>
+        <h2 class="section-title">💬 Chat &amp; messagerie</h2>
+        <p class="section-intro">3 canaux de communication pour PRIVEOS Capital : avec ASTRAEOS (l'éditeur), avec les licenciés, avec les clients finaux directement.</p>
+      </div>
+
+      <div class="page-card priority">
+        <div class="pc-header">
+          <div class="pc-icon">💬</div>
+          <div class="pc-info">
+            <div class="pc-eyebrow">Page principale · /chat</div>
+            <div class="pc-title">Messagerie unifiée</div>
+            <div class="pc-desc">Layout 3 colonnes type Slack/Intercom : nav canaux + liste conversations + thread actif.</div>
+          </div>
+          <span class="pc-status priority">PRIORITÉ ⭐ MVP</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-section-label">Wireframe proposé</div>
+          <div class="pc-tree">
+<span class="b">┌─ LAYOUT 3 COLONNES (240px / 320px / 1fr)</span>
+
+<span class="b">├─ COLONNE 1 : Navigation canaux</span>
+│   ├─ <span class="i">📨 Avec ASTRAEOS</span> <span class="s">(support outil éditeur)</span>
+│   ├─ <span class="i">💼 Avec mes licenciés</span> <span class="s">(14 conversations)</span>
+│   ├─ <span class="i">👤 Avec mes clients finaux</span> <span class="s">(direct)</span>
+│   └─ <span class="i">📢 Annonces groupées</span> <span class="s">(broadcasts)</span>
+
+<span class="b">├─ COLONNE 2 : Liste des conversations</span>
+│   ├─ Filtres <span class="s">(non lus · épinglés · archive)</span>
+│   ├─ Search bar
+│   └─ Liste threads <span class="s">(avatar + nom + preview + timestamp + badge)</span>
+
+<span class="b">└─ COLONNE 3 : Thread actif</span>
+    ├─ Header thread <span class="s">(avatar + nom + actions : épingler / archiver / signaler)</span>
+    ├─ Messages bulles <span class="s">(envoyés à droite / reçus à gauche)</span>
+    │   ├─ Avatar + horodatage
+    │   ├─ Texte / fichiers / liens cliquables
+    │   └─ Statuts <span class="s">(envoyé · livré · lu)</span>
+    └─ Composer en bas <span class="s">(éditeur riche · pièces jointes · emojis · @mentions)</span>
+          </div>
+          <div class="pc-section-label">Interactions clés</div>
+          <div class="pc-interactions">
+            <div class="pc-interaction"><strong>Annonce groupée</strong> → broadcast vers tous licenciés OU tous clients</div>
+            <div class="pc-interaction"><strong>@mention</strong> notifie l'utilisateur cité</div>
+            <div class="pc-interaction"><strong>Pièce jointe</strong> upload + preview inline</div>
+            <div class="pc-interaction"><strong>Notifications</strong> SMS+email si non lu après 24h</div>
+            <div class="pc-interaction"><strong>Recherche</strong> dans tous les threads</div>
+            <div class="pc-interaction"><strong>Archivage</strong> auto après 6 mois sans activité</div>
+          </div>
+          <div class="pc-section-label">Sous-pages à imaginer</div>
+          <div class="pc-subpages">
+            <div class="pc-subpage"><strong>Composer annonce broadcast</strong> · sélection cible · planification</div>
+            <div class="pc-subpage"><strong>Détail message</strong> · modal avec actions (signaler · répondre · transférer)</div>
+            <div class="pc-subpage"><strong>Paramètres notifications</strong> · règles de notification par canal</div>
+            <div class="pc-subpage"><strong>Archive conversations</strong> · accès aux conversations archivées</div>
+            <div class="pc-subpage"><strong>Threads épinglés</strong> · accès rapide aux conversations importantes</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== -->
+    <!-- RÉCAPITULATIF                   -->
+    <!-- ============================== -->
+    <section class="main-section" id="recap">
+      <div class="section-header">
+        <div class="section-eyebrow"><span class="num">📋</span> Récapitulatif</div>
+        <h2 class="section-title">Synthèse Espace PRIVEOS Capital (Propriétaire de marque)</h2>
+        <p class="section-intro">Vue d'ensemble des 14 sections, de leur état d'avancement et de leur priorité de développement (MVP vs Phase 2).</p>
+      </div>
+
+      <div class="note gold">
+        <strong>🎯 État actuel des 14 sections :</strong>
+        <table style="width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 12.5px;">
+          <thead>
+            <tr style="background: rgba(198,142,14,0.10);">
+              <th style="text-align: left; padding: 8px 10px; font-weight: 700;">#</th>
+              <th style="text-align: left; padding: 8px 10px; font-weight: 700;">Section</th>
+              <th style="text-align: left; padding: 8px 10px; font-weight: 700;">Statut HTML existant</th>
+              <th style="text-align: left; padding: 8px 10px; font-weight: 700;">Priorité MVP</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td style="padding: 6px 10px;">1</td><td style="padding: 6px 10px;">📊 Tableau de bord</td><td style="padding: 6px 10px; color: var(--green-text); font-weight: 700;">FAIT</td><td style="padding: 6px 10px;">—</td></tr>
+            <tr><td style="padding: 6px 10px;">2</td><td style="padding: 6px 10px;">💰 Synthèse financière</td><td style="padding: 6px 10px; color: var(--green-text); font-weight: 700;">FAIT</td><td style="padding: 6px 10px;">—</td></tr>
+            <tr><td style="padding: 6px 10px;">3</td><td style="padding: 6px 10px;">🏆 Performance licenciés</td><td style="padding: 6px 10px; color: var(--green-text); font-weight: 700;">FAIT</td><td style="padding: 6px 10px;">—</td></tr>
+            <tr><td style="padding: 6px 10px;">4</td><td style="padding: 6px 10px;">🌍 Annuaire licenciés</td><td style="padding: 6px 10px; color: var(--green-text); font-weight: 700;">FAIT</td><td style="padding: 6px 10px;">—</td></tr>
+            <tr><td style="padding: 6px 10px;">5</td><td style="padding: 6px 10px;">📁 Fiche cabinet (6 onglets)</td><td style="padding: 6px 10px; color: var(--green-text); font-weight: 700;">2/6 ONGLETS FAITS</td><td style="padding: 6px 10px; color: var(--gold); font-weight: 700;">⭐ MVP (onglets 3+4) · PHASE 2 (5+6)</td></tr>
+            <tr style="background: rgba(198,142,14,0.10);"><td style="padding: 6px 10px;"><strong>6</strong></td><td style="padding: 6px 10px;"><strong>🚀 Pipeline 6 étapes + Fiche dossier client</strong></td><td style="padding: 6px 10px; color: var(--green-text); font-weight: 700;">FAIT (pipeline)</td><td style="padding: 6px 10px; color: var(--gold); font-weight: 800;">⭐ MVP — Fiche dossier 6 onglets ⭐ NOUVEAU</td></tr>
+            <tr><td style="padding: 6px 10px;">7</td><td style="padding: 6px 10px;">🎯 CRM réseau ⭐</td><td style="padding: 6px 10px; color: var(--navy); font-weight: 700;">À CODER</td><td style="padding: 6px 10px; color: var(--gold); font-weight: 700;">⭐ MVP</td></tr>
+            <tr><td style="padding: 6px 10px;">8</td><td style="padding: 6px 10px;">📦 Catalogue produits</td><td style="padding: 6px 10px; color: var(--navy); font-weight: 700;">À CODER</td><td style="padding: 6px 10px; color: var(--gold); font-weight: 700;">⭐ MVP</td></tr>
+            <tr><td style="padding: 6px 10px;">9</td><td style="padding: 6px 10px;">📚 Référentiel &amp; documents</td><td style="padding: 6px 10px; color: var(--navy); font-weight: 700;">À CODER</td><td style="padding: 6px 10px; color: var(--gold); font-weight: 700;">⭐ MVP</td></tr>
+            <tr><td style="padding: 6px 10px;">10</td><td style="padding: 6px 10px;">🛠 Outils &amp; simulateurs</td><td style="padding: 6px 10px; color: var(--navy); font-weight: 700;">À CODER</td><td style="padding: 6px 10px; color: var(--navy-300); font-weight: 700;">PHASE 2</td></tr>
+            <tr><td style="padding: 6px 10px;">11</td><td style="padding: 6px 10px;">⚖ Compliance ⭐</td><td style="padding: 6px 10px; color: var(--navy); font-weight: 700;">À CODER</td><td style="padding: 6px 10px; color: var(--gold); font-weight: 700;">⭐ MVP</td></tr>
+            <tr><td style="padding: 6px 10px;">12</td><td style="padding: 6px 10px;">📢 Animation réseau</td><td style="padding: 6px 10px; color: var(--navy); font-weight: 700;">À CODER</td><td style="padding: 6px 10px; color: var(--navy-300); font-weight: 700;">PHASE 2</td></tr>
+            <tr><td style="padding: 6px 10px;">13</td><td style="padding: 6px 10px;">⚙ Administration</td><td style="padding: 6px 10px; color: var(--navy); font-weight: 700;">À CODER</td><td style="padding: 6px 10px; color: var(--navy-300); font-weight: 700;">PHASE 2</td></tr>
+            <tr><td style="padding: 6px 10px;">14</td><td style="padding: 6px 10px;">💬 Chat &amp; messagerie</td><td style="padding: 6px 10px; color: var(--navy); font-weight: 700;">À CODER</td><td style="padding: 6px 10px; color: var(--gold); font-weight: 700;">⭐ MVP</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note gold">
+        <strong>⭐ Récapitulatif des priorités MVP (8 éléments critiques au démarrage) :</strong>
+        <ol style="margin-top: 8px; padding-left: 20px; font-size: 12.5px; line-height: 1.8;">
+          <li><strong>Section 5 — Onglets 3 et 4 de la fiche cabinet</strong> · Études &amp; dossiers + Génération financière (les 2 onglets stratégiques pour suivre l'activité d'un cabinet)</li>
+          <li><strong>Section 6 — Fiche dossier client (6 onglets) ⭐ NOUVEAU</strong> · vue 360° complète éditable d'un dossier patrimonial · accessible depuis le pipeline et le CRM</li>
+          <li><strong>Section 7 — CRM réseau</strong> · vue consolidée + workflow réattribution + création prospect direct + fiche prospect</li>
+          <li><strong>Section 8 — Catalogue produits</strong> · paramétrage des produits commercialisés et taux de rétrocession (cœur du business)</li>
+          <li><strong>Section 9 — Référentiel &amp; documents</strong> · le DCI à 13 catégories est central · alimente Doc 4, 5, 6</li>
+          <li><strong>Section 11 — Compliance &amp; conformité</strong> · suivi ORIAS, formations CIF/IAS, RC pro pour le réseau</li>
+          <li><strong>Section 14 — Chat &amp; messagerie</strong> · communication avec les licenciés + les clients en captation directe</li>
+          <li><strong>Section 5 — Pages existantes (sections 1-4 + 6 + onglets 1-2 fiche cabinet)</strong> · à intégrer dans l'app (HTML statiques existants à connecter)</li>
+        </ol>
+      </div>
+
+      <div class="note">
+        <strong>📅 Phase 2 (à développer après le MVP) :</strong>
+        <ul style="margin-top: 8px; padding-left: 20px; font-size: 12.5px; line-height: 1.7;">
+          <li><strong>Section 5 — Onglets 5 et 6 de la fiche cabinet</strong> · Documents partagés + Accès &amp; droits</li>
+          <li><strong>Section 10 — Outils &amp; simulateurs</strong> · simulateurs patrimoniaux (succession, fiscalité…)</li>
+          <li><strong>Section 12 — Animation réseau</strong> · boîte à idées, articles, annonces, formation</li>
+          <li><strong>Section 13 — Administration</strong> · paramétrages globaux du tenant</li>
+        </ul>
+      </div>
+
+      <div class="note gold" style="background: rgba(198,142,14,0.10); border-left-width: 6px;">
+        <strong>⚖ Rappel · Cet espace est réservé aux tenants Marque :</strong>
+        <p style="margin: 6px 0 0; font-size: 12.5px;">PRIVEOS Capital est le 1<sup>er</sup> tenant de ce type. Les <em>cabinets indépendants</em> qui achètent ASTRAEOS directement (~3 000 cabinets en France) <strong>n'ont pas accès à cet espace</strong> — ils utilisent uniquement les Doc 4 (Cabinet), Doc 5 (Ingénieur), Doc 6 (Client). Voir <a href="01_Architecture_Master.html#modeles-commerciaux" style="color: var(--gold); font-weight: 700;">Doc 1 Master · 2 modèles commerciaux</a>.</p>
+      </div>
+
+      <div class="note gold" style="background: rgba(198,142,14,0.08); border-left-width: 6px;">
+        <strong>🔓 Niveau d'accès PRIVEOS Capital sur les dossiers du réseau :</strong>
+        <p style="margin: 6px 0 0; font-size: 12.5px;">En tant que propriétaire de marque, PRIVEOS Capital dispose du <strong>plus haut niveau de droits</strong> sur tous les dossiers de son réseau : <em>vue complète éditable</em>. Cela permet de superviser, intervenir, corriger, escalader, réassigner — pas pour microgérer, mais pour garantir la qualité de service du réseau et pouvoir prendre la main en cas de blocage.</p>
+      </div>
+
+      <div class="note">
+        <strong>🔗 Prochaine étape collaborative :</strong> avec ce Doc 3 v2.2 finalisé, l'architecture des 6 documents est <strong>complète et cohérente</strong>. La prochaine grande étape sera la <strong>Phase 2 du projet</strong> : transformation des arborescences en <strong>masques HTML page par page</strong> (wireframes haute fidélité avec interactions) ou <strong>spécification fine du module IA</strong> (Doc 5 Section 8).
+      </div>
+
+      <div class="note">
+        <strong>📅 Historique des évolutions :</strong>
+        <ul style="margin-top: 6px; padding-left: 20px; font-size: 12px;">
+          <li><strong>v2.2 (mai 2026)</strong> — Finalisation du Doc 3 : ajout de la <em>Fiche dossier client</em> (sous-page de la Section 6 Pipeline · 6 onglets immersifs · vue complète éditable pour PRIVEOS Capital). Repriorisation des 13 sections "à coder" en 2 niveaux (⭐ MVP critique · PHASE 2). Nouveau tableau récap avec colonne priorité.</li>
+          <li><strong>v2.1 (mai 2026)</strong> — Audit de cohérence terminologique : correction du title HTML (PRIVEOS → ASTRAEOS) et de la sidebar-brand-name (PRIVEOS Capital → PROPRIÉTAIRE DE LA MARQUE (PRIVEOS CAPITAL)) pour rappeler que cet espace fonctionne pour tout tenant de type Marque, dont PRIVEOS Capital est le 1<sup>er</sup> représentant.</li>
+          <li><strong>v2.0 (mai 2026)</strong> — Adaptation pour le <em>double modèle commercial</em> ASTRAEOS. Header /5 → /6. Sidebar refondue avec lien vers le nouveau Doc 5 (Ingénieur) et lien Doc 6 corrigé. Glossaire enrichi avec le concept de <code>tenant_type</code> (Marque vs Cabinet direct). Nouvel encart pédagogique en haut précisant que ce document est <strong>réservé aux tenants Marque</strong> (PRIVEOS Capital + futurs propriétaires de réseau). Référence à la Marketplace ASTRAEOS pour les cabinets indépendants.</li>
+          <li><strong>v1.0 (mai 2026)</strong> — Document initial avec 14 sections. Architecture 5 documents (avant ajout du Doc 5 Ingénieur).</li>
+        </ul>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+  const sections = document.querySelectorAll('section.main-section[id]');
+  const navLinks = document.querySelectorAll('.sidebar-nav a[href^="#"]');
+  function updateActiveLink() {
+    let current = '';
+    sections.forEach(section => {
+      const top = section.offsetTop - 100;
+      if (window.scrollY >= top) current = section.id;
+    });
+    navLinks.forEach(link => {
+      link.classList.toggle('active', link.getAttribute('href') === '#' + current);
+    });
+  }
+  window.addEventListener('scroll', updateActiveLink);
+  updateActiveLink();
+</script>
+
+</body>
+</html>
