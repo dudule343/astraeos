@@ -1,3 +1,6 @@
+"use client";
+
+import { useRouter } from "next/navigation";
 import { Topbar } from "../_components/Topbar";
 
 type Compare = { period: string; value: string; direction: "up" | "down" | "neutral" };
@@ -302,6 +305,7 @@ function SectionHeader({
 }
 
 export default function BusinessPage() {
+  const router = useRouter();
   return (
     <>
       <Topbar current="01 · Pilotage business" />
@@ -428,6 +432,7 @@ export default function BusinessPage() {
                 {expansionRows.map((row) => (
                   <tr
                     key={row.rank}
+                    onClick={() => router.push("/clients")}
                     className="cursor-pointer text-[12.5px] text-[var(--navy)] hover:bg-[var(--light-blue)]"
                   >
                     <td className="px-4 py-3 font-bold text-[var(--navy-300)]">{row.rank}</td>

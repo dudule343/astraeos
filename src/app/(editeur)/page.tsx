@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Topbar } from "./_components/Topbar";
 
 type Compare = {
@@ -12,6 +13,7 @@ type Kpi = {
   unit?: string;
   meta: string;
   compares: Compare[];
+  href: string;
 };
 
 type CockpitBlock = {
@@ -19,6 +21,7 @@ type CockpitBlock = {
   label: string;
   score: number;
   tone: "green" | "orange" | "red";
+  href: string;
 };
 
 type AlertItem = {
@@ -27,6 +30,7 @@ type AlertItem = {
   time: string;
   title: string;
   sub: string;
+  href: string;
 };
 
 type Prospect = {
@@ -41,6 +45,7 @@ const kpis: Kpi[] = [
     value: "142 800",
     unit: "€",
     meta: "facturé en mai 2026",
+    href: "/finance",
     compares: [
       { period: "M-1", value: "▲ 128 400 €", direction: "up" },
       { period: "N-1", value: "▲ 41 200 €", direction: "up" },
@@ -51,6 +56,7 @@ const kpis: Kpi[] = [
     value: "128 400",
     unit: "€",
     meta: "trésorerie réellement perçue",
+    href: "/finance",
     compares: [
       { period: "M-1", value: "▲ 118 200 €", direction: "up" },
       { period: "N-1", value: "▲ 38 600 €", direction: "up" },
@@ -61,6 +67,7 @@ const kpis: Kpi[] = [
     value: "42 600",
     unit: "€",
     meta: "cloud + IA + équipe + licences",
+    href: "/finance",
     compares: [
       { period: "M-1", value: "▲ 38 200 €", direction: "down" },
       { period: "N-1", value: "▲ 22 400 €", direction: "down" },
@@ -70,6 +77,7 @@ const kpis: Kpi[] = [
     label: "Base prospects",
     value: "312",
     meta: "leads qualifiés actifs",
+    href: "/leads",
     compares: [
       { period: "M-1", value: "▲ +42", direction: "up" },
       { period: "N-1", value: "▲ +180", direction: "up" },
@@ -79,6 +87,7 @@ const kpis: Kpi[] = [
     label: "Clients actifs",
     value: "23",
     meta: "3 marques · 17 cabinets · 3 autres pros",
+    href: "/clients",
     compares: [
       { period: "M-1", value: "▲ +2", direction: "up" },
       { period: "N-1", value: "▲ +14", direction: "up" },
@@ -89,6 +98,7 @@ const kpis: Kpi[] = [
     value: "2,4",
     unit: "%",
     meta: "trimestre en cours",
+    href: "/business",
     compares: [
       { period: "T-1", value: "▼ 5,0 %", direction: "up" },
       { period: "N-1", value: "▼ 8,3 %", direction: "up" },
@@ -97,14 +107,14 @@ const kpis: Kpi[] = [
 ];
 
 const cockpitBlocks: CockpitBlock[] = [
-  { num: "01", label: "Pilotage business", score: 92, tone: "green" },
-  { num: "02", label: "Acquisition & conversion", score: 85, tone: "green" },
-  { num: "03", label: "Adoption produit", score: 72, tone: "orange" },
-  { num: "04", label: "Première valeur", score: 68, tone: "orange" },
-  { num: "05", label: "Santé clients", score: 88, tone: "green" },
-  { num: "06", label: "Analyse produit", score: 74, tone: "orange" },
-  { num: "07", label: "Support & qualité", score: 94, tone: "green" },
-  { num: "08", label: "Infrastructure", score: 99, tone: "green" },
+  { num: "01", label: "Pilotage business", score: 92, tone: "green", href: "/business" },
+  { num: "02", label: "Acquisition & conversion", score: 85, tone: "green", href: "/acquisition" },
+  { num: "03", label: "Adoption produit", score: 72, tone: "orange", href: "/adoption" },
+  { num: "04", label: "Première valeur", score: 68, tone: "orange", href: "/ttv" },
+  { num: "05", label: "Santé clients", score: 88, tone: "green", href: "/health" },
+  { num: "06", label: "Analyse produit", score: 74, tone: "orange", href: "/product" },
+  { num: "07", label: "Support & qualité", score: 94, tone: "green", href: "/quality" },
+  { num: "08", label: "Infrastructure", score: 99, tone: "green", href: "/infra" },
 ];
 
 const alerts: AlertItem[] = [
@@ -114,6 +124,7 @@ const alerts: AlertItem[] = [
     time: "il y a 12 min",
     title: "PRIVEOS Capital · usage IA dépasse quota",
     sub: "112 % du plan · escalader pack ou ajuster facturation",
+    href: "/health",
   },
   {
     level: "warning",
@@ -121,6 +132,7 @@ const alerts: AlertItem[] = [
     time: "il y a 2h",
     title: "3 essais arrivent à échéance dans < 7 jours",
     sub: "Pierre VAUBAN · Antoine BERNARD · clore l'essai",
+    href: "/trial",
   },
   {
     level: "warning",
@@ -128,6 +140,7 @@ const alerts: AlertItem[] = [
     time: "hier 19h",
     title: "12 tickets dépassent 24h sans réponse",
     sub: "SLA en risque · 4 tickets critiques",
+    href: "/quality",
   },
   {
     level: "info",
@@ -135,6 +148,7 @@ const alerts: AlertItem[] = [
     time: "il y a 4h",
     title: "Cabinet Lyonnais · score santé en baisse",
     sub: "-12 pts en 30 jours · responsable relation client à alerter",
+    href: "/health",
   },
 ];
 
@@ -225,9 +239,10 @@ export default function HomePage() {
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
             {kpis.map((kpi) => (
-              <div
+              <Link
                 key={kpi.label}
-                className="cursor-pointer rounded-md border border-[var(--navy-100)] bg-white p-4 transition-shadow hover:shadow-sm"
+                href={kpi.href}
+                className="block cursor-pointer rounded-md border border-[var(--navy-100)] bg-white p-4 transition-shadow hover:border-[var(--gold)] hover:shadow-sm"
               >
                 <div className="mb-2 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-[var(--navy-300)]">
                   {kpi.label}
@@ -260,7 +275,7 @@ export default function HomePage() {
                     </div>
                   ))}
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </section>
@@ -331,8 +346,9 @@ export default function HomePage() {
             </div>
             <div className="divide-y divide-[var(--navy-100)]">
               {cockpitBlocks.map((block) => (
-                <div
+                <Link
                   key={block.num}
+                  href={block.href}
                   className="flex cursor-pointer items-center gap-3 px-4 py-3 hover:bg-[var(--light-blue)]"
                 >
                   <div className="flex-1">
@@ -353,7 +369,7 @@ export default function HomePage() {
                       />
                     </div>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           </div>
@@ -374,9 +390,10 @@ export default function HomePage() {
             </div>
             <div className="divide-y divide-[var(--navy-100)]">
               {alerts.map((alert) => (
-                <div
+                <Link
                   key={alert.title}
-                  className="cursor-pointer px-4 py-3 hover:bg-[var(--light-blue)]"
+                  href={alert.href}
+                  className="block cursor-pointer px-4 py-3 hover:bg-[var(--light-blue)]"
                 >
                   <div className="mb-1 flex items-center gap-2 text-[10.5px]">
                     <span
@@ -392,7 +409,7 @@ export default function HomePage() {
                   <div className="mt-0.5 text-[11.5px] text-[var(--navy-300)]">
                     {alert.sub}
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           </div>
@@ -402,12 +419,12 @@ export default function HomePage() {
               <div className="text-[13px] font-semibold text-[var(--navy)]">
                 Pipeline commercial
               </div>
-              <button
-                type="button"
+              <Link
+                href="/clients"
                 className="rounded-md border border-[var(--navy-100)] bg-white px-2.5 py-1 text-[11px] font-semibold text-[var(--navy)] hover:border-[var(--gold)]"
               >
                 Détails
-              </button>
+              </Link>
             </div>
             <div className="px-4 py-3">
               <div className="mb-3 grid grid-cols-2 gap-2">
@@ -437,9 +454,10 @@ export default function HomePage() {
 
               <div className="flex flex-col gap-1.5">
                 {prospects.map((p) => (
-                  <div
+                  <Link
                     key={p.name}
-                    className="cursor-pointer rounded-md border border-[var(--navy-100)] bg-[var(--ivory)] px-3 py-2 hover:border-[var(--gold-300)]"
+                    href="/trial"
+                    className="block cursor-pointer rounded-md border border-[var(--navy-100)] bg-[var(--ivory)] px-3 py-2 hover:border-[var(--gold-300)]"
                   >
                     <div className="text-[12px] font-semibold text-[var(--navy)]">
                       {p.name}
@@ -450,14 +468,14 @@ export default function HomePage() {
                         {p.amount}
                       </span>
                     </div>
-                  </div>
+                  </Link>
                 ))}
-                <a
+                <Link
                   href="/trial"
                   className="mt-1 text-center text-[11px] font-semibold text-[var(--gold)] hover:underline"
                 >
                   Voir le 4ème prospect & clients signés →
-                </a>
+                </Link>
               </div>
             </div>
           </div>
