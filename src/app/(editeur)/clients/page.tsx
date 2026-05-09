@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { Topbar } from "../_components/Topbar";
 import { KpiCard, type KpiBlock } from "../_components/KpiCard";
-import { PageHero, GhostButton, GoldButton } from "../_components/PageHeader";
+import { PageHero, GoldButton } from "../_components/PageHeader";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { DbClientsTable, type DbClient } from "./DbClientsTable";
+import { ExportCsvButton } from "./ExportCsvButton";
 
 export const dynamic = "force-dynamic";
 
@@ -134,7 +135,7 @@ export default async function ClientsPage() {
           description="La liste des clients qui paient un abonnement à ASTRAEOS, répartie en 3 catégories : marques (franchise, licence, réseau), cabinets directs indépendants, autres professionnels (notaires, avocats, experts-comptables)."
           actions={
             <>
-              <GhostButton>Export CSV</GhostButton>
+              <ExportCsvButton clients={dbClients} />
               <Link href="/client-new">
                 <GoldButton>＋ Nouveau client</GoldButton>
               </Link>
