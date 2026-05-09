@@ -10,6 +10,45 @@ const inputClass =
 const labelClass =
   "mb-1.5 block text-[10.5px] font-bold uppercase tracking-[0.08em] text-[var(--navy-300)]";
 
+// Catégories disponibles, groupées par type (sub_category → category parent)
+type CategoryOption = { value: string; label: string; parent: "marque" | "cabinet_direct" | "autre_pro" };
+
+const CATEGORY_OPTIONS: { groupLabel: string; options: CategoryOption[] }[] = [
+  {
+    groupLabel: "Marques",
+    options: [
+      { value: "Marque · Licence", label: "Marque · Licence", parent: "marque" },
+      { value: "Marque · Réseau", label: "Marque · Réseau", parent: "marque" },
+      { value: "Marque · Franchise", label: "Marque · Franchise", parent: "marque" },
+    ],
+  },
+  {
+    groupLabel: "Cabinets directs",
+    options: [
+      { value: "Cabinet direct", label: "Cabinet direct", parent: "cabinet_direct" },
+      { value: "Cabinet affilié", label: "Cabinet affilié", parent: "cabinet_direct" },
+      { value: "Mandataire", label: "Mandataire (d'une marque)", parent: "cabinet_direct" },
+    ],
+  },
+  {
+    groupLabel: "Autres professionnels",
+    options: [
+      { value: "Notaire", label: "Notaire", parent: "autre_pro" },
+      { value: "Avocat", label: "Avocat", parent: "autre_pro" },
+      { value: "Expert-comptable", label: "Expert-comptable", parent: "autre_pro" },
+      { value: "Autre pro", label: "Autre professionnel", parent: "autre_pro" },
+    ],
+  },
+];
+
+function findParentCategory(subCategory: string): "marque" | "cabinet_direct" | "autre_pro" | null {
+  for (const group of CATEGORY_OPTIONS) {
+    const opt = group.options.find((o) => o.value === subCategory);
+    if (opt) return opt.parent;
+  }
+  return null;
+}
+
 export function EditClientModal({
   client,
   onClose,
@@ -38,10 +77,12 @@ export function EditClientModal({
     e.preventDefault();
     startTransition(async () => {
       try {
+        // Déduire la catégorie parente à partir de la sous-catégorie sélectionnée
+        const parent = form.sub_category ? findParentCategory(form.sub_category) : null;
         await updateClientAction({
           id: client.id,
           ...form,
-          category: client.category ?? undefined,
+          category: parent ?? client.category ?? undefined,
         });
         onClose();
       } catch (err) {
@@ -106,13 +147,23 @@ export function EditClientModal({
               />
             </div>
             <div>
-              <label className={labelClass}>Catégorie (libellé affiché)</label>
-              <input
+              <label className={labelClass}>Catégorie</label>
+              <select
                 className={inputClass}
-                placeholder="Ex: Marque · Licence, Cabinet direct, Notaire"
                 value={form.sub_category}
                 onChange={(e) => set("sub_category", e.target.value)}
-              />
+              >
+                <option value="">— Choisir une catégorie —</option>
+                {CATEGORY_OPTIONS.map((group) => (
+                  <optgroup key={group.groupLabel} label={group.groupLabel}>
+                    {group.options.map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))}
+                  </optgroup>
+                ))}
+              </select>
             </div>
             <div>
               <label className={labelClass}>Pack</label>
