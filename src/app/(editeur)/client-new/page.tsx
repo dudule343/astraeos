@@ -1,9 +1,41 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Topbar } from "../_components/Topbar";
 import { PageHero, GhostButton } from "../_components/PageHeader";
 import { createClientAction } from "./actions";
+
+const DRAFT_KEY = "astraeos:client-new:draft";
+
+function readDraft(): Record<string, string> {
+  if (typeof window === "undefined") return {};
+  try {
+    const raw = window.localStorage.getItem(DRAFT_KEY);
+    return raw ? (JSON.parse(raw) as Record<string, string>) : {};
+  } catch {
+    return {};
+  }
+}
+
+function writeDraft(form: HTMLFormElement) {
+  const data: Record<string, string> = {};
+  new FormData(form).forEach((v, k) => {
+    if (typeof v === "string") data[k] = v;
+  });
+  try {
+    window.localStorage.setItem(DRAFT_KEY, JSON.stringify(data));
+  } catch {
+    // quota exceeded, ignore
+  }
+}
+
+function clearDraft() {
+  try {
+    window.localStorage.removeItem(DRAFT_KEY);
+  } catch {
+    // ignore
+  }
+}
 
 type StepStatus = "completed" | "active" | "todo" | "final";
 
@@ -81,16 +113,55 @@ const inputClass =
 
 export default function ClientNewPage() {
   const [openStep, setOpenStep] = useState<number>(2);
+  const [hasDraft, setHasDraft] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
 
   const toggle = (n: number) => setOpenStep((cur) => (cur === n ? 0 : n));
   const goNext = (n: number) => setOpenStep(Math.min(n + 1, 6));
   const goPrev = (n: number) => setOpenStep(Math.max(n - 1, 1));
 
+  // Restore draft on mount (after inputs are rendered with defaultValue)
+  useEffect(() => {
+    const draft = readDraft();
+    if (!formRef.current || Object.keys(draft).length === 0) return;
+    Object.entries(draft).forEach(([name, value]) => {
+      const el = formRef.current!.elements.namedItem(name) as
+        | HTMLInputElement
+        | HTMLSelectElement
+        | HTMLTextAreaElement
+        | null;
+      if (el && "value" in el) el.value = value;
+    });
+    setHasDraft(true);
+  }, []);
+
+  // Auto-save on every input change
+  const handleInput = () => {
+    if (formRef.current) writeDraft(formRef.current);
+  };
+
+  // Clear draft on submit (form action will redirect on success)
+  const handleSubmit = () => {
+    clearDraft();
+  };
+
+  const handleClearDraft = () => {
+    clearDraft();
+    setHasDraft(false);
+    if (formRef.current) formRef.current.reset();
+  };
+
   return (
     <>
       <Topbar current="Nouveau client" />
 
-      <form action={createClientAction} className="px-10 py-8">
+      <form
+        ref={formRef}
+        action={createClientAction}
+        onInput={handleInput}
+        onSubmit={handleSubmit}
+        className="px-10 py-8"
+      >
         <PageHero
           eyebrow="Opérations clients"
           title="Créer un nouveau client"
@@ -98,12 +169,30 @@ export default function ClientNewPage() {
           actions={<GhostButton>Annuler</GhostButton>}
         />
 
+        {hasDraft && (
+          <div className="mb-6 flex items-center justify-between gap-3 rounded-md border border-[var(--green-text)]/30 bg-[var(--green-bg)] px-4 py-3 text-[12px] text-[var(--navy)]">
+            <div>
+              ✓ <strong>Brouillon restauré</strong> — tes saisies précédentes ont été
+              récupérées automatiquement. L'auto-save est actif : tu peux quitter la page et
+              revenir plus tard.
+            </div>
+            <button
+              type="button"
+              onClick={handleClearDraft}
+              className="flex-shrink-0 rounded-md border border-[var(--green-text)] bg-white px-2.5 py-1 text-[11px] font-semibold text-[var(--green-text)] hover:bg-[var(--green-text)] hover:text-white"
+            >
+              Repartir de zéro
+            </button>
+          </div>
+        )}
+
         <div className="mb-6 flex items-start gap-2 rounded-md border border-[var(--gold-300)] bg-[var(--gold-200)]/30 px-4 py-3 text-[11.5px] text-[var(--navy)]">
           <span>ℹ️</span>
           <div>
             <strong>Mode test :</strong> toutes les étapes sont cliquables. Cliquer sur "Continuer"
             referme l'étape courante et ouvre la suivante. Cliquer à nouveau sur l'en-tête d'une
-            étape précédente la rouvre pour modification.
+            étape précédente la rouvre pour modification. <strong>Auto-save activé</strong> — tes
+            saisies sont conservées entre sessions.
           </div>
         </div>
 
