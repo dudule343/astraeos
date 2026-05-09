@@ -88,17 +88,3 @@ export async function createClientAction(formData: FormData) {
   revalidatePath("/");
   redirect("/clients");
 }
-
-export async function deleteAllTestClientsAction() {
-  const supabase = createAdminClient();
-  // ON DELETE CASCADE supprime personnes + dossiers + souscriptions associées
-  const { error } = await supabase
-    .from("clients")
-    .delete()
-    .eq("tenant_id", DEFAULT_TENANT_ID);
-
-  if (error) throw new Error(error.message);
-
-  revalidatePath("/clients");
-  revalidatePath("/");
-}
