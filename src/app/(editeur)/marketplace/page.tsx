@@ -167,6 +167,7 @@ export default function MarketplacePage() {
                 <button
                   type="button"
                   key={p.label}
+                  data-stub={`Filtre période · ${p.label}`}
                   className={`rounded-md px-3 py-1 text-[11px] font-semibold ${
                     p.active
                       ? "bg-[var(--navy)] text-white"
@@ -223,6 +224,7 @@ export default function MarketplacePage() {
             <button
               type="button"
               key={t}
+              data-stub={`Onglet · ${t}`}
               className={`-mb-px border-b-2 px-4 py-2 text-[12px] font-semibold ${
                 i === 0
                   ? "border-[var(--gold)] text-[var(--gold)]"

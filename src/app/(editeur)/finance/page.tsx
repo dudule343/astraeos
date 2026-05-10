@@ -148,6 +148,7 @@ function TabResultat() {
               <button
                 type="button"
                 key={p.label}
+                data-stub={`Filtre période · ${p.label}`}
                 className={`rounded-md px-3 py-1.5 text-[11.5px] font-semibold ${
                   p.active
                     ? "bg-[var(--navy)] text-white"
@@ -704,6 +705,7 @@ function TabPrevi() {
                 <td className="px-4 py-2.5 text-center">
                   <button
                     type="button"
+                    data-stub="Annoter cette ligne du compte de résultat"
                     className={`rounded-md border px-2 py-1 text-[11px] ${r.current ? "border-[var(--gold)] bg-[var(--gold)] text-white" : "border-[var(--navy-100)] bg-white text-[var(--navy)] hover:border-[var(--gold)]"}`}
                   >
                     📝

@@ -133,12 +133,14 @@ export default function CommsPage() {
               <div className="flex gap-1">
                 <button
                   type="button"
+                  data-stub="Vue mensuelle du calendrier"
                   className="rounded-md bg-[var(--navy)] px-3 py-1 text-[11px] font-semibold text-white"
                 >
                   Mois
                 </button>
                 <button
                   type="button"
+                  data-stub="Vue trimestrielle du calendrier"
                   className="rounded-md border border-[var(--navy-100)] bg-white px-3 py-1 text-[11px] font-semibold text-[var(--navy)] hover:border-[var(--gold)]"
                 >
                   Trimestre

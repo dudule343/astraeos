@@ -209,12 +209,15 @@ export default function HomePage() {
           <div className="flex flex-shrink-0 gap-2">
             <button
               type="button"
+              data-stub="Rapport hebdo"
+              data-stub-mode="toast"
               className="rounded-md border border-[var(--navy-100)] bg-white px-3 py-2 text-[11.5px] font-semibold text-[var(--navy)] hover:border-[var(--gold)]"
             >
               Rapport hebdo
             </button>
             <button
               type="button"
+              data-stub="Personnaliser le tableau de bord"
               className="rounded-md bg-[var(--gold)] px-3 py-2 text-[11.5px] font-bold text-white hover:brightness-110"
             >
               Personnaliser
@@ -383,6 +386,7 @@ export default function HomePage() {
               </div>
               <button
                 type="button"
+                data-stub="Filtre alertes · Toutes"
                 className="rounded-md border border-[var(--navy-100)] bg-white px-2.5 py-1 text-[11px] font-semibold text-[var(--navy)] hover:border-[var(--gold)]"
               >
                 Toutes

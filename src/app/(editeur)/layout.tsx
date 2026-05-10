@@ -1,4 +1,5 @@
 import { SpaceSwitcher } from "../_components/SpaceSwitcher";
+import { StubShell } from "../_components/StubShell";
 import { Sidebar } from "./_components/Sidebar";
 
 export default function EditeurLayout({
@@ -11,6 +12,7 @@ export default function EditeurLayout({
         <Sidebar />
         <main className="min-w-0 flex-1">{children}</main>
       </div>
+      <StubShell />
     </div>
   );
 }

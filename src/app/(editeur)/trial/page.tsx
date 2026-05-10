@@ -186,6 +186,7 @@ export default function TrialPage() {
                 <button
                   type="button"
                   key={f.label}
+                  data-stub={`Filtre essais · ${f.label}`}
                   className={`rounded-md px-3 py-1.5 text-[11.5px] font-semibold ${
                     f.active
                       ? "bg-[var(--navy)] text-white"

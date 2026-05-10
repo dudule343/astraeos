@@ -111,6 +111,7 @@ export default function ReferralPage() {
               <button
                 type="button"
                 key={t}
+                data-stub={`Onglet · ${t}`}
                 className={`-mb-px border-b-2 px-4 py-2 text-[12px] font-semibold ${
                   i === 0
                     ? "border-[var(--gold)] text-[var(--gold)]"

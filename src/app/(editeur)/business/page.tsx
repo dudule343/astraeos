@@ -327,12 +327,15 @@ export default function BusinessPage() {
           <div className="flex flex-shrink-0 gap-2">
             <button
               type="button"
+              data-stub="Export Pilotage business"
+              data-stub-mode="toast"
               className="rounded-md border border-[var(--navy-100)] bg-white px-3 py-2 text-[11.5px] font-semibold text-[var(--navy)] hover:border-[var(--gold)]"
             >
               Export
             </button>
             <button
               type="button"
+              data-stub="Ajouter un widget au cockpit"
               className="rounded-md bg-[var(--gold)] px-3 py-2 text-[11.5px] font-bold text-white hover:brightness-110"
             >
               Ajouter widget
@@ -356,6 +359,7 @@ export default function BusinessPage() {
             right={
               <button
                 type="button"
+                data-stub="Sélecteur de période"
                 className="rounded-md border border-[var(--navy-100)] bg-white px-3 py-1.5 text-[11px] font-semibold text-[var(--navy)] hover:border-[var(--gold)]"
               >
                 12 mois ▾

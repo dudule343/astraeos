@@ -430,6 +430,7 @@ function Step3({ onPrev, onNext }: { onPrev: () => void; onNext: () => void }) {
         <Field label="Logo">
           <button
             type="button"
+            data-stub="Téléversement du logo client"
             className="flex w-full items-center justify-center gap-2 rounded-md border border-[var(--navy-100)] bg-white px-3 py-2 text-[12.5px] font-semibold text-[var(--navy)] hover:border-[var(--gold)]"
           >
             ⬆ Téléverser
@@ -634,6 +635,7 @@ function Step5({ onPrev, onNext }: { onPrev: () => void; onNext: () => void }) {
       </div>
       <button
         type="button"
+        data-stub="Ajouter un ingénieur patrimonial"
         className="mt-3 rounded-md border border-[var(--navy-100)] bg-white px-3 py-1.5 text-[11.5px] font-semibold text-[var(--navy)] hover:border-[var(--gold)]"
       >
         ＋ Ajouter un ingénieur
@@ -714,6 +716,8 @@ function Step6({ onPrev }: { onPrev: () => void }) {
               <button
                 key={d}
                 type="button"
+                data-stub={`Télécharger document · ${d}`}
+                data-stub-mode="toast"
                 className="flex items-center gap-2 rounded-md border border-[var(--navy-100)] bg-white px-3 py-2 text-left text-[12.5px] font-semibold text-[var(--navy)] hover:border-[var(--gold)]"
               >
                 📄 {d}
