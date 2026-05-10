@@ -8662,17 +8662,17 @@
               </div>
               <div style="flex:1;">
                 <div style="display:flex; align-items:center; gap:10px; margin-bottom:4px;">
-                  <span class="badge badge-success" style="font-size:9.5px;">Compte Qonto connecté</span>
+                  <span class="badge badge-success" style="font-size:9.5px;" data-qonto-status>Compte Qonto connecté</span>
                   <span style="font-size:10.5px; color:var(--navy-300);">·</span>
-                  <span style="font-size:10.5px; color:var(--navy-300);">Connecté depuis le <strong style="color:var(--navy);">12/01/2024</strong></span>
+                  <span style="font-size:10.5px; color:var(--navy-300);" data-qonto-source>Mode démo · ajouter QONTO_AUTH pour activer la connexion live</span>
                 </div>
-                <div style="font-size:20px; font-weight:700; color:var(--navy); margin-bottom:6px;">Compte principal · Qonto</div>
+                <div style="font-size:20px; font-weight:700; color:var(--navy); margin-bottom:6px;" data-qonto-name>Compte principal · Qonto</div>
                 <div style="font-size:12px; color:var(--navy-300); line-height:1.55;">Ce compte alimente automatiquement <strong style="color:var(--navy);">le compte de résultat réseau</strong>, <strong style="color:var(--navy);">la page Trésorerie</strong> et <strong style="color:var(--navy);">l'ensemble financier consolidé</strong> (CA réalisé, encaissements, dépenses).</div>
               </div>
               <div style="text-align:right; flex-shrink:0;">
                 <div style="font-size:10.5px; color:var(--navy-300); letter-spacing:0.1em; text-transform:uppercase; font-weight:700; margin-bottom:4px;">Solde temps réel</div>
-                <div style="font-size:24px; font-weight:700; color:var(--gold); font-family:'Epilogue',sans-serif;">360 000 €</div>
-                <div style="font-size:10.5px; color:var(--navy-300); margin-top:2px;">au 09/05/2026 · 11h47</div>
+                <div style="font-size:24px; font-weight:700; color:var(--gold); font-family:'Epilogue',sans-serif;" data-qonto-balance>360 000 €</div>
+                <div style="font-size:10.5px; color:var(--navy-300); margin-top:2px;" data-qonto-updated>au 09/05/2026 · 11h47</div>
               </div>
             </div>
 
@@ -8680,11 +8680,11 @@
             <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:10px; margin-bottom:18px;">
               <div style="background:white; padding:12px 14px; border-radius:8px; border:1px solid var(--navy-100);">
                 <div style="font-size:9.5px; font-weight:700; color:var(--navy-300); letter-spacing:0.1em; text-transform:uppercase;">IBAN</div>
-                <div style="font-size:11.5px; font-weight:700; color:var(--navy); margin-top:4px; font-family:monospace;">FR76 1660 8000 0112 3456 7890 142</div>
+                <div style="font-size:11.5px; font-weight:700; color:var(--navy); margin-top:4px; font-family:monospace;" data-qonto-iban>FR76 1660 8000 0112 3456 7890 142</div>
               </div>
               <div style="background:white; padding:12px 14px; border-radius:8px; border:1px solid var(--navy-100);">
                 <div style="font-size:9.5px; font-weight:700; color:var(--navy-300); letter-spacing:0.1em; text-transform:uppercase;">BIC</div>
-                <div style="font-size:11.5px; font-weight:700; color:var(--navy); margin-top:4px; font-family:monospace;">QNTOFRP1XXX</div>
+                <div style="font-size:11.5px; font-weight:700; color:var(--navy); margin-top:4px; font-family:monospace;" data-qonto-bic>QNTOFRP1XXX</div>
               </div>
               <div style="background:white; padding:12px 14px; border-radius:8px; border:1px solid var(--navy-100);">
                 <div style="font-size:9.5px; font-weight:700; color:var(--navy-300); letter-spacing:0.1em; text-transform:uppercase;">Transactions importées</div>
@@ -10422,6 +10422,81 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 });
+
+// === Live Qonto connection ===
+(function () {
+  function formatEUR(value) {
+    if (typeof value !== 'number') return '—';
+    return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(value);
+  }
+  function formatDateTime(iso) {
+    if (!iso) return '';
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return '';
+    var date = d.toLocaleDateString('fr-FR');
+    var time = d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    return 'au ' + date + ' · ' + time;
+  }
+  function setText(selector, text) {
+    document.querySelectorAll(selector).forEach(function (el) { el.textContent = text; });
+  }
+  function setBalanceTone(connected) {
+    document.querySelectorAll('[data-qonto-status]').forEach(function (el) {
+      el.classList.remove('badge-success');
+      el.classList.remove('badge-warn');
+      el.classList.add(connected ? 'badge-success' : 'badge-warn');
+    });
+  }
+  async function refreshQonto() {
+    try {
+      var res = await fetch('/api/qonto/organization', { cache: 'no-store' });
+      if (!res.ok) return;
+      var data = await res.json();
+      var account = data.main_account || {};
+      if (typeof account.balance === 'number') setText('[data-qonto-balance]', formatEUR(account.balance));
+      if (account.iban) setText('[data-qonto-iban]', account.iban);
+      if (account.bic) setText('[data-qonto-bic]', account.bic);
+      if (account.name) setText('[data-qonto-name]', account.name);
+      setText('[data-qonto-updated]', formatDateTime(account.updated_at || data.fetched_at));
+      if (data.source === 'live') {
+        setText('[data-qonto-status]', 'Compte Qonto connecté');
+        setText('[data-qonto-source]', 'Données live · org ' + (data.organization && data.organization.slug ? data.organization.slug : ''));
+      } else {
+        setText('[data-qonto-status]', 'Mode démo');
+        setText('[data-qonto-source]', data.error ? ('Qonto API erreur · ' + data.error) : 'Ajouter QONTO_AUTH dans les variables Vercel pour activer la connexion live');
+      }
+      setBalanceTone(data.source === 'live');
+    } catch (e) {
+      // silencieux: on garde les valeurs mock affichées
+    }
+  }
+  function bindActions() {
+    // Bouton "Forcer une synchronisation"
+    document.querySelectorAll('#page-admin-banque button').forEach(function (btn) {
+      if (btn.textContent && btn.textContent.indexOf('Forcer une synchronisation') !== -1) {
+        btn.addEventListener('click', function () {
+          btn.disabled = true;
+          var prev = btn.textContent;
+          btn.textContent = 'Synchronisation…';
+          refreshQonto().finally(function () { btn.disabled = false; btn.textContent = prev; });
+        });
+      }
+    });
+  }
+  document.addEventListener('DOMContentLoaded', function () {
+    refreshQonto();
+    bindActions();
+  });
+  // Refresh quand l'utilisateur ouvre la page admin-banque via goToPage
+  var origGoToPage = window.goToPage;
+  if (typeof origGoToPage === 'function') {
+    window.goToPage = function (pageId) {
+      var r = origGoToPage.apply(this, arguments);
+      if (pageId === 'admin-banque') refreshQonto();
+      return r;
+    };
+  }
+})();
 </script>
 
 </body>
