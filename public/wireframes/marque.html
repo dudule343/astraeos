@@ -1017,9 +1017,9 @@
       <!-- Documents fondateurs -->
       <div class="nav-section">
         <div class="nav-section-header"><span class="dot"></span>Documents fondateurs</div>
-        <a class="nav-item" href="00_Master_Dataset.html"><svg class="nav-item-icon"><use href="#i-doc"/></svg><span>Master Dataset</span></a>
-        <a class="nav-item" href="00_Data_Architecture.html"><svg class="nav-item-icon"><use href="#i-chart"/></svg><span>Data Architecture</span></a>
-        <a class="nav-item" href="02_Wireframes_Editeur.html"><svg class="nav-item-icon"><use href="#i-business"/></svg><span>Doc 2 · Espace Éditeur</span></a>
+        <button class="nav-item" data-action="open-modal" data-modal-title="Master Dataset" data-modal-body="Référentiel maître des entités, schémas et nomenclatures du réseau PRIVEOS. Module en construction."><svg class="nav-item-icon"><use href="#i-doc"/></svg><span>Master Dataset</span></button>
+        <button class="nav-item" data-action="open-modal" data-modal-title="Data Architecture" data-modal-body="Schéma de l'architecture data et des flux entre modules. Module en construction."><svg class="nav-item-icon"><use href="#i-chart"/></svg><span>Data Architecture</span></button>
+        <button class="nav-item" data-action="switch-space" data-target="/"><svg class="nav-item-icon"><use href="#i-business"/></svg><span>Doc 2 · Espace Éditeur</span></button>
       </div>
 
       <div style="margin-top:24px; padding:14px; background:linear-gradient(135deg, var(--ivory) 0%, var(--gold-100) 100%); border:1px solid var(--gold-200); border-radius:6px;">
@@ -1086,9 +1086,9 @@
             </div>
           </div>
 
-          <div class="icon-btn"><svg class="ico"><use href="#i-search"/></svg></div>
-          <div class="icon-btn"><svg class="ico"><use href="#i-bell"/></svg><span class="dot"></span></div>
-          <div class="user-pill"><div class="user-avatar">LT</div><span class="user-name">Luc THILLIEZ · Président</span></div>
+          <div class="icon-btn" id="topbar-search" title="Recherche globale (⌘K)"><svg class="ico"><use href="#i-search"/></svg></div>
+          <div class="icon-btn" id="topbar-bell" title="Notifications"><svg class="ico"><use href="#i-bell"/></svg><span class="dot"></span></div>
+          <div class="user-pill" id="topbar-user"><div class="user-avatar">LT</div><span class="user-name">Luc THILLIEZ · Président</span></div>
         </div>
       </div>
 
@@ -10490,6 +10490,294 @@ document.addEventListener('DOMContentLoaded', function() {
       return r;
     };
   }
+})();
+</script>
+
+<!-- ============== UI SHELL : modale + panels topbar ============== -->
+<style>
+  .ui-overlay { position: fixed; inset: 0; background: rgba(10,31,58,0.42); z-index: 9000; display: none; align-items: center; justify-content: center; }
+  .ui-overlay.open { display: flex; }
+  .ui-modal { background: white; border-radius: 10px; box-shadow: 0 18px 48px rgba(10,31,58,0.28); max-width: 520px; width: calc(100% - 48px); padding: 24px 26px; border-top: 4px solid var(--gold); }
+  .ui-modal h3 { font-family: var(--serif); font-weight: 600; font-size: 22px; color: var(--navy); margin-bottom: 10px; }
+  .ui-modal p { font-size: 13px; color: var(--navy-300); line-height: 1.6; margin-bottom: 16px; }
+  .ui-modal-row { display: flex; gap: 8px; justify-content: flex-end; }
+  .ui-popover { position: absolute; top: calc(100% + 6px); right: 0; background: white; border: 1px solid var(--navy-100); border-radius: 8px; box-shadow: 0 8px 28px rgba(10,31,58,0.15); width: 320px; z-index: 50; display: none; overflow: hidden; }
+  .ui-popover.open { display: block; }
+  .ui-popover-header { padding: 12px 14px; border-bottom: 1px solid var(--navy-100); display: flex; align-items: center; justify-content: space-between; font-size: 11.5px; font-weight: 700; color: var(--navy); letter-spacing: 0.08em; text-transform: uppercase; }
+  .ui-popover-list { max-height: 320px; overflow-y: auto; }
+  .ui-popover-item { padding: 11px 14px; border-bottom: 1px solid var(--navy-100); cursor: pointer; font-size: 12px; color: var(--navy); }
+  .ui-popover-item:last-child { border-bottom: none; }
+  .ui-popover-item:hover { background: var(--light-blue); }
+  .ui-popover-item .meta { font-size: 10.5px; color: var(--navy-300); margin-top: 3px; }
+  .ui-popover-item .tag { display: inline-block; font-size: 9.5px; font-weight: 700; padding: 2px 6px; border-radius: 3px; margin-right: 6px; letter-spacing: 0.06em; text-transform: uppercase; }
+  .ui-popover-item .tag.alert { background: var(--red-bg); color: var(--red-text); }
+  .ui-popover-item .tag.info { background: var(--light-blue); color: var(--navy); }
+  .ui-popover-item .tag.gold { background: var(--gold-100); color: var(--gold-deep); }
+  .ui-user-menu { width: 240px; }
+  .ui-user-menu .ui-popover-item { display: flex; align-items: center; gap: 9px; }
+  .ui-toast { position: fixed; bottom: 24px; right: 24px; background: var(--navy); color: white; padding: 12px 18px; border-radius: 8px; box-shadow: 0 8px 22px rgba(10,31,58,0.32); font-size: 12.5px; z-index: 9500; opacity: 0; transform: translateY(8px); transition: all 0.2s ease; }
+  .ui-toast.open { opacity: 1; transform: translateY(0); }
+  .icon-btn { cursor: pointer; }
+  .user-pill { cursor: pointer; position: relative; }
+  #topbar-bell, #topbar-search { position: relative; }
+  tr.dt-clickable { transition: background 0.12s; }
+  tr.dt-clickable:hover { background: var(--light-blue); }
+</style>
+
+<div class="ui-overlay" id="ui-overlay">
+  <div class="ui-modal" role="dialog" aria-modal="true">
+    <h3 id="ui-modal-title">Titre</h3>
+    <p id="ui-modal-body">Contenu</p>
+    <div class="ui-modal-row">
+      <button class="btn btn-ghost btn-sm" data-modal-close>Fermer</button>
+      <button class="btn btn-gold btn-sm" id="ui-modal-primary" data-modal-close>OK</button>
+    </div>
+  </div>
+</div>
+
+<div class="ui-toast" id="ui-toast">Action enregistrée</div>
+
+<template id="tpl-notif-panel">
+  <div class="ui-popover-header">
+    <span>Notifications · 4</span>
+    <span style="font-size:10px;color:var(--navy-300);text-transform:none;letter-spacing:0;cursor:pointer;" data-action="mark-all-read">Tout marquer lu</span>
+  </div>
+  <div class="ui-popover-list">
+    <div class="ui-popover-item" data-target-page="ref-compliance"><span class="tag alert">Compliance</span> 2 documents ORIAS à renouveler<div class="meta">il y a 12 min · Cabinet Paris Étoile, Cabinet Lyon Défense</div></div>
+    <div class="ui-popover-item" data-target-page="pipe-04"><span class="tag gold">Étude</span> Dossier MOREAU-2026-04 en attente de validation<div class="meta">il y a 1h · Romain BERTHIER</div></div>
+    <div class="ui-popover-item" data-target-page="performance"><span class="tag info">Performance</span> Score réseau hebdomadaire disponible<div class="meta">il y a 2h · 8,2/10 · +0,3 vs S-1</div></div>
+    <div class="ui-popover-item" data-target-page="anim-idees"><span class="tag gold">Boîte à idées</span> 3 idées en attente d'arbitrage<div class="meta">hier · Module SCPI · App mobile · LMNP</div></div>
+  </div>
+</template>
+
+<template id="tpl-user-menu">
+  <div class="ui-popover-header"><span>Luc THILLIEZ · Président</span></div>
+  <div class="ui-popover-list ui-user-menu">
+    <div class="ui-popover-item" data-target-page="admin-utilisateurs"><svg style="width:14px;height:14px;" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Mon profil</div>
+    <div class="ui-popover-item" data-target-page="admin-overview"><svg style="width:14px;height:14px;" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.5 4.5l2 2M17.5 17.5l2 2M4.5 19.5l2-2M17.5 6.5l2-2"/></svg>Paramètres administrateur</div>
+    <div class="ui-popover-item" data-action="switch-space" data-target="/"><svg style="width:14px;height:14px;" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M3 12h18M12 3l9 9-9 9"/></svg>Aller à l'Espace Éditeur</div>
+    <div class="ui-popover-item" data-action="signout" style="color:var(--red-text);"><svg style="width:14px;height:14px;" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>Se déconnecter</div>
+  </div>
+</template>
+
+<template id="tpl-search-panel">
+  <div class="ui-popover-header"><span>Recherche globale</span></div>
+  <div style="padding:12px 14px;border-bottom:1px solid var(--navy-100);">
+    <input type="text" placeholder="Cherchez un licencié, un client, un dossier…" style="width:100%;padding:8px 10px;border:1px solid var(--navy-100);border-radius:6px;font-family:inherit;font-size:12.5px;" id="ui-search-input">
+  </div>
+  <div class="ui-popover-list">
+    <div class="ui-popover-item" data-target-page="licencies"><span class="tag info">Page</span> Licenciés du réseau<div class="meta">30 cabinets actifs</div></div>
+    <div class="ui-popover-item" data-target-page="pipe-04"><span class="tag info">Page</span> Pipeline · Études en cours<div class="meta">41 dossiers actifs</div></div>
+    <div class="ui-popover-item" data-target-page="performance"><span class="tag info">Page</span> Performance des licenciés</div>
+    <div class="ui-popover-item" data-target-page="admin-banque"><span class="tag info">Page</span> Connexions bancaires<div class="meta">Compte Qonto principal</div></div>
+    <div class="ui-popover-item" data-target-page="anim-academie"><span class="tag info">Page</span> Académie PRIVEOS</div>
+  </div>
+</template>
+
+<script>
+// ====================== WIRE-UP COMPLET DE L'ESPACE MARQUE ======================
+(function () {
+  function safeGoToPage(pageId) {
+    if (typeof window.goToPage === 'function') window.goToPage(pageId);
+  }
+  function openModal(title, body, opts) {
+    opts = opts || {};
+    var overlay = document.getElementById('ui-overlay');
+    document.getElementById('ui-modal-title').textContent = title || 'Information';
+    document.getElementById('ui-modal-body').textContent = body || '';
+    var primary = document.getElementById('ui-modal-primary');
+    primary.textContent = opts.primaryLabel || 'OK';
+    primary.onclick = function () {
+      closeModal();
+      if (typeof opts.onPrimary === 'function') opts.onPrimary();
+    };
+    overlay.classList.add('open');
+  }
+  function closeModal() {
+    document.getElementById('ui-overlay').classList.remove('open');
+  }
+  function toast(message) {
+    var t = document.getElementById('ui-toast');
+    t.textContent = message;
+    t.classList.add('open');
+    clearTimeout(t._timer);
+    t._timer = setTimeout(function () { t.classList.remove('open'); }, 2200);
+  }
+
+  // Popovers ancrés (notifications, user menu, search)
+  var openPopover = null;
+  function closePopover() {
+    if (openPopover && openPopover.parentNode) openPopover.parentNode.removeChild(openPopover);
+    openPopover = null;
+  }
+  function showPopover(anchor, templateId, extraClass) {
+    closePopover();
+    var tpl = document.getElementById(templateId);
+    if (!tpl) return;
+    var pop = document.createElement('div');
+    pop.className = 'ui-popover open' + (extraClass ? ' ' + extraClass : '');
+    pop.appendChild(tpl.content.cloneNode(true));
+    // ancrage relatif au parent de l'anchor (topbar-right doit être en position relative)
+    anchor.style.position = 'relative';
+    anchor.appendChild(pop);
+    openPopover = pop;
+    setTimeout(function () {
+      document.addEventListener('click', onDocClickOnce, { once: true });
+    }, 0);
+  }
+  function onDocClickOnce(e) {
+    if (openPopover && !openPopover.contains(e.target)) closePopover();
+    else if (openPopover) document.addEventListener('click', onDocClickOnce, { once: true });
+  }
+
+  function init() {
+    // ========== TOPBAR ==========
+    var bell = document.getElementById('topbar-bell');
+    if (bell) bell.addEventListener('click', function (e) {
+      if (e.target.closest('.ui-popover')) return; // laisse les listeners délégués gérer
+      e.stopPropagation();
+      if (openPopover && bell.contains(openPopover)) { closePopover(); return; }
+      showPopover(bell, 'tpl-notif-panel');
+    });
+    var user = document.getElementById('topbar-user');
+    if (user) user.addEventListener('click', function (e) {
+      if (e.target.closest('.ui-popover')) return;
+      e.stopPropagation();
+      if (openPopover && user.contains(openPopover)) { closePopover(); return; }
+      showPopover(user, 'tpl-user-menu');
+    });
+    var search = document.getElementById('topbar-search');
+    if (search) search.addEventListener('click', function (e) {
+      if (e.target.closest('.ui-popover')) return;
+      e.stopPropagation();
+      if (openPopover && search.contains(openPopover)) { closePopover(); return; }
+      showPopover(search, 'tpl-search-panel');
+      setTimeout(function () { var i = document.getElementById('ui-search-input'); if (i) i.focus(); }, 0);
+    });
+
+    // Shortcut ⌘K / Ctrl-K → ouvre la recherche
+    document.addEventListener('keydown', function (e) {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        if (search) search.click();
+      }
+      if (e.key === 'Escape') { closeModal(); closePopover(); }
+    });
+
+    // ========== ACTIONS GÉNÉRIQUES (data-action) ==========
+    document.addEventListener('click', function (e) {
+      var target = e.target.closest('[data-action]');
+      if (!target) return;
+      var action = target.getAttribute('data-action');
+
+      if (action === 'open-modal') {
+        e.preventDefault();
+        openModal(target.getAttribute('data-modal-title'), target.getAttribute('data-modal-body'));
+      } else if (action === 'switch-space') {
+        e.preventDefault();
+        var t = target.getAttribute('data-target') || '/';
+        if (window.parent && window.parent !== window) window.parent.location.href = t;
+        else window.location.href = t;
+      } else if (action === 'signout') {
+        e.preventDefault();
+        closePopover();
+        openModal('Déconnexion', 'Êtes-vous sûr de vouloir quitter votre session ASTRAEOS ?', {
+          primaryLabel: 'Se déconnecter',
+          onPrimary: function () { toast('Déconnecté · au revoir Luc 👋'); }
+        });
+      } else if (action === 'mark-all-read') {
+        e.preventDefault();
+        var dot = document.querySelector('#topbar-bell .dot');
+        if (dot) dot.style.display = 'none';
+        closePopover();
+        toast('Toutes les notifications marquées comme lues');
+      }
+    });
+
+    // Fermeture modale
+    document.querySelectorAll('[data-modal-close]').forEach(function (b) {
+      b.addEventListener('click', closeModal);
+    });
+    document.getElementById('ui-overlay').addEventListener('click', function (e) {
+      if (e.target.id === 'ui-overlay') closeModal();
+    });
+
+    // ========== Navigation depuis popovers (data-target-page) ==========
+    document.addEventListener('click', function (e) {
+      var pg = e.target.closest('[data-target-page]');
+      if (!pg) return;
+      var page = pg.getAttribute('data-target-page');
+      closePopover();
+      safeGoToPage(page);
+    });
+
+    // ========== Lignes <tr class="dt-clickable"> sans onclick ==========
+    document.querySelectorAll('tr.dt-clickable').forEach(function (row) {
+      if (row.getAttribute('onclick')) return;
+      var label = (row.querySelector('.cell-primary') || row.querySelector('td')).textContent.trim();
+      row.style.cursor = 'pointer';
+      row.addEventListener('click', function () {
+        openModal(
+          label,
+          "Fiche détail de « " + label + " ». La page de détail dédiée est en cours d'implémentation — pour l'instant on simule l'ouverture."
+        );
+      });
+    });
+
+    // ========== Boutons "Voir" dans tables ==========
+    document.querySelectorAll('button.btn').forEach(function (btn) {
+      if (btn.getAttribute('onclick')) return;
+      var txt = (btn.textContent || '').trim();
+      if (txt === 'Voir') {
+        btn.addEventListener('click', function (e) {
+          e.stopPropagation();
+          var row = btn.closest('tr');
+          var label = row && (row.querySelector('.cell-primary') || row.querySelector('td'));
+          openModal(label ? label.textContent.trim() : 'Fiche détail', "Ouverture de la fiche détail. La vue dédiée est en cours d'implémentation.");
+        });
+      }
+    });
+
+    // ========== Boutons en construction ==========
+    var inConstruction = [
+      'Lancer le simulateur',
+      'Lancer un audit',
+      'Voir facturation',
+      'Voir tous les contrats signés',
+      "Voir les 38 clients",
+      "Voir les 62 clients",
+      "Voir les 42 clients"
+    ];
+    document.querySelectorAll('button.btn').forEach(function (btn) {
+      if (btn.getAttribute('onclick')) return;
+      var txt = (btn.textContent || '').trim();
+      if (inConstruction.indexOf(txt) !== -1) {
+        btn.addEventListener('click', function () {
+          openModal(txt, "Module en cours d'implémentation. Sera disponible dans une prochaine itération.");
+        });
+      }
+    });
+
+    // ========== Boutons hero "Annuler" / "Enregistrer les modifications" ==========
+    document.querySelectorAll('button.btn').forEach(function (btn) {
+      if (btn.getAttribute('onclick')) return;
+      var txt = (btn.textContent || '').trim();
+      if (txt === 'Annuler') {
+        btn.addEventListener('click', function () { toast('Modifications annulées'); });
+      } else if (txt === 'Enregistrer les modifications' || txt === 'Enregistrer') {
+        btn.addEventListener('click', function () { toast('Modifications enregistrées ✓'); });
+      } else if (txt.startsWith('+ Ajouter')) {
+        btn.addEventListener('click', function () {
+          openModal(txt, "Formulaire de création en cours d'implémentation.");
+        });
+      } else if (txt === 'Export' || txt.indexOf('Exporter') === 0) {
+        btn.addEventListener('click', function () { toast('Export généré · téléchargement simulé'); });
+      }
+    });
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
 })();
 </script>
 
