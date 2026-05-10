@@ -994,6 +994,7 @@
         <button class="nav-item" data-page="anim-academie" onclick="goToPage('anim-academie')"><svg class="nav-item-icon"><use href="#i-doc"/></svg><span>Académie PRIVEOS</span></button>
         <button class="nav-item" data-page="anim-idees" onclick="goToPage('anim-idees')"><svg class="nav-item-icon"><use href="#i-comms"/></svg><span>Boîte à idées</span><span class="nav-badge">3</span></button>
         <button class="nav-item" data-page="anim-blog" onclick="goToPage('anim-blog')"><svg class="nav-item-icon"><use href="#i-comms"/></svg><span>Articles &amp; blog</span></button>
+        <button class="nav-item" data-page="identite" onclick="goToPage('identite')"><svg class="nav-item-icon"><use href="#i-marketplace"/></svg><span>Charte &amp; templates</span></button>
       </div>
 
       <!-- 10. ADMINISTRATION · 2 sous-groupements -->
@@ -1181,7 +1182,7 @@
                 <div class="kpi-compare-cell"><div class="kpi-compare-period">N-1</div><div class="kpi-compare-value up">▲ +38</div></div>
               </div>
             </div>
-            <div class="kpi clickable" onclick="goToPage('assets-reseau')">
+            <div class="kpi clickable" onclick="goToPage('assets-financier')">
               <div class="kpi-label">Encours sous gestion</div>
               <div class="kpi-value" style="font-size:24px;">87 400 000 <span class="unit">€</span></div>
               <div class="kpi-meta">+18,4 M€ captés en 2026</div>
@@ -1238,7 +1239,7 @@
               <div class="section-eyebrow">Synthèse par source · 3 colonnes uniformes : volume · frais perçus · récurrence perçue</div>
               <div class="section-title"><strong>Assets PRIVEOS</strong></div>
             </div>
-            <button class="btn btn-ghost btn-sm" onclick="goToPage('assets-reseau')">Synthèse complète →</button>
+            <button class="btn btn-ghost btn-sm" onclick="goToPage('assets-financier')">Synthèse complète →</button>
           </div>
 
           <!-- Card 1 · Investissement financier -->
@@ -10709,6 +10710,16 @@ document.addEventListener('DOMContentLoaded', function() {
       var page = pg.getAttribute('data-target-page');
       closePopover();
       safeGoToPage(page);
+    });
+
+    // ========== KPI clickables sans onclick ==========
+    document.querySelectorAll('.kpi.clickable').forEach(function (kpi) {
+      if (kpi.getAttribute('onclick')) return;
+      kpi.addEventListener('click', function () {
+        var labelEl = kpi.querySelector('.kpi-label');
+        var label = labelEl ? labelEl.textContent.trim() : 'KPI';
+        openModal(label, "Vue détaillée du KPI « " + label + " ». Drill-down en cours d'implémentation.");
+      });
     });
 
     // ========== Lignes <tr class="dt-clickable"> sans onclick ==========
