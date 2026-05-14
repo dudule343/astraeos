@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ASTRAEOS · Wireframes Espace Marque · PRIVEOS · v3</title>
+<title>ASTRAEOS · Wireframes Espace Dirigeant · PRIVEOS · v3</title>
 <link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@300;400;500;600;700;800&family=Cormorant+Garamond:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -980,13 +980,6 @@
           <button class="nav-item" data-page="ing-profil" onclick="goToPage('ing-profil')"><svg class="nav-item-icon"><use href="#i-team"/></svg><span>Mon profil &amp; agréments</span><span class="nav-badge" style="background:var(--navy-100); color:var(--navy);">L2</span></button>
         </div>
 
-        <!-- Documents fondateurs -->
-        <div class="nav-section">
-          <div class="nav-section-header"><span class="dot"></span>Documents fondateurs</div>
-          <a class="nav-item" href="00_Master_Dataset.html"><svg class="nav-item-icon"><use href="#i-doc"/></svg><span>Master Dataset</span></a>
-          <a class="nav-item" href="00_Data_Architecture.html"><svg class="nav-item-icon"><use href="#i-chart"/></svg><span>Data Architecture</span></a>
-          <a class="nav-item" href="01_Wireframes_Marque.html"><svg class="nav-item-icon"><use href="#i-business"/></svg><span>Doc 1 · Espace Marque</span></a>
-        </div>
       </nav>
 
       <div style="margin-top:24px; padding:14px; background:linear-gradient(135deg, var(--ivory) 0%, var(--gold-100) 100%); border:1px solid var(--gold-200); border-radius:6px;">
@@ -1080,11 +1073,6 @@
           <button class="nav-item" data-page="dir-param-identite" onclick="goToPage('dir-param-identite')"><svg class="nav-item-icon"><use href="#i-business"/></svg><span>Identité de la marque</span></button>
         </div>
 
-        <div class="nav-section">
-          <div class="nav-section-header"><span class="dot"></span>Documents fondateurs</div>
-          <a class="nav-item" href="00_Master_Dataset.html"><svg class="nav-item-icon"><use href="#i-doc"/></svg><span>Master Dataset</span></a>
-          <a class="nav-item" href="01_Wireframes_Marque.html"><svg class="nav-item-icon"><use href="#i-business"/></svg><span>Doc 1 · Espace Marque</span></a>
-        </div>
       </nav>
 
       <div style="margin-top:24px; padding:14px; background:linear-gradient(135deg, var(--ivory) 0%, var(--gold-100) 100%); border:1px solid var(--gold-200); border-radius:6px;">
@@ -1099,9 +1087,9 @@
     <main class="main">
       <div class="topbar">
         <div class="breadcrumb">
-          <a onclick="goToPage('ing-accueil')">PRIVEOS</a>
+          <a id="bcHome" onclick="goToPage((document.body.getAttribute('data-active-role')||'dirigeant')==='dirigeant' ? 'dir-accueil' : 'ing-accueil')">PRIVEOS</a>
           <span class="sep">›</span>
-          <span class="current" id="bcCurrent">Mon tableau de bord</span>
+          <span class="current" id="bcCurrent">Accueil cabinet</span>
         </div>
         <div class="topbar-right">
 
@@ -1162,30 +1150,20 @@
 
     <script>
       function switchRole(role) {
-        // Masquer toutes les sidebars
         document.querySelectorAll('aside[data-sidebar]').forEach(s => s.style.display = 'none');
-        // Afficher la sidebar du rôle choisi
         const targetSidebar = document.querySelector('aside[data-sidebar="' + role + '"]');
         if (targetSidebar) targetSidebar.style.display = '';
-        // Masquer toutes les pages
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        // Activer la page d'accueil du rôle
         const homePages = { 'ingenieur': 'ing-accueil', 'dirigeant': 'dir-accueil' };
-        const homePage = document.getElementById('page-' + homePages[role]);
+        const homeId = homePages[role];
+        const homePage = document.getElementById('page-' + homeId);
         if (homePage) homePage.classList.add('active');
-        // MAJ état "active" des nav items
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        const activeNav = document.querySelector('aside[data-sidebar="' + role + '"] .nav-item[data-page="' + homePages[role] + '"]');
+        const activeNav = document.querySelector('aside[data-sidebar="' + role + '"] .nav-item[data-page="' + homeId + '"]');
         if (activeNav) activeNav.classList.add('active');
-        // Tracker le rôle actif sur le body
         document.body.setAttribute('data-active-role', role);
-      }
-      function goToPage(pageId) {
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        const target = document.getElementById('page-' + pageId);
-        if (target) target.classList.add('active');
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        document.querySelectorAll('.nav-item[data-page="' + pageId + '"]').forEach(n => n.classList.add('active'));
+        const bc = document.getElementById('bcCurrent');
+        if (bc && typeof PAGE_LABELS !== 'undefined') bc.innerHTML = PAGE_LABELS[homeId] || '';
       }
     </script>      <!-- ============================================================== -->
       <!-- PAGE · ACCUEIL INGÉNIEUR · TABLEAU DE BORD PERSONNEL              -->
@@ -6619,8 +6597,8 @@
           <div class="kpi"><div class="kpi-label">Candidatures actives</div><div class="kpi-value">9</div><div class="kpi-meta">en cours d'instruction</div></div>
           <div class="kpi"><div class="kpi-label">À auditionner</div><div class="kpi-value" style="color:var(--gold);">3</div><div class="kpi-meta">RDV à planifier</div></div>
           <div class="kpi"><div class="kpi-label">En audit dossier</div><div class="kpi-value">4</div><div class="kpi-meta">vérification ORIAS / RC</div></div>
-          <div class="kpi"><div class="kpi-label">À signer</div><div class="kpi-value" style="color:var(--green-text);">2</div><div class="kpi-meta">prêts pour souscription</div></div>
-          <div class="kpi"><div class="kpi-label">Délai moyen</div><div class="kpi-value">42 <span class="unit">jours</span></div><div class="kpi-meta">candidature → souscription</div></div>
+          <div class="kpi"><div class="kpi-label">À signer</div><div class="kpi-value" style="color:var(--green-text);">2</div><div class="kpi-meta">prêts pour signature du contrat</div></div>
+          <div class="kpi"><div class="kpi-label">Délai moyen</div><div class="kpi-value">42 <span class="unit">jours</span></div><div class="kpi-meta">candidature → signature du contrat</div></div>
         </div>
 
         <!-- Tableau candidatures -->
@@ -7755,7 +7733,7 @@
           <div>
             <div class="hero-eyebrow">Assets du cabinet · investissement financier</div>
             <h1 class="hero-title">Investissement <strong>financier</strong></h1>
-            <p class="hero-sub">Détail réseau des placements financiers (PEA, AV, Capitalisation, Compte-titres). Pour chaque cabinet : nombre de contrats, encours, frais d'entrée distribués, récurrence perçue, classement de contribution.</p>
+            <p class="hero-sub">Détail cabinet des placements financiers (PEA, AV, Capitalisation, Compte-titres). Pour chaque ingénieur : nombre de contrats, encours, frais d'entrée distribués, récurrence perçue, classement de contribution.</p>
           </div>
           <div class="hero-actions">
             <button class="btn btn-ghost btn-sm" onclick="goToPage('dir-accueil')">← Retour accueil</button>
@@ -7765,9 +7743,9 @@
 
         <!-- Top KPIs -->
         <div class="kpis kpis-4 mb-20">
-          <div class="kpi"><div class="kpi-label">Encours sous gestion</div><div class="kpi-value">87 400 000 <span class="unit">€</span></div><div class="kpi-meta">tous contrats vivants · réseau</div></div>
+          <div class="kpi"><div class="kpi-label">Encours sous gestion</div><div class="kpi-value">87 400 000 <span class="unit">€</span></div><div class="kpi-meta">tous contrats vivants du cabinet</div></div>
           <div class="kpi"><div class="kpi-label">Clients investissement financier</div><div class="kpi-value">358</div><div class="kpi-meta">↳ 478 contrats actifs · PEA, AV, Capi, Compte-titres</div></div>
-          <div class="kpi"><div class="kpi-label">Frais d'entrée perçus</div><div class="kpi-value gold">1 540 800 <span class="unit">€</span></div><div class="kpi-meta">part PRIVEOS · cumul janv-mai</div></div>
+          <div class="kpi"><div class="kpi-label">Frais d'entrée perçus</div><div class="kpi-value gold">1 540 800 <span class="unit">€</span></div><div class="kpi-meta">part cabinet · cumul janv-mai</div></div>
           <div class="kpi"><div class="kpi-label">Récurrence perçue</div><div class="kpi-value gold">333 780 <span class="unit">€</span></div><div class="kpi-meta">% sur encours · cumul janv-mai</div></div>
         </div>
 
@@ -7833,7 +7811,7 @@
           <div>
             <div class="hero-eyebrow">Assets du cabinet · assurance</div>
             <h1 class="hero-title"><strong>Assurance</strong></h1>
-            <p class="hero-sub">Détail réseau des contrats d'assurance distribués via le module multi-compagnies (emprunteur immo, prêt conso, prévoyance pro, mutuelle dirigeant, homme clé). Apports d'affaires PRIVEOS sur les commissions distribuées.</p>
+            <p class="hero-sub">Détail cabinet des contrats d'assurance distribués via le module multi-compagnies (emprunteur immo, prêt conso, prévoyance pro, mutuelle dirigeant, homme clé). Apports d'affaires sur les commissions distribuées.</p>
           </div>
           <div class="hero-actions">
             <button class="btn btn-ghost btn-sm" onclick="goToPage('dir-accueil')">← Retour accueil</button>
@@ -7842,10 +7820,10 @@
         </div>
 
         <div class="kpis kpis-4 mb-20">
-          <div class="kpi"><div class="kpi-label">Contrats actifs</div><div class="kpi-value">412</div><div class="kpi-meta">tous types confondus · réseau</div></div>
-          <div class="kpi"><div class="kpi-label">Primes perçues réseau</div><div class="kpi-value">3 200 000 <span class="unit">€</span></div><div class="kpi-meta">total issu du réseau · annualisé</div></div>
+          <div class="kpi"><div class="kpi-label">Contrats actifs</div><div class="kpi-value">412</div><div class="kpi-meta">tous types confondus · cabinet</div></div>
+          <div class="kpi"><div class="kpi-label">Primes perçues cabinet</div><div class="kpi-value">3 200 000 <span class="unit">€</span></div><div class="kpi-meta">total cabinet · annualisé</div></div>
           <div class="kpi"><div class="kpi-label">Frais de dossiers perçus par le cabinet</div><div class="kpi-value gold">504 000 <span class="unit">€</span></div><div class="kpi-meta">cumul depuis janvier 2026</div></div>
-          <div class="kpi"><div class="kpi-label">Récurrence perçue par PRIVEOS</div><div class="kpi-value gold">128 600 <span class="unit">€</span></div><div class="kpi-meta">cumul depuis janvier 2026</div></div>
+          <div class="kpi"><div class="kpi-label">Récurrence perçue · cabinet</div><div class="kpi-value gold">128 600 <span class="unit">€</span></div><div class="kpi-meta">cumul depuis janvier 2026</div></div>
         </div>
 
         <div class="card mb-24">
@@ -7857,20 +7835,20 @@
                 <th class="num">Contrats actifs</th>
                 <th class="num">Frais de dossiers perçus par le cabinet<br><span style="font-weight:400; color:var(--navy-300);">cumul depuis janvier 2026 · cabinet</span></th>
                 <th class="num">Récurrence perçue par le cabinet<br><span style="font-weight:400; color:var(--navy-300);">cumul depuis janvier</span></th>
-                <th class="num">Récurrence perçue par PRIVEOS<br><span style="font-weight:400; color:var(--navy-300);">cumul depuis janvier</span></th>
-                <th class="num">Total flux PRIVEOS<br><span style="font-weight:400; color:var(--navy-300);">cumul depuis janvier</span></th>
+                <th class="num">Récurrence perçue · cabinet<br><span style="font-weight:400; color:var(--navy-300);">cumul depuis janvier</span></th>
+                <th class="num">Total flux cabinet<br><span style="font-weight:400; color:var(--navy-300);">cumul depuis janvier</span></th>
                 <th>Évolution N-1</th>
               </tr>
             </thead>
             <tbody>
-              <tr class="dt-clickable" onclick="alert('Détail Cabinet Paris Étoile · Assurance :\n\n· 58 contrats actifs\n  - 28 emprunteur immo\n  - 10 emprunteur prêt conso\n  - 8 prévoyance pro\n  - 7 mutuelle dirigeant\n  - 5 homme clé\n· Primes perçues : 462 000 €\n· Frais de dossiers PRIVEOS : 78 200 €\n  - Émilie LAMBERT a placé : 38 contrats / 52 000 €\n  - Julien VASSEUR a placé : 20 contrats / 26 200 €\n· Récurrence PRIVEOS : 18 400 €');"><td><div style="display:flex;align-items:center;gap:9px;"><div class="tlogo tlogo-sm tlogo-priveos">PE</div><div class="cell-primary">Cabinet Paris Étoile</div></div></td><td class="num">58</td><td class="num cell-money">462 000 €</td><td class="num cell-money gold">78 200 €</td><td class="num cell-money">18 400 €</td><td class="num cell-money gold">96 600 €</td><td><span class="up">▲ +16 %</span></td></tr>
+              <tr class="dt-clickable" onclick="alert('Détail Cabinet Paris Étoile · Assurance :\n\n· 58 contrats actifs\n  - 28 emprunteur immo\n  - 10 emprunteur prêt conso\n  - 8 prévoyance pro\n  - 7 mutuelle dirigeant\n  - 5 homme clé\n· Primes perçues : 462 000 €\n· Frais de dossiers cabinet : 78 200 €\n  - Émilie LAMBERT a placé : 38 contrats / 52 000 €\n  - Julien VASSEUR a placé : 20 contrats / 26 200 €\n· Récurrence cabinet : 18 400 €');"><td><div style="display:flex;align-items:center;gap:9px;"><div class="tlogo tlogo-sm tlogo-priveos">PE</div><div class="cell-primary">Cabinet Paris Étoile</div></div></td><td class="num">58</td><td class="num cell-money">462 000 €</td><td class="num cell-money gold">78 200 €</td><td class="num cell-money">18 400 €</td><td class="num cell-money gold">96 600 €</td><td><span class="up">▲ +16 %</span></td></tr>
               <tr class="dt-clickable"><td><div style="display:flex;align-items:center;gap:9px;"><div class="tlogo tlogo-sm tlogo-1">LD</div><div class="cell-primary">Cabinet Lyon Défense</div></div></td><td class="num">48</td><td class="num cell-money">388 000 €</td><td class="num cell-money gold">62 400 €</td><td class="num cell-money">15 200 €</td><td class="num cell-money gold">77 600 €</td><td><span class="up">▲ +12 %</span></td></tr>
               <tr class="dt-clickable"><td><div style="display:flex;align-items:center;gap:9px;"><div class="tlogo tlogo-sm tlogo-2">PV</div><div class="cell-primary">Cabinet Paris Vendôme</div></div></td><td class="num">42</td><td class="num cell-money">328 000 €</td><td class="num cell-money gold">52 800 €</td><td class="num cell-money">13 400 €</td><td class="num cell-money gold">66 200 €</td><td><span class="up">▲ +10 %</span></td></tr>
               <tr class="dt-clickable"><td><div style="display:flex;align-items:center;gap:9px;"><div class="tlogo tlogo-sm tlogo-3">BC</div><div class="cell-primary">Cabinet Bordeaux Centre</div></div></td><td class="num">36</td><td class="num cell-money">274 000 €</td><td class="num cell-money gold">42 600 €</td><td class="num cell-money">11 200 €</td><td class="num cell-money gold">53 800 €</td><td><span class="up">▲ +8 %</span></td></tr>
               <tr class="dt-clickable"><td><div style="display:flex;align-items:center;gap:9px;"><div class="tlogo tlogo-sm tlogo-pro">SO</div><div class="cell-primary">Cabinet Strasbourg Orangerie</div></div></td><td class="num">32</td><td class="num cell-money">238 000 €</td><td class="num cell-money gold">36 800 €</td><td class="num cell-money">9 600 €</td><td class="num cell-money gold">46 400 €</td><td><span class="up">▲ +7 %</span></td></tr>
               <tr style="background:var(--ivory);"><td colspan="7" style="text-align:center; font-size:11.5px; color:var(--navy-300); padding:14px;">… 25 autres cabinets · <a style="color:var(--gold);font-weight:700;cursor:pointer;">Voir tous (30)</a></td></tr>
               <tr style="background:var(--gold-200); font-weight:700;">
-                <td><strong>Total réseau</strong></td>
+                <td><strong>Total</strong></td>
                 <td class="num">412</td>
                 <td class="num cell-money">3 200 000 €</td>
                 <td class="num cell-money">504 000 €</td>
@@ -7886,7 +7864,7 @@
         <div class="card">
           <div class="card-header"><div class="card-title"><svg><use href="#i-quality"/></svg>Top produits assurance · placés par le cabinet</div></div>
           <table class="dt" style="font-size:12px;">
-            <thead><tr><th>Produit</th><th>Compagnies</th><th class="num">Contrats 2026</th><th class="num">Primes perçues réseau</th></tr></thead>
+            <thead><tr><th>Produit</th><th>Compagnies</th><th class="num">Contrats 2026</th><th class="num">Primes perçues cabinet</th></tr></thead>
             <tbody>
               <tr><td><strong>Assurance emprunteur immo</strong></td><td>5 partenaires</td><td class="num cell-money gold">182</td><td class="num cell-money">1 420 000 €</td></tr>
               <tr><td><strong>Prévoyance professionnelle</strong></td><td>4 partenaires</td><td class="num">128</td><td class="num cell-money">980 000 €</td></tr>
@@ -7917,10 +7895,10 @@
         </div>
 
         <div class="kpis kpis-4 mb-20">
-          <div class="kpi"><div class="kpi-label">Volume immobilier traité</div><div class="kpi-value">28 100 000 <span class="unit">€</span></div><div class="kpi-meta">cumul depuis janvier 2026 · réseau</div></div>
+          <div class="kpi"><div class="kpi-label">Volume immobilier traité</div><div class="kpi-value">28 100 000 <span class="unit">€</span></div><div class="kpi-meta">cumul depuis janvier 2026 · cabinet</div></div>
           <div class="kpi"><div class="kpi-label">Projets réalisés</div><div class="kpi-value">53</div><div class="kpi-meta">tous types confondus</div></div>
-          <div class="kpi"><div class="kpi-label">Apports d'affaires perçus PRIVEOS</div><div class="kpi-value gold">96 000 <span class="unit">€</span></div><div class="kpi-meta">cumul depuis janvier 2026</div></div>
-          <div class="kpi"><div class="kpi-label">Ticket moyen par projet</div><div class="kpi-value">530 000 <span class="unit">€</span></div><div class="kpi-meta">moyenne réseau</div></div>
+          <div class="kpi"><div class="kpi-label">Apports d'affaires perçus · cabinet</div><div class="kpi-value gold">96 000 <span class="unit">€</span></div><div class="kpi-meta">cumul depuis janvier 2026</div></div>
+          <div class="kpi"><div class="kpi-label">Ticket moyen par projet</div><div class="kpi-value">530 000 <span class="unit">€</span></div><div class="kpi-meta">moyenne cabinet</div></div>
         </div>
 
         <div class="card mb-24">
@@ -7931,8 +7909,8 @@
                 <th>Cabinet</th>
                 <th class="num">Projets réalisés</th>
                 <th class="num">Volume traité</th>
-                <th class="num">Apports d'affaires PRIVEOS</th>
-                <th class="num">Récurrence perçue PRIVEOS</th>
+                <th class="num">Apports d'affaires cabinet</th>
+                <th class="num">Récurrence perçue cabinet</th>
                 <th class="num">Délai moyen<br><span style="font-weight:400; color:var(--navy-300);">de la présentation au paiement</span></th>
                 <th>Évolution N-1</th>
               </tr>
@@ -7945,7 +7923,7 @@
               <tr class="dt-clickable" onclick="openDrawerImmo('Cabinet Strasbourg Orangerie')"><td><div style="display:flex;align-items:center;gap:9px;"><div class="tlogo tlogo-sm tlogo-pro">SO</div><div class="cell-primary">Cabinet Strasbourg Orangerie</div></div></td><td class="num">4</td><td class="num cell-money">1 900 000 €</td><td class="num cell-money gold">7 600 €</td><td class="num cell-money">1 400 €</td><td class="num">82 jours</td><td><span class="up">▲ +7 %</span></td></tr>
               <tr style="background:var(--ivory);"><td colspan="7" style="text-align:center; font-size:11.5px; color:var(--navy-300); padding:14px;">… 25 autres cabinets · <a style="color:var(--gold);font-weight:700;cursor:pointer;">Voir tous (30)</a></td></tr>
               <tr style="background:var(--gold-200); font-weight:700;">
-                <td><strong>Total réseau</strong></td>
+                <td><strong>Total</strong></td>
                 <td class="num">53</td>
                 <td class="num cell-money">28 100 000 €</td>
                 <td class="num cell-money">96 000 €</td>
@@ -7959,7 +7937,7 @@
 
         <!-- Répartition par type de programme -->
         <div class="card">
-          <div class="card-header"><div class="card-title"><svg><use href="#i-business"/></svg>Répartition par type de programme · réseau</div></div>
+          <div class="card-header"><div class="card-title"><svg><use href="#i-business"/></svg>Répartition par type de programme · cabinet</div></div>
           <table class="dt" style="font-size:12px;">
             <thead><tr><th>Programme</th><th>Type</th><th class="num">Projets réalisés</th><th class="num">Volume traité</th></tr></thead>
             <tbody>
@@ -8008,7 +7986,7 @@
                   <div style="font-family:'Epilogue',sans-serif; font-size:18px; font-weight:700; color:var(--navy); margin-top:4px;">4 200 000 €</div>
                 </div>
                 <div style="background:white; padding:12px 14px; border-radius:8px; border-left:3px solid var(--gold);">
-                  <div style="font-size:10px; color:var(--navy-300); font-weight:700; letter-spacing:0.1em; text-transform:uppercase;">Apports PRIVEOS</div>
+                  <div style="font-size:10px; color:var(--navy-300); font-weight:700; letter-spacing:0.1em; text-transform:uppercase;">Apports cabinet</div>
                   <div style="font-family:'Epilogue',sans-serif; font-size:18px; font-weight:700; color:var(--gold); margin-top:4px;">18 200 €</div>
                 </div>
                 <div style="background:white; padding:12px 14px; border-radius:8px; border-left:3px solid var(--gold);">
@@ -8021,7 +7999,7 @@
               <div style="font-size:11px; font-weight:700; color:var(--gold); letter-spacing:0.14em; text-transform:uppercase; margin-bottom:8px;">Détail des 8 projets · cumul depuis janvier 2026</div>
               <div class="card" style="margin-bottom:18px;">
                 <table class="dt" style="font-size:12px;">
-                  <thead><tr><th>Date</th><th>Client</th><th>Programme</th><th class="num">Montant</th><th class="num">Apport PRIVEOS</th><th class="num">Délai</th><th>Ingénieur</th></tr></thead>
+                  <thead><tr><th>Date</th><th>Client</th><th>Programme</th><th class="num">Montant</th><th class="num">Apport cabinet</th><th class="num">Délai</th><th>Ingénieur</th></tr></thead>
                   <tbody>
                     <tr><td class="nowrap">12/02/2026</td><td><strong>Albert &amp; Cécile HUYGHE</strong></td><td><span style="color:var(--gold-deep); font-weight:600;">Projet Denormandie</span></td><td class="num cell-money">680 000 €</td><td class="num cell-money gold">2 800 €</td><td class="num">62 j</td><td>Émilie LAMBERT</td></tr>
                     <tr><td class="nowrap">28/02/2026</td><td><strong>Olivier MAILLOT</strong></td><td><span style="color:var(--gold-deep); font-weight:600;">Projet Denormandie</span></td><td class="num cell-money">580 000 €</td><td class="num cell-money gold">2 400 €</td><td class="num">68 j</td><td>Julien VASSEUR</td></tr>
@@ -8039,7 +8017,7 @@
               <div style="font-size:11px; font-weight:700; color:var(--gold); letter-spacing:0.14em; text-transform:uppercase; margin-bottom:8px;">Décomposition par programme</div>
               <div class="card" style="margin-bottom:18px;">
                 <table class="dt" style="font-size:12px;">
-                  <thead><tr><th>Programme</th><th class="num">Projets</th><th class="num">Volume</th><th class="num">Apport PRIVEOS</th></tr></thead>
+                  <thead><tr><th>Programme</th><th class="num">Projets</th><th class="num">Volume</th><th class="num">Apport cabinet</th></tr></thead>
                   <tbody>
                     <tr><td><strong style="color:var(--gold-deep);">Projet Denormandie</strong></td><td class="num">4</td><td class="num cell-money">2 400 000 €</td><td class="num cell-money gold">10 000 €</td></tr>
                     <tr><td><strong>LMNP résidences services</strong></td><td class="num">2</td><td class="num cell-money">900 000 €</td><td class="num cell-money gold">3 600 €</td></tr>
@@ -8053,7 +8031,7 @@
               <div style="font-size:11px; font-weight:700; color:var(--gold); letter-spacing:0.14em; text-transform:uppercase; margin-bottom:8px;">Contribution des ingénieurs</div>
               <div class="card">
                 <table class="dt" style="font-size:12px;">
-                  <thead><tr><th>Ingénieur</th><th class="num">Projets</th><th class="num">Apports PRIVEOS générés</th></tr></thead>
+                  <thead><tr><th>Ingénieur</th><th class="num">Projets</th><th class="num">Apports cabinet générés</th></tr></thead>
                   <tbody>
                     <tr><td><strong>Julien VASSEUR</strong></td><td class="num">5</td><td class="num cell-money gold">11 200 €</td></tr>
                     <tr><td><strong>Émilie LAMBERT</strong></td><td class="num">3</td><td class="num cell-money">7 000 €</td></tr>
@@ -8083,7 +8061,7 @@
           <div>
             <div class="hero-eyebrow">Assets du cabinet · honoraires de conseil</div>
             <h1 class="hero-title">Honoraires de <strong>conseil</strong></h1>
-            <p class="hero-sub">Détail réseau des honoraires perçus directement par les ingénieurs sur les études patrimoniales, audits, missions de structuration et immatriculations de société. Distribution par ingénieur et type de mission.</p>
+            <p class="hero-sub">Détail des honoraires perçus directement par les ingénieurs du cabinet sur les études patrimoniales, audits, missions de structuration et immatriculations de société. Distribution par ingénieur et type de mission.</p>
           </div>
           <div class="hero-actions">
             <button class="btn btn-ghost btn-sm" onclick="goToPage('dir-accueil')">← Retour accueil</button>
@@ -8092,8 +8070,8 @@
         </div>
 
         <div class="kpis kpis-4 mb-20">
-          <div class="kpi"><div class="kpi-label">Études &amp; missions réalisées</div><div class="kpi-value">69</div><div class="kpi-meta">cumul · 2026 · réseau</div></div>
-          <div class="kpi"><div class="kpi-label">Honoraires HT facturés</div><div class="kpi-value">595 200 <span class="unit">€</span></div><div class="kpi-meta">total réseau · cumul janv-mai</div></div>
+          <div class="kpi"><div class="kpi-label">Études &amp; missions réalisées</div><div class="kpi-value">69</div><div class="kpi-meta">cumul · 2026 · cabinet</div></div>
+          <div class="kpi"><div class="kpi-label">Honoraires HT facturés</div><div class="kpi-value">595 200 <span class="unit">€</span></div><div class="kpi-meta">total cabinet · cumul janv-mai</div></div>
           <div class="kpi"><div class="kpi-label">Honoraire moyen</div><div class="kpi-value">8 627 <span class="unit">€</span></div><div class="kpi-meta">par mission</div></div>
           <div class="kpi"><div class="kpi-label">Récurrence missions</div><div class="kpi-value gold">52 800 <span class="unit">€</span></div><div class="kpi-meta">missions de suivi · cumul</div></div>
         </div>
@@ -8120,7 +8098,7 @@
               <tr class="dt-clickable"><td><div style="display:flex;align-items:center;gap:9px;"><div class="tlogo tlogo-sm tlogo-pro">SO</div><div class="cell-primary">Cabinet Strasbourg Orangerie</div></div></td><td class="num">4</td><td class="num">2</td><td class="num">1</td><td class="num">7</td><td class="num cell-money gold">42 600 €</td><td><span class="up">▲ +9 %</span></td></tr>
               <tr style="background:var(--ivory);"><td colspan="7" style="text-align:center; font-size:11.5px; color:var(--navy-300); padding:14px;">… 25 autres cabinets · <a style="color:var(--gold);font-weight:700;cursor:pointer;">Voir tous (30)</a></td></tr>
               <tr style="background:var(--gold-200); font-weight:700;">
-                <td><strong>Total réseau</strong></td>
+                <td><strong>Total</strong></td>
                 <td class="num">42</td>
                 <td class="num">17</td>
                 <td class="num">10</td>
@@ -8134,7 +8112,7 @@
 
         <!-- Répartition par type -->
         <div class="card">
-          <div class="card-header"><div class="card-title"><svg><use href="#i-doc"/></svg>Répartition par type de mission · réseau</div></div>
+          <div class="card-header"><div class="card-title"><svg><use href="#i-doc"/></svg>Répartition par type de mission · cabinet</div></div>
           <table class="dt" style="font-size:12px;">
             <thead><tr><th>Mission</th><th>Type</th><th class="num">Réalisées 2026</th><th class="num">Tarif moyen</th><th class="num">Honoraires totaux</th></tr></thead>
             <tbody>
@@ -8158,12 +8136,12 @@
           <div>
             <div class="hero-eyebrow">Référentiel · méthode &amp; ressources pour mes ingénieurs</div>
             <h1 class="hero-title">Process &amp; <strong>méthodologie</strong></h1>
-            <p class="hero-sub">Référentiel opérationnel du Cabinet Paris Étoile : zone IA pour interrogation contextuelle, manuel opératoire, contrat-cadre licenciés, bibliothèque de modèles documentaires, éléments de communication.</p>
+            <p class="hero-sub">Référentiel opérationnel du Cabinet Paris Étoile : zone IA pour interrogation contextuelle, manuel opératoire, contrat-cadre PRIVEOS, bibliothèque de modèles documentaires, éléments de communication.</p>
           </div>
           <div class="hero-actions" style="flex-direction:column; align-items:flex-end; gap:10px;">
-            <!-- Toggle GLOBAL : mettre en ligne / ne pas mettre en ligne pour les licenciés -->
+            <!-- Toggle GLOBAL : référentiel en ligne pour les ingénieurs -->
             <div style="display:flex; align-items:center; gap:10px; background:white; padding:10px 14px; border-radius:8px; border:1px solid var(--navy-100);">
-              <span style="font-size:11.5px; font-weight:700; color:var(--navy);">Mettre le référentiel en ligne</span>
+              <span style="font-size:11.5px; font-weight:700; color:var(--navy);">Référentiel en ligne pour les ingénieurs</span>
               <label style="position:relative; display:inline-block; width:42px; height:22px;">
                 <input type="checkbox" checked style="opacity:0; width:0; height:0;">
                 <span style="position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background:var(--gold); border-radius:22px; transition:0.2s;"></span>
@@ -8177,9 +8155,9 @@
 
         <!-- Zone IA -->
         <div class="card mb-24" style="border-left:4px solid var(--gold); background:linear-gradient(135deg, var(--ivory) 0%, white 60%); position:relative;">
-          <!-- Toggle accessible licenciés (haut droite) -->
+          <!-- Toggle accessible aux ingénieurs (haut droite) -->
           <div style="position:absolute; top:14px; right:18px; display:flex; align-items:center; gap:8px; background:white; padding:6px 10px; border-radius:20px; border:1px solid var(--gold-200);">
-            <span style="font-size:10px; font-weight:700; color:var(--navy);">À mettre à disposition des licenciés</span>
+            <span style="font-size:10px; font-weight:700; color:var(--navy);">À mettre à disposition des ingénieurs</span>
             <label style="position:relative; display:inline-block; width:32px; height:18px; margin:0;">
               <input type="checkbox" checked style="opacity:0; width:0; height:0;">
               <span style="position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background:var(--gold); border-radius:18px;"></span>
@@ -8195,7 +8173,7 @@
               <div style="flex:1;">
                 <div class="kpi-label" style="margin-bottom:4px;">Assistant IA · méthodologie</div>
                 <div style="font-size:18px; font-weight:700; color:var(--navy); margin-bottom:8px;">Interrogez le référentiel PRIVEOS</div>
-                <div style="font-size:12.5px; color:var(--navy-300); line-height:1.5; margin-bottom:14px;">L'IA est entraînée sur l'ensemble du référentiel : process, contrat licenciés, bibliothèque, FAQ. Posez vos questions en langage naturel, obtenez la réponse contextualisée et le lien vers le document source.</div>
+                <div style="font-size:12.5px; color:var(--navy-300); line-height:1.5; margin-bottom:14px;">L'IA est entraînée sur l'ensemble du référentiel : process, contrat-cadre PRIVEOS, bibliothèque, FAQ. Posez vos questions en langage naturel, obtenez la réponse contextualisée et le lien vers le document source.</div>
                 <div style="display:flex; gap:10px;">
                   <input type="text" placeholder="Comment rédiger un pacte d'associés selon le process PRIVEOS ?" style="flex:1; padding:12px 16px; border:1px solid var(--navy-100); border-radius:8px; font-family:inherit; font-size:13px;">
                   <button class="btn btn-gold">Demander à l'IA</button>
@@ -8217,7 +8195,7 @@
             <div class="card-header">
               <div class="card-title"><svg><use href="#i-doc"/></svg>Manuel opératoire</div>
               <div style="display:flex; align-items:center; gap:8px; background:white; padding:5px 10px; border-radius:18px; border:1px solid var(--gold-200);">
-                <span style="font-size:10px; font-weight:700; color:var(--navy);">Accessible licenciés</span>
+                <span style="font-size:10px; font-weight:700; color:var(--navy);">Accessible aux ingénieurs</span>
                 <label style="position:relative; display:inline-block; width:30px; height:16px; margin:0;">
                   <input type="checkbox" checked style="opacity:0; width:0; height:0;">
                   <span style="position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background:var(--gold); border-radius:16px;"></span>
@@ -8243,9 +8221,9 @@
 
           <div class="card">
             <div class="card-header">
-              <div class="card-title"><svg><use href="#i-doc"/></svg>Contrat-cadre licenciés · licence de marque</div>
+              <div class="card-title"><svg><use href="#i-doc"/></svg>Contrat-cadre PRIVEOS · licence de marque</div>
               <div style="display:flex; align-items:center; gap:8px; background:white; padding:5px 10px; border-radius:18px; border:1px solid var(--gold-200);">
-                <span style="font-size:10px; font-weight:700; color:var(--navy);">Accessible licenciés</span>
+                <span style="font-size:10px; font-weight:700; color:var(--navy);">Accessible aux ingénieurs</span>
                 <label style="position:relative; display:inline-block; width:30px; height:16px; margin:0;">
                   <input type="checkbox" checked style="opacity:0; width:0; height:0;">
                   <span style="position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background:var(--gold); border-radius:16px;"></span>
@@ -8277,7 +8255,7 @@
           <div class="card-header">
             <div class="card-title"><svg><use href="#i-marketplace"/></svg>Bibliothèque de modèles documentaires</div>
             <div style="display:flex; align-items:center; gap:8px; background:white; padding:5px 10px; border-radius:18px; border:1px solid var(--gold-200);">
-              <span style="font-size:10px; font-weight:700; color:var(--navy);">Accessible licenciés</span>
+              <span style="font-size:10px; font-weight:700; color:var(--navy);">Accessible aux ingénieurs</span>
               <label style="position:relative; display:inline-block; width:30px; height:16px; margin:0;">
                 <input type="checkbox" checked style="opacity:0; width:0; height:0;">
                 <span style="position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background:var(--gold); border-radius:16px;"></span>
@@ -9570,7 +9548,7 @@
           <div>
             <div class="hero-eyebrow">Outils · simulateurs · consultation &amp; calculateurs</div>
             <h1 class="hero-title">Simulateurs &amp; <strong>calculateurs</strong></h1>
-            <p class="hero-sub">Outils mis à disposition des cabinets licenciés et des clients : simulations fiscales, financières et immobilières.</p>
+            <p class="hero-sub">Outils mis à disposition de vos ingénieurs et de vos clients : simulations fiscales, financières et immobilières.</p>
           </div>
         </div>
 
@@ -9847,7 +9825,6 @@ const PAGE_LABELS = {
   'dir-out-simulateurs': 'Outils · Simulateurs',
   'dir-out-marketing':   'Outils · Bibliothèque marketing',
   'dir-ref-process':     'Référentiel · Process & méthodologie',
-  'dir-ref-compliance':  'Référentiel · Documentation compliance',
   'dir-param-identite':  'Paramétrages · Identité de la marque',
   'dir-param-banque':    'Paramétrages · Connexions bancaires',
   'dir-param-integrations':'Paramétrages · Intégrations & connecteurs',
