@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 
-type Space = "editeur" | "marque" | "dirigeant";
+type Space = "editeur" | "marque" | "dirigeant" | "ingenieur";
 
 export function SpaceSwitcher({ active }: { active: Space }) {
   return (
@@ -37,6 +37,16 @@ export function SpaceSwitcher({ active }: { active: Space }) {
           }`}
         >
           Espace Dirigeant
+        </Link>
+        <Link
+          href="/ingenieur"
+          className={`rounded px-3 py-1.5 text-[11.5px] font-semibold tracking-wide transition-colors ${
+            active === "ingenieur"
+              ? "bg-[var(--gold)] text-white"
+              : "text-white/70 hover:text-white"
+          }`}
+        >
+          Espace Ingénieur
         </Link>
       </div>
       <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-white/50">
