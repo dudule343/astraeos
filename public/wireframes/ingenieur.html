@@ -17030,6 +17030,127 @@ Président associé du cabinet PRIVEOS</textarea>
       });
     });
   })();
+
+  // ═══════════════════════════════════════════════════════════════════
+  // ASTRAEOS · Boîte de réception DCI (données réelles depuis /api/dci)
+  // Polle toutes les 8s et affiche un panneau quand un prospect a soumis.
+  // ═══════════════════════════════════════════════════════════════════
+  (function () {
+    var DEMO_SLUG = 'bertrand-dupont-topin';
+    var KIND_LABELS = {
+      rdv: 'Prise de RDV',
+      simple: 'DCI simplifié',
+      qualification: 'Questionnaire qualification',
+      complet: 'DCI complet',
+    };
+
+    function injectStyles() {
+      if (document.getElementById('astr-inbox-style')) return;
+      var css = document.createElement('style');
+      css.id = 'astr-inbox-style';
+      css.textContent = ''
+        + '.astr-inbox-toggle { position: fixed; right: 22px; bottom: 22px; z-index: 9000; background: var(--navy); color: var(--gold); border: 2px solid var(--gold); border-radius: 999px; padding: 11px 18px; font-family: inherit; font-size: 12px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; cursor: pointer; box-shadow: 0 10px 30px rgba(16,45,80,0.25); display: flex; align-items: center; gap: 10px; transition: transform .15s; }'
+        + '.astr-inbox-toggle:hover { transform: translateY(-2px); }'
+        + '.astr-inbox-toggle .astr-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 0 4px rgba(198,142,14,0.25); animation: astrPulse 1.6s ease-in-out infinite; }'
+        + '@keyframes astrPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }'
+        + '.astr-inbox-toggle .astr-count { background: var(--gold); color: var(--navy); padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 800; }'
+        + '.astr-inbox-panel { position: fixed; right: 22px; bottom: 78px; width: 420px; max-height: 70vh; overflow: auto; background: white; border: 1px solid #D9D5C9; border-radius: 14px; box-shadow: 0 20px 60px rgba(16,45,80,0.18); z-index: 9000; display: none; padding: 22px 24px; font-family: inherit; }'
+        + '.astr-inbox-panel.open { display: block; }'
+        + '.astr-inbox-panel h3 { font-family: "Cormorant Garamond", "Georgia", serif; font-size: 19px; font-style: italic; color: var(--navy); margin: 0 0 4px; font-weight: 600; }'
+        + '.astr-inbox-panel .astr-sub { font-size: 11.5px; color: #708196; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 18px; font-weight: 600; }'
+        + '.astr-inbox-panel .astr-sub strong { color: var(--gold); font-weight: 700; }'
+        + '.astr-inbox-item { border: 1px solid #ECE7D6; border-radius: 10px; padding: 12px 14px; margin-bottom: 10px; background: #FAF8F3; }'
+        + '.astr-inbox-item.empty { color: #708196; font-style: italic; font-size: 12.5px; background: white; }'
+        + '.astr-inbox-item-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }'
+        + '.astr-inbox-item-kind { font-size: 12px; font-weight: 700; color: var(--navy); }'
+        + '.astr-inbox-item-time { font-size: 10.5px; color: #708196; }'
+        + '.astr-inbox-item-name { font-family: "Cormorant Garamond", serif; font-style: italic; font-size: 15px; color: var(--navy); font-weight: 600; }'
+        + '.astr-inbox-item-actions { margin-top: 8px; display: flex; gap: 8px; }'
+        + '.astr-inbox-btn { font-size: 10.5px; padding: 5px 10px; border-radius: 5px; border: 1px solid #D9D5C9; background: white; color: var(--navy); cursor: pointer; font-family: inherit; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }'
+        + '.astr-inbox-btn:hover { border-color: var(--gold); color: var(--gold); }'
+        + '.astr-inbox-source { font-size: 10px; color: #708196; text-align: right; margin-top: 8px; font-style: italic; }'
+        + '.astr-inbox-source strong { color: var(--gold); font-style: normal; font-weight: 700; }'
+        + '.astr-inbox-payload { display: none; background: white; border: 1px solid #ECE7D6; border-radius: 6px; padding: 10px; margin-top: 8px; font-family: ui-monospace, monospace; font-size: 10.5px; line-height: 1.45; max-height: 280px; overflow: auto; white-space: pre-wrap; word-break: break-word; color: #1F2937; }'
+        + '.astr-inbox-payload.open { display: block; }';
+      document.head.appendChild(css);
+    }
+
+    function buildUI() {
+      injectStyles();
+      var toggle = document.createElement('button');
+      toggle.id = 'astr-inbox-toggle';
+      toggle.className = 'astr-inbox-toggle';
+      toggle.innerHTML = '<span class="astr-dot"></span> DCI reçus <span class="astr-count" id="astr-count">0</span>';
+      var panel = document.createElement('div');
+      panel.id = 'astr-inbox-panel';
+      panel.className = 'astr-inbox-panel';
+      panel.innerHTML = '<h3>Boîte de réception DCI</h3>'
+        + '<div class="astr-sub">Prospect : <strong>Bertrand DUPONT-TOPIN</strong></div>'
+        + '<div id="astr-inbox-list"></div>'
+        + '<div class="astr-inbox-source" id="astr-inbox-source"></div>';
+      document.body.appendChild(toggle);
+      document.body.appendChild(panel);
+      toggle.addEventListener('click', function () { panel.classList.toggle('open'); });
+    }
+
+    function render(data) {
+      var list = document.getElementById('astr-inbox-list');
+      var count = document.getElementById('astr-count');
+      var src = document.getElementById('astr-inbox-source');
+      if (!list || !count || !src) return;
+      var items = Object.keys(data.submissions || {}).filter(function (k) { return data.submissions[k]; });
+      count.textContent = items.length;
+      if (items.length === 0) {
+        list.innerHTML = '<div class="astr-inbox-item empty">Aucun document reçu pour ce prospect. Le client n\'a pas encore terminé son parcours.</div>';
+      } else {
+        list.innerHTML = items.map(function (k) {
+          var s = data.submissions[k];
+          var date = new Date(s.submitted_at).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' });
+          var safe = JSON.stringify(s.payload, null, 2)
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+          var id = 'astr-pay-' + k;
+          return '<div class="astr-inbox-item">'
+            + '<div class="astr-inbox-item-head">'
+            +   '<span class="astr-inbox-item-kind">' + (KIND_LABELS[k] || k) + '</span>'
+            +   '<span class="astr-inbox-item-time">' + date + '</span>'
+            + '</div>'
+            + '<div class="astr-inbox-item-name">' + (s.display_name || s.prospect_slug) + '</div>'
+            + '<div class="astr-inbox-item-actions">'
+            +   '<button class="astr-inbox-btn" onclick="document.getElementById(\'' + id + '\').classList.toggle(\'open\')">Voir le contenu</button>'
+            + '</div>'
+            + '<pre class="astr-inbox-payload" id="' + id + '">' + safe + '</pre>'
+            + '</div>';
+        }).join('');
+      }
+      src.innerHTML = 'Source : <strong>' + (data.source || 'inconnue') + '</strong>'
+        + (data.source === 'file' ? ' (.data/dci-store.json local · OK pour démo)' : ' (Supabase)');
+    }
+
+    var lastSig = '';
+    async function poll() {
+      try {
+        var r = await fetch('/api/dci?prospect=' + DEMO_SLUG, { cache: 'no-store' });
+        if (!r.ok) return;
+        var data = await r.json();
+        var sig = JSON.stringify(data.submissions);
+        if (sig !== lastSig) {
+          lastSig = sig;
+          render(data);
+          var count = parseInt(document.getElementById('astr-count')?.textContent || '0', 10);
+          if (count > 0 && document.getElementById('astr-inbox-toggle')) {
+            document.getElementById('astr-inbox-toggle').style.background = 'var(--gold)';
+            document.getElementById('astr-inbox-toggle').style.color = 'var(--navy)';
+          }
+        }
+      } catch (err) { /* silencieux */ }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      buildUI();
+      poll();
+      setInterval(poll, 8000);
+    });
+  })();
 </script>
 
 </body>

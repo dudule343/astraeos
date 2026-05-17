@@ -869,11 +869,44 @@ function checkFormValid() {
 });
 
 // ─── Confirmation ─────────────────────────────────────
-function confirmBooking() {
+async function confirmBooking() {
   const dayStr = selectedDate.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  const firstName = document.getElementById('firstName').value.trim();
+  const lastName  = document.getElementById('lastName').value.trim();
+  const email     = document.getElementById('email').value.trim();
+  const referral  = document.getElementById('referral').value.trim();
+  const recordOK  = document.getElementById('consentRecord').checked;
+
+  // POST → /api/dci/rdv (l'ingénieur recevra la donnée dans son tableau)
+  try {
+    await fetch('/api/dci/rdv', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        prospect_slug: 'bertrand-dupont-topin',
+        display_name: `${firstName} ${lastName}`.trim() || 'Bertrand DUPONT-TOPIN',
+        payload: {
+          first_name: firstName,
+          last_name: lastName,
+          email: email,
+          referral: referral,
+          consent_recording: recordOK,
+          selected_date: selectedDate.toISOString().slice(0, 10),
+          selected_slot: selectedSlot,
+          duration_minutes: 60,
+          modality: 'google_meet',
+          advisor: 'Luc THILLIEZ',
+          cabinet: 'Cabinet Paris Étoile',
+        },
+      }),
+    });
+  } catch (err) {
+    console.warn('[RDV] persistence failed:', err);
+  }
+
   document.getElementById('confDate').textContent = dayStr.charAt(0).toUpperCase() + dayStr.slice(1);
   document.getElementById('confTime').textContent = `${selectedSlot} – ${addOneHour(selectedSlot)} · 1 heure`;
-  document.getElementById('confEmail').textContent = document.getElementById('email').value.trim();
+  document.getElementById('confEmail').textContent = email;
   document.getElementById('bookingView').style.display = 'none';
   document.getElementById('confirmationView').classList.add('active');
   window.scrollTo({ top: 0, behavior: 'smooth' });

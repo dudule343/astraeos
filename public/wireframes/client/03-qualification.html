@@ -1847,7 +1847,62 @@ function checkFinalValid() {
   }
 }
 
-function submitForm() {
+function serializeAstraeosQualif() {
+  const data = { products: [], profile: {}, esg_themes: [], esg_avoid: [] };
+
+  // 9 produits financiers (Actions, Obligations, Fonds €, SCPI, Structurés, FCPI, OPCVM, Levier, ETF, Crypto)
+  document.querySelectorAll('.product-card').forEach((card, i) => {
+    const selects = card.querySelectorAll('select');
+    data.products.push({
+      label: card.closest('.section')?.querySelector('.section-title')?.textContent.trim() || `produit_${i}`,
+      connaissance: selects[0]?.value,
+      experience: selects[1]?.value,
+      detention: selects[2]?.value,
+      risque_perception: selects[3]?.value,
+    });
+  });
+
+  // Profil (auto-éval, horizon, profil-inv, tolérance, réaction, courbe)
+  const groups = ['auto-eval', 'horizon', 'profile', 'tolerance', 'reaction', 'curve', 'esg', 'esg-eq'];
+  groups.forEach(g => {
+    const sel = document.querySelector(`.section[data-step] .choice-radio.selected`);
+    // Plus précis : on cherche dans chaque section active séquentiellement
+  });
+  document.querySelectorAll('.section').forEach(section => {
+    const eyebrow = section.querySelector('.section-eyebrow')?.textContent.trim() || '';
+    section.querySelectorAll('.choice-radio.selected').forEach(r => {
+      const label = r.querySelector('.choice-radio-label')?.textContent.trim();
+      const title = section.querySelector('.section-title')?.textContent.trim();
+      if (title && label) data.profile[title] = label;
+    });
+  });
+
+  // ESG checks
+  document.querySelectorAll('.conditional.visible .check-row.checked').forEach(row => {
+    const txt = row.querySelector('.check-label')?.textContent.trim() || '';
+    const condTitle = row.closest('.conditional')?.previousElementSibling?.textContent.trim() || '';
+    if (condTitle.toLowerCase().includes('éviter')) data.esg_avoid.push(txt);
+    else data.esg_themes.push(txt);
+  });
+
+  return data;
+}
+
+async function submitForm() {
+  try {
+    const payload = serializeAstraeosQualif();
+    await fetch('/api/dci/qualification', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        prospect_slug: 'bertrand-dupont-topin',
+        display_name: 'Bertrand DUPONT-TOPIN',
+        payload,
+      }),
+    });
+  } catch (err) {
+    console.warn('[Qualif] persistence failed:', err);
+  }
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.getElementById('finalView').classList.add('active');
   document.getElementById('navBar').style.display = 'none';

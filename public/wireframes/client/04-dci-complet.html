@@ -4804,7 +4804,60 @@ function checkFinalValid() {
   }
 }
 
-function submitForm() {
+function serializeAstraeosComplet() {
+  const data = { fields: {}, choices: [], yesno: [], checked: [], assets: [], objectifs: [], by_section: {} };
+  document.querySelectorAll('input, select, textarea').forEach(el => {
+    const key = el.id || el.name || (el.placeholder || '').slice(0, 24);
+    if (!key) return;
+    if (el.type === 'checkbox' || el.type === 'radio') data.fields[key] = el.checked;
+    else data.fields[key] = el.value;
+  });
+  document.querySelectorAll('.choice-card.selected').forEach(el => {
+    data.choices.push(el.querySelector('.choice-card-label')?.textContent.trim() || '');
+  });
+  document.querySelectorAll('.yesno .yesno-option.selected').forEach(el => {
+    data.yesno.push(el.textContent.trim());
+  });
+  document.querySelectorAll('.check-row.checked, .cto-nature-check input:checked').forEach(el => {
+    const lab = el.querySelector ? el.querySelector('.check-label')?.textContent.trim() : el.parentElement?.textContent.trim();
+    if (lab) data.checked.push(lab);
+  });
+  document.querySelectorAll('.asset-row').forEach(row => {
+    data.assets.push({
+      titre: row.querySelector('.asset-row-title')?.textContent.trim(),
+      meta:  row.querySelector('.asset-row-meta')?.textContent.trim(),
+      valeur:row.querySelector('.asset-row-value')?.textContent.trim(),
+    });
+  });
+  document.querySelectorAll('.obj-block').forEach((block, idx) => {
+    const selects = block.querySelectorAll('select');
+    data.objectifs.push({
+      rang: idx + 1,
+      values: Array.from(selects).map(s => s.value),
+    });
+  });
+  document.querySelectorAll('.section[data-step]').forEach(s => {
+    const t = s.querySelector('.section-title')?.textContent.trim();
+    if (t) data.by_section[t] = (s.querySelector('.section-subtitle')?.textContent.trim() || '');
+  });
+  return data;
+}
+
+async function submitForm() {
+  try {
+    const payload = serializeAstraeosComplet();
+    await fetch('/api/dci/complet', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        prospect_slug: 'bertrand-dupont-topin',
+        display_name: 'Bertrand DUPONT-TOPIN',
+        payload,
+      }),
+    });
+  } catch (err) {
+    console.warn('[DCI complet] persistence failed:', err);
+  }
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.getElementById('finalView').classList.add('active');
   document.getElementById('navBar').style.display = 'none';

@@ -2704,7 +2704,61 @@ function checkFinalValid() {
   }
 }
 
-function submitForm() {
+// Serializer générique : extrait tous les champs visibles + sélections
+function serializeAstraeosForm() {
+  const data = { fields: {}, choices: [], yesno: [], checked: [], objectifs: [], enfants: [] };
+  document.querySelectorAll('input, select, textarea').forEach(el => {
+    const key = el.id || el.name || (el.placeholder || '').slice(0, 24);
+    if (!key) return;
+    if (el.type === 'checkbox' || el.type === 'radio') data.fields[key] = el.checked;
+    else data.fields[key] = el.value;
+  });
+  document.querySelectorAll('.choice-card.selected').forEach(el => {
+    data.choices.push(el.querySelector('.choice-card-label')?.textContent.trim() || '');
+  });
+  document.querySelectorAll('.yesno .yesno-option.selected').forEach(el => {
+    data.yesno.push(el.textContent.trim());
+  });
+  document.querySelectorAll('.check-row.checked').forEach(el => {
+    data.checked.push(el.querySelector('.check-label')?.textContent.trim() || '');
+  });
+  document.querySelectorAll('.obj-card').forEach((card, idx) => {
+    const selects = card.querySelectorAll('select');
+    data.objectifs.push({
+      rang: idx + 1,
+      objectif: selects[0]?.value,
+      importance: selects[1]?.value,
+      horizon_initier: selects[2]?.value,
+      horizon_atteindre: selects[3]?.value,
+    });
+  });
+  document.querySelectorAll('.dyn-row-enfant').forEach(row => {
+    const cells = row.querySelectorAll('input, select');
+    data.enfants.push({
+      prenom: cells[0]?.value,
+      date_naissance: cells[1]?.value,
+      filiation: cells[2]?.value,
+      a_charge: cells[3]?.value,
+    });
+  });
+  return data;
+}
+
+async function submitForm() {
+  try {
+    const payload = serializeAstraeosForm();
+    await fetch('/api/dci/simple', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        prospect_slug: 'bertrand-dupont-topin',
+        display_name: 'Bertrand DUPONT-TOPIN',
+        payload,
+      }),
+    });
+  } catch (err) {
+    console.warn('[DCI simplifié] persistence failed:', err);
+  }
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.getElementById('finalView').classList.add('active');
   document.getElementById('navBar').style.display = 'none';
