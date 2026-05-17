@@ -66,24 +66,23 @@ body {
   gap: 12px;
 }
 .client-shell-brand-mark {
-  width: 30px;
-  height: 30px;
-  background: var(--navy);
-  border-radius: 50%;
+  width: 34px;
+  height: 34px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--gold);
-  font-family: 'Cinzel', 'Georgia', serif;
-  font-weight: 700;
-  font-size: 12px;
-  letter-spacing: 0.05em;
+  flex-shrink: 0;
+}
+.client-shell-brand-mark img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 .client-shell-brand-text {
-  font-family: 'Cinzel', 'Georgia', serif;
-  font-size: 14px;
+  font-family: 'Cormorant Garamond', 'Georgia', serif;
+  font-size: 22px;
   font-weight: 600;
-  letter-spacing: 0.22em;
+  letter-spacing: 0.18em;
   color: var(--navy);
 }
 .client-shell-context {
@@ -338,7 +337,9 @@ body {
   <div class="client-shell-inner">
     <div class="client-shell-top">
       <div class="client-shell-brand">
-        <div class="client-shell-brand-mark">P</div>
+        <div class="client-shell-brand-mark">
+          <img src="/logos/priveos-tree.webp" alt="PRIVEOS" />
+        </div>
         <div class="client-shell-brand-text">PRIVEOS</div>
         <div class="client-shell-context" style="margin-left: 18px;">
           ESPACE CLIENT · <strong>Parcours d'accompagnement</strong>
