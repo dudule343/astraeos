@@ -12913,30 +12913,50 @@ document.addEventListener('DOMContentLoaded', function() {
 // ====================================================================
 (function () {
   function statusToStep(text) {
-    if (!text) return 'rdv';
+    if (!text) return null;
     var t = text.toLowerCase();
+    // RDV / amont
     if (t.indexOf('dormant') !== -1)            return 'rdv';
     if (t.indexOf('non envoy') !== -1)          return 'rdv';
+    if (t.indexOf('inactif') !== -1)            return 'rdv';
+    // DCI simplifié
     if (t.indexOf('rencontré') !== -1)          return 'dci-simple';
     if (t.indexOf('docs envoyés') !== -1)       return 'dci-simple';
     if (t.indexOf('attente retour') !== -1)     return 'dci-simple';
     if (t.indexOf('à relancer') !== -1)         return 'dci-simple';
+    // Qualification investisseur
     if (t.indexOf('compliance') !== -1)         return 'qualification';
     if (t.indexOf('qualifié') !== -1)           return 'qualification';
+    if (t.indexOf('en collecte') !== -1)        return 'qualification';
+    if (t.indexOf('prêt à commencer') !== -1)   return 'qualification';
+    // DCI complet · étude / signature / suivi
+    if (t.indexOf('à signer') !== -1)           return 'dci-complet';
+    if (t.indexOf('tous signés') !== -1)        return 'dci-complet';
+    if (t.indexOf('paiement reçu') !== -1)      return 'dci-complet';
+    if (t.indexOf('attente paiement') !== -1)   return 'dci-complet';
+    if (t.indexOf('validation client') !== -1)  return 'dci-complet';
+    if (t.indexOf('investissements validés') !== -1) return 'dci-complet';
+    if (t.indexOf('refus') !== -1)              return 'dci-complet';
+    if (t.indexOf('réflexion') !== -1)          return 'dci-complet';
     if (t.indexOf('en cours') !== -1)           return 'dci-complet';
     if (t.indexOf('étude') !== -1)              return 'dci-complet';
     if (t.indexOf('restitu') !== -1)            return 'dci-complet';
-    return 'rdv';
+    return null;
   }
 
   function pageIdToStep(pageId) {
     if (!pageId) return null;
-    if (/pipe-01$/.test(pageId)) return 'rdv';          // prospects actifs
-    if (/pipe-02$/.test(pageId)) return 'dci-simple';   // compliance validée
-    if (/pipe-03$/.test(pageId)) return 'qualification';// collecte docs
-    if (/pipe-04$/.test(pageId)) return 'dci-complet';  // études en cours
-    if (/pipe-05$/.test(pageId)) return 'dci-complet';  // études restituées
-    if (/pipe-06$/.test(pageId)) return 'dci-complet';  // clients en suivi
+    if (/pipe-01$/.test(pageId)) return 'rdv';            // prospects actifs
+    if (/pipe-02$/.test(pageId)) return 'dci-simple';     // compliance validée
+    if (/pipe-03$/.test(pageId)) return 'qualification';  // collecte docs
+    if (/pipe-04$/.test(pageId)) return 'dci-complet';    // études en cours
+    if (/pipe-05$/.test(pageId)) return 'dci-complet';    // études restituées
+    if (/pipe-06$/.test(pageId)) return 'dci-complet';    // clients en suivi
+    if (pageId === 'page-ing-clients')        return 'dci-complet';
+    if (pageId === 'page-ing-fiche-client')   return 'dci-complet';
+    if (pageId === 'page-ing-fiche-dossier')  return 'dci-complet';
+    if (pageId === 'page-ing-pipeline')       return 'rdv';
+    if (pageId === 'page-ing-detail-etape-1') return 'rdv';
     return null;
   }
 
