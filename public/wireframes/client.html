@@ -398,12 +398,25 @@ body {
     </div>
     <div class="client-frame-meta-actions">
       <a class="client-frame-meta-link" id="frameOpenInNew" href="/wireframes/client/01-rdv.html" target="_blank" rel="noopener">Ouvrir dans un nouvel onglet ↗</a>
+      <span class="client-frame-meta-link" id="frameProspectTag" style="cursor:default;background:var(--gold-faint,#F8EFDA);border-color:var(--gold-soft,#EEDDB6);color:var(--gold);" title="Identifiant utilisé pour relier les soumissions à ce prospect"></span>
       <button class="client-frame-meta-link" onclick="prevTab()">‹ Étape précédente</button>
       <button class="client-frame-meta-link primary" onclick="nextTab()">Étape suivante ›</button>
     </div>
   </div>
 
   <iframe class="client-iframe" id="clientIframe" src="/wireframes/client/01-rdv.html" title="Étape parcours client"></iframe>
+
+  <script>
+    // Tag prospect visible dans la barre meta
+    (function () {
+      var tag = document.getElementById('frameProspectTag');
+      if (!tag) return;
+      try {
+        var slug = new URLSearchParams(location.search).get('prospect');
+        tag.textContent = slug ? '👤 ' + slug : '👤 prospect démo';
+      } catch (e) { tag.textContent = '👤 prospect démo'; }
+    })();
+  </script>
 </div>
 
 <div class="client-journey-strip">
@@ -424,6 +437,11 @@ const TABS = [
   { id: 'dci-complet',  src: '/wireframes/client/04-dci-complet.html',  title: 'DCI complet · étude patrimoniale détaillée', badge: 'Étape 4 sur 4 · Post-02' },
 ];
 
+// Slug du prospect (?prospect=camille-joubert) — propagé aux iframes via postMessage + query
+const PARAMS = new URLSearchParams(location.search);
+const PROSPECT_SLUG = PARAMS.get('prospect') || 'bertrand-dupont-topin';
+function withSlug(src) { return src + '?prospect=' + encodeURIComponent(PROSPECT_SLUG); }
+
 function selectTab(id) {
   const idx = TABS.findIndex(t => t.id === id);
   if (idx < 0) return;
@@ -433,12 +451,14 @@ function selectTab(id) {
     if (el.dataset.tab === id) el.classList.add('active');
   });
   const iframe = document.getElementById('clientIframe');
-  iframe.src = tab.src;
+  const srcWithSlug = withSlug(tab.src);
+  iframe.src = srcWithSlug;
   document.getElementById('frameTitle').textContent = tab.title;
   document.getElementById('frameBadge').textContent = tab.badge;
-  document.getElementById('frameOpenInNew').href = tab.src;
+  document.getElementById('frameOpenInNew').href = srcWithSlug;
   if (location.hash.replace('#','') !== id) {
-    history.replaceState(null, '', '#' + id);
+    const newUrl = location.pathname + location.search + '#' + id;
+    history.replaceState(null, '', newUrl);
   }
 }
 

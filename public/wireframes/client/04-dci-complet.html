@@ -4850,7 +4850,7 @@ async function submitForm() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        prospect_slug: 'bertrand-dupont-topin',
+        prospect_slug: (new URLSearchParams(location.search).get('prospect') || 'bertrand-dupont-topin'),
         display_name: 'Bertrand DUPONT-TOPIN',
         payload,
       }),

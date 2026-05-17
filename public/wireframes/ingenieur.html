@@ -3803,7 +3803,7 @@
             </div>
           </div>
           <div class="kpi"><div class="kpi-label">Durée moyenne</div><div class="kpi-value">1 <span class="unit">h 12 min</span></div><div class="kpi-meta">cumul N-1 · ▼ -8 min</div></div>
-          <div class="kpi"><div class="kpi-label">Mon lien public</div><div class="kpi-value" style="font-size:13px; word-break:break-all;">priveos.com/rdv/luc-thilliez</div><div class="kpi-meta"><a style="color:var(--gold-deep); font-weight:700; cursor:pointer;">Copier le lien</a></div></div>
+          <div class="kpi"><div class="kpi-label">Mon lien public</div><div class="kpi-value" style="font-size:13px; word-break:break-all;">priveos.com/rdv/<span class="astr-link-slug" data-engineer="luc-thilliez">luc-thilliez</span></div><div class="kpi-meta"><a style="color:var(--gold-deep); font-weight:700; cursor:pointer;" onclick="astraeosCopyPublicLink('luc-thilliez', this)">Copier le lien</a></div></div>
         </div>
 
         <!-- 2 colonnes : Calendrier semaine + Panneau type de RDV -->
@@ -4093,10 +4093,10 @@
                 <div style="font-size:11.5px; color:var(--navy); line-height:1.6; margin-bottom:14px;">
                   Partagez ce lien avec vos clients et prospects pour qu'ils prennent rendez-vous sur les créneaux que vous avez ouverts.
                 </div>
-                <div style="padding:10px 14px; background:var(--ivory); border:1px solid var(--ivory-deep); border-radius:6px; font-size:11.5px; color:var(--gold-deep); font-weight:600; word-break:break-all; margin-bottom:10px;">priveos.com/rdv/luc-thilliez</div>
+                <div style="padding:10px 14px; background:var(--ivory); border:1px solid var(--ivory-deep); border-radius:6px; font-size:11.5px; color:var(--gold-deep); font-weight:600; word-break:break-all; margin-bottom:10px;">priveos.com/rdv/<span class="astr-link-slug" data-engineer="luc-thilliez">luc-thilliez</span></div>
                 <div style="display:flex; gap:6px;">
-                  <button class="btn btn-gold btn-sm" style="flex:1; font-size:11px;">Copier</button>
-                  <button class="btn btn-ghost btn-sm" style="flex:1; font-size:11px;">Aperçu</button>
+                  <button class="btn btn-gold btn-sm" style="flex:1; font-size:11px;" onclick="astraeosCopyPublicLink('luc-thilliez', this)">Copier</button>
+                  <a class="btn btn-ghost btn-sm" style="flex:1; font-size:11px; text-decoration:none; display:inline-flex; align-items:center; justify-content:center;" href="/client#rdv" target="_top">Aperçu</a>
                 </div>
               </div>
             </div>
@@ -5107,7 +5107,7 @@
                   <div style="font-weight:700; color:var(--navy);">Luc THILLIEZ</div>
                   <div style="font-size:11px; color:var(--navy-300);">Président associé du cabinet PRIVEOS</div>
                   <div style="font-size:11px; color:var(--navy-300); margin-top:4px;">📧 luc.thilliez@email-test.fr · 📞 +33 6 12 34 56 78</div>
-                  <div style="font-size:10.5px; color:var(--gold-deep); margin-top:4px;">priveos.com/rdv/luc-thilliez · prendre rendez-vous</div>
+                  <div style="font-size:10.5px; color:var(--gold-deep); margin-top:4px;">priveos.com/rdv/<span class="astr-link-slug" data-engineer="luc-thilliez">luc-thilliez</span> · prendre rendez-vous</div>
                 </div>
               </div>
               <div style="margin-top:14px; padding-top:12px; border-top:1px solid var(--ivory-deep); font-size:10px; color:var(--navy-300); line-height:1.5;">
@@ -17151,6 +17151,163 @@ Président associé du cabinet PRIVEOS</textarea>
       setInterval(poll, 8000);
     });
   })();
+
+  // ═══════════════════════════════════════════════════════════════════
+  // ASTRAEOS · Copie de liens publics + toast
+  // ═══════════════════════════════════════════════════════════════════
+  function astraeosBaseUrl() {
+    try {
+      // Si on est dans une iframe, prendre l'origin du top window (= astraeos.vercel.app)
+      if (window.top && window.top !== window && window.top.location && window.top.location.origin) {
+        return window.top.location.origin;
+      }
+    } catch (e) { /* cross-origin */ }
+    return window.location.origin;
+  }
+  function astraeosSlugify(s) {
+    return (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '')
+      .toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  }
+  function astraeosToast(msg) {
+    var t = document.getElementById('astr-toast');
+    if (!t) {
+      t = document.createElement('div');
+      t.id = 'astr-toast';
+      t.style.cssText = 'position:fixed;bottom:90px;right:22px;background:var(--navy);color:white;padding:12px 18px;border-radius:8px;font-size:13px;font-weight:600;letter-spacing:0.04em;box-shadow:0 10px 30px rgba(16,45,80,0.25);z-index:10000;opacity:0;transition:opacity .2s;border-left:3px solid var(--gold);max-width:380px;';
+      document.body.appendChild(t);
+    }
+    t.textContent = msg;
+    t.style.opacity = '1';
+    clearTimeout(window.__astrToastTimer);
+    window.__astrToastTimer = setTimeout(function () { t.style.opacity = '0'; }, 3000);
+  }
+  async function astraeosCopy(text) {
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+      } else {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed'; ta.style.opacity = '0';
+        document.body.appendChild(ta); ta.select();
+        document.execCommand('copy'); document.body.removeChild(ta);
+      }
+      return true;
+    } catch (e) { return false; }
+  }
+  window.astraeosCopyPublicLink = async function (engineerSlug, btn) {
+    var url = astraeosBaseUrl() + '/client#rdv';
+    var ok = await astraeosCopy(url);
+    astraeosToast(ok ? 'Lien copié · ' + url : 'Impossible de copier (autorisez le presse-papier)');
+    if (btn) {
+      var old = btn.textContent;
+      btn.textContent = '✓ Copié';
+      setTimeout(function () { btn.textContent = old; }, 1600);
+    }
+  };
+
+  // ═══════════════════════════════════════════════════════════════════
+  // ASTRAEOS · Modale "Inviter au DCI" par prospect
+  // ═══════════════════════════════════════════════════════════════════
+  function astraeosBuildInviteModal() {
+    if (document.getElementById('astr-invite-modal')) return;
+    var html = ''
+      + '<div id="astr-invite-modal" style="position:fixed;inset:0;z-index:10001;background:rgba(16,45,80,0.55);display:none;align-items:center;justify-content:center;padding:24px;">'
+      +   '<div style="background:white;border-radius:14px;max-width:560px;width:100%;padding:32px 36px;box-shadow:0 20px 60px rgba(0,0,0,0.3);font-family:inherit;">'
+      +     '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">'
+      +       '<div>'
+      +         '<div style="font-size:10px;letter-spacing:0.22em;text-transform:uppercase;color:var(--gold-deep);font-weight:700;margin-bottom:6px;">Inviter au parcours client</div>'
+      +         '<h2 style="font-family:\'Cormorant Garamond\',Georgia,serif;font-size:24px;font-style:italic;color:var(--navy);margin:0;font-weight:600;" id="astr-invite-title">Bertrand DUPONT-TOPIN</h2>'
+      +       '</div>'
+      +       '<button onclick="astraeosCloseInvite()" style="background:transparent;border:none;font-size:24px;color:var(--navy-300);cursor:pointer;line-height:1;">×</button>'
+      +     '</div>'
+      +     '<div style="font-size:12.5px;color:var(--navy-300);margin-bottom:22px;line-height:1.55;">Le prospect recevra un lien personnel pour suivre les 4 étapes du parcours · prise de RDV, DCI simplifié, questionnaire de qualification, DCI complet.</div>'
+      +     '<div style="background:var(--ivory);border:1px solid var(--ivory-deep);border-left:3px solid var(--gold);border-radius:8px;padding:14px 16px;margin-bottom:18px;">'
+      +       '<div style="font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold-deep);font-weight:700;margin-bottom:6px;">Lien personnel</div>'
+      +       '<div id="astr-invite-link" style="font-family:\'JetBrains Mono\',ui-monospace,monospace;font-size:12px;color:var(--navy);word-break:break-all;line-height:1.5;"></div>'
+      +     '</div>'
+      +     '<div style="display:flex;gap:8px;margin-bottom:22px;">'
+      +       '<button class="btn btn-gold btn-sm" style="flex:1;" onclick="astraeosCopyInvite(this)">Copier le lien</button>'
+      +       '<a class="btn btn-ghost btn-sm" id="astr-invite-mail" href="#" style="flex:1;text-align:center;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:7px;">📧 Envoyer par email</a>'
+      +       '<a class="btn btn-ghost btn-sm" id="astr-invite-preview" href="#" target="_top" style="flex:1;text-align:center;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:7px;">👁 Aperçu</a>'
+      +     '</div>'
+      +     '<div style="border-top:1px solid var(--ivory-deep);padding-top:18px;">'
+      +       '<div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--navy-300);font-weight:700;margin-bottom:10px;">Le prospect verra dans son espace</div>'
+      +       '<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;font-size:12px;color:var(--navy);">'
+      +         '<div style="background:var(--ivory);padding:9px 12px;border-radius:6px;border:1px solid var(--ivory-deep);"><strong>1.</strong> Prise de RDV (Calendly)</div>'
+      +         '<div style="background:var(--ivory);padding:9px 12px;border-radius:6px;border:1px solid var(--ivory-deep);"><strong>2.</strong> DCI simplifié</div>'
+      +         '<div style="background:var(--ivory);padding:9px 12px;border-radius:6px;border:1px solid var(--ivory-deep);"><strong>3.</strong> Questionnaire qualification</div>'
+      +         '<div style="background:var(--ivory);padding:9px 12px;border-radius:6px;border:1px solid var(--ivory-deep);"><strong>4.</strong> DCI complet</div>'
+      +       '</div>'
+      +     '</div>'
+      +   '</div>'
+      + '</div>';
+    var wrap = document.createElement('div');
+    wrap.innerHTML = html;
+    document.body.appendChild(wrap.firstChild);
+  }
+  window.astraeosCloseInvite = function () {
+    var m = document.getElementById('astr-invite-modal');
+    if (m) m.style.display = 'none';
+  };
+  window.astraeosCopyInvite = async function (btn) {
+    var link = document.getElementById('astr-invite-link')?.textContent || '';
+    if (!link) return;
+    var ok = await astraeosCopy(link);
+    astraeosToast(ok ? 'Lien d\'invitation copié dans le presse-papier' : 'Impossible de copier');
+    if (btn) { var old = btn.textContent; btn.textContent = '✓ Copié'; setTimeout(function () { btn.textContent = old; }, 1600); }
+  };
+  window.astraeosOpenInvite = function (displayName, slug, email) {
+    astraeosBuildInviteModal();
+    var base = astraeosBaseUrl();
+    var url = base + '/client?prospect=' + encodeURIComponent(slug) + '#rdv';
+    document.getElementById('astr-invite-title').textContent = displayName;
+    document.getElementById('astr-invite-link').textContent = url;
+    document.getElementById('astr-invite-preview').href = '/client?prospect=' + encodeURIComponent(slug) + '#rdv';
+    var subject = encodeURIComponent('Préparation de notre rendez-vous · PRIVEOS');
+    var body = encodeURIComponent(
+      'Bonjour ' + displayName + ',\n\n' +
+      'En vue de notre prochain entretien patrimonial, je vous invite à compléter votre espace personnel sécurisé PRIVEOS :\n\n' +
+      url + '\n\n' +
+      'Vous y trouverez les 4 étapes de notre parcours d\'accompagnement (prise de rendez-vous, document de collecte, questionnaire de qualification investisseur).\n\n' +
+      'Je reste à votre disposition pour toute question.\n\n' +
+      'Bien cordialement,\nLuc THILLIEZ\nIngénieur patrimonial · PRIVEOS'
+    );
+    document.getElementById('astr-invite-mail').href = 'mailto:' + (email || '') + '?subject=' + subject + '&body=' + body;
+    document.getElementById('astr-invite-modal').style.display = 'flex';
+  };
+
+  // Wire un bouton "Inviter" dans chaque ligne prospect (en plus des actions existantes)
+  function astraeosInjectInviteButtons() {
+    document.querySelectorAll('.dt tbody tr').forEach(function (row) {
+      var actions = row.querySelector('.actions-cell');
+      var nameCell = row.querySelector('.client-cell');
+      if (!actions || !nameCell) return;
+      if (actions.querySelector('.astr-invite-btn')) return; // déjà injecté
+      var names = Array.from(nameCell.querySelectorAll('.client-name, .client-name-line'))
+        .map(function (n) { return n.textContent.trim(); }).filter(Boolean);
+      if (names.length === 0) return;
+      var displayName = names.join(' & ');
+      var slug = astraeosSlugify(names[0]);
+      var btn = document.createElement('button');
+      btn.className = 'action-btn astr-invite-btn';
+      btn.title = 'Envoyer un lien d\'invitation au DCI à ce prospect';
+      btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H5.17L4 17.17V4z"/><polyline points="8 9 12 13 16 9"/></svg>';
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        astraeosOpenInvite(displayName, slug, '');
+      });
+      actions.appendChild(btn);
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    astraeosInjectInviteButtons();
+    // Re-injecter quand on change de page (pour les pipe-02..06 chargés dynamiquement)
+    document.querySelectorAll('.nav-item, .stepper-item-v1').forEach(function (el) {
+      el.addEventListener('click', function () { setTimeout(astraeosInjectInviteButtons, 100); });
+    });
+  });
 
   // ═══════════════════════════════════════════════════════════════════
   // ASTRAEOS · Connexion Google Calendar (flow Calendly-like)
