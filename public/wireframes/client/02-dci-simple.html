@@ -1,0 +1,2807 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Document de collecte · PRIVEOS</title>
+<style>
+:root {
+  --navy: #102D50;
+  --navy-700: #1A3A60;
+  --navy-500: #3A4F6E;
+  --navy-300: #708196;
+  --navy-200: #A4AEBB;
+  --navy-100: #DBE0E4;
+  --navy-50: #EFF2F5;
+  --gold: #C68E0E;
+  --gold-light: #DDBB6E;
+  --gold-soft: #EEDDB6;
+  --gold-faint: #F8EFDA;
+  --ivory: #FAF8F3;
+  --ivory-deep: #F4F0E5;
+  --ivory-card: #FFFFFE;
+  --light-blue: #EBF1FA;
+  --white: #FFFFFF;
+  --text: #1F2937;
+  --text-soft: #4A5568;
+  --text-muted: #6B7689;
+  --success: #2EA85A;
+  --error: #D9534F;
+  --line: #E8E3D6;
+  --line-soft: #F0EBE0;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Epilogue', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--ivory);
+  color: var(--text);
+  line-height: 1.6;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─── Bandeau de progression haut ───────────────────── */
+.top-bar {
+  position: sticky;
+  top: 0;
+  background: var(--white);
+  border-bottom: 1px solid var(--line);
+  z-index: 50;
+  padding: 18px 0;
+}
+.top-bar-inner {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 0 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+.brand-mini {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+.brand-mini-mark {
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.brand-mini-mark svg { width: 100%; height: 100%; }
+.brand-mini-text {
+  font-family: 'Cinzel', 'Georgia', serif;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  color: var(--navy);
+}
+.progress-zone {
+  flex: 1;
+  max-width: 480px;
+}
+.progress-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--navy-300);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+.progress-info .percent { color: var(--gold); font-weight: 700; }
+.progress-bar-wrap {
+  height: 2px;
+  background: var(--line);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--gold) 0%, var(--gold-light) 100%);
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 2px;
+}
+.save-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11px;
+  color: var(--navy-300);
+  letter-spacing: 0.06em;
+  font-style: italic;
+}
+.save-indicator.saved { color: var(--success); }
+.save-icon { width: 13px; height: 13px; stroke-width: 2; }
+
+/* ─── Conteneur de section ─────────────────────────── */
+.section-container {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 60px 32px 100px;
+  min-height: calc(100vh - 75px);
+}
+
+.section {
+  display: none;
+  animation: sectionIn 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.section.active { display: block; }
+@keyframes sectionIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: 48px;
+}
+.section-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 10px;
+  color: var(--gold);
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  font-weight: 700;
+  margin-bottom: 22px;
+}
+.section-eyebrow::before, .section-eyebrow::after {
+  content: '';
+  width: 28px;
+  height: 1px;
+  background: var(--gold);
+  opacity: 0.5;
+}
+.section-title {
+  font-family: 'Cormorant Garamond', 'Georgia', serif;
+  font-size: 44px;
+  font-weight: 500;
+  color: var(--navy);
+  letter-spacing: -0.015em;
+  margin-bottom: 16px;
+  line-height: 1.1;
+}
+.section-subtitle {
+  font-size: 14.5px;
+  color: var(--text-soft);
+  max-width: 560px;
+  margin: 0 auto;
+  line-height: 1.65;
+}
+.subtitle-sep {
+  display: inline-block;
+  width: 32px;
+  height: 1px;
+  background: var(--gold);
+  vertical-align: middle;
+  margin: 14px 0;
+}
+
+/* ─── Bloc / Carte de questions ────────────────────── */
+.q-block {
+  background: var(--ivory-card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 36px 38px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(16, 45, 80, 0.03);
+}
+.q-block-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding-bottom: 22px;
+  margin-bottom: 26px;
+  border-bottom: 1px solid var(--line-soft);
+}
+.q-block-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: var(--ivory);
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  border-radius: 50%;
+  font-family: 'Cormorant Garamond', 'Georgia', serif;
+  font-size: 14px;
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.q-block-text { flex: 1; }
+.q-block-title {
+  font-family: 'Cormorant Garamond', 'Georgia', serif;
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--navy);
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+  margin-bottom: 4px;
+}
+.q-block-subtitle {
+  font-size: 13px;
+  color: var(--text-muted);
+  font-style: italic;
+  line-height: 1.55;
+}
+
+/* ─── Champs de formulaire ─────────────────────────── */
+.field {
+  margin-bottom: 22px;
+}
+.field:last-child { margin-bottom: 0; }
+.field-row, .field-row-3 {
+  margin-bottom: 22px;
+}
+.field-row:last-child, .field-row-3:last-child { margin-bottom: 0; }
+.field-row .field, .field-row-3 .field {
+  margin-bottom: 0;
+}
+.field-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--navy);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+.field-label .required {
+  color: var(--gold);
+  font-weight: 700;
+}
+.field-label .opt {
+  color: var(--text-muted);
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0.02em;
+  font-style: italic;
+  font-size: 11px;
+  margin-left: 4px;
+}
+.field-help {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  margin-top: 6px;
+  font-style: italic;
+  line-height: 1.5;
+}
+.field-help a { color: var(--gold); text-decoration: none; border-bottom: 1px dotted var(--gold); }
+.field-help a:hover { border-bottom-style: solid; }
+
+.text-input, .select-input {
+  width: 100%;
+  padding: 13px 16px;
+  background: var(--white);
+  border: 1px solid var(--navy-100);
+  border-radius: 9px;
+  color: var(--text);
+  font-size: 14px;
+  font-family: inherit;
+  transition: all 0.18s;
+}
+.text-input::placeholder { color: var(--navy-200); }
+.text-input:focus, .select-input:focus {
+  outline: none;
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px var(--gold-faint);
+}
+.text-input:read-only {
+  background: var(--ivory);
+  color: var(--text-soft);
+}
+.select-input {
+  appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none' stroke='%23C68E0E' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><polyline points='1 1.5 6 6.5 11 1.5'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  padding-right: 44px;
+  cursor: pointer;
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+}
+.field-row-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 32px;
+}
+
+/* ─── Sélecteurs en cartes (boutons radio stylisés) ── */
+.choice-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+}
+.choice-card {
+  padding: 24px 18px;
+  background: var(--white);
+  border: 1px solid var(--navy-100);
+  border-radius: 12px;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s;
+  position: relative;
+}
+.choice-card:hover {
+  border-color: var(--gold);
+  box-shadow: 0 4px 12px rgba(198, 142, 14, 0.08);
+}
+.choice-card.selected {
+  background: var(--gold-faint);
+  border-color: var(--gold);
+  box-shadow: 0 0 0 1px var(--gold);
+}
+.choice-card-icon {
+  width: 36px;
+  height: 36px;
+  margin: 0 auto 12px;
+  color: var(--gold);
+}
+.choice-card-icon svg { width: 100%; height: 100%; stroke-width: 1.4; }
+.choice-card-label {
+  font-family: 'Georgia', serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--navy);
+  margin-bottom: 5px;
+}
+.choice-card-desc {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* ─── Toggle Oui/Non/3-options ─────────────────────── */
+.yesno {
+  display: inline-flex;
+  background: var(--white);
+  border: 1px solid var(--navy-100);
+  border-radius: 9px;
+  overflow: hidden;
+  padding: 3px;
+  gap: 2px;
+}
+.yesno-option {
+  padding: 9px 22px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  transition: all 0.15s;
+  border-radius: 6px;
+  user-select: none;
+}
+.yesno-option:hover { color: var(--navy); background: var(--ivory); }
+.yesno-option.selected {
+  background: var(--navy);
+  color: var(--ivory);
+}
+
+/* ─── Tables dynamiques (enfants, objectifs) ─────────── */
+.dyn-wrap {
+  border-radius: 10px;
+  margin-top: 8px;
+}
+.dyn-header-cols {
+  display: grid;
+  gap: 12px;
+  padding: 0 14px 8px;
+  font-size: 10px;
+  color: var(--navy-300);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+.dyn-header-cols.h-enfant { grid-template-columns: 1fr 1fr 1.2fr 1fr 40px; }
+.dyn-header-cols.h-relation { grid-template-columns: 1fr 1fr 1fr 40px; }
+
+.dyn-row {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  background: var(--ivory);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  margin-bottom: 10px;
+  align-items: center;
+}
+.dyn-row .text-input, .dyn-row .select-input {
+  padding: 9px 12px;
+  font-size: 13px;
+  background: var(--white);
+}
+.dyn-row .select-input { background-position: right 10px center; padding-right: 32px; }
+.dyn-row-enfant { grid-template-columns: 1fr 1fr 1.2fr 1fr 40px; }
+.dyn-row-relation { grid-template-columns: 1fr 1fr 1fr 40px; }
+.dyn-row-remove {
+  width: 32px; height: 32px;
+  background: var(--white);
+  border: 1px solid var(--navy-100);
+  color: var(--text-muted);
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 300;
+  transition: all 0.15s;
+}
+.dyn-row-remove:hover {
+  background: #FDF2F0;
+  border-color: var(--error);
+  color: var(--error);
+}
+
+.dyn-add {
+  background: transparent;
+  border: 1px dashed var(--gold);
+  color: var(--gold);
+  padding: 12px 22px;
+  border-radius: 9px;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: inherit;
+  transition: all 0.18s;
+  margin-top: 12px;
+}
+.dyn-add:hover {
+  background: var(--gold-faint);
+  border-style: solid;
+}
+.dyn-add svg { width: 14px; height: 14px; stroke-width: 2; }
+
+/* ─── Objectifs · cartes verticales (refonte) ──────── */
+.obj-card {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 24px 26px;
+  margin-bottom: 14px;
+  position: relative;
+}
+.obj-card-num {
+  position: absolute;
+  top: -10px;
+  left: 24px;
+  background: var(--ivory-card);
+  padding: 0 10px;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+.obj-card-remove {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 28px;
+  height: 28px;
+  background: transparent;
+  border: none;
+  color: var(--navy-200);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: all 0.15s;
+  font-size: 18px;
+}
+.obj-card-remove:hover {
+  background: #FDF2F0;
+  color: var(--error);
+}
+.obj-card-field { margin-bottom: 16px; }
+.obj-card-field:last-child { margin-bottom: 0; }
+.obj-card-importance {
+  margin-bottom: 16px;
+}
+.obj-card-importance .select-input {
+  max-width: 280px;
+}
+.obj-card-horizons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+/* ─── Sections accordéon (patrimoine sous-sections) ── */
+.accordion {
+  margin-bottom: 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--ivory-card);
+  transition: all 0.2s;
+}
+.accordion:hover { border-color: var(--navy-100); }
+.accordion-head {
+  padding: 22px 28px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  transition: background 0.15s;
+}
+.accordion-head:hover { background: var(--ivory); }
+.accordion-head-icon-bg {
+  width: 42px;
+  height: 42px;
+  background: var(--gold-faint);
+  border: 1px solid var(--gold-soft);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--gold);
+}
+.accordion-head-icon-bg svg { width: 20px; height: 20px; stroke-width: 1.6; }
+.accordion-head-text { flex: 1; }
+.accordion-head-title {
+  font-family: 'Cormorant Garamond', 'Georgia', serif;
+  font-size: 19px;
+  color: var(--navy);
+  font-weight: 600;
+  margin-bottom: 2px;
+  letter-spacing: -0.01em;
+}
+.accordion-head-desc {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  font-style: italic;
+}
+.accordion-head-state {
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-weight: 700;
+  padding: 5px 11px;
+  border-radius: 4px;
+  background: var(--ivory);
+}
+.accordion-head-state.filled {
+  color: var(--success);
+  background: rgba(46, 168, 90, 0.08);
+}
+.accordion-chevron {
+  color: var(--gold);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-left: 4px;
+}
+.accordion-chevron svg { width: 18px; height: 18px; stroke-width: 1.8; }
+.accordion.open .accordion-chevron { transform: rotate(90deg); }
+.accordion-body {
+  display: none;
+  padding: 0 28px 28px;
+  border-top: 1px solid var(--line-soft);
+}
+.accordion.open .accordion-body { display: block; padding-top: 24px; }
+
+/* ─── Conditionnels ─────────────────────────────────── */
+.conditional {
+  display: none;
+  margin-top: 16px;
+  margin-bottom: 12px;
+  padding: 4px 0 4px 18px;
+  border-left: 2px solid var(--gold);
+}
+.conditional.visible { display: block; animation: condIn 0.3s ease; }
+.conditional + .field {
+  margin-top: 28px;
+}
+@keyframes condIn {
+  from { opacity: 0; transform: translateX(-4px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* ─── Navigation entre sections ─────────────────────── */
+.nav-bar {
+  position: sticky;
+  bottom: 0;
+  background: var(--white);
+  border-top: 1px solid var(--line);
+  padding: 18px 0;
+  box-shadow: 0 -4px 16px rgba(16, 45, 80, 0.04);
+}
+.nav-bar-inner {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 0 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+}
+.nav-btn {
+  padding: 13px 30px;
+  border-radius: 9px;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  border: none;
+}
+.nav-btn.prev {
+  background: transparent;
+  color: var(--navy);
+  border: 1px solid var(--navy-100);
+}
+.nav-btn.prev:hover {
+  background: var(--ivory);
+  border-color: var(--navy);
+}
+.nav-btn.next {
+  background: var(--navy);
+  color: var(--ivory);
+}
+.nav-btn.next:hover {
+  background: var(--navy-700);
+}
+.nav-btn.next.final {
+  background: var(--gold);
+  color: var(--navy);
+}
+.nav-btn.next.final:hover { background: var(--gold-light); }
+.nav-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.nav-btn svg { width: 14px; height: 14px; stroke-width: 2; }
+.nav-step-indicator {
+  font-size: 11px;
+  color: var(--navy-300);
+  letter-spacing: 0.18em;
+  font-weight: 600;
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 14px;
+  letter-spacing: 0.06em;
+  text-transform: none;
+}
+.nav-step-indicator strong { color: var(--gold); font-weight: 700; font-style: normal; font-family: 'Epilogue', sans-serif; letter-spacing: 0.1em; }
+
+/* ─── Section 01 spécial · accueil dans cadre élégant ─── */
+.welcome-frame {
+  background: var(--white);
+  border: 1px solid var(--gold-soft);
+  border-radius: 16px;
+  padding: 56px 56px;
+  position: relative;
+  box-shadow: 0 8px 32px rgba(16, 45, 80, 0.06);
+  text-align: center;
+  max-width: 760px;
+  margin: 0 auto 40px;
+}
+.welcome-frame::before,
+.welcome-frame::after {
+  content: '';
+  position: absolute;
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--gold);
+}
+.welcome-frame::before {
+  top: -1px; left: -1px;
+  border-right: none; border-bottom: none;
+  border-radius: 16px 0 0 0;
+}
+.welcome-frame::after {
+  bottom: -1px; right: -1px;
+  border-left: none; border-top: none;
+  border-radius: 0 0 16px 0;
+}
+.welcome-mark {
+  font-family: 'Cinzel', 'Georgia', serif;
+  font-size: 28px;
+  color: var(--navy);
+  letter-spacing: 0.24em;
+  font-weight: 600;
+  margin-bottom: 22px;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+.welcome-mark svg { width: 32px; height: 32px; }
+.welcome-line {
+  width: 80px;
+  height: 1px;
+  background: var(--gold);
+  margin: 0 auto 26px;
+}
+.welcome-name {
+  font-family: 'Cormorant Garamond', 'Georgia', serif;
+  font-size: 36px;
+  color: var(--navy);
+  margin-bottom: 20px;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+.welcome-message {
+  font-size: 15px;
+  color: var(--text-soft);
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.7;
+}
+.welcome-message strong { color: var(--navy); font-weight: 600; }
+
+.info-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  margin-bottom: 44px;
+}
+.info-card {
+  background: var(--ivory-card);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 28px 20px;
+  text-align: center;
+  transition: all 0.25s;
+}
+.info-card:hover {
+  border-color: var(--gold-soft);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(16, 45, 80, 0.05);
+}
+.info-card-icon {
+  width: 36px;
+  height: 36px;
+  margin: 0 auto 16px;
+  color: var(--gold);
+}
+.info-card-icon svg { width: 100%; height: 100%; stroke-width: 1.4; }
+.info-card-title {
+  font-family: 'Cormorant Garamond', 'Georgia', serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--navy);
+  margin-bottom: 8px;
+}
+.info-card-text {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  line-height: 1.55;
+}
+
+.rgpd-block {
+  background: var(--ivory-card);
+  border: 1px solid var(--line);
+  border-left: 2px solid var(--gold);
+  border-radius: 10px;
+  padding: 26px 32px;
+  margin-bottom: 32px;
+}
+.rgpd-title {
+  font-family: 'Cormorant Garamond', 'Georgia', serif;
+  font-size: 18px;
+  color: var(--navy);
+  font-weight: 600;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.rgpd-title svg { width: 18px; height: 18px; color: var(--gold); stroke-width: 1.6; }
+.rgpd-text {
+  font-size: 13px;
+  color: var(--text-soft);
+  line-height: 1.7;
+  margin-bottom: 8px;
+}
+.rgpd-text:last-child { margin-bottom: 0; }
+.rgpd-text a {
+  color: var(--gold);
+  text-decoration: none;
+  font-weight: 600;
+  border-bottom: 1px dotted var(--gold);
+  padding-bottom: 1px;
+}
+.rgpd-text a:hover { border-bottom-style: solid; }
+
+/* ─── Section 8 · validation finale ──────────────────── */
+.recap-intro {
+  text-align: center;
+  font-size: 14px;
+  color: var(--text-soft);
+  margin-bottom: 32px;
+  max-width: 540px;
+  margin-left: auto;
+  margin-right: auto;
+  font-style: italic;
+  line-height: 1.65;
+}
+
+.recap-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 36px;
+}
+.recap-card {
+  background: var(--ivory-card);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 22px 26px;
+  transition: all 0.2s;
+}
+.recap-card:hover { border-color: var(--gold-soft); }
+.recap-card-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--line-soft);
+}
+.recap-card-label {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 10.5px;
+  color: var(--gold);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+.recap-card-label svg { width: 14px; height: 14px; stroke-width: 1.6; }
+.recap-card-edit {
+  font-size: 10px;
+  color: var(--text-muted);
+  cursor: pointer;
+  letter-spacing: 0.14em;
+  font-weight: 600;
+  text-transform: uppercase;
+  transition: color 0.15s;
+}
+.recap-card-edit:hover { color: var(--gold); }
+.recap-card-content {
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.7;
+}
+
+/* ─── Refonte récap v9 · bandeau de synthèse en tête ─── */
+.recap-hero {
+  background: var(--ivory-card);
+  color: var(--navy);
+  border: 1px solid var(--navy);
+  border-left: 4px solid var(--navy);
+  border-radius: 12px;
+  padding: 28px 32px;
+  margin-bottom: 32px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 28px;
+  align-items: center;
+  position: relative;
+  box-shadow: 0 2px 12px rgba(16, 45, 80, 0.05);
+}
+.recap-hero-mark {
+  width: 58px;
+  height: 58px;
+  background: var(--white);
+  border: 1px solid var(--gold-soft);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gold);
+  flex-shrink: 0;
+}
+.recap-hero-content { }
+.recap-hero-eyebrow {
+  font-size: 10px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--gold);
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.recap-hero-name {
+  font-family: 'Cormorant Garamond', 'Georgia', serif;
+  font-size: 26px;
+  font-weight: 600;
+  font-style: italic;
+  color: var(--navy);
+  line-height: 1.1;
+  margin-bottom: 8px;
+}
+.recap-hero-meta {
+  font-size: 12.5px;
+  color: var(--text-soft);
+  line-height: 1.5;
+}
+.recap-hero-side {
+  text-align: right;
+  padding-left: 28px;
+  border-left: 1px solid var(--line);
+}
+.recap-hero-side-label {
+  font-size: 9.5px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--gold);
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.recap-hero-side-value {
+  font-family: 'Cormorant Garamond', 'Georgia', serif;
+  font-size: 30px;
+  font-weight: 600;
+  font-style: italic;
+  color: var(--navy);
+  line-height: 1;
+  margin-bottom: 6px;
+}
+.recap-hero-side-sub {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.recap-section-title {
+  font-family: 'Cormorant Garamond', 'Georgia', serif;
+  font-size: 22px;
+  color: var(--navy);
+  font-style: italic;
+  font-weight: 600;
+  margin-bottom: 16px;
+  position: relative;
+  padding-left: 14px;
+}
+.recap-section-title::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 8px;
+  bottom: 8px;
+  width: 2px;
+  background: var(--gold);
+}
+
+.recap-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 7px 0;
+  border-bottom: 1px dotted var(--line-soft);
+  font-size: 12.5px;
+}
+.recap-line:last-child { border-bottom: none; }
+.recap-line-label {
+  color: var(--text-muted);
+  font-weight: 500;
+  font-size: 11.5px;
+  letter-spacing: 0.04em;
+}
+.recap-line-val {
+  color: var(--navy);
+  font-weight: 600;
+  text-align: right;
+}
+.recap-line-amount {
+  font-family: 'Cormorant Garamond', 'Georgia', serif;
+  font-size: 15px;
+  font-weight: 600;
+}
+.recap-line-positive { color: var(--gold); }
+.recap-line.recap-line-neg .recap-line-val { color: #C0392B; }
+
+.recap-objective {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 8px 0;
+  border-bottom: 1px dotted var(--line-soft);
+}
+.recap-objective:last-child { border-bottom: none; }
+.recap-obj-num {
+  width: 26px;
+  height: 26px;
+  background: var(--gold-faint, #FAF6E8);
+  border: 1px solid var(--gold-soft);
+  color: var(--gold);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Cormorant Garamond', 'Georgia', serif;
+  font-size: 14px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.recap-obj-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--navy);
+  margin-bottom: 2px;
+}
+.recap-obj-meta {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.cert-block {
+  background: var(--ivory-card);
+  border: 1px solid var(--gold);
+  border-radius: 12px;
+  padding: 28px 32px;
+  margin-bottom: 28px;
+  box-shadow: 0 2px 8px rgba(198, 142, 14, 0.08);
+}
+.cert-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  cursor: pointer;
+}
+.cert-checkbox {
+  width: 20px;
+  height: 20px;
+  border: 1.5px solid var(--gold);
+  border-radius: 4px;
+  flex-shrink: 0;
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--white);
+  transition: all 0.18s;
+  position: relative;
+}
+.cert-label input { position: absolute; opacity: 0; width: 20px; height: 20px; cursor: pointer; }
+.cert-label input:checked ~ .cert-checkbox { background: var(--gold); }
+.cert-label input:checked ~ .cert-checkbox::after {
+  content: '';
+  width: 6px; height: 11px;
+  border: solid var(--white);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg) translate(-1px, -2px);
+}
+.cert-text {
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.7;
+  flex: 1;
+}
+.cert-text strong { font-weight: 700; color: var(--navy); }
+
+.final-note {
+  background: var(--ivory);
+  border-left: 2px solid var(--gold);
+  padding: 18px 24px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-size: 13px;
+  color: var(--text-soft);
+  line-height: 1.7;
+}
+.final-note strong { color: var(--gold); font-weight: 700; }
+.final-note em { color: var(--navy); font-style: normal; font-weight: 600; }
+
+/* ─── Splash de fin (après envoi) ───────────────────── */
+.final-view {
+  display: none;
+  text-align: center;
+  padding: 60px 0 60px;
+  max-width: 680px;
+  margin: 0 auto;
+}
+.final-view.active { display: block; }
+.final-frame {
+  background: var(--white);
+  border: 1px solid var(--gold-soft);
+  border-radius: 16px;
+  padding: 64px 56px;
+  position: relative;
+  box-shadow: 0 8px 32px rgba(16, 45, 80, 0.06);
+}
+.final-frame::before, .final-frame::after {
+  content: '';
+  position: absolute;
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--gold);
+}
+.final-frame::before {
+  top: -1px;
+  left: -1px;
+  border-right: none;
+  border-bottom: none;
+  border-radius: 16px 0 0 0;
+}
+.final-frame::after {
+  bottom: -1px;
+  right: -1px;
+  border-left: none;
+  border-top: none;
+  border-radius: 0 0 16px 0;
+}
+.final-seal {
+  width: 100px;
+  height: 100px;
+  margin: 0 auto 36px;
+  position: relative;
+}
+.final-seal svg { width: 100%; height: 100%; }
+.final-line {
+  width: 80px;
+  height: 1px;
+  background: var(--gold);
+  margin: 0 auto 30px;
+}
+.final-title {
+  font-family: 'Cormorant Garamond', 'Georgia', serif;
+  font-size: 46px;
+  color: var(--navy);
+  margin-bottom: 24px;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+.final-text {
+  font-size: 16px;
+  color: var(--text-soft);
+  max-width: 560px;
+  margin: 0 auto 36px;
+  line-height: 1.75;
+}
+.final-text strong { color: var(--navy); font-weight: 600; }
+.final-signature {
+  font-size: 16px;
+  color: var(--text-soft);
+  margin-top: 38px;
+  line-height: 1.75;
+}
+.final-signature-name {
+  font-family: 'Cinzel', serif;
+  font-size: 13px;
+  letter-spacing: 0.24em;
+  color: var(--gold);
+  font-style: normal;
+  margin-top: 6px;
+  font-weight: 600;
+}
+
+/* ─── Bandeau wireframe (à supprimer en prod) ─────── */
+.wf-annotation {
+  background: var(--navy);
+  color: var(--gold);
+  font-size: 11px;
+  padding: 10px 16px;
+  text-align: center;
+  letter-spacing: 0.1em;
+  font-weight: 500;
+}
+.wf-annotation strong { color: var(--ivory); letter-spacing: 0.18em; }
+
+/* ─── Responsive mobile ──────────────────────────────── */
+@media (max-width: 760px) {
+  .top-bar-inner { flex-wrap: wrap; gap: 14px; padding: 0 18px; }
+  .progress-zone { order: 3; max-width: 100%; width: 100%; }
+  .section-container { padding: 36px 20px 50px; }
+  .section-title { font-size: 32px; }
+  .section-subtitle { font-size: 13.5px; }
+  .q-block { padding: 26px 22px; }
+  .q-block-title { font-size: 19px; }
+  .field-row, .field-row-3, .obj-card-horizons { grid-template-columns: 1fr; }
+  .info-row { grid-template-columns: 1fr; }
+  .recap-grid { grid-template-columns: 1fr; }
+  .nav-bar-inner { padding: 0 20px; }
+  .nav-btn { padding: 11px 18px; font-size: 11px; }
+  .dyn-row-enfant, .dyn-row-relation { grid-template-columns: 1fr; }
+  .dyn-header-cols { display: none; }
+  .obj-card-horizons { gap: 12px; }
+  .welcome-name { font-size: 28px; }
+  .welcome-message { font-size: 14.5px; }
+  .final-title { font-size: 34px; }
+  .final-frame { padding: 44px 24px; }
+  .accordion-head { padding: 18px 20px; gap: 14px; }
+  .accordion-head-title { font-size: 16px; }
+  .accordion-body { padding: 0 20px 22px; }
+  .accordion.open .accordion-body { padding-top: 20px; }
+}
+
+/* ─── SVG hidden symbols ───────────────────────────── */
+.svg-defs { width: 0; height: 0; position: absolute; visibility: hidden; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════
+     SVG SYMBOLS · pictogrammes haut de gamme
+═══════════════════════════════════════════════════════ -->
+<svg class="svg-defs" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <!-- Arbre PRIVEOS (logo simplifié) -->
+  <symbol id="ic-tree" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M16 28V18" stroke-width="1.6"/>
+    <path d="M16 18c-3 0-5.5-2.2-5.5-5s2.5-5 5.5-5 5.5 2.2 5.5 5-2.5 5-5.5 5z" stroke-width="1.4"/>
+    <path d="M16 8V4" stroke-width="1.4"/>
+    <circle cx="11.5" cy="11" r="1.2" fill="currentColor" stroke="none"/>
+    <circle cx="20.5" cy="11" r="1.2" fill="currentColor" stroke="none"/>
+    <circle cx="16" cy="14.5" r="1.2" fill="currentColor" stroke="none"/>
+  </symbol>
+  <!-- Confidentialité · serrure fine -->
+  <symbol id="ic-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="5" y="11" width="14" height="10" rx="2"/>
+    <path d="M8 11V7a4 4 0 018 0v4"/>
+    <circle cx="12" cy="16" r="1.2" fill="currentColor" stroke="none"/>
+  </symbol>
+  <!-- Temps · horloge fine -->
+  <symbol id="ic-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="9"/>
+    <polyline points="12 7 12 12 15 14"/>
+  </symbol>
+  <!-- Appareils · responsive -->
+  <symbol id="ic-devices" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="2" y="5" width="13" height="10" rx="1"/>
+    <path d="M2 18h14"/>
+    <rect x="17" y="9" width="5" height="11" rx="1"/>
+    <line x1="19.5" y1="17.5" x2="19.5" y2="17.5" stroke-width="1.5"/>
+  </symbol>
+  <!-- Bouclier RGPD -->
+  <symbol id="ic-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6l8-3z"/>
+    <polyline points="9 12 11 14 15 10"/>
+  </symbol>
+  <!-- Foyer · personne -->
+  <symbol id="ic-user" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="8" r="4"/>
+    <path d="M5 20c1.5-4 4-6 7-6s5.5 2 7 6"/>
+  </symbol>
+  <symbol id="ic-couple" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="8" cy="8" r="3.2"/>
+    <circle cx="16" cy="8" r="3.2"/>
+    <path d="M2 20c1-3.5 3-5.5 6-5.5s5 2 6 5.5"/>
+    <path d="M10 20c1-3.5 3-5.5 6-5.5s5 2 6 5.5"/>
+  </symbol>
+  <!-- Pictogrammes patrimoine accordéons -->
+  <symbol id="ic-briefcase" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3" y="7" width="18" height="13" rx="1.5"/>
+    <path d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2"/>
+    <line x1="3" y1="13" x2="21" y2="13"/>
+  </symbol>
+  <symbol id="ic-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M4 11l8-7 8 7v9a1 1 0 01-1 1h-4v-6h-6v6H5a1 1 0 01-1-1v-9z"/>
+  </symbol>
+  <symbol id="ic-coins" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+    <ellipse cx="9" cy="8" rx="6" ry="2.5"/>
+    <path d="M3 8v4c0 1.4 2.7 2.5 6 2.5s6-1.1 6-2.5V8"/>
+    <path d="M3 12v4c0 1.4 2.7 2.5 6 2.5s6-1.1 6-2.5v-4"/>
+    <ellipse cx="17" cy="14" rx="4" ry="2"/>
+    <path d="M13 14v4c0 1.1 1.8 2 4 2s4-.9 4-2v-4"/>
+  </symbol>
+  <symbol id="ic-diamond" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M6 3h12l4 6-10 12L2 9l4-6z"/>
+    <line x1="6" y1="3" x2="10" y2="9"/>
+    <line x1="18" y1="3" x2="14" y2="9"/>
+    <line x1="2" y1="9" x2="22" y2="9"/>
+    <line x1="10" y1="9" x2="12" y2="21"/>
+    <line x1="14" y1="9" x2="12" y2="21"/>
+  </symbol>
+  <symbol id="ic-trend-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="3 7 9 13 13 9 21 17"/>
+    <polyline points="21 11 21 17 15 17"/>
+  </symbol>
+  <!-- Sauvegarde · validé -->
+  <symbol id="ic-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="4 12 10 18 20 6"/>
+  </symbol>
+  <!-- Plus pour ajout -->
+  <symbol id="ic-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="12" y1="5" x2="12" y2="19"/>
+    <line x1="5" y1="12" x2="19" y2="12"/>
+  </symbol>
+  <!-- Chevron -->
+  <symbol id="ic-chevron-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="9 6 15 12 9 18"/>
+  </symbol>
+  <symbol id="ic-arrow-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="4" y1="12" x2="20" y2="12"/>
+    <polyline points="14 6 20 12 14 18"/>
+  </symbol>
+  <symbol id="ic-arrow-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="20" y1="12" x2="4" y2="12"/>
+    <polyline points="10 6 4 12 10 18"/>
+  </symbol>
+  <!-- Récap pictos -->
+  <symbol id="ic-family" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="6" cy="7" r="2.5"/>
+    <circle cx="18" cy="7" r="2.5"/>
+    <circle cx="12" cy="14" r="2"/>
+    <path d="M3 19c.7-2.3 2-3.5 4-3.5"/>
+    <path d="M17 15.5c2 0 3.3 1.2 4 3.5"/>
+    <path d="M9 21c.5-2 1.5-3 3-3s2.5 1 3 3"/>
+  </symbol>
+  <symbol id="ic-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 22s7-7 7-13a7 7 0 10-14 0c0 6 7 13 7 13z"/>
+    <circle cx="12" cy="9" r="2.5"/>
+  </symbol>
+  <symbol id="ic-doc" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M14 3H6a1 1 0 00-1 1v16a1 1 0 001 1h12a1 1 0 001-1V8l-5-5z"/>
+    <polyline points="14 3 14 8 19 8"/>
+    <line x1="8" y1="13" x2="16" y2="13"/>
+    <line x1="8" y1="17" x2="13" y2="17"/>
+  </symbol>
+  <symbol id="ic-wallet" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3" y="6" width="18" height="14" rx="2"/>
+    <path d="M3 10h18"/>
+    <circle cx="17" cy="15" r="1.2" fill="currentColor" stroke="none"/>
+  </symbol>
+  <symbol id="ic-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="4" y1="20" x2="20" y2="20"/>
+    <rect x="6" y="12" width="3" height="8"/>
+    <rect x="11" y="8" width="3" height="12"/>
+    <rect x="16" y="14" width="3" height="6"/>
+  </symbol>
+  <symbol id="ic-target" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="9"/>
+    <circle cx="12" cy="12" r="5"/>
+    <circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/>
+  </symbol>
+  <!-- Sceau d'envoi final -->
+  <symbol id="ic-seal" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="50" cy="50" r="46" stroke-width="1.5"/>
+    <circle cx="50" cy="50" r="36" stroke-width="1"/>
+    <polyline points="34 50 46 62 66 38" stroke-width="2.5"/>
+  </symbol>
+</defs>
+</svg>
+
+<div class="wf-annotation">
+  <strong>WIREFRAME · 03 v2 · ESPACE PROSPECT · DCI SIMPLIFIÉ</strong> · Direction artistique haut de gamme éditoriale · fond ivory · à remplir avant l'entretien initial
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     BANDEAU SUPÉRIEUR · BRAND + PROGRESSION
+═══════════════════════════════════════════════════════ -->
+<div class="top-bar">
+  <div class="top-bar-inner">
+    <div class="brand-mini">
+      <div class="brand-mini-mark" style="color: var(--gold);">
+        <svg><use href="#ic-tree"/></svg>
+      </div>
+      <div class="brand-mini-text">PRIVEOS</div>
+    </div>
+    <div class="progress-zone">
+      <div class="progress-info">
+        <span><span class="percent" id="progPercent">0%</span> complété</span>
+        <span id="progStep">Étape 1 sur 8</span>
+      </div>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" id="progFill" style="width: 0%"></div>
+      </div>
+    </div>
+    <div class="save-indicator saved" id="saveIndicator">
+      <svg class="save-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><use href="#ic-check"/></svg>
+      Enregistré
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     CONTENEUR DES 8 SECTIONS
+═══════════════════════════════════════════════════════ -->
+<div class="section-container">
+
+  <!-- ───────────────────────────────────────────────────
+       SECTION 01 · BIENVENUE + RGPD
+  ───────────────────────────────────────────────────── -->
+  <div class="section active" data-step="1">
+    <div class="welcome-frame">
+      <div class="welcome-mark" style="color: var(--gold);">
+        <svg><use href="#ic-tree"/></svg>
+        <span style="color: var(--navy);">PRIVEOS</span>
+      </div>
+      <div class="welcome-line"></div>
+      <div class="welcome-name">Bonjour Monsieur Bertrand DUPONT-TOPIN,</div>
+      <div class="welcome-message">
+        En prévision de notre entretien initial du <strong>vendredi 22 mai 2026 à 10h00</strong>, nous vous invitons à compléter ce document de collecte d'informations. Il nous permettra de mieux comprendre votre situation et vos objectifs, et de préparer notre échange dans les meilleures conditions.
+        <br><br>
+        Il vous prendra environ <strong>15 minutes</strong> (vos réponses sont sauvegardées automatiquement, vous pouvez le compléter en plusieurs fois).
+      </div>
+    </div>
+
+    <div class="info-row">
+      <div class="info-card">
+        <div class="info-card-icon"><svg><use href="#ic-lock"/></svg></div>
+        <div class="info-card-title">Confidentialité</div>
+        <div class="info-card-text">Vos données sont strictement protégées et destinées uniquement à votre ingénieur patrimonial.</div>
+      </div>
+      <div class="info-card">
+        <div class="info-card-icon"><svg><use href="#ic-clock"/></svg></div>
+        <div class="info-card-title">15 minutes</div>
+        <div class="info-card-text">Durée moyenne de remplissage · sauvegarde automatique à chaque étape.</div>
+      </div>
+      <div class="info-card">
+        <div class="info-card-icon"><svg><use href="#ic-devices"/></svg></div>
+        <div class="info-card-title">Mobile ou ordinateur</div>
+        <div class="info-card-text">Reprenez quand vous le souhaitez, depuis n'importe quel appareil.</div>
+      </div>
+    </div>
+
+    <div class="rgpd-block">
+      <div class="rgpd-title">
+        <svg><use href="#ic-shield"/></svg>
+        Protection de vos données personnelles · RGPD
+      </div>
+      <div class="rgpd-text">
+        Les informations recueillies dans ce document sont enregistrées dans un fichier informatisé par PRIVEOS afin de connaître votre situation familiale, financière et patrimoniale, et de vous conseiller au mieux de vos intérêts.
+      </div>
+      <div class="rgpd-text">
+        Conservation : pendant la durée nécessaire à l'exécution des prestations. Vous disposez d'un droit d'accès, de rectification et de suppression de vos données. Pour toute demande : <a href="mailto:contact@priveos.io">contact@priveos.io</a>
+      </div>
+    </div>
+
+    <div class="q-block">
+      <div class="q-block-head">
+        <div class="q-block-number">I</div>
+        <div class="q-block-text">
+          <div class="q-block-title">Votre identifiant</div>
+          <div class="q-block-subtitle">Quelques informations pour démarrer — vous pourrez compléter le reste juste après</div>
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label">Prénom <span class="required">*</span></label>
+          <input type="text" class="text-input" value="Bertrand" placeholder="Votre prénom">
+        </div>
+        <div class="field">
+          <label class="field-label">Nom <span class="required">*</span></label>
+          <input type="text" class="text-input" value="DUPONT-TOPIN" placeholder="Votre nom">
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">Adresse e-mail <span class="required">*</span></label>
+        <input type="email" class="text-input" value="bertrand.dupont@email.fr" readonly>
+        <div class="field-help">Cette adresse est utilisée pour l'envoi de votre confirmation dans votre agenda · <a href="#" onclick="alert('Ouverture de la messagerie pour contacter votre ingénieur patrimonial');return false;">Cliquez ici pour contacter votre ingénieur patrimonial</a></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ───────────────────────────────────────────────────
+       SECTION 02 · FOYER
+  ───────────────────────────────────────────────────── -->
+  <div class="section" data-step="2">
+    <div class="section-header">
+      <div class="section-eyebrow">Étape 2 sur 8</div>
+      <h1 class="section-title">Votre foyer</h1>
+      <div class="section-subtitle">Nous vous invitons à nous partager les informations qui composent votre foyer.</div>
+    </div>
+
+    <div class="q-block">
+      <div class="q-block-head">
+        <div class="q-block-number">I</div>
+        <div class="q-block-text">
+          <div class="q-block-title">Votre situation</div>
+          <div class="q-block-subtitle">Êtes-vous seul ou en couple ?</div>
+        </div>
+      </div>
+      <div class="choice-cards">
+        <div class="choice-card" onclick="selectCard(this, 'foyer-type', 'seul')">
+          <div class="choice-card-icon"><svg><use href="#ic-user"/></svg></div>
+          <div class="choice-card-label">Seul</div>
+          <div class="choice-card-desc">Célibataire · divorcé(e) · veuf(ve)</div>
+        </div>
+        <div class="choice-card selected" onclick="selectCard(this, 'foyer-type', 'couple')">
+          <div class="choice-card-icon"><svg><use href="#ic-couple"/></svg></div>
+          <div class="choice-card-label">En couple</div>
+          <div class="choice-card-desc">Marié(e) · pacsé(e) · concubin(e)</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="q-block">
+      <div class="q-block-head">
+        <div class="q-block-number">II</div>
+        <div class="q-block-text">
+          <div class="q-block-title">Vous</div>
+          <div class="q-block-subtitle">Vos informations personnelles principales</div>
+        </div>
+      </div>
+      <div class="field-row-3">
+        <div class="field">
+          <label class="field-label">Civilité <span class="required">*</span></label>
+          <select class="select-input">
+            <option>Monsieur</option>
+            <option>Madame</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label">Prénom <span class="required">*</span></label>
+          <input type="text" class="text-input" value="Bertrand">
+        </div>
+        <div class="field">
+          <label class="field-label">Nom <span class="required">*</span></label>
+          <input type="text" class="text-input" value="DUPONT-TOPIN">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label">Date de naissance <span class="required">*</span></label>
+          <input type="date" class="text-input" value="1964-03-12">
+        </div>
+        <div class="field">
+          <label class="field-label">Nationalité <span class="required">*</span></label>
+          <select class="select-input">
+            <option>Française</option>
+            <option>Autre pays de l'Union européenne</option>
+            <option>Hors Union européenne</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="q-block" id="conjoint-block">
+      <div class="q-block-head">
+        <div class="q-block-number">III</div>
+        <div class="q-block-text">
+          <div class="q-block-title">Votre conjoint(e)</div>
+          <div class="q-block-subtitle">Les mêmes informations pour la personne avec qui vous partagez votre vie</div>
+        </div>
+      </div>
+      <div class="field-row-3">
+        <div class="field">
+          <label class="field-label">Civilité <span class="required">*</span></label>
+          <select class="select-input">
+            <option>Madame</option>
+            <option>Monsieur</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label">Prénom <span class="required">*</span></label>
+          <input type="text" class="text-input" value="Monique">
+        </div>
+        <div class="field">
+          <label class="field-label">Nom <span class="required">*</span></label>
+          <input type="text" class="text-input" value="DUPONT-TOPIN">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label">Date de naissance <span class="required">*</span></label>
+          <input type="date" class="text-input" value="1968-07-22">
+        </div>
+        <div class="field">
+          <label class="field-label">Nationalité <span class="required">*</span></label>
+          <select class="select-input">
+            <option>Française</option>
+            <option>Autre pays de l'Union européenne</option>
+            <option>Hors Union européenne</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="q-block">
+      <div class="q-block-head">
+        <div class="q-block-number">IV</div>
+        <div class="q-block-text">
+          <div class="q-block-title">Vos enfants</div>
+          <div class="q-block-subtitle">Avez-vous des enfants ? Vous pouvez en ajouter autant que nécessaire.</div>
+        </div>
+      </div>
+      <div class="dyn-header-cols h-enfant">
+        <div>Prénom</div>
+        <div>Date de naissance</div>
+        <div>Enfant de</div>
+        <div>À charge fiscale</div>
+        <div></div>
+      </div>
+      <div class="dyn-wrap" id="enfantsTable">
+        <div class="dyn-row dyn-row-enfant">
+          <input type="text" class="text-input" placeholder="Prénom" value="Camille">
+          <input type="date" class="text-input" value="1996-04-18">
+          <select class="select-input"><option>Du couple</option><option>De Monsieur</option><option>De Madame</option></select>
+          <select class="select-input"><option>Non</option><option>Oui</option></select>
+          <div class="dyn-row-remove" onclick="this.parentElement.remove()">×</div>
+        </div>
+        <div class="dyn-row dyn-row-enfant">
+          <input type="text" class="text-input" placeholder="Prénom" value="Antoine">
+          <input type="date" class="text-input" value="1999-11-03">
+          <select class="select-input"><option>Du couple</option><option>De Monsieur</option><option>De Madame</option></select>
+          <select class="select-input"><option>Non</option><option>Oui</option></select>
+          <div class="dyn-row-remove" onclick="this.parentElement.remove()">×</div>
+        </div>
+      </div>
+      <button class="dyn-add" onclick="addEnfant()">
+        <svg><use href="#ic-plus"/></svg>
+        Ajouter un enfant
+      </button>
+    </div>
+
+    <div class="q-block">
+      <div class="q-block-head">
+        <div class="q-block-number">V</div>
+        <div class="q-block-text">
+          <div class="q-block-title">Autres personnes à charge <span class="opt">facultatif</span></div>
+          <div class="q-block-subtitle">Parent âgé, frère, sœur ou autre personne dont vous avez la charge financière ou affective</div>
+        </div>
+      </div>
+      <div class="yesno">
+        <div class="yesno-option" onclick="toggleYN(this); document.getElementById('autresPersonnes').classList.toggle('visible')">Oui</div>
+        <div class="yesno-option selected" onclick="toggleYN(this); document.getElementById('autresPersonnes').classList.remove('visible')">Non</div>
+      </div>
+      <div class="conditional" id="autresPersonnes">
+        <div class="dyn-header-cols h-relation" style="margin-top: 14px;">
+          <div>Lien</div>
+          <div>Prénom</div>
+          <div>Nom</div>
+          <div></div>
+        </div>
+        <div class="dyn-wrap">
+          <div class="dyn-row dyn-row-relation">
+            <select class="select-input"><option>Père / Mère</option><option>Frère / Sœur</option><option>Grand-parent</option><option>Autre</option></select>
+            <input type="text" class="text-input" placeholder="Prénom">
+            <input type="text" class="text-input" placeholder="Nom">
+            <div class="dyn-row-remove" onclick="this.parentElement.remove()">×</div>
+          </div>
+        </div>
+        <button class="dyn-add">
+          <svg><use href="#ic-plus"/></svg>
+          Ajouter une personne
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ───────────────────────────────────────────────────
+       SECTION 03 · COORDONNÉES
+  ───────────────────────────────────────────────────── -->
+  <div class="section" data-step="3">
+    <div class="section-header">
+      <div class="section-eyebrow">Étape 3 sur 8</div>
+      <h1 class="section-title">Vos coordonnées</h1>
+      <div class="section-subtitle">Nous proposons de disposer des coordonnées qui nous permettront de vous joindre.</div>
+    </div>
+
+    <div class="q-block">
+      <div class="q-block-head">
+        <div class="q-block-number">I</div>
+        <div class="q-block-text">
+          <div class="q-block-title">Adresse principale</div>
+          <div class="q-block-subtitle">L'adresse de votre résidence principale</div>
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">Adresse <span class="required">*</span></label>
+        <input type="text" class="text-input" value="48 rue de l'Université">
+      </div>
+      <div class="field-row-3">
+        <div class="field">
+          <label class="field-label">Code postal <span class="required">*</span></label>
+          <input type="text" class="text-input" value="75007">
+        </div>
+        <div class="field">
+          <label class="field-label">Ville <span class="required">*</span></label>
+          <input type="text" class="text-input" value="Paris">
+        </div>
+        <div class="field">
+          <label class="field-label">Pays <span class="required">*</span></label>
+          <select class="select-input">
+            <option>France</option>
+            <option>Belgique</option>
+            <option>Suisse</option>
+            <option>Luxembourg</option>
+            <option>Autre</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="q-block">
+      <div class="q-block-head">
+        <div class="q-block-number">II</div>
+        <div class="q-block-text">
+          <div class="q-block-title">Vos coordonnées personnelles</div>
+          <div class="q-block-subtitle">Téléphone et e-mail pour vous joindre</div>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label">Téléphone mobile · Vous <span class="required">*</span></label>
+          <input type="tel" class="text-input" value="+33 6 12 34 56 78">
+        </div>
+        <div class="field">
+          <label class="field-label">E-mail · Vous <span class="required">*</span></label>
+          <input type="email" class="text-input" value="bertrand.dupont@email.fr">
+        </div>
+      </div>
+      <div class="field-row" id="conjoint-coords">
+        <div class="field">
+          <label class="field-label">Téléphone mobile · Madame <span class="required">*</span></label>
+          <input type="tel" class="text-input" value="+33 6 98 76 54 32">
+        </div>
+        <div class="field">
+          <label class="field-label">E-mail · Madame <span class="required">*</span></label>
+          <input type="email" class="text-input" value="monique.dupont@email.fr">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ───────────────────────────────────────────────────
+       SECTION 04 · SITUATION (matrimoniale + pro + fiscale)
+  ───────────────────────────────────────────────────── -->
+  <div class="section" data-step="4">
+    <div class="section-header">
+      <div class="section-eyebrow">Étape 4 sur 8</div>
+      <h1 class="section-title">Votre situation</h1>
+      <div class="section-subtitle">Nous souhaiterions connaître votre situation matrimoniale, professionnelle et fiscale.</div>
+    </div>
+
+    <div class="q-block">
+      <div class="q-block-head">
+        <div class="q-block-number">I</div>
+        <div class="q-block-text">
+          <div class="q-block-title">Situation matrimoniale</div>
+          <div class="q-block-subtitle">Comment êtes-vous unis officiellement ?</div>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label">Votre statut <span class="required">*</span></label>
+          <select class="select-input">
+            <option>Marié(e)</option>
+            <option>Pacsé(e)</option>
+            <option>Concubin(e)</option>
+            <option>Célibataire</option>
+            <option>Divorcé(e)</option>
+            <option>Veuf / Veuve</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label">Date de mariage / PACS</label>
+          <input type="date" class="text-input" value="1990-06-15">
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">Avez-vous signé un contrat de mariage ou une convention de PACS ?</label>
+        <select class="select-input">
+          <option>Oui — Communauté légale (la plupart des couples)</option>
+          <option>Oui — Séparation de biens</option>
+          <option>Oui — Communauté universelle</option>
+          <option>Oui — Participation aux acquêts</option>
+          <option>Non / je ne sais pas</option>
+        </select>
+        <div class="field-help">Si vous n'êtes pas sûr, votre ingénieur patrimonial vous aidera à le préciser lors de l'entretien.</div>
+      </div>
+      <div class="field">
+        <label class="field-label">Avez-vous rédigé un testament ?</label>
+        <div class="yesno">
+          <div class="yesno-option selected" onclick="toggleYN(this)">Oui</div>
+          <div class="yesno-option" onclick="toggleYN(this)">Non</div>
+          <div class="yesno-option" onclick="toggleYN(this)">Je ne sais pas</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="q-block">
+      <div class="q-block-head">
+        <div class="q-block-number">II</div>
+        <div class="q-block-text">
+          <div class="q-block-title">Votre activité professionnelle</div>
+          <div class="q-block-subtitle">Pour vous et votre conjoint(e)</div>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label">Statut professionnel · Vous <span class="required">*</span></label>
+          <select class="select-input">
+            <option>Dirigeant d'entreprise</option>
+            <option>Salarié du privé</option>
+            <option>Salarié du public / fonctionnaire</option>
+            <option>Profession libérale</option>
+            <option>Artisan / commerçant</option>
+            <option>Retraité</option>
+            <option>Sans activité</option>
+            <option>En recherche d'emploi</option>
+            <option>Étudiant</option>
+            <option>Autre</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label">Profession · Vous <span class="required">*</span></label>
+          <input type="text" class="text-input" value="Cardiologue libéral" placeholder="Votre profession actuelle">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label">Statut professionnel · Madame <span class="required">*</span></label>
+          <select class="select-input">
+            <option>Salarié du privé</option>
+            <option>Dirigeant d'entreprise</option>
+            <option>Salarié du public / fonctionnaire</option>
+            <option>Profession libérale</option>
+            <option>Artisan / commerçant</option>
+            <option>Retraité</option>
+            <option>Sans activité</option>
+            <option>En recherche d'emploi</option>
+            <option>Étudiant</option>
+            <option>Autre</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label">Profession · Madame <span class="required">*</span></label>
+          <input type="text" class="text-input" value="Directrice marketing" placeholder="Profession actuelle">
+        </div>
+      </div>
+    </div>
+
+    <div class="q-block">
+      <div class="q-block-head">
+        <div class="q-block-number">III</div>
+        <div class="q-block-text">
+          <div class="q-block-title">Situation fiscale</div>
+          <div class="q-block-subtitle">Votre pays de résidence fiscale principal</div>
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">Pays de résidence fiscale <span class="required">*</span></label>
+        <select class="select-input">
+          <option>France</option>
+          <option>Belgique</option>
+          <option>Suisse</option>
+          <option>Luxembourg</option>
+          <option>Royaume-Uni</option>
+          <option>Allemagne</option>
+          <option>Autre pays UE</option>
+          <option>États-Unis</option>
+          <option>Autre pays hors UE</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="field-label">Avez-vous une autre résidence fiscale ?</label>
+        <div class="yesno">
+          <div class="yesno-option" onclick="toggleYN(this); document.getElementById('secondFiscal').classList.add('visible')">Oui</div>
+          <div class="yesno-option selected" onclick="toggleYN(this); document.getElementById('secondFiscal').classList.remove('visible')">Non</div>
+        </div>
+        <div class="conditional" id="secondFiscal">
+          <div class="field" style="margin-top: 14px; margin-bottom: 0;">
+            <label class="field-label">Précisez le pays</label>
+            <input type="text" class="text-input" placeholder="Pays de seconde résidence fiscale">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ───────────────────────────────────────────────────
+       SECTION 05 · PATRIMOINE
+  ───────────────────────────────────────────────────── -->
+  <div class="section" data-step="5">
+    <div class="section-header">
+      <div class="section-eyebrow">Étape 5 sur 8</div>
+      <h1 class="section-title">Votre patrimoine</h1>
+      <div class="section-subtitle">Nous proposons de disposer d'un aperçu de votre patrimoine actuel.</div>
+    </div>
+
+    <!-- 5.1 · Actifs professionnels -->
+    <div class="accordion">
+      <div class="accordion-head" onclick="toggleAcc(this)">
+        <div class="accordion-head-icon-bg"><svg><use href="#ic-briefcase"/></svg></div>
+        <div class="accordion-head-text">
+          <div class="accordion-head-title">Actifs professionnels</div>
+          <div class="accordion-head-desc">Sociétés que vous détenez ou dirigez</div>
+        </div>
+        <div class="accordion-head-state">À compléter</div>
+        <div class="accordion-chevron"><svg><use href="#ic-chevron-right"/></svg></div>
+      </div>
+      <div class="accordion-body">
+        <div class="field">
+          <label class="field-label">Détenez-vous des parts dans des sociétés ?</label>
+          <div class="yesno">
+            <div class="yesno-option selected" onclick="toggleYN(this); document.getElementById('socDetail').classList.add('visible')">Oui</div>
+            <div class="yesno-option" onclick="toggleYN(this); document.getElementById('socDetail').classList.remove('visible')">Non</div>
+          </div>
+        </div>
+        <div class="conditional visible" id="socDetail">
+          <div class="field-row">
+            <div class="field">
+              <label class="field-label">Sociétés civiles · combien ?</label>
+              <input type="number" class="text-input" value="1" min="0">
+              <div class="field-help">SCI, sociétés civiles patrimoniales</div>
+            </div>
+            <div class="field">
+              <label class="field-label">Sociétés commerciales · combien ?</label>
+              <input type="number" class="text-input" value="1" min="0">
+              <div class="field-help">SARL, SAS, SA, EURL, SASU, etc.</div>
+            </div>
+          </div>
+          <div class="field">
+            <label class="field-label">Estimation totale de la valeur de ces actifs professionnels</label>
+            <input type="text" class="text-input" value="180 000 €" placeholder="Montant en €">
+            <div class="field-help">Estimation approximative — pas besoin d'être précis à ce stade</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5.2 · Immobilier -->
+    <div class="accordion open">
+      <div class="accordion-head" onclick="toggleAcc(this)">
+        <div class="accordion-head-icon-bg"><svg><use href="#ic-home"/></svg></div>
+        <div class="accordion-head-text">
+          <div class="accordion-head-title">Immobilier</div>
+          <div class="accordion-head-desc">Votre résidence et vos investissements immobiliers</div>
+        </div>
+        <div class="accordion-head-state filled">Renseigné</div>
+        <div class="accordion-chevron"><svg><use href="#ic-chevron-right"/></svg></div>
+      </div>
+      <div class="accordion-body">
+        <div class="field">
+          <label class="field-label">Votre résidence principale</label>
+          <div class="yesno">
+            <div class="yesno-option selected" onclick="toggleYN(this); document.getElementById('rpDetail').classList.add('visible')">Propriétaire</div>
+            <div class="yesno-option" onclick="toggleYN(this); document.getElementById('rpDetail').classList.remove('visible')">Locataire</div>
+            <div class="yesno-option" onclick="toggleYN(this); document.getElementById('rpDetail').classList.remove('visible')">Hébergé à titre gratuit</div>
+          </div>
+        </div>
+        <div class="conditional visible" id="rpDetail">
+          <div class="field" style="margin-top: 14px;">
+            <label class="field-label">Valeur brute estimée de votre résidence principale</label>
+            <input type="text" class="text-input" value="850 000 €" placeholder="Valeur estimée">
+          </div>
+        </div>
+        <div class="field">
+          <label class="field-label">Investissements immobiliers locatifs</label>
+          <div class="yesno">
+            <div class="yesno-option selected" onclick="toggleYN(this); document.getElementById('locDetail').classList.add('visible')">Oui</div>
+            <div class="yesno-option" onclick="toggleYN(this); document.getElementById('locDetail').classList.remove('visible')">Non</div>
+          </div>
+        </div>
+        <div class="conditional visible" id="locDetail">
+          <div class="field-row" style="margin-top: 14px;">
+            <div class="field">
+              <label class="field-label">Combien de biens ?</label>
+              <input type="number" class="text-input" value="2" min="1">
+            </div>
+            <div class="field">
+              <label class="field-label">Valeur brute totale estimée</label>
+              <input type="text" class="text-input" value="620 000 €">
+            </div>
+          </div>
+        </div>
+        <div class="field">
+          <label class="field-label">Immobilier indirect (SCPI, OPCI, parts de SCI…)</label>
+          <div class="yesno">
+            <div class="yesno-option" onclick="toggleYN(this); document.getElementById('indiDetail').classList.toggle('visible')">Oui</div>
+            <div class="yesno-option selected" onclick="toggleYN(this); document.getElementById('indiDetail').classList.remove('visible')">Non</div>
+          </div>
+        </div>
+        <div class="conditional" id="indiDetail">
+          <div class="field-row" style="margin-top: 14px;">
+            <div class="field">
+              <label class="field-label">Combien de supports ?</label>
+              <input type="number" class="text-input" min="1">
+            </div>
+            <div class="field">
+              <label class="field-label">Valeur brute totale estimée</label>
+              <input type="text" class="text-input" placeholder="Montant en €">
+            </div>
+          </div>
+        </div>
+        <div class="field">
+          <label class="field-label">Autres biens immobiliers (résidence secondaire, terrains…)</label>
+          <div class="yesno">
+            <div class="yesno-option" onclick="toggleYN(this); document.getElementById('autresImmo').classList.toggle('visible')">Oui</div>
+            <div class="yesno-option selected" onclick="toggleYN(this); document.getElementById('autresImmo').classList.remove('visible')">Non</div>
+          </div>
+        </div>
+        <div class="conditional" id="autresImmo">
+          <div class="field-row" style="margin-top: 14px;">
+            <div class="field">
+              <label class="field-label">Combien de biens ?</label>
+              <input type="number" class="text-input" min="1">
+            </div>
+            <div class="field">
+              <label class="field-label">Valeur brute totale estimée</label>
+              <input type="text" class="text-input" placeholder="Montant en €">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5.3 · Financier -->
+    <div class="accordion open">
+      <div class="accordion-head" onclick="toggleAcc(this)">
+        <div class="accordion-head-icon-bg"><svg><use href="#ic-coins"/></svg></div>
+        <div class="accordion-head-text">
+          <div class="accordion-head-title">Patrimoine financier</div>
+          <div class="accordion-head-desc">Liquidités, placements et investissements financiers</div>
+        </div>
+        <div class="accordion-head-state filled">Renseigné</div>
+        <div class="accordion-chevron"><svg><use href="#ic-chevron-right"/></svg></div>
+      </div>
+      <div class="accordion-body">
+        <div style="background: var(--gold-faint); border-left: 2px solid var(--gold); padding: 12px 16px; border-radius: 6px; margin-bottom: 22px; font-size: 12.5px; color: var(--text-soft); font-style: italic; line-height: 1.55;">
+          Indiquez pour chaque type de produit que vous possédez, le nombre total de supports et le montant total approximatif.
+        </div>
+
+        <div class="field">
+          <label class="field-label">Épargne disponible (livrets, comptes de dépôt…)</label>
+          <div class="yesno">
+            <div class="yesno-option selected" onclick="toggleYN(this); document.getElementById('liqDetail').classList.add('visible')">Oui</div>
+            <div class="yesno-option" onclick="toggleYN(this); document.getElementById('liqDetail').classList.remove('visible')">Non</div>
+          </div>
+        </div>
+        <div class="conditional visible" id="liqDetail">
+          <div class="field-row" style="margin-top: 14px;">
+            <div class="field">
+              <label class="field-label">Nombre de supports</label>
+              <input type="number" class="text-input" value="4">
+            </div>
+            <div class="field">
+              <label class="field-label">Montant total</label>
+              <input type="text" class="text-input" value="85 000 €">
+            </div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field-label">Assurances-vie</label>
+          <div class="yesno">
+            <div class="yesno-option selected" onclick="toggleYN(this); document.getElementById('avDetail').classList.add('visible')">Oui</div>
+            <div class="yesno-option" onclick="toggleYN(this); document.getElementById('avDetail').classList.remove('visible')">Non</div>
+          </div>
+        </div>
+        <div class="conditional visible" id="avDetail">
+          <div class="field-row" style="margin-top: 14px;">
+            <div class="field">
+              <label class="field-label">Nombre de contrats</label>
+              <input type="number" class="text-input" value="3">
+            </div>
+            <div class="field">
+              <label class="field-label">Montant total</label>
+              <input type="text" class="text-input" value="280 000 €">
+            </div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field-label">PEA (Plan d'Épargne en Actions)</label>
+          <div class="yesno">
+            <div class="yesno-option selected" onclick="toggleYN(this); document.getElementById('peaDetail').classList.add('visible')">Oui</div>
+            <div class="yesno-option" onclick="toggleYN(this); document.getElementById('peaDetail').classList.remove('visible')">Non</div>
+          </div>
+        </div>
+        <div class="conditional visible" id="peaDetail">
+          <div class="field-row" style="margin-top: 14px;">
+            <div class="field">
+              <label class="field-label">Nombre de PEA</label>
+              <input type="number" class="text-input" value="1">
+            </div>
+            <div class="field">
+              <label class="field-label">Montant total</label>
+              <input type="text" class="text-input" value="95 000 €">
+            </div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field-label">Compte-titres ordinaire (CTO)</label>
+          <div class="yesno">
+            <div class="yesno-option" onclick="toggleYN(this); document.getElementById('ctoDetail').classList.toggle('visible')">Oui</div>
+            <div class="yesno-option selected" onclick="toggleYN(this); document.getElementById('ctoDetail').classList.remove('visible')">Non</div>
+          </div>
+        </div>
+        <div class="conditional" id="ctoDetail">
+          <div class="field-row" style="margin-top: 14px;">
+            <div class="field">
+              <label class="field-label">Nombre de comptes</label>
+              <input type="number" class="text-input">
+            </div>
+            <div class="field">
+              <label class="field-label">Montant total</label>
+              <input type="text" class="text-input" placeholder="Montant en €">
+            </div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field-label">Épargne retraite (PER, PERP, Madelin, PERCO…)</label>
+          <div class="yesno">
+            <div class="yesno-option selected" onclick="toggleYN(this); document.getElementById('perDetail').classList.add('visible')">Oui</div>
+            <div class="yesno-option" onclick="toggleYN(this); document.getElementById('perDetail').classList.remove('visible')">Non</div>
+          </div>
+        </div>
+        <div class="conditional visible" id="perDetail">
+          <div class="field-row" style="margin-top: 14px;">
+            <div class="field">
+              <label class="field-label">Nombre de contrats</label>
+              <input type="number" class="text-input" value="2">
+            </div>
+            <div class="field">
+              <label class="field-label">Montant total</label>
+              <input type="text" class="text-input" value="60 000 €">
+            </div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field-label">Autres placements financiers</label>
+          <div class="yesno">
+            <div class="yesno-option" onclick="toggleYN(this); document.getElementById('autresFin').classList.toggle('visible')">Oui</div>
+            <div class="yesno-option selected" onclick="toggleYN(this); document.getElementById('autresFin').classList.remove('visible')">Non</div>
+          </div>
+        </div>
+        <div class="conditional" id="autresFin">
+          <div class="field-row" style="margin-top: 14px;">
+            <div class="field">
+              <label class="field-label">Nombre de supports</label>
+              <input type="number" class="text-input">
+            </div>
+            <div class="field">
+              <label class="field-label">Montant total</label>
+              <input type="text" class="text-input" placeholder="Montant en €">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5.4 · Alternatif -->
+    <div class="accordion">
+      <div class="accordion-head" onclick="toggleAcc(this)">
+        <div class="accordion-head-icon-bg"><svg><use href="#ic-diamond"/></svg></div>
+        <div class="accordion-head-text">
+          <div class="accordion-head-title">Placements alternatifs</div>
+          <div class="accordion-head-desc">Crypto-monnaies, or, art, vins, montres, véhicules de collection…</div>
+        </div>
+        <div class="accordion-head-state">À compléter</div>
+        <div class="accordion-chevron"><svg><use href="#ic-chevron-right"/></svg></div>
+      </div>
+      <div class="accordion-body">
+        <div class="field">
+          <label class="field-label">Possédez-vous des placements alternatifs ?</label>
+          <div class="yesno">
+            <div class="yesno-option" onclick="toggleYN(this); document.getElementById('altDetail').classList.toggle('visible')">Oui</div>
+            <div class="yesno-option selected" onclick="toggleYN(this); document.getElementById('altDetail').classList.remove('visible')">Non</div>
+          </div>
+        </div>
+        <div class="conditional" id="altDetail">
+          <div class="field-row" style="margin-top: 14px;">
+            <div class="field">
+              <label class="field-label">Nombre de supports</label>
+              <input type="number" class="text-input" min="1">
+            </div>
+            <div class="field">
+              <label class="field-label">Montant total estimé</label>
+              <input type="text" class="text-input" placeholder="Montant en €">
+            </div>
+          </div>
+          <div class="field">
+            <label class="field-label">Précisez les types <span class="opt">facultatif</span></label>
+            <input type="text" class="text-input" placeholder="Ex. : crypto-monnaies, or, montres, art…">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5.5 · Emprunts -->
+    <div class="accordion open">
+      <div class="accordion-head" onclick="toggleAcc(this)">
+        <div class="accordion-head-icon-bg"><svg><use href="#ic-trend-down"/></svg></div>
+        <div class="accordion-head-text">
+          <div class="accordion-head-title">Emprunts et dettes</div>
+          <div class="accordion-head-desc">Crédits en cours et dettes diverses</div>
+        </div>
+        <div class="accordion-head-state filled">Renseigné</div>
+        <div class="accordion-chevron"><svg><use href="#ic-chevron-right"/></svg></div>
+      </div>
+      <div class="accordion-body">
+        <div class="field">
+          <label class="field-label">Prêt(s) immobilier(s)</label>
+          <div class="yesno">
+            <div class="yesno-option selected" onclick="toggleYN(this); document.getElementById('pretImmo').classList.add('visible')">Oui</div>
+            <div class="yesno-option" onclick="toggleYN(this); document.getElementById('pretImmo').classList.remove('visible')">Non</div>
+          </div>
+        </div>
+        <div class="conditional visible" id="pretImmo">
+          <div class="field-row" style="margin-top: 14px;">
+            <div class="field">
+              <label class="field-label">Nombre de prêts</label>
+              <input type="number" class="text-input" value="2">
+            </div>
+            <div class="field">
+              <label class="field-label">Capital restant dû total</label>
+              <input type="text" class="text-input" value="220 000 €">
+            </div>
+          </div>
+        </div>
+        <div class="field">
+          <label class="field-label">Prêt(s) à la consommation</label>
+          <div class="yesno">
+            <div class="yesno-option" onclick="toggleYN(this); document.getElementById('pretConso').classList.toggle('visible')">Oui</div>
+            <div class="yesno-option selected" onclick="toggleYN(this); document.getElementById('pretConso').classList.remove('visible')">Non</div>
+          </div>
+        </div>
+        <div class="conditional" id="pretConso">
+          <div class="field-row" style="margin-top: 14px;">
+            <div class="field">
+              <label class="field-label">Nombre de prêts</label>
+              <input type="number" class="text-input">
+            </div>
+            <div class="field">
+              <label class="field-label">Capital restant dû total</label>
+              <input type="text" class="text-input" placeholder="Montant en €">
+            </div>
+          </div>
+        </div>
+        <div class="field">
+          <label class="field-label">Autres dettes (familiales, fiscales, professionnelles…)</label>
+          <div class="yesno">
+            <div class="yesno-option" onclick="toggleYN(this); document.getElementById('autresDettes').classList.toggle('visible')">Oui</div>
+            <div class="yesno-option selected" onclick="toggleYN(this); document.getElementById('autresDettes').classList.remove('visible')">Non</div>
+          </div>
+        </div>
+        <div class="conditional" id="autresDettes">
+          <div class="field" style="margin-top: 14px;">
+            <label class="field-label">Précisez la nature et le montant</label>
+            <input type="text" class="text-input" placeholder="Ex. : dette familiale 50 000 €, dette fiscale…">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ───────────────────────────────────────────────────
+       SECTION 06 · BUDGET
+  ───────────────────────────────────────────────────── -->
+  <div class="section" data-step="6">
+    <div class="section-header">
+      <div class="section-eyebrow">Étape 6 sur 8</div>
+      <h1 class="section-title">Votre budget</h1>
+      <div class="section-subtitle">Nous proposons de disposer d'un aperçu de vos revenus et de vos charges annuels.</div>
+    </div>
+
+    <div class="q-block">
+      <div class="q-block-head">
+        <div class="q-block-number">I</div>
+        <div class="q-block-text">
+          <div class="q-block-title">Vos revenus annuels avant impôt</div>
+          <div class="q-block-subtitle">Total des revenus bruts perçus par le foyer (salaires, pensions, loyers, dividendes…)</div>
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">Montant total annuel des revenus du foyer · avant impôt</label>
+        <input type="text" class="text-input" value="220 000 €" placeholder="Ex. 80 000 €">
+        <div class="field-help">Approximatif — revenus bruts du foyer (Monsieur + Madame, toutes sources confondues, avant impôt)</div>
+      </div>
+    </div>
+
+    <div class="q-block">
+      <div class="q-block-head">
+        <div class="q-block-number">II</div>
+        <div class="q-block-text">
+          <div class="q-block-title">Vos charges annuelles</div>
+          <div class="q-block-subtitle">Charges fixes (loyer / crédits, impôts, factures…) et charges courantes</div>
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">Montant total annuel des charges du foyer</label>
+        <input type="text" class="text-input" value="140 000 €" placeholder="Ex. 50 000 €">
+        <div class="field-help">Approximatif — ensemble des dépenses annuelles récurrentes</div>
+      </div>
+    </div>
+
+    <div class="q-block" style="background: var(--gold-faint); border-color: var(--gold-soft);">
+      <div style="display: flex; align-items: center; gap: 18px;">
+        <div style="width: 44px; height: 44px; background: var(--white); border: 1px solid var(--gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--gold); flex-shrink: 0;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3M12 18v3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M3 12h3M18 12h3M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/><circle cx="12" cy="12" r="3"/></svg>
+        </div>
+        <div>
+          <div style="font-family: 'Cormorant Garamond', 'Georgia', serif; font-size: 18px; color: var(--navy); font-weight: 600; margin-bottom: 4px;">Capacité d'épargne estimée par an</div>
+          <div style="font-size: 13.5px; color: var(--text-soft); line-height: 1.6;">D'après vos réponses : environ <strong style="color: var(--navy); font-weight: 700;">80 000 € par an</strong> · soit <strong style="color: var(--navy); font-weight: 700;">6 700 € par mois</strong>.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ───────────────────────────────────────────────────
+       SECTION 07 · OBJECTIFS (refonte cartes verticales)
+  ───────────────────────────────────────────────────── -->
+  <div class="section" data-step="7">
+    <div class="section-header">
+      <div class="section-eyebrow">Étape 7 sur 8</div>
+      <h1 class="section-title">Quels sont vos objectifs ?</h1>
+      <div class="section-subtitle">Nous vous invitons à nous indiquer les principaux objectifs qui motivent votre démarche.</div>
+    </div>
+
+    <div class="q-block">
+      <div class="q-block-head">
+        <div class="q-block-number">I</div>
+        <div class="q-block-text">
+          <div class="q-block-title">Vos projets prioritaires</div>
+          <div class="q-block-subtitle">Ajoutez autant d'objectifs que nécessaire — classez-les par ordre d'importance</div>
+        </div>
+      </div>
+
+      <div id="objectifsContainer">
+
+        <!-- Objectif 1 -->
+        <div class="obj-card">
+          <div class="obj-card-num">Objectif n° 1</div>
+          <button class="obj-card-remove" onclick="this.parentElement.remove()">×</button>
+          <div class="obj-card-field">
+            <label class="field-label">Quel est cet objectif ?</label>
+            <select class="select-input">
+              <option>Préparer ma transmission patrimoniale</option>
+              <option>Préparer ma retraite</option>
+              <option>Optimiser ma fiscalité</option>
+              <option>Protéger ma famille</option>
+              <option>Acquérir un bien immobilier</option>
+              <option>Investir pour générer des revenus</option>
+              <option>Constituer un capital</option>
+              <option>Financer les études de mes enfants</option>
+              <option>Anticiper une cession professionnelle</option>
+              <option>Diversifier mon patrimoine</option>
+              <option>Autre · préciser</option>
+            </select>
+          </div>
+          <div class="obj-card-importance">
+            <label class="field-label">Importance</label>
+            <select class="select-input">
+              <option>Élevée</option>
+              <option>Moyenne</option>
+              <option>Faible</option>
+            </select>
+          </div>
+          <div class="obj-card-horizons">
+            <div>
+              <label class="field-label">Quand initier ?</label>
+              <select class="select-input">
+                <option>Court terme (1 à 2 ans)</option>
+                <option>Urgent (moins d'un an)</option>
+                <option>Moyen terme (3 à 5 ans)</option>
+                <option>Long terme (5 à 10 ans)</option>
+                <option>Très long terme (plus de 10 ans)</option>
+              </select>
+            </div>
+            <div>
+              <label class="field-label">Quand atteindre ?</label>
+              <select class="select-input">
+                <option>Long terme (5 à 10 ans)</option>
+                <option>Urgent (moins d'un an)</option>
+                <option>Court terme (1 à 2 ans)</option>
+                <option>Moyen terme (3 à 5 ans)</option>
+                <option>Très long terme (plus de 10 ans)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Objectif 2 -->
+        <div class="obj-card">
+          <div class="obj-card-num">Objectif n° 2</div>
+          <button class="obj-card-remove" onclick="this.parentElement.remove()">×</button>
+          <div class="obj-card-field">
+            <label class="field-label">Quel est cet objectif ?</label>
+            <select class="select-input">
+              <option>Optimiser ma fiscalité</option>
+              <option>Préparer ma transmission patrimoniale</option>
+              <option>Préparer ma retraite</option>
+              <option>Protéger ma famille</option>
+              <option>Acquérir un bien immobilier</option>
+              <option>Autre · préciser</option>
+            </select>
+          </div>
+          <div class="obj-card-importance">
+            <label class="field-label">Importance</label>
+            <select class="select-input">
+              <option>Moyenne</option>
+              <option>Élevée</option>
+              <option>Faible</option>
+            </select>
+          </div>
+          <div class="obj-card-horizons">
+            <div>
+              <label class="field-label">Quand initier ?</label>
+              <select class="select-input">
+                <option>Urgent (moins d'un an)</option>
+                <option>Court terme (1 à 2 ans)</option>
+                <option>Moyen terme (3 à 5 ans)</option>
+                <option>Long terme (5 à 10 ans)</option>
+                <option>Très long terme (plus de 10 ans)</option>
+              </select>
+            </div>
+            <div>
+              <label class="field-label">Quand atteindre ?</label>
+              <select class="select-input">
+                <option>Court terme (1 à 2 ans)</option>
+                <option>Urgent (moins d'un an)</option>
+                <option>Moyen terme (3 à 5 ans)</option>
+                <option>Long terme (5 à 10 ans)</option>
+                <option>Très long terme (plus de 10 ans)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <button class="dyn-add" onclick="addObjectif()">
+        <svg><use href="#ic-plus"/></svg>
+        Ajouter un objectif
+      </button>
+    </div>
+
+    <div class="q-block">
+      <div class="q-block-head">
+        <div class="q-block-number">II</div>
+        <div class="q-block-text">
+          <div class="q-block-title">Un message libre <span class="opt">facultatif</span></div>
+          <div class="q-block-subtitle">Une préoccupation particulière, un contexte, une question — tout ce que vous souhaitez nous partager avant l'entretien</div>
+        </div>
+      </div>
+      <div class="field">
+        <textarea class="text-input" rows="5" placeholder="Votre message…" style="resize: vertical; font-family: inherit;"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- ───────────────────────────────────────────────────
+       SECTION 08 · VALIDATION
+  ───────────────────────────────────────────────────── -->
+  <div class="section" data-step="8">
+    <div class="section-header">
+      <div class="section-eyebrow">Étape 8 sur 8</div>
+      <h1 class="section-title">Récapitulatif de votre profil</h1>
+      <div class="section-subtitle">Vérifiez vos informations avant de les transmettre à votre ingénieur patrimonial.</div>
+    </div>
+
+    <!-- Bandeau de synthèse en tête -->
+    <div class="recap-hero">
+      <div class="recap-hero-mark">
+        <svg width="44" height="44" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M32 52 V18"/>
+          <path d="M32 24 Q22 24 19 16"/>
+          <path d="M32 30 Q44 30 47 20"/>
+          <path d="M32 36 Q22 36 18 28"/>
+          <path d="M32 42 Q44 42 46 34"/>
+          <ellipse cx="32" cy="54" rx="9" ry="2.5"/>
+        </svg>
+      </div>
+      <div class="recap-hero-content">
+        <div class="recap-hero-eyebrow">Profil patrimonial complété</div>
+        <div class="recap-hero-name">Bertrand &amp; Monique DUPONT-TOPIN</div>
+        <div class="recap-hero-meta">Couple · 2 enfants · Résidence fiscale France · Cardiologue libéral</div>
+      </div>
+      <div class="recap-hero-side">
+        <div class="recap-hero-side-label">Patrimoine brut estimé</div>
+        <div class="recap-hero-side-value">≈ 2,17 M€</div>
+        <div class="recap-hero-side-sub">après dettes : ≈ 1,95 M€</div>
+      </div>
+    </div>
+
+    <div class="recap-section-title">Détail par rubrique</div>
+
+    <div class="recap-grid">
+      <div class="recap-card">
+        <div class="recap-card-title">
+          <div class="recap-card-label"><svg><use href="#ic-family"/></svg> Foyer</div>
+          <span class="recap-card-edit" onclick="goToStep(2)">Modifier</span>
+        </div>
+        <div class="recap-card-content">
+          <div class="recap-line"><span class="recap-line-label">Composition</span><span class="recap-line-val">Couple marié</span></div>
+          <div class="recap-line"><span class="recap-line-label">Conjoints</span><span class="recap-line-val">Bertrand &amp; Monique</span></div>
+          <div class="recap-line"><span class="recap-line-label">Enfants</span><span class="recap-line-val">Camille (30) · Antoine (26)</span></div>
+        </div>
+      </div>
+
+      <div class="recap-card">
+        <div class="recap-card-title">
+          <div class="recap-card-label"><svg><use href="#ic-pin"/></svg> Coordonnées</div>
+          <span class="recap-card-edit" onclick="goToStep(3)">Modifier</span>
+        </div>
+        <div class="recap-card-content">
+          <div class="recap-line"><span class="recap-line-label">Adresse</span><span class="recap-line-val">48 rue de l'Université</span></div>
+          <div class="recap-line"><span class="recap-line-label">Ville</span><span class="recap-line-val">75007 Paris</span></div>
+          <div class="recap-line"><span class="recap-line-label">E-mail</span><span class="recap-line-val">bertrand.dupont@email.fr</span></div>
+        </div>
+      </div>
+
+      <div class="recap-card">
+        <div class="recap-card-title">
+          <div class="recap-card-label"><svg><use href="#ic-doc"/></svg> Situation</div>
+          <span class="recap-card-edit" onclick="goToStep(4)">Modifier</span>
+        </div>
+        <div class="recap-card-content">
+          <div class="recap-line"><span class="recap-line-label">Régime</span><span class="recap-line-val">Communauté légale</span></div>
+          <div class="recap-line"><span class="recap-line-label">Marié depuis</span><span class="recap-line-val">1990</span></div>
+          <div class="recap-line"><span class="recap-line-label">Activité</span><span class="recap-line-val">Cardiologue libéral</span></div>
+          <div class="recap-line"><span class="recap-line-label">Fiscalité</span><span class="recap-line-val">France</span></div>
+        </div>
+      </div>
+
+      <div class="recap-card">
+        <div class="recap-card-title">
+          <div class="recap-card-label"><svg><use href="#ic-home"/></svg> Patrimoine</div>
+          <span class="recap-card-edit" onclick="goToStep(5)">Modifier</span>
+        </div>
+        <div class="recap-card-content">
+          <div class="recap-line"><span class="recap-line-label">Immobilier</span><span class="recap-line-val recap-line-amount">≈ 1 470 000 €</span></div>
+          <div class="recap-line"><span class="recap-line-label">Financier</span><span class="recap-line-val recap-line-amount">≈ 520 000 €</span></div>
+          <div class="recap-line"><span class="recap-line-label">Professionnel</span><span class="recap-line-val recap-line-amount">≈ 180 000 €</span></div>
+          <div class="recap-line recap-line-neg"><span class="recap-line-label">Dettes</span><span class="recap-line-val recap-line-amount">− 220 000 €</span></div>
+        </div>
+      </div>
+
+      <div class="recap-card">
+        <div class="recap-card-title">
+          <div class="recap-card-label"><svg><use href="#ic-wallet"/></svg> Budget</div>
+          <span class="recap-card-edit" onclick="goToStep(6)">Modifier</span>
+        </div>
+        <div class="recap-card-content">
+          <div class="recap-line"><span class="recap-line-label">Revenus annuels</span><span class="recap-line-val recap-line-amount">220 000 €</span></div>
+          <div class="recap-line"><span class="recap-line-label">Charges annuelles</span><span class="recap-line-val recap-line-amount">140 000 €</span></div>
+          <div class="recap-line"><span class="recap-line-label">Capacité d'épargne</span><span class="recap-line-val recap-line-amount recap-line-positive">≈ 80 000 € / an</span></div>
+        </div>
+      </div>
+
+      <div class="recap-card">
+        <div class="recap-card-title">
+          <div class="recap-card-label"><svg><use href="#ic-target"/></svg> Objectifs</div>
+          <span class="recap-card-edit" onclick="goToStep(7)">Modifier</span>
+        </div>
+        <div class="recap-card-content">
+          <div class="recap-objective"><span class="recap-obj-num">1</span><div><div class="recap-obj-title">Transmission patrimoniale</div><div class="recap-obj-meta">Horizon long terme</div></div></div>
+          <div class="recap-objective"><span class="recap-obj-num">2</span><div><div class="recap-obj-title">Optimisation fiscale</div><div class="recap-obj-meta">Horizon court terme</div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cert-block">
+      <label class="cert-label">
+        <input type="checkbox" id="certCheck" onchange="checkFinalValid()">
+        <span class="cert-checkbox"></span>
+        <span class="cert-text">
+          <strong>Je certifie l'exactitude des informations</strong> communiquées dans ce document. Je comprends que la qualité du conseil prodigué par PRIVEOS dépendra de la véracité et de l'exhaustivité de mes réponses. Je consens au traitement de ces données par PRIVEOS pour les besoins de l'accompagnement patrimonial qui me sera proposé.
+        </span>
+      </label>
+    </div>
+
+    <div class="final-note">
+      <strong>À noter ·</strong> Une fois envoyé, votre ingénieur patrimonial recevra immédiatement vos réponses et préparera votre entretien initial du <em>vendredi 22 mai 2026 à 10h00</em>. Vous pourrez ensuite décider ensemble si vous souhaitez engager une étude patrimoniale plus approfondie.
+    </div>
+  </div>
+
+  <!-- ───────────────────────────────────────────────────
+       VUE FINALE · APRÈS ENVOI
+  ───────────────────────────────────────────────────── -->
+  <div class="final-view" id="finalView">
+    <div class="final-frame">
+      <div class="final-seal" style="color: var(--gold);">
+        <svg><use href="#ic-seal"/></svg>
+      </div>
+      <div class="final-line"></div>
+      <div class="final-title">Merci Bertrand,</div>
+      <div class="final-text">
+        Vos informations ont été transmises à votre ingénieur patrimonial :
+        <br><br>
+        <strong>Luc THILLIEZ</strong>.
+        <br><br>
+        Votre ingénieur étudiera vos informations attentivement pour préparer votre entretien initial du :
+        <br><br>
+        <strong>vendredi 22 mai 2026 à 10h00</strong>.
+        <br><br>
+        Vous allez recevoir un e-mail de confirmation avec un lien de connexion.
+      </div>
+      <div class="final-signature">
+        À très bientôt,
+        <div class="final-signature-name">L'ÉQUIPE PRIVEOS</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     BARRE DE NAVIGATION
+═══════════════════════════════════════════════════════ -->
+<div class="nav-bar" id="navBar">
+  <div class="nav-bar-inner">
+    <button class="nav-btn prev" id="prevBtn" onclick="prevStep()" style="visibility: hidden;">
+      <svg><use href="#ic-arrow-left"/></svg>
+      Précédent
+    </button>
+    <div class="nav-step-indicator" id="stepIndicator"><strong>1</strong> sur 8</div>
+    <button class="nav-btn next" id="nextBtn" onclick="nextStep()">
+      Continuer
+      <svg><use href="#ic-arrow-right"/></svg>
+    </button>
+  </div>
+</div>
+
+<script>
+const TOTAL_STEPS = 8;
+let currentStep = 1;
+
+function showStep(n) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  const sec = document.querySelector(`.section[data-step="${n}"]`);
+  if (sec) sec.classList.add('active');
+  currentStep = n;
+  updateProgress();
+  updateNav();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  flashSave();
+}
+
+function updateProgress() {
+  const pct = Math.round(((currentStep - 1) / (TOTAL_STEPS - 1)) * 100);
+  document.getElementById('progFill').style.width = pct + '%';
+  document.getElementById('progPercent').textContent = pct + '%';
+  document.getElementById('progStep').textContent = `Étape ${currentStep} sur ${TOTAL_STEPS}`;
+  document.getElementById('stepIndicator').innerHTML = `<strong>${currentStep}</strong> sur ${TOTAL_STEPS}`;
+}
+
+function updateNav() {
+  const prev = document.getElementById('prevBtn');
+  const next = document.getElementById('nextBtn');
+  prev.style.visibility = currentStep === 1 ? 'hidden' : 'visible';
+  if (currentStep === TOTAL_STEPS) {
+    next.innerHTML = 'Envoyer mes réponses <svg><use href="#ic-arrow-right"/></svg>';
+    next.classList.add('final');
+    next.disabled = !document.getElementById('certCheck').checked;
+  } else {
+    next.innerHTML = 'Continuer <svg><use href="#ic-arrow-right"/></svg>';
+    next.classList.remove('final');
+    next.disabled = false;
+  }
+}
+
+function nextStep() {
+  if (currentStep === TOTAL_STEPS) { submitForm(); return; }
+  if (currentStep < TOTAL_STEPS) showStep(currentStep + 1);
+}
+function prevStep() { if (currentStep > 1) showStep(currentStep - 1); }
+function goToStep(n) { showStep(n); }
+
+function checkFinalValid() {
+  if (currentStep === TOTAL_STEPS) {
+    document.getElementById('nextBtn').disabled = !document.getElementById('certCheck').checked;
+  }
+}
+
+function submitForm() {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById('finalView').classList.add('active');
+  document.getElementById('navBar').style.display = 'none';
+  document.querySelector('.top-bar').style.display = 'none';
+  document.getElementById('progFill').style.width = '100%';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function flashSave() {
+  const ind = document.getElementById('saveIndicator');
+  ind.classList.remove('saved');
+  setTimeout(() => ind.classList.add('saved'), 200);
+}
+
+function selectCard(el, group, val) {
+  el.parentElement.querySelectorAll('.choice-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  if (group === 'foyer-type') {
+    const cb = document.getElementById('conjoint-block');
+    const cc = document.getElementById('conjoint-coords');
+    if (val === 'seul') {
+      if (cb) cb.style.display = 'none';
+      if (cc) cc.style.display = 'none';
+    } else {
+      if (cb) cb.style.display = 'block';
+      if (cc) cc.style.display = 'grid';
+    }
+  }
+}
+
+function toggleYN(el) {
+  el.parentElement.querySelectorAll('.yesno-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function toggleAcc(head) { head.parentElement.classList.toggle('open'); }
+
+function addEnfant() {
+  const tbl = document.getElementById('enfantsTable');
+  const row = document.createElement('div');
+  row.className = 'dyn-row dyn-row-enfant';
+  row.innerHTML = `
+    <input type="text" class="text-input" placeholder="Prénom">
+    <input type="date" class="text-input">
+    <select class="select-input"><option>Du couple</option><option>De Monsieur</option><option>De Madame</option></select>
+    <select class="select-input"><option>Non</option><option>Oui</option></select>
+    <div class="dyn-row-remove" onclick="this.parentElement.remove()">×</div>
+  `;
+  tbl.appendChild(row);
+}
+
+let objCount = 2;
+function addObjectif() {
+  objCount++;
+  const cont = document.getElementById('objectifsContainer');
+  const card = document.createElement('div');
+  card.className = 'obj-card';
+  card.innerHTML = `
+    <div class="obj-card-num">Objectif n° ${objCount}</div>
+    <button class="obj-card-remove" onclick="this.parentElement.remove()">×</button>
+    <div class="obj-card-field">
+      <label class="field-label">Quel est cet objectif ?</label>
+      <select class="select-input">
+        <option>Préparer ma transmission patrimoniale</option>
+        <option>Préparer ma retraite</option>
+        <option>Optimiser ma fiscalité</option>
+        <option>Protéger ma famille</option>
+        <option>Acquérir un bien immobilier</option>
+        <option>Investir pour générer des revenus</option>
+        <option>Constituer un capital</option>
+        <option>Financer les études de mes enfants</option>
+        <option>Anticiper une cession professionnelle</option>
+        <option>Diversifier mon patrimoine</option>
+        <option>Autre · préciser</option>
+      </select>
+    </div>
+    <div class="obj-card-importance">
+      <label class="field-label">Importance</label>
+      <select class="select-input"><option>Moyenne</option><option>Élevée</option><option>Faible</option></select>
+    </div>
+    <div class="obj-card-horizons">
+      <div>
+        <label class="field-label">Quand initier ?</label>
+        <select class="select-input"><option>Court terme (1 à 2 ans)</option><option>Urgent (moins d'un an)</option><option>Moyen terme (3 à 5 ans)</option><option>Long terme (5 à 10 ans)</option><option>Très long terme (plus de 10 ans)</option></select>
+      </div>
+      <div>
+        <label class="field-label">Quand atteindre ?</label>
+        <select class="select-input"><option>Moyen terme (3 à 5 ans)</option><option>Urgent (moins d'un an)</option><option>Court terme (1 à 2 ans)</option><option>Long terme (5 à 10 ans)</option><option>Très long terme (plus de 10 ans)</option></select>
+      </div>
+    </div>
+  `;
+  cont.appendChild(card);
+}
+
+updateProgress();
+updateNav();
+</script>
+
+</body>
+</html>
