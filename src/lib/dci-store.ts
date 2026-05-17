@@ -77,30 +77,22 @@ async function saveSupabase(s: Submission): Promise<void> {
   const supabase = createAdminClient();
   const col = categoryColumnFor(s.kind);
 
-  // Upsert minimal : la ligne `dci_responses` est liée à `DEMO_DOSSIER_ID`.
-  // Si pas encore créée, on l'insère avec la colonne du kind renseignée ;
-  // sinon on PATCH la colonne.
-  const updatePayload = {
-    [col]: { ...s.payload, _submitted_at: s.submitted_at, _slug: s.prospect_slug, _display_name: s.display_name },
-    updated_at: new Date().toISOString(),
-  } as Record<string, unknown>;
-
-  const { error: updateErr, count } = await supabase
-    .from("dci_responses")
-    .update(updatePayload, { count: "exact" })
-    .eq("dossier_id", DEMO_DOSSIER_ID)
-    .select("id", { count: "exact", head: true });
-
-  if (updateErr) throw updateErr;
-  if ((count ?? 0) > 0) return;
-
-  // Pas de ligne existante → insert
-  const insertPayload = {
-    dossier_id: DEMO_DOSSIER_ID,
-    [col]: updatePayload[col],
+  const blob = {
+    ...s.payload,
+    _submitted_at: s.submitted_at,
+    _slug: s.prospect_slug,
+    _display_name: s.display_name,
   };
-  const { error: insertErr } = await supabase.from("dci_responses").insert(insertPayload);
-  if (insertErr) throw insertErr;
+
+  // `dossier_id` est UNIQUE dans `dci_responses` → onConflict simple.
+  const { error } = await supabase
+    .from("dci_responses")
+    .upsert(
+      { dossier_id: DEMO_DOSSIER_ID, [col]: blob, updated_at: new Date().toISOString() },
+      { onConflict: "dossier_id" },
+    );
+
+  if (error) throw error;
 }
 
 async function loadSupabase(slug: string): Promise<Record<DciKind, Submission | null>> {
@@ -114,19 +106,20 @@ async function loadSupabase(slug: string): Promise<Record<DciKind, Submission | 
     .maybeSingle();
   if (error) throw error;
 
-  function extract(col: keyof typeof data, kind: DciKind): Submission | null {
+  function extract(col: string, kind: DciKind): Submission | null {
     if (!data) return null;
-    const blob = (data as Record<string, unknown>)[col as string] as
+    const blob = (data as Record<string, unknown>)[col] as
       | (Record<string, unknown> & { _submitted_at?: string; _slug?: string; _display_name?: string })
-      | null;
+      | null
+      | undefined;
     if (!blob || !blob._submitted_at) return null;
-    if (blob._slug && blob._slug !== slug) return null;
+    if (slug && blob._slug && blob._slug !== slug) return null;
     const { _submitted_at, _slug, _display_name, ...payload } = blob;
     return {
       prospect_slug: _slug ?? slug,
       kind,
       payload,
-      submitted_at: _submitted_at!,
+      submitted_at: _submitted_at,
       display_name: _display_name,
     };
   }
