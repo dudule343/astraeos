@@ -1,0 +1,84 @@
+import { NextResponse, type NextRequest } from "next/server";
+
+import { exchangeCodeForTokens, fetchUserEmail, saveTokens } from "@/lib/google-oauth";
+
+/**
+ * GET /api/auth/google/callback?code=...&state=...
+ *
+ * Récupère le code, l'échange contre des tokens, fetch l'email Google,
+ * persiste pour l'engineer_slug, puis retourne une page HTML qui :
+ *   - signale window.opener (postMessage) que la connexion est OK
+ *   - se ferme automatiquement après 800ms
+ */
+export async function GET(req: NextRequest) {
+  const code = req.nextUrl.searchParams.get("code");
+  const stateParam = req.nextUrl.searchParams.get("state");
+  const cookieState = req.cookies.get("astr_google_state")?.value;
+
+  if (!code || !stateParam) {
+    return htmlResponse(`<h1>Erreur</h1><p>Paramètres manquants.</p>`, 400);
+  }
+  if (!cookieState || cookieState !== stateParam) {
+    return htmlResponse(`<h1>Erreur</h1><p>State invalide (CSRF).</p>`, 400);
+  }
+
+  let engineer = "luc-thilliez";
+  try {
+    const parsed = JSON.parse(Buffer.from(stateParam, "base64url").toString("utf-8"));
+    if (typeof parsed?.engineer === "string") engineer = parsed.engineer;
+  } catch {
+    /* ignore parse error, garde le défaut */
+  }
+
+  try {
+    const tokens = await exchangeCodeForTokens(code);
+    const email = await fetchUserEmail(tokens.access_token);
+    await saveTokens({
+      engineer_slug: engineer,
+      email,
+      access_token: tokens.access_token,
+      refresh_token: tokens.refresh_token ?? "",
+      expires_at: Date.now() + tokens.expires_in * 1000,
+      scope: tokens.scope,
+      granted_at: new Date().toISOString(),
+    });
+    return htmlResponse(successHtml(email, engineer), 200);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    return htmlResponse(`<h1>Erreur OAuth</h1><pre>${escapeHtml(msg)}</pre>`, 500);
+  }
+}
+
+function htmlResponse(body: string, status: number) {
+  return new NextResponse(
+    `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Astraeos · Google Calendar</title>
+<style>body{font-family:-apple-system,system-ui,sans-serif;background:#FAF8F3;color:#102D50;margin:0;padding:40px;text-align:center}
+h1{font-family:Georgia,serif;color:#102D50}.box{max-width:520px;margin:60px auto;background:white;border:1px solid #E8E3D6;border-radius:14px;padding:40px 32px;box-shadow:0 8px 32px rgba(16,45,80,0.06)}
+.email{font-weight:700;color:#C68E0E}.note{color:#708196;font-size:13px;margin-top:18px}
+.spinner{border:3px solid #E8E3D6;border-top-color:#C68E0E;border-radius:50%;width:28px;height:28px;margin:0 auto 18px;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}</style></head><body><div class="box">${body}</div></body></html>`,
+    { status, headers: { "Content-Type": "text/html; charset=utf-8" } },
+  );
+}
+
+function successHtml(email: string, engineer: string): string {
+  const payload = JSON.stringify({ ok: true, email, engineer });
+  return `
+    <div class="spinner"></div>
+    <h1>Google Calendar connecté</h1>
+    <p>Compte autorisé : <span class="email">${escapeHtml(email)}</span></p>
+    <p class="note">Cette fenêtre va se fermer automatiquement.</p>
+    <script>
+      try {
+        if (window.opener) {
+          window.opener.postMessage(${payload}, window.location.origin);
+        }
+      } catch (e) {}
+      setTimeout(function () { window.close(); }, 800);
+    </script>
+  `;
+}
+
+function escapeHtml(s: string): string {
+  return s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
+}
