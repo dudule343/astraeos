@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Espace Client · PRIVEOS · ASTRAEOS</title>
+<style>
+:root {
+  --navy: #102D50;
+  --navy-700: #1A3A60;
+  --navy-300: #708196;
+  --navy-100: #DBE0E4;
+  --gold: #C68E0E;
+  --gold-light: #DDBB6E;
+  --gold-soft: #EEDDB6;
+  --gold-faint: #F8EFDA;
+  --ivory: #FAF8F3;
+  --ivory-deep: #F4F0E5;
+  --white: #FFFFFF;
+  --text: #1F2937;
+  --text-soft: #4A5568;
+  --text-muted: #6B7689;
+  --success: #2EA85A;
+  --line: #E8E3D6;
+  --line-soft: #F0EBE0;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  font-family: 'Epilogue', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--ivory);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* ─── Bandeau parcours client ──────────────────────── */
+.client-shell {
+  background: linear-gradient(180deg, var(--white) 0%, #FCFAF4 100%);
+  border-bottom: 1px solid var(--line);
+  padding: 18px 0 0;
+}
+.client-shell-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+.client-shell-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.client-shell-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.client-shell-brand-mark {
+  width: 30px;
+  height: 30px;
+  background: var(--navy);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gold);
+  font-family: 'Cinzel', 'Georgia', serif;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.05em;
+}
+.client-shell-brand-text {
+  font-family: 'Cinzel', 'Georgia', serif;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  color: var(--navy);
+}
+.client-shell-context {
+  font-size: 11px;
+  color: var(--navy-300);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+.client-shell-context strong {
+  color: var(--gold);
+  font-weight: 700;
+}
+.client-shell-prospect {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12.5px;
+  color: var(--navy);
+}
+.client-shell-prospect-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-700) 100%);
+  color: var(--gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Georgia', serif;
+  font-size: 11px;
+  font-weight: 700;
+  border: 2px solid var(--gold-soft);
+}
+.client-shell-prospect-meta {
+  line-height: 1.25;
+}
+.client-shell-prospect-name {
+  font-weight: 700;
+  color: var(--navy);
+  font-size: 12.5px;
+}
+.client-shell-prospect-sub {
+  font-size: 10.5px;
+  color: var(--navy-300);
+  letter-spacing: 0.08em;
+}
+
+/* ─── Onglets parcours ─────────────────────────────── */
+.client-tabs {
+  display: flex;
+  gap: 4px;
+  margin-top: 8px;
+  border-bottom: 1px solid var(--line);
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+.client-tab {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 18px 14px;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  white-space: nowrap;
+  border-bottom: 2px solid transparent;
+  transition: all 0.18s;
+  position: relative;
+  margin-bottom: -1px;
+}
+.client-tab:hover { background: var(--ivory); }
+.client-tab.active {
+  border-bottom-color: var(--gold);
+  background: var(--white);
+}
+.client-tab-num {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--ivory);
+  border: 1px solid var(--navy-100);
+  color: var(--navy-300);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Cormorant Garamond', 'Georgia', serif;
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+  transition: all 0.18s;
+}
+.client-tab.active .client-tab-num,
+.client-tab.completed .client-tab-num {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: var(--white);
+}
+.client-tab.completed .client-tab-num::after {
+  content: '✓';
+  position: absolute;
+}
+.client-tab.completed .client-tab-num span { display: none; }
+.client-tab-text { text-align: left; }
+.client-tab-eyebrow {
+  display: block;
+  font-size: 9.5px;
+  color: var(--navy-300);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+.client-tab.active .client-tab-eyebrow { color: var(--gold); }
+.client-tab-label {
+  display: block;
+  font-size: 13px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+.client-tab.active .client-tab-label { color: var(--navy); }
+.client-tab-arrow {
+  color: var(--navy-100);
+  font-size: 14px;
+  margin-left: 4px;
+}
+
+/* ─── Frame qui contient l'iframe active ───────────── */
+.client-frame-wrap {
+  flex: 1;
+  background: var(--ivory);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.client-frame-meta {
+  background: var(--white);
+  border-bottom: 1px solid var(--line);
+  padding: 10px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.client-frame-meta-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.client-frame-meta-badge {
+  font-size: 9.5px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  font-weight: 700;
+  padding: 4px 9px;
+  border-radius: 4px;
+  background: var(--gold-faint);
+  color: var(--gold);
+  border: 1px solid var(--gold-soft);
+}
+.client-frame-meta-title {
+  font-family: 'Cormorant Garamond', 'Georgia', serif;
+  font-size: 16px;
+  color: var(--navy);
+  font-weight: 600;
+  font-style: italic;
+}
+.client-frame-meta-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.client-frame-meta-link {
+  font-size: 11px;
+  color: var(--navy-300);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 600;
+  padding: 6px 12px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--white);
+  cursor: pointer;
+  transition: all 0.15s;
+  text-decoration: none;
+  font-family: inherit;
+}
+.client-frame-meta-link:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+.client-frame-meta-link.primary {
+  background: var(--navy);
+  color: var(--white);
+  border-color: var(--navy);
+}
+.client-frame-meta-link.primary:hover {
+  background: var(--navy-700);
+  color: var(--gold);
+}
+.client-iframe {
+  flex: 1;
+  width: 100%;
+  border: 0;
+  background: var(--ivory);
+  display: block;
+  min-height: calc(100vh - 230px);
+}
+
+/* ─── Footer parcours (overview pédagogique) ──────── */
+.client-journey-strip {
+  background: var(--navy);
+  color: var(--ivory);
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 600;
+  flex-wrap: wrap;
+}
+.client-journey-strip span { color: rgba(255,255,255,0.7); }
+.client-journey-strip strong { color: var(--gold); font-weight: 700; }
+.client-journey-strip .dot {
+  width: 4px;
+  height: 4px;
+  background: var(--gold);
+  border-radius: 50%;
+  opacity: 0.6;
+}
+
+@media (max-width: 760px) {
+  .client-shell-inner { padding: 0 16px; }
+  .client-shell-top { gap: 12px; }
+  .client-tab { padding: 10px 12px 12px; }
+  .client-tab-eyebrow { font-size: 9px; }
+  .client-tab-label { font-size: 12px; }
+  .client-frame-meta { padding: 10px 16px; }
+  .client-iframe { min-height: calc(100vh - 280px); }
+}
+</style>
+</head>
+<body>
+
+<div class="client-shell">
+  <div class="client-shell-inner">
+    <div class="client-shell-top">
+      <div class="client-shell-brand">
+        <div class="client-shell-brand-mark">P</div>
+        <div class="client-shell-brand-text">PRIVEOS</div>
+        <div class="client-shell-context" style="margin-left: 18px;">
+          ESPACE CLIENT · <strong>Parcours d'accompagnement</strong>
+        </div>
+      </div>
+      <div class="client-shell-prospect">
+        <div class="client-shell-prospect-avatar">BD</div>
+        <div class="client-shell-prospect-meta">
+          <div class="client-shell-prospect-name">Bertrand DUPONT-TOPIN</div>
+          <div class="client-shell-prospect-sub">Prospect · Ingénieur Luc THILLIEZ</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="client-tabs" id="clientTabs">
+      <button class="client-tab active" data-tab="rdv" onclick="selectTab('rdv')">
+        <span class="client-tab-num"><span>1</span></span>
+        <span class="client-tab-text">
+          <span class="client-tab-eyebrow">Avant-01 · Lien public</span>
+          <span class="client-tab-label">Prise de rendez-vous</span>
+        </span>
+      </button>
+      <span class="client-tab-arrow">›</span>
+      <button class="client-tab" data-tab="dci-simple" onclick="selectTab('dci-simple')">
+        <span class="client-tab-num"><span>2</span></span>
+        <span class="client-tab-text">
+          <span class="client-tab-eyebrow">Avant-02 · Pré-entretien</span>
+          <span class="client-tab-label">DCI simplifié</span>
+        </span>
+      </button>
+      <span class="client-tab-arrow">›</span>
+      <button class="client-tab" data-tab="qualification" onclick="selectTab('qualification')">
+        <span class="client-tab-num"><span>3</span></span>
+        <span class="client-tab-text">
+          <span class="client-tab-eyebrow">Post-01 · Profil investisseur</span>
+          <span class="client-tab-label">Questionnaire de qualification</span>
+        </span>
+      </button>
+      <span class="client-tab-arrow">›</span>
+      <button class="client-tab" data-tab="dci-complet" onclick="selectTab('dci-complet')">
+        <span class="client-tab-num"><span>4</span></span>
+        <span class="client-tab-text">
+          <span class="client-tab-eyebrow">Post-02 · Étude complète</span>
+          <span class="client-tab-label">DCI complet</span>
+        </span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="client-frame-wrap">
+  <div class="client-frame-meta">
+    <div class="client-frame-meta-left">
+      <span class="client-frame-meta-badge" id="frameBadge">Étape 1 sur 4</span>
+      <span class="client-frame-meta-title" id="frameTitle">Prise de rendez-vous · Calendly PRIVEOS</span>
+    </div>
+    <div class="client-frame-meta-actions">
+      <a class="client-frame-meta-link" id="frameOpenInNew" href="/wireframes/client/01-rdv.html" target="_blank" rel="noopener">Ouvrir dans un nouvel onglet ↗</a>
+      <button class="client-frame-meta-link" onclick="prevTab()">‹ Étape précédente</button>
+      <button class="client-frame-meta-link primary" onclick="nextTab()">Étape suivante ›</button>
+    </div>
+  </div>
+
+  <iframe class="client-iframe" id="clientIframe" src="/wireframes/client/01-rdv.html" title="Étape parcours client"></iframe>
+</div>
+
+<div class="client-journey-strip">
+  <span>1. Le client reçoit un lien Calendly</span>
+  <span class="dot"></span>
+  <span>2. Il complète le DCI simplifié avant l'entretien</span>
+  <span class="dot"></span>
+  <span>3. Après le RDV, il signe son <strong>profil d'investisseur</strong></span>
+  <span class="dot"></span>
+  <span>4. Il finalise le DCI complet pour l'étude patrimoniale</span>
+</div>
+
+<script>
+const TABS = [
+  { id: 'rdv',          src: '/wireframes/client/01-rdv.html',          title: 'Prise de rendez-vous · Calendly PRIVEOS',    badge: 'Étape 1 sur 4 · Avant-01' },
+  { id: 'dci-simple',   src: '/wireframes/client/02-dci-simple.html',   title: 'DCI simplifié · document de collecte',       badge: 'Étape 2 sur 4 · Avant-02' },
+  { id: 'qualification',src: '/wireframes/client/03-qualification.html',title: 'Questionnaire de qualification client',      badge: 'Étape 3 sur 4 · Post-01' },
+  { id: 'dci-complet',  src: '/wireframes/client/04-dci-complet.html',  title: 'DCI complet · étude patrimoniale détaillée', badge: 'Étape 4 sur 4 · Post-02' },
+];
+
+function selectTab(id) {
+  const idx = TABS.findIndex(t => t.id === id);
+  if (idx < 0) return;
+  const tab = TABS[idx];
+  document.querySelectorAll('.client-tab').forEach(el => {
+    el.classList.remove('active');
+    if (el.dataset.tab === id) el.classList.add('active');
+  });
+  const iframe = document.getElementById('clientIframe');
+  iframe.src = tab.src;
+  document.getElementById('frameTitle').textContent = tab.title;
+  document.getElementById('frameBadge').textContent = tab.badge;
+  document.getElementById('frameOpenInNew').href = tab.src;
+  if (location.hash.replace('#','') !== id) {
+    history.replaceState(null, '', '#' + id);
+  }
+}
+
+function nextTab() {
+  const cur = document.querySelector('.client-tab.active').dataset.tab;
+  const idx = TABS.findIndex(t => t.id === cur);
+  const next = TABS[(idx + 1) % TABS.length];
+  selectTab(next.id);
+}
+
+function prevTab() {
+  const cur = document.querySelector('.client-tab.active').dataset.tab;
+  const idx = TABS.findIndex(t => t.id === cur);
+  const prev = TABS[(idx - 1 + TABS.length) % TABS.length];
+  selectTab(prev.id);
+}
+
+const initial = (location.hash || '#rdv').replace('#','');
+if (TABS.some(t => t.id === initial)) selectTab(initial);
+
+window.addEventListener('hashchange', () => {
+  const id = location.hash.replace('#','');
+  if (TABS.some(t => t.id === id)) selectTab(id);
+});
+</script>
+
+</body>
+</html>
