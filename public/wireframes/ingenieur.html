@@ -12906,6 +12906,114 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 });
+
+// ====================================================================
+// OUVERTURE ESPACE CLIENT · clic sur prospect / client (œil ou nom)
+// Ouvre /client#<step> en top-frame ; step déduit du statut.
+// ====================================================================
+(function () {
+  function statusToStep(text) {
+    if (!text) return 'rdv';
+    var t = text.toLowerCase();
+    if (t.indexOf('dormant') !== -1)            return 'rdv';
+    if (t.indexOf('non envoy') !== -1)          return 'rdv';
+    if (t.indexOf('rencontré') !== -1)          return 'dci-simple';
+    if (t.indexOf('docs envoyés') !== -1)       return 'dci-simple';
+    if (t.indexOf('attente retour') !== -1)     return 'dci-simple';
+    if (t.indexOf('à relancer') !== -1)         return 'dci-simple';
+    if (t.indexOf('compliance') !== -1)         return 'qualification';
+    if (t.indexOf('qualifié') !== -1)           return 'qualification';
+    if (t.indexOf('en cours') !== -1)           return 'dci-complet';
+    if (t.indexOf('étude') !== -1)              return 'dci-complet';
+    if (t.indexOf('restitu') !== -1)            return 'dci-complet';
+    return 'rdv';
+  }
+
+  function pageIdToStep(pageId) {
+    if (!pageId) return null;
+    if (/pipe-01$/.test(pageId)) return 'rdv';          // prospects actifs
+    if (/pipe-02$/.test(pageId)) return 'dci-simple';   // compliance validée
+    if (/pipe-03$/.test(pageId)) return 'qualification';// collecte docs
+    if (/pipe-04$/.test(pageId)) return 'dci-complet';  // études en cours
+    if (/pipe-05$/.test(pageId)) return 'dci-complet';  // études restituées
+    if (/pipe-06$/.test(pageId)) return 'dci-complet';  // clients en suivi
+    return null;
+  }
+
+  function openClientStep(step) {
+    var url = '/client#' + (step || 'rdv');
+    try {
+      if (window.top && window.top !== window) {
+        window.top.location.href = url;
+        return;
+      }
+    } catch (err) { /* cross-origin, fallback */ }
+    window.location.href = url;
+  }
+
+  function findRow(el) {
+    while (el && el !== document) {
+      if (el.tagName === 'TR') return el;
+      el = el.parentElement;
+    }
+    return null;
+  }
+
+  function stepForRow(row) {
+    if (!row) return 'rdv';
+    var pill = row.querySelector('.status-pill-v1, .status-pill');
+    if (pill) {
+      var step = statusToStep(pill.textContent || '');
+      if (step) return step;
+    }
+    var page = row.closest && row.closest('.page');
+    if (page) {
+      var fromPage = pageIdToStep(page.id);
+      if (fromPage) return fromPage;
+    }
+    return 'rdv';
+  }
+
+  // Rend toutes les lignes de prospects/clients cliquables (œil + nom)
+  document.addEventListener('click', function (e) {
+    // 1. Clic sur un bouton action œil
+    var actionBtn = e.target.closest && e.target.closest('.action-btn');
+    if (actionBtn) {
+      // Premier bouton (œil) = aperçu côté client
+      var cell = actionBtn.parentElement;
+      var isEye = cell && cell.firstElementChild === actionBtn;
+      if (isEye) {
+        e.preventDefault();
+        e.stopPropagation();
+        var row = findRow(actionBtn);
+        openClientStep(stepForRow(row));
+        return;
+      }
+    }
+
+    // 2. Clic sur le nom (cellule client) d'une ligne de pipeline
+    var clientCell = e.target.closest && e.target.closest('.client-cell');
+    if (clientCell) {
+      var row = findRow(clientCell);
+      if (row && row.closest('.dt')) {
+        e.preventDefault();
+        openClientStep(stepForRow(row));
+        return;
+      }
+    }
+  });
+
+  // Curseur pointer sur les éléments cliquables (UX)
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.dt .client-cell').forEach(function (c) {
+      c.style.cursor = 'pointer';
+      c.title = 'Voir le parcours côté client';
+    });
+    document.querySelectorAll('.dt .actions-cell .action-btn:first-child').forEach(function (b) {
+      b.title = 'Voir le parcours côté client';
+    });
+  });
+})();
 </script>
 
 </body>
