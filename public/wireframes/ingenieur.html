@@ -3461,19 +3461,19 @@
                     <div></div>
                     <div>
                       <label style="display:block; font-size:10.5px; font-weight:600; color:var(--navy-300); margin-bottom:4px;">Prénom *</label>
-                      <input type="text" placeholder="Bertrand" style="width:100%; padding:9px 12px; border:1px solid var(--navy-100); border-radius:6px; font-family:inherit; font-size:12.5px;">
+                      <input id="astr-p1-prenom" type="text" placeholder="Bertrand" style="width:100%; padding:9px 12px; border:1px solid var(--navy-100); border-radius:6px; font-family:inherit; font-size:12.5px;">
                     </div>
                     <div>
                       <label style="display:block; font-size:10.5px; font-weight:600; color:var(--navy-300); margin-bottom:4px;">Nom *</label>
-                      <input type="text" placeholder="DUPONT" style="width:100%; padding:9px 12px; border:1px solid var(--navy-100); border-radius:6px; font-family:inherit; font-size:12.5px; text-transform:uppercase;">
+                      <input id="astr-p1-nom" type="text" placeholder="DUPONT" style="width:100%; padding:9px 12px; border:1px solid var(--navy-100); border-radius:6px; font-family:inherit; font-size:12.5px; text-transform:uppercase;">
                     </div>
                     <div>
                       <label style="display:block; font-size:10.5px; font-weight:600; color:var(--navy-300); margin-bottom:4px;">E-mail *</label>
-                      <input type="email" placeholder="bertrand.dupont@email-test.fr" style="width:100%; padding:9px 12px; border:1px solid var(--navy-100); border-radius:6px; font-family:inherit; font-size:12.5px;">
+                      <input id="astr-p1-email" type="email" placeholder="bertrand.dupont@email-test.fr" style="width:100%; padding:9px 12px; border:1px solid var(--navy-100); border-radius:6px; font-family:inherit; font-size:12.5px;">
                     </div>
                     <div>
                       <label style="display:block; font-size:10.5px; font-weight:600; color:var(--navy-300); margin-bottom:4px;">Téléphone</label>
-                      <input type="tel" placeholder="+33 6 12 34 56 78" style="width:100%; padding:9px 12px; border:1px solid var(--navy-100); border-radius:6px; font-family:inherit; font-size:12.5px;">
+                      <input id="astr-p1-tel" type="tel" placeholder="+33 6 12 34 56 78" style="width:100%; padding:9px 12px; border:1px solid var(--navy-100); border-radius:6px; font-family:inherit; font-size:12.5px;">
                     </div>
                   </div>
                 </div>
@@ -3735,7 +3735,7 @@
             </div>
             <div style="display:flex; gap:10px;">
               <button class="btn btn-ghost btn-sm">Enregistrer en brouillon</button>
-              <button class="btn btn-gold btn-sm">✓ Créer l'espace + envoyer les documents sélectionnés</button>
+              <button class="btn btn-gold btn-sm" onclick="astraeosCreerEspaceClient()">✓ Créer l'espace + envoyer les documents sélectionnés</button>
             </div>
           </div>
         </div>
@@ -17277,6 +17277,43 @@ Président associé du cabinet PRIVEOS</textarea>
     document.getElementById('astr-invite-modal').style.display = 'flex';
   };
 
+  // Génération du lien depuis l'écran "Créer un espace client" (étape 01)
+  window.astraeosCreerEspaceClient = function () {
+    var prenom = (document.getElementById('astr-p1-prenom')?.value || '').trim();
+    var nom    = (document.getElementById('astr-p1-nom')?.value || '').trim();
+    var email  = (document.getElementById('astr-p1-email')?.value || '').trim();
+    if (!prenom || !nom) {
+      astraeosToast('Renseignez au moins prénom + nom de la personne 1 avant de créer.');
+      var input = document.getElementById('astr-p1-prenom');
+      if (input) input.focus();
+      return;
+    }
+    var displayName = prenom + ' ' + nom.toUpperCase();
+    var slug = astraeosSlugify(prenom + '-' + nom);
+    astraeosOpenInvite(displayName, slug, email);
+    astraeosToast('Espace client créé · lien personnel généré pour ' + displayName);
+  };
+
+  // Mini bandeau live · affiche le lien généré dans l'aperçu e-mail au fur et à mesure
+  function astraeosBindLivePreview() {
+    var prenom = document.getElementById('astr-p1-prenom');
+    var nom    = document.getElementById('astr-p1-nom');
+    if (!prenom || !nom) return;
+    function update() {
+      var p = (prenom.value || '').trim();
+      var n = (nom.value || '').trim();
+      if (!p && !n) return;
+      var slug = astraeosSlugify(p + '-' + n);
+      // Remplace l'éventuelle ligne de prévisualisation existante
+      var preview = document.querySelector('#page-ing-detail-etape-1 [style*="Accéder à mon espace PRIVEOS"]');
+      if (preview) {
+        preview.innerHTML = '→ Accéder à mon espace PRIVEOS<br><span style="font-family:\'JetBrains Mono\',ui-monospace,monospace;font-size:9px;color:var(--gold-300);font-weight:500;letter-spacing:0;">astraeos.vercel.app/client?prospect=' + slug + '</span>';
+      }
+    }
+    prenom.addEventListener('input', update);
+    nom.addEventListener('input', update);
+  }
+
   // Wire un bouton "Inviter" dans chaque ligne prospect (en plus des actions existantes)
   function astraeosInjectInviteButtons() {
     document.querySelectorAll('.dt tbody tr').forEach(function (row) {
@@ -17303,6 +17340,7 @@ Président associé du cabinet PRIVEOS</textarea>
 
   document.addEventListener('DOMContentLoaded', function () {
     astraeosInjectInviteButtons();
+    astraeosBindLivePreview();
     // Re-injecter quand on change de page (pour les pipe-02..06 chargés dynamiquement)
     document.querySelectorAll('.nav-item, .stepper-item-v1').forEach(function (el) {
       el.addEventListener('click', function () { setTimeout(astraeosInjectInviteButtons, 100); });
