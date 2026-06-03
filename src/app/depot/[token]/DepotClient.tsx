@@ -44,6 +44,41 @@ type IndexedItem = StructureItem & { index: number };
 const MAX_SIZE = 15 * 1024 * 1024; // 15 Mo
 const ACCEPT = ".pdf,.jpg,.jpeg,.png,.heic,application/pdf,image/jpeg,image/png,image/heic";
 
+/* ----------------------------------------------------------------------------
+   Format de réponse attendu pour les items « Question », déduit du libellé.
+   Objectif : réponses cohérentes (chiffre + devise + période, Oui/Non…)
+   plutôt que du texte libre. Règle prudente : jamais de Oui/Non quand la
+   question contient une alternative (« … ou … »).
+---------------------------------------------------------------------------- */
+
+type AnswerKind =
+  | { kind: "texte" }
+  | { kind: "montant"; suffix: " € / an" | " € / mois" | " €" }
+  | { kind: "nombre"; suffix: " ans" }
+  | { kind: "ouinon" };
+
+function answerKindFor(label: string): AnswerKind {
+  const l = label.toLowerCase();
+  if (/^à quel âge/.test(l)) return { kind: "nombre", suffix: " ans" };
+  if (/train de vie|montant annuel|montant actuel|quel est le montant|valeur estimée par le client/.test(l)) {
+    if (/loyer|mensuel|par mois/.test(l)) return { kind: "montant", suffix: " € / mois" };
+    if (/annuel|par an|train de vie/.test(l)) return { kind: "montant", suffix: " € / an" };
+    return { kind: "montant", suffix: " €" };
+  }
+  const interrogatif =
+    /(est-il|est-elle|sont-ils|sont-elles|a-t-il|a-t-elle|ont-ils|existe-t-il|détient-il|verse-t-il|réalise-t-il|anticipe-t-il|envisage-t-il|souhaite-t-il|souhaite-t-elle|pense-t-il|posent-ils|s'est-elle|avez-vous|êtes-vous)/.test(
+      l,
+    );
+  if (interrogatif && !/ ou /.test(l)) return { kind: "ouinon" };
+  return { kind: "texte" };
+}
+
+/** 1234567 → « 1 234 567 » (saisie de montants). */
+function formatMilliers(digits: string): string {
+  const clean = digits.replace(/\D/g, "");
+  return clean.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+}
+
 export function DepotClient({ token }: { token: string }) {
   const [state, setState] = useState<LoadState>({ phase: "loading" });
 
@@ -199,6 +234,14 @@ function ReadyView({
     return map;
   }, [data.depots]);
 
+  // Chat conseiller : ouverture globale ou depuis un document précis (préfixe).
+  const [chatOpen, setChatOpen] = useState(false);
+  const [chatPrefill, setChatPrefill] = useState("");
+  const askAbout = useCallback((label: string) => {
+    setChatPrefill(`À propos de « ${label} » : `);
+    setChatOpen(true);
+  }, []);
+
   // Regroupement par thème puis sous-rubrique, en conservant l'item_index global.
   const groups = useMemo(() => {
     const indexed: IndexedItem[] = data.structure.map((it, index) => ({ ...it, index }));
@@ -215,9 +258,7 @@ function ReadyView({
     <>
       <Header clientNom={data.client_nom} done={data.progress.done} total={data.progress.total} />
 
-      <div style={{ maxWidth: 720, margin: "0 auto", padding: "20px 16px 64px" }}>
-        <AiNotice />
-
+      <div style={{ maxWidth: 720, margin: "0 auto", padding: "20px 16px 96px" }}>
         {groups.map((group) => (
           <ThemeSection
             key={group.theme}
@@ -227,30 +268,13 @@ function ReadyView({
             depotByIndex={depotByIndex}
             onProgress={onProgress}
             onDepot={onDepot}
+            onAskAbout={askAbout}
           />
         ))}
       </div>
-    </>
-  );
-}
 
-function AiNotice() {
-  return (
-    <div
-      style={{
-        background: "var(--light-blue)",
-        border: "1px solid var(--navy-100)",
-        borderRadius: 12,
-        padding: "14px 16px",
-        marginBottom: 20,
-        color: "var(--navy)",
-        fontSize: 13,
-        lineHeight: 1.55,
-      }}
-    >
-      Chaque document déposé est analysé par l&apos;IA (cohérence avec votre entretien initial).
-      Votre ingénieur revient vers vous en cas de question.
-    </div>
+      <ChatWidget token={token} open={chatOpen} setOpen={setChatOpen} prefill={chatPrefill} />
+    </>
   );
 }
 
@@ -261,6 +285,7 @@ function ThemeSection({
   depotByIndex,
   onProgress,
   onDepot,
+  onAskAbout,
 }: {
   token: string;
   theme: string;
@@ -268,6 +293,7 @@ function ThemeSection({
   depotByIndex: Map<number, Depot>;
   onProgress: (p: { done: number; total: number }) => void;
   onDepot: (d: Depot) => void;
+  onAskAbout: (label: string) => void;
 }) {
   const [open, setOpen] = useState(true);
 
@@ -382,6 +408,7 @@ function ThemeSection({
                   depot={depotByIndex.get(it.index) ?? null}
                   onProgress={onProgress}
                   onDepot={onDepot}
+                  onAskAbout={onAskAbout}
                 />
               ))}
             </div>
@@ -398,16 +425,19 @@ function ItemRow({
   depot,
   onProgress,
   onDepot,
+  onAskAbout,
 }: {
   token: string;
   item: IndexedItem;
   depot: Depot | null;
   onProgress: (p: { done: number; total: number }) => void;
   onDepot: (d: Depot) => void;
+  onAskAbout: (label: string) => void;
 }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [draft, setDraft] = useState(depot?.reponse ?? "");
+  const [dragOver, setDragOver] = useState(false);
 
   // La structure stocke 'Document' | 'Question' — comparaison insensible à la casse par sécurité.
   const isDocument = (item.type || "").toLowerCase() !== "question";
@@ -470,29 +500,55 @@ function ItemRow({
     [item.index, item.label, submit, onDepot],
   );
 
-  const onAnswer = useCallback(async () => {
-    const value = draft.trim();
-    if (!value) return;
-    const body = new FormData();
-    body.set("item_index", String(item.index));
-    body.set("label", item.label);
-    body.set("reponse", value);
-    const ok = await submit(body);
-    if (ok) {
-      onDepot({
-        item_index: item.index,
-        file_name: null,
-        reponse: value,
-        created_at: new Date().toISOString(),
-      });
-    }
-  }, [draft, item.index, item.label, submit, onDepot]);
+  const onAnswer = useCallback(
+    async (raw: string) => {
+      const value = raw.trim();
+      if (!value) return;
+      const body = new FormData();
+      body.set("item_index", String(item.index));
+      body.set("label", item.label);
+      body.set("reponse", value);
+      const ok = await submit(body);
+      if (ok) {
+        onDepot({
+          item_index: item.index,
+          file_name: null,
+          reponse: value,
+          created_at: new Date().toISOString(),
+        });
+      }
+    },
+    [item.index, item.label, submit, onDepot],
+  );
 
   return (
     <div
+      onDragOver={
+        isDocument && !busy
+          ? (e) => {
+              e.preventDefault();
+              setDragOver(true);
+            }
+          : undefined
+      }
+      onDragLeave={isDocument ? () => setDragOver(false) : undefined}
+      onDrop={
+        isDocument && !busy
+          ? (e) => {
+              e.preventDefault();
+              setDragOver(false);
+              void onFile(e.dataTransfer.files?.[0]);
+            }
+          : undefined
+      }
       style={{
-        padding: "13px 4px",
+        padding: "13px 8px",
         borderTop: "1px solid var(--navy-100)",
+        borderRadius: dragOver ? 12 : 0,
+        outline: dragOver ? "2px dashed var(--gold)" : "none",
+        outlineOffset: -2,
+        background: dragOver ? "rgba(200,165,92,0.08)" : "transparent",
+        transition: "background 120ms ease",
       }}
     >
       <div
@@ -521,12 +577,35 @@ function ItemRow({
           )}
           {answerDone && (
             <div style={{ fontSize: 12, color: "var(--green-text)", marginTop: 4 }}>
-              Répondu ✓
+              Répondu ✓ — {depot?.reponse}
             </div>
           )}
           {error && (
             <div style={{ fontSize: 12, color: "var(--red-text)", marginTop: 4 }}>{error}</div>
           )}
+          {isDocument && !done && (
+            <div style={{ fontSize: 11.5, color: "var(--navy-300)", marginTop: 4 }}>
+              ou glissez-déposez votre fichier sur cette ligne
+            </div>
+          )}
+          <button
+            type="button"
+            onClick={() => onAskAbout(item.label)}
+            style={{
+              border: "none",
+              background: "none",
+              padding: 0,
+              marginTop: 6,
+              fontSize: 11.5,
+              color: "var(--gold-deep, #9a7a35)",
+              cursor: "pointer",
+              fontFamily: "inherit",
+              textDecoration: "underline",
+              textUnderlineOffset: 3,
+            }}
+          >
+            {isDocument ? "Une question sur ce document ?" : "Une question ?"}
+          </button>
         </div>
 
         {isDocument && (
@@ -560,42 +639,15 @@ function ItemRow({
       </div>
 
       {!isDocument && (
-        <div style={{ marginTop: 10 }}>
-          <textarea
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            placeholder="Votre réponse…"
-            rows={3}
-            disabled={busy}
-            style={{
-              width: "100%",
-              border: "1px solid var(--navy-100)",
-              borderRadius: 10,
-              padding: "10px 12px",
-              fontSize: 14,
-              fontFamily: "inherit",
-              resize: "vertical",
-              color: "#222",
-              background: "#fff",
-            }}
-          />
-          <div style={{ marginTop: 8, display: "flex", justifyContent: "flex-end" }}>
-            <button
-              type="button"
-              onClick={() => void onAnswer()}
-              disabled={busy || draft.trim() === "" || draft.trim() === (depot?.reponse ?? "").trim()}
-              style={{
-                ...buttonStyle(answerDone ? "ghost" : "primary"),
-                opacity:
-                  busy || draft.trim() === "" || draft.trim() === (depot?.reponse ?? "").trim()
-                    ? 0.5
-                    : 1,
-              }}
-            >
-              {busy ? "Envoi…" : answerDone ? "Modifier" : "Répondre"}
-            </button>
-          </div>
-        </div>
+        <AnswerField
+          label={item.label}
+          current={depot?.reponse ?? ""}
+          busy={busy}
+          answerDone={answerDone}
+          draft={draft}
+          setDraft={setDraft}
+          onSubmit={(value) => void onAnswer(value)}
+        />
       )}
     </div>
   );
@@ -670,6 +722,397 @@ function Spinner() {
     >
       <style>{`@keyframes depot-spin { to { transform: rotate(360deg); } }`}</style>
     </span>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* Réponse typée selon la question : montant (devise + période), âge, Oui/Non */
+/* avec précision, ou texte libre.                                            */
+
+function AnswerField({
+  label,
+  current,
+  busy,
+  answerDone,
+  draft,
+  setDraft,
+  onSubmit,
+}: {
+  label: string;
+  current: string;
+  busy: boolean;
+  answerDone: boolean;
+  draft: string;
+  setDraft: (v: string) => void;
+  onSubmit: (value: string) => void;
+}) {
+  const kind = useMemo(() => answerKindFor(label), [label]);
+
+  // États dédiés aux formats chiffrés / Oui-Non, initialisés depuis la
+  // réponse déjà enregistrée pour rester modifiables.
+  const [montant, setMontant] = useState(() =>
+    kind.kind === "montant" || kind.kind === "nombre" ? current.replace(/\D/g, "") : "",
+  );
+  const [yesNo, setYesNo] = useState<"Oui" | "Non" | null>(() =>
+    kind.kind === "ouinon" && /^oui/i.test(current) ? "Oui" : /^non/i.test(current) ? "Non" : null,
+  );
+  const [precision, setPrecision] = useState(() =>
+    kind.kind === "ouinon" ? current.replace(/^(oui|non)\s*(—\s*)?/i, "") : "",
+  );
+
+  const inputBase: React.CSSProperties = {
+    border: "1px solid var(--navy-100)",
+    borderRadius: 10,
+    padding: "10px 12px",
+    fontSize: 14,
+    fontFamily: "inherit",
+    color: "#222",
+    background: "#fff",
+  };
+
+  // Valeur composée envoyée au conseiller (toujours lisible : devise, période…).
+  const composed = (() => {
+    if (kind.kind === "montant" || kind.kind === "nombre") {
+      return montant ? `${formatMilliers(montant)}${kind.suffix}` : "";
+    }
+    if (kind.kind === "ouinon") {
+      if (!yesNo) return "";
+      return precision.trim() ? `${yesNo} — ${precision.trim()}` : yesNo;
+    }
+    return draft;
+  })();
+  const unchanged = composed.trim() === current.trim();
+  const disabled = busy || composed.trim() === "" || unchanged;
+
+  return (
+    <div style={{ marginTop: 10 }}>
+      {(kind.kind === "montant" || kind.kind === "nombre") && (
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <input
+            inputMode="numeric"
+            value={formatMilliers(montant)}
+            onChange={(e) => setMontant(e.target.value.replace(/\D/g, "").slice(0, 12))}
+            placeholder={kind.kind === "nombre" ? "62" : "30 000"}
+            disabled={busy}
+            style={{ ...inputBase, width: 160, textAlign: "right" }}
+          />
+          <span style={{ fontSize: 14, fontWeight: 600, color: "var(--navy)" }}>
+            {kind.suffix.trim()}
+          </span>
+        </div>
+      )}
+
+      {kind.kind === "ouinon" && (
+        <div>
+          <div style={{ display: "flex", gap: 8 }}>
+            {(["Oui", "Non"] as const).map((opt) => (
+              <button
+                key={opt}
+                type="button"
+                disabled={busy}
+                onClick={() => setYesNo(opt)}
+                style={{
+                  border: yesNo === opt ? "1.5px solid var(--gold)" : "1px solid var(--navy-100)",
+                  background: yesNo === opt ? "rgba(200,165,92,0.12)" : "#fff",
+                  color: "var(--navy)",
+                  fontWeight: yesNo === opt ? 700 : 500,
+                  borderRadius: 999,
+                  padding: "9px 26px",
+                  fontSize: 14,
+                  fontFamily: "inherit",
+                  cursor: "pointer",
+                }}
+              >
+                {opt}
+              </button>
+            ))}
+          </div>
+          {yesNo === "Oui" && (
+            <input
+              value={precision}
+              onChange={(e) => setPrecision(e.target.value)}
+              placeholder="Précision (facultatif)…"
+              disabled={busy}
+              style={{ ...inputBase, width: "100%", marginTop: 8 }}
+            />
+          )}
+        </div>
+      )}
+
+      {kind.kind === "texte" && (
+        <textarea
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          placeholder="Votre réponse…"
+          rows={3}
+          disabled={busy}
+          style={{ ...inputBase, width: "100%", resize: "vertical" }}
+        />
+      )}
+
+      <div style={{ marginTop: 8, display: "flex", justifyContent: "flex-end" }}>
+        <button
+          type="button"
+          onClick={() => onSubmit(composed)}
+          disabled={disabled}
+          style={{
+            ...buttonStyle(answerDone ? "ghost" : "primary"),
+            opacity: disabled ? 0.5 : 1,
+          }}
+        >
+          {busy ? "Envoi…" : answerDone ? "Modifier" : "Répondre"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* Chat avec le conseiller — bouton flottant + panneau, historique poll 8 s.   */
+
+type ChatMessage = {
+  id: string;
+  item_index: number | null;
+  author: "client" | "conseiller";
+  body: string;
+  created_at: string;
+};
+
+function ChatWidget({
+  token,
+  open,
+  setOpen,
+  prefill,
+}: {
+  token: string;
+  open: boolean;
+  setOpen: (o: boolean) => void;
+  prefill: string;
+}) {
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [draft, setDraft] = useState("");
+  const [sending, setSending] = useState(false);
+
+  // Pré-remplissage quand on arrive depuis « Une question sur ce document ? »
+  // (ajustement pendant le rendu — pas d'effect, cf. règles React).
+  const [lastPrefill, setLastPrefill] = useState(prefill);
+  if (prefill !== lastPrefill) {
+    setLastPrefill(prefill);
+    if (prefill) setDraft(prefill);
+  }
+
+  // Historique : chargé à l'ouverture puis rafraîchi toutes les 8 s.
+  useEffect(() => {
+    if (!open) return;
+    let cancelled = false;
+    const load = async () => {
+      try {
+        const res = await fetch(`/api/collecte/${encodeURIComponent(token)}/messages`, {
+          cache: "no-store",
+        });
+        if (!res.ok) return;
+        const json = (await res.json()) as { messages: ChatMessage[] };
+        if (!cancelled) setMessages(json.messages ?? []);
+      } catch {
+        // silencieux : on retentera au prochain tick
+      }
+    };
+    void load();
+    const t = setInterval(load, 8000);
+    return () => {
+      cancelled = true;
+      clearInterval(t);
+    };
+  }, [open, token]);
+
+  const send = useCallback(async () => {
+    const body = draft.trim();
+    if (!body || sending) return;
+    setSending(true);
+    try {
+      const res = await fetch(`/api/collecte/${encodeURIComponent(token)}/messages`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ body }),
+      });
+      const json = (await res.json().catch(() => null)) as
+        | { ok: true; message: ChatMessage }
+        | null;
+      if (res.ok && json && "message" in json) {
+        setMessages((prev) => [...prev, json.message]);
+        setDraft("");
+      }
+    } finally {
+      setSending(false);
+    }
+  }, [draft, sending, token]);
+
+  return (
+    <>
+      {!open && (
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          style={{
+            position: "fixed",
+            right: 18,
+            bottom: 18,
+            zIndex: 60,
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            background: "var(--navy)",
+            color: "#fff",
+            border: "none",
+            borderRadius: 999,
+            padding: "13px 18px",
+            fontSize: 13.5,
+            fontWeight: 600,
+            fontFamily: "inherit",
+            cursor: "pointer",
+            boxShadow: "0 10px 30px rgba(11,28,53,0.35)",
+          }}
+        >
+          <ChatIcon /> Votre conseiller
+        </button>
+      )}
+
+      {open && (
+        <div
+          style={{
+            position: "fixed",
+            right: 0,
+            bottom: 0,
+            zIndex: 70,
+            width: "min(400px, 100vw)",
+            maxHeight: "min(560px, 85vh)",
+            display: "flex",
+            flexDirection: "column",
+            background: "#fff",
+            borderRadius: "16px 16px 0 0",
+            boxShadow: "0 -8px 40px rgba(11,28,53,0.25)",
+            overflow: "hidden",
+          }}
+        >
+          <div
+            style={{
+              background: "var(--navy)",
+              color: "#fff",
+              padding: "14px 16px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 10,
+            }}
+          >
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 600 }}>Votre conseiller</div>
+              <div style={{ fontSize: 11.5, color: "var(--navy-100)" }}>
+                Réponse sous 24 h ouvrées
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              aria-label="Fermer la conversation"
+              style={{
+                border: "none",
+                background: "rgba(255,255,255,0.12)",
+                color: "#fff",
+                borderRadius: 8,
+                width: 30,
+                height: 30,
+                cursor: "pointer",
+                fontSize: 14,
+              }}
+            >
+              ✕
+            </button>
+          </div>
+
+          <div style={{ flex: 1, overflowY: "auto", padding: 14, background: "var(--ivory)" }}>
+            {messages.length === 0 && (
+              <p style={{ fontSize: 12.5, color: "var(--navy-300)", textAlign: "center", margin: "24px 8px" }}>
+                Posez votre question sur un document ou sur votre dossier — votre conseiller vous
+                répond directement ici.
+              </p>
+            )}
+            {messages.map((m) => (
+              <div
+                key={m.id}
+                style={{
+                  display: "flex",
+                  justifyContent: m.author === "client" ? "flex-end" : "flex-start",
+                  marginBottom: 8,
+                }}
+              >
+                <div
+                  style={{
+                    maxWidth: "82%",
+                    padding: "9px 12px",
+                    borderRadius: 12,
+                    fontSize: 13,
+                    lineHeight: 1.5,
+                    whiteSpace: "pre-wrap",
+                    wordBreak: "break-word",
+                    background: m.author === "client" ? "var(--navy)" : "#fff",
+                    color: m.author === "client" ? "#fff" : "var(--navy)",
+                    border: m.author === "client" ? "none" : "1px solid var(--navy-100)",
+                  }}
+                >
+                  {m.body}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ display: "flex", gap: 8, padding: 12, borderTop: "1px solid var(--navy-100)" }}>
+            <textarea
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  void send();
+                }
+              }}
+              placeholder="Écrire à votre conseiller…"
+              rows={2}
+              style={{
+                flex: 1,
+                border: "1px solid var(--navy-100)",
+                borderRadius: 10,
+                padding: "9px 11px",
+                fontSize: 13,
+                fontFamily: "inherit",
+                resize: "none",
+                color: "#222",
+              }}
+            />
+            <button
+              type="button"
+              onClick={() => void send()}
+              disabled={sending || draft.trim() === ""}
+              style={{
+                ...buttonStyle("primary"),
+                alignSelf: "flex-end",
+                opacity: sending || draft.trim() === "" ? 0.5 : 1,
+              }}
+            >
+              {sending ? "…" : "Envoyer"}
+            </button>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
+function ChatIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+    </svg>
   );
 }
 
