@@ -26735,6 +26735,8 @@ function addCollecteRow(n1,n2){
   const names=n2?'<span class="client-name-line">'+e(n1)+'</span><span class="client-name-line">'+e(n2)+'</span><span class="client-type couple">Couple</span>'
                :'<span class="client-name">'+e(n1)+'</span><span class="client-type">Personne seule</span>';
   const tr=document.createElement('tr');
+  tr.dataset.astrOptimistic='1';
+  tr.dataset.astrClient=n1;
   tr.innerHTML='<td><div class="client-cell">'+names+'</div></td>'
     +'<td class="td-c"><div class="collecte-ing">Luc THILLIEZ</div></td><td class="td-c"><div class="collecte-sup">—</div></td>'
     +'<td class="td-c"><div class="collecte-date">09/05/2026</div></td>'
@@ -27081,5 +27083,341 @@ document.addEventListener('DOMContentLoaded',function(){if(document.getElementBy
   </div>
 </div>
 
+<script>
+// ═══════════════════════════════════════════════════════════════════
+// ASTRAEOS · Collectes réelles (étape 03)
+// Polle /api/collecte-admin/list toutes les 10 s et injecte les vraies
+// collectes en tête du tableau. Modale de consultation + conversation.
+// Aucune dépendance. Silencieux en mode fichier statique sans backend.
+// ═══════════════════════════════════════════════════════════════════
+(function () {
+  var POLL_LIST_MS = 10000;
+  var POLL_DETAIL_MS = 8000;
+  var NAVY = '#0B1C35';
+  var GOLD = '#C8A55C';
+  var IVORY = '#FAF7F0';
+
+  function esc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function fmtDate(iso) {
+    if (!iso) return '—';
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return '—';
+    var dd = String(d.getDate()).padStart(2, '0');
+    var mm = String(d.getMonth() + 1).padStart(2, '0');
+    return dd + '/' + mm + '/' + d.getFullYear();
+  }
+
+  function fmtTime(iso) {
+    if (!iso) return '';
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return '';
+    return d.toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' });
+  }
+
+  // ── Ligne du tableau (vue réelle en tête de #collecte-tbody) ─────────
+  function rowHTML(c) {
+    var total = c.total || 0;
+    var done = c.done || 0;
+    var pct = total > 0 ? Math.round((done / total) * 100) : 0;
+    var full = total > 0 && done >= total;
+    var fillColor = full ? 'var(--navy)' : 'var(--gold)';
+    var statutClass = full ? 'st-pret' : 'st-collecte';
+    var statutLabel = full ? "Prêt à commencer l'étude" : 'En collecte';
+    var chat = (c.messages || 0) > 0
+      ? '<span class="astr-real-chat" title="Messages échangés">💬 ' + (c.messages || 0) + '</span>'
+      : '';
+    var badge = '<span class="astr-real-badge">Réel</span>';
+    return ''
+      + '<td><div class="client-cell"><span class="client-name">' + esc(c.client_nom) + ' ' + badge + '</span>'
+      +   '<span class="client-type">' + esc(c.client_email || '') + '</span></div></td>'
+      + '<td class="td-c"><div class="collecte-ing">—</div></td>'
+      + '<td class="td-c"><div class="collecte-sup">—</div></td>'
+      + '<td class="td-c"><div class="collecte-date">' + fmtDate(c.created_at) + '</div></td>'
+      + '<td><div class="collecte-prog-wrap"><div class="collecte-prog-bar">'
+      +   '<div class="collecte-prog-fill" style="width:' + pct + '%;background:' + fillColor + ';"></div>'
+      +   '</div><span class="collecte-prog-pct">' + pct + '%</span></div></td>'
+      + '<td class="td-c"><span class="collecte-statut ' + statutClass + '">' + statutLabel + '</span> ' + chat + '</td>'
+      + '<td class="td-c"><div class="collecte-actions" onclick="event.stopPropagation()">'
+      +   '<button class="collecte-act-btn neutral" onclick="astrOpenCollecte(\'' + esc(c.token) + '\')">Consulter</button>'
+      +   '</div></td>';
+  }
+
+  function injectRowStyles() {
+    if (document.getElementById('astr-real-row-style')) return;
+    var css = document.createElement('style');
+    css.id = 'astr-real-row-style';
+    css.textContent = ''
+      + '.astr-real-badge { display:inline-block; background:' + GOLD + '; color:' + NAVY + '; font-size:9px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; padding:1px 6px; border-radius:999px; vertical-align:middle; margin-left:6px; }'
+      + '.astr-real-chat { display:inline-block; background:' + IVORY + '; border:1px solid #E2DCC9; color:' + NAVY + '; font-size:10.5px; font-weight:700; padding:1px 7px; border-radius:999px; margin-left:4px; }'
+      + 'tr[data-astr-real] { background:rgba(200,165,92,0.04); }';
+    document.head.appendChild(css);
+  }
+
+  function syncRows(collectes) {
+    var tb = document.getElementById('collecte-tbody');
+    if (!tb) return;
+    injectRowStyles();
+
+    var realNames = {};
+    collectes.forEach(function (c) { realNames[String(c.client_nom).trim()] = true; });
+
+    // Dédoublonnage : retire les lignes optimistes dont le client est arrivé en réel.
+    Array.prototype.slice.call(tb.querySelectorAll('tr[data-astr-optimistic]')).forEach(function (tr) {
+      var n = (tr.dataset.astrClient || '').trim();
+      if (n && realNames[n]) tr.parentNode.removeChild(tr);
+    });
+
+    // Insère/actualise chaque collecte réelle. On parcourt en ordre inverse
+    // pour que la plus récente (index 0) finisse en toute première ligne.
+    for (var i = collectes.length - 1; i >= 0; i--) {
+      var c = collectes[i];
+      var tr = tb.querySelector('tr[data-astr-real="' + (window.CSS && CSS.escape ? CSS.escape(c.token) : c.token) + '"]');
+      if (!tr) {
+        tr = document.createElement('tr');
+        tr.setAttribute('data-astr-real', c.token);
+        tr.className = 'pipe-row-clickable';
+        tr.style.cursor = 'pointer';
+        (function (tok) {
+          tr.addEventListener('click', function (ev) {
+            if (ev.target.closest('.collecte-actions')) return;
+            astrOpenCollecte(tok);
+          });
+        })(c.token);
+      }
+      tr.innerHTML = rowHTML(c);
+      if (tr.parentNode === tb) tb.removeChild(tr);
+      tb.insertBefore(tr, tb.firstChild);
+    }
+  }
+
+  var listSig = '';
+  async function pollList() {
+    try {
+      var r = await fetch('/api/collecte-admin/list', { cache: 'no-store' });
+      if (!r.ok) return;
+      var data = await r.json();
+      var collectes = (data && data.collectes) || [];
+      var sig = JSON.stringify(collectes);
+      if (sig === listSig) return;
+      listSig = sig;
+      syncRows(collectes);
+    } catch (err) { /* silencieux : mode fichier statique sans backend */ }
+  }
+
+  // ── Modale de consultation ───────────────────────────────────────────
+  function injectModalStyles() {
+    if (document.getElementById('astr-collecte-modal-style')) return;
+    var css = document.createElement('style');
+    css.id = 'astr-collecte-modal-style';
+    css.textContent = ''
+      + '.astr-cm-overlay { position:fixed; inset:0; background:rgba(11,28,53,0.55); z-index:99990; display:flex; align-items:center; justify-content:center; padding:24px; font-family:"Epilogue",inherit; }'
+      + '.astr-cm-card { background:white; width:100%; max-width:760px; max-height:86vh; border-radius:16px; box-shadow:0 30px 80px rgba(11,28,53,0.4); display:flex; flex-direction:column; overflow:hidden; }'
+      + '.astr-cm-head { padding:22px 26px; border-bottom:1px solid #ECE7D6; display:flex; align-items:flex-start; gap:16px; background:' + IVORY + '; }'
+      + '.astr-cm-head-main { flex:1; min-width:0; }'
+      + '.astr-cm-name { font-family:"Cormorant Garamond","Georgia",serif; font-style:italic; font-size:23px; font-weight:600; color:' + NAVY + '; margin:0 0 3px; }'
+      + '.astr-cm-meta { font-size:11.5px; color:#708196; letter-spacing:.04em; }'
+      + '.astr-cm-meta strong { color:' + NAVY + '; font-weight:600; }'
+      + '.astr-cm-prog { text-align:right; flex-shrink:0; }'
+      + '.astr-cm-prog-ring { font-size:22px; font-weight:800; color:' + GOLD + '; line-height:1; }'
+      + '.astr-cm-prog-txt { font-size:10.5px; color:#708196; text-transform:uppercase; letter-spacing:.1em; margin-top:3px; }'
+      + '.astr-cm-close { background:none; border:none; font-size:22px; line-height:1; color:#708196; cursor:pointer; padding:2px 6px; }'
+      + '.astr-cm-close:hover { color:' + NAVY + '; }'
+      + '.astr-cm-body { padding:20px 26px; overflow:auto; flex:1; }'
+      + '.astr-cm-theme { font-family:"Cormorant Garamond",serif; font-style:italic; font-size:17px; font-weight:600; color:' + NAVY + '; margin:18px 0 8px; padding-bottom:5px; border-bottom:1px solid #ECE7D6; }'
+      + '.astr-cm-theme:first-child { margin-top:0; }'
+      + '.astr-cm-item { display:flex; justify-content:space-between; align-items:baseline; gap:14px; padding:7px 0; border-bottom:1px dashed #F0ECE0; }'
+      + '.astr-cm-item-label { font-size:13px; color:' + NAVY + '; flex:1; }'
+      + '.astr-cm-item-state { font-size:12px; text-align:right; flex-shrink:0; }'
+      + '.astr-cm-ok { color:#2F855A; font-weight:600; }'
+      + '.astr-cm-wait { color:#A0AEC0; font-style:italic; }'
+      + '.astr-cm-dl { margin-left:8px; font-size:11px; color:' + GOLD + '; text-decoration:underline; }'
+      + '.astr-cm-conv-h { font-family:"Cormorant Garamond",serif; font-style:italic; font-size:18px; font-weight:600; color:' + NAVY + '; margin:24px 0 12px; }'
+      + '.astr-cm-msgs { display:flex; flex-direction:column; gap:8px; margin-bottom:14px; }'
+      + '.astr-cm-msg { max-width:78%; padding:9px 13px; border-radius:12px; font-size:12.5px; line-height:1.45; }'
+      + '.astr-cm-msg.client { align-self:flex-start; background:white; border:1px solid #E2DCC9; color:' + NAVY + '; }'
+      + '.astr-cm-msg.conseiller { align-self:flex-end; background:' + NAVY + '; color:white; }'
+      + '.astr-cm-msg-time { display:block; font-size:9.5px; opacity:.6; margin-top:4px; }'
+      + '.astr-cm-msgs-empty { font-size:12px; color:#A0AEC0; font-style:italic; }'
+      + '.astr-cm-reply { display:flex; flex-direction:column; gap:8px; }'
+      + '.astr-cm-reply textarea { width:100%; box-sizing:border-box; min-height:64px; resize:vertical; border:1px solid #D9D5C9; border-radius:10px; padding:10px 12px; font-family:inherit; font-size:12.5px; color:' + NAVY + '; }'
+      + '.astr-cm-reply textarea:focus { outline:none; border-color:' + GOLD + '; }'
+      + '.astr-cm-send { align-self:flex-end; background:' + NAVY + '; color:white; border:none; border-radius:9px; padding:9px 18px; font-family:inherit; font-size:12px; font-weight:700; letter-spacing:.04em; cursor:pointer; }'
+      + '.astr-cm-send:hover { background:#13294a; }'
+      + '.astr-cm-send:disabled { opacity:.5; cursor:default; }';
+    document.head.appendChild(css);
+  }
+
+  var modalState = { token: null, timer: null };
+
+  function closeModal() {
+    if (modalState.timer) { clearInterval(modalState.timer); modalState.timer = null; }
+    modalState.token = null;
+    var ov = document.getElementById('astr-cm-overlay');
+    if (ov && ov.parentNode) ov.parentNode.removeChild(ov);
+  }
+
+  function buildModalShell() {
+    injectModalStyles();
+    var ov = document.createElement('div');
+    ov.id = 'astr-cm-overlay';
+    ov.className = 'astr-cm-overlay';
+    ov.addEventListener('click', function (ev) { if (ev.target === ov) closeModal(); });
+    ov.innerHTML = ''
+      + '<div class="astr-cm-card">'
+      +   '<div class="astr-cm-head">'
+      +     '<div class="astr-cm-head-main">'
+      +       '<h3 class="astr-cm-name" id="astr-cm-name">…</h3>'
+      +       '<div class="astr-cm-meta" id="astr-cm-meta"></div>'
+      +     '</div>'
+      +     '<div class="astr-cm-prog"><div class="astr-cm-prog-ring" id="astr-cm-ring">0/0</div>'
+      +       '<div class="astr-cm-prog-txt">pièces</div></div>'
+      +     '<button class="astr-cm-close" id="astr-cm-close" aria-label="Fermer">✕</button>'
+      +   '</div>'
+      +   '<div class="astr-cm-body" id="astr-cm-body"></div>'
+      + '</div>';
+    document.body.appendChild(ov);
+    document.getElementById('astr-cm-close').addEventListener('click', closeModal);
+    return ov;
+  }
+
+  function renderModal(token, d) {
+    var name = document.getElementById('astr-cm-name');
+    var meta = document.getElementById('astr-cm-meta');
+    var ring = document.getElementById('astr-cm-ring');
+    var body = document.getElementById('astr-cm-body');
+    if (!name || !body) return;
+
+    var prog = d.progress || { done: 0, total: 0 };
+    name.textContent = d.client_nom || '—';
+    meta.innerHTML = '<strong>' + esc(d.client_email || '') + '</strong> · Créée le ' + fmtDate(d.created_at)
+      + (d.opened_at ? ' · Ouverte le ' + fmtDate(d.opened_at) : ' · Non ouverte');
+    ring.textContent = prog.done + '/' + prog.total;
+
+    var structure = d.structure || [];
+    var depots = d.depots || [];
+    var depByIndex = {};
+    depots.forEach(function (dp) { depByIndex[dp.item_index] = dp; });
+
+    // Corps groupé par thème.
+    var html = '';
+    var curTheme = null;
+    structure.forEach(function (it, idx) {
+      var theme = it.theme || 'Pièces demandées';
+      if (theme !== curTheme) {
+        curTheme = theme;
+        html += '<div class="astr-cm-theme">' + esc(theme) + '</div>';
+      }
+      var dp = depByIndex[idx];
+      var state;
+      if (dp && dp.file_name) {
+        state = '<span class="astr-cm-ok">✓ ' + esc(dp.file_name) + '</span>'
+          + '<a class="astr-cm-dl" href="/api/collecte-admin/' + esc(token) + '/file?item_index=' + idx + '" target="_blank" rel="noopener">Télécharger</a>';
+      } else if (dp && dp.reponse) {
+        state = '<span class="astr-cm-ok">✓ ' + esc(dp.reponse) + '</span>';
+      } else {
+        state = '<span class="astr-cm-wait">En attente</span>';
+      }
+      html += '<div class="astr-cm-item"><span class="astr-cm-item-label">' + esc(it.label) + '</span>'
+        + '<span class="astr-cm-item-state">' + state + '</span></div>';
+    });
+
+    // Conversation.
+    var msgs = d.messages || [];
+    var msgsHtml = msgs.length
+      ? msgs.map(function (m) {
+          var side = m.author === 'conseiller' ? 'conseiller' : 'client';
+          return '<div class="astr-cm-msg ' + side + '">' + esc(m.body)
+            + '<span class="astr-cm-msg-time">' + fmtTime(m.created_at) + '</span></div>';
+        }).join('')
+      : '<div class="astr-cm-msgs-empty">Aucun message pour l\'instant.</div>';
+
+    html += '<div class="astr-cm-conv-h">Conversation avec le client</div>'
+      + '<div class="astr-cm-msgs" id="astr-cm-msgs">' + msgsHtml + '</div>'
+      + '<div class="astr-cm-reply">'
+      +   '<textarea id="astr-cm-textarea" placeholder="Votre réponse au client…"></textarea>'
+      +   '<button class="astr-cm-send" id="astr-cm-send">Répondre au client</button>'
+      + '</div>';
+
+    // Préserve le brouillon du textarea entre deux refreshs.
+    var prevDraft = '';
+    var oldTa = document.getElementById('astr-cm-textarea');
+    if (oldTa) prevDraft = oldTa.value;
+
+    body.innerHTML = html;
+
+    var ta = document.getElementById('astr-cm-textarea');
+    if (ta && prevDraft) ta.value = prevDraft;
+    var sendBtn = document.getElementById('astr-cm-send');
+    if (sendBtn) {
+      sendBtn.addEventListener('click', function () { sendReply(token, ta, sendBtn); });
+    }
+  }
+
+  async function sendReply(token, ta, btn) {
+    var body = (ta && ta.value || '').trim();
+    if (!body) return;
+    btn.disabled = true;
+    try {
+      var r = await fetch('/api/collecte-admin/' + encodeURIComponent(token) + '/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ body: body }),
+      });
+      if (!r.ok) throw new Error('post failed');
+      var data = await r.json();
+      var m = data && data.message;
+      var box = document.getElementById('astr-cm-msgs');
+      if (box) {
+        var empty = box.querySelector('.astr-cm-msgs-empty');
+        if (empty) box.innerHTML = '';
+        var el = document.createElement('div');
+        el.className = 'astr-cm-msg conseiller';
+        el.innerHTML = esc(m ? m.body : body) + '<span class="astr-cm-msg-time">'
+          + fmtTime(m ? m.created_at : new Date().toISOString()) + '</span>';
+        box.appendChild(el);
+      }
+      if (ta) ta.value = '';
+    } catch (err) { /* silencieux */ }
+    btn.disabled = false;
+  }
+
+  async function loadDetail(token) {
+    try {
+      var r = await fetch('/api/collecte-admin/' + encodeURIComponent(token), { cache: 'no-store' });
+      if (!r.ok) return;
+      var d = await r.json();
+      if (modalState.token === token) renderModal(token, d);
+    } catch (err) { /* silencieux */ }
+  }
+
+  function astrOpenCollecte(token) {
+    closeModal();
+    modalState.token = token;
+    buildModalShell();
+    loadDetail(token);
+    modalState.timer = setInterval(function () {
+      if (modalState.token === token) loadDetail(token);
+    }, POLL_DETAIL_MS);
+  }
+  window.astrOpenCollecte = astrOpenCollecte;
+
+  document.addEventListener('keydown', function (ev) {
+    if (ev.key === 'Escape' && modalState.token) closeModal();
+  });
+
+  document.addEventListener('DOMContentLoaded', function () {
+    pollList();
+    setInterval(pollList, POLL_LIST_MS);
+  });
+})();
+</script>
 </body>
 </html>
