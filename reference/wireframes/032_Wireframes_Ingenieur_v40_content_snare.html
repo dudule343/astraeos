@@ -4629,7 +4629,7 @@
             <p class="hero-sub">Régime de l&apos;union : 2 personnes physiques liées par mariage (régime de la communauté réduite aux acquêts) · 62 ans et 58 ans · domicile principal Paris 7e · 3 enfants majeurs.</p>
           </div>
           <div class="hero-actions">
-            <button class="btn btn-ghost btn-sm" onclick="goToPage('ing-clients')">← Retour aux clients</button>
+            <button class="btn btn-ghost btn-sm" onclick="goToPage(\'ing-clients\')">← Retour aux clients</button>
             <button class="btn btn-gold btn-sm">Nouvelle étude</button>
           </div>
         </div>
@@ -5212,19 +5212,19 @@
                     <div></div>
                     <div>
                       <label style="display:block; font-size:10.5px; font-weight:600; color:var(--navy-300); margin-bottom:4px;">Prénom *</label>
-                      <input id="astr-p1-prenom" type="text" placeholder="Bertrand" style="width:100%; padding:9px 12px; border:1px solid var(--navy-100); border-radius:6px; font-family:inherit; font-size:12.5px;">
+                      <input type="text" placeholder="Bertrand" style="width:100%; padding:9px 12px; border:1px solid var(--navy-100); border-radius:6px; font-family:inherit; font-size:12.5px;">
                     </div>
                     <div>
                       <label style="display:block; font-size:10.5px; font-weight:600; color:var(--navy-300); margin-bottom:4px;">Nom *</label>
-                      <input id="astr-p1-nom" type="text" placeholder="DUPONT" style="width:100%; padding:9px 12px; border:1px solid var(--navy-100); border-radius:6px; font-family:inherit; font-size:12.5px; text-transform:uppercase;">
+                      <input type="text" placeholder="DUPONT" style="width:100%; padding:9px 12px; border:1px solid var(--navy-100); border-radius:6px; font-family:inherit; font-size:12.5px; text-transform:uppercase;">
                     </div>
                     <div>
                       <label style="display:block; font-size:10.5px; font-weight:600; color:var(--navy-300); margin-bottom:4px;">E-mail *</label>
-                      <input id="astr-p1-email" type="email" placeholder="bertrand.dupont@email-test.fr" style="width:100%; padding:9px 12px; border:1px solid var(--navy-100); border-radius:6px; font-family:inherit; font-size:12.5px;">
+                      <input type="email" placeholder="bertrand.dupont@email-test.fr" style="width:100%; padding:9px 12px; border:1px solid var(--navy-100); border-radius:6px; font-family:inherit; font-size:12.5px;">
                     </div>
                     <div>
                       <label style="display:block; font-size:10.5px; font-weight:600; color:var(--navy-300); margin-bottom:4px;">Téléphone</label>
-                      <input id="astr-p1-tel" type="tel" placeholder="+33 6 12 34 56 78" style="width:100%; padding:9px 12px; border:1px solid var(--navy-100); border-radius:6px; font-family:inherit; font-size:12.5px;">
+                      <input type="tel" placeholder="+33 6 12 34 56 78" style="width:100%; padding:9px 12px; border:1px solid var(--navy-100); border-radius:6px; font-family:inherit; font-size:12.5px;">
                     </div>
                   </div>
                 </div>
@@ -5486,7 +5486,7 @@
             </div>
             <div style="display:flex; gap:10px;">
               <button class="btn btn-ghost btn-sm">Enregistrer en brouillon</button>
-              <button class="btn btn-gold btn-sm" onclick="astraeosCreerEspaceClient()">✓ Créer l'espace + envoyer les documents sélectionnés</button>
+              <button class="btn btn-gold btn-sm">✓ Créer l'espace + envoyer les documents sélectionnés</button>
             </div>
           </div>
         </div>
@@ -5524,9 +5524,9 @@
             <p class="hero-sub">Vue semaine de votre agenda · connecté à Google Calendar (sync activée) et lien public personnel de prise de RDV (style Calendly) à partager à vos clients.</p>
           </div>
           <div class="hero-actions">
-            <button class="btn btn-ghost btn-sm" id="btn-gcal-connect" onclick="connectGoogleCalendar()" title="Synchroniser votre Google Calendar avec Astraeos">
+            <button class="btn btn-ghost btn-sm">
               <svg style="width:13px;height:13px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M8 12 L 11 15 L 16 9"/></svg>
-              <span id="btn-gcal-label">Connecter Google Calendar</span>
+              Google Agenda · sync 11:42
             </button>
             <button class="btn btn-gold btn-sm" onclick="openModalNouveauRdv()">+ Nouveau RDV</button>
           </div>
@@ -5553,7 +5553,7 @@
             </div>
           </div>
           <div class="kpi"><div class="kpi-label">Durée moyenne</div><div class="kpi-value">1 <span class="unit">h 12 min</span></div><div class="kpi-meta">cumul N-1 · ▼ -8 min</div></div>
-          <div class="kpi"><div class="kpi-label">Mon lien public</div><div class="kpi-value" style="font-size:13px; word-break:break-all;">priveos.com/rdv/<span class="astr-link-slug" data-engineer="luc-thilliez">luc-thilliez</span></div><div class="kpi-meta"><a style="color:var(--gold-deep); font-weight:700; cursor:pointer;" onclick="astraeosCopyPublicLink('luc-thilliez', this)">Copier le lien</a></div></div>
+          <div class="kpi"><div class="kpi-label">Mon lien public</div><div class="kpi-value" style="font-size:13px; word-break:break-all;">priveos.com/rdv/luc-thilliez</div><div class="kpi-meta"><a style="color:var(--gold-deep); font-weight:700; cursor:pointer;">Copier le lien</a></div></div>
         </div>
 
         <!-- 2 colonnes : Calendrier semaine + Panneau type de RDV -->
@@ -5843,10 +5843,10 @@
                 <div style="font-size:11.5px; color:var(--navy); line-height:1.6; margin-bottom:14px;">
                   Partagez ce lien avec vos clients et prospects pour qu'ils prennent rendez-vous sur les créneaux que vous avez ouverts.
                 </div>
-                <div style="padding:10px 14px; background:var(--ivory); border:1px solid var(--ivory-deep); border-radius:6px; font-size:11.5px; color:var(--gold-deep); font-weight:600; word-break:break-all; margin-bottom:10px;">priveos.com/rdv/<span class="astr-link-slug" data-engineer="luc-thilliez">luc-thilliez</span></div>
+                <div style="padding:10px 14px; background:var(--ivory); border:1px solid var(--ivory-deep); border-radius:6px; font-size:11.5px; color:var(--gold-deep); font-weight:600; word-break:break-all; margin-bottom:10px;">priveos.com/rdv/luc-thilliez</div>
                 <div style="display:flex; gap:6px;">
-                  <button class="btn btn-gold btn-sm" style="flex:1; font-size:11px;" onclick="astraeosCopyPublicLink('luc-thilliez', this)">Copier</button>
-                  <a class="btn btn-ghost btn-sm" style="flex:1; font-size:11px; text-decoration:none; display:inline-flex; align-items:center; justify-content:center;" href="/client#rdv" target="_top">Aperçu</a>
+                  <button class="btn btn-gold btn-sm" style="flex:1; font-size:11px;">Copier</button>
+                  <button class="btn btn-ghost btn-sm" style="flex:1; font-size:11px;">Aperçu</button>
                 </div>
               </div>
             </div>
@@ -8142,7 +8142,7 @@ Style relationnel · couple très autonome, à l'aise techniquement, attentes cl
                   <div style="font-weight:700; color:var(--navy);">Luc THILLIEZ</div>
                   <div style="font-size:11px; color:var(--navy-300);">Président associé du cabinet PRIVEOS</div>
                   <div style="font-size:11px; color:var(--navy-300); margin-top:4px;">📧 luc.thilliez@email-test.fr · 📞 +33 6 12 34 56 78</div>
-                  <div style="font-size:10.5px; color:var(--gold-deep); margin-top:4px;">priveos.com/rdv/<span class="astr-link-slug" data-engineer="luc-thilliez">luc-thilliez</span> · prendre rendez-vous</div>
+                  <div style="font-size:10.5px; color:var(--gold-deep); margin-top:4px;">priveos.com/rdv/luc-thilliez · prendre rendez-vous</div>
                 </div>
               </div>
               <div style="margin-top:14px; padding-top:12px; border-top:1px solid var(--ivory-deep); font-size:10px; color:var(--navy-300); line-height:1.5;">
@@ -26900,497 +26900,5 @@ document.addEventListener('DOMContentLoaded',function(){if(document.getElementBy
   </div>
 </div>
 
-
-<script>
-  // ═══════════════════════════════════════════════════════════════════
-  // ASTRAEOS · ouverture Espace Client (vue côté prospect) depuis les
-  // tables pipeline. Préserve les onclick existants (modales internes).
-  // ═══════════════════════════════════════════════════════════════════
-  (function () {
-    function statusToStep(text) {
-      if (!text) return null;
-      var t = text.toLowerCase();
-      if (t.indexOf('dormant') !== -1)            return 'rdv';
-      if (t.indexOf('non envoy') !== -1)          return 'rdv';
-      if (t.indexOf('inactif') !== -1)            return 'rdv';
-      if (t.indexOf('rencontré') !== -1)          return 'dci-simple';
-      if (t.indexOf('docs envoyés') !== -1)       return 'dci-simple';
-      if (t.indexOf('attente retour') !== -1)     return 'dci-simple';
-      if (t.indexOf('à relancer') !== -1)         return 'dci-simple';
-      if (t.indexOf('compliance') !== -1)         return 'qualification';
-      if (t.indexOf('qualifié') !== -1)           return 'qualification';
-      if (t.indexOf('en collecte') !== -1)        return 'qualification';
-      if (t.indexOf('prêt à commencer') !== -1)   return 'qualification';
-      if (t.indexOf('à signer') !== -1)           return 'dci-complet';
-      if (t.indexOf('tous signés') !== -1)        return 'dci-complet';
-      if (t.indexOf('paiement reçu') !== -1)      return 'dci-complet';
-      if (t.indexOf('attente paiement') !== -1)   return 'dci-complet';
-      if (t.indexOf('validation client') !== -1)  return 'dci-complet';
-      if (t.indexOf('investissements validés') !== -1) return 'dci-complet';
-      if (t.indexOf('refus') !== -1)              return 'dci-complet';
-      if (t.indexOf('réflexion') !== -1)          return 'dci-complet';
-      if (t.indexOf('en cours') !== -1)           return 'dci-complet';
-      if (t.indexOf('étude') !== -1)              return 'dci-complet';
-      if (t.indexOf('restitu') !== -1)            return 'dci-complet';
-      return null;
-    }
-    function pageIdToStep(pageId) {
-      if (!pageId) return null;
-      // ing-pipe-* ET dir-pipe-* (même nomenclature 01..06)
-      if (/(ing|dir)-pipe-01$/.test(pageId)) return 'rdv';
-      if (/(ing|dir)-pipe-02$/.test(pageId)) return 'dci-simple';
-      if (/(ing|dir)-pipe-03$/.test(pageId)) return 'qualification';
-      if (/(ing|dir)-pipe-04$/.test(pageId)) return 'dci-complet';
-      if (/(ing|dir)-pipe-05$/.test(pageId)) return 'dci-complet';
-      if (/(ing|dir)-pipe-06$/.test(pageId)) return 'dci-complet';
-      if (pageId === 'page-ing-clients')        return 'dci-complet';
-      if (pageId === 'page-ing-fiche-client')   return 'dci-complet';
-      if (pageId === 'page-ing-fiche-dossier')  return 'dci-complet';
-      if (pageId === 'page-ing-pipeline')       return 'rdv';
-      if (pageId === 'page-ing-detail-etape-1') return 'rdv';
-      return null;
-    }
-    function openClientStep(step) {
-      var url = '/client#' + (step || 'rdv');
-      try { if (window.top && window.top !== window) { window.top.location.href = url; return; } }
-      catch (err) {}
-      window.location.href = url;
-    }
-    function findRow(el) {
-      while (el && el !== document) { if (el.tagName === 'TR') return el; el = el.parentElement; }
-      return null;
-    }
-    function stepForRow(row) {
-      if (!row) return 'rdv';
-      var pill = row.querySelector('.status-pill-v1, .status-pill');
-      if (pill) { var s = statusToStep(pill.textContent || ''); if (s) return s; }
-      var page = row.closest && row.closest('.page');
-      if (page) { var p = pageIdToStep(page.id); if (p) return p; }
-      return 'rdv';
-    }
-    document.addEventListener('click', function (e) {
-      // Eye buttons WITHOUT existing onclick → open client view
-      var actionBtn = e.target.closest && e.target.closest('.action-btn');
-      if (actionBtn && !actionBtn.hasAttribute('onclick') && !actionBtn.dataset.astrHandled) {
-        var cell = actionBtn.parentElement;
-        if (cell && cell.firstElementChild === actionBtn) {
-          e.preventDefault(); e.stopPropagation();
-          openClientStep(stepForRow(findRow(actionBtn)));
-          return;
-        }
-      }
-      // Prospect/client name → open client view
-      var clientCell = e.target.closest && e.target.closest('.client-cell');
-      if (clientCell) {
-        var row = findRow(clientCell);
-        if (row && row.closest('.dt')) {
-          e.preventDefault();
-          openClientStep(stepForRow(row));
-          return;
-        }
-      }
-    });
-    document.addEventListener('DOMContentLoaded', function () {
-      document.querySelectorAll('.dt .client-cell').forEach(function (c) {
-        c.style.cursor = 'pointer';
-        c.title = 'Voir le parcours côté client (Espace Client)';
-      });
-      document.querySelectorAll('.dt .actions-cell .action-btn:first-child').forEach(function (b) {
-        if (!b.hasAttribute('onclick')) {
-          b.title = 'Voir le parcours côté client';
-        }
-      });
-    });
-  })();
-
-  // ═══════════════════════════════════════════════════════════════════
-  // ASTRAEOS · Boîte de réception DCI (données réelles depuis /api/dci)
-  // Polle toutes les 8s et affiche un panneau quand un prospect a soumis.
-  // ═══════════════════════════════════════════════════════════════════
-  (function () {
-    var DEMO_SLUG = 'bertrand-dupont-topin';
-    var KIND_LABELS = {
-      rdv: 'Prise de RDV',
-      simple: 'DCI simplifié',
-      qualification: 'Questionnaire qualification',
-      complet: 'DCI complet',
-    };
-
-    function injectStyles() {
-      if (document.getElementById('astr-inbox-style')) return;
-      var css = document.createElement('style');
-      css.id = 'astr-inbox-style';
-      css.textContent = ''
-        + '.astr-inbox-toggle { position: fixed; right: 22px; bottom: 22px; z-index: 9000; background: var(--navy); color: var(--gold); border: 2px solid var(--gold); border-radius: 999px; padding: 11px 18px; font-family: inherit; font-size: 12px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; cursor: pointer; box-shadow: 0 10px 30px rgba(16,45,80,0.25); display: flex; align-items: center; gap: 10px; transition: transform .15s; }'
-        + '.astr-inbox-toggle:hover { transform: translateY(-2px); }'
-        + '.astr-inbox-toggle .astr-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 0 4px rgba(198,142,14,0.25); animation: astrPulse 1.6s ease-in-out infinite; }'
-        + '@keyframes astrPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }'
-        + '.astr-inbox-toggle .astr-count { background: var(--gold); color: var(--navy); padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 800; }'
-        + '.astr-inbox-panel { position: fixed; right: 22px; bottom: 78px; width: 420px; max-height: 70vh; overflow: auto; background: white; border: 1px solid #D9D5C9; border-radius: 14px; box-shadow: 0 20px 60px rgba(16,45,80,0.18); z-index: 9000; display: none; padding: 22px 24px; font-family: inherit; }'
-        + '.astr-inbox-panel.open { display: block; }'
-        + '.astr-inbox-panel h3 { font-family: "Cormorant Garamond", "Georgia", serif; font-size: 19px; font-style: italic; color: var(--navy); margin: 0 0 4px; font-weight: 600; }'
-        + '.astr-inbox-panel .astr-sub { font-size: 11.5px; color: #708196; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 18px; font-weight: 600; }'
-        + '.astr-inbox-panel .astr-sub strong { color: var(--gold); font-weight: 700; }'
-        + '.astr-inbox-item { border: 1px solid #ECE7D6; border-radius: 10px; padding: 12px 14px; margin-bottom: 10px; background: #FAF8F3; }'
-        + '.astr-inbox-item.empty { color: #708196; font-style: italic; font-size: 12.5px; background: white; }'
-        + '.astr-inbox-item-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }'
-        + '.astr-inbox-item-kind { font-size: 12px; font-weight: 700; color: var(--navy); }'
-        + '.astr-inbox-item-time { font-size: 10.5px; color: #708196; }'
-        + '.astr-inbox-item-name { font-family: "Cormorant Garamond", serif; font-style: italic; font-size: 15px; color: var(--navy); font-weight: 600; }'
-        + '.astr-inbox-item-actions { margin-top: 8px; display: flex; gap: 8px; }'
-        + '.astr-inbox-btn { font-size: 10.5px; padding: 5px 10px; border-radius: 5px; border: 1px solid #D9D5C9; background: white; color: var(--navy); cursor: pointer; font-family: inherit; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }'
-        + '.astr-inbox-btn:hover { border-color: var(--gold); color: var(--gold); }'
-        + '.astr-inbox-source { font-size: 10px; color: #708196; text-align: right; margin-top: 8px; font-style: italic; }'
-        + '.astr-inbox-source strong { color: var(--gold); font-style: normal; font-weight: 700; }'
-        + '.astr-inbox-payload { display: none; background: white; border: 1px solid #ECE7D6; border-radius: 6px; padding: 10px; margin-top: 8px; font-family: ui-monospace, monospace; font-size: 10.5px; line-height: 1.45; max-height: 280px; overflow: auto; white-space: pre-wrap; word-break: break-word; color: #1F2937; }'
-        + '.astr-inbox-payload.open { display: block; }';
-      document.head.appendChild(css);
-    }
-
-    function buildUI() {
-      injectStyles();
-      var toggle = document.createElement('button');
-      toggle.id = 'astr-inbox-toggle';
-      toggle.className = 'astr-inbox-toggle';
-      toggle.innerHTML = '<span class="astr-dot"></span> DCI reçus <span class="astr-count" id="astr-count">0</span>';
-      var panel = document.createElement('div');
-      panel.id = 'astr-inbox-panel';
-      panel.className = 'astr-inbox-panel';
-      panel.innerHTML = '<h3>Boîte de réception DCI</h3>'
-        + '<div class="astr-sub">Prospect : <strong>Bertrand DUPONT-TOPIN</strong></div>'
-        + '<div id="astr-inbox-list"></div>'
-        + '<div class="astr-inbox-source" id="astr-inbox-source"></div>';
-      document.body.appendChild(toggle);
-      document.body.appendChild(panel);
-      toggle.addEventListener('click', function () { panel.classList.toggle('open'); });
-    }
-
-    function render(data) {
-      var list = document.getElementById('astr-inbox-list');
-      var count = document.getElementById('astr-count');
-      var src = document.getElementById('astr-inbox-source');
-      if (!list || !count || !src) return;
-      var items = Object.keys(data.submissions || {}).filter(function (k) { return data.submissions[k]; });
-      count.textContent = items.length;
-      if (items.length === 0) {
-        list.innerHTML = '<div class="astr-inbox-item empty">Aucun document reçu pour ce prospect. Le client n\'a pas encore terminé son parcours.</div>';
-      } else {
-        list.innerHTML = items.map(function (k) {
-          var s = data.submissions[k];
-          var date = new Date(s.submitted_at).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' });
-          var safe = JSON.stringify(s.payload, null, 2)
-            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-          var id = 'astr-pay-' + k;
-          return '<div class="astr-inbox-item">'
-            + '<div class="astr-inbox-item-head">'
-            +   '<span class="astr-inbox-item-kind">' + (KIND_LABELS[k] || k) + '</span>'
-            +   '<span class="astr-inbox-item-time">' + date + '</span>'
-            + '</div>'
-            + '<div class="astr-inbox-item-name">' + (s.display_name || s.prospect_slug) + '</div>'
-            + '<div class="astr-inbox-item-actions">'
-            +   '<button class="astr-inbox-btn" onclick="document.getElementById(\'' + id + '\').classList.toggle(\'open\')">Voir le contenu</button>'
-            + '</div>'
-            + '<pre class="astr-inbox-payload" id="' + id + '">' + safe + '</pre>'
-            + '</div>';
-        }).join('');
-      }
-      src.innerHTML = 'Source : <strong>' + (data.source || 'inconnue') + '</strong>'
-        + (data.source === 'file' ? ' (.data/dci-store.json local · OK pour démo)' : ' (Supabase)');
-    }
-
-    var lastSig = '';
-    async function poll() {
-      try {
-        var r = await fetch('/api/dci?prospect=' + DEMO_SLUG, { cache: 'no-store' });
-        if (!r.ok) return;
-        var data = await r.json();
-        var sig = JSON.stringify(data.submissions);
-        if (sig !== lastSig) {
-          lastSig = sig;
-          render(data);
-          var count = parseInt(document.getElementById('astr-count')?.textContent || '0', 10);
-          if (count > 0 && document.getElementById('astr-inbox-toggle')) {
-            document.getElementById('astr-inbox-toggle').style.background = 'var(--gold)';
-            document.getElementById('astr-inbox-toggle').style.color = 'var(--navy)';
-          }
-        }
-      } catch (err) { /* silencieux */ }
-    }
-
-    document.addEventListener('DOMContentLoaded', function () {
-      buildUI();
-      poll();
-      setInterval(poll, 8000);
-    });
-  })();
-
-  // ═══════════════════════════════════════════════════════════════════
-  // ASTRAEOS · Copie de liens publics + toast
-  // ═══════════════════════════════════════════════════════════════════
-  function astraeosBaseUrl() {
-    try {
-      // Si on est dans une iframe, prendre l'origin du top window (= astraeos.vercel.app)
-      if (window.top && window.top !== window && window.top.location && window.top.location.origin) {
-        return window.top.location.origin;
-      }
-    } catch (e) { /* cross-origin */ }
-    return window.location.origin;
-  }
-  function astraeosSlugify(s) {
-    return (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '')
-      .toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
-  }
-  function astraeosToast(msg) {
-    var t = document.getElementById('astr-toast');
-    if (!t) {
-      t = document.createElement('div');
-      t.id = 'astr-toast';
-      t.style.cssText = 'position:fixed;bottom:90px;right:22px;background:var(--navy);color:white;padding:12px 18px;border-radius:8px;font-size:13px;font-weight:600;letter-spacing:0.04em;box-shadow:0 10px 30px rgba(16,45,80,0.25);z-index:10000;opacity:0;transition:opacity .2s;border-left:3px solid var(--gold);max-width:380px;';
-      document.body.appendChild(t);
-    }
-    t.textContent = msg;
-    t.style.opacity = '1';
-    clearTimeout(window.__astrToastTimer);
-    window.__astrToastTimer = setTimeout(function () { t.style.opacity = '0'; }, 3000);
-  }
-  async function astraeosCopy(text) {
-    try {
-      if (navigator.clipboard && window.isSecureContext) {
-        await navigator.clipboard.writeText(text);
-      } else {
-        var ta = document.createElement('textarea');
-        ta.value = text;
-        ta.style.position = 'fixed'; ta.style.opacity = '0';
-        document.body.appendChild(ta); ta.select();
-        document.execCommand('copy'); document.body.removeChild(ta);
-      }
-      return true;
-    } catch (e) { return false; }
-  }
-  window.astraeosCopyPublicLink = async function (engineerSlug, btn) {
-    var url = astraeosBaseUrl() + '/client#rdv';
-    var ok = await astraeosCopy(url);
-    astraeosToast(ok ? 'Lien copié · ' + url : 'Impossible de copier (autorisez le presse-papier)');
-    if (btn) {
-      var old = btn.textContent;
-      btn.textContent = '✓ Copié';
-      setTimeout(function () { btn.textContent = old; }, 1600);
-    }
-  };
-
-  // ═══════════════════════════════════════════════════════════════════
-  // ASTRAEOS · Modale "Inviter au DCI" par prospect
-  // ═══════════════════════════════════════════════════════════════════
-  function astraeosBuildInviteModal() {
-    if (document.getElementById('astr-invite-modal')) return;
-    var html = ''
-      + '<div id="astr-invite-modal" style="position:fixed;inset:0;z-index:10001;background:rgba(16,45,80,0.55);display:none;align-items:center;justify-content:center;padding:24px;">'
-      +   '<div style="background:white;border-radius:14px;max-width:560px;width:100%;padding:32px 36px;box-shadow:0 20px 60px rgba(0,0,0,0.3);font-family:inherit;">'
-      +     '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">'
-      +       '<div>'
-      +         '<div style="font-size:10px;letter-spacing:0.22em;text-transform:uppercase;color:var(--gold-deep);font-weight:700;margin-bottom:6px;">Inviter au parcours client</div>'
-      +         '<h2 style="font-family:\'Cormorant Garamond\',Georgia,serif;font-size:24px;font-style:italic;color:var(--navy);margin:0;font-weight:600;" id="astr-invite-title">Bertrand DUPONT-TOPIN</h2>'
-      +       '</div>'
-      +       '<button onclick="astraeosCloseInvite()" style="background:transparent;border:none;font-size:24px;color:var(--navy-300);cursor:pointer;line-height:1;">×</button>'
-      +     '</div>'
-      +     '<div style="font-size:12.5px;color:var(--navy-300);margin-bottom:22px;line-height:1.55;">Le prospect recevra un lien personnel pour suivre les 4 étapes du parcours · prise de RDV, DCI simplifié, questionnaire de qualification, DCI complet.</div>'
-      +     '<div style="background:var(--ivory);border:1px solid var(--ivory-deep);border-left:3px solid var(--gold);border-radius:8px;padding:14px 16px;margin-bottom:18px;">'
-      +       '<div style="font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold-deep);font-weight:700;margin-bottom:6px;">Lien personnel</div>'
-      +       '<div id="astr-invite-link" style="font-family:\'JetBrains Mono\',ui-monospace,monospace;font-size:12px;color:var(--navy);word-break:break-all;line-height:1.5;"></div>'
-      +     '</div>'
-      +     '<div style="display:flex;gap:8px;margin-bottom:22px;">'
-      +       '<button class="btn btn-gold btn-sm" style="flex:1;" onclick="astraeosCopyInvite(this)">Copier le lien</button>'
-      +       '<a class="btn btn-ghost btn-sm" id="astr-invite-mail" href="#" style="flex:1;text-align:center;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:7px;">📧 Envoyer par email</a>'
-      +       '<a class="btn btn-ghost btn-sm" id="astr-invite-preview" href="#" target="_top" style="flex:1;text-align:center;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:7px;">👁 Aperçu</a>'
-      +     '</div>'
-      +     '<div style="border-top:1px solid var(--ivory-deep);padding-top:18px;">'
-      +       '<div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--navy-300);font-weight:700;margin-bottom:10px;">Le prospect verra dans son espace</div>'
-      +       '<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;font-size:12px;color:var(--navy);">'
-      +         '<div style="background:var(--ivory);padding:9px 12px;border-radius:6px;border:1px solid var(--ivory-deep);"><strong>1.</strong> Prise de RDV (Calendly)</div>'
-      +         '<div style="background:var(--ivory);padding:9px 12px;border-radius:6px;border:1px solid var(--ivory-deep);"><strong>2.</strong> DCI simplifié</div>'
-      +         '<div style="background:var(--ivory);padding:9px 12px;border-radius:6px;border:1px solid var(--ivory-deep);"><strong>3.</strong> Questionnaire qualification</div>'
-      +         '<div style="background:var(--ivory);padding:9px 12px;border-radius:6px;border:1px solid var(--ivory-deep);"><strong>4.</strong> DCI complet</div>'
-      +       '</div>'
-      +     '</div>'
-      +   '</div>'
-      + '</div>';
-    var wrap = document.createElement('div');
-    wrap.innerHTML = html;
-    document.body.appendChild(wrap.firstChild);
-  }
-  window.astraeosCloseInvite = function () {
-    var m = document.getElementById('astr-invite-modal');
-    if (m) m.style.display = 'none';
-  };
-  window.astraeosCopyInvite = async function (btn) {
-    var link = document.getElementById('astr-invite-link')?.textContent || '';
-    if (!link) return;
-    var ok = await astraeosCopy(link);
-    astraeosToast(ok ? 'Lien d\'invitation copié dans le presse-papier' : 'Impossible de copier');
-    if (btn) { var old = btn.textContent; btn.textContent = '✓ Copié'; setTimeout(function () { btn.textContent = old; }, 1600); }
-  };
-  window.astraeosOpenInvite = function (displayName, slug, email) {
-    astraeosBuildInviteModal();
-    var base = astraeosBaseUrl();
-    var url = base + '/client?prospect=' + encodeURIComponent(slug) + '#rdv';
-    document.getElementById('astr-invite-title').textContent = displayName;
-    document.getElementById('astr-invite-link').textContent = url;
-    document.getElementById('astr-invite-preview').href = '/client?prospect=' + encodeURIComponent(slug) + '#rdv';
-    var subject = encodeURIComponent('Préparation de notre rendez-vous · PRIVEOS');
-    var body = encodeURIComponent(
-      'Bonjour ' + displayName + ',\n\n' +
-      'En vue de notre prochain entretien patrimonial, je vous invite à compléter votre espace personnel sécurisé PRIVEOS :\n\n' +
-      url + '\n\n' +
-      'Vous y trouverez les 4 étapes de notre parcours d\'accompagnement (prise de rendez-vous, document de collecte, questionnaire de qualification investisseur).\n\n' +
-      'Je reste à votre disposition pour toute question.\n\n' +
-      'Bien cordialement,\nLuc THILLIEZ\nIngénieur patrimonial · PRIVEOS'
-    );
-    document.getElementById('astr-invite-mail').href = 'mailto:' + (email || '') + '?subject=' + subject + '&body=' + body;
-    document.getElementById('astr-invite-modal').style.display = 'flex';
-  };
-
-  // Génération du lien depuis l'écran "Créer un espace client" (étape 01)
-  window.astraeosCreerEspaceClient = function () {
-    var prenom = (document.getElementById('astr-p1-prenom')?.value || '').trim();
-    var nom    = (document.getElementById('astr-p1-nom')?.value || '').trim();
-    var email  = (document.getElementById('astr-p1-email')?.value || '').trim();
-    if (!prenom || !nom) {
-      astraeosToast('Renseignez au moins prénom + nom de la personne 1 avant de créer.');
-      var input = document.getElementById('astr-p1-prenom');
-      if (input) input.focus();
-      return;
-    }
-    var displayName = prenom + ' ' + nom.toUpperCase();
-    var slug = astraeosSlugify(prenom + '-' + nom);
-    astraeosOpenInvite(displayName, slug, email);
-    astraeosToast('Espace client créé · lien personnel généré pour ' + displayName);
-  };
-
-  // Mini bandeau live · affiche le lien généré dans l'aperçu e-mail au fur et à mesure
-  function astraeosBindLivePreview() {
-    var prenom = document.getElementById('astr-p1-prenom');
-    var nom    = document.getElementById('astr-p1-nom');
-    if (!prenom || !nom) return;
-    function update() {
-      var p = (prenom.value || '').trim();
-      var n = (nom.value || '').trim();
-      if (!p && !n) return;
-      var slug = astraeosSlugify(p + '-' + n);
-      // Remplace l'éventuelle ligne de prévisualisation existante
-      var preview = document.querySelector('#page-ing-detail-etape-1 [style*="Accéder à mon espace PRIVEOS"]');
-      if (preview) {
-        preview.innerHTML = '→ Accéder à mon espace PRIVEOS<br><span style="font-family:\'JetBrains Mono\',ui-monospace,monospace;font-size:9px;color:var(--gold-300);font-weight:500;letter-spacing:0;">astraeos.vercel.app/client?prospect=' + slug + '</span>';
-      }
-    }
-    prenom.addEventListener('input', update);
-    nom.addEventListener('input', update);
-  }
-
-  // Wire un bouton "Inviter" dans chaque ligne prospect (en plus des actions existantes)
-  function astraeosInjectInviteButtons() {
-    document.querySelectorAll('.dt tbody tr').forEach(function (row) {
-      var actions = row.querySelector('.actions-cell');
-      var nameCell = row.querySelector('.client-cell');
-      if (!actions || !nameCell) return;
-      if (actions.querySelector('.astr-invite-btn')) return; // déjà injecté
-      var names = Array.from(nameCell.querySelectorAll('.client-name, .client-name-line'))
-        .map(function (n) { return n.textContent.trim(); }).filter(Boolean);
-      if (names.length === 0) return;
-      var displayName = names.join(' & ');
-      var slug = astraeosSlugify(names[0]);
-      var btn = document.createElement('button');
-      btn.className = 'action-btn astr-invite-btn';
-      btn.title = 'Envoyer un lien d\'invitation au DCI à ce prospect';
-      btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H5.17L4 17.17V4z"/><polyline points="8 9 12 13 16 9"/></svg>';
-      btn.addEventListener('click', function (e) {
-        e.stopPropagation();
-        astraeosOpenInvite(displayName, slug, '');
-      });
-      actions.appendChild(btn);
-    });
-  }
-
-  document.addEventListener('DOMContentLoaded', function () {
-    astraeosInjectInviteButtons();
-    astraeosBindLivePreview();
-    // Re-injecter quand on change de page (pour les pipe-02..06 chargés dynamiquement)
-    document.querySelectorAll('.nav-item, .stepper-item-v1').forEach(function (el) {
-      el.addEventListener('click', function () { setTimeout(astraeosInjectInviteButtons, 100); });
-    });
-  });
-
-  // ═══════════════════════════════════════════════════════════════════
-  // ASTRAEOS · Connexion Google Calendar (flow Calendly-like)
-  // ═══════════════════════════════════════════════════════════════════
-  (function () {
-    var ENGINEER_SLUG = 'luc-thilliez';
-
-    window.connectGoogleCalendar = function () {
-      var url = '/api/auth/google/start?engineer=' + encodeURIComponent(ENGINEER_SLUG);
-      var w = 480, h = 640;
-      var left = (window.screen.width - w) / 2;
-      var top = (window.screen.height - h) / 2;
-      var popup = window.open(url, 'astr_google_oauth',
-        'width=' + w + ',height=' + h + ',left=' + left + ',top=' + top + ',toolbar=no,menubar=no');
-      if (!popup) {
-        alert('Veuillez autoriser les pop-ups pour connecter Google Calendar.');
-        return;
-      }
-      var timer = setInterval(function () {
-        if (popup.closed) { clearInterval(timer); refreshStatus(); }
-      }, 500);
-    };
-
-    window.disconnectGoogleCalendar = function () {
-      if (!confirm('Déconnecter Google Calendar de cet espace ?')) return;
-      fetch('/api/calendar/disconnect?engineer=' + encodeURIComponent(ENGINEER_SLUG), { method: 'POST' })
-        .then(refreshStatus);
-    };
-
-    window.addEventListener('message', function (e) {
-      if (e.origin !== window.location.origin) return;
-      if (e.data && e.data.ok && e.data.engineer) refreshStatus();
-    });
-
-    function fmtTime(iso) {
-      try {
-        var d = new Date(iso);
-        return d.toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' });
-      } catch (e) { return iso; }
-    }
-
-    function refreshStatus() {
-      var btn = document.getElementById('btn-gcal-connect');
-      var label = document.getElementById('btn-gcal-label');
-      if (!btn || !label) return;
-      fetch('/api/calendar/status?engineer=' + encodeURIComponent(ENGINEER_SLUG))
-        .then(function (r) { return r.json(); })
-        .then(function (s) {
-          if (s.connected) {
-            var demoTag = s.demo ? ' (démo)' : '';
-            label.innerHTML = 'Google Calendar · <span style="color:var(--gold);">'
-              + (s.email || 'connecté') + '</span>' + demoTag
-              + ' <span style="opacity:0.6;font-size:10.5px;margin-left:6px;">↻ ' + fmtTime(s.granted_at) + '</span>';
-            btn.onclick = disconnectGoogleCalendar;
-            btn.title = 'Cliquer pour déconnecter';
-            btn.style.borderColor = '#69D49D';
-          } else {
-            label.textContent = 'Connecter Google Calendar' + (s.oauth_configured ? '' : ' (mode démo)');
-            btn.onclick = connectGoogleCalendar;
-            btn.title = s.oauth_configured
-              ? 'Cliquer pour autoriser Astraeos à accéder à votre Google Calendar'
-              : 'Mode démo · GOOGLE_CLIENT_ID non configuré côté serveur';
-            btn.style.borderColor = '';
-          }
-        })
-        .catch(function () { /* silencieux */ });
-    }
-
-    document.addEventListener('DOMContentLoaded', function () {
-      refreshStatus();
-      setInterval(refreshStatus, 30000); // refresh status toutes les 30s
-    });
-  })();
-</script>
 </body>
 </html>

@@ -34,10 +34,13 @@ DRIVE = Path(
     "0 - Construction de la Saas"
 )
 
-# (source_path_relative_to_DRIVE, local_path_relative_to_repo)
+# (source_path, local_path_relative_to_repo)
+# Le source est résolu relativement à DRIVE par défaut. Préfixe `repo:` →
+# résolu relativement au repo (utile quand la source Drive n'est pas
+# synchronisée localement et qu'on garde une copie de référence dans reference/).
 PAIRS = [
     (
-        "03 - Ingénieur/030_Wireframes_Ingenieur_v12_S1Bv3.html",
+        "repo:reference/wireframes/032_Wireframes_Ingenieur_v40_content_snare.html",
         "public/wireframes/ingenieur.html",
     ),
     (
@@ -206,7 +209,10 @@ def main() -> int:
     print("\n🔍 Comparaison source (Drive) ↔ local (public/wireframes/)\n")
 
     for src_rel, local_rel in PAIRS:
-        src_path = DRIVE / src_rel
+        if src_rel.startswith("repo:"):
+            src_path = REPO / src_rel[len("repo:"):]
+        else:
+            src_path = DRIVE / src_rel
         local_path = REPO / local_rel
         if not src_path.exists():
             print(f"❌ Source introuvable : {src_path}")
