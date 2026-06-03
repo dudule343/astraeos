@@ -1,6 +1,7 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { NextResponse, type NextRequest, after } from "next/server";
 
 import { createAdminClient } from "@/lib/supabase/admin";
+import { analyserDepot } from "@/lib/ia-analyse";
 
 const MAX_FILE_SIZE = 15 * 1024 * 1024; // 15 Mo
 const BUCKET = "depots";
@@ -129,6 +130,17 @@ export async function POST(
     return NextResponse.json(
       { error: `Enregistrement impossible : ${upsertError.message}` },
       { status: 500 },
+    );
+  }
+
+  // Analyse IA en post-réponse, uniquement pour un dépôt de FICHIER.
+  // `after` (Next 16, exporté par next/server) laisse répondre le client sans
+  // attendre l'analyse. Si la clé IA n'est pas branchée, analyserDepot ne fait rien.
+  if (hasFile) {
+    after(
+      analyserDepot({ collecteId: collecte.id, itemIndex }).catch(() => {
+        /* silencieux : l'analyse ne doit jamais impacter le dépôt client */
+      }),
     );
   }
 

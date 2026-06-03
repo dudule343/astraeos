@@ -27097,6 +27097,13 @@ document.addEventListener('DOMContentLoaded',function(){if(document.getElementBy
   var GOLD = '#C8A55C';
   var IVORY = '#FAF7F0';
 
+  // État de la connexion IA du cabinet (renseigné par GET /api/ia-settings).
+  var astrIaState = { connected: false, provider: null, model: null, masked_key: null, label: null };
+  var IA_MODELS = [
+    { id: 'claude-haiku-4-5', label: 'Haiku — rapide, ~1 ct/doc' },
+    { id: 'claude-sonnet-4-6', label: 'Sonnet — précis' }
+  ];
+
   function esc(s) {
     return String(s == null ? '' : s)
       .replace(/&/g, '&amp;')
@@ -27251,7 +27258,23 @@ document.addEventListener('DOMContentLoaded',function(){if(document.getElementBy
       + '.astr-cm-reply textarea:focus { outline:none; border-color:' + GOLD + '; }'
       + '.astr-cm-send { align-self:flex-end; background:' + NAVY + '; color:white; border:none; border-radius:9px; padding:9px 18px; font-family:inherit; font-size:12px; font-weight:700; letter-spacing:.04em; cursor:pointer; }'
       + '.astr-cm-send:hover { background:#13294a; }'
-      + '.astr-cm-send:disabled { opacity:.5; cursor:default; }';
+      + '.astr-cm-send:disabled { opacity:.5; cursor:default; }'
+      // ── Analyse IA dans la fiche ──
+      + '.astr-ia-line { display:block; font-size:11px; margin-top:3px; line-height:1.4; }'
+      + '.astr-ia-wait { color:#A0AEC0; font-style:italic; }'
+      + '.astr-ia-ok { color:#2F855A; font-weight:600; }'
+      + '.astr-ia-warn { color:#B7791F; font-weight:600; }'
+      + '.astr-ia-mut { color:#A0AEC0; }'
+      + '.astr-ia-detail { display:block; font-size:10.5px; color:#708196; font-weight:400; font-style:normal; margin-top:1px; }'
+      + '.astr-ia-link { display:inline-block; margin-left:8px; font-size:10.5px; color:' + GOLD + '; text-decoration:underline; cursor:pointer; }'
+      // ── Bandeau cohérence IA en tête de modale ──
+      + '.astr-ia-banner { background:#FFFAF0; border:1px solid #F0D9A8; border-left:3px solid ' + GOLD + '; border-radius:10px; padding:12px 14px; margin:0 0 16px; }'
+      + '.astr-ia-banner-h { font-size:12px; font-weight:800; color:#9C6F1B; letter-spacing:.02em; margin-bottom:8px; }'
+      + '.astr-ia-banner-item { font-size:12px; color:' + NAVY + '; padding:6px 0; border-top:1px dashed #F0D9A8; }'
+      + '.astr-ia-banner-item:first-of-type { border-top:none; }'
+      + '.astr-ia-banner-item strong { color:#9C6F1B; }'
+      + '.astr-ia-banner-detail { display:block; font-size:11px; color:#708196; margin-top:2px; }'
+      + '.astr-cm-ia-link { display:inline-block; margin-top:6px; font-size:11px; color:' + GOLD + '; text-decoration:underline; cursor:pointer; }';
     document.head.appendChild(css);
   }
 
@@ -27306,8 +27329,29 @@ document.addEventListener('DOMContentLoaded',function(){if(document.getElementBy
     var depByIndex = {};
     depots.forEach(function (dp) { depByIndex[dp.item_index] = dp; });
 
+    var analyses = d.analyses || [];
+    var anByIndex = {};
+    analyses.forEach(function (a) { anByIndex[a.item_index] = a; });
+
+    // Bandeau « Contrôle de cohérence IA » : compte les incohérences.
+    var incohs = analyses.filter(function (a) { return a.status === 'incoherence'; });
+    var bannerHtml = '';
+    if (incohs.length > 0) {
+      bannerHtml = '<div class="astr-ia-banner">'
+        + '<div class="astr-ia-banner-h">Contrôle de cohérence IA · ' + incohs.length + ' point(s) à clarifier</div>'
+        + incohs.map(function (a) {
+            return '<div class="astr-ia-banner-item"><strong>⚠ ' + esc(a.resume || 'Incohérence détectée') + '</strong>'
+              + (a.detail ? '<span class="astr-ia-banner-detail">' + esc(a.detail) + '</span>' : '')
+              + '</div>';
+          }).join('')
+        + '</div>';
+    } else if (!astrIaState.connected) {
+      // IA non connectée : lien discret pour ouvrir la modale de connexion.
+      bannerHtml = '<a class="astr-cm-ia-link" id="astr-cm-ia-connect">IA non connectée — connecter</a>';
+    }
+
     // Corps groupé par thème.
-    var html = '';
+    var html = bannerHtml;
     var curTheme = null;
     structure.forEach(function (it, idx) {
       var theme = it.theme || 'Pièces demandées';
@@ -27319,7 +27363,8 @@ document.addEventListener('DOMContentLoaded',function(){if(document.getElementBy
       var state;
       if (dp && dp.file_name) {
         state = '<span class="astr-cm-ok">✓ ' + esc(dp.file_name) + '</span>'
-          + '<a class="astr-cm-dl" href="/api/collecte-admin/' + esc(token) + '/file?item_index=' + idx + '" target="_blank" rel="noopener">Télécharger</a>';
+          + '<a class="astr-cm-dl" href="/api/collecte-admin/' + esc(token) + '/file?item_index=' + idx + '" target="_blank" rel="noopener">Télécharger</a>'
+          + analysisLineHTML(anByIndex[idx]);
       } else if (dp && dp.reponse) {
         state = '<span class="astr-cm-ok">✓ ' + esc(dp.reponse) + '</span>';
       } else {
@@ -27359,6 +27404,28 @@ document.addEventListener('DOMContentLoaded',function(){if(document.getElementBy
     if (sendBtn) {
       sendBtn.addEventListener('click', function () { sendReply(token, ta, sendBtn); });
     }
+    var iaConnect = document.getElementById('astr-cm-ia-connect');
+    if (iaConnect) {
+      iaConnect.addEventListener('click', function () { astrOpenIaModal(); });
+    }
+  }
+
+  // Ligne d'état d'analyse IA sous un fichier déposé.
+  function analysisLineHTML(a) {
+    if (!a) return '';
+    if (a.status === 'en_cours') {
+      return '<span class="astr-ia-line astr-ia-wait">⏳ Analyse IA en cours…</span>';
+    }
+    if (a.status === 'conforme') {
+      return '<span class="astr-ia-line astr-ia-ok" title="' + esc(a.resume || '') + '">✓ IA : conforme'
+        + (a.resume ? '<span class="astr-ia-detail">' + esc(a.resume) + '</span>' : '') + '</span>';
+    }
+    if (a.status === 'incoherence') {
+      return '<span class="astr-ia-line astr-ia-warn">⚠ IA : ' + esc(a.resume || 'incohérence')
+        + (a.detail ? '<span class="astr-ia-detail">' + esc(a.detail) + '</span>' : '') + '</span>';
+    }
+    // illisible / erreur → gris discret avec le résumé.
+    return '<span class="astr-ia-line astr-ia-mut">IA : ' + esc(a.resume || 'non analysable') + '</span>';
   }
 
   async function sendReply(token, ta, btn) {
@@ -27409,13 +27476,193 @@ document.addEventListener('DOMContentLoaded',function(){if(document.getElementBy
   }
   window.astrOpenCollecte = astrOpenCollecte;
 
+  // ══════════════════════════════════════════════════════════════════
+  // IA · connexion de la clé API du cabinet
+  // ══════════════════════════════════════════════════════════════════
+
+  async function fetchIaSettings() {
+    try {
+      var r = await fetch('/api/ia-settings', { cache: 'no-store' });
+      if (!r.ok) return;
+      var d = await r.json();
+      astrIaState = {
+        connected: !!(d && d.connected),
+        provider: d && d.provider || null,
+        model: d && d.model || null,
+        masked_key: d && d.masked_key || null,
+        label: d && d.label || null
+      };
+    } catch (err) { /* silencieux : mode fichier statique sans backend */ }
+    renderIaToolbarBtn();
+  }
+
+  function injectIaStyles() {
+    if (document.getElementById('astr-ia-toolbar-style')) return;
+    var css = document.createElement('style');
+    css.id = 'astr-ia-toolbar-style';
+    css.textContent = ''
+      + '.astr-ia-btn { display:inline-flex; align-items:center; gap:6px; border:1px solid #E2DCC9; background:white; border-radius:999px; padding:6px 14px; font-family:"Epilogue",inherit; font-size:11.5px; font-weight:700; letter-spacing:.02em; cursor:pointer; line-height:1; }'
+      + '.astr-ia-btn:hover { border-color:' + GOLD + '; }'
+      + '.astr-ia-btn.on { color:#2F855A; border-color:#BFE3CC; background:#F4FBF6; }'
+      + '.astr-ia-btn.off { color:' + GOLD + '; border-color:#E8D6AE; }'
+      // ── Modale connexion IA (réutilise les styles overlay astr-cm-*) ──
+      + '.astr-iam-intro { font-size:12.5px; color:#708196; line-height:1.5; margin:0 0 18px; }'
+      + '.astr-iam-field { margin-bottom:16px; }'
+      + '.astr-iam-label { display:block; font-size:11px; font-weight:700; color:' + NAVY + '; text-transform:uppercase; letter-spacing:.06em; margin-bottom:6px; }'
+      + '.astr-iam-input, .astr-iam-select { width:100%; box-sizing:border-box; border:1px solid #D9D5C9; border-radius:10px; padding:10px 12px; font-family:inherit; font-size:13px; color:' + NAVY + '; background:white; }'
+      + '.astr-iam-input:focus, .astr-iam-select:focus { outline:none; border-color:' + GOLD + '; }'
+      + '.astr-iam-err { font-size:12px; color:#C53030; margin:0 0 14px; min-height:0; }'
+      + '.astr-iam-connected { font-size:12.5px; color:' + NAVY + '; background:' + IVORY + '; border:1px solid #ECE7D6; border-radius:10px; padding:12px 14px; margin-bottom:16px; }'
+      + '.astr-iam-connected strong { font-family:"SF Mono","Menlo",monospace; font-weight:600; }'
+      + '.astr-iam-actions { display:flex; justify-content:flex-end; gap:10px; }'
+      + '.astr-iam-primary { background:' + NAVY + '; color:white; border:none; border-radius:9px; padding:10px 20px; font-family:inherit; font-size:12px; font-weight:700; letter-spacing:.04em; cursor:pointer; }'
+      + '.astr-iam-primary:hover { background:#13294a; }'
+      + '.astr-iam-primary:disabled { opacity:.5; cursor:default; }'
+      + '.astr-iam-danger { background:white; color:#C53030; border:1px solid #F0C0C0; border-radius:9px; padding:10px 18px; font-family:inherit; font-size:12px; font-weight:700; cursor:pointer; }'
+      + '.astr-iam-danger:hover { background:#FFF5F5; }';
+    document.head.appendChild(css);
+  }
+
+  function renderIaToolbarBtn() {
+    var toolbar = document.querySelector('#page-ing-pipe-03 .collecte-toolbar');
+    if (!toolbar) return;
+    injectIaStyles();
+    var btn = document.getElementById('astr-ia-toolbar-btn');
+    if (!btn) {
+      btn = document.createElement('button');
+      btn.id = 'astr-ia-toolbar-btn';
+      btn.type = 'button';
+      btn.addEventListener('click', function () { astrOpenIaModal(); });
+      toolbar.appendChild(btn);
+    }
+    if (astrIaState.connected) {
+      btn.className = 'astr-ia-btn on';
+      btn.innerHTML = '⚙ IA connectée · ' + esc(astrIaState.model || '');
+    } else {
+      btn.className = 'astr-ia-btn off';
+      btn.innerHTML = '⚙ Connecter mon IA';
+    }
+  }
+
+  function closeIaModal() {
+    var ov = document.getElementById('astr-iam-overlay');
+    if (ov && ov.parentNode) ov.parentNode.removeChild(ov);
+  }
+
+  function astrOpenIaModal() {
+    injectModalStyles();
+    injectIaStyles();
+    closeIaModal();
+    var ov = document.createElement('div');
+    ov.id = 'astr-iam-overlay';
+    ov.className = 'astr-cm-overlay';
+    ov.addEventListener('click', function (ev) { if (ev.target === ov) closeIaModal(); });
+    ov.innerHTML = ''
+      + '<div class="astr-cm-card" style="max-width:520px;">'
+      +   '<div class="astr-cm-head">'
+      +     '<div class="astr-cm-head-main"><h3 class="astr-cm-name">Connecter mon IA</h3>'
+      +       '<div class="astr-cm-meta">Analyse de cohérence des documents déposés</div></div>'
+      +     '<button class="astr-cm-close" id="astr-iam-close" aria-label="Fermer">✕</button>'
+      +   '</div>'
+      +   '<div class="astr-cm-body" id="astr-iam-body"></div>'
+      + '</div>';
+    document.body.appendChild(ov);
+    document.getElementById('astr-iam-close').addEventListener('click', closeIaModal);
+    renderIaModalBody();
+  }
+
+  function renderIaModalBody() {
+    var body = document.getElementById('astr-iam-body');
+    if (!body) return;
+
+    if (astrIaState.connected) {
+      body.innerHTML = ''
+        + '<div class="astr-iam-connected">Clé API connectée : <strong>' + esc(astrIaState.masked_key || '••••') + '</strong>'
+        +   '<br>Modèle actif : <strong>' + esc(astrIaState.model || '') + '</strong></div>'
+        + '<div class="astr-iam-actions">'
+        +   '<button class="astr-iam-danger" id="astr-iam-disconnect">Déconnecter</button>'
+        + '</div>';
+      document.getElementById('astr-iam-disconnect').addEventListener('click', iaDisconnect);
+      return;
+    }
+
+    var opts = IA_MODELS.map(function (m) {
+      return '<option value="' + esc(m.id) + '">' + esc(m.label) + '</option>';
+    }).join('');
+    body.innerHTML = ''
+      + '<p class="astr-iam-intro">Connectez votre propre clé API — l\'analyse des documents est facturée sur votre compte Anthropic.</p>'
+      + '<div class="astr-iam-err" id="astr-iam-err"></div>'
+      + '<div class="astr-iam-field">'
+      +   '<label class="astr-iam-label" for="astr-iam-key">Clé API</label>'
+      +   '<input class="astr-iam-input" id="astr-iam-key" type="password" autocomplete="off" placeholder="sk-ant-…" />'
+      + '</div>'
+      + '<div class="astr-iam-field">'
+      +   '<label class="astr-iam-label" for="astr-iam-model">Modèle</label>'
+      +   '<select class="astr-iam-select" id="astr-iam-model">' + opts + '</select>'
+      + '</div>'
+      + '<div class="astr-iam-actions">'
+      +   '<button class="astr-iam-primary" id="astr-iam-test">Tester et connecter</button>'
+      + '</div>';
+    document.getElementById('astr-iam-test').addEventListener('click', iaTestConnect);
+  }
+
+  async function iaTestConnect() {
+    var keyEl = document.getElementById('astr-iam-key');
+    var modelEl = document.getElementById('astr-iam-model');
+    var errEl = document.getElementById('astr-iam-err');
+    var btn = document.getElementById('astr-iam-test');
+    var key = (keyEl && keyEl.value || '').trim();
+    if (errEl) errEl.textContent = '';
+    if (!key) { if (errEl) errEl.textContent = 'Renseignez votre clé API.'; return; }
+    if (btn) { btn.disabled = true; btn.textContent = 'Test en cours…'; }
+    try {
+      var r = await fetch('/api/ia-settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ api_key: key, model: modelEl ? modelEl.value : undefined })
+      });
+      var d = await r.json().catch(function () { return {}; });
+      if (!r.ok) {
+        if (errEl) errEl.textContent = (d && d.error) || 'Connexion impossible.';
+        if (btn) { btn.disabled = false; btn.textContent = 'Tester et connecter'; }
+        return;
+      }
+      astrIaState = {
+        connected: !!(d && d.connected),
+        provider: d && d.provider || null,
+        model: d && d.model || null,
+        masked_key: d && d.masked_key || null,
+        label: d && d.label || null
+      };
+      renderIaToolbarBtn();
+      renderIaModalBody();
+    } catch (err) {
+      if (errEl) errEl.textContent = 'Connexion impossible.';
+      if (btn) { btn.disabled = false; btn.textContent = 'Tester et connecter'; }
+    }
+  }
+
+  async function iaDisconnect() {
+    var btn = document.getElementById('astr-iam-disconnect');
+    if (btn) { btn.disabled = true; btn.textContent = 'Déconnexion…'; }
+    try {
+      await fetch('/api/ia-settings', { method: 'DELETE' });
+    } catch (err) { /* silencieux */ }
+    astrIaState = { connected: false, provider: null, model: null, masked_key: null, label: null };
+    renderIaToolbarBtn();
+    renderIaModalBody();
+  }
+
   document.addEventListener('keydown', function (ev) {
-    if (ev.key === 'Escape' && modalState.token) closeModal();
+    if (ev.key !== 'Escape') return;
+    if (document.getElementById('astr-iam-overlay')) { closeIaModal(); return; }
+    if (modalState.token) closeModal();
   });
 
   document.addEventListener('DOMContentLoaded', function () {
     pollList();
     setInterval(pollList, POLL_LIST_MS);
+    fetchIaSettings();
   });
 })();
 </script>

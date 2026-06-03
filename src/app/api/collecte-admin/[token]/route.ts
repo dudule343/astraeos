@@ -47,19 +47,25 @@ export async function GET(
     return NextResponse.json({ error: "Collecte introuvable" }, { status: 404 });
   }
 
-  const [{ data: depotsData }, { data: messagesData }] = await Promise.all([
-    supabase
-      .from("collecte_depots")
-      .select("item_index, label, file_name, file_size, reponse, created_at, storage_path")
-      .eq("collecte_id", collecte.id)
-      .order("item_index", { ascending: true }),
-    supabase
-      .from("collecte_messages")
-      .select("id, item_index, author, body, created_at")
-      .eq("collecte_id", collecte.id)
-      .order("created_at", { ascending: true })
-      .limit(200),
-  ]);
+  const [{ data: depotsData }, { data: messagesData }, { data: analysesData }] =
+    await Promise.all([
+      supabase
+        .from("collecte_depots")
+        .select("item_index, label, file_name, file_size, reponse, created_at, storage_path")
+        .eq("collecte_id", collecte.id)
+        .order("item_index", { ascending: true }),
+      supabase
+        .from("collecte_messages")
+        .select("id, item_index, author, body, created_at")
+        .eq("collecte_id", collecte.id)
+        .order("created_at", { ascending: true })
+        .limit(200),
+      supabase
+        .from("collecte_analyses")
+        .select("item_index, status, resume, detail, updated_at")
+        .eq("collecte_id", collecte.id)
+        .order("item_index", { ascending: true }),
+    ]);
 
   const depots: Depot[] = (depotsData ?? []) as Depot[];
   const structure: Item[] = Array.isArray(collecte.structure)
@@ -74,6 +80,7 @@ export async function GET(
     structure,
     depots,
     messages: messagesData ?? [],
+    analyses: analysesData ?? [],
     progress: { done: depots.length, total: structure.length },
   });
 }
