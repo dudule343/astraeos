@@ -26773,7 +26773,87 @@ function wizSend(){
   if(WIZ_MODE==='create')addCollecteRow(n1,n2);
   else if(WIZ_MODE==='prepare')updateCollecteRowAfterSend(n1);
   closeWizard();
-  prepToast(two?'2 demandes envoyées — chaque client reçoit son e-mail personnel avec le lien de dépôt sécurisé.':'Demande envoyée — '+n1+' reçoit son e-mail personnel avec le lien de dépôt sécurisé.');
+  const baseToast=two?'2 demandes envoyées — chaque client reçoit son e-mail personnel avec le lien de dépôt sécurisé.':'Demande envoyée — '+n1+' reçoit son e-mail personnel avec le lien de dépôt sécurisé.';
+  prepToast(baseToast);
+  // ── Envoi réel en arrière-plan : ne doit jamais bloquer l'UI optimiste ──
+  try{ sendCollecteRequest(two,baseToast); }catch(e){}
+}
+// Construit la liste des documents cochés (ordre DOM) + demandes libres, puis appelle l'API d'envoi.
+function collectWizItems(){
+  const items=[];
+  document.querySelectorAll('.wiz-pane[data-pane="documents"] .prep-rub').forEach(rub=>{
+    const th=rub.querySelector('.prep-rub-head strong');
+    const theme=th?th.textContent.trim():'';
+    let sub='';
+    const docs=rub.querySelector('.prep-rub-docs');
+    if(!docs)return;
+    docs.childNodes.forEach(node=>{
+      if(node.nodeType!==1)return;
+      if(node.classList&&node.classList.contains('prep-sub')){
+        const c=node.cloneNode(true);
+        c.querySelectorAll('.prep-sub-n').forEach(s=>s.remove());
+        sub=c.textContent.trim();
+        return;
+      }
+      if(node.classList&&node.classList.contains('prep-doc')){
+        const cb=node.querySelector('input[type=checkbox]');
+        if(!cb||!cb.checked)return;
+        const type=node.querySelector('.prep-qbadge')?'Question':'Document';
+        const c=node.cloneNode(true);
+        c.querySelectorAll('.prep-qbadge,.prep-doc-acts,input').forEach(s=>s.remove());
+        const label=c.textContent.trim();
+        if(label)items.push({theme,sub,label,type});
+      }
+    });
+  });
+  document.querySelectorAll('#prep-autres-list .prep-autres-item .prep-autres-nom').forEach(n=>{
+    const label=(n.textContent||'').trim();
+    if(label)items.push({theme:'Autres documents',sub:'',label,type:'Document'});
+  });
+  return items;
+}
+function _email(s){ s=(s||'').trim(); return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(s)?s:''; }
+function sendCollecteRequest(two,baseToast){
+  const items=collectWizItems();
+  // Participants + message édité par participant
+  const list=[];
+  if(WIZ_MODE==='prepare'&&PREP_INFO){
+    const e1=_email(PREP_INFO.m1);
+    if(e1)list.push({nom:PREP_INFO.n1,email:e1,message:_val('wiz-mail-1')});
+    if(two){ const e2=_email(PREP_INFO.m2); if(e2)list.push({nom:PREP_INFO.n2,email:e2,message:_val('wiz-mail-2')}); }
+  }else{
+    const e1=_email(_val('p1-mail'));
+    const nm1=(_val('p1-prenom')+' '+_val('p1-nom')).trim()||'Nouveau client';
+    if(e1)list.push({nom:nm1,email:e1,message:_val('wiz-mail-1')});
+    if(two){ const e2=_email(_val('p2-mail')); const nm2=(_val('p2-prenom')+' '+_val('p2-nom')).trim()||'Second client'; if(e2)list.push({nom:nm2,email:e2,message:_val('wiz-mail-2')}); }
+  }
+  if(!list.length)return;
+  // Si messages différents entre participants : un appel par participant ; sinon un appel groupé.
+  const sameMsg=list.every(p=>p.message===list[0].message);
+  const calls=(sameMsg?[list]:list.map(p=>[p]));
+  const done=[],fail=[];
+  let pending=calls.length;
+  const finish=()=>{
+    if(--pending>0)return;
+    let extra='';
+    if(fail.length){ extra=' (e-mail non envoyé : '+fail[0]+')'; }
+    else if(done.length){ extra=' E-mail réellement envoyé ✓'; }
+    if(extra)prepToast(baseToast+extra);
+  };
+  calls.forEach(group=>{
+    const msg=group[0].message||'';
+    const participants=group.map(p=>({nom:p.nom,email:p.email}));
+    fetch('/api/collecte/send',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({participants,items,message:msg})})
+      .then(r=>r.json().catch(()=>({})).then(j=>({ok:r.ok,j})))
+      .then(({ok,j})=>{
+        const results=(j&&j.results)||[];
+        const err=results.find(x=>x&&x.error);
+        if(ok&&j&&j.ok&&!err){ done.push(true); }
+        else{ fail.push((err&&err.error)||(j&&j.error)||'erreur réseau'); }
+        finish();
+      })
+      .catch(e=>{ fail.push('erreur réseau'); finish(); });
+  });
 }
 function toggleSecondClient(show){
   document.getElementById('create-second').style.display=show?'block':'none';
