@@ -5524,9 +5524,9 @@
             <p class="hero-sub">Vue semaine de votre agenda · connecté à Google Calendar (sync activée) et lien public personnel de prise de RDV (style Calendly) à partager à vos clients.</p>
           </div>
           <div class="hero-actions">
-            <button class="btn btn-ghost btn-sm">
+            <button class="btn btn-ghost btn-sm" id="btn-gcal-connect" onclick="connectGoogleCalendar()" title="Synchroniser votre Google Calendar avec Astraeos">
               <svg style="width:13px;height:13px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M8 12 L 11 15 L 16 9"/></svg>
-              Google Agenda · sync 11:42
+              <span id="btn-gcal-label">Connecter Google Calendar</span>
             </button>
             <button class="btn btn-gold btn-sm" onclick="openModalNouveauRdv()">+ Nouveau RDV</button>
           </div>
@@ -5553,7 +5553,7 @@
             </div>
           </div>
           <div class="kpi"><div class="kpi-label">Durée moyenne</div><div class="kpi-value">1 <span class="unit">h 12 min</span></div><div class="kpi-meta">cumul N-1 · ▼ -8 min</div></div>
-          <div class="kpi"><div class="kpi-label">Mon lien public</div><div class="kpi-value" style="font-size:13px; word-break:break-all;">priveos.com/rdv/luc-thilliez</div><div class="kpi-meta"><a style="color:var(--gold-deep); font-weight:700; cursor:pointer;">Copier le lien</a></div></div>
+          <div class="kpi"><div class="kpi-label">Mon lien public</div><div class="kpi-value" style="font-size:13px; word-break:break-all;">priveos.com/rdv/<span class="astr-link-slug" data-engineer="luc-thilliez">luc-thilliez</span></div><div class="kpi-meta"><a style="color:var(--gold-deep); font-weight:700; cursor:pointer;" onclick="astraeosCopyPublicLink('luc-thilliez', this)">Copier le lien</a></div></div>
         </div>
 
         <!-- 2 colonnes : Calendrier semaine + Panneau type de RDV -->
@@ -5599,7 +5599,7 @@
                 <div class="agenda-v2-cell half-line" onclick="openModalNouveauRdv('9h30', 'Lundi 11 mai 2026')"></div>
                 <div class="agenda-v2-cell half-line today-col" onclick="openModalNouveauRdv('9h30', 'Mardi 12 mai 2026')"></div>
                 <div class="agenda-v2-cell half-line">
-                  <div class="agenda-v2-event ev-navy" onclick="goToPage('ing-fiche-client')" style="cursor:pointer;"><strong>09h30 · MARCHAND</strong><div class="ev-meta">Suivi annuel · visio</div></div>
+                  <div class="agenda-v2-event ev-navy" onclick="goToPage('ing-fiche-client')" style="cursor:pointer;"><strong>09h30 · MARCHAND</strong><div class="ev-meta">Suivi annuel · visio · <a href="/visio" target="_top" onclick="event.stopPropagation();" style="color:var(--gold-deep); font-weight:700; text-decoration:none;">Visio →</a></div></div>
                 </div>
                 <div class="agenda-v2-cell half-line" onclick="openModalNouveauRdv('9h30', 'Jeudi 14 mai 2026')"></div>
                 <div class="agenda-v2-cell half-line" onclick="openModalNouveauRdv('9h30', 'Vendredi 15 mai 2026')"></div>
@@ -5625,7 +5625,7 @@
                 <div class="agenda-v2-cell half-line" onclick="openModalNouveauRdv('10h30', 'Mercredi 13 mai 2026')"></div>
                 <div class="agenda-v2-cell half-line" onclick="openModalNouveauRdv('10h30', 'Jeudi 14 mai 2026')"></div>
                 <div class="agenda-v2-cell half-line">
-                  <div class="agenda-v2-event ev-navy" onclick="goToPage('ing-fiche-client')" style="cursor:pointer;"><strong>10h30 · LEFEBVRE</strong><div class="ev-meta">Suivi étude · visio</div></div>
+                  <div class="agenda-v2-event ev-navy" onclick="goToPage('ing-fiche-client')" style="cursor:pointer;"><strong>10h30 · LEFEBVRE</strong><div class="ev-meta">Suivi étude · visio · <a href="/visio" target="_top" onclick="event.stopPropagation();" style="color:var(--gold-deep); font-weight:700; text-decoration:none;">Visio →</a></div></div>
                 </div>
                 <div class="agenda-v2-cell half-line" onclick="openModalNouveauRdv('10h30', 'Samedi 16 mai 2026')"></div>
                 <div class="agenda-v2-cell half-line" onclick="openModalNouveauRdv('10h30', 'Dimanche 17 mai 2026')"></div>
@@ -5646,7 +5646,7 @@
                 <div class="agenda-v2-time-label half">11h30</div>
                 <div class="agenda-v2-cell half-line" onclick="openModalNouveauRdv('11h30', 'Lundi 11 mai 2026')"></div>
                 <div class="agenda-v2-cell half-line today-col">
-                  <div class="agenda-v2-event ev-gold" onclick="goToPage('ing-fiche-rdv-joubert')" style="cursor:pointer;"><strong>11h30 · JOUBERT-BERTHOUX</strong><div class="ev-meta">Entretien initial couple · visio</div></div>
+                  <div class="agenda-v2-event ev-gold" onclick="goToPage('ing-fiche-rdv-joubert')" style="cursor:pointer;"><strong>11h30 · JOUBERT-BERTHOUX</strong><div class="ev-meta">Entretien initial couple · visio · <a href="/visio" target="_top" onclick="event.stopPropagation();" style="color:var(--gold-deep); font-weight:700; text-decoration:none;">Visio →</a></div></div>
                 </div>
                 <div class="agenda-v2-cell half-line" onclick="openModalNouveauRdv('11h30', 'Mercredi 13 mai 2026')"></div>
                 <div class="agenda-v2-cell half-line" onclick="openModalNouveauRdv('11h30', 'Jeudi 14 mai 2026')"></div>
@@ -5709,7 +5709,7 @@
                 <!-- 14:30 -->
                 <div class="agenda-v2-time-label half">14h30</div>
                 <div class="agenda-v2-cell half-line">
-                  <div class="agenda-v2-event ev-gold" onclick="goToPage('ing-fiche-client')" style="cursor:pointer;"><strong>14h30 · LAMOUREUX</strong><div class="ev-meta">Revue annuelle · visio</div></div>
+                  <div class="agenda-v2-event ev-gold" onclick="goToPage('ing-fiche-client')" style="cursor:pointer;"><strong>14h30 · LAMOUREUX</strong><div class="ev-meta">Revue annuelle · visio · <a href="/visio" target="_top" onclick="event.stopPropagation();" style="color:var(--gold-deep); font-weight:700; text-decoration:none;">Visio →</a></div></div>
                 </div>
                 <div class="agenda-v2-cell half-line today-col" onclick="openModalNouveauRdv('14h30', 'Mardi 12 mai 2026')"></div>
                 <div class="agenda-v2-cell half-line" onclick="openModalNouveauRdv('14h30', 'Mercredi 13 mai 2026')"></div>
@@ -5723,7 +5723,7 @@
                 <div class="agenda-v2-cell" onclick="openModalNouveauRdv('15h00', 'Lundi 11 mai 2026')"></div>
                 <div class="agenda-v2-cell today-col" onclick="openModalNouveauRdv('15h00', 'Mardi 12 mai 2026')"></div>
                 <div class="agenda-v2-cell">
-                  <div class="agenda-v2-event ev-navy" onclick="goToPage('ing-fiche-client')" style="cursor:pointer;"><strong>15h · TESSIER</strong><div class="ev-meta">Entretien interm. · visio</div></div>
+                  <div class="agenda-v2-event ev-navy" onclick="goToPage('ing-fiche-client')" style="cursor:pointer;"><strong>15h · TESSIER</strong><div class="ev-meta">Entretien interm. · visio · <a href="/visio" target="_top" onclick="event.stopPropagation();" style="color:var(--gold-deep); font-weight:700; text-decoration:none;">Visio →</a></div></div>
                 </div>
                 <div class="agenda-v2-cell" onclick="openModalNouveauRdv('15h00', 'Jeudi 14 mai 2026')"></div>
                 <div class="agenda-v2-cell" onclick="openModalNouveauRdv('15h00', 'Vendredi 15 mai 2026')"></div>
@@ -5746,7 +5746,7 @@
                 <div class="agenda-v2-time-label">16h</div>
                 <div class="agenda-v2-cell" onclick="openModalNouveauRdv('16h00', 'Lundi 11 mai 2026')"></div>
                 <div class="agenda-v2-cell today-col">
-                  <div class="agenda-v2-event ev-gold" onclick="goToPage('ing-fiche-rdv-mercier')" style="cursor:pointer;"><strong>16h · MERCIER</strong><div class="ev-meta">Entretien initial · visio</div></div>
+                  <div class="agenda-v2-event ev-gold" onclick="goToPage('ing-fiche-rdv-mercier')" style="cursor:pointer;"><strong>16h · MERCIER</strong><div class="ev-meta">Entretien initial · visio · <a href="/visio" target="_top" onclick="event.stopPropagation();" style="color:var(--gold-deep); font-weight:700; text-decoration:none;">Visio →</a></div></div>
                 </div>
                 <div class="agenda-v2-cell" onclick="openModalNouveauRdv('16h00', 'Mercredi 13 mai 2026')"></div>
                 <div class="agenda-v2-cell" onclick="openModalNouveauRdv('16h00', 'Jeudi 14 mai 2026')"></div>
@@ -5760,7 +5760,7 @@
                 <div class="agenda-v2-cell half-line today-col" onclick="openModalNouveauRdv('16h30', 'Mardi 12 mai 2026')"></div>
                 <div class="agenda-v2-cell half-line" onclick="openModalNouveauRdv('16h30', 'Mercredi 13 mai 2026')"></div>
                 <div class="agenda-v2-cell half-line">
-                  <div class="agenda-v2-event ev-navy" onclick="goToPage('ing-fiche-client')" style="cursor:pointer;"><strong>16h30 · LEFRANC</strong><div class="ev-meta">Suivi étude · visio</div></div>
+                  <div class="agenda-v2-event ev-navy" onclick="goToPage('ing-fiche-client')" style="cursor:pointer;"><strong>16h30 · LEFRANC</strong><div class="ev-meta">Suivi étude · visio · <a href="/visio" target="_top" onclick="event.stopPropagation();" style="color:var(--gold-deep); font-weight:700; text-decoration:none;">Visio →</a></div></div>
                 </div>
                 <div class="agenda-v2-cell half-line" onclick="openModalNouveauRdv('16h30', 'Vendredi 15 mai 2026')"></div>
                 <div class="agenda-v2-cell half-line" onclick="openModalNouveauRdv('16h30', 'Samedi 16 mai 2026')"></div>
@@ -5843,10 +5843,10 @@
                 <div style="font-size:11.5px; color:var(--navy); line-height:1.6; margin-bottom:14px;">
                   Partagez ce lien avec vos clients et prospects pour qu'ils prennent rendez-vous sur les créneaux que vous avez ouverts.
                 </div>
-                <div style="padding:10px 14px; background:var(--ivory); border:1px solid var(--ivory-deep); border-radius:6px; font-size:11.5px; color:var(--gold-deep); font-weight:600; word-break:break-all; margin-bottom:10px;">priveos.com/rdv/luc-thilliez</div>
+                <div style="padding:10px 14px; background:var(--ivory); border:1px solid var(--ivory-deep); border-radius:6px; font-size:11.5px; color:var(--gold-deep); font-weight:600; word-break:break-all; margin-bottom:10px;">priveos.com/rdv/<span class="astr-link-slug" data-engineer="luc-thilliez">luc-thilliez</span></div>
                 <div style="display:flex; gap:6px;">
-                  <button class="btn btn-gold btn-sm" style="flex:1; font-size:11px;">Copier</button>
-                  <button class="btn btn-ghost btn-sm" style="flex:1; font-size:11px;">Aperçu</button>
+                  <button class="btn btn-gold btn-sm" style="flex:1; font-size:11px;" onclick="astraeosCopyPublicLink('luc-thilliez', this)">Copier</button>
+                  <a class="btn btn-ghost btn-sm" style="flex:1; font-size:11px; text-decoration:none; display:inline-flex; align-items:center; justify-content:center;" href="/client#rdv" target="_top">Aperçu</a>
                 </div>
               </div>
             </div>
@@ -8142,7 +8142,7 @@ Style relationnel · couple très autonome, à l'aise techniquement, attentes cl
                   <div style="font-weight:700; color:var(--navy);">Luc THILLIEZ</div>
                   <div style="font-size:11px; color:var(--navy-300);">Président associé du cabinet PRIVEOS</div>
                   <div style="font-size:11px; color:var(--navy-300); margin-top:4px;">📧 luc.thilliez@email-test.fr · 📞 +33 6 12 34 56 78</div>
-                  <div style="font-size:10.5px; color:var(--gold-deep); margin-top:4px;">priveos.com/rdv/luc-thilliez · prendre rendez-vous</div>
+                  <div style="font-size:10.5px; color:var(--gold-deep); margin-top:4px;">priveos.com/rdv/<span class="astr-link-slug" data-engineer="luc-thilliez">luc-thilliez</span> · prendre rendez-vous</div>
                 </div>
               </div>
               <div style="margin-top:14px; padding-top:12px; border-top:1px solid var(--ivory-deep); font-size:10px; color:var(--navy-300); line-height:1.5;">
@@ -20661,7 +20661,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <div class="s1a-grid-2">
           <div class="s1a-field">
             <label class="s1a-field-label">Lieu</label>
-            <select class="s1a-select">
+            <select class="s1a-select" id="rdv-lieu" onchange="toggleRdvVisioLink()">
               <option>Cabinet · Paris 8e</option>
               <option>Visioconférence Google Meet</option>
               <option>Téléphone</option>
@@ -20678,6 +20678,11 @@ document.addEventListener('DOMContentLoaded', function() {
               <option>Aucun rappel</option>
             </select>
           </div>
+        </div>
+        <!-- v28 · lien salle visio · visible si Lieu = Visioconférence -->
+        <div id="rdv-visio-link" style="display:none; margin-top:10px; padding:10px 14px; background:var(--ivory); border:1px solid var(--ivory-deep); border-radius:6px; align-items:center; justify-content:space-between; gap:12px;">
+          <div style="font-size:11.5px; color:var(--navy-300); line-height:1.5;">La salle visio et le lien client sont générés automatiquement à la création du RDV.</div>
+          <a class="s1a-btn s1a-btn-ghost" style="text-decoration:none; white-space:nowrap; flex-shrink:0;" href="/visio" target="_top">Ouvrir la salle visio →</a>
         </div>
       </div>
 
@@ -24959,11 +24964,20 @@ Président associé du cabinet PRIVEOS</textarea>
         const d = document.getElementById('rdv-date');
         if (d) d.value = jour;
       }
+      toggleRdvVisioLink();
     }
   }
   function closeModalNouveauRdv() {
     const m = document.getElementById('modal-nouveau-rdv');
     if (m) { m.classList.remove('open'); document.body.style.overflow = ''; }
+  }
+  // v28 · affiche le lien salle visio quand le lieu est une visioconférence
+  function toggleRdvVisioLink() {
+    const lieu = document.getElementById('rdv-lieu');
+    const link = document.getElementById('rdv-visio-link');
+    if (!link) return;
+    const isVisio = lieu && /visio/i.test(lieu.value);
+    link.style.display = isVisio ? 'flex' : 'none';
   }
   // v27 · Ajouter un participant supplémentaire au RDV (avocat, notaire, tiers…)
   function ajouterParticipantRdv() {
@@ -26280,6 +26294,12 @@ Président associé du cabinet PRIVEOS</textarea>
     const heureField = document.getElementById('rdv-heure-debut');
     if (dateField) dateField.value = "Mardi 9 juin 2026";
     if (heureField) heureField.value = "17h00";
+    // Le RDV Mercier modifié est en visio → présélectionner et afficher le lien
+    const lieuField = document.getElementById('rdv-lieu');
+    if (lieuField) {
+      [...lieuField.options].forEach(o => o.selected = /visio/i.test(o.text));
+    }
+    toggleRdvVisioLink();
     // Ouvrir
     m.classList.add('open');
     document.body.style.overflow = 'hidden';
