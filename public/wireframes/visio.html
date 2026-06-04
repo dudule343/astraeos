@@ -671,6 +671,14 @@ select.v4-modal-input { cursor:pointer; appearance:none; -webkit-appearance:none
 .assist-tab.active { color:var(--gold-deep); background:white; border-bottom-color:var(--gold); font-weight:700; }
 .assist-tab .tab-badge { position:absolute; top:7px; right:7px; min-width:14px; height:14px; padding:0 4px; border-radius:7px; background:var(--gold); color:white; font-size:8.5px; font-weight:700; display:flex; align-items:center; justify-content:center; }
 .assist-tab { position:relative; }
+/* Flux de transcription en direct du mode compagnon */
+.cmp-feed { margin-top:14px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.12); border-radius:12px; padding:12px 14px; display:flex; flex-direction:column; min-height:120px; max-height:38vh; }
+.cmp-feed-title { font-size:10px; font-weight:800; letter-spacing:0.12em; text-transform:uppercase; color:var(--gold-300, #d8b86a); margin-bottom:8px; }
+.cmp-feed-list { overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:7px; }
+.cmp-feed-empty { color:rgba(255,255,255,0.45); font-size:12px; font-style:italic; }
+.cmp-feed-row { display:flex; gap:8px; align-items:flex-start; font-size:12.5px; line-height:1.5; color:rgba(255,255,255,0.92); }
+.cmp-feed-time { flex:none; font-family:'JetBrains Mono',ui-monospace,monospace; font-size:10px; color:rgba(255,255,255,0.45); padding-top:2px; }
+
 
 .assist-body { flex:1; overflow-y:auto; padding:14px; }
 .assist-pane { display:none; }
@@ -3765,7 +3773,11 @@ setInterval(() => {
       +   '<div class="cmp-step"><span class="cmp-step-n">3</span><span>Cliquez sur <strong>▶ Démarrer la transcription</strong> (panneau en bas à gauche).</span></div>'
       +   '<div class="cmp-step"><span class="cmp-step-n">4</span><span>Dans le sélecteur, choisissez <strong>l\'onglet ' + escCompanion(label) + '</strong> et cochez <strong>Partager l\'audio de l\'onglet</strong>.</span></div>'
       + '</div>'
-      + '<div class="cmp-status" data-cmp-status><span class="cmp-status-dot"></span>Transcription en attente</div>';
+      + '<div class="cmp-status" data-cmp-status><span class="cmp-status-dot"></span>Transcription en attente</div>'
+      + '<div class="cmp-feed" data-cmp-feed>'
+      +   '<div class="cmp-feed-title">Transcription en direct</div>'
+      +   '<div class="cmp-feed-list" data-cmp-feed-list><div class="cmp-feed-empty">Les échanges s\'afficheront ici dès que la transcription démarre.</div></div>'
+      + '</div>';
     zoneEl.appendChild(wrap);
 
     // Copier le lien client (= le lien Meet/Zoom).
@@ -3790,6 +3802,51 @@ setInterval(() => {
     }
     document.addEventListener('astr-capture-state', function (ev) {
       try { setStatus(!!(ev && ev.detail && ev.detail.active)); } catch (e) {}
+    });
+
+    // Miroir GRAND FORMAT de la transcription : chaque ligne finalisée émise
+    // par le bloc transcription (CustomEvent astr-transcript-line) s'affiche
+    // dans la colonne gauche, sous le panneau de réunion.
+    var feedList = wrap.querySelector('[data-cmp-feed-list]');
+    var feedCount = 0;
+    // Badge dynamique sur l'onglet Insights IA : +1 à chaque conseil/article réel.
+    (function () {
+      var tab = null, badge = null, n = 0;
+      document.querySelectorAll('.assist-tab').forEach(function (b) {
+        if (b.textContent.indexOf('Insights') !== -1) tab = b;
+      });
+      if (!tab) return;
+      badge = tab.querySelector('.tab-badge');
+      if (badge) badge.remove(); // retire le '5' statique de la maquette
+      function bump() {
+        n++;
+        if (!badge || !tab.contains(badge)) {
+          badge = document.createElement('span');
+          badge.className = 'tab-badge';
+          tab.appendChild(badge);
+        }
+        badge.textContent = String(n);
+      }
+      window.addEventListener('astr-conseil', bump);
+      window.addEventListener('astr-article', bump);
+      tab.addEventListener('click', function () { n = 0; if (badge) badge.remove(); });
+    })();
+
+    window.addEventListener('astr-transcript-line', function (ev) {
+      try {
+        if (!feedList || !ev || !ev.detail || !ev.detail.text) return;
+        var empty = feedList.querySelector('.cmp-feed-empty');
+        if (empty) empty.remove();
+        var row = document.createElement('div');
+        row.className = 'cmp-feed-row';
+        var time = ev.detail.t ? String(ev.detail.t) : '';
+        row.innerHTML = '<span class="cmp-feed-time">' + escCompanion(time) + '</span>'
+          + '<span class="cmp-feed-text">' + escCompanion(String(ev.detail.text)) + '</span>';
+        feedList.appendChild(row);
+        feedCount++;
+        while (feedCount > 200 && feedList.firstChild) { feedList.removeChild(feedList.firstChild); feedCount--; }
+        feedList.scrollTop = feedList.scrollHeight;
+      } catch (e) {}
     });
   }
 
