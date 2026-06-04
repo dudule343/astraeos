@@ -3587,16 +3587,42 @@ setInterval(() => {
 (function astraeosVisioJitsi() {
   'use strict';
 
-  // ---- Lecture room + role depuis l'URL ----------------------------
+  // ---- Lecture room + role + outil compagnon depuis l'URL ----------
   var params = new URLSearchParams(window.location.search);
   var room = (params.get('room') || '').replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 64);
   var role = params.get('role') === 'client' ? 'client' : 'engineer';
+
+  // tool=meet|zoom + lien validé (http(s), hostname autorisé, ≤ 300) → mode
+  // « compagnon » : la visio se déroule sur l'outil tiers, PRIVEOS n'affiche
+  // qu'un panneau d'accompagnement + la transcription. PAS de Jitsi.
+  var rawTool = params.get('tool');
+  var tool = (rawTool === 'meet' || rawTool === 'zoom') ? rawTool : '';
+  var lien = sanitizeCompanionLink(params.get('lien'), tool);
+  if (!lien) tool = ''; // lien invalide → on retombe sur la salle intégrée.
+
+  function sanitizeCompanionLink(raw, t) {
+    var v = (raw || '').trim();
+    if (!v || v.length > 300 || !t) return '';
+    var u;
+    try { u = new URL(v); } catch (e) { return ''; }
+    if (u.protocol !== 'http:' && u.protocol !== 'https:') return '';
+    var host = u.hostname.toLowerCase();
+    if (t === 'meet') return host === 'meet.google.com' ? v : '';
+    if (t === 'zoom') return (host === 'zoom.us' || host.indexOf('.zoom.us') === host.length - 8) ? v : '';
+    return '';
+  }
 
   // Pas de room → on reste en mode démo (avatars statiques du masque).
   if (!room) return;
 
   var zone = document.getElementById('video-zone');
   if (!zone) return;
+
+  // ---- MODE COMPAGNON (Meet / Zoom) : aucune instance Jitsi ---------
+  if (tool) {
+    mountCompanion(zone, tool, lien, role);
+    return;
+  }
 
   var grid    = zone.querySelector('.video-grid');
   var pip     = zone.querySelector('.video-pip');
@@ -3638,6 +3664,133 @@ setInterval(() => {
   }
   function hideStatus() {
     status.classList.add('jts-hidden');
+  }
+
+  // ---- Échappement (panneau compagnon) -----------------------------
+  function escCompanion(v) {
+    return String(v == null ? '' : v)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  // ---- Panneau compagnon Meet / Zoom -------------------------------
+  // Remplace la zone vidéo (côté ingénieur) par un cockpit d'accompagnement :
+  // logo/nom de l'outil, lien cliquable, copie du lien client, et les étapes
+  // pour démarrer la transcription sur le bon onglet. Côté client, on n'affiche
+  // PAS le cockpit (le client est déjà sur Meet/Zoom) : un écran sobre suffit.
+  function mountCompanion(zoneEl, t, link, viewRole) {
+    var label = t === 'zoom' ? 'Zoom' : 'Google Meet';
+    var safeLink = escCompanion(link);
+
+    // Vue client en mode compagnon : aucun sens (le client est sur l'outil).
+    // Écran plein, sobre, avec un seul bouton « Rejoindre l'entretien ».
+    if (viewRole === 'client') {
+      var ov = document.createElement('div');
+      ov.id = 'astr-companion-client';
+      ov.style.cssText = 'position:fixed;inset:0;z-index:3000;background:linear-gradient(160deg,#0A1F38 0%,#1B3A5F 100%);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px;';
+      ov.innerHTML =
+        '<div style="font-size:11px;font-weight:800;letter-spacing:0.14em;color:#f0c869;margin-bottom:14px;">PRIVEOS · ENTRETIEN PATRIMONIAL</div>'
+        + '<div style="font-size:21px;font-weight:700;margin-bottom:10px;">Rejoignez l\'entretien sur ' + escCompanion(label) + '</div>'
+        + '<div style="font-size:13px;color:rgba(255,255,255,0.7);max-width:440px;line-height:1.6;margin-bottom:26px;">Votre ingénieur patrimonial vous attend dans la réunion. Cliquez ci-dessous pour la rejoindre.</div>'
+        + '<a href="' + safeLink + '" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:9px;background:var(--gold,#C68E0E);color:#fff;font-weight:700;font-size:14px;padding:13px 26px;border-radius:9px;text-decoration:none;">'
+        +   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="17" height="17"><polygon points="5 3 19 12 5 21 5 3"/></svg>Rejoindre l\'entretien</a>'
+        + '<div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:18px;word-break:break-all;max-width:440px;">' + safeLink + '</div>';
+      document.body.appendChild(ov);
+      return;
+    }
+
+    // Vue ingénieur : panneau d'accompagnement dans la zone vidéo.
+    var css = ''
+      + '.cmp-wrap{position:absolute;inset:12px;border-radius:8px;overflow:auto;background:linear-gradient(160deg,#08182c 0%,#0A1F38 100%);'
+      + 'color:#e8eef6;padding:22px 22px 24px;display:flex;flex-direction:column;gap:16px;}'
+      + '.video-zoomed .cmp-wrap{inset:18px;}'
+      + '.cmp-head{display:flex;align-items:center;gap:12px;}'
+      + '.cmp-logo{width:42px;height:42px;border-radius:10px;background:var(--gold,#C68E0E);color:#fff;display:flex;align-items:center;justify-content:center;flex:none;}'
+      + '.cmp-logo svg{width:22px;height:22px;}'
+      + '.cmp-tool-name{font-size:16px;font-weight:800;letter-spacing:0.01em;}'
+      + '.cmp-tool-sub{font-size:10.5px;color:#9fb0c6;margin-top:2px;}'
+      + '.cmp-link-card{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:13px 14px;}'
+      + '.cmp-link-lbl{font-size:9.5px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#8ea2bd;margin-bottom:7px;}'
+      + '.cmp-link-url{font-family:monospace;font-size:11px;color:#cfe0f4;word-break:break-all;line-height:1.5;}'
+      + '.cmp-actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;}'
+      + '.cmp-btn{display:inline-flex;align-items:center;gap:7px;border:none;border-radius:8px;font-family:inherit;font-size:11.5px;font-weight:700;cursor:pointer;padding:9px 14px;letter-spacing:0.01em;text-decoration:none;}'
+      + '.cmp-btn-primary{background:var(--gold,#C68E0E);color:#fff;}'
+      + '.cmp-btn-primary:hover{filter:brightness(1.08);}'
+      + '.cmp-btn-ghost{background:rgba(255,255,255,0.08);color:#fff;}'
+      + '.cmp-btn-ghost:hover{background:rgba(255,255,255,0.14);}'
+      + '.cmp-steps{background:rgba(0,0,0,0.22);border-radius:10px;padding:14px 16px;}'
+      + '.cmp-steps-title{font-size:10.5px;font-weight:800;letter-spacing:0.05em;text-transform:uppercase;color:#bcd;margin-bottom:10px;}'
+      + '.cmp-step{display:flex;gap:10px;align-items:flex-start;margin-bottom:9px;font-size:12px;line-height:1.45;color:#dbe6f3;}'
+      + '.cmp-step:last-child{margin-bottom:0;}'
+      + '.cmp-step-n{flex:none;width:20px;height:20px;border-radius:50%;background:var(--gold,#C68E0E);color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;margin-top:1px;}'
+      + '.cmp-status{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:700;color:#9fb0c6;}'
+      + '.cmp-status-dot{width:9px;height:9px;border-radius:50%;background:#708196;flex:none;}'
+      + '.cmp-status.cmp-on{color:#cfeede;}'
+      + '.cmp-status.cmp-on .cmp-status-dot{background:#27c06b;animation:cmpPulse 1.4s infinite;}'
+      + '@keyframes cmpPulse{0%,100%{opacity:1;}50%{opacity:0.4;}}';
+    var styleEl = document.createElement('style');
+    styleEl.textContent = css;
+    document.head.appendChild(styleEl);
+
+    // Masquer les décors statiques (grid / pip / toolbar) de la zone vidéo.
+    ['.video-grid', '.video-pip', '.video-toolbar'].forEach(function (sel) {
+      var el = zoneEl.querySelector(sel);
+      if (el) el.style.display = 'none';
+    });
+
+    var wrap = document.createElement('div');
+    wrap.className = 'cmp-wrap';
+    var iconMeet = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 10l4.553-2.276A1 1 0 0 1 21 8.618v6.764a1 1 0 0 1-1.447.894L15 14"/><rect x="3" y="6" width="12" height="12" rx="2"/></svg>';
+    var iconZoom = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="14" height="12" rx="3"/><path d="M16 10l5-3v10l-5-3"/></svg>';
+    wrap.innerHTML = ''
+      + '<div class="cmp-head">'
+      +   '<div class="cmp-logo">' + (t === 'zoom' ? iconZoom : iconMeet) + '</div>'
+      +   '<div><div class="cmp-tool-name">' + escCompanion(label) + '</div>'
+      +     '<div class="cmp-tool-sub">Visio externe · cockpit PRIVEOS en accompagnement</div></div>'
+      + '</div>'
+      + '<div class="cmp-link-card">'
+      +   '<div class="cmp-link-lbl">Lien de la réunion (à partager au client)</div>'
+      +   '<div class="cmp-link-url">' + safeLink + '</div>'
+      +   '<div class="cmp-actions">'
+      +     '<a class="cmp-btn cmp-btn-primary" href="' + safeLink + '" target="_blank" rel="noopener noreferrer">'
+      +       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="14" height="14"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>Ouvrir la réunion</a>'
+      +     '<button type="button" class="cmp-btn cmp-btn-ghost" data-cmp-copy>'
+      +       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="14" height="14"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copier le lien client</button>'
+      +   '</div>'
+      + '</div>'
+      + '<div class="cmp-steps">'
+      +   '<div class="cmp-steps-title">Démarrer la transcription</div>'
+      +   '<div class="cmp-step"><span class="cmp-step-n">1</span><span>Ouvrez la réunion dans son onglet (bouton ci-dessus).</span></div>'
+      +   '<div class="cmp-step"><span class="cmp-step-n">2</span><span>Revenez sur cet onglet PRIVEOS.</span></div>'
+      +   '<div class="cmp-step"><span class="cmp-step-n">3</span><span>Cliquez sur <strong>▶ Démarrer la transcription</strong> (panneau en bas à gauche).</span></div>'
+      +   '<div class="cmp-step"><span class="cmp-step-n">4</span><span>Dans le sélecteur, choisissez <strong>l\'onglet ' + escCompanion(label) + '</strong> et cochez <strong>Partager l\'audio de l\'onglet</strong>.</span></div>'
+      + '</div>'
+      + '<div class="cmp-status" data-cmp-status><span class="cmp-status-dot"></span>Transcription en attente</div>';
+    zoneEl.appendChild(wrap);
+
+    // Copier le lien client (= le lien Meet/Zoom).
+    var copyBtn = wrap.querySelector('[data-cmp-copy]');
+    if (copyBtn) {
+      copyBtn.addEventListener('click', function () {
+        try {
+          navigator.clipboard.writeText(link).then(function () {
+            if (typeof window.showToast === 'function') window.showToast('Lien client copié');
+          }, function () {});
+        } catch (e) { /* clipboard indispo : silencieux */ }
+      });
+    }
+
+    // Refléter l'état de capture (la transcription émet ces events).
+    var statusEl = wrap.querySelector('[data-cmp-status]');
+    function setStatus(active) {
+      if (!statusEl) return;
+      statusEl.className = 'cmp-status' + (active ? ' cmp-on' : '');
+      statusEl.innerHTML = '<span class="cmp-status-dot"></span>'
+        + (active ? 'Transcription active' : 'Transcription en attente');
+    }
+    document.addEventListener('astr-capture-state', function (ev) {
+      try { setStatus(!!(ev && ev.detail && ev.detail.active)); } catch (e) {}
+    });
   }
 
   // ---- Chargement de l'external API Jitsi (via <script src>) --------
@@ -4067,6 +4220,24 @@ setInterval(() => {
       .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   }
 
+  // ---- Outil compagnon (meet|zoom) : adapte la consigne de partage d'onglet.
+  // En mode compagnon, l'audio à capter est celui de l'onglet Meet/Zoom (pas
+  // celui-ci) ; le micro de l'ingénieur reste mixé via getUserMedia plus bas.
+  var sttTool = (function () {
+    try {
+      var t = new URLSearchParams(window.location.search).get('tool');
+      return (t === 'meet' || t === 'zoom') ? t : '';
+    } catch (e) { return ''; }
+  })();
+  var sttToolLabel = sttTool === 'zoom' ? 'Zoom' : (sttTool === 'meet' ? 'Google Meet' : '');
+
+  // Émet l'état de capture vers le panneau compagnon (statut « active / attente »).
+  function emitCaptureState(active) {
+    try {
+      document.dispatchEvent(new CustomEvent('astr-capture-state', { detail: { active: !!active } }));
+    } catch (e) { /* silencieux */ }
+  }
+
   function mmss(ms) {
     var s = Math.floor(ms / 1000);
     var m = Math.floor(s / 60);
@@ -4116,8 +4287,11 @@ setInterval(() => {
   }
   function showUpsell() {
     upsellEl.style.display = '';
+    var tail = sttTool
+      ? 'pour transcrire aussi le client (sélectionnez alors l\'onglet ' + esc(sttToolLabel) + ' et cochez Partager l\'audio de l\'onglet).'
+      : 'pour transcrire aussi le client.';
     upsellEl.innerHTML = 'Mode micro local : seule la voix de l\'ingénieur est captée. '
-      + '<a data-alt-upsell-link>Connectez la transcription complète (Deepgram)</a> pour transcrire aussi le client.';
+      + '<a data-alt-upsell-link>Connectez la transcription complète (Deepgram)</a> ' + tail;
     var lnk = upsellEl.querySelector('[data-alt-upsell-link]');
     if (lnk) lnk.addEventListener('click', openModal);
   }
@@ -4221,6 +4395,7 @@ setInterval(() => {
     showUpsell();
     if (!recog) recog = buildRecognizer();
     try { recog.start(); wsRunning = true; } catch (e) {}
+    emitCaptureState(true);
     setNote('Transcription locale active (voix de l\'ingénieur). L\'IA analyse la conversation.');
     return true;
   }
@@ -4310,7 +4485,11 @@ setInterval(() => {
       startWebSpeech();
       return;
     }
-    setNote('Sélectionnez cet onglet et cochez « Partager l\'audio de l\'onglet » pour transcrire toute la conversation.');
+    if (sttTool) {
+      setNote('Sélectionnez l\'onglet ' + sttToolLabel + ' (pas celui-ci) et cochez « Partager l\'audio de l\'onglet » pour transcrire la conversation.');
+    } else {
+      setNote('Sélectionnez cet onglet et cochez « Partager l\'audio de l\'onglet » pour transcrire toute la conversation.');
+    }
     navigator.mediaDevices.getDisplayMedia({ video: true, audio: true })
       .then(function (stream) {
         var audioTracks = stream.getAudioTracks();
@@ -4389,7 +4568,12 @@ setInterval(() => {
         activeMode = 'deepgram';
         setMode('Transcription complète', true);
         hideUpsell();
-        setNote('Transcription complète active (les deux voix). L\'IA analyse la conversation.');
+        emitCaptureState(true);
+        if (sttTool) {
+          setNote('Transcription complète active : voix de l\'ingénieur (micro) + audio de l\'onglet ' + sttToolLabel + '. L\'IA analyse la conversation.');
+        } else {
+          setNote('Transcription complète active (les deux voix). L\'IA analyse la conversation.');
+        }
 
         // KeepAlive Deepgram toutes les 8 s
         dgKeepAlive = setInterval(function () {
@@ -4452,6 +4636,7 @@ setInterval(() => {
     if (recog) { try { recog.stop(); } catch (e) {} }
     wsRunning = false;
     cleanupDeepgram();
+    emitCaptureState(false);
     if (!keepRunningVisual) {
       panel.classList.remove('alt-running');
       startBtn.style.display = '';
@@ -4789,6 +4974,14 @@ setInterval(() => {
   var prospect = (params.get('prospect') || '').toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 64);
   var nom = (params.get('nom') || '').trim().slice(0, 80);
 
+  // Outil compagnon : on le consigne dans le display (préfixe) pour tracer dans
+  // quel outil l'entretien s'est tenu, sans migration de schéma.
+  var rawTool = params.get('tool');
+  var tool = (rawTool === 'meet' || rawTool === 'zoom') ? rawTool : '';
+  var toolPrefix = tool === 'meet' ? '[Meet] ' : (tool === 'zoom' ? '[Zoom] ' : '');
+  // display = nom préfixé par l'outil (borné à 80 pour rester cohérent).
+  var displayName = (toolPrefix + (nom || (tool ? 'Entretien' : ''))).slice(0, 80) || null;
+
   // Sans room : pas de persistance (le masque tourne en local, inchangé).
   if (!room) return;
 
@@ -4990,7 +5183,8 @@ setInterval(() => {
       sections: sections,
       duration: duration,
       prospect_slug: prospect || null,
-      display_name: nom || null,
+      display_name: displayName,
+      tool: tool || null,
       generated_at: new Date().toISOString()
     };
   }
@@ -5019,7 +5213,7 @@ setInterval(() => {
     fetch('/api/entretiens', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ room: room, prospect_slug: prospect || undefined, display_name: nom || undefined })
+      body: JSON.stringify({ room: room, prospect_slug: prospect || undefined, display_name: displayName || undefined })
     }).then(function (r) { return r.ok ? r.json() : null; })
       .then(function (data) {
         if (!data || !data.id) return;

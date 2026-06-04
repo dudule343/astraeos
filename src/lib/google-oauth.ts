@@ -276,3 +276,13 @@ export async function getFreshAccessToken(engineer_slug: string): Promise<string
     return null;
   }
 }
+
+/**
+ * Renvoie un access_token Google valide pour l'ingénieur (refresh transparent
+ * si expiré), ou null si l'ingénieur n'a pas connecté Google Calendar.
+ * Alias explicite de getFreshAccessToken : nomme l'intention côté appelants
+ * (« je veux un token utilisable maintenant »).
+ */
+export async function getValidAccessToken(engineer_slug: string): Promise<string | null> {
+  return getFreshAccessToken(engineer_slug);
+}
