@@ -1,10 +1,11 @@
-import { NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 
 import { createAdminClient } from "@/lib/supabase/admin";
+import { requireAuth } from "@/lib/auth";
 
 /**
  * Vue ingénieur : liste des collectes réelles avec leur avancement.
- * Outil privé (service_role, pas d'auth à ce stade).
+ * Réservé au cabinet (cookie de session).
  * Tri created_at desc, 50 dernières.
  */
 
@@ -19,7 +20,9 @@ type CollecteRow = {
   structure: unknown;
 };
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const denied = requireAuth(req);
+  if (denied) return denied;
   try {
     const supabase = createAdminClient();
 

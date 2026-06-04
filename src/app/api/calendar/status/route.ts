@@ -1,9 +1,13 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 import { isOAuthConfigured, loadTokens } from "@/lib/google-oauth";
+import { requireAuth } from "@/lib/auth";
 
 /** GET /api/calendar/status?engineer=luc-thilliez */
 export async function GET(req: NextRequest) {
+  const denied = requireAuth(req);
+  if (denied) return denied;
+
   const engineer = req.nextUrl.searchParams.get("engineer") || "luc-thilliez";
   const tokens = await loadTokens(engineer);
   return NextResponse.json({

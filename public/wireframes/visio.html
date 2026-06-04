@@ -4194,6 +4194,13 @@ setInterval(() => {
 (function astraeosLiveTranscript() {
   'use strict';
 
+  // Vue client : pas de panneau de transcription, pas de pompe conseils. Ces
+  // endpoints (/api/visio/stt-token, /api/visio/conseils) sont réservés au
+  // cabinet (cookie) → en role=client ils renverraient 401. On ne monte rien.
+  try {
+    if (new URLSearchParams(window.location.search).get('role') === 'client') return;
+  } catch (e) { /* pas d'URL exploitable : on reste en vue ingénieur par défaut */ }
+
   // ---- Styles injectés (scopés .alt- pour le panneau, .sttm- modale) ----
   var css = ''
     + '.alt-panel{position:fixed;left:18px;bottom:18px;width:340px;max-width:calc(100vw - 36px);'
@@ -5027,6 +5034,11 @@ setInterval(() => {
 
   // ---- Paramètres d'URL (passés par /visio/[room]/page.tsx) --------------
   var params = new URLSearchParams(window.location.search);
+
+  // Vue client : aucun appel aux endpoints ingénieur (entretiens/*), qui sont
+  // désormais protégés par cookie → 401 bruyants côté client. On sort tout de suite.
+  if (params.get('role') === 'client') return;
+
   var room = (params.get('room') || '').replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 64);
   var prospect = (params.get('prospect') || '').toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 64);
   var nom = (params.get('nom') || '').trim().slice(0, 80);

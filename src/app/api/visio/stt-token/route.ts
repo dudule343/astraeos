@@ -1,6 +1,7 @@
-import { NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 
 import { createAdminClient } from "@/lib/supabase/admin";
+import { requireAuth } from "@/lib/auth";
 
 // On fabrique une clé Deepgram ÉPHÉMÈRE (TTL court, scope minimal) à partir de
 // la clé maître du cabinet. Cette clé temporaire est sûre à exposer au
@@ -11,7 +12,10 @@ const TTL_SECONDS = 120;
 
 type Project = { project_id?: string };
 
-export async function POST() {
+export async function POST(req: NextRequest) {
+  const denied = requireAuth(req);
+  if (denied) return denied;
+
   // 1. Clé maître Deepgram. Absente → 409 (le front bascule sur Web Speech).
   let masterKey: string;
   try {

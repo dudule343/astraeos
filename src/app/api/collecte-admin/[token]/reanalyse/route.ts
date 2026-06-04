@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest, after } from "next/server";
 
 import { createAdminClient } from "@/lib/supabase/admin";
 import { analyserDepot } from "@/lib/ia-analyse";
+import { requireAuth } from "@/lib/auth";
 
 /**
  * Vue ingénieur : relancer l'analyse IA d'un dépôt.
@@ -21,6 +22,9 @@ export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ token: string }> },
 ) {
+  const denied = requireAuth(req);
+  if (denied) return denied;
+
   const { token } = await params;
 
   if (!token || token.length > 40) {

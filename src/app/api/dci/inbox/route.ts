@@ -1,6 +1,7 @@
-import { NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 
 import { KINDS, loadAllSubmissions, type DciKind } from "@/lib/dci-store";
+import { requireAuth } from "@/lib/auth";
 
 type ProspectEntry = {
   prospect_slug: string;
@@ -9,7 +10,9 @@ type ProspectEntry = {
   last_at: string | null;
 };
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const denied = requireAuth(req);
+  if (denied) return denied;
   try {
     const { source, submissions } = await loadAllSubmissions();
 

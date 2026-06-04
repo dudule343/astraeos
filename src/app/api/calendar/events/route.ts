@@ -1,12 +1,16 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 import { getFreshAccessToken, loadTokens } from "@/lib/google-oauth";
+import { requireAuth } from "@/lib/auth";
 
 /**
  * GET /api/calendar/events?engineer=luc-thilliez&days=7
  * Liste les événements de la semaine.
  */
 export async function GET(req: NextRequest) {
+  const denied = requireAuth(req);
+  if (denied) return denied;
+
   const engineer = req.nextUrl.searchParams.get("engineer") || "luc-thilliez";
   const days = parseInt(req.nextUrl.searchParams.get("days") || "7", 10);
   const tokens = await loadTokens(engineer);
@@ -53,6 +57,9 @@ export async function GET(req: NextRequest) {
  * Crée un événement dans le calendrier primaire de l'ingénieur.
  */
 export async function POST(req: NextRequest) {
+  const denied = requireAuth(req);
+  if (denied) return denied;
+
   const engineer = req.nextUrl.searchParams.get("engineer") || "luc-thilliez";
   const tokens = await loadTokens(engineer);
   if (!tokens) {

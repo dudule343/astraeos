@@ -6,6 +6,7 @@ import {
   type MergeInput,
   type TranscriptLine,
 } from "@/lib/entretiens-store";
+import { requireAuth } from "@/lib/auth";
 
 const SNAPSHOT_MAX_BYTES = 256 * 1024; // 256 Ko
 const APPEND_MAX = 500; // garde-fou par appel PATCH (le cap historique vit dans le store)
@@ -54,9 +55,12 @@ function normaliseRecordAppend(
 
 /** GET /api/entretiens/[id] → l'entretien complet. */
 export async function GET(
-  _req: NextRequest,
+  req: NextRequest,
   ctx: { params: Promise<{ id: string }> },
 ) {
+  const denied = requireAuth(req);
+  if (denied) return denied;
+
   const { id } = await ctx.params;
   if (!id) {
     return NextResponse.json({ error: "id requis" }, { status: 400 });
@@ -78,6 +82,9 @@ export async function PATCH(
   req: NextRequest,
   ctx: { params: Promise<{ id: string }> },
 ) {
+  const denied = requireAuth(req);
+  if (denied) return denied;
+
   const { id } = await ctx.params;
   if (!id) {
     return NextResponse.json({ error: "id requis" }, { status: 400 });

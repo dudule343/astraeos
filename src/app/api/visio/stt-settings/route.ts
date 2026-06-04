@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 import { createAdminClient } from "@/lib/supabase/admin";
+import { requireAuth } from "@/lib/auth";
 
 // Endpoint Deepgram utilisé à la fois pour valider la clé (le simple fait de
 // lister les projets exige une clé valide) et, dans stt-token, pour récupérer
@@ -45,7 +46,9 @@ function publicView(settings: SettingsRow | null) {
   };
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const denied = requireAuth(req);
+  if (denied) return denied;
   try {
     const { settings } = await readSettings();
     return NextResponse.json(publicView(settings));
@@ -58,6 +61,9 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  const denied = requireAuth(req);
+  if (denied) return denied;
+
   let payload: { api_key?: unknown };
   try {
     payload = await req.json();
@@ -122,7 +128,9 @@ export async function POST(req: NextRequest) {
   }
 }
 
-export async function DELETE() {
+export async function DELETE(req: NextRequest) {
+  const denied = requireAuth(req);
+  if (denied) return denied;
   try {
     const { supabase } = await readSettings();
     await supabase

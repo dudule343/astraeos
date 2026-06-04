@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 import { getValidAccessToken, loadTokens } from "@/lib/google-oauth";
+import { requireAuth } from "@/lib/auth";
 
 /**
  * POST /api/calendar/meet-link
@@ -16,6 +17,9 @@ import { getValidAccessToken, loadTokens } from "@/lib/google-oauth";
  *   502 { error: "..." }                              → erreur côté Google
  */
 export async function POST(req: NextRequest) {
+  const denied = requireAuth(req);
+  if (denied) return denied;
+
   let body: Record<string, unknown> = {};
   try {
     const parsed = await req.json();

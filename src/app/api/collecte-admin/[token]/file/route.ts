@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 import { createAdminClient } from "@/lib/supabase/admin";
+import { requireAuth } from "@/lib/auth";
 
 const BUCKET = "depots";
 
@@ -15,6 +16,9 @@ export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ token: string }> },
 ) {
+  const denied = requireAuth(req);
+  if (denied) return denied;
+
   const { token } = await params;
 
   if (!token || token.length > 40) {

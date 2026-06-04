@@ -1,9 +1,13 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 import { deleteTokens, loadTokens } from "@/lib/google-oauth";
+import { requireAuth } from "@/lib/auth";
 
 /** POST /api/calendar/disconnect?engineer=luc-thilliez */
 export async function POST(req: NextRequest) {
+  const denied = requireAuth(req);
+  if (denied) return denied;
+
   const engineer = req.nextUrl.searchParams.get("engineer") || "luc-thilliez";
   try {
     // Révocation best-effort du grant OAuth côté Google avant de purger le store local.

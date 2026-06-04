@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 import { createAdminClient } from "@/lib/supabase/admin";
+import { requireAuth } from "@/lib/auth";
 
 /**
  * Vue ingénieur : réponse du conseiller dans la conversation d'une collecte.
@@ -13,6 +14,9 @@ export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ token: string }> },
 ) {
+  const denied = requireAuth(req);
+  if (denied) return denied;
+
   const { token } = await params;
 
   if (!token || token.length > 40) {

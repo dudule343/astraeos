@@ -4,6 +4,7 @@ import { NextResponse, type NextRequest } from "next/server";
 
 import { createAdminClient } from "@/lib/supabase/admin";
 import { buildCollecteEmail } from "@/lib/collecte-email";
+import { requireAuth } from "@/lib/auth";
 
 // Alphabet sans caractères ambigus (pas de l/o/0/1).
 const TOKEN_ALPHABET = "abcdefghijkmnpqrstuvwxyz23456789";
@@ -31,6 +32,9 @@ function generateToken(): string {
 }
 
 export async function POST(req: NextRequest) {
+  const denied = requireAuth(req);
+  if (denied) return denied;
+
   let body: unknown;
   try {
     body = await req.json();

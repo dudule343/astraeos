@@ -1,10 +1,11 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 import { createAdminClient } from "@/lib/supabase/admin";
+import { requireAuth } from "@/lib/auth";
 
 /**
  * Vue ingénieur : détail d'une collecte (structure, dépôts, messages, avancement).
- * Outil privé (service_role, pas d'auth à ce stade).
+ * Réservé au cabinet (cookie de session).
  */
 
 type Item = {
@@ -26,9 +27,12 @@ type Depot = {
 
 // Next 16 : params est une Promise.
 export async function GET(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ token: string }> },
 ) {
+  const denied = requireAuth(req);
+  if (denied) return denied;
+
   const { token } = await params;
 
   if (!token || token.length > 40) {

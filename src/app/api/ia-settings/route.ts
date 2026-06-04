@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 
 import { createAdminClient } from "@/lib/supabase/admin";
 import { ALLOWED_MODELS, DEFAULT_MODEL } from "@/lib/ia-analyse";
+import { requireAuth } from "@/lib/auth";
 
 const ANTHROPIC_URL = "https://api.anthropic.com/v1/messages";
 const ANTHROPIC_VERSION = "2023-06-01";
@@ -50,7 +51,9 @@ function publicView(settings: SettingsRow | null) {
   };
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const denied = requireAuth(req);
+  if (denied) return denied;
   try {
     const { settings } = await readSettings();
     return NextResponse.json(publicView(settings));
@@ -63,6 +66,9 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  const denied = requireAuth(req);
+  if (denied) return denied;
+
   let payload: { api_key?: unknown; model?: unknown };
   try {
     payload = await req.json();
@@ -142,7 +148,9 @@ export async function POST(req: NextRequest) {
   }
 }
 
-export async function DELETE() {
+export async function DELETE(req: NextRequest) {
+  const denied = requireAuth(req);
+  if (denied) return denied;
   try {
     const { supabase } = await readSettings();
     await supabase.from("ia_settings").delete().neq("id", "00000000-0000-0000-0000-000000000000");

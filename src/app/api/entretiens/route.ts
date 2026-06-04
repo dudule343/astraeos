@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 import { listEntretiens, upsertEntretien } from "@/lib/entretiens-store";
+import { requireAuth } from "@/lib/auth";
 
 const ROOM_MAX = 64;
 const DISPLAY_MAX = 120;
@@ -16,6 +17,9 @@ function sanitizeSlug(raw: string): string {
 
 /** GET /api/entretiens?prospect=<slug> → liste légère (sans gros blobs). */
 export async function GET(req: NextRequest) {
+  const denied = requireAuth(req);
+  if (denied) return denied;
+
   const slug = req.nextUrl.searchParams.get("prospect");
   if (!slug || !slug.trim()) {
     return NextResponse.json(
@@ -38,6 +42,9 @@ export async function GET(req: NextRequest) {
 
 /** POST /api/entretiens → upsert par room (ne réécrase jamais l'existant). */
 export async function POST(req: NextRequest) {
+  const denied = requireAuth(req);
+  if (denied) return denied;
+
   let body: unknown;
   try {
     body = await req.json();
