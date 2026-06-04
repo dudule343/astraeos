@@ -2,9 +2,12 @@
  * Store hybride pour les soumissions du parcours client.
  *
  * - Si Supabase est configuré (NEXT_PUBLIC_SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY) :
- *   écrit dans `dci_responses` (1 ligne par dossier, JSONB par catégorie / kind).
+ *   écrit dans `dci_submissions`, une ligne par (prospect_slug, kind).
  * - Sinon : fallback fichier `.data/dci-store.json` à la racine du repo
  *   (gitignored), pour que le flux soit testable en local sans Supabase.
+ *
+ * Le backend (Supabase ou fichier) est choisi par isSupabaseConfigured() à la
+ * fois en écriture et en lecture → cohérence save/load garantie.
  *
  * Les 4 kinds gérés correspondent aux 4 étapes du parcours client :
  *   - rdv           → prise de RDV (Calendly)
@@ -59,76 +62,71 @@ async function writeFileStore(store: FileStore): Promise<void> {
 
 // --- Supabase impl ----------------------------------------------------------
 
-const DEMO_DOSSIER_ID = "00000000-0000-0000-0000-000000099001"; // 1 dossier de démo
+type DciSubmissionRow = {
+  prospect_slug: string;
+  kind: DciKind;
+  payload: Record<string, unknown> | null;
+  display_name: string | null;
+  source_ip: string | null;
+  submitted_at: string;
+  updated_at: string;
+};
 
-function categoryColumnFor(kind: DciKind): string {
-  // On stocke chaque kind dans une colonne JSONB distincte de `dci_responses`
-  // afin d'éviter de devoir altérer le schéma : on réutilise les catégories
-  // existantes pour les payloads de démo (mapping pragmatique).
-  switch (kind) {
-    case "rdv":            return "responses_cat_01_identite";      // identité saisie au RDV
-    case "simple":         return "responses_cat_12_objectifs";     // version simplifiée = objectifs + foyer
-    case "qualification":  return "responses_cat_13_kyc";           // KYC = qualification client MIF
-    case "complet":        return "responses_cat_05_financier";     // patrimoine financier détaillé (placeholder)
-  }
+function rowToSubmission(row: DciSubmissionRow): Submission {
+  return {
+    prospect_slug: row.prospect_slug,
+    kind: row.kind,
+    payload: row.payload ?? {},
+    submitted_at: row.submitted_at,
+    display_name: row.display_name ?? undefined,
+    source_ip: row.source_ip ?? undefined,
+  };
 }
 
 async function saveSupabase(s: Submission): Promise<void> {
   const supabase = createAdminClient();
-  const col = categoryColumnFor(s.kind);
-
-  const blob = {
-    ...s.payload,
-    _submitted_at: s.submitted_at,
-    _slug: s.prospect_slug,
-    _display_name: s.display_name,
-  };
-
-  // `dossier_id` est UNIQUE dans `dci_responses` → onConflict simple.
+  const now = new Date().toISOString();
   const { error } = await supabase
-    .from("dci_responses")
+    .from("dci_submissions")
     .upsert(
-      { dossier_id: DEMO_DOSSIER_ID, [col]: blob, updated_at: new Date().toISOString() },
-      { onConflict: "dossier_id" },
+      {
+        prospect_slug: s.prospect_slug,
+        kind: s.kind,
+        payload: s.payload,
+        display_name: s.display_name ?? null,
+        source_ip: s.source_ip ?? null,
+        submitted_at: s.submitted_at,
+        updated_at: now,
+      },
+      { onConflict: "prospect_slug,kind" },
     );
-
   if (error) throw error;
 }
 
 async function loadSupabase(slug: string): Promise<Record<DciKind, Submission | null>> {
   const supabase = createAdminClient();
   const { data, error } = await supabase
-    .from("dci_responses")
-    .select(
-      "responses_cat_01_identite, responses_cat_05_financier, responses_cat_12_objectifs, responses_cat_13_kyc, updated_at",
-    )
-    .eq("dossier_id", DEMO_DOSSIER_ID)
-    .maybeSingle();
+    .from("dci_submissions")
+    .select("prospect_slug, kind, payload, display_name, source_ip, submitted_at, updated_at")
+    .eq("prospect_slug", slug);
   if (error) throw error;
 
-  function extract(col: string, kind: DciKind): Submission | null {
-    if (!data) return null;
-    const blob = (data as Record<string, unknown>)[col] as
-      | (Record<string, unknown> & { _submitted_at?: string; _slug?: string; _display_name?: string })
-      | null
-      | undefined;
-    if (!blob || !blob._submitted_at) return null;
-    if (slug && blob._slug && blob._slug !== slug) return null;
-    const { _submitted_at, _slug, _display_name, ...payload } = blob;
-    return {
-      prospect_slug: _slug ?? slug,
-      kind,
-      payload,
-      submitted_at: _submitted_at,
-      display_name: _display_name,
-    };
+  const byKind = Object.fromEntries(KINDS.map((k) => [k, null])) as Record<DciKind, Submission | null>;
+  for (const row of (data ?? []) as DciSubmissionRow[]) {
+    if ((KINDS as string[]).includes(row.kind)) byKind[row.kind] = rowToSubmission(row);
   }
-  return {
-    rdv:           extract("responses_cat_01_identite", "rdv"),
-    simple:        extract("responses_cat_12_objectifs", "simple"),
-    qualification: extract("responses_cat_13_kyc", "qualification"),
-    complet:       extract("responses_cat_05_financier", "complet"),
-  };
+  return byKind;
+}
+
+async function loadAllSupabase(): Promise<Submission[]> {
+  const supabase = createAdminClient();
+  const { data, error } = await supabase
+    .from("dci_submissions")
+    .select("prospect_slug, kind, payload, display_name, source_ip, submitted_at, updated_at")
+    .order("updated_at", { ascending: false })
+    .limit(500);
+  if (error) throw error;
+  return ((data ?? []) as DciSubmissionRow[]).map(rowToSubmission);
 }
 
 // --- File impl --------------------------------------------------------------
@@ -181,16 +179,17 @@ export async function loadSubmissions(slug: string): Promise<{
   return { source: "file", submissions: await loadFile(slug) };
 }
 
-export async function loadAllSubmissions(): Promise<Submission[]> {
+export async function loadAllSubmissions(): Promise<{
+  source: "supabase" | "file";
+  submissions: Submission[];
+}> {
   if (isSupabaseConfigured()) {
-    // Pour la démo on a 1 seul dossier, on extrait via loadSupabase("*")
     try {
-      const all = await loadSupabase("");
-      return Object.values(all).filter(Boolean) as Submission[];
+      return { source: "supabase", submissions: await loadAllSupabase() };
     } catch (err) {
-      console.warn("[dci-store] Supabase loadAll failed, falling back:", err);
+      console.warn("[dci-store] Supabase loadAll failed, falling back to file:", err);
     }
   }
   const store = await readFileStore();
-  return store.submissions;
+  return { source: "file", submissions: store.submissions };
 }
