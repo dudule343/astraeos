@@ -829,6 +829,10 @@ select.v4-modal-input { cursor:pointer; appearance:none; -webkit-appearance:none
     <div class="live-indicators">
       <span class="live-dot" id="rec-indicator">Enregistrement</span>
       <span class="live-dot transcript">Transcription IA</span>
+      <button type="button" id="stt-connect-btn" class="stt-connect-btn" title="Connecter la transcription complète (Deepgram)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="13" height="13"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
+        <span id="stt-connect-label">Transcription complète</span>
+      </button>
       <span class="session-timer">00:24:18 / 1h30</span>
       <button class="v3-end-btn primary" onclick="openModalEndInterview()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="20 6 9 17 4 12"/></svg>
@@ -1238,6 +1242,18 @@ select.v4-modal-input { cursor:pointer; appearance:none; -webkit-appearance:none
 
           <div style="margin-top:14px; padding:10px 12px; background:var(--ivory); border-radius:6px; font-size:10.5px; color:var(--navy-300); line-height:1.5; text-align:center;">
             <strong style="color:var(--navy);">5 opportunités identifiées</strong> · l'IA continue d'analyser la conversation en temps réel
+          </div>
+
+          <!-- Repères juridiques en direct · articles de loi injectés par l'IA -->
+          <div id="legal-live" style="margin-top:18px;">
+            <div style="display:flex; align-items:center; gap:7px; font-size:11px; font-weight:800; letter-spacing:0.04em; text-transform:uppercase; color:var(--navy); margin-bottom:10px;">
+              <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--gold);"></span>
+              Repères juridiques en direct
+            </div>
+            <div id="legal-live-empty" style="font-size:10px; color:var(--navy-300); font-style:italic; line-height:1.5;">
+              Les articles de loi et dispositifs fiscaux pertinents s'afficheront ici au fil de la conversation.
+            </div>
+            <div id="legal-live-list"></div>
           </div>
         </div>
 
@@ -3539,6 +3555,152 @@ setInterval(() => {
 </script>
 
 <!-- ============================================================= -->
+<!-- ASTRAEOS · Visio Jitsi (vidéo réelle)                         -->
+<!-- room + role lus dans l'URL. Sans room → avatars statiques     -->
+<!-- (mode démo). Avec room → vraie conférence dans .video-zone.   -->
+<!-- Greffe non destructive : aucun global du masque n'est touché. -->
+<!-- ============================================================= -->
+<script>
+(function astraeosVisioJitsi() {
+  'use strict';
+
+  // ---- Lecture room + role depuis l'URL ----------------------------
+  var params = new URLSearchParams(window.location.search);
+  var room = (params.get('room') || '').replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 64);
+  var role = params.get('role') === 'client' ? 'client' : 'engineer';
+
+  // Pas de room → on reste en mode démo (avatars statiques du masque).
+  if (!room) return;
+
+  var zone = document.getElementById('video-zone');
+  if (!zone) return;
+
+  var grid    = zone.querySelector('.video-grid');
+  var pip     = zone.querySelector('.video-pip');
+  var toolbar = zone.querySelector('.video-toolbar');
+
+  // ---- Styles scopés (.jts-) ---------------------------------------
+  var css = ''
+    + '.jts-container{position:absolute;inset:12px;border-radius:8px;overflow:hidden;background:#04101f;}'
+    + '.video-zoomed .jts-container{inset:18px;}'
+    + '.jts-container iframe{width:100%;height:100%;border:0;display:block;}'
+    + '.jts-status{position:absolute;inset:12px;display:flex;align-items:center;justify-content:center;'
+    + 'text-align:center;color:#9fb0c6;font-size:12px;line-height:1.5;padding:24px;'
+    + 'background:#04101f;border-radius:8px;z-index:1;}'
+    + '.jts-status.jts-hidden{display:none;}'
+    + '.jts-err{color:#ffb3a7;}';
+  var styleEl = document.createElement('style');
+  styleEl.textContent = css;
+  document.head.appendChild(styleEl);
+
+  // Masquer les avatars statiques + le PiP/toolbar décoratifs : la vraie
+  // conférence apporte ses propres tuiles et sa propre barre d'outils.
+  if (grid) grid.style.display = 'none';
+  if (pip) pip.style.display = 'none';
+  if (toolbar) toolbar.style.display = 'none';
+
+  // Conteneur Jitsi + voyant d'état (pendant le chargement du script).
+  var container = document.createElement('div');
+  container.className = 'jts-container';
+  var status = document.createElement('div');
+  status.className = 'jts-status';
+  status.textContent = 'Connexion à la salle vidéo…';
+  zone.appendChild(container);
+  zone.appendChild(status);
+
+  function showStatus(msg, isErr) {
+    status.textContent = msg;
+    status.className = 'jts-status' + (isErr ? ' jts-err' : '');
+    status.classList.remove('jts-hidden');
+  }
+  function hideStatus() {
+    status.classList.add('jts-hidden');
+  }
+
+  // ---- Chargement de l'external API Jitsi (via <script src>) --------
+  var DOMAIN = 'meet.jit.si';
+  var SCRIPT_SRC = 'https://meet.jit.si/external_api.js';
+
+  function loadScript(src, cb) {
+    var existing = document.querySelector('script[data-jts-api]');
+    if (existing) {
+      if (window.JitsiMeetExternalAPI) { cb(); return; }
+      existing.addEventListener('load', cb);
+      existing.addEventListener('error', function () { cb(new Error('load')); });
+      return;
+    }
+    var s = document.createElement('script');
+    s.src = src;
+    s.async = true;
+    s.setAttribute('data-jts-api', '1');
+    s.onload = function () { cb(); };
+    s.onerror = function () { cb(new Error('load')); };
+    document.head.appendChild(s);
+  }
+
+  function displayName() {
+    if (role === 'client') return 'Client';
+    var src = document.querySelector('.video-pip .video-avatar-circle');
+    return src && src.textContent.trim() ? 'Ingénieur · ' + src.textContent.trim() : 'Ingénieur';
+  }
+
+  function startJitsi() {
+    if (typeof window.JitsiMeetExternalAPI !== 'function') {
+      showStatus('Vidéo indisponible : impossible de charger meet.jit.si.', true);
+      return;
+    }
+    try {
+      var api = new window.JitsiMeetExternalAPI(DOMAIN, {
+        roomName: 'astraeosPriveos_' + room,
+        parentNode: container,
+        width: '100%',
+        height: '100%',
+        userInfo: { displayName: displayName() },
+        configOverwrite: {
+          prejoinPageEnabled: false,
+          disableDeepLinking: true,
+          startWithAudioMuted: false,
+          startWithVideoMuted: false,
+          enableWelcomePage: false,
+          disableProfile: true
+        },
+        interfaceConfigOverwrite: {
+          SHOW_JITSI_WATERMARK: false,
+          SHOW_WATERMARK_FOR_GUESTS: false,
+          SHOW_BRAND_WATERMARK: false,
+          SHOW_POWERED_BY: false,
+          DEFAULT_BACKGROUND: '#04101f',
+          DISABLE_VIDEO_BACKGROUND: false,
+          TOOLBAR_BUTTONS: [
+            'microphone', 'camera', 'desktop', 'tileview',
+            'hangup', 'fullscreen', 'settings'
+          ],
+          MOBILE_APP_PROMO: false
+        }
+      });
+
+      api.addEventListener('videoConferenceJoined', hideStatus);
+      api.addEventListener('readyToClose', function () {
+        showStatus('Vidéo terminée. Vous pouvez fermer cet onglet.');
+      });
+      // Expose l'instance pour la transcription (captureStream / état).
+      window.__astraeosJitsi = api;
+    } catch (e) {
+      showStatus('Vidéo indisponible : initialisation impossible.', true);
+    }
+  }
+
+  loadScript(SCRIPT_SRC, function (err) {
+    if (err) {
+      showStatus('Vidéo indisponible : impossible de charger meet.jit.si.', true);
+      return;
+    }
+    startJitsi();
+  });
+})();
+</script>
+
+<!-- ============================================================= -->
 <!-- ASTRAEOS · Transcription live & conseils IA                   -->
 <!-- Greffe non destructive : aucun global du masque n'est touché. -->
 <!-- ============================================================= -->
@@ -3546,9 +3708,9 @@ setInterval(() => {
 (function astraeosLiveTranscript() {
   'use strict';
 
-  // ---- Styles injectés (scopés via préfixe .alt-) -------------------
+  // ---- Styles injectés (scopés .alt- pour le panneau, .sttm- modale) ----
   var css = ''
-    + '.alt-panel{position:fixed;left:18px;bottom:18px;width:320px;max-width:calc(100vw - 36px);'
+    + '.alt-panel{position:fixed;left:18px;bottom:18px;width:340px;max-width:calc(100vw - 36px);'
     + 'background:#0A1F38;color:#fff;border-radius:12px;box-shadow:0 14px 40px rgba(0,0,0,0.35);'
     + 'font-family:inherit;z-index:9000;overflow:hidden;border:1px solid rgba(255,255,255,0.08);}'
     + '.alt-panel.alt-collapsed .alt-body{display:none;}'
@@ -3557,6 +3719,9 @@ setInterval(() => {
     + '.alt-head-title{font-size:11px;font-weight:700;letter-spacing:0.04em;flex:1;display:flex;align-items:center;gap:7px;}'
     + '.alt-dot{width:8px;height:8px;border-radius:50%;background:#708196;flex:none;}'
     + '.alt-panel.alt-running .alt-dot{background:#27c06b;animation:altPulse 1.4s infinite;}'
+    + '.alt-mode{font-size:8px;font-weight:800;letter-spacing:0.05em;text-transform:uppercase;'
+    + 'padding:2px 6px;border-radius:8px;background:rgba(255,255,255,0.1);color:#bcd;flex:none;}'
+    + '.alt-mode.alt-mode-full{background:#1F5A36;color:#cfeede;}'
     + '@keyframes altPulse{0%,100%{opacity:1;}50%{opacity:0.35;}}'
     + '.alt-chevron{font-size:11px;opacity:0.7;transition:transform 0.2s;}'
     + '.alt-panel.alt-collapsed .alt-chevron{transform:rotate(180deg);}'
@@ -3574,7 +3739,47 @@ setInterval(() => {
     + '.alt-interim{color:#9fb0c6;font-style:italic;}'
     + '.alt-empty{color:#8ea2bd;font-size:10.5px;font-style:italic;}'
     + '.alt-note{margin-top:9px;font-size:9.5px;color:#9fb0c6;line-height:1.45;}'
-    + '.alt-note.alt-err{color:#ffb3a7;}';
+    + '.alt-note.alt-err{color:#ffb3a7;}'
+    + '.alt-upsell{margin-top:9px;padding:8px 9px;border-radius:7px;background:rgba(255,255,255,0.05);'
+    + 'border:1px dashed rgba(255,255,255,0.18);font-size:9.5px;color:#bcd;line-height:1.45;}'
+    + '.alt-upsell a{color:#f0c869;font-weight:700;cursor:pointer;text-decoration:underline;}'
+    // bouton du bandeau
+    + '.stt-connect-btn{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--navy-100);'
+    + 'background:#fff;color:var(--navy);font-family:inherit;font-size:10px;font-weight:700;'
+    + 'letter-spacing:0.02em;padding:5px 9px;border-radius:7px;cursor:pointer;line-height:1;}'
+    + '.stt-connect-btn:hover{background:var(--ivory);}'
+    + '.stt-connect-btn.stt-on{border-color:#1F5A36;color:#1F5A36;}'
+    + '.stt-connect-btn.stt-on svg{stroke:#1F5A36;}'
+    // modale
+    + '.sttm-overlay{position:fixed;inset:0;background:rgba(8,20,38,0.55);z-index:11000;display:none;'
+    + 'align-items:center;justify-content:center;padding:20px;}'
+    + '.sttm-overlay.sttm-open{display:flex;}'
+    + '.sttm-card{width:440px;max-width:100%;background:#fff;border-radius:14px;overflow:hidden;'
+    + 'box-shadow:0 24px 60px rgba(0,0,0,0.3);font-family:inherit;}'
+    + '.sttm-head{padding:16px 18px;background:var(--navy,#0A1F38);color:#fff;}'
+    + '.sttm-title{font-size:14px;font-weight:800;letter-spacing:0.01em;}'
+    + '.sttm-sub{font-size:10.5px;opacity:0.75;margin-top:4px;line-height:1.45;}'
+    + '.sttm-body{padding:16px 18px 18px;}'
+    + '.sttm-label{font-size:10px;font-weight:700;letter-spacing:0.03em;text-transform:uppercase;'
+    + 'color:var(--navy-300,#708196);margin-bottom:6px;}'
+    + '.sttm-input{width:100%;box-sizing:border-box;padding:9px 11px;border:1px solid var(--navy-100,#dbe3ee);'
+    + 'border-radius:8px;font-family:inherit;font-size:12px;color:var(--navy,#0A1F38);}'
+    + '.sttm-input:focus{outline:none;border-color:var(--navy,#0A1F38);}'
+    + '.sttm-row{display:flex;gap:8px;margin-top:14px;}'
+    + '.sttm-btn{flex:1;padding:10px;border:none;border-radius:8px;font-family:inherit;font-size:11px;'
+    + 'font-weight:700;cursor:pointer;letter-spacing:0.02em;}'
+    + '.sttm-btn-primary{background:var(--navy,#0A1F38);color:#fff;}'
+    + '.sttm-btn-primary:hover{filter:brightness(1.1);}'
+    + '.sttm-btn-ghost{background:var(--ivory,#f4f1ea);color:var(--navy,#0A1F38);flex:none;padding:10px 14px;}'
+    + '.sttm-btn[disabled]{opacity:0.5;cursor:default;}'
+    + '.sttm-msg{margin-top:12px;font-size:10.5px;line-height:1.45;color:var(--navy-300,#708196);}'
+    + '.sttm-msg.sttm-ok{color:#1F5A36;font-weight:600;}'
+    + '.sttm-msg.sttm-err{color:#b3402f;font-weight:600;}'
+    + '.sttm-state{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:9px;'
+    + 'background:var(--ivory,#f4f1ea);font-size:11px;color:var(--navy,#0A1F38);margin-bottom:14px;}'
+    + '.sttm-state .sttm-state-dot{width:9px;height:9px;border-radius:50%;background:#708196;flex:none;}'
+    + '.sttm-state.sttm-state-on .sttm-state-dot{background:#27c06b;}'
+    + '.sttm-state .sttm-state-key{font-family:monospace;font-size:10.5px;color:var(--navy-300,#708196);}';
   var styleEl = document.createElement('style');
   styleEl.textContent = css;
   document.head.appendChild(styleEl);
@@ -3593,21 +3798,25 @@ setInterval(() => {
     return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
   }
 
-  // ---- Construction du panneau transcript ---------------------------
+  // ============================================================
+  // Panneau transcription
+  // ============================================================
   var panel = document.createElement('div');
   panel.className = 'alt-panel alt-collapsed';
   panel.innerHTML = ''
     + '<div class="alt-head" data-alt-toggle>'
-    +   '<span class="alt-head-title"><span class="alt-dot"></span>Transcription en direct</span>'
-    +   '<span class="alt-chevron">▾</span>'
+    +   '<span class="alt-head-title"><span class="alt-dot"></span>Transcription en direct'
+    +     '<span class="alt-mode" data-alt-mode>Micro local</span></span>'
+    +   '<span class="alt-chevron">&#9662;</span>'
     + '</div>'
     + '<div class="alt-body">'
     +   '<div class="alt-controls">'
-    +     '<button class="alt-btn" data-alt-start>▶ Démarrer la transcription</button>'
+    +     '<button class="alt-btn" data-alt-start>&#9654; Démarrer la transcription</button>'
     +     '<button class="alt-btn alt-btn-ghost" data-alt-pause style="display:none;flex:none;">Pause</button>'
     +   '</div>'
-    +   '<div class="alt-stream"><div class="alt-empty">Cliquez sur « Démarrer » pour activer le micro et la transcription.</div></div>'
+    +   '<div class="alt-stream"><div class="alt-empty">Cliquez sur « Démarrer » pour transcrire la conversation.</div></div>'
     +   '<div class="alt-note" data-alt-note></div>'
+    +   '<div class="alt-upsell" data-alt-upsell style="display:none;"></div>'
     + '</div>';
   document.body.appendChild(panel);
 
@@ -3616,38 +3825,42 @@ setInterval(() => {
   var pauseBtn = panel.querySelector('[data-alt-pause]');
   var stream   = panel.querySelector('.alt-stream');
   var noteEl   = panel.querySelector('[data-alt-note]');
+  var modeEl   = panel.querySelector('[data-alt-mode]');
+  var upsellEl = panel.querySelector('[data-alt-upsell]');
 
-  head.addEventListener('click', function () {
-    panel.classList.toggle('alt-collapsed');
-  });
+  head.addEventListener('click', function () { panel.classList.toggle('alt-collapsed'); });
 
   function setNote(msg, isErr) {
     noteEl.textContent = msg || '';
     noteEl.className = 'alt-note' + (isErr ? ' alt-err' : '');
   }
+  function setMode(label, isFull) {
+    modeEl.textContent = label;
+    modeEl.className = 'alt-mode' + (isFull ? ' alt-mode-full' : '');
+  }
+  function showUpsell() {
+    upsellEl.style.display = '';
+    upsellEl.innerHTML = 'Mode micro local : seule la voix de l\'ingénieur est captée. '
+      + '<a data-alt-upsell-link>Connectez la transcription complète (Deepgram)</a> pour transcrire aussi le client.';
+    var lnk = upsellEl.querySelector('[data-alt-upsell-link]');
+    if (lnk) lnk.addEventListener('click', openModal);
+  }
+  function hideUpsell() { upsellEl.style.display = 'none'; upsellEl.innerHTML = ''; }
 
-  // ---- État de la transcription -------------------------------------
-  var SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
-  var recog = null;
-  var userPaused = true;     // tant que l'utilisateur n'a pas démarré
-  var running = false;
+  // ---- Flux d'affichage transcript (final / interim) ---------------
   var startTs = 0;
-  var finalBuffer = '';      // fenêtre glissante des chars finalisés
   var emptyShown = true;
 
   function appendFinalLine(text) {
     if (emptyShown) { stream.innerHTML = ''; emptyShown = false; }
-    // retirer l'éventuelle ligne interim
     var interim = stream.querySelector('.alt-line.alt-interim-line');
     if (interim) interim.remove();
     var line = document.createElement('div');
     line.className = 'alt-line';
-    line.innerHTML = '<span class="alt-ts">' + esc(mmss(Date.now() - startTs)) + '</span>'
-      + esc(text);
+    line.innerHTML = '<span class="alt-ts">' + esc(mmss(Date.now() - startTs)) + '</span>' + esc(text);
     stream.appendChild(line);
     stream.scrollTop = stream.scrollHeight;
   }
-
   function showInterim(text) {
     if (emptyShown) { stream.innerHTML = ''; emptyShown = false; }
     var interim = stream.querySelector('.alt-line.alt-interim-line');
@@ -3661,6 +3874,29 @@ setInterval(() => {
     stream.scrollTop = stream.scrollHeight;
   }
 
+  // Texte finalisé → buffer pour les conseils + déclenchement
+  var finalBuffer = '';
+  function pushFinalText(clean) {
+    clean = (clean || '').trim();
+    if (!clean) return;
+    appendFinalLine(clean);
+    finalBuffer += (finalBuffer ? ' ' : '') + clean;
+    charsSinceSend += clean.length;
+    if (finalBuffer.length > 4000) finalBuffer = finalBuffer.slice(finalBuffer.length - 4000);
+    maybeSendConseils(false);
+  }
+
+  // ============================================================
+  // État global de capture
+  // ============================================================
+  var userPaused = true;     // tant que l'utilisateur n'a pas démarré
+  var activeMode = null;     // 'deepgram' | 'webspeech' | null
+
+  // ---- Web Speech (fallback micro local) ---------------------------
+  var SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+  var recog = null;
+  var wsRunning = false;
+
   function buildRecognizer() {
     var r = new SpeechRec();
     r.lang = 'fr-FR';
@@ -3671,78 +3907,407 @@ setInterval(() => {
       for (var i = ev.resultIndex; i < ev.results.length; i++) {
         var res = ev.results[i];
         var txt = (res[0] && res[0].transcript) ? res[0].transcript : '';
-        if (res.isFinal) {
-          var clean = txt.trim();
-          if (clean) {
-            appendFinalLine(clean);
-            finalBuffer += (finalBuffer ? ' ' : '') + clean;
-            charsSinceSend += clean.length;
-            // fenêtre glissante ~4000 chars
-            if (finalBuffer.length > 4000) {
-              finalBuffer = finalBuffer.slice(finalBuffer.length - 4000);
-            }
-            maybeSendConseils(false);
-          }
-        } else {
-          interim += txt;
-        }
+        if (res.isFinal) { pushFinalText(txt); }
+        else { interim += txt; }
       }
       showInterim(interim.trim());
     };
     r.onerror = function (ev) {
-      // 'not-allowed' / 'service-not-allowed' : micro refusé → on arrête proprement
       if (ev && (ev.error === 'not-allowed' || ev.error === 'service-not-allowed')) {
-        userPaused = true; running = false;
-        panel.classList.remove('alt-running');
-        startBtn.style.display = ''; pauseBtn.style.display = 'none';
-        startBtn.disabled = false;
+        stopAll();
         setNote('Micro refusé. Autorisez le microphone puis redémarrez.', true);
       }
-      // les autres erreurs (no-speech, network) sont absorbées par onend → auto-restart
     };
     r.onend = function () {
-      running = false;
-      if (!userPaused) {
-        // auto-redémarrage tant que l'utilisateur n'a pas mis pause
-        try { r.start(); running = true; } catch (e) { /* déjà en cours / transitoire */ }
+      wsRunning = false;
+      if (!userPaused && activeMode === 'webspeech') {
+        try { r.start(); wsRunning = true; } catch (e) {}
       }
     };
     return r;
   }
 
-  function startTranscription() {
+  function startWebSpeech() {
     if (!SpeechRec) {
-      setNote('Transcription disponible sur Chrome (API Web Speech non supportée par ce navigateur).', true);
-      startBtn.disabled = true;
+      setNote('Transcription locale indisponible sur ce navigateur (API Web Speech absente). Connectez Deepgram pour la transcription complète.', true);
+      return false;
+    }
+    activeMode = 'webspeech';
+    setMode('Micro local', false);
+    showUpsell();
+    if (!recog) recog = buildRecognizer();
+    try { recog.start(); wsRunning = true; } catch (e) {}
+    setNote('Transcription locale active (voix de l\'ingénieur). L\'IA analyse la conversation.');
+    return true;
+  }
+
+  // ---- Deepgram (transcription complète via audio d'onglet) --------
+  var dgWs = null;
+  var dgAudioCtx = null;
+  var dgSource = null;
+  var dgProcessor = null;
+  var dgDisplayStream = null;
+  var dgKeepAlive = null;
+
+  function floatTo16BitPCM(input) {
+    var out = new Int16Array(input.length);
+    for (var i = 0; i < input.length; i++) {
+      var s = Math.max(-1, Math.min(1, input[i]));
+      out[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
+    }
+    return out;
+  }
+  // rééchantillonnage linéaire vers 16 kHz
+  function downsampleTo16k(buffer, inRate) {
+    var outRate = 16000;
+    if (inRate === outRate) return buffer;
+    var ratio = inRate / outRate;
+    var newLen = Math.round(buffer.length / ratio);
+    var result = new Float32Array(newLen);
+    var pos = 0, idx = 0;
+    while (idx < newLen) {
+      var next = Math.round((idx + 1) * ratio);
+      var sum = 0, count = 0;
+      for (var i = pos; i < next && i < buffer.length; i++) { sum += buffer[i]; count++; }
+      result[idx] = count ? sum / count : 0;
+      idx++; pos = next;
+    }
+    return result;
+  }
+
+  function cleanupDeepgram() {
+    if (dgKeepAlive) { clearInterval(dgKeepAlive); dgKeepAlive = null; }
+    try { if (dgProcessor) dgProcessor.disconnect(); } catch (e) {}
+    try { if (dgSource) dgSource.disconnect(); } catch (e) {}
+    try { if (dgAudioCtx && dgAudioCtx.state !== 'closed') dgAudioCtx.close(); } catch (e) {}
+    try {
+      if (dgDisplayStream) dgDisplayStream.getTracks().forEach(function (t) { try { t.stop(); } catch (e) {} });
+    } catch (e) {}
+    try { if (dgWs && (dgWs.readyState === 0 || dgWs.readyState === 1)) dgWs.close(); } catch (e) {}
+    dgProcessor = dgSource = dgAudioCtx = dgDisplayStream = dgWs = null;
+  }
+
+  // Démarrage Deepgram : 1) token éphémère, 2) audio onglet, 3) WS PCM16
+  function startDeepgram() {
+    setNote('Récupération du jeton de transcription…');
+    fetch('/api/visio/stt-token', { method: 'POST' })
+      .then(function (res) {
+        if (res.status === 409) return { _notConnected: true };
+        if (!res.ok) return { _err: true };
+        return res.json().catch(function () { return { _err: true }; });
+      })
+      .then(function (data) {
+        if (!data || data._notConnected) {
+          // STT non connectée → fallback Web Speech + carte discrète
+          startWebSpeech();
+          return;
+        }
+        if (data._err || !data.key) {
+          setNote('Service de transcription indisponible (jeton). Repli sur le micro local.', true);
+          startWebSpeech();
+          return;
+        }
+        beginDisplayCapture(data.key);
+      })
+      .catch(function () {
+        setNote('Réseau indisponible pour la transcription complète. Repli sur le micro local.', true);
+        startWebSpeech();
+      });
+  }
+
+  function beginDisplayCapture(token) {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
+      setNote('Le partage d\'onglet n\'est pas supporté ici. Repli sur le micro local.', true);
+      startWebSpeech();
       return;
     }
+    setNote('Sélectionnez cet onglet et cochez « Partager l\'audio de l\'onglet » pour transcrire toute la conversation.');
+    navigator.mediaDevices.getDisplayMedia({ video: true, audio: true })
+      .then(function (stream) {
+        var audioTracks = stream.getAudioTracks();
+        if (!audioTracks.length) {
+          stream.getTracks().forEach(function (t) { try { t.stop(); } catch (e) {} });
+          setNote('Aucun audio partagé : recochez « Partager l\'audio de l\'onglet ». Repli sur le micro local.', true);
+          startWebSpeech();
+          return;
+        }
+        dgDisplayStream = stream;
+        // on arrête la piste vidéo (inutile pour la transcription)
+        stream.getVideoTracks().forEach(function (t) { try { t.stop(); } catch (e) {} });
+        // si l'utilisateur stoppe le partage depuis la barre Chrome → arrêt propre
+        audioTracks[0].addEventListener('ended', function () {
+          if (activeMode === 'deepgram' && !userPaused) {
+            setNote('Partage d\'onglet interrompu. Cliquez sur Reprendre.', true);
+            stopAll(true);
+          }
+        });
+        openDeepgramSocket(token, stream);
+      })
+      .catch(function () {
+        setNote('Partage d\'onglet refusé. Repli sur le micro local.', true);
+        startWebSpeech();
+      });
+  }
+
+  function openDeepgramSocket(token, stream) {
+    var url = 'wss://api.deepgram.com/v1/listen'
+      + '?model=nova-2&language=fr&punctuate=true&interim_results=true'
+      + '&encoding=linear16&sample_rate=16000&channels=1';
+    var ws;
+    try { ws = new WebSocket(url, ['token', token]); }
+    catch (e) {
+      setNote('Connexion Deepgram impossible. Repli sur le micro local.', true);
+      startWebSpeech();
+      return;
+    }
+    dgWs = ws;
+    ws.binaryType = 'arraybuffer';
+
+    ws.onopen = function () {
+      try {
+        var Ctx = window.AudioContext || window.webkitAudioContext;
+        dgAudioCtx = new Ctx();
+        dgSource = dgAudioCtx.createMediaStreamSource(stream);
+        var bufSize = 4096;
+        dgProcessor = dgAudioCtx.createScriptProcessor(bufSize, 1, 1);
+        dgProcessor.onaudioprocess = function (e) {
+          if (!dgWs || dgWs.readyState !== 1) return;
+          var input = e.inputBuffer.getChannelData(0);
+          var down = downsampleTo16k(input, dgAudioCtx.sampleRate);
+          var pcm = floatTo16BitPCM(down);
+          try { dgWs.send(pcm.buffer); } catch (err) {}
+        };
+        dgSource.connect(dgProcessor);
+        // destination requise pour que ScriptProcessor s'exécute (gain 0 → silencieux)
+        var sink = dgAudioCtx.createGain();
+        sink.gain.value = 0;
+        dgProcessor.connect(sink);
+        sink.connect(dgAudioCtx.destination);
+
+        activeMode = 'deepgram';
+        setMode('Transcription complète', true);
+        hideUpsell();
+        setNote('Transcription complète active (les deux voix). L\'IA analyse la conversation.');
+
+        // KeepAlive Deepgram toutes les 8 s
+        dgKeepAlive = setInterval(function () {
+          if (dgWs && dgWs.readyState === 1) {
+            try { dgWs.send(JSON.stringify({ type: 'KeepAlive' })); } catch (e) {}
+          }
+        }, 8000);
+      } catch (e) {
+        setNote('Initialisation audio impossible. Repli sur le micro local.', true);
+        cleanupDeepgram();
+        startWebSpeech();
+      }
+    };
+
+    ws.onmessage = function (ev) {
+      var msg;
+      try { msg = JSON.parse(ev.data); } catch (e) { return; }
+      if (!msg || msg.type !== 'Results' || !msg.channel) return;
+      var alt = msg.channel.alternatives && msg.channel.alternatives[0];
+      var txt = alt && alt.transcript ? alt.transcript : '';
+      if (!txt) return;
+      if (msg.is_final) { showInterim(''); pushFinalText(txt); }
+      else { showInterim(txt); }
+    };
+
+    ws.onerror = function () {
+      if (activeMode !== 'deepgram') {
+        setNote('Erreur Deepgram. Repli sur le micro local.', true);
+        cleanupDeepgram();
+        if (!userPaused) startWebSpeech();
+      }
+    };
+    ws.onclose = function () {
+      if (activeMode === 'deepgram' && !userPaused) {
+        // fermeture inattendue → on tente le micro local pour ne pas perdre la suite
+        cleanupDeepgram();
+        setNote('Connexion de transcription fermée. Repli sur le micro local.', true);
+        startWebSpeech();
+      }
+    };
+  }
+
+  // ============================================================
+  // Démarrage / pause / arrêt unifiés
+  // ============================================================
+  function startTranscription() {
     userPaused = false;
     if (!startTs) startTs = Date.now();
-    if (!recog) recog = buildRecognizer();
-    try { recog.start(); running = true; } catch (e) { /* déjà démarré */ }
     panel.classList.add('alt-running');
     startBtn.style.display = 'none';
     pauseBtn.style.display = '';
-    setNote('Transcription active · l\'IA analyse la conversation.');
-    // premier tick de conseils déclenché immédiatement par l'intervalle ci-dessous
+    setNote('Démarrage de la transcription…');
+    // On privilégie toujours Deepgram (transcription complète) ; le fallback
+    // micro local est automatique si STT non connectée / partage refusé.
+    startDeepgram();
+  }
+
+  function stopAll(keepRunningVisual) {
+    activeMode = null;
+    if (recog) { try { recog.stop(); } catch (e) {} }
+    wsRunning = false;
+    cleanupDeepgram();
+    if (!keepRunningVisual) {
+      panel.classList.remove('alt-running');
+      startBtn.style.display = '';
+      pauseBtn.style.display = 'none';
+    }
   }
 
   function pauseTranscription() {
     userPaused = true;
-    if (recog) { try { recog.stop(); } catch (e) {} }
-    running = false;
-    panel.classList.remove('alt-running');
-    startBtn.style.display = '';
-    pauseBtn.style.display = 'none';
+    stopAll(false);
     startBtn.textContent = '▶ Reprendre la transcription';
+    setMode('En pause', false);
     setNote('Transcription en pause.');
   }
 
   startBtn.addEventListener('click', startTranscription);
   pauseBtn.addEventListener('click', pauseTranscription);
 
-  // ---- Conseils IA live ---------------------------------------------
-  var emittedTitles = [];          // titres déjà injectés (case-insensitive)
+  // ============================================================
+  // Modale « Connecter la transcription » (Deepgram BYOK)
+  // ============================================================
+  var connectBtn = document.getElementById('stt-connect-btn');
+  var connectLabel = document.getElementById('stt-connect-label');
+
+  var overlay = document.createElement('div');
+  overlay.className = 'sttm-overlay';
+  overlay.innerHTML = ''
+    + '<div class="sttm-card" role="dialog" aria-modal="true">'
+    +   '<div class="sttm-head">'
+    +     '<div class="sttm-title">Connecter la transcription complète</div>'
+    +     '<div class="sttm-sub">Transcrivez les deux voix (ingénieur + client) en temps réel via Deepgram. '
+    +       'Votre clé est validée puis stockée côté serveur, jamais réaffichée.</div>'
+    +   '</div>'
+    +   '<div class="sttm-body">'
+    +     '<div class="sttm-state" data-sttm-state style="display:none;">'
+    +       '<span class="sttm-state-dot"></span>'
+    +       '<span data-sttm-state-label>Vérification…</span>'
+    +       '<span class="sttm-state-key" data-sttm-state-key></span>'
+    +     '</div>'
+    +     '<div class="sttm-label">Clé API Deepgram</div>'
+    +     '<input class="sttm-input" type="password" autocomplete="off" spellcheck="false" '
+    +       'placeholder="Collez votre clé Deepgram" data-sttm-input>'
+    +     '<div class="sttm-row">'
+    +       '<button class="sttm-btn sttm-btn-primary" data-sttm-save>Tester et connecter</button>'
+    +       '<button class="sttm-btn sttm-btn-ghost" data-sttm-disconnect style="display:none;">Déconnecter</button>'
+    +     '</div>'
+    +     '<div class="sttm-msg" data-sttm-msg></div>'
+    +   '</div>'
+    + '</div>';
+  document.body.appendChild(overlay);
+
+  var sttInput      = overlay.querySelector('[data-sttm-input]');
+  var sttSaveBtn    = overlay.querySelector('[data-sttm-save]');
+  var sttDiscBtn    = overlay.querySelector('[data-sttm-disconnect]');
+  var sttMsg        = overlay.querySelector('[data-sttm-msg]');
+  var sttStateBox   = overlay.querySelector('[data-sttm-state]');
+  var sttStateLabel = overlay.querySelector('[data-sttm-state-label]');
+  var sttStateKey   = overlay.querySelector('[data-sttm-state-key]');
+
+  function setSttMsg(msg, kind) {
+    sttMsg.textContent = msg || '';
+    sttMsg.className = 'sttm-msg' + (kind ? ' sttm-' + kind : '');
+  }
+  function renderConnectBtn(connected) {
+    if (!connectBtn) return;
+    connectBtn.classList.toggle('stt-on', !!connected);
+    if (connectLabel) connectLabel.textContent = connected ? 'Transcription complète ✓' : 'Transcription complète';
+  }
+  function renderState(connected, masked) {
+    if (connected) {
+      sttStateBox.style.display = '';
+      sttStateBox.classList.add('sttm-state-on');
+      sttStateLabel.textContent = 'Deepgram connecté';
+      sttStateKey.textContent = masked || '';
+      sttDiscBtn.style.display = '';
+      sttSaveBtn.textContent = 'Remplacer la clé';
+    } else {
+      sttStateBox.style.display = 'none';
+      sttStateBox.classList.remove('sttm-state-on');
+      sttDiscBtn.style.display = 'none';
+      sttSaveBtn.textContent = 'Tester et connecter';
+    }
+    renderConnectBtn(connected);
+  }
+
+  function refreshSttStatus() {
+    fetch('/api/visio/stt-settings', { method: 'GET' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        if (!d) { renderState(false, ''); return; }
+        renderState(!!d.connected, d.masked_key || '');
+      })
+      .catch(function () { renderState(false, ''); });
+  }
+
+  function openModal() {
+    overlay.classList.add('sttm-open');
+    setSttMsg('');
+    sttInput.value = '';
+    refreshSttStatus();
+    setTimeout(function () { try { sttInput.focus(); } catch (e) {} }, 50);
+  }
+  function closeModal() { overlay.classList.remove('sttm-open'); }
+
+  if (connectBtn) connectBtn.addEventListener('click', openModal);
+  overlay.addEventListener('click', function (e) { if (e.target === overlay) closeModal(); });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && overlay.classList.contains('sttm-open')) closeModal();
+  });
+
+  sttSaveBtn.addEventListener('click', function () {
+    var key = (sttInput.value || '').trim();
+    if (!key) { setSttMsg('Collez votre clé Deepgram.', 'err'); return; }
+    sttSaveBtn.disabled = true;
+    setSttMsg('Vérification de la clé auprès de Deepgram…');
+    fetch('/api/visio/stt-settings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ api_key: key })
+    }).then(function (r) {
+      return r.json().catch(function () { return null; }).then(function (body) {
+        return { ok: r.ok, body: body };
+      });
+    }).then(function (res) {
+      sttSaveBtn.disabled = false;
+      if (res.ok && res.body && res.body.connected) {
+        sttInput.value = '';
+        renderState(true, res.body.masked_key || '');
+        setSttMsg('Clé validée et connectée. La transcription complète est disponible.', 'ok');
+      } else {
+        var err = (res.body && res.body.error) ? res.body.error : 'Connexion impossible.';
+        setSttMsg(err, 'err');
+      }
+    }).catch(function () {
+      sttSaveBtn.disabled = false;
+      setSttMsg('Réseau indisponible. Réessayez.', 'err');
+    });
+  });
+
+  sttDiscBtn.addEventListener('click', function () {
+    sttDiscBtn.disabled = true;
+    fetch('/api/visio/stt-settings', { method: 'DELETE' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function () {
+        sttDiscBtn.disabled = false;
+        renderState(false, '');
+        setSttMsg('Transcription Deepgram déconnectée.', 'ok');
+      })
+      .catch(function () { sttDiscBtn.disabled = false; setSttMsg('Échec de la déconnexion.', 'err'); });
+  });
+
+  // état initial du bouton bandeau
+  refreshSttStatus();
+
+  // ============================================================
+  // Conseils IA + Articles de loi (panneau « Repères juridiques »)
+  // ============================================================
+  var emitted = [];                // titres de conseils ET références d'articles déjà affichés
   var charsSinceSend = 0;
   var lastSentAt = 0;
   var sending = false;
@@ -3751,6 +4316,8 @@ setInterval(() => {
   var SEND_CHARS = 400;
 
   var insightsPane = document.getElementById('pane-insights');
+  var legalList    = document.getElementById('legal-live-list');
+  var legalEmpty   = document.getElementById('legal-live-empty');
 
   function contexte() {
     var t = document.querySelector('.session-title');
@@ -3775,7 +4342,6 @@ setInterval(() => {
 
   function insertCardTop(card) {
     if (!insightsPane) return;
-    // insérer après la note d'intro (1er enfant) si présente, sinon en tête
     var intro = insightsPane.firstElementChild;
     if (intro && intro.classList && !intro.classList.contains('insight-card')) {
       if (intro.nextSibling) insightsPane.insertBefore(card, intro.nextSibling);
@@ -3813,8 +4379,21 @@ setInterval(() => {
       +   '<button class="insight-btn ghost" onclick="dismissInsight(this)">Question suivante</button>'
       + '</div>';
     insertCardTop(card);
-    // retirer le halo .new après 6 s
     setTimeout(function () { card.classList.remove('new'); }, 6000);
+  }
+
+  function injectArticle(a) {
+    if (!legalList) return;
+    if (legalEmpty) legalEmpty.style.display = 'none';
+    var card = document.createElement('div');
+    card.className = 'insight-legal';
+    card.style.marginTop = '8px';
+    var refHtml = a.reference
+      ? '<span class="insight-legal-tag">' + esc(a.reference) + '</span> '
+      : '<span class="insight-legal-tag">Dispositif</span> ';
+    var titleHtml = a.intitule ? '<strong>' + esc(a.intitule) + '</strong> — ' : '';
+    card.innerHTML = refHtml + titleHtml + esc(a.extrait);
+    legalList.insertBefore(card, legalList.firstChild);
   }
 
   function maybeSendConseils(fromInterval) {
@@ -3833,7 +4412,7 @@ setInterval(() => {
 
     var payload = {
       transcript: finalBuffer.slice(-6000),
-      deja_emis: emittedTitles.slice(-60),
+      deja_emis: emitted.slice(-80),
       contexte: contexte().slice(0, 600)
     };
 
@@ -3846,15 +4425,25 @@ setInterval(() => {
       if (!res.ok) return null;
       return res.json().catch(function () { return null; });
     }).then(function (data) {
-      if (!data || !Array.isArray(data.conseils)) return;
-      data.conseils.forEach(function (c) {
-        if (!c || !c.detail) return;
-        var key = (c.titre || c.detail).toLowerCase().trim();
-        if (!key) return;
-        if (emittedTitles.indexOf(key) !== -1) return;  // anti-doublon
-        emittedTitles.push(key);
-        injectConseil(c);
-      });
+      if (!data) return;
+      if (Array.isArray(data.conseils)) {
+        data.conseils.forEach(function (c) {
+          if (!c || !c.detail) return;
+          var key = (c.titre || c.detail).toLowerCase().trim();
+          if (!key || emitted.indexOf(key) !== -1) return;
+          emitted.push(key);
+          injectConseil(c);
+        });
+      }
+      if (Array.isArray(data.articles)) {
+        data.articles.forEach(function (a) {
+          if (!a || !a.extrait) return;
+          var key = (a.reference || a.intitule || a.extrait).toLowerCase().trim();
+          if (!key || emitted.indexOf(key) !== -1) return;
+          emitted.push(key);
+          injectArticle(a);
+        });
+      }
     }).catch(function () {
       // échec réseau silencieux · retry au prochain tick
     }).then(function () {
@@ -3862,7 +4451,6 @@ setInterval(() => {
     });
   }
 
-  // Tick périodique : déclenche le 1er envoi dès que de la parole est dispo
   setInterval(function () {
     if (userPaused) return;
     maybeSendConseils(true);

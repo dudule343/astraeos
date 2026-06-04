@@ -1,17 +1,11 @@
-export const metadata = {
-  title: "PRIVEOS · Visio",
-};
+"use client";
 
-export default function VisioPage() {
-  return (
-    <div className="flex min-h-screen flex-col bg-[var(--ivory)]">
-      <iframe
-        src="/wireframes/visio.html"
-        title="Visio PRIVEOS"
-        allow="microphone; camera"
-        className="block w-full flex-1 border-0"
-        style={{ height: "100vh" }}
-      />
-    </div>
-  );
+import dynamic from "next/dynamic";
+
+// Chargé sans SSR : l'identifiant de salle aléatoire n'est généré que côté
+// navigateur — pas de mismatch d'hydratation, pas de setState dans un effect.
+const VisioLobby = dynamic(() => import("./VisioLobby"), { ssr: false });
+
+export default function VisioLobbyPage() {
+  return <VisioLobby />;
 }
