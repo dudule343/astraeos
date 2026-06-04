@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-import { exchangeCodeForTokens, fetchUserEmail, saveTokens } from "@/lib/google-oauth";
+import { exchangeCodeForTokens, fetchUserEmail, saveTokens, verifyState } from "@/lib/google-oauth";
 
 /**
  * GET /api/auth/google/callback?code=...&state=...
@@ -13,22 +13,17 @@ import { exchangeCodeForTokens, fetchUserEmail, saveTokens } from "@/lib/google-
 export async function GET(req: NextRequest) {
   const code = req.nextUrl.searchParams.get("code");
   const stateParam = req.nextUrl.searchParams.get("state");
-  const cookieState = req.cookies.get("astr_google_state")?.value;
 
   if (!code || !stateParam) {
     return htmlResponse(`<h1>Erreur</h1><p>Paramètres manquants.</p>`, 400);
   }
-  if (!cookieState || cookieState !== stateParam) {
-    return htmlResponse(`<h1>Erreur</h1><p>State invalide (CSRF).</p>`, 400);
+  // State auto-signé (HMAC + TTL 10 min) : vérifiable sans cookie, donc valide
+  // même si le flow a démarré depuis un autre domaine (URL de déploiement).
+  const verified = verifyState(stateParam);
+  if (!verified) {
+    return htmlResponse(`<h1>Erreur</h1><p>State invalide ou expiré — relancez la connexion.</p>`, 400);
   }
-
-  let engineer = "luc-thilliez";
-  try {
-    const parsed = JSON.parse(Buffer.from(stateParam, "base64url").toString("utf-8"));
-    if (typeof parsed?.engineer === "string") engineer = parsed.engineer;
-  } catch {
-    /* ignore parse error, garde le défaut */
-  }
+  const engineer = verified.engineer;
 
   try {
     const tokens = await exchangeCodeForTokens(code);

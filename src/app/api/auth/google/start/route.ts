@@ -1,7 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
-import crypto from "node:crypto";
 
-import { buildAuthorizeUrl, isOAuthConfigured } from "@/lib/google-oauth";
+import { buildAuthorizeUrl, isOAuthConfigured , signState } from "@/lib/google-oauth";
 
 /**
  * GET /api/auth/google/start?engineer=luc-thilliez
@@ -20,8 +19,8 @@ export function GET(req: NextRequest) {
     return NextResponse.redirect(fallback);
   }
 
-  const nonce = crypto.randomBytes(16).toString("hex");
-  const state = Buffer.from(JSON.stringify({ engineer, nonce })).toString("base64url");
+  // State auto-signé (HMAC + TTL) — ne dépend plus du cookie au callback.
+  const state = signState({ engineer });
 
   const authorizeUrl = buildAuthorizeUrl(state);
   const res = NextResponse.redirect(authorizeUrl);

@@ -17,6 +17,7 @@
  */
 
 import { promises as fs } from "node:fs";
+import crypto from "node:crypto";
 import path from "node:path";
 
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -50,6 +51,46 @@ export function getOAuthConfig() {
 export function isOAuthConfigured(): boolean {
   const { clientId, clientSecret, redirectUri } = getOAuthConfig();
   return Boolean(clientId && clientSecret && redirectUri);
+}
+
+
+/**
+ * State OAuth auto-signé (HMAC-SHA256 + horodatage, TTL 10 min).
+ * Indépendant des cookies : robuste en serverless et quand le flow démarre
+ * depuis un autre domaine que le callback (URL de déploiement Vercel, etc.).
+ */
+export function signState(data: { engineer: string }): string {
+  const { clientSecret } = getOAuthConfig();
+  const payload = Buffer.from(
+    JSON.stringify({ ...data, ts: Date.now() }),
+  ).toString("base64url");
+  const sig = crypto
+    .createHmac("sha256", clientSecret ?? "astraeos-dev")
+    .update(payload)
+    .digest("base64url");
+  return `${payload}.${sig}`;
+}
+
+export function verifyState(state: string): { engineer: string } | null {
+  const dot = state.lastIndexOf(".");
+  if (dot <= 0) return null;
+  const payload = state.slice(0, dot);
+  const sig = state.slice(dot + 1);
+  const { clientSecret } = getOAuthConfig();
+  const expected = crypto
+    .createHmac("sha256", clientSecret ?? "astraeos-dev")
+    .update(payload)
+    .digest("base64url");
+  if (sig.length !== expected.length) return null;
+  if (!crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expected))) return null;
+  try {
+    const parsed = JSON.parse(Buffer.from(payload, "base64url").toString("utf-8"));
+    if (typeof parsed?.engineer !== "string") return null;
+    if (typeof parsed?.ts !== "number" || Date.now() - parsed.ts > 10 * 60 * 1000) return null;
+    return { engineer: parsed.engineer };
+  } catch {
+    return null;
+  }
 }
 
 export function buildAuthorizeUrl(state: string): string {
