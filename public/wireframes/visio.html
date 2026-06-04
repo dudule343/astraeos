@@ -4231,6 +4231,8 @@ setInterval(() => {
   var dgSource = null;
   var dgProcessor = null;
   var dgDisplayStream = null;
+  var dgMicStream = null;     // micro de l'ingénieur, mixé avec l'audio de l'onglet
+  var dgMicSource = null;
   var dgKeepAlive = null;
 
   function floatTo16BitPCM(input) {
@@ -4266,9 +4268,12 @@ setInterval(() => {
     try { if (dgAudioCtx && dgAudioCtx.state !== 'closed') dgAudioCtx.close(); } catch (e) {}
     try {
       if (dgDisplayStream) dgDisplayStream.getTracks().forEach(function (t) { try { t.stop(); } catch (e) {} });
+      if (dgMicStream) dgMicStream.getTracks().forEach(function (t) { try { t.stop(); } catch (e) {} });
+      try { if (dgMicSource) dgMicSource.disconnect(); } catch (e) {}
     } catch (e) {}
     try { if (dgWs && (dgWs.readyState === 0 || dgWs.readyState === 1)) dgWs.close(); } catch (e) {}
     dgProcessor = dgSource = dgAudioCtx = dgDisplayStream = dgWs = null;
+    dgMicStream = dgMicSource = null;
   }
 
   // Démarrage Deepgram : 1) token éphémère, 2) audio onglet, 3) WS PCM16
@@ -4362,6 +4367,19 @@ setInterval(() => {
           try { dgWs.send(pcm.buffer); } catch (err) {}
         };
         dgSource.connect(dgProcessor);
+        // Mixe le micro de l'ingénieur : l'audio de l'onglet ne contient que
+        // les voix DISTANTES (le client) — sans ce branchement, la voix de
+        // l'ingénieur n'était pas transcrite.
+        navigator.mediaDevices.getUserMedia({ audio: true })
+          .then(function (mic) {
+            if (!dgAudioCtx) { mic.getTracks().forEach(function (t) { try { t.stop(); } catch (e) {} }); return; }
+            dgMicStream = mic;
+            dgMicSource = dgAudioCtx.createMediaStreamSource(mic);
+            dgMicSource.connect(dgProcessor);
+          })
+          .catch(function () {
+            setNote('Micro refusé : seule la voix du client sera transcrite.', true);
+          });
         // destination requise pour que ScriptProcessor s'exécute (gain 0 → silencieux)
         var sink = dgAudioCtx.createGain();
         sink.gain.value = 0;
