@@ -77,23 +77,27 @@ export async function POST() {
       },
     );
 
-    if (!resp.ok) {
-      const msg = await resp.text().catch(() => "");
-      return NextResponse.json(
-        { error: `Deepgram: création de clé en échec (HTTP ${resp.status}). ${msg.slice(0, 160)}`.trim() },
-        { status: 502 },
-      );
+    if (resp.ok) {
+      const data = (await resp.json()) as { key?: string };
+      if (data.key) {
+        return NextResponse.json({ key: data.key, expires_in: TTL_SECONDS });
+      }
     }
 
-    const data = (await resp.json()) as { key?: string };
-    if (!data.key) {
-      return NextResponse.json(
-        { error: "Deepgram: clé temporaire absente de la réponse" },
-        { status: 502 },
-      );
+    // Repli : les clés créées via la console Deepgram (rôle « Default ») savent
+    // transcrire mais n'ont pas le scope keys:write pour fabriquer des clés
+    // éphémères (HTTP 403). Dans ce cas on renvoie la clé du cabinet telle
+    // quelle : elle ne permet que l'usage (transcription), pas la gestion du
+    // compte. À resserrer quand l'authentification des endpoints sera posée.
+    if (resp.status === 403) {
+      return NextResponse.json({ key: masterKey, expires_in: TTL_SECONDS, mode: "direct" });
     }
 
-    return NextResponse.json({ key: data.key, expires_in: TTL_SECONDS });
+    const msg = await resp.text().catch(() => "");
+    return NextResponse.json(
+      { error: `Deepgram: création de clé en échec (HTTP ${resp.status}). ${msg.slice(0, 160)}`.trim() },
+      { status: 502 },
+    );
   } catch {
     return NextResponse.json(
       { error: "Impossible de joindre l'API Deepgram" },
