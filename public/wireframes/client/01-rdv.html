@@ -693,7 +693,7 @@ body {
 
     <div class="legal-footer">
       PRIVEOS · SAS au capital de 10 000 € · SIREN 948 742 903 · ORIAS 23004036<br>
-      <a href="#">Mentions légales</a> · <a href="#">Politique de confidentialité</a> · <a href="#">Liste Bloctel</a>
+      <a href="#" onclick="astrToast('Mentions légales · bientôt disponible');return false;">Mentions légales</a> · <a href="#" onclick="astrToast('Politique de confidentialité · bientôt disponible');return false;">Politique de confidentialité</a> · <a href="#" onclick="astrToast('Liste Bloctel · bientôt disponible');return false;">Liste Bloctel</a>
     </div>
   </div>
 
@@ -913,6 +913,29 @@ async function confirmBooking() {
 }
 
 renderCalendar();
+</script>
+
+<!-- Toast in-app minimal (remplace alert/liens morts). Injecté une fois. -->
+<script>
+(function () {
+  if (window.astrToast) return;
+  var s = document.createElement('style');
+  s.textContent = '.astr-toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(12px);' +
+    'background:#102D50;color:#fff;padding:11px 18px;border-radius:9px;font-size:13px;font-weight:600;' +
+    'box-shadow:0 8px 28px rgba(16,45,80,.28);z-index:99999;opacity:0;pointer-events:none;' +
+    'transition:opacity .22s,transform .22s;max-width:80vw;text-align:center;}' +
+    '.astr-toast.open{opacity:1;transform:translateX(-50%) translateY(0);}';
+  document.head.appendChild(s);
+  var el = document.createElement('div');
+  el.className = 'astr-toast';
+  document.body.appendChild(el);
+  window.astrToast = function (msg) {
+    el.textContent = msg;
+    el.classList.add('open');
+    clearTimeout(el._t);
+    el._t = setTimeout(function () { el.classList.remove('open'); }, 2400);
+  };
+})();
 </script>
 
 </body>

@@ -1493,7 +1493,7 @@ body {
       <div class="field">
         <label class="field-label">Adresse e-mail <span class="required">*</span></label>
         <input type="email" class="text-input" value="bertrand.dupont@email.fr" readonly>
-        <div class="field-help">Cette adresse est utilisée pour l'envoi de votre confirmation dans votre agenda · <a href="#" onclick="alert('Ouverture de la messagerie pour contacter votre ingénieur patrimonial');return false;">Cliquez ici pour contacter votre ingénieur patrimonial</a></div>
+        <div class="field-help">Cette adresse est utilisée pour l'envoi de votre confirmation dans votre agenda · <a href="#" onclick="astrToast('Votre messagerie va s\'ouvrir pour contacter votre ingénieur patrimonial');return false;">Cliquez ici pour contacter votre ingénieur patrimonial</a></div>
       </div>
     </div>
   </div>
@@ -2855,6 +2855,29 @@ function addObjectif() {
 
 updateProgress();
 updateNav();
+</script>
+
+<!-- Toast in-app minimal (remplace alert/liens morts). Injecté une fois. -->
+<script>
+(function () {
+  if (window.astrToast) return;
+  var s = document.createElement('style');
+  s.textContent = '.astr-toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(12px);' +
+    'background:#102D50;color:#fff;padding:11px 18px;border-radius:9px;font-size:13px;font-weight:600;' +
+    'box-shadow:0 8px 28px rgba(16,45,80,.28);z-index:99999;opacity:0;pointer-events:none;' +
+    'transition:opacity .22s,transform .22s;max-width:80vw;text-align:center;}' +
+    '.astr-toast.open{opacity:1;transform:translateX(-50%) translateY(0);}';
+  document.head.appendChild(s);
+  var el = document.createElement('div');
+  el.className = 'astr-toast';
+  document.body.appendChild(el);
+  window.astrToast = function (msg) {
+    el.textContent = msg;
+    el.classList.add('open');
+    clearTimeout(el._t);
+    el._t = setTimeout(function () { el.classList.remove('open'); }, 2400);
+  };
+})();
 </script>
 
 </body>

@@ -1328,6 +1328,7 @@ select.v4-modal-input { cursor:pointer; appearance:none; -webkit-appearance:none
       <div id="rec-action-motif-wrap" style="margin-top:14px;">
         <p style="margin-bottom:6px;"><strong>Motif de l'action</strong> (obligatoire) :</p>
         <textarea class="v3-modal-textarea" id="rec-action-motif" placeholder="ex. Échange confidentiel hors sujet patrimonial · demande du client · pause technique…"></textarea>
+        <div id="rec-action-error" style="display:none; margin-top:8px; padding:8px 11px; background:rgba(192,57,43,0.08); border:1px solid rgba(192,57,43,0.25); border-radius:6px; color:#C0392B; font-size:11px; font-weight:600;"></div>
         <p style="font-size:10.5px; color:var(--navy-300); margin-top:10px;">Date/heure : <strong id="rec-action-time">à l'instant</strong> · agent : Luc THILLIEZ · session #VIS-2026-0512-JOU</p>
       </div>
     </div>
@@ -2547,6 +2548,11 @@ function openRecAction(action) {
     motifWrap.style.display = 'block';
     document.getElementById('rec-action-motif').value = '';
   }
+  // Réinitialiser le message d'erreur inline à chaque ouverture
+  try {
+    const errEl = document.getElementById('rec-action-error');
+    if (errEl) { errEl.style.display = 'none'; errEl.textContent = ''; }
+  } catch (e) { /* silencieux */ }
   // Icône
   const icon = document.getElementById('rec-action-icon');
   if (action === 'stop') {
@@ -2576,13 +2582,20 @@ function openRecAction(action) {
 function confirmRecAction() {
   const action = REC_PENDING_ACTION;
   // Vérifier motif si nécessaire
+  const errEl = document.getElementById('rec-action-error');
   if (action === 'pause' || action === 'stop') {
     const motif = document.getElementById('rec-action-motif').value.trim();
     if (motif.length < 5) {
-      alert('Merci d\'indiquer un motif (5 caractères minimum).');
+      if (errEl) {
+        errEl.textContent = 'Merci d\'indiquer un motif (5 caractères minimum).';
+        errEl.style.display = 'block';
+      }
+      const ta = document.getElementById('rec-action-motif');
+      if (ta) try { ta.focus(); } catch (e) {}
       return;
     }
   }
+  if (errEl) { errEl.style.display = 'none'; errEl.textContent = ''; }
   closeModal('modal-rec-action');
 
   if (action === 'pause') {
@@ -3428,13 +3441,23 @@ function addItem(gi, kind) {
 }
 
 function removeItem(gi, ii) {
-  if (!confirm('Retirer cet élément ?')) return;
-  const section = DCI_DATA.sections.find(s => s.id === CURRENT_SECTION);
-  section.groups[gi].items.splice(ii, 1);
-  renderSection();
-  renderNav();
-  triggerAutoSave();
-  showToast('Élément retiré');
+  const doRemove = () => {
+    const section = DCI_DATA.sections.find(s => s.id === CURRENT_SECTION);
+    section.groups[gi].items.splice(ii, 1);
+    renderSection();
+    renderNav();
+    triggerAutoSave();
+    showToast('Élément retiré');
+  };
+  if (typeof window.astraeosConfirm === 'function') {
+    window.astraeosConfirm({
+      title: 'Retirer cet élément ?',
+      message: 'Cet élément sera retiré de la section. Vous pourrez le rajouter manuellement si besoin.',
+      okLabel: 'Retirer', cancelLabel: 'Annuler', danger: true
+    }).then((ok) => { if (ok) doRemove(); });
+  } else {
+    doRemove();
+  }
 }
 
 function triggerAutoSave() {
@@ -3697,6 +3720,252 @@ setInterval(() => {
     }
     startJitsi();
   });
+})();
+</script>
+
+<!-- ============================================================= -->
+<!-- ASTRAEOS · Vue client + sorties (confidentialité & cul-de-sac) -->
+<!-- role==='client' dans l'URL → masque tout le cockpit ingénieur, -->
+<!-- ne laisse que la vidéo + un bandeau sobre. Sorties partout.    -->
+<!-- Greffe non destructive : helpers réutilisables, try/catch.     -->
+<!-- ============================================================= -->
+<script>
+(function astraeosClientViewAndExits() {
+  'use strict';
+
+  // ---- Helper confirm/fin in-app réutilisable (jamais de window.confirm) --
+  // astraeosConfirm({title, message, okLabel, cancelLabel, danger}) -> Promise<bool>
+  function ensureConfirmHost() {
+    var host = document.getElementById('astr-confirm-host');
+    if (host) return host;
+    host = document.createElement('div');
+    host.id = 'astr-confirm-host';
+    host.className = 'v3-modal';
+    host.innerHTML =
+      '<div class="v3-modal-card" style="width:440px;">'
+      + '<div class="v3-modal-header">'
+      +   '<div class="v3-modal-icon" id="astr-confirm-icon">'
+      +     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="13"/><line x1="12" y1="16.5" x2="12" y2="16.5"/></svg>'
+      +   '</div>'
+      +   '<div><div class="v3-modal-title" id="astr-confirm-title">Confirmer ?</div></div>'
+      + '</div>'
+      + '<div class="v3-modal-body"><p id="astr-confirm-msg"></p></div>'
+      + '<div class="v3-modal-footer">'
+      +   '<button class="v3-modal-btn cancel" id="astr-confirm-cancel">Annuler</button>'
+      +   '<button class="v3-modal-btn primary" id="astr-confirm-ok">Confirmer</button>'
+      + '</div>'
+      + '</div>';
+    document.body.appendChild(host);
+    return host;
+  }
+
+  window.astraeosConfirm = function (opts) {
+    opts = opts || {};
+    return new Promise(function (resolve) {
+      try {
+        var host = ensureConfirmHost();
+        host.querySelector('#astr-confirm-title').textContent = opts.title || 'Confirmer ?';
+        host.querySelector('#astr-confirm-msg').textContent = opts.message || '';
+        var okBtn = host.querySelector('#astr-confirm-ok');
+        var cancelBtn = host.querySelector('#astr-confirm-cancel');
+        var icon = host.querySelector('#astr-confirm-icon');
+        okBtn.textContent = opts.okLabel || 'Confirmer';
+        cancelBtn.textContent = opts.cancelLabel || 'Annuler';
+        okBtn.className = 'v3-modal-btn ' + (opts.danger ? 'danger' : 'primary');
+        icon.className = 'v3-modal-icon' + (opts.danger ? ' danger' : '');
+
+        function cleanup(result) {
+          host.classList.remove('open');
+          okBtn.onclick = null; cancelBtn.onclick = null; host.onclick = null;
+          resolve(result);
+        }
+        okBtn.onclick = function () { cleanup(true); };
+        cancelBtn.onclick = function () { cleanup(false); };
+        host.onclick = function (e) { if (e.target === host) cleanup(false); };
+        host.classList.add('open');
+      } catch (e) {
+        resolve(true); // dégradé : ne pas bloquer l'action
+      }
+    });
+  };
+
+  // ---- Écran de fin plein écran (client) ----------------------------------
+  function showClientEndScreen() {
+    try {
+      var ov = document.createElement('div');
+      ov.id = 'astr-client-end';
+      ov.style.cssText = 'position:fixed; inset:0; z-index:2000; background:linear-gradient(160deg,#0A1F38 0%,#1B3A5F 100%); color:white; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:40px;';
+      ov.innerHTML =
+        '<div style="width:64px; height:64px; border-radius:50%; background:rgba(82,201,122,0.15); display:flex; align-items:center; justify-content:center; margin-bottom:22px;">'
+        + '<svg viewBox="0 0 24 24" fill="none" stroke="#52C97A" stroke-width="2.4" width="30" height="30"><polyline points="20 6 9 17 4 12"/></svg>'
+        + '</div>'
+        + '<div style="font-size:20px; font-weight:700; margin-bottom:10px;">Merci, l\'entretien est terminé.</div>'
+        + '<div style="font-size:13px; color:rgba(255,255,255,0.7); max-width:420px; line-height:1.6;">Vous pouvez fermer cette fenêtre. Votre ingénieur patrimonial reviendra vers vous très prochainement.</div>';
+      document.body.appendChild(ov);
+      try { window.close(); } catch (e) { /* bloqué par le navigateur : l'écran reste affiché */ }
+    } catch (e) { /* silencieux */ }
+  }
+
+  // ---- Lecture du rôle (même logique que l'IIFE Jitsi) --------------------
+  var role;
+  try {
+    role = new URLSearchParams(window.location.search).get('role') === 'client' ? 'client' : 'engineer';
+  } catch (e) { role = 'engineer'; }
+
+  // ---- Sortie côté ingénieur ----------------------------------------------
+  function quitEngineer() {
+    window.astraeosConfirm({
+      title: 'Quitter l\'entretien ?',
+      message: 'La visio reste accessible via le lien. Vous reviendrez à votre espace.',
+      okLabel: 'Quitter', cancelLabel: 'Rester'
+    }).then(function (ok) {
+      if (!ok) return;
+      try { window.top.location.href = '/ingenieur'; }
+      catch (e) { window.location.href = '/ingenieur'; }
+    });
+  }
+
+  // ---- Sortie côté client --------------------------------------------------
+  function quitClient() {
+    window.astraeosConfirm({
+      title: 'Quitter l\'entretien ?',
+      message: 'La visio reste accessible via le lien si vous souhaitez revenir.',
+      okLabel: 'Quitter', cancelLabel: 'Rester'
+    }).then(function (ok) {
+      if (!ok) return;
+      showClientEndScreen();
+    });
+  }
+
+  function injectEngineerExit() {
+    try {
+      var bar = document.querySelector('#view-ingenieur .live-indicators');
+      if (!bar || document.getElementById('astr-quit-eng')) return;
+      var btn = document.createElement('button');
+      btn.id = 'astr-quit-eng';
+      btn.type = 'button';
+      btn.className = 'v3-modal-btn cancel';
+      btn.style.cssText = 'display:inline-flex; align-items:center; gap:6px; padding:6px 12px;';
+      btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="13" height="13"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>Quitter';
+      btn.onclick = quitEngineer;
+      bar.insertBefore(btn, bar.firstChild);
+    } catch (e) { /* silencieux */ }
+  }
+
+  function applyClientView() {
+    try {
+      document.body.classList.add('client-view');
+
+      // CSS injecté : masque tout le confidentiel ingénieur, vidéo plein cadre.
+      var css = ''
+        + 'body.client-view .role-switch{display:none;}'
+        // Chrome wireframe « Masque visio » + crumb identité prospect : masqué côté client
+        + 'body.client-view > .top-bar{display:none !important;}'
+        // Panneau de transcription en direct (injecté en body, position fixed) : confidentiel ingénieur
+        + 'body.client-view .alt-panel{display:none !important;}'
+        + 'body.client-view #view-client{display:none !important;}'
+        + 'body.client-view #view-ingenieur{display:flex !important;}'
+        // Bandeau de session ingénieur masqué (remplacé par bandeau client)
+        + 'body.client-view #view-ingenieur > .session-bar{display:none !important;}'
+        // Cockpit : une seule colonne = la vidéo occupe tout
+        + 'body.client-view #view-ingenieur .cockpit{grid-template-columns:1fr !important;}'
+        + 'body.client-view #view-ingenieur .cockpit.video-zoomed{grid-template-columns:1fr !important;}'
+        // Colonnes confidentielles + contrôles ingénieur masqués
+        + 'body.client-view #view-ingenieur .dci-live,'
+        + 'body.client-view #view-ingenieur .assist,'
+        + 'body.client-view #view-ingenieur .rec-controls,'
+        + 'body.client-view #view-ingenieur .video-zoom-btn{display:none !important;}'
+        // Bandeau client sobre
+        + '.astr-client-topbar{display:flex; align-items:center; justify-content:space-between; gap:14px; padding:12px 24px; background:linear-gradient(135deg,#0A1F38 0%,#1B3A5F 100%); color:white; flex-shrink:0;}'
+        + '.astr-client-topbar .astr-ct-brand{display:flex; align-items:center; gap:10px; font-size:13px; font-weight:700; letter-spacing:0.04em;}'
+        + '.astr-client-topbar .astr-ct-logo{width:30px; height:30px; border-radius:7px; background:var(--gold); color:white; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:13px;}'
+        + '.astr-client-topbar .astr-ct-brand strong{color:var(--gold-300);}'
+        + '.astr-client-topbar .astr-ct-quit{display:inline-flex; align-items:center; gap:6px; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.22); color:white; padding:7px 14px; border-radius:6px; font-family:inherit; font-size:11.5px; font-weight:700; cursor:pointer;}'
+        + '.astr-client-topbar .astr-ct-quit:hover{background:rgba(255,255,255,0.18);}';
+      var styleEl = document.createElement('style');
+      styleEl.textContent = css;
+      document.head.appendChild(styleEl);
+
+      // Forcer la vue ingénieur active (la vidéo Jitsi y est montée)
+      var vEng = document.getElementById('view-ingenieur');
+      var vCli = document.getElementById('view-client');
+      if (vCli) vCli.classList.remove('active');
+      if (vEng) vEng.classList.add('active');
+
+      // Bandeau client sobre injecté en tête de #view-ingenieur
+      if (vEng && !document.getElementById('astr-client-topbar')) {
+        var topbar = document.createElement('div');
+        topbar.id = 'astr-client-topbar';
+        topbar.className = 'astr-client-topbar';
+        topbar.innerHTML =
+          '<div class="astr-ct-brand"><div class="astr-ct-logo">P</div><div>PRI<strong>VEOS</strong> · Entretien avec votre conseiller</div></div>'
+          + '<button type="button" class="astr-ct-quit" id="astr-quit-client">'
+          +   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="13" height="13"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>Quitter'
+          + '</button>';
+        vEng.insertBefore(topbar, vEng.firstChild);
+        var qb = topbar.querySelector('#astr-quit-client');
+        if (qb) qb.onclick = quitClient;
+      }
+    } catch (e) { /* silencieux : on ne casse pas l'affichage */ }
+  }
+
+  function init() {
+    if (role === 'client') {
+      applyClientView();
+    } else {
+      injectEngineerExit();
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+
+  // ---- P3 · après clôture, proposer « Revenir à mon espace » --------------
+  // Wrappe confirmEndInterview (après le wrap de persistance plus bas, l'ordre
+  // d'exécution garantit que notre wrap est le plus externe car ce script
+  // s'exécute avant le bloc persistance ? Non : on re-wrappe à l'init pour
+  // être sûr d'englober la chaîne complète).
+  function wrapEndInterview() {
+    try {
+      if (typeof window.confirmEndInterview !== 'function') return;
+      if (window.__astrEndWrapped) return;
+      window.__astrEndWrapped = true;
+      var orig = window.confirmEndInterview;
+      window.confirmEndInterview = function () {
+        try { orig.apply(this, arguments); } catch (e) { /* garder le masque */ }
+        try { injectReturnToSpace(); } catch (e) { /* silencieux */ }
+      };
+    } catch (e) { /* silencieux */ }
+  }
+
+  function injectReturnToSpace() {
+    try {
+      var section = document.querySelector('#view-ingenieur .dci-body');
+      if (!section || document.getElementById('astr-return-space')) return;
+      var box = document.createElement('div');
+      box.id = 'astr-return-space';
+      box.style.cssText = 'margin:18px; padding:16px 18px; background:var(--ivory); border:1px solid var(--navy-100); border-radius:10px; display:flex; align-items:center; justify-content:space-between; gap:14px;';
+      box.innerHTML =
+        '<div style="font-size:12px; color:var(--navy); line-height:1.5;"><strong>Entretien clôturé.</strong> La synthèse est en cours de génération.</div>'
+        + '<button type="button" class="v3-modal-btn primary" id="astr-return-space-btn" style="white-space:nowrap;">Revenir à mon espace</button>';
+      section.insertBefore(box, section.firstChild);
+      var b = box.querySelector('#astr-return-space-btn');
+      if (b) b.onclick = function () {
+        try { window.top.location.href = '/ingenieur'; }
+        catch (e) { window.location.href = '/ingenieur'; }
+      };
+    } catch (e) { /* silencieux */ }
+  }
+
+  // Re-wrap après que les autres scripts aient défini/wrappé confirmEndInterview.
+  if (document.readyState === 'loading') {
+    window.addEventListener('load', wrapEndInterview);
+  } else {
+    setTimeout(wrapEndInterview, 0);
+  }
 })();
 </script>
 

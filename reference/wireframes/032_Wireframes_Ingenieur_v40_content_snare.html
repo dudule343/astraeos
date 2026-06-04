@@ -4151,6 +4151,116 @@
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
         document.querySelectorAll('.nav-item[data-page="' + pageId + '"]').forEach(n => n.classList.add('active'));
       }
+
+      /* ── Helpers UI in-app (toast / confirm / prompt) · charte navy/or ── */
+      (function () {
+        if (window.showToast) return;
+        var FONT = "'Inter','Helvetica Neue',Arial,sans-serif";
+
+        function ensureToastHost() {
+          var host = document.getElementById('astr-toast-host');
+          if (!host) {
+            host = document.createElement('div');
+            host.id = 'astr-toast-host';
+            host.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:99999;display:flex;flex-direction:column;gap:10px;align-items:center;pointer-events:none;';
+            document.body.appendChild(host);
+          }
+          return host;
+        }
+
+        window.showToast = function (message, opts) {
+          opts = opts || {};
+          var host = ensureToastHost();
+          var t = document.createElement('div');
+          var accent = opts.tone === 'gold' ? '#C68E0E' : '#102D50';
+          t.style.cssText = 'pointer-events:auto;max-width:460px;background:#102D50;color:#fff;border-left:3px solid ' + accent + ';box-shadow:0 10px 30px rgba(10,31,58,.28);border-radius:8px;padding:13px 18px;font-family:' + FONT + ';font-size:13px;line-height:1.5;letter-spacing:.005em;white-space:pre-line;opacity:0;transform:translateY(8px);transition:opacity .22s ease,transform .22s ease;';
+          t.textContent = message;
+          host.appendChild(t);
+          requestAnimationFrame(function () { t.style.opacity = '1'; t.style.transform = 'translateY(0)'; });
+          var ttl = opts.duration || Math.min(7000, 2600 + message.length * 28);
+          setTimeout(function () {
+            t.style.opacity = '0'; t.style.transform = 'translateY(8px)';
+            setTimeout(function () { if (t.parentNode) t.parentNode.removeChild(t); }, 240);
+          }, ttl);
+        };
+
+        function buildOverlay() {
+          var ov = document.createElement('div');
+          ov.style.cssText = 'position:fixed;inset:0;z-index:99998;background:rgba(10,31,58,.46);backdrop-filter:blur(2px);display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;transition:opacity .18s ease;';
+          var card = document.createElement('div');
+          card.style.cssText = 'background:#fff;border-radius:14px;max-width:440px;width:100%;box-shadow:0 24px 60px rgba(10,31,58,.34);border-top:4px solid #C68E0E;overflow:hidden;transform:translateY(10px) scale(.98);transition:transform .18s ease;font-family:' + FONT + ';';
+          ov.appendChild(card);
+          return { ov: ov, card: card };
+        }
+
+        function openOverlay(o) {
+          document.body.appendChild(o.ov);
+          requestAnimationFrame(function () { o.ov.style.opacity = '1'; o.card.style.transform = 'translateY(0) scale(1)'; });
+        }
+        function closeOverlay(o, cb) {
+          o.ov.style.opacity = '0'; o.card.style.transform = 'translateY(10px) scale(.98)';
+          setTimeout(function () { if (o.ov.parentNode) o.ov.parentNode.removeChild(o.ov); if (cb) cb(); }, 200);
+        }
+
+        function btnStyles() {
+          return {
+            ghost: 'cursor:pointer;border:1px solid #DBE0E4;background:#fff;color:#102D50;font-weight:600;font-size:13px;font-family:' + FONT + ';padding:9px 18px;border-radius:8px;',
+            solid: 'cursor:pointer;border:1px solid #C68E0E;background:#C68E0E;color:#fff;font-weight:700;font-size:13px;font-family:' + FONT + ';padding:9px 18px;border-radius:8px;'
+          };
+        }
+
+        window.astrConfirm = function (message, onOk, opts) {
+          opts = opts || {};
+          var o = buildOverlay();
+          var bs = btnStyles();
+          var body = document.createElement('div');
+          body.style.cssText = 'padding:26px 26px 22px;';
+          var msg = document.createElement('div');
+          msg.style.cssText = 'color:#102D50;font-size:14.5px;line-height:1.55;white-space:pre-line;margin-bottom:22px;';
+          msg.textContent = message;
+          var row = document.createElement('div');
+          row.style.cssText = 'display:flex;gap:10px;justify-content:flex-end;';
+          var cancel = document.createElement('button');
+          cancel.style.cssText = bs.ghost; cancel.textContent = opts.cancelLabel || 'Annuler';
+          var ok = document.createElement('button');
+          ok.style.cssText = bs.solid; ok.textContent = opts.okLabel || 'Confirmer';
+          cancel.onclick = function () { closeOverlay(o); };
+          ok.onclick = function () { closeOverlay(o, function () { if (onOk) onOk(); }); };
+          row.appendChild(cancel); row.appendChild(ok);
+          body.appendChild(msg); body.appendChild(row); o.card.appendChild(body);
+          o.ov.addEventListener('click', function (e) { if (e.target === o.ov) closeOverlay(o); });
+          openOverlay(o);
+        };
+
+        window.astrPrompt = function (message, defaultVal, onOk, opts) {
+          opts = opts || {};
+          var o = buildOverlay();
+          var bs = btnStyles();
+          var body = document.createElement('div');
+          body.style.cssText = 'padding:26px 26px 22px;';
+          var msg = document.createElement('div');
+          msg.style.cssText = 'color:#102D50;font-size:14.5px;line-height:1.55;white-space:pre-line;margin-bottom:14px;';
+          msg.textContent = message;
+          var input = document.createElement('input');
+          input.type = 'text'; input.value = defaultVal || '';
+          input.style.cssText = 'width:100%;box-sizing:border-box;border:1px solid #DBE0E4;border-radius:8px;padding:10px 12px;font-size:14px;font-family:' + FONT + ';color:#102D50;margin-bottom:22px;outline:none;';
+          input.addEventListener('focus', function () { input.style.borderColor = '#C68E0E'; });
+          var row = document.createElement('div');
+          row.style.cssText = 'display:flex;gap:10px;justify-content:flex-end;';
+          var cancel = document.createElement('button');
+          cancel.style.cssText = bs.ghost; cancel.textContent = opts.cancelLabel || 'Annuler';
+          var ok = document.createElement('button');
+          ok.style.cssText = bs.solid; ok.textContent = opts.okLabel || 'Valider';
+          cancel.onclick = function () { closeOverlay(o); };
+          ok.onclick = function () { var v = input.value; closeOverlay(o, function () { if (onOk) onOk(v); }); };
+          input.addEventListener('keydown', function (e) { if (e.key === 'Enter') ok.click(); if (e.key === 'Escape') cancel.click(); });
+          row.appendChild(cancel); row.appendChild(ok);
+          body.appendChild(msg); body.appendChild(input); body.appendChild(row); o.card.appendChild(body);
+          o.ov.addEventListener('click', function (e) { if (e.target === o.ov) closeOverlay(o); });
+          openOverlay(o);
+          setTimeout(function () { input.focus(); input.select(); }, 60);
+        };
+      })();
     </script>      <!-- ============================================================== -->
       <!-- PAGE · ACCUEIL INGÉNIEUR · TABLEAU DE BORD PERSONNEL              -->
       <!-- ============================================================== -->
@@ -6133,7 +6243,7 @@
             <span style="color:var(--navy-300);">Compléter le questionnaire de qualification et réaliser l'entretien initial pour débloquer le passage.</span>
           </div>
           <div style="display:flex; gap:10px; align-items:center;">
-            <button class="s1b-btn-danger" onclick="if(confirm('Supprimer définitivement ce dossier prospect ?')) goToPage('ing-pipe-01')">Supprimer</button>
+            <button class="s1b-btn-danger" onclick="astrConfirm('Supprimer définitivement ce dossier prospect ?', function(){ goToPage('ing-pipe-01'); }, {okLabel:'Supprimer'})">Supprimer</button>
             <button class="s1b-btn-secondary">Relancer le client</button>
             <button class="s1b-btn-promote" disabled title="Conditions non remplies">Faire avancer en étape 02</button>
           </div>
@@ -6420,7 +6530,7 @@ Style relationnel · couple très autonome, à l'aise techniquement, attentes cl
             <span style="color:var(--navy-300);">Le passage déclenche la génération automatique du DCI Complet, du DER, du KYC et de la lettre de mission.</span>
           </div>
           <div style="display:flex; gap:10px; align-items:center;">
-            <button class="s1b-btn-danger" onclick="if(confirm('Supprimer définitivement ce dossier prospect ?')) goToPage('ing-pipe-01')">Supprimer</button>
+            <button class="s1b-btn-danger" onclick="astrConfirm('Supprimer définitivement ce dossier prospect ?', function(){ goToPage('ing-pipe-01'); }, {okLabel:'Supprimer'})">Supprimer</button>
             <button class="s1b-btn-secondary">Relancer le client</button>
             <button class="s1b-btn-promote" onclick="openModalPromoteEtape2('joubert')">Faire avancer en étape 02 →</button>
           </div>
@@ -6582,7 +6692,7 @@ Style relationnel · couple très autonome, à l'aise techniquement, attentes cl
                   <div style="font-size:10px; color:var(--navy-300); margin-top:4px;"><strong style="color:var(--gold-deep);">À préparer :</strong> retour du DCI Simplifié attendu avant le RDV · si non reçu, prévoir relance 48h avant.</div>
                   <div style="margin-top:10px; display:flex; gap:6px;">
                     <button class="btn btn-sm" style="font-size:11.5px; padding:7px 16px; background:var(--navy); color:white; border:1px solid var(--navy);" onclick="openModalModifierRdv()">Modifier le rendez-vous</button>
-                    <button class="btn btn-ghost btn-sm" style="font-size:11.5px; padding:7px 16px;" onclick="alert('Maquette · l\'annulation déclencherait une notification au client.');">Annuler le rendez-vous</button>
+                    <button class="btn btn-ghost btn-sm" style="font-size:11.5px; padding:7px 16px;" onclick="showToast('Maquette · l\'annulation déclencherait une notification au client.');">Annuler le rendez-vous</button>
                   </div>
                 </div>
               </div>
@@ -6617,7 +6727,7 @@ Style relationnel · couple très autonome, à l'aise techniquement, attentes cl
             <span style="color:var(--navy-300);">Réaliser le RDV initial du 09/06 et obtenir le DCI Simplifié + le Questionnaire de qualification.</span>
           </div>
           <div style="display:flex; gap:10px; align-items:center;">
-            <button class="s1b-btn-danger" onclick="if(confirm('Supprimer définitivement ce dossier prospect ?')) goToPage('ing-pipe-01')">Supprimer</button>
+            <button class="s1b-btn-danger" onclick="astrConfirm('Supprimer définitivement ce dossier prospect ?', function(){ goToPage('ing-pipe-01'); }, {okLabel:'Supprimer'})">Supprimer</button>
             <button class="s1b-btn-secondary">Relancer le client</button>
             <button class="s1b-btn-promote" disabled title="Conditions non remplies">Faire avancer en étape 02</button>
           </div>
@@ -7098,7 +7208,7 @@ Style relationnel · couple très autonome, à l'aise techniquement, attentes cl
             <div style="font-size:13px; font-weight:700; color:var(--gold-deep);">Prêt à passer en étape 03 · Collecte de documents</div>
             <div style="font-size:11px; color:var(--navy-300); margin-top:4px;">Ouvrir l'espace sécurisé déclenchera l'envoi automatique de la liste des pièces à transmettre et la création de l'accès client (30 jours pour transmettre).</div>
           </div>
-          <button class="s1b-btn-promote navy" onclick="alert('Maquette · l\'ouverture de l\'espace sécurisé bascule le dossier en étape 03 et déclenche l\'envoi automatique de la check-list documentaire au client.');">Ouvrir l'espace sécurisé</button>
+          <button class="s1b-btn-promote navy" onclick="showToast('Maquette · l\'ouverture de l\'espace sécurisé bascule le dossier en étape 03 et déclenche l\'envoi automatique de la check-list documentaire au client.');">Ouvrir l'espace sécurisé</button>
         </div>
 
       </div>
@@ -7230,7 +7340,7 @@ Style relationnel · couple très autonome, à l'aise techniquement, attentes cl
             <div style="font-size:13px; font-weight:700; color:var(--gold-deep);">Prêt à passer en étape 03 · Collecte de documents</div>
             <div style="font-size:11px; color:var(--navy-300); margin-top:4px;">Ouvrir l'espace sécurisé déclenchera l'envoi automatique de la liste des pièces à transmettre (30 jours pour transmettre).</div>
           </div>
-          <button class="s1b-btn-promote navy" onclick="alert('Maquette · l\'ouverture de l\'espace sécurisé bascule le dossier en étape 03 et déclenche l\'envoi automatique de la check-list documentaire au client.');">Ouvrir l'espace sécurisé</button>
+          <button class="s1b-btn-promote navy" onclick="showToast('Maquette · l\'ouverture de l\'espace sécurisé bascule le dossier en étape 03 et déclenche l\'envoi automatique de la check-list documentaire au client.');">Ouvrir l'espace sécurisé</button>
         </div>
 
       </div>
@@ -7375,7 +7485,7 @@ Style relationnel · couple très autonome, à l'aise techniquement, attentes cl
             <div style="font-size:13px; font-weight:700; color:var(--gold-deep);">Prêt à passer en étape 03 · Collecte de documents · personne morale</div>
             <div style="font-size:11px; color:var(--navy-300); margin-top:4px;">Ouvrir l'espace sécurisé déclenchera l'envoi automatique de la liste des pièces sociétés (statuts, K-bis, bilans, comptes, baux, etc.) au représentant légal (30 jours pour transmettre).</div>
           </div>
-          <button class="s1b-btn-promote navy" onclick="alert('Maquette · l\'ouverture de l\'espace sécurisé bascule le dossier en étape 03 et déclenche l\'envoi automatique de la check-list documentaire au représentant légal.');">Ouvrir l'espace sécurisé</button>
+          <button class="s1b-btn-promote navy" onclick="showToast('Maquette · l\'ouverture de l\'espace sécurisé bascule le dossier en étape 03 et déclenche l\'envoi automatique de la check-list documentaire au représentant légal.');">Ouvrir l'espace sécurisé</button>
         </div>
 
       </div>
@@ -13024,7 +13134,7 @@ Style relationnel · couple très autonome, à l'aise techniquement, attentes cl
                 <td><div class="cabinet-cell"><span class="name">Luc THILLIEZ</span><span class="city">Dirigeant-praticien</span></div></td>
                 <td><div class="ingenieur-cell"><div class="ingenieur-avatar">JV</div><span class="ingenieur-name">Julien VASSEUR</span></div></td>
                 <td class="nowrap"><div class="date-cell">29/04/2026</div><div class="date-cell-meta">Il y a 10 jours</div></td>
-                <td style="cursor:pointer;" onclick="alert('Détail : 142 documents collectés sur 142 attendus. Cliquez ici pour ouvrir la liste des documents (CNI, RIB, avis imposition, contrats existants, statuts société, etc.).')"><div class="progress-cell"><div class="progress-bar"><div class="progress-bar-fill complete" style="width:100%"></div></div><div class="progress-text"><span>142/142 docs</span><span class="pct">100 %</span></div></div></td>
+                <td style="cursor:pointer;" onclick="showToast('Détail : 142 documents collectés sur 142 attendus. Cliquez ici pour ouvrir la liste des documents (CNI, RIB, avis imposition, contrats existants, statuts société, etc.).')"><div class="progress-cell"><div class="progress-bar"><div class="progress-bar-fill complete" style="width:100%"></div></div><div class="progress-text"><span>142/142 docs</span><span class="pct">100 %</span></div></div></td>
                 <td><span class="status-pill-v1 signed">Prêt à commencer l&apos;étude</span></td>
                 <td class="center"><div class="actions-cell"><button class="action-btn"><svg><use href="#i-eye"/></svg></button></div></td>
               </tr>
@@ -13033,7 +13143,7 @@ Style relationnel · couple très autonome, à l'aise techniquement, attentes cl
                 <td><div class="cabinet-cell"><span class="name">Julien VASSEUR</span><span class="city">Senior · 8 ans</span></div></td>
                 <td><div class="ingenieur-cell"><div class="ingenieur-avatar">RB</div><span class="ingenieur-name">Romain BERTHIER</span></div></td>
                 <td class="nowrap"><div class="date-cell">02/05/2026</div><div class="date-cell-meta">Il y a 7 jours</div></td>
-                <td style="cursor:pointer;" onclick="alert('Détail : 65/85 documents collectés. Documents manquants : 3 derniers bulletins de salaire, attestation de propriété, RIB compte épargne...')"><div class="progress-cell"><div class="progress-bar"><div class="progress-bar-fill" style="width:76%"></div></div><div class="progress-text"><span>65/85 docs</span><span class="pct">76 %</span></div></div></td>
+                <td style="cursor:pointer;" onclick="showToast('Détail : 65/85 documents collectés. Documents manquants : 3 derniers bulletins de salaire, attestation de propriété, RIB compte épargne...')"><div class="progress-cell"><div class="progress-bar"><div class="progress-bar-fill" style="width:76%"></div></div><div class="progress-text"><span>65/85 docs</span><span class="pct">76 %</span></div></div></td>
                 <td><span class="status-pill-v1 sent">En collecte</span></td>
                 <td class="center"><div class="actions-cell"><button class="action-btn"><svg><use href="#i-eye"/></svg></button></div></td>
               </tr>
@@ -13042,7 +13152,7 @@ Style relationnel · couple très autonome, à l'aise techniquement, attentes cl
                 <td><div class="cabinet-cell"><span class="name">Julien VASSEUR</span><span class="city">Senior · 8 ans</span></div></td>
                 <td><div class="ingenieur-cell"><div class="ingenieur-avatar">AR</div><span class="ingenieur-name">Antoine ROSSI</span></div></td>
                 <td class="nowrap"><div class="date-cell">04/05/2026</div><div class="date-cell-meta">Il y a 5 jours</div></td>
-                <td style="cursor:pointer;" onclick="alert('Détail : 84/186 documents collectés. Couple avec patrimoine complexe : 2 SCI, plusieurs immobiliers locatifs, 4 contrats AV, 1 PER...')"><div class="progress-cell"><div class="progress-bar"><div class="progress-bar-fill" style="width:45%"></div></div><div class="progress-text"><span>84/186 docs</span><span class="pct">45 %</span></div></div></td>
+                <td style="cursor:pointer;" onclick="showToast('Détail : 84/186 documents collectés. Couple avec patrimoine complexe : 2 SCI, plusieurs immobiliers locatifs, 4 contrats AV, 1 PER...')"><div class="progress-cell"><div class="progress-bar"><div class="progress-bar-fill" style="width:45%"></div></div><div class="progress-text"><span>84/186 docs</span><span class="pct">45 %</span></div></div></td>
                 <td><span class="status-pill-v1 sent">En collecte</span></td>
                 <td class="center"><div class="actions-cell"><button class="action-btn"><svg><use href="#i-eye"/></svg></button></div></td>
               </tr>
@@ -13051,7 +13161,7 @@ Style relationnel · couple très autonome, à l'aise techniquement, attentes cl
                 <td><div class="cabinet-cell"><span class="name">Luc THILLIEZ</span><span class="city">Dirigeant-praticien</span></div></td>
                 <td><div class="ingenieur-cell"><div class="ingenieur-avatar">JV</div><span class="ingenieur-name">Julien VASSEUR</span></div></td>
                 <td class="nowrap"><div class="date-cell">06/05/2026</div><div class="date-cell-meta">Il y a 3 jours</div></td>
-                <td style="cursor:pointer;" onclick="alert('Détail : 95/268 documents. Personne morale : statuts, K-bis, bilans 3 dernières années, déclarations fiscales, pacte associés, comptes courants associés...')"><div class="progress-cell"><div class="progress-bar"><div class="progress-bar-fill" style="width:35%"></div></div><div class="progress-text"><span>95/268 docs</span><span class="pct">35 %</span></div></div></td>
+                <td style="cursor:pointer;" onclick="showToast('Détail : 95/268 documents. Personne morale : statuts, K-bis, bilans 3 dernières années, déclarations fiscales, pacte associés, comptes courants associés...')"><div class="progress-cell"><div class="progress-bar"><div class="progress-bar-fill" style="width:35%"></div></div><div class="progress-text"><span>95/268 docs</span><span class="pct">35 %</span></div></div></td>
                 <td><span class="status-pill-v1 sent">En collecte</span></td>
                 <td class="center"><div class="actions-cell"><button class="action-btn"><svg><use href="#i-eye"/></svg></button></div></td>
               </tr>
@@ -13766,7 +13876,7 @@ Style relationnel · couple très autonome, à l'aise techniquement, attentes cl
               </tr>
             </thead>
             <tbody>
-              <tr class="dt-clickable" onclick="alert('Détail Cabinet Paris Étoile · Assurance :\n\n· 58 contrats actifs\n  - 28 emprunteur immo\n  - 10 emprunteur prêt conso\n  - 8 prévoyance pro\n  - 7 mutuelle dirigeant\n  - 5 homme clé\n· Primes perçues : 462 000 €\n· Frais de dossiers PRIVEOS : 78 200 €\n  - Émilie LAMBERT a placé : 38 contrats / 52 000 €\n  - Julien VASSEUR a placé : 20 contrats / 26 200 €\n· Récurrence PRIVEOS : 18 400 €');"><td><div style="display:flex;align-items:center;gap:9px;"><div class="tlogo tlogo-sm tlogo-priveos">PE</div><div class="cell-primary">Cabinet Paris Étoile</div></div></td><td class="num">58</td><td class="num cell-money">462 000 €</td><td class="num cell-money gold">78 200 €</td><td class="num cell-money">18 400 €</td><td class="num cell-money gold">96 600 €</td><td><span class="up">▲ +16 %</span></td></tr>
+              <tr class="dt-clickable" onclick="showToast('Détail Cabinet Paris Étoile · Assurance :\n\n· 58 contrats actifs\n  - 28 emprunteur immo\n  - 10 emprunteur prêt conso\n  - 8 prévoyance pro\n  - 7 mutuelle dirigeant\n  - 5 homme clé\n· Primes perçues : 462 000 €\n· Frais de dossiers PRIVEOS : 78 200 €\n  - Émilie LAMBERT a placé : 38 contrats / 52 000 €\n  - Julien VASSEUR a placé : 20 contrats / 26 200 €\n· Récurrence PRIVEOS : 18 400 €');"><td><div style="display:flex;align-items:center;gap:9px;"><div class="tlogo tlogo-sm tlogo-priveos">PE</div><div class="cell-primary">Cabinet Paris Étoile</div></div></td><td class="num">58</td><td class="num cell-money">462 000 €</td><td class="num cell-money gold">78 200 €</td><td class="num cell-money">18 400 €</td><td class="num cell-money gold">96 600 €</td><td><span class="up">▲ +16 %</span></td></tr>
               <tr class="dt-clickable"><td><div style="display:flex;align-items:center;gap:9px;"><div class="tlogo tlogo-sm tlogo-1">LD</div><div class="cell-primary">Cabinet Lyon Défense</div></div></td><td class="num">48</td><td class="num cell-money">388 000 €</td><td class="num cell-money gold">62 400 €</td><td class="num cell-money">15 200 €</td><td class="num cell-money gold">77 600 €</td><td><span class="up">▲ +12 %</span></td></tr>
               <tr class="dt-clickable"><td><div style="display:flex;align-items:center;gap:9px;"><div class="tlogo tlogo-sm tlogo-2">PV</div><div class="cell-primary">Cabinet Paris Vendôme</div></div></td><td class="num">42</td><td class="num cell-money">328 000 €</td><td class="num cell-money gold">52 800 €</td><td class="num cell-money">13 400 €</td><td class="num cell-money gold">66 200 €</td><td><span class="up">▲ +10 %</span></td></tr>
               <tr class="dt-clickable"><td><div style="display:flex;align-items:center;gap:9px;"><div class="tlogo tlogo-sm tlogo-3">BC</div><div class="cell-primary">Cabinet Bordeaux Centre</div></div></td><td class="num">36</td><td class="num cell-money">274 000 €</td><td class="num cell-money gold">42 600 €</td><td class="num cell-money">11 200 €</td><td class="num cell-money gold">53 800 €</td><td><span class="up">▲ +8 %</span></td></tr>
@@ -14513,7 +14623,7 @@ Style relationnel · couple très autonome, à l'aise techniquement, attentes cl
               </tr>
             </thead>
             <tbody>
-              <tr class="dt-clickable" onclick="alert('Détail Cabinet Paris Étoile · Honoraires de conseil :\n\n· 14 missions en 2026\n  - 8 études patrimoniales (8 200 € en moyenne) : 65 600 €\n  - 3 audits transmission : 21 000 €\n  - 2 immatriculations société : 4 000 €\n  - 1 démembrement notaire : 6 800 €\n· Total honoraires : 97 400 €\n· Top contributeur : Émilie LAMBERT (6 missions / 48 200 €)');"><td><div style="display:flex;align-items:center;gap:9px;"><div class="tlogo tlogo-sm tlogo-priveos">PE</div><div class="cell-primary">Cabinet Paris Étoile</div></div></td><td class="num">8</td><td class="num">4</td><td class="num">2</td><td class="num">14</td><td class="num cell-money gold">97 400 €</td><td><span class="up">▲ +28 %</span></td></tr>
+              <tr class="dt-clickable" onclick="showToast('Détail Cabinet Paris Étoile · Honoraires de conseil :\n\n· 14 missions en 2026\n  - 8 études patrimoniales (8 200 € en moyenne) : 65 600 €\n  - 3 audits transmission : 21 000 €\n  - 2 immatriculations société : 4 000 €\n  - 1 démembrement notaire : 6 800 €\n· Total honoraires : 97 400 €\n· Top contributeur : Émilie LAMBERT (6 missions / 48 200 €)');"><td><div style="display:flex;align-items:center;gap:9px;"><div class="tlogo tlogo-sm tlogo-priveos">PE</div><div class="cell-primary">Cabinet Paris Étoile</div></div></td><td class="num">8</td><td class="num">4</td><td class="num">2</td><td class="num">14</td><td class="num cell-money gold">97 400 €</td><td><span class="up">▲ +28 %</span></td></tr>
               <tr class="dt-clickable"><td><div style="display:flex;align-items:center;gap:9px;"><div class="tlogo tlogo-sm tlogo-1">LD</div><div class="cell-primary">Cabinet Lyon Défense</div></div></td><td class="num">7</td><td class="num">3</td><td class="num">1</td><td class="num">11</td><td class="num cell-money gold">76 200 €</td><td><span class="up">▲ +20 %</span></td></tr>
               <tr class="dt-clickable"><td><div style="display:flex;align-items:center;gap:9px;"><div class="tlogo tlogo-sm tlogo-2">PV</div><div class="cell-primary">Cabinet Paris Vendôme</div></div></td><td class="num">6</td><td class="num">2</td><td class="num">2</td><td class="num">10</td><td class="num cell-money gold">68 400 €</td><td><span class="up">▲ +14 %</span></td></tr>
               <tr class="dt-clickable"><td><div style="display:flex;align-items:center;gap:9px;"><div class="tlogo tlogo-sm tlogo-3">BC</div><div class="cell-primary">Cabinet Bordeaux Centre</div></div></td><td class="num">5</td><td class="num">2</td><td class="num">1</td><td class="num">8</td><td class="num cell-money gold">52 800 €</td><td><span class="up">▲ +12 %</span></td></tr>
@@ -16825,7 +16935,7 @@ Style relationnel · couple très autonome, à l'aise techniquement, attentes cl
       <td><div class="client-cell"><span class="client-name-line">Philippe AUBERT</span><span class="client-name-line">Catherine AUBERT</span><span class="client-type couple">Couple</span></div></td><td class="td-c"><div class="collecte-ing">Sophie MERCIER</div></td><td class="td-c"><div class="collecte-sup">—</div></td>
       <td class="td-c"><div class="collecte-date">08/05/2026</div></td><td><div class="collecte-prog-wrap"><div class="collecte-prog-bar"><div class="collecte-prog-fill" style="width:100%;background:var(--navy);"></div></div><span class="collecte-prog-pct">100%</span></div></td>
       <td class="td-c"><span class="collecte-statut st-pret">Prêt à commencer l'étude</span></td>
-      <td class="td-c"><div class="collecte-actions" onclick="event.stopPropagation()"><button class="collecte-act-btn primary" onclick="openConfirmStep()">Passer à l'étape suivante</button><button class="collecte-act-btn neutral" onclick="void(0)">Consulter</button></div></td>
+      <td class="td-c"><div class="collecte-actions" onclick="event.stopPropagation()"><button class="collecte-act-btn primary" onclick="openConfirmStep()">Passer à l'étape suivante</button><button class="collecte-act-btn neutral" onclick="showToast('Fiche de collecte détaillée · bientôt disponible pour ce dossier.')">Consulter</button></div></td>
     </tr><tr class="" >
       <td><div class="client-cell"><span class="client-name">Stéphane MOREAU</span><span class="client-type">Personne seule</span></div></td><td class="td-c"><div class="collecte-ing">Julien VASSEUR</div></td><td class="td-c"><div class="collecte-sup">Romain BERTHIER</div></td>
       <td class="td-c"><div class="collecte-date"><span class="collecte-dash">—</span></div></td><td><span class="collecte-dash">Non initiée</span></td>
@@ -16840,12 +16950,12 @@ Style relationnel · couple très autonome, à l'aise techniquement, attentes cl
       <td><div class="client-cell"><span class="client-name">Pierre LEFEBVRE</span><span class="client-name-line" style="font-size:10.5px;color:var(--navy-300);font-weight:500;">Groupe Lefebvre · SAS</span><span class="client-type personne-morale">Personne morale</span></div></td><td class="td-c"><div class="collecte-ing">Thomas LEROY</div></td><td class="td-c"><div class="collecte-sup">Camille BERTRAND</div></td>
       <td class="td-c"><div class="collecte-date">05/05/2026</div></td><td><div class="collecte-prog-wrap"><div class="collecte-prog-bar"><div class="collecte-prog-fill" style="width:30%;background:var(--navy-200);"></div></div><span class="collecte-prog-pct">30%</span></div></td>
       <td class="td-c"><span class="collecte-statut st-inactif">Inactif · +14 j</span></td>
-      <td class="td-c"><div class="collecte-actions" onclick="event.stopPropagation()"><button class="collecte-act-btn neutral" onclick="void(0)">Consulter</button></div></td>
+      <td class="td-c"><div class="collecte-actions" onclick="event.stopPropagation()"><button class="collecte-act-btn neutral" onclick="showToast('Fiche de collecte détaillée · bientôt disponible pour ce dossier.')">Consulter</button></div></td>
     </tr><tr class="" >
       <td><div class="client-cell"><span class="client-name-line">Camille JOUBERT</span><span class="client-name-line">Yannick BERTHOUX</span><span class="client-type couple">Couple</span></div></td><td class="td-c"><div class="collecte-ing">Luc THILLIEZ</div></td><td class="td-c"><div class="collecte-sup">—</div></td>
       <td class="td-c"><div class="collecte-date">09/05/2026</div></td><td><div class="collecte-prog-wrap"><div class="collecte-prog-bar"><div class="collecte-prog-fill" style="width:62%;background:var(--gold);"></div></div><span class="collecte-prog-pct">62%</span></div></td>
       <td class="td-c"><span class="collecte-statut st-collecte">En collecte</span></td>
-      <td class="td-c"><div class="collecte-actions" onclick="event.stopPropagation()"><button class="collecte-act-btn neutral" onclick="void(0)">Consulter</button></div></td>
+      <td class="td-c"><div class="collecte-actions" onclick="event.stopPropagation()"><button class="collecte-act-btn neutral" onclick="showToast('Fiche de collecte détaillée · bientôt disponible pour ce dossier.')">Consulter</button></div></td>
     </tr><tr class="" >
       <td><div class="client-cell"><span class="client-name">Patricia MERCIER</span><span class="client-type">Personne seule</span></div></td><td class="td-c"><div class="collecte-ing">Sophie MERCIER</div></td><td class="td-c"><div class="collecte-sup">—</div></td>
       <td class="td-c"><div class="collecte-date"><span class="collecte-dash">—</span></div></td><td><span class="collecte-dash">Non initiée</span></td>
@@ -16855,12 +16965,12 @@ Style relationnel · couple très autonome, à l'aise techniquement, attentes cl
       <td><div class="client-cell"><span class="client-name-line">Hélène NGUYEN</span><span class="client-name-line">Daniel NGUYEN</span><span class="client-type couple">Couple</span></div></td><td class="td-c"><div class="collecte-ing">Thomas LEROY</div></td><td class="td-c"><div class="collecte-sup">Camille BERTRAND</div></td>
       <td class="td-c"><div class="collecte-date">02/05/2026</div></td><td><div class="collecte-prog-wrap"><div class="collecte-prog-bar"><div class="collecte-prog-fill" style="width:100%;background:var(--navy);"></div></div><span class="collecte-prog-pct">100%</span></div></td>
       <td class="td-c"><span class="collecte-statut st-pret">Prêt à commencer l'étude</span></td>
-      <td class="td-c"><div class="collecte-actions" onclick="event.stopPropagation()"><button class="collecte-act-btn primary" onclick="openConfirmStep()">Passer à l'étape suivante</button><button class="collecte-act-btn neutral" onclick="void(0)">Consulter</button></div></td>
+      <td class="td-c"><div class="collecte-actions" onclick="event.stopPropagation()"><button class="collecte-act-btn primary" onclick="openConfirmStep()">Passer à l'étape suivante</button><button class="collecte-act-btn neutral" onclick="showToast('Fiche de collecte détaillée · bientôt disponible pour ce dossier.')">Consulter</button></div></td>
     </tr><tr class="" >
       <td><div class="client-cell"><span class="client-name">Sylvie ROUSSEAU</span><span class="client-type">Personne seule</span></div></td><td class="td-c"><div class="collecte-ing">Camille BERTRAND</div></td><td class="td-c"><div class="collecte-sup">Luc THILLIEZ</div></td>
       <td class="td-c"><div class="collecte-date">06/05/2026</div></td><td><div class="collecte-prog-wrap"><div class="collecte-prog-bar"><div class="collecte-prog-fill" style="width:24%;background:var(--navy-200);"></div></div><span class="collecte-prog-pct">24%</span></div></td>
       <td class="td-c"><span class="collecte-statut st-inactif">Inactif · +14 j</span></td>
-      <td class="td-c"><div class="collecte-actions" onclick="event.stopPropagation()"><button class="collecte-act-btn neutral" onclick="void(0)">Consulter</button></div></td>
+      <td class="td-c"><div class="collecte-actions" onclick="event.stopPropagation()"><button class="collecte-act-btn neutral" onclick="showToast('Fiche de collecte détaillée · bientôt disponible pour ce dossier.')">Consulter</button></div></td>
     </tr></tbody></table></div>
 </div>
       <div class="page" id="page-ing-fiche-collecte-dupont-topin">
@@ -20231,7 +20341,7 @@ function closeLicencieDrawer() {
 
 function connectAsLicencie(licencieId) {
   const d = LICENCIE_DATA[licencieId];
-  alert(`🔄 Mode délégation activé\n\nVous allez être connecté en tant que :\n${d ? d.name : licencieId}\n\nUne bannière persistante en haut de l'écran rappellera votre identité PRIVEOS pendant toute la session.\n\n[Démo wireframe — l'action ouvrirait l'espace cabinet en mode délégation]`);
+  showToast(`Mode délégation activé\n\nVous allez être connecté en tant que :\n${d ? d.name : licencieId}\n\nUne bannière persistante en haut de l'écran rappellera votre identité PRIVEOS pendant toute la session.\n\n[Démo wireframe — l'action ouvrirait l'espace cabinet en mode délégation]`, {tone:'gold'});
 }
 
 // ====================================================================
@@ -20251,7 +20361,7 @@ function toggleCompareItem(id, cb) {
   if (cb && cb.checked) {
     if (compareSelection.length >= 3) {
       cb.checked = false;
-      alert('Maximum 3 licenciés dans le comparateur');
+      showToast('Maximum 3 licenciés dans le comparateur');
       return;
     }
     compareSelection.push(id);
@@ -20277,7 +20387,7 @@ function updateCompareUI() {
 function launchCompare() {
   if (compareSelection.length < 2) return;
   const names = compareSelection.map(id => LICENCIE_DATA[id] ? LICENCIE_DATA[id].name : id).join(' vs ');
-  alert(`📊 Comparateur lancé\n\n${names}\n\n[Démo — ouvrirait une vue tableau côte-à-côte avec CA / croissance / score / conformité / portefeuille]`);
+  showToast(`Comparateur lancé\n\n${names}\n\n[Démo — ouvrirait une vue tableau côte-à-côte avec CA / croissance / score / conformité / portefeuille]`, {tone:'gold'});
 }
 
 function resetCompare() {
@@ -24904,7 +25014,7 @@ Président associé du cabinet PRIVEOS</textarea>
       </div>
       <div class="s1a-modal-footer-actions">
         <button class="s1a-btn s1a-btn-ghost" onclick="closeModalPromoteEtape3()">Annuler</button>
-        <button class="s1a-btn s1a-btn-primary" style="background:var(--gold); border-color:var(--gold);" onclick="closeModalPromoteEtape3(); alert('Maquette · l\'étape 03 sera disponible dans le sprint S1D.');">→ Ouvrir l'espace sécurisé (étape 03)</button>
+        <button class="s1a-btn s1a-btn-primary" style="background:var(--gold); border-color:var(--gold);" onclick="closeModalPromoteEtape3(); showToast('Maquette · l\'étape 03 sera disponible dans le sprint S1D.');">→ Ouvrir l'espace sécurisé (étape 03)</button>
       </div>
     </div>
   </div>
@@ -25578,19 +25688,19 @@ Président associé du cabinet PRIVEOS</textarea>
   // v22 · DCI Simplifié · navigation master-detail
   // v26 · Visio · rejoindre (RDV à venir) / consulter (RDV passé)
   function rejoindreVisio(label) {
-    alert('Maquette · lancement de la visioconférence.\n\n« ' + label + ' »\n\nDans la version finale : ouverture de la salle de visioconférence intégrée (Google Meet / Whereby) avec enregistrement et transcription IA automatiques.');
+    showToast('Maquette · lancement de la visioconférence.\n\n« ' + label + ' »\n\nDans la version finale : ouverture de la salle de visioconférence intégrée (Google Meet / Whereby) avec enregistrement et transcription IA automatiques.');
   }
   function consulterVisio(label) {
-    alert('Maquette · consultation de la visio enregistrée.\n\n« ' + label + ' »\n\nDans la version finale : lecture de l\'enregistrement, accès à la transcription IA et à la synthèse générée automatiquement.');
+    showToast('Maquette · consultation de la visio enregistrée.\n\n« ' + label + ' »\n\nDans la version finale : lecture de l\'enregistrement, accès à la transcription IA et à la synthèse générée automatiquement.');
   }
   // v26 · Envoi isolé d'un document (relance ou envoi individuel)
   function envoyerDocIsole(doc) {
-    alert('Maquette · envoi isolé de « ' + doc + ' » au client.\n\nDans la version finale : ouverture d\'une fenêtre d\'envoi avec e-mail pré-rempli pour ce seul document (utile pour une relance ou un renvoi). Pour le premier envoi complet, privilégier l\'espace « Envoyer le pack au client » plus bas qui regroupe toutes les pièces en un seul e-mail.');
+    showToast('Maquette · envoi isolé de « ' + doc + ' » au client.\n\nDans la version finale : ouverture d\'une fenêtre d\'envoi avec e-mail pré-rempli pour ce seul document (utile pour une relance ou un renvoi). Pour le premier envoi complet, privilégier l\'espace « Envoyer le pack au client » plus bas qui regroupe toutes les pièces en un seul e-mail.');
   }
   // v26 · Envoi groupé du pack de contractualisation
   function envoyerPackComplet() {
     const checks = document.querySelectorAll('.s1c-envoi-piece input[type="checkbox"]:checked');
-    alert('Maquette · envoi groupé du pack au client.\n\n' + checks.length + ' pièces sélectionnées seront jointes à l\'e-mail d\'accompagnement et adressées à Camille & Yannick en un seul envoi.\n\nL\'envoi déclenche la signature électronique (Yousign) des 3 documents contractuels et la demande de règlement des honoraires. Le dossier reste en « Conformité en cours » jusqu\'à signature complète + paiement reçu.');
+    showToast('Maquette · envoi groupé du pack au client.\n\n' + checks.length + ' pièces sélectionnées seront jointes à l\'e-mail d\'accompagnement et adressées à Camille & Yannick en un seul envoi.\n\nL\'envoi déclenche la signature électronique (Yousign) des 3 documents contractuels et la demande de règlement des honoraires. Le dossier reste en « Conformité en cours » jusqu\'à signature complète + paiement reçu.');
   }
 
   function scrollToSimplifieSection(step, btn) {
@@ -25976,10 +26086,10 @@ Président associé du cabinet PRIVEOS</textarea>
     list.appendChild(newRow);
   }
   function removeEnfantRow(btn) {
-    if (confirm('Confirmer la suppression de cet enfant ?')) {
+    astrConfirm('Confirmer la suppression de cet enfant ?', function () {
       const row = btn.closest('.s1c-enfant-row');
       if (row) row.remove();
-    }
+    }, { okLabel: 'Supprimer' });
   }
 
   // — Sous-nav DCI Complet · master-detail (v17) ·
@@ -26567,7 +26677,7 @@ function coherenceVoir(btn){
     target.classList.add('ci-flash');
   }
 }
-function coherenceReject(btn){const c=btn.closest('.ci-coh-card');c.style.borderColor='var(--gold-deep)';alert('Incohérence signalée comme non résolue · une précision peut être demandée au client');}
+function coherenceReject(btn){const c=btn.closest('.ci-coh-card');c.style.borderColor='var(--gold-deep)';showToast('Incohérence signalée comme non résolue · une précision peut être demandée au client');}
 function resolveCoh(btn){const c=btn.closest('.ci-coh-card');c.classList.add('resolved');c.dataset.resolved='1';updateCohCount();}
 function undoResolve(btn){const c=btn.closest('.ci-coh-card');c.classList.remove('resolved');c.dataset.resolved='0';updateCohCount();}
 function updateCohCount(){
@@ -27022,7 +27132,7 @@ document.addEventListener('DOMContentLoaded',function(){if(document.getElementBy
     </div></div>
       <div class="prep-footer"><button class="btn btn-ghost btn-sm" id="wiz-doc-back" onclick="wizGoTo('identite')">← Retour</button>
         <button class="btn btn-gold btn-sm" id="wiz-doc-next" onclick="wizGoTo('email')">Préparer l'e-mail →</button>
-        <button class="btn btn-gold btn-sm" id="wiz-doc-save" style="display:none;" onclick="alert('Structure de collecte mise à jour');closeWizard()">Enregistrer les modifications</button>
+        <button class="btn btn-gold btn-sm" id="wiz-doc-save" style="display:none;" onclick="showToast('Structure de collecte mise à jour');closeWizard()">Enregistrer les modifications</button>
       </div>
     </div>
     <div class="wiz-pane" data-pane="email" style="display:none;">
@@ -27070,7 +27180,7 @@ document.addEventListener('DOMContentLoaded',function(){if(document.getElementBy
         <label class="create-field" style="grid-column:1/-1;"><span>Format</span><select><option>Visioconférence</option><option>Au cabinet</option><option>Par téléphone</option></select></label>
       </div>
     </div>
-    <div class="prep-footer"><button class="btn btn-ghost btn-sm" onclick="closeConfirmStep()">Annuler</button><button class="btn btn-gold btn-sm" onclick="alert('Dossier passé à l étape 04 · Réalisation de l étude');closeConfirmStep()">Confirmer le passage</button></div>
+    <div class="prep-footer"><button class="btn btn-ghost btn-sm" onclick="closeConfirmStep()">Annuler</button><button class="btn btn-gold btn-sm" onclick="showToast('Dossier passé à l étape 04 · Réalisation de l étude');closeConfirmStep()">Confirmer le passage</button></div>
   </div>
 </div><div class="chat-overlay" id="chat-overlay" onclick="if(event.target===this)closeDocChat()">
   <div class="chat-drawer">
@@ -27099,7 +27209,7 @@ document.addEventListener('DOMContentLoaded',function(){if(document.getElementBy
         <textarea class="relance-mail-edit" id="relance-mail-body2"></textarea></div>
       </div>
     </div>
-    <div class="prep-footer"><button class="btn btn-ghost btn-sm" onclick="closeRelance()">Annuler</button><button class="btn btn-gold btn-sm" onclick="alert('Relance envoyée au client');closeRelance()">Envoyer la relance</button></div>
+    <div class="prep-footer"><button class="btn btn-ghost btn-sm" onclick="closeRelance()">Annuler</button><button class="btn btn-gold btn-sm" onclick="showToast('Relance envoyée au client');closeRelance()">Envoyer la relance</button></div>
   </div>
 </div>
 
