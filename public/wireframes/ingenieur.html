@@ -27520,7 +27520,12 @@ document.addEventListener('DOMContentLoaded',function(){if(document.getElementBy
         return window.top.location.origin;
       }
     } catch (e) { /* cross-origin */ }
-    return window.location.origin;
+    var o = window.location.origin;
+    // Jamais une URL de déploiement Vercel (SSO) dans un lien public.
+    if (/\.vercel\.app$/.test(window.location.hostname) && window.location.hostname !== 'astraeos.vercel.app') {
+      return 'https://astraeos.vercel.app';
+    }
+    return o;
   }
   function astraeosSlugify(s) {
     return (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '')

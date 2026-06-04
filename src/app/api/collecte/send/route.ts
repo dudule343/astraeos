@@ -108,7 +108,11 @@ export async function POST(req: NextRequest) {
 
   // Origine dérivée des en-têtes de proxy : req.nextUrl.origin ignore x-forwarded-host
   // et renverrait le host interne sur les previews / domaines alias Vercel.
+  // Domaine public de prod fourni par Vercel : évite d'embarquer une URL de
+  // déploiement (protégée par SSO) dans les e-mails clients.
+  const prodHost = process.env.VERCEL_PROJECT_PRODUCTION_URL;
   const host =
+    prodHost ??
     req.headers.get("x-forwarded-host") ??
     req.headers.get("host") ??
     req.nextUrl.host;

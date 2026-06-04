@@ -3,6 +3,17 @@
 import { useMemo, useState } from "react";
 
 /** Identifiant de salle lisible "rdv-XXXX" (4 chars base36, sans 0/O/1/I/L). */
+
+/** Origine publique : jamais une URL de déploiement Vercel (protégée par SSO). */
+function publicOrigin(): string {
+  if (typeof window === "undefined") return "";
+  const h = window.location.hostname;
+  if (h.endsWith(".vercel.app") && h !== "astraeos.vercel.app") {
+    return "https://astraeos.vercel.app";
+  }
+  return window.location.origin;
+}
+
 function makeRoomId(): string {
   const alphabet = "abcdefghjkmnpqrstuvwxyz23456789";
   const bytes = new Uint8Array(4);
@@ -90,7 +101,7 @@ export default function VisioLobby() {
     if (prospect) q.set("prospect", prospect);
     const path = `/visio/${room}?${q.toString()}`;
     if (typeof window === "undefined") return path;
-    return `${window.location.origin}${path}`;
+    return `${publicOrigin()}${path}`;
   }, [tool, externalLink, externalLinkValid, room, prospect]);
 
   const canStart = Boolean(room) && (tool === "integre" || externalLinkValid);
