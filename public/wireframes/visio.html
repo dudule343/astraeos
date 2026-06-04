@@ -3607,7 +3607,7 @@ setInterval(() => {
     + '.jts-container{position:absolute;inset:12px;border-radius:8px;overflow:hidden;background:#04101f;}'
     + '.video-zoomed .jts-container{inset:18px;}'
     + '.jts-container iframe{width:100%;height:100%;border:0;display:block;}'
-    + '.jts-status{position:absolute;inset:12px;display:flex;align-items:center;justify-content:center;'
+    + '.jts-status{position:absolute;inset:12px;display:flex;align-items:center;justify-content:center;pointer-events:none;'
     + 'text-align:center;color:#9fb0c6;font-size:12px;line-height:1.5;padding:24px;'
     + 'background:#04101f;border-radius:8px;z-index:1;}'
     + '.jts-status.jts-hidden{display:none;}'
@@ -3641,8 +3641,8 @@ setInterval(() => {
   }
 
   // ---- Chargement de l'external API Jitsi (via <script src>) --------
-  var DOMAIN = 'meet.jit.si';
-  var SCRIPT_SRC = 'https://meet.jit.si/external_api.js';
+  var DOMAIN = 'meet.jit.si'; // l'ingénieur se connecte UNE fois (Google) dans le cadre vidéo → modérateur ; les clients entrent sans compte
+  var SCRIPT_SRC = 'https://' + DOMAIN + '/external_api.js';
 
   function loadScript(src, cb) {
     var existing = document.querySelector('script[data-jts-api]');
@@ -3669,7 +3669,7 @@ setInterval(() => {
 
   function startJitsi() {
     if (typeof window.JitsiMeetExternalAPI !== 'function') {
-      showStatus('Vidéo indisponible : impossible de charger meet.jit.si.', true);
+      showStatus('Vidéo indisponible : impossible de charger la salle vidéo.', true);
       return;
     }
     try {
@@ -3681,6 +3681,7 @@ setInterval(() => {
         userInfo: { displayName: displayName() },
         configOverwrite: {
           prejoinPageEnabled: false,
+          prejoinConfig: { enabled: false },
           disableDeepLinking: true,
           startWithAudioMuted: false,
           startWithVideoMuted: false,
@@ -3703,6 +3704,12 @@ setInterval(() => {
       });
 
       api.addEventListener('videoConferenceJoined', hideStatus);
+      // Repli : dès que l'iframe Jitsi est rendue, le voile n'a plus de raison
+      // de masquer quoi que ce soit (prejoin, autorisations, file d'attente…).
+      var jtsWait = setInterval(function () {
+        if (container.querySelector('iframe')) { hideStatus(); clearInterval(jtsWait); }
+      }, 500);
+      setTimeout(function () { clearInterval(jtsWait); hideStatus(); }, 8000);
       api.addEventListener('readyToClose', function () {
         showStatus('Vidéo terminée. Vous pouvez fermer cet onglet.');
       });
@@ -3715,7 +3722,7 @@ setInterval(() => {
 
   loadScript(SCRIPT_SRC, function (err) {
     if (err) {
-      showStatus('Vidéo indisponible : impossible de charger meet.jit.si.', true);
+      showStatus('Vidéo indisponible : impossible de charger la salle vidéo.', true);
       return;
     }
     startJitsi();
