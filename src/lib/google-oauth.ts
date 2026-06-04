@@ -155,11 +155,23 @@ export async function saveTokens(t: GoogleTokens): Promise<void> {
   if (supabaseConfigured()) {
     try {
       const supabase = createAdminClient();
-      // Stocke dans une table générique `external_integrations` (à créer)
-      // ou dans `users.metadata` ; pour la démo on fait fichier même avec Supabase configuré.
-      // TODO : créer une migration `google_oauth_tokens` quand on aura le user lié.
+      const { error } = await supabase.from("google_tokens").upsert(
+        {
+          engineer_slug: t.engineer_slug,
+          email: t.email,
+          access_token: t.access_token,
+          refresh_token: t.refresh_token,
+          expires_at: t.expires_at,
+          scope: t.scope,
+          granted_at: t.granted_at,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "engineer_slug" },
+      );
+      if (error) throw error;
+      return;
     } catch (err) {
-      console.warn("[google-oauth] Supabase save skipped:", err);
+      console.warn("[google-oauth] Supabase save échoué, fallback fichier:", err);
     }
   }
   const all = await readFileTokens();
@@ -170,11 +182,35 @@ export async function saveTokens(t: GoogleTokens): Promise<void> {
 }
 
 export async function loadTokens(engineer_slug: string): Promise<GoogleTokens | null> {
+  if (supabaseConfigured()) {
+    try {
+      const supabase = createAdminClient();
+      const { data, error } = await supabase
+        .from("google_tokens")
+        .select("engineer_slug, email, access_token, refresh_token, expires_at, scope, granted_at")
+        .eq("engineer_slug", engineer_slug)
+        .maybeSingle();
+      if (error) throw error;
+      if (data) return { ...data, expires_at: Number(data.expires_at) } as GoogleTokens;
+      // Pas de ligne Supabase : on retombe sur le fichier (compat dev / données existantes).
+    } catch (err) {
+      console.warn("[google-oauth] Supabase load échoué, fallback fichier:", err);
+    }
+  }
   const all = await readFileTokens();
   return all.find((x) => x.engineer_slug === engineer_slug) ?? null;
 }
 
 export async function deleteTokens(engineer_slug: string): Promise<void> {
+  if (supabaseConfigured()) {
+    try {
+      const supabase = createAdminClient();
+      const { error } = await supabase.from("google_tokens").delete().eq("engineer_slug", engineer_slug);
+      if (error) throw error;
+    } catch (err) {
+      console.warn("[google-oauth] Supabase delete échoué, fallback fichier:", err);
+    }
+  }
   const all = await readFileTokens();
   await writeFileTokens(all.filter((x) => x.engineer_slug !== engineer_slug));
 }

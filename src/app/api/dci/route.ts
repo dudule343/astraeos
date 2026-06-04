@@ -7,6 +7,11 @@ export async function GET(req: NextRequest) {
   if (!slug) {
     return NextResponse.json({ error: "prospect query param required" }, { status: 400 });
   }
-  const { source, submissions } = await loadSubmissions(slug);
-  return NextResponse.json({ source, prospect: slug, submissions });
+  try {
+    const { source, submissions } = await loadSubmissions(slug);
+    return NextResponse.json({ source, prospect: slug, submissions });
+  } catch (err) {
+    console.error("[dci] erreur:", err);
+    return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
+  }
 }

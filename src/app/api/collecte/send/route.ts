@@ -51,6 +51,39 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "items requis" }, { status: 400 });
   }
 
+  // Bornes anti-DoS : un volume excessif fait timeouter la route (envoi e-mail séquentiel).
+  const MAX_PARTICIPANTS = 50;
+  const MAX_ITEMS = 300;
+  if (participants.length > MAX_PARTICIPANTS) {
+    return NextResponse.json(
+      { error: `Trop de participants (max ${MAX_PARTICIPANTS})` },
+      { status: 400 },
+    );
+  }
+  if (items.length > MAX_ITEMS) {
+    return NextResponse.json(
+      { error: `Trop d'éléments (max ${MAX_ITEMS})` },
+      { status: 400 },
+    );
+  }
+
+  // Validation des items : chaque élément doit être un objet avec un libellé non vide.
+  // Couvre items:[null] (évite une TypeError 500 au .map) et les items sans libellé
+  // (évite l'envoi d'un e-mail avec une ligne d'élément vide).
+  for (const it of items) {
+    if (
+      !it ||
+      typeof it !== "object" ||
+      typeof (it as Item).label !== "string" ||
+      !(it as Item).label.trim()
+    ) {
+      return NextResponse.json(
+        { error: "Chaque élément doit avoir un libellé" },
+        { status: 400 },
+      );
+    }
+  }
+
   // Validation des participants
   for (const p of participants) {
     if (!p || typeof p.nom !== "string" || !p.nom.trim()) {
@@ -69,7 +102,15 @@ export async function POST(req: NextRequest) {
     type: it.type === "Question" ? "Question" : "Document",
   }));
 
-  const origin = req.nextUrl.origin;
+  // Origine dérivée des en-têtes de proxy : req.nextUrl.origin ignore x-forwarded-host
+  // et renverrait le host interne sur les previews / domaines alias Vercel.
+  const host =
+    req.headers.get("x-forwarded-host") ??
+    req.headers.get("host") ??
+    req.nextUrl.host;
+  const proto =
+    req.headers.get("x-forwarded-proto") ?? req.nextUrl.protocol.replace(":", "");
+  const origin = `${proto}://${host}`;
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.RESEND_FROM || "Astraeos <onboarding@resend.dev>";
   const supabase = createAdminClient();

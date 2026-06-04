@@ -27,37 +27,42 @@ export async function GET(
     return NextResponse.json({ error: "item_index invalide" }, { status: 400 });
   }
 
-  const supabase = createAdminClient();
+  try {
+    const supabase = createAdminClient();
 
-  const { data: collecte, error } = await supabase
-    .from("collectes")
-    .select("id")
-    .eq("token", token)
-    .maybeSingle();
+    const { data: collecte, error } = await supabase
+      .from("collectes")
+      .select("id")
+      .eq("token", token)
+      .maybeSingle();
 
-  if (error || !collecte) {
-    return NextResponse.json({ error: "Collecte introuvable" }, { status: 404 });
+    if (error || !collecte) {
+      return NextResponse.json({ error: "Collecte introuvable" }, { status: 404 });
+    }
+
+    const { data: depot } = await supabase
+      .from("collecte_depots")
+      .select("storage_path")
+      .eq("collecte_id", collecte.id)
+      .eq("item_index", itemIndex)
+      .maybeSingle();
+
+    const storagePath = depot?.storage_path as string | null | undefined;
+    if (!storagePath) {
+      return NextResponse.json({ error: "Pièce introuvable" }, { status: 404 });
+    }
+
+    const { data: signed, error: signError } = await supabase.storage
+      .from(BUCKET)
+      .createSignedUrl(storagePath, 3600);
+
+    if (signError || !signed?.signedUrl) {
+      return NextResponse.json({ error: "URL signée indisponible" }, { status: 404 });
+    }
+
+    return NextResponse.redirect(signed.signedUrl);
+  } catch (err) {
+    console.error("[collecte-admin/[token]/file] erreur:", err);
+    return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
   }
-
-  const { data: depot } = await supabase
-    .from("collecte_depots")
-    .select("storage_path")
-    .eq("collecte_id", collecte.id)
-    .eq("item_index", itemIndex)
-    .maybeSingle();
-
-  const storagePath = depot?.storage_path as string | null | undefined;
-  if (!storagePath) {
-    return NextResponse.json({ error: "Pièce introuvable" }, { status: 404 });
-  }
-
-  const { data: signed, error: signError } = await supabase.storage
-    .from(BUCKET)
-    .createSignedUrl(storagePath, 3600);
-
-  if (signError || !signed?.signedUrl) {
-    return NextResponse.json({ error: "URL signée indisponible" }, { status: 404 });
-  }
-
-  return NextResponse.redirect(signed.signedUrl);
 }

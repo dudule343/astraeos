@@ -6,6 +6,21 @@ import { analyserDepot } from "@/lib/ia-analyse";
 const MAX_FILE_SIZE = 15 * 1024 * 1024; // 15 Mo
 const BUCKET = "depots";
 
+// L'analyse IA tourne via `after()` après la réponse : on laisse la fonction
+// vivre assez longtemps pour ne pas être coupée en plein appel modèle (sinon
+// le dépôt reste bloqué en 'en_cours').
+export const maxDuration = 60;
+
+// Liste blanche cohérente avec l'attribut accept côté client.
+const TYPES_AUTORISES = new Set([
+  "application/pdf",
+  "image/jpeg",
+  "image/png",
+  "image/heic",
+  "image/heif",
+]);
+const EXTENSIONS_AUTORISEES = new Set(["pdf", "jpg", "jpeg", "png", "heic", "heif"]);
+
 /** Assainit un nom de fichier pour un chemin de stockage. */
 function sanitizeFileName(name: string): string {
   const cleaned = name
@@ -91,10 +106,25 @@ export async function POST(
       );
     }
 
+    const safeName = sanitizeFileName(file.name);
+    const ext = safeName.includes(".") ? safeName.split(".").pop()!.toLowerCase() : "";
+    const declaredType = (file.type || "").toLowerCase();
+    // On accepte si le type MIME déclaré est dans la liste blanche
+    // OU si l'extension assainie est autorisée (certains navigateurs n'envoient
+    // pas de type fiable pour HEIC). Sinon rejet 400.
+    const typeOk = declaredType !== "" && TYPES_AUTORISES.has(declaredType);
+    const extOk = EXTENSIONS_AUTORISEES.has(ext);
+    if (!typeOk && !extOk) {
+      return NextResponse.json(
+        { error: "Type de fichier non autorisé (PDF, JPG, PNG ou HEIC uniquement)" },
+        { status: 400 },
+      );
+    }
+
     fileName = file.name;
     fileSize = file.size;
     mime = file.type || "application/octet-stream";
-    storagePath = `${collecte.id}/${itemIndex}-${sanitizeFileName(file.name)}`;
+    storagePath = `${collecte.id}/${itemIndex}-${safeName}`;
 
     const bytes = new Uint8Array(await file.arrayBuffer());
     const { error: uploadError } = await supabase.storage
