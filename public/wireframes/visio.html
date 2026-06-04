@@ -3880,6 +3880,14 @@ setInterval(() => {
     clean = (clean || '').trim();
     if (!clean) return;
     appendFinalLine(clean);
+    // Greffe ASTRAEOS · persistance : émettre la ligne finale pour l'IIFE de
+    // persistance (buffer + PATCH transcript_append débouncé). Try/catch :
+    // ne jamais casser la transcription si l'event échoue.
+    try {
+      document.dispatchEvent(new CustomEvent('astr-transcript-line', {
+        detail: { t: new Date().toISOString(), text: clean }
+      }));
+    } catch (e) { /* silencieux */ }
     finalBuffer += (finalBuffer ? ' ' : '') + clean;
     charsSinceSend += clean.length;
     if (finalBuffer.length > 4000) finalBuffer = finalBuffer.slice(finalBuffer.length - 4000);
@@ -4380,6 +4388,12 @@ setInterval(() => {
       + '</div>';
     insertCardTop(card);
     setTimeout(function () { card.classList.remove('new'); }, 6000);
+    // Greffe ASTRAEOS · persistance du conseil injecté.
+    try {
+      document.dispatchEvent(new CustomEvent('astr-conseil', {
+        detail: { titre: c.titre || '', type: c.type || '', detail: c.detail || '', repere_legal: c.repere_legal || null }
+      }));
+    } catch (e) { /* silencieux */ }
   }
 
   function injectArticle(a) {
@@ -4394,6 +4408,12 @@ setInterval(() => {
     var titleHtml = a.intitule ? '<strong>' + esc(a.intitule) + '</strong> — ' : '';
     card.innerHTML = refHtml + titleHtml + esc(a.extrait);
     legalList.insertBefore(card, legalList.firstChild);
+    // Greffe ASTRAEOS · persistance de l'article injecté.
+    try {
+      document.dispatchEvent(new CustomEvent('astr-article', {
+        detail: { reference: a.reference || '', intitule: a.intitule || '', extrait: a.extrait || '' }
+      }));
+    } catch (e) { /* silencieux */ }
   }
 
   function maybeSendConseils(fromInterval) {
@@ -4455,6 +4475,279 @@ setInterval(() => {
     if (userPaused) return;
     maybeSendConseils(true);
   }, SEND_INTERVAL_MS);
+})();
+</script>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- ASTRAEOS · Entretien persisté                                            -->
+<!-- Câble le cockpit visio à /api/entretiens : création/reprise, auto-save   -->
+<!-- du DCI, transcript + conseils + articles, clôture avec rapport.          -->
+<!-- Tout en try/catch silencieux : si l'API tombe, l'entretien reste         -->
+<!-- pleinement fonctionnel (mode dégradé = comportement actuel du masque).   -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<script>
+(function astraeosEntretienPersist() {
+  'use strict';
+
+  // ---- Paramètres d'URL (passés par /visio/[room]/page.tsx) --------------
+  var params = new URLSearchParams(window.location.search);
+  var room = (params.get('room') || '').replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 64);
+  var prospect = (params.get('prospect') || '').toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 64);
+  var nom = (params.get('nom') || '').trim().slice(0, 80);
+
+  // Sans room : pas de persistance (le masque tourne en local, inchangé).
+  if (!room) return;
+
+  var entretienId = null;
+
+  // ---- Helpers ------------------------------------------------------------
+  function esc(v) {
+    return String(v == null ? '' : v)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  function patchEntretien(payload) {
+    if (!entretienId) return Promise.resolve(false);
+    return fetch('/api/entretiens/' + encodeURIComponent(entretienId), {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    }).then(function (r) { return r.ok; }).catch(function () { return false; });
+  }
+
+  // ---- Re-render après remplacement du DCI_DATA par un snapshot serveur ---
+  function applySnapshotAndRerender(snapshot) {
+    if (!snapshot || typeof snapshot !== 'object' || typeof DCI_DATA === 'undefined') return;
+    try {
+      // DCI_DATA est un `const` : on mute en place plutôt que de réassigner.
+      Object.keys(DCI_DATA).forEach(function (k) { delete DCI_DATA[k]; });
+      Object.keys(snapshot).forEach(function (k) { DCI_DATA[k] = snapshot[k]; });
+      // S'assurer que la section courante existe encore dans le snapshot.
+      if (Array.isArray(DCI_DATA.sections) && DCI_DATA.sections.length) {
+        var exists = DCI_DATA.sections.some(function (s) { return s.id === CURRENT_SECTION; });
+        if (!exists) CURRENT_SECTION = DCI_DATA.sections[0].id;
+      }
+      if (typeof renderNav === 'function') renderNav();
+      if (typeof renderSection === 'function') renderSection();
+    } catch (e) { /* snapshot corrompu : on garde le DCI du masque */ }
+  }
+
+  // ---- Pastille « DCI client reçu » dans le bandeau -----------------------
+  function showDciPill(kinds) {
+    try {
+      if (document.getElementById('astr-dci-pill')) return;
+      var bar = document.querySelector('.live-indicators');
+      if (!bar) return;
+      var pill = document.createElement('span');
+      pill.id = 'astr-dci-pill';
+      pill.style.cssText = 'display:inline-flex;align-items:center;gap:5px;background:var(--green-bg,#e6f4ec);'
+        + 'color:var(--green-text,#1F5A36);font-size:10px;font-weight:700;letter-spacing:0.02em;'
+        + 'padding:4px 9px;border-radius:999px;line-height:1;';
+      var label = kinds && kinds.length ? ' · ' + kinds.join(', ') : '';
+      pill.innerHTML = '<span style="width:7px;height:7px;border-radius:50%;background:currentColor;flex:none;"></span>'
+        + 'DCI client reçu' + esc(label);
+      bar.insertBefore(pill, bar.firstChild);
+    } catch (e) { /* silencieux */ }
+  }
+
+  function loadDciBadge() {
+    if (!prospect) return;
+    fetch('/api/dci?prospect=' + encodeURIComponent(prospect), { cache: 'no-store' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (data) {
+        if (!data || !data.submissions) return;
+        var kinds = Object.keys(data.submissions).filter(function (k) {
+          return data.submissions[k];
+        });
+        if (kinds.length) showDciPill(kinds);
+      })
+      .catch(function () { /* silencieux */ });
+  }
+
+  // ---- Mise à jour du titre de session avec le nom (?nom=) ----------------
+  function applySessionTitle() {
+    if (!nom) return;
+    try {
+      var t = document.querySelector('.session-title');
+      if (t) t.textContent = 'Entretien · ' + nom;
+    } catch (e) { /* silencieux */ }
+  }
+
+  // ---- État de la pastille d'auto-save (reflète l'état réseau réel) -------
+  function setAutoSavePill(state) {
+    var pill = document.getElementById('auto-save-pill');
+    if (!pill) return;
+    if (state === 'saving') {
+      pill.textContent = 'Enregistrement…';
+      pill.style.background = 'var(--gold-100)';
+      pill.style.color = 'var(--gold-deep)';
+    } else if (state === 'saved') {
+      var t = new Date();
+      var tstr = String(t.getHours()).padStart(2, '0') + ':' + String(t.getMinutes()).padStart(2, '0') + ':' + String(t.getSeconds()).padStart(2, '0');
+      pill.textContent = 'Enregistré · ' + tstr;
+      pill.style.background = 'var(--green-bg)';
+      pill.style.color = 'var(--green-text)';
+    } else if (state === 'offline') {
+      pill.textContent = 'Hors-ligne, réessaiera';
+      pill.style.background = 'var(--gold-100)';
+      pill.style.color = 'var(--gold-deep)';
+    }
+  }
+
+  // ---- Auto-save DCI : wrap de triggerAutoSave (débouncé 2 s) -------------
+  var dciSaveTimer = null;
+  function scheduleDciSave() {
+    if (!entretienId || typeof DCI_DATA === 'undefined') return;
+    clearTimeout(dciSaveTimer);
+    dciSaveTimer = setTimeout(function () {
+      setAutoSavePill('saving');
+      patchEntretien({ dci_snapshot: DCI_DATA }).then(function (ok) {
+        setAutoSavePill(ok ? 'saved' : 'offline');
+      });
+    }, 2000);
+  }
+
+  if (typeof window.triggerAutoSave === 'function') {
+    var origTriggerAutoSave = window.triggerAutoSave;
+    window.triggerAutoSave = function () {
+      try { origTriggerAutoSave.apply(this, arguments); } catch (e) { /* garder l'original robuste */ }
+      try { scheduleDciSave(); } catch (e) { /* silencieux */ }
+    };
+  }
+
+  // ---- Transcript / conseils / articles : buffers + flush débouncés -------
+  var transcriptBuf = [];
+  var conseilsBuf = [];
+  var articlesBuf = [];
+  var transcriptTimer = null;
+  var insightsTimer = null;
+
+  function flushTranscript() {
+    if (!entretienId || !transcriptBuf.length) return;
+    var batch = transcriptBuf.splice(0, transcriptBuf.length);
+    patchEntretien({ transcript_append: batch }).then(function (ok) {
+      if (!ok) {
+        // Échec : on remet le lot en tête pour le prochain flush.
+        transcriptBuf = batch.concat(transcriptBuf);
+      }
+    });
+  }
+
+  function flushInsights() {
+    if (!entretienId) return;
+    var payload = {};
+    if (conseilsBuf.length) payload.conseils_append = conseilsBuf.splice(0, conseilsBuf.length);
+    if (articlesBuf.length) payload.articles_append = articlesBuf.splice(0, articlesBuf.length);
+    if (!payload.conseils_append && !payload.articles_append) return;
+    patchEntretien(payload).then(function (ok) {
+      if (!ok) {
+        if (payload.conseils_append) conseilsBuf = payload.conseils_append.concat(conseilsBuf);
+        if (payload.articles_append) articlesBuf = payload.articles_append.concat(articlesBuf);
+      }
+    });
+  }
+
+  document.addEventListener('astr-transcript-line', function (ev) {
+    var d = ev && ev.detail;
+    if (!d || !d.text) return;
+    transcriptBuf.push({ t: d.t || new Date().toISOString(), text: String(d.text).slice(0, 4000) });
+    if (transcriptBuf.length > 500) transcriptBuf = transcriptBuf.slice(-500);
+    clearTimeout(transcriptTimer);
+    transcriptTimer = setTimeout(flushTranscript, 5000);
+  });
+
+  document.addEventListener('astr-conseil', function (ev) {
+    var d = ev && ev.detail;
+    if (!d) return;
+    conseilsBuf.push(d);
+    if (conseilsBuf.length > 200) conseilsBuf = conseilsBuf.slice(-200);
+    clearTimeout(insightsTimer);
+    insightsTimer = setTimeout(flushInsights, 5000);
+  });
+
+  document.addEventListener('astr-article', function (ev) {
+    var d = ev && ev.detail;
+    if (!d) return;
+    articlesBuf.push(d);
+    if (articlesBuf.length > 200) articlesBuf = articlesBuf.slice(-200);
+    clearTimeout(insightsTimer);
+    insightsTimer = setTimeout(flushInsights, 5000);
+  });
+
+  // ---- Clôture : wrap de confirmEndInterview ------------------------------
+  function buildRapport() {
+    // generateInterviewReport() du masque ne renvoie rien d'exploitable
+    // (simple toast). On produit donc un rapport pragmatique.
+    var sections = [];
+    try {
+      if (typeof DCI_DATA !== 'undefined' && Array.isArray(DCI_DATA.sections)) {
+        sections = DCI_DATA.sections.map(function (s) {
+          return { id: s.id, num: s.num || null, title: s.title || '' };
+        });
+      }
+    } catch (e) { /* silencieux */ }
+    var duration = null;
+    try {
+      var timer = document.querySelector('.session-timer');
+      if (timer) duration = timer.textContent.trim();
+    } catch (e) { /* silencieux */ }
+    return {
+      sections: sections,
+      duration: duration,
+      prospect_slug: prospect || null,
+      display_name: nom || null,
+      generated_at: new Date().toISOString()
+    };
+  }
+
+  if (typeof window.confirmEndInterview === 'function') {
+    var origConfirmEnd = window.confirmEndInterview;
+    window.confirmEndInterview = function () {
+      try { origConfirmEnd.apply(this, arguments); } catch (e) { /* garder le comportement masque */ }
+      try {
+        // Vider les buffers restants avant de clôturer.
+        flushTranscript();
+        flushInsights();
+        if (entretienId) {
+          fetch('/api/entretiens/' + encodeURIComponent(entretienId) + '/terminer', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ rapport: buildRapport() })
+          }).catch(function () { /* silencieux */ });
+        }
+      } catch (e) { /* silencieux */ }
+    };
+  }
+
+  // ---- Ouverture : créer/reprendre l'entretien ----------------------------
+  function openEntretien() {
+    fetch('/api/entretiens', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ room: room, prospect_slug: prospect || undefined, display_name: nom || undefined })
+    }).then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (data) {
+        if (!data || !data.id) return;
+        entretienId = data.id;
+        if (data.dci_snapshot) applySnapshotAndRerender(data.dci_snapshot);
+      })
+      .catch(function () { /* mode dégradé : l'entretien tourne en local */ })
+      .then(function () {
+        loadDciBadge();
+      });
+  }
+
+  function init() {
+    applySessionTitle();
+    openEntretien();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
 })();
 </script>
 </body>

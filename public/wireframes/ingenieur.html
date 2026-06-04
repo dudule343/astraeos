@@ -27318,15 +27318,43 @@ document.addEventListener('DOMContentLoaded',function(){if(document.getElementBy
             + '</div>'
             + '<div class="astr-inbox-item-name" onclick="window.astrOpenProspect(\'' + slug.replace(/\\/g, '\\\\').replace(/'/g, "\\'") + '\')">' + name + '</div>'
             + '<div class="astr-inbox-item-slug">' + slug + '</div>'
+            + '<div class="astr-inbox-visio" data-astr-visio="' + slug + '" style="display:none;font-size:10.5px;color:var(--navy,#0A1F38);margin-top:6px;"></div>'
             + '<div class="astr-inbox-kinds">' + chips + '</div>'
             + '<div class="astr-inbox-item-actions">'
             +   '<button class="astr-inbox-btn" onclick="window.astrOpenProspect(\'' + slug.replace(/\\/g, '\\\\').replace(/'/g, "\\'") + '\')">Ouvrir l\'espace client</button>'
             + '</div>'
             + '</div>';
         }).join('');
+        decorateVisio(prospects);
       }
       src.innerHTML = 'Source : <strong>' + esc(data.source || 'inconnue') + '</strong>'
         + (data.source === 'file' ? ' (.data/dci-store.json local · OK pour démo)' : ' (Supabase)');
+    }
+
+    // Décore chaque carte prospect avec le nombre d'entretiens visio (discret).
+    function decorateVisio(prospects) {
+      prospects.forEach(function (p) {
+        var rawSlug = p.prospect_slug;
+        if (!rawSlug) return;
+        fetch('/api/entretiens?prospect=' + encodeURIComponent(rawSlug), { cache: 'no-store' })
+          .then(function (r) { return r.ok ? r.json() : null; })
+          .then(function (data) {
+            if (!data || !Array.isArray(data.entretiens) || !data.entretiens.length) return;
+            var el = document.querySelector('[data-astr-visio="' + esc(rawSlug) + '"]');
+            if (!el) return;
+            var n = data.entretiens.length;
+            var last = data.entretiens.reduce(function (acc, e) {
+              return (!acc || (e.started_at || '') > acc) ? (e.started_at || '') : acc;
+            }, '');
+            var dateStr = last
+              ? new Date(last).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })
+              : '';
+            el.innerHTML = '🎥 ' + n + ' entretien' + (n > 1 ? 's' : '')
+              + (dateStr ? ' · dernier le ' + esc(dateStr) : '');
+            el.style.display = 'block';
+          })
+          .catch(function () { /* silencieux */ });
+      });
     }
 
     var lastSig = '';

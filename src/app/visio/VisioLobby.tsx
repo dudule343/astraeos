@@ -14,21 +14,49 @@ function makeRoomId(): string {
   return `rdv-${id}`;
 }
 
+/** Slug prospect : [a-z0-9-], borné à 64 chars. */
+function sanitizeSlug(raw: string): string {
+  return raw.toLowerCase().replace(/[^a-z0-9-]/g, "").slice(0, 64);
+}
+
+/** Nom affichable : trim + borné à 80 chars. */
+function sanitizeNom(raw: string): string {
+  return raw.trim().slice(0, 80);
+}
+
 export default function VisioLobby() {
   // Ce composant n'est jamais rendu côté serveur (dynamic ssr:false) :
   // l'initialiseur peut générer l'aléatoire directement.
   const [room] = useState<string>(() => makeRoomId());
   const [copied, setCopied] = useState(false);
 
+  // ?prospect=<slug>&nom=<display name> dans l'URL du lobby → propagés vers
+  // l'entretien (bouton ingénieur + lien client). ssr:false → window dispo.
+  const { prospect, nom } = useMemo(() => {
+    if (typeof window === "undefined") return { prospect: "", nom: "" };
+    const p = new URLSearchParams(window.location.search);
+    return {
+      prospect: sanitizeSlug(p.get("prospect") ?? ""),
+      nom: sanitizeNom(p.get("nom") ?? ""),
+    };
+  }, []);
+
   const clientLink = useMemo(() => {
     if (!room) return "";
-    if (typeof window === "undefined") return `/visio/${room}?role=client`;
-    return `${window.location.origin}/visio/${room}?role=client`;
-  }, [room]);
+    // Le client n'a pas besoin du nom affichable : seul le prospect_slug le lie au dossier.
+    const q = new URLSearchParams({ role: "client" });
+    if (prospect) q.set("prospect", prospect);
+    const path = `/visio/${room}?${q.toString()}`;
+    if (typeof window === "undefined") return path;
+    return `${window.location.origin}${path}`;
+  }, [room, prospect]);
 
   function startAsEngineer() {
     if (!room) return;
-    window.location.href = `/visio/${room}?role=engineer`;
+    const q = new URLSearchParams({ role: "engineer" });
+    if (prospect) q.set("prospect", prospect);
+    if (nom) q.set("nom", nom);
+    window.location.href = `/visio/${room}?${q.toString()}`;
   }
 
   async function copyClientLink() {
