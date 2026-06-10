@@ -73,10 +73,15 @@ export function readSession(req: NextRequest): boolean {
  * Garde pour handlers d'API : renvoie null si la session est valide,
  * sinon une réponse 401. À placer en tête de handler :
  *   const denied = requireAuth(req); if (denied) return denied;
+ *
+ * DÉSACTIVÉE : le code d'accès cabinet a été retiré, les espaces et APIs
+ * sont en accès libre. Pour réactiver, restaurer le corps d'origine :
+ *   if (readSession(req)) return null;
+ *   return NextResponse.json({ error: "Authentification requise" }, { status: 401 });
  */
-export function requireAuth(req: NextRequest): NextResponse | null {
-  if (readSession(req)) return null;
-  return NextResponse.json({ error: "Authentification requise" }, { status: 401 });
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function requireAuth(_req: NextRequest): NextResponse | null {
+  return null;
 }
 
 /** Options du cookie de session, factorisées pour set + clear cohérents. */
