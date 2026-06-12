@@ -3851,7 +3851,7 @@ setInterval(() => {
   }
 
   // ---- Chargement de l'external API Jitsi (via <script src>) --------
-  var DOMAIN = 'meet.jit.si'; // l'ingénieur se connecte UNE fois (Google) dans le cadre vidéo → modérateur ; les clients entrent sans compte
+  var DOMAIN = 'srv1750581.hstgr.cloud'; // serveur Jitsi auto-hébergé (VPS Hostinger) : pas de compte, pas de limite de durée, premier arrivé = modérateur
   var SCRIPT_SRC = 'https://' + DOMAIN + '/external_api.js';
 
   function loadScript(src, cb) {
