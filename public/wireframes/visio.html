@@ -3645,7 +3645,17 @@ setInterval(() => {
     + 'text-align:center;color:#9fb0c6;font-size:12px;line-height:1.5;padding:24px;'
     + 'background:#04101f;border-radius:8px;z-index:1;}'
     + '.jts-status.jts-hidden{display:none;}'
-    + '.jts-err{color:#ffb3a7;}';
+    + '.jts-err{color:#ffb3a7;}'
+    // Overlay de marque : recouvre le watermark « jitsi » (coin haut-gauche).
+    // L'iframe Jitsi étant cross-origin, on ne peut pas masquer son logo de
+    // l'intérieur → on superpose le lockup PRIVEOS par-dessus.
+    + '.jts-brand{position:absolute;top:14px;left:16px;z-index:3;display:flex;align-items:center;gap:8px;'
+    + 'padding:6px 12px 6px 6px;border-radius:10px;background:rgba(4,16,31,0.55);backdrop-filter:blur(5px);'
+    + '-webkit-backdrop-filter:blur(5px);pointer-events:none;user-select:none;}'
+    + '.jts-brand-tile{width:30px;height:30px;border-radius:7px;background:var(--gold,#C68E0E);color:#fff;'
+    + 'display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;line-height:1;}'
+    + '.jts-brand-text{color:#fff;font-weight:600;font-size:14px;letter-spacing:0.04em;line-height:1;}'
+    + '.jts-brand-text strong{font-weight:800;color:#f0c869;}';
   var styleEl = document.createElement('style');
   styleEl.textContent = css;
   document.head.appendChild(styleEl);
@@ -3664,6 +3674,14 @@ setInterval(() => {
   status.textContent = 'Connexion à la salle vidéo…';
   zone.appendChild(container);
   zone.appendChild(status);
+
+  // Lockup PRIVEOS superposé au coin haut-gauche (couvre le watermark Jitsi).
+  var brand = document.createElement('div');
+  brand.className = 'jts-brand';
+  brand.setAttribute('aria-hidden', 'true');
+  brand.innerHTML = '<div class="jts-brand-tile">P</div>'
+    + '<div class="jts-brand-text">PRI<strong>VEOS</strong></div>';
+  container.appendChild(brand);
 
   function showStatus(msg, isErr) {
     status.textContent = msg;
@@ -3896,7 +3914,11 @@ setInterval(() => {
           startWithAudioMuted: false,
           startWithVideoMuted: false,
           enableWelcomePage: false,
-          disableProfile: true
+          disableProfile: true,
+          // Jitsi récent pilote le watermark in-call via config.defaultLogoUrl
+          // (le flag interfaceConfig SHOW_JITSI_WATERMARK est ignoré) : chaîne
+          // vide = pas de logo Jitsi. Le branding PRIVEOS est superposé en CSS.
+          defaultLogoUrl: ''
         },
         interfaceConfigOverwrite: {
           SHOW_JITSI_WATERMARK: false,
