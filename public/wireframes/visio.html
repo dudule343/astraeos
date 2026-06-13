@@ -5279,6 +5279,92 @@ setInterval(() => {
   setTimeout(function () {
     if (dciSummary()) maybeSendConseils(true);
   }, 2500);
+
+  // ============================================================
+  // DCI vivant : l'IA remplit le dossier depuis la conversation
+  // ============================================================
+  var lastExtractAt = 0;
+  var extracting = false;
+  var EXTRACT_INTERVAL_MS = 20000;
+
+  // Champs encore vides, candidats au remplissage par l'IA. La section courante
+  // (sujet probable de la conversation) est priorisée ; borné côté serveur.
+  function dciCandidateFields() {
+    var out = [];
+    try {
+      if (typeof DCI_DATA === 'undefined' || !DCI_DATA || !DCI_DATA.sections) return out;
+      var cur = (typeof CURRENT_SECTION !== 'undefined') ? CURRENT_SECTION : null;
+      DCI_DATA.sections.forEach(function (s) {
+        (s.groups || []).forEach(function (g, gi) {
+          (g.fields || []).forEach(function (f, fi) {
+            if (f && f.status === 'empty' && f.label) {
+              var item = { id: s.id + '|' + gi + '|' + fi, label: f.label, _cur: s.id === cur };
+              if (Array.isArray(f.options) && f.options.length) item.options = f.options.slice(0, 20);
+              out.push(item);
+            }
+          });
+        });
+      });
+    } catch (e) { return []; }
+    out.sort(function (a, b) { return (b._cur ? 1 : 0) - (a._cur ? 1 : 0); });
+    return out.map(function (o) { var c = { id: o.id, label: o.label }; if (o.options) c.options = o.options; return c; });
+  }
+
+  // Applique les valeurs extraites au DCI affiché (statut « ✨ Proposition IA »).
+  function applyDciUpdates(updates) {
+    if (!Array.isArray(updates) || !updates.length) return false;
+    var changed = false;
+    updates.forEach(function (u) {
+      if (!u || !u.id || !u.value) return;
+      var parts = String(u.id).split('|');
+      if (parts.length !== 3) return;
+      var sid = parts[0], gi = parseInt(parts[1], 10), fi = parseInt(parts[2], 10);
+      var s = DCI_DATA.sections.filter(function (x) { return x.id === sid; })[0];
+      if (!s || !s.groups || !s.groups[gi] || !s.groups[gi].fields || !s.groups[gi].fields[fi]) return;
+      var f = s.groups[gi].fields[fi];
+      if (f.status !== 'empty') return; // ne jamais écraser une donnée déjà saisie/validée
+      f.value = String(u.value);
+      f.status = 'ai-suggest';
+      f.conf = 80;
+      changed = true;
+    });
+    if (changed) {
+      try { if (typeof renderNav === 'function') renderNav(); } catch (e) {}
+      try { if (typeof renderSection === 'function') renderSection(); } catch (e) {}
+      // Le DCI a grossi → relance une analyse d'insights (croise DCI + conversation).
+      try { maybeSendConseils(true); } catch (e) {}
+    }
+    return changed;
+  }
+
+  function maybeExtractDci(fromInterval) {
+    if (userPaused && !fromInterval) return;
+    if (extracting) return;
+    var now = Date.now();
+    if (lastExtractAt && (now - lastExtractAt) < EXTRACT_INTERVAL_MS) return;
+    if (!finalBuffer.trim()) return;
+    var fields = dciCandidateFields();
+    if (!fields.length) return; // dossier déjà complet
+    extracting = true;
+    lastExtractAt = now;
+    fetch('/api/visio/dci-extract', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ transcript: finalBuffer.slice(-6000), fields: fields })
+    }).then(function (res) {
+      return res.ok ? res.json().catch(function () { return null; }) : null;
+    }).then(function (data) {
+      if (data && Array.isArray(data.updates)) applyDciUpdates(data.updates);
+    }).catch(function () {
+      // échec silencieux · retry au prochain tick
+    }).then(function () {
+      extracting = false;
+    });
+  }
+
+  setInterval(function () {
+    if (!userPaused) maybeExtractDci(true);
+  }, EXTRACT_INTERVAL_MS);
 })();
 </script>
 
