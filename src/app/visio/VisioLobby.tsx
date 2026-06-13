@@ -90,56 +90,99 @@ export default function VisioLobby() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#0A1F38] px-5 py-10">
-      <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-2xl">
-        <div className="mb-1 text-xs font-bold uppercase tracking-widest text-[#1F5A36]">
-          PRIVEOS · Visio
-        </div>
-        <h1 className="mb-2 text-2xl font-bold text-[#0A1F38]">Nouvel entretien</h1>
-        <p className="mb-6 text-sm leading-relaxed text-slate-500">
-          Visio hébergée par PRIVEOS, vue client épurée incluse. Le cockpit
-          (transcription, DCI, conseils) accompagne l&apos;entretien.
-        </p>
-
-        <div className="mb-6 rounded-lg bg-slate-50 px-4 py-3 text-sm text-slate-600">
-          Salle&nbsp;:{" "}
-          <span className="font-mono font-semibold text-[#0A1F38]">
-            {room ?? "…"}
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-[#0A1F38] via-[#0d243f] to-[#13294a] px-5 py-10">
+      <div className="w-full max-w-lg">
+        {/* Marque */}
+        <div className="mb-5 flex items-center gap-2.5">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#C68E0E] text-base font-extrabold text-white">
+            P
+          </div>
+          <span className="text-sm font-semibold tracking-wide text-white/90">
+            PRI<span className="font-extrabold text-[#f0c869]">VEOS</span>
+            <span className="ml-2 font-normal text-white/50">· Visio</span>
           </span>
         </div>
 
-        <button
-          type="button"
-          onClick={startAsEngineer}
-          disabled={!canStart}
-          className="mb-6 w-full rounded-lg bg-[#0A1F38] px-4 py-3 text-sm font-semibold text-white transition hover:brightness-110 disabled:opacity-40"
-        >
-          Démarrer l&apos;entretien (ingénieur) →
-        </button>
+        <div className="overflow-hidden rounded-2xl bg-white shadow-2xl">
+          {/* En-tête */}
+          <div className="border-b border-slate-100 px-8 pb-6 pt-8">
+            <h1 className="text-2xl font-bold text-[#0A1F38]">
+              Démarrer un entretien
+            </h1>
+            <p className="mt-2 text-sm leading-relaxed text-slate-500">
+              {nom ? (
+                <>
+                  Entretien avec{" "}
+                  <span className="font-semibold text-[#0A1F38]">{nom}</span>.
+                </>
+              ) : (
+                "Entretien visio hébergé par PRIVEOS. Aucun client préchargé : le dossier se remplit pendant l'échange."
+              )}
+            </p>
+          </div>
 
-        <label
-          htmlFor="client-link-input"
-          className="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-400"
-        >
-          Lien à partager au client
-        </label>
-        <div className="flex gap-2">
-          <input
-            id="client-link-input"
-            type="text"
-            readOnly
-            value={clientLink}
-            onFocus={(e) => e.currentTarget.select()}
-            className="flex-1 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 font-mono text-xs text-slate-700"
-          />
-          <button
-            type="button"
-            onClick={copyClientLink}
-            disabled={!clientLink}
-            className="rounded-lg bg-[#1F5A36] px-4 py-2 text-xs font-semibold text-white transition hover:brightness-110 disabled:opacity-40"
-          >
-            {copied ? "Copié ✓" : "Copier"}
-          </button>
+          {/* Étape 1 · Ingénieur */}
+          <div className="px-8 pt-6">
+            <div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-[#C68E0E]">
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#C68E0E]/15 text-[11px]">
+                1
+              </span>
+              Vous, l&apos;ingénieur
+            </div>
+            <button
+              type="button"
+              onClick={startAsEngineer}
+              disabled={!canStart}
+              className="w-full rounded-xl bg-[#0A1F38] px-4 py-3.5 text-sm font-semibold text-white transition hover:brightness-125 disabled:opacity-40"
+            >
+              Rejoindre l&apos;entretien maintenant →
+            </button>
+            <p className="mt-2 text-xs leading-relaxed text-slate-400">
+              Votre cockpit s&apos;ouvre&nbsp;: transcription en direct, DCI et
+              conseils IA pendant l&apos;échange.
+            </p>
+          </div>
+
+          {/* Étape 2 · Client */}
+          <div className="mt-6 border-t border-slate-100 bg-slate-50/60 px-8 py-6">
+            <div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-[#1F5A36]">
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#1F5A36]/15 text-[11px]">
+                2
+              </span>
+              Votre client
+            </div>
+            <p className="mb-3 text-xs leading-relaxed text-slate-500">
+              Envoyez-lui ce lien&nbsp;: il rejoint la même salle avec une vue
+              épurée, sans votre cockpit.
+            </p>
+            <div className="flex gap-2">
+              <input
+                id="client-link-input"
+                type="text"
+                readOnly
+                value={clientLink}
+                onFocus={(e) => e.currentTarget.select()}
+                className="min-w-0 flex-1 rounded-lg border border-slate-200 bg-white px-3 py-2.5 font-mono text-xs text-slate-600"
+              />
+              <button
+                type="button"
+                onClick={copyClientLink}
+                disabled={!clientLink}
+                className="shrink-0 rounded-lg bg-[#1F5A36] px-4 py-2.5 text-xs font-semibold text-white transition hover:brightness-110 disabled:opacity-40"
+              >
+                {copied ? "Copié ✓" : "Copier"}
+              </button>
+            </div>
+          </div>
+
+          {/* Pied : salle */}
+          <div className="flex items-center justify-center gap-1.5 px-8 py-3 text-[11px] text-slate-400">
+            Salle
+            <span className="font-mono font-semibold text-slate-500">
+              {room ?? "…"}
+            </span>
+            <span className="text-slate-300">· générée automatiquement</span>
+          </div>
         </div>
       </div>
     </div>
