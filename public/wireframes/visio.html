@@ -3933,8 +3933,10 @@ setInterval(() => {
           disableProfile: true,
           // Jitsi récent pilote le watermark in-call via config.defaultLogoUrl
           // (le flag interfaceConfig SHOW_JITSI_WATERMARK est ignoré) : chaîne
-          // vide = pas de logo Jitsi. Le branding PRIVEOS est superposé en CSS.
-          defaultLogoUrl: ''
+          // vide = pas de logo Jitsi. logoImageUrl est le nom récent (defaultLogoUrl
+          // est déprécié) → on vide les deux. Le branding PRIVEOS est superposé en CSS.
+          defaultLogoUrl: '',
+          logoImageUrl: ''
         },
         interfaceConfigOverwrite: {
           SHOW_JITSI_WATERMARK: false,
@@ -3955,6 +3957,23 @@ setInterval(() => {
         hideStatus();
         // Signale à la pompe de transcription de démarrer automatiquement.
         try { document.dispatchEvent(new CustomEvent('astr-conference-joined')); } catch (e) {}
+      });
+
+      // Réception des lignes de transcription du prospect : son navigateur
+      // transcrit son micro et les diffuse via le canal de données Jitsi
+      // (sendEndpointTextMessage). On les réinjecte dans la pompe locale →
+      // panneau + onglet Transcription + conseils IA, étiquetées « Prospect ».
+      api.addEventListener('endpointTextMessageReceived', function (e) {
+        try {
+          var ed = e && e.data && e.data.eventData ? e.data.eventData : null;
+          var raw = ed && typeof ed.text === 'string' ? ed.text : null;
+          if (!raw || raw.indexOf('astrType') === -1) return;
+          var msg = JSON.parse(raw);
+          if (!msg || msg.astrType !== 'transcript' || !msg.text) return;
+          if (typeof window.__astraeosRemoteTranscript === 'function') {
+            window.__astraeosRemoteTranscript(String(msg.text), msg.t);
+          }
+        } catch (err) { /* pas un message de transcription → on ignore */ }
       });
       // Repli : dès que l'iframe Jitsi est rendue, le voile n'a plus de raison
       // de masquer quoi que ce soit (prejoin, autorisations, file d'attente…).
@@ -4407,13 +4426,16 @@ setInterval(() => {
   var startTs = 0;
   var emptyShown = true;
 
-  function appendFinalLine(text) {
+  function appendFinalLine(text, speaker) {
     if (emptyShown) { stream.innerHTML = ''; emptyShown = false; }
     var interim = stream.querySelector('.alt-line.alt-interim-line');
     if (interim) interim.remove();
+    var who = speaker === 'prospect'
+      ? '<span style="color:#f0c869;font-weight:700;margin-right:6px;">Prospect</span>'
+      : '<span style="color:#7fd0a8;font-weight:700;margin-right:6px;">Vous</span>';
     var line = document.createElement('div');
     line.className = 'alt-line';
-    line.innerHTML = '<span class="alt-ts">' + esc(mmss(Date.now() - startTs)) + '</span>' + esc(text);
+    line.innerHTML = '<span class="alt-ts">' + esc(mmss(Date.now() - startTs)) + '</span>' + who + esc(text);
     stream.appendChild(line);
     stream.scrollTop = stream.scrollHeight;
   }
@@ -4432,23 +4454,32 @@ setInterval(() => {
 
   // Texte finalisé → buffer pour les conseils + déclenchement
   var finalBuffer = '';
-  function pushFinalText(clean) {
+  function pushFinalText(clean, speaker) {
     clean = (clean || '').trim();
     if (!clean) return;
-    appendFinalLine(clean);
+    if (!startTs) startTs = Date.now(); // une ligne du prospect peut arriver avant un démarrage local
+    appendFinalLine(clean, speaker);
     // Greffe ASTRAEOS · persistance : émettre la ligne finale pour l'IIFE de
-    // persistance (buffer + PATCH transcript_append débouncé). Try/catch :
-    // ne jamais casser la transcription si l'event échoue.
+    // persistance (buffer + PATCH transcript_append débouncé) ET pour l'onglet
+    // Transcription. Try/catch : ne jamais casser la transcription si l'event échoue.
     try {
       document.dispatchEvent(new CustomEvent('astr-transcript-line', {
-        detail: { t: new Date().toISOString(), text: clean }
+        detail: { t: new Date().toISOString(), text: clean, speaker: speaker || 'engineer' }
       }));
     } catch (e) { /* silencieux */ }
-    finalBuffer += (finalBuffer ? ' ' : '') + clean;
+    // Le conseil IA bénéficie de l'attribution des tours de parole.
+    var label = speaker === 'prospect' ? 'Prospect: ' : 'Conseiller: ';
+    finalBuffer += (finalBuffer ? ' ' : '') + label + clean;
     charsSinceSend += clean.length;
     if (finalBuffer.length > 4000) finalBuffer = finalBuffer.slice(finalBuffer.length - 4000);
     maybeSendConseils(false);
   }
+
+  // Ligne du prospect reçue via le canal de données Jitsi (envoyée par le
+  // navigateur du client). Exposée pour l'écouteur Jitsi de l'IIFE visio.
+  window.__astraeosRemoteTranscript = function (text, t) {
+    pushFinalText(String(text == null ? '' : text), 'prospect');
+  };
 
   // ============================================================
   // État global de capture
@@ -5389,6 +5420,67 @@ setInterval(() => {
   }
 })();
 
+/* ASTRAEOS · Transcription CÔTÉ CLIENT (prospect).
+   Le navigateur du prospect transcrit son propre micro (Web Speech, déjà
+   autorisé pour l'appel → aucun prompt) et diffuse chaque ligne finale à
+   l'ingénieur via le canal de données Jitsi (sendEndpointTextMessage). Aucune
+   UI : seul l'ingénieur qui a lancé la visio voit la transcription. Ne tourne
+   QUE pour role=client. */
+(function astraeosClientTranscript() {
+  'use strict';
+  try { if (new URLSearchParams(window.location.search).get('role') !== 'client') return; }
+  catch (e) { return; }
+  var SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRec) return; // navigateur sans reconnaissance vocale → pas de capture côté client
+
+  var recog = null, started = false, joined = false;
+  var queue = [];
+
+  function deliver(msg) {
+    var api = window.__astraeosJitsi;
+    if (joined && api && typeof api.executeCommand === 'function') {
+      try { api.executeCommand('sendEndpointTextMessage', '', msg); return true; }
+      catch (e) { return false; }
+    }
+    return false;
+  }
+  function sendLine(text) {
+    var msg = JSON.stringify({ astrType: 'transcript', t: new Date().toISOString(), text: text });
+    if (!deliver(msg)) queue.push(msg); // canal pas prêt → on garde et on rejoue au flush
+  }
+  function flush() {
+    while (queue.length) { if (!deliver(queue[0])) break; queue.shift(); }
+  }
+  function build() {
+    var r = new SpeechRec();
+    r.lang = 'fr-FR';
+    r.continuous = true;
+    r.interimResults = true;
+    r.onresult = function (ev) {
+      for (var i = ev.resultIndex; i < ev.results.length; i++) {
+        var res = ev.results[i];
+        if (res.isFinal && res[0] && res[0].transcript) {
+          var t = res[0].transcript.trim();
+          if (t) sendLine(t);
+        }
+      }
+    };
+    r.onend = function () { if (started) { try { r.start(); } catch (e) {} } };
+    r.onerror = function () { /* onend relancera la reconnaissance */ };
+    return r;
+  }
+  function start() {
+    if (started) return;
+    started = true;
+    try { recog = build(); recog.start(); } catch (e) {}
+  }
+  document.addEventListener('astr-conference-joined', function () {
+    joined = true;
+    flush();
+    start();
+  });
+})();
+
 /* ASTRAEOS · Miroir de la transcription dans l'onglet dédié du panneau droit.
    Écoute les lignes finales (astr-transcript-line) émises par la pompe de
    transcription et les empile dans #tr-live-list. Autonome : sans l'onglet
@@ -5416,10 +5508,13 @@ setInterval(() => {
     if (!text) return;
     if (empty) empty.style.display = 'none';
     if (dot) dot.style.background = '#27c06b';
+    var who = d.speaker === 'prospect'
+      ? '<span style="color:var(--gold-deep,#9a6c0a); font-weight:700; margin-right:6px;">Prospect</span>'
+      : '<span style="color:#1F5A36; font-weight:700; margin-right:6px;">Vous</span>';
     var line = document.createElement('div');
     line.style.cssText = 'margin-bottom:7px; padding-bottom:7px; border-bottom:1px solid rgba(16,45,80,0.06);';
     line.innerHTML = '<span style="color:var(--navy-300); font-variant-numeric:tabular-nums; font-size:10px; margin-right:7px;">'
-      + esc(hhmm(d.t)) + '</span>' + esc(text);
+      + esc(hhmm(d.t)) + '</span>' + who + esc(text);
     list.appendChild(line);
     var pane = document.getElementById('pane-transcript');
     if (pane && pane.classList.contains('active')) line.scrollIntoView({ block: 'nearest' });
