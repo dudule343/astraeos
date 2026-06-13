@@ -4600,6 +4600,7 @@ setInterval(() => {
       setNote('Transcription locale indisponible sur ce navigateur (API Web Speech absente). Connectez Deepgram pour la transcription complète.', true);
       return false;
     }
+    if (wsRunning) return true; // déjà une reconnaissance en cours → pas de seconde instance
     activeMode = 'webspeech';
     setMode('Micro local', false);
     showUpsell();
@@ -4702,8 +4703,13 @@ setInterval(() => {
       startWebSpeech();
       return;
     }
+    // Toujours repartir propre : tue toute socket/stream Deepgram résiduel
+    // (couvre un double-démarrage dans la fenêtre async + évite la fuite du
+    // précédent flux micro).
+    cleanupDeepgram();
     navigator.mediaDevices.getUserMedia({ audio: true })
       .then(function (mic) {
+        if (dgMicStream) { try { dgMicStream.getTracks().forEach(function (t) { t.stop(); }); } catch (e) {} }
         dgMicStream = mic;
         openDeepgramSocket(token, mic, true);
       })
@@ -4855,7 +4861,9 @@ setInterval(() => {
     };
 
     ws.onerror = function () {
-      if (activeMode !== 'deepgram') {
+      // Erreur de la socket Deepgram → si on est bien en mode Deepgram, on
+      // bascule sur le micro local pour ne pas perdre la transcription.
+      if (activeMode === 'deepgram') {
         setNote('Erreur Deepgram. Repli sur le micro local.', true);
         cleanupDeepgram();
         if (!userPaused) startWebSpeech();
@@ -4875,6 +4883,7 @@ setInterval(() => {
   // Démarrage / pause / arrêt unifiés
   // ============================================================
   function startTranscription() {
+    if (activeMode) return; // déjà en cours (Deepgram ou micro local) → pas de double-démarrage
     userPaused = false;
     if (!startTs) startTs = Date.now();
     panel.classList.add('alt-running');
@@ -5239,10 +5248,11 @@ setInterval(() => {
       body: JSON.stringify(payload)
     }).then(function (res) {
       if (res.status === 409) { injectIaDisconnectedCard(); return null; }
-      if (!res.ok) return null;
-      return res.json().catch(function () { return null; });
+      if (!res.ok) { flagIaError(); return null; }
+      return res.json().catch(function () { flagIaError(); return null; });
     }).then(function (data) {
       if (!data) return;
+      clearIaError();
       if (Array.isArray(data.conseils)) {
         data.conseils.forEach(function (c) {
           if (!c || !c.detail) return;
@@ -5262,10 +5272,28 @@ setInterval(() => {
         });
       }
     }).catch(function () {
-      // échec réseau silencieux · retry au prochain tick
+      flagIaError(); // réseau indisponible → on le signale (retry au prochain tick)
     }).then(function () {
       sending = false;
     });
+  }
+
+  // Retour visible de l'état IA dans l'en-tête de l'onglet Insights (au lieu
+  // d'un échec silencieux qui laisse croire que l'analyse tourne).
+  function flagIaError() {
+    var el = document.getElementById('insights-count');
+    if (!el) return;
+    el.setAttribute('data-err', '1');
+    el.textContent = '⚠ Analyse IA momentanément indisponible';
+  }
+  function clearIaError() {
+    var el = document.getElementById('insights-count');
+    if (!el || !el.getAttribute('data-err')) return;
+    el.removeAttribute('data-err');
+    var n = el.getAttribute('data-n');
+    el.textContent = n
+      ? (n + (parseInt(n, 10) > 1 ? ' opportunités identifiées' : ' opportunité identifiée'))
+      : "L'IA analyse en temps réel";
   }
 
   setInterval(function () {
