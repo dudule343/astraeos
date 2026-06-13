@@ -16,22 +16,29 @@ export async function POST(req: NextRequest) {
   const denied = requireAuth(req);
   if (denied) return denied;
 
-  // 1. Clé maître Deepgram. Absente → 409 (le front bascule sur Web Speech).
+  // 1. Clé maître Deepgram : clé serveur PRIVEOS (env DEEPGRAM_API_KEY) en
+  //    priorité, sinon repli sur la clé du cabinet (stt_settings). Absente des
+  //    deux → 409 (le front bascule sur Web Speech).
   let masterKey: string;
-  try {
-    const supabase = createAdminClient();
-    const { data: settings } = await supabase
-      .from("stt_settings")
-      .select("api_key")
-      .limit(1)
-      .maybeSingle();
+  const envKey = process.env.DEEPGRAM_API_KEY?.trim();
+  if (envKey) {
+    masterKey = envKey;
+  } else {
+    try {
+      const supabase = createAdminClient();
+      const { data: settings } = await supabase
+        .from("stt_settings")
+        .select("api_key")
+        .limit(1)
+        .maybeSingle();
 
-    if (!settings || !settings.api_key) {
+      if (!settings || !settings.api_key) {
+        return NextResponse.json({ error: "STT non connectée" }, { status: 409 });
+      }
+      masterKey = settings.api_key as string;
+    } catch {
       return NextResponse.json({ error: "STT non connectée" }, { status: 409 });
     }
-    masterKey = settings.api_key as string;
-  } catch {
-    return NextResponse.json({ error: "STT non connectée" }, { status: 409 });
   }
 
   const authHeader = { Authorization: `Token ${masterKey}` };

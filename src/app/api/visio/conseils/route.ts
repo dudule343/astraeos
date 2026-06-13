@@ -162,24 +162,31 @@ export async function POST(req: NextRequest) {
   const contexteStr =
     typeof contexte === "string" ? contexte.trim().slice(0, CONTEXTE_MAX) : "";
 
-  // 2. Clé IA. Absente → 409.
+  // 2. Clé IA : clé serveur PRIVEOS (env ANTHROPIC_API_KEY) en priorité, sinon
+  //    repli sur la clé du cabinet (ia_settings). Absente des deux → 409.
   let apiKey: string;
   let model: string;
-  try {
-    const supabase = createAdminClient();
-    const { data: settings } = await supabase
-      .from("ia_settings")
-      .select("api_key, model")
-      .limit(1)
-      .maybeSingle();
+  const envApiKey = process.env.ANTHROPIC_API_KEY?.trim();
+  if (envApiKey) {
+    apiKey = envApiKey;
+    model = process.env.ANTHROPIC_MODEL?.trim() || DEFAULT_MODEL;
+  } else {
+    try {
+      const supabase = createAdminClient();
+      const { data: settings } = await supabase
+        .from("ia_settings")
+        .select("api_key, model")
+        .limit(1)
+        .maybeSingle();
 
-    if (!settings || !settings.api_key) {
+      if (!settings || !settings.api_key) {
+        return NextResponse.json({ error: "IA non connectée" }, { status: 409 });
+      }
+      apiKey = settings.api_key as string;
+      model = (settings.model as string) || DEFAULT_MODEL;
+    } catch {
       return NextResponse.json({ error: "IA non connectée" }, { status: 409 });
     }
-    apiKey = settings.api_key as string;
-    model = (settings.model as string) || DEFAULT_MODEL;
-  } catch {
-    return NextResponse.json({ error: "IA non connectée" }, { status: 409 });
   }
 
   // 3. Prompts.

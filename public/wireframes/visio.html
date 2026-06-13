@@ -929,6 +929,10 @@ select.v4-modal-input { cursor:pointer; appearance:none; -webkit-appearance:none
           Insights IA
           <span class="tab-badge">5</span>
         </button>
+        <button class="assist-tab" onclick="setAssistTab('transcript')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="13" y2="17"/></svg>
+          Transcription
+        </button>
       </div>
 
       <div class="assist-body">
@@ -1263,6 +1267,18 @@ select.v4-modal-input { cursor:pointer; appearance:none; -webkit-appearance:none
             </div>
             <div id="legal-live-list"></div>
           </div>
+        </div>
+
+        <!-- Pane 5 · Transcription en direct -->
+        <div class="assist-pane" id="pane-transcript">
+          <div style="display:flex; align-items:center; gap:7px; font-size:11px; font-weight:800; letter-spacing:0.04em; text-transform:uppercase; color:var(--navy); margin-bottom:10px;">
+            <span id="tr-live-dot" style="display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--navy-300); transition:background 0.2s;"></span>
+            Transcription en direct
+          </div>
+          <div id="tr-live-empty" style="font-size:10px; color:var(--navy-300); font-style:italic; line-height:1.55;">
+            La transcription de l'entretien s'affichera ici, ligne par ligne, au fil de la conversation. Lancez-la depuis le panneau « Transcription en direct » en bas à gauche de l'écran.
+          </div>
+          <div id="tr-live-list" style="font-size:11.5px; line-height:1.6; color:var(--navy);"></div>
         </div>
 
       </div>
@@ -3645,7 +3661,17 @@ setInterval(() => {
     + 'text-align:center;color:#9fb0c6;font-size:12px;line-height:1.5;padding:24px;'
     + 'background:#04101f;border-radius:8px;z-index:1;}'
     + '.jts-status.jts-hidden{display:none;}'
-    + '.jts-err{color:#ffb3a7;}';
+    + '.jts-err{color:#ffb3a7;}'
+    // Overlay de marque : recouvre le watermark « jitsi » (coin haut-gauche).
+    // L'iframe Jitsi étant cross-origin, on ne peut pas masquer son logo de
+    // l'intérieur → on superpose le lockup PRIVEOS par-dessus.
+    + '.jts-brand{position:absolute;top:14px;left:16px;z-index:3;display:flex;align-items:center;gap:8px;'
+    + 'padding:6px 12px 6px 6px;border-radius:10px;background:rgba(4,16,31,0.55);backdrop-filter:blur(5px);'
+    + '-webkit-backdrop-filter:blur(5px);pointer-events:none;user-select:none;}'
+    + '.jts-brand-tile{width:30px;height:30px;border-radius:7px;background:var(--gold,#C68E0E);color:#fff;'
+    + 'display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;line-height:1;}'
+    + '.jts-brand-text{color:#fff;font-weight:600;font-size:14px;letter-spacing:0.04em;line-height:1;}'
+    + '.jts-brand-text strong{font-weight:800;color:#f0c869;}';
   var styleEl = document.createElement('style');
   styleEl.textContent = css;
   document.head.appendChild(styleEl);
@@ -3664,6 +3690,14 @@ setInterval(() => {
   status.textContent = 'Connexion à la salle vidéo…';
   zone.appendChild(container);
   zone.appendChild(status);
+
+  // Lockup PRIVEOS superposé au coin haut-gauche (couvre le watermark Jitsi).
+  var brand = document.createElement('div');
+  brand.className = 'jts-brand';
+  brand.setAttribute('aria-hidden', 'true');
+  brand.innerHTML = '<div class="jts-brand-tile">P</div>'
+    + '<div class="jts-brand-text">PRI<strong>VEOS</strong></div>';
+  container.appendChild(brand);
 
   function showStatus(msg, isErr) {
     status.textContent = msg;
@@ -3896,7 +3930,13 @@ setInterval(() => {
           startWithAudioMuted: false,
           startWithVideoMuted: false,
           enableWelcomePage: false,
-          disableProfile: true
+          disableProfile: true,
+          // Jitsi récent pilote le watermark in-call via config.defaultLogoUrl
+          // (le flag interfaceConfig SHOW_JITSI_WATERMARK est ignoré) : chaîne
+          // vide = pas de logo Jitsi. logoImageUrl est le nom récent (defaultLogoUrl
+          // est déprécié) → on vide les deux. Le branding PRIVEOS est superposé en CSS.
+          defaultLogoUrl: '',
+          logoImageUrl: ''
         },
         interfaceConfigOverwrite: {
           SHOW_JITSI_WATERMARK: false,
@@ -3913,7 +3953,14 @@ setInterval(() => {
         }
       });
 
-      api.addEventListener('videoConferenceJoined', hideStatus);
+      api.addEventListener('videoConferenceJoined', function () {
+        hideStatus();
+        // Signale à la pompe de transcription de démarrer automatiquement.
+        try { document.dispatchEvent(new CustomEvent('astr-conference-joined')); } catch (e) {}
+      });
+      // NB : la transcription du prospect transite par Supabase Realtime
+      // (canal partagé par salle), pas par le canal de données Jitsi qui
+      // dépend de l'établissement WebRTC. Voir l'IIFE astraeosRealtime.
       // Repli : dès que l'iframe Jitsi est rendue, le voile n'a plus de raison
       // de masquer quoi que ce soit (prejoin, autorisations, file d'attente…).
       var jtsWait = setInterval(function () {
@@ -4365,13 +4412,16 @@ setInterval(() => {
   var startTs = 0;
   var emptyShown = true;
 
-  function appendFinalLine(text) {
+  function appendFinalLine(text, speaker) {
     if (emptyShown) { stream.innerHTML = ''; emptyShown = false; }
     var interim = stream.querySelector('.alt-line.alt-interim-line');
     if (interim) interim.remove();
+    var who = speaker === 'prospect'
+      ? '<span style="color:#f0c869;font-weight:700;margin-right:6px;">Prospect</span>'
+      : '<span style="color:#7fd0a8;font-weight:700;margin-right:6px;">Vous</span>';
     var line = document.createElement('div');
     line.className = 'alt-line';
-    line.innerHTML = '<span class="alt-ts">' + esc(mmss(Date.now() - startTs)) + '</span>' + esc(text);
+    line.innerHTML = '<span class="alt-ts">' + esc(mmss(Date.now() - startTs)) + '</span>' + who + esc(text);
     stream.appendChild(line);
     stream.scrollTop = stream.scrollHeight;
   }
@@ -4390,23 +4440,42 @@ setInterval(() => {
 
   // Texte finalisé → buffer pour les conseils + déclenchement
   var finalBuffer = '';
-  function pushFinalText(clean) {
+  function pushFinalText(clean, speaker) {
     clean = (clean || '').trim();
     if (!clean) return;
-    appendFinalLine(clean);
+    if (!startTs) startTs = Date.now(); // une ligne du prospect peut arriver avant un démarrage local
+    appendFinalLine(clean, speaker);
     // Greffe ASTRAEOS · persistance : émettre la ligne finale pour l'IIFE de
-    // persistance (buffer + PATCH transcript_append débouncé). Try/catch :
-    // ne jamais casser la transcription si l'event échoue.
+    // persistance (buffer + PATCH transcript_append débouncé) ET pour l'onglet
+    // Transcription. Try/catch : ne jamais casser la transcription si l'event échoue.
     try {
       document.dispatchEvent(new CustomEvent('astr-transcript-line', {
-        detail: { t: new Date().toISOString(), text: clean }
+        detail: { t: new Date().toISOString(), text: clean, speaker: speaker || 'engineer' }
       }));
     } catch (e) { /* silencieux */ }
-    finalBuffer += (finalBuffer ? ' ' : '') + clean;
+    // Le conseil IA bénéficie de l'attribution des tours de parole.
+    var label = speaker === 'prospect' ? 'Prospect: ' : 'Conseiller: ';
+    finalBuffer += (finalBuffer ? ' ' : '') + label + clean;
     charsSinceSend += clean.length;
     if (finalBuffer.length > 4000) finalBuffer = finalBuffer.slice(finalBuffer.length - 4000);
     maybeSendConseils(false);
   }
+
+  // Ligne du prospect reçue via Supabase Realtime (diffusée par le navigateur
+  // du client). Réinjectée dans la pompe locale, étiquetée « Prospect ».
+  window.__astraeosRemoteTranscript = function (text, t) {
+    pushFinalText(String(text == null ? '' : text), 'prospect');
+  };
+  // Abonnement au canal Realtime de la salle dès qu'il est disponible.
+  (function subscribeRemoteTranscript() {
+    if (window.__astrRealtime && typeof window.__astrRealtime.onMessage === 'function') {
+      window.__astrRealtime.onMessage(function (d) {
+        if (d && d.text) window.__astraeosRemoteTranscript(String(d.text), d.t);
+      });
+      return;
+    }
+    setTimeout(subscribeRemoteTranscript, 300);
+  })();
 
   // ============================================================
   // État global de capture
@@ -4535,10 +4604,34 @@ setInterval(() => {
           startWebSpeech();
           return;
         }
-        beginDisplayCapture(data.key);
+        // Salle Jitsi intégrée → micro seul, sans aucun prompt (le micro est
+        // déjà autorisé pour l'appel). Mode compagnon Meet/Zoom → partage de
+        // l'onglet tiers (impossible à éviter : l'audio du prospect est dans
+        // l'autre onglet).
+        if (sttTool) beginDisplayCapture(data.key);
+        else beginMicCapture(data.key);
       })
       .catch(function () {
         setNote('Réseau indisponible pour la transcription complète. Repli sur le micro local.', true);
+        startWebSpeech();
+      });
+  }
+
+  // Capture micro seul (salle Jitsi intégrée) : aucun partage d'onglet, donc
+  // aucun prompt. Le micro est déjà autorisé par Jitsi pour l'appel.
+  function beginMicCapture(token) {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      setNote('Micro non disponible ici. Repli sur la reconnaissance locale.', true);
+      startWebSpeech();
+      return;
+    }
+    navigator.mediaDevices.getUserMedia({ audio: true })
+      .then(function (mic) {
+        dgMicStream = mic;
+        openDeepgramSocket(token, mic, true);
+      })
+      .catch(function () {
+        setNote('Micro refusé. Repli sur la reconnaissance locale.', true);
         startWebSpeech();
       });
   }
@@ -4581,7 +4674,7 @@ setInterval(() => {
       });
   }
 
-  function openDeepgramSocket(token, stream) {
+  function openDeepgramSocket(token, stream, micOnly) {
     var url = 'wss://api.deepgram.com/v1/listen'
       + '?model=nova-2&language=fr&punctuate=true&interim_results=true'
       + '&encoding=linear16&sample_rate=16000&channels=1';
@@ -4610,19 +4703,22 @@ setInterval(() => {
           try { dgWs.send(pcm.buffer); } catch (err) {}
         };
         dgSource.connect(dgProcessor);
-        // Mixe le micro de l'ingénieur : l'audio de l'onglet ne contient que
-        // les voix DISTANTES (le client) — sans ce branchement, la voix de
-        // l'ingénieur n'était pas transcrite.
-        navigator.mediaDevices.getUserMedia({ audio: true })
-          .then(function (mic) {
-            if (!dgAudioCtx) { mic.getTracks().forEach(function (t) { try { t.stop(); } catch (e) {} }); return; }
-            dgMicStream = mic;
-            dgMicSource = dgAudioCtx.createMediaStreamSource(mic);
-            dgMicSource.connect(dgProcessor);
-          })
-          .catch(function () {
-            setNote('Micro refusé : seule la voix du client sera transcrite.', true);
-          });
+        // Mode partage d'onglet (compagnon Meet/Zoom) : l'audio de l'onglet ne
+        // contient que les voix DISTANTES → on mixe le micro de l'ingénieur.
+        // Mode micro seul (salle Jitsi intégrée) : `stream` EST déjà le micro,
+        // pas de second branchement.
+        if (!micOnly) {
+          navigator.mediaDevices.getUserMedia({ audio: true })
+            .then(function (mic) {
+              if (!dgAudioCtx) { mic.getTracks().forEach(function (t) { try { t.stop(); } catch (e) {} }); return; }
+              dgMicStream = mic;
+              dgMicSource = dgAudioCtx.createMediaStreamSource(mic);
+              dgMicSource.connect(dgProcessor);
+            })
+            .catch(function () {
+              setNote('Micro refusé : seule la voix du client sera transcrite.', true);
+            });
+        }
         // destination requise pour que ScriptProcessor s'exécute (gain 0 → silencieux)
         var sink = dgAudioCtx.createGain();
         sink.gain.value = 0;
@@ -4635,6 +4731,8 @@ setInterval(() => {
         emitCaptureState(true);
         if (sttTool) {
           setNote('Transcription complète active : voix de l\'ingénieur (micro) + audio de l\'onglet ' + sttToolLabel + '. L\'IA analyse la conversation.');
+        } else if (micOnly) {
+          setNote('Transcription active (votre micro). L\'IA analyse la conversation.');
         } else {
           setNote('Transcription complète active (les deux voix). L\'IA analyse la conversation.');
         }
@@ -4718,6 +4816,17 @@ setInterval(() => {
 
   startBtn.addEventListener('click', startTranscription);
   pauseBtn.addEventListener('click', pauseTranscription);
+
+  // Démarrage AUTOMATIQUE : dès que la conférence Jitsi est rejointe, on lance
+  // la transcription sans intervention. Le micro est déjà autorisé pour l'appel,
+  // donc zéro prompt. Une seule fois, et seulement si l'ingénieur n'a pas mis
+  // en pause manuellement entre-temps.
+  var autoStarted = false;
+  document.addEventListener('astr-conference-joined', function () {
+    if (autoStarted) return;
+    autoStarted = true;
+    if (userPaused) startTranscription();
+  });
 
   // ============================================================
   // Modale « Connecter la transcription » (Deepgram BYOK)
@@ -5305,6 +5414,144 @@ setInterval(() => {
   } else {
     init();
   }
+})();
+
+/* ASTRAEOS · Transport Realtime (Supabase) pour la transcription par salle.
+   Canal partagé « realtime:visio:<room> ». Le prospect y diffuse ses lignes,
+   l'ingénieur s'y abonne. URL + clé anon (publiques) passées par l'iframe
+   (?sb=&sbk=). Découplé de Jitsi/WebRTC → fiable quel que soit l'état média. */
+(function astraeosRealtime() {
+  'use strict';
+  var p;
+  try { p = new URLSearchParams(window.location.search); } catch (e) { return; }
+  var room = (p.get('room') || '').replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 64);
+  var sbUrl = p.get('sb');
+  var sbKey = p.get('sbk');
+  if (!room || !sbUrl || !sbKey) return; // params absents → transport indisponible
+  var host = String(sbUrl).replace(/^https?:\/\//, '').replace(/\/+$/, '');
+  var topic = 'realtime:visio:' + room;
+  var ws = null, joined = false, hb = null, refn = 0;
+  var subs = [], outbox = [];
+
+  function raw(obj) { try { ws.send(JSON.stringify(obj)); return true; } catch (e) { return false; } }
+  function flush() { while (outbox.length) { if (!raw(outbox[0])) break; outbox.shift(); } }
+
+  function connect() {
+    try { ws = new WebSocket('wss://' + host + '/realtime/v1/websocket?apikey=' + encodeURIComponent(sbKey) + '&vsn=1.0.0'); }
+    catch (e) { return; }
+    ws.onopen = function () {
+      raw({ topic: topic, event: 'phx_join', payload: { config: { broadcast: { self: false }, presence: { key: '' }, private: false } }, ref: String(++refn), join_ref: '1' });
+      hb = setInterval(function () { raw({ topic: 'phoenix', event: 'heartbeat', payload: {}, ref: String(++refn) }); }, 25000);
+    };
+    ws.onmessage = function (e) {
+      var m; try { m = JSON.parse(e.data); } catch (x) { return; }
+      if (!joined && m.event === 'phx_reply' && m.payload && m.payload.status === 'ok') { joined = true; flush(); }
+      if (m.event === 'broadcast' && m.payload && m.payload.event === 'transcript') {
+        var d = m.payload.payload || {};
+        subs.forEach(function (cb) { try { cb(d); } catch (e2) {} });
+      }
+    };
+    ws.onclose = function () { joined = false; if (hb) { clearInterval(hb); hb = null; } setTimeout(connect, 2000); };
+    ws.onerror = function () {};
+  }
+
+  function broadcast(d) {
+    var msg = { topic: topic, event: 'broadcast', payload: { type: 'broadcast', event: 'transcript', payload: d }, ref: String(++refn) };
+    if (joined) { if (!raw(msg)) outbox.push(msg); } else outbox.push(msg);
+  }
+
+  connect();
+  window.__astrRealtime = { broadcast: broadcast, onMessage: function (cb) { if (typeof cb === 'function') subs.push(cb); } };
+})();
+
+/* ASTRAEOS · Transcription CÔTÉ CLIENT (prospect).
+   Le navigateur du prospect transcrit son propre micro (Web Speech, déjà
+   autorisé pour l'appel → aucun prompt) et diffuse chaque ligne finale à
+   l'ingénieur via le canal de données Jitsi (sendEndpointTextMessage). Aucune
+   UI : seul l'ingénieur qui a lancé la visio voit la transcription. Ne tourne
+   QUE pour role=client. */
+(function astraeosClientTranscript() {
+  'use strict';
+  try { if (new URLSearchParams(window.location.search).get('role') !== 'client') return; }
+  catch (e) { return; }
+  var SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRec) return; // navigateur sans reconnaissance vocale → pas de capture côté client
+
+  var recog = null, started = false;
+
+  // Diffuse une ligne du prospect à l'ingénieur via le canal Realtime de la
+  // salle (le helper gère sa propre file d'attente avant l'établissement).
+  function sendLine(text) {
+    if (window.__astrRealtime && typeof window.__astrRealtime.broadcast === 'function') {
+      window.__astrRealtime.broadcast({ t: new Date().toISOString(), text: text });
+    }
+  }
+  function build() {
+    var r = new SpeechRec();
+    r.lang = 'fr-FR';
+    r.continuous = true;
+    r.interimResults = true;
+    r.onresult = function (ev) {
+      for (var i = ev.resultIndex; i < ev.results.length; i++) {
+        var res = ev.results[i];
+        if (res.isFinal && res[0] && res[0].transcript) {
+          var t = res[0].transcript.trim();
+          if (t) sendLine(t);
+        }
+      }
+    };
+    r.onend = function () { if (started) { try { r.start(); } catch (e) {} } };
+    r.onerror = function () { /* onend relancera la reconnaissance */ };
+    return r;
+  }
+  function start() {
+    if (started) return;
+    started = true;
+    try { recog = build(); recog.start(); } catch (e) {}
+  }
+  document.addEventListener('astr-conference-joined', function () {
+    start();
+  });
+})();
+
+/* ASTRAEOS · Miroir de la transcription dans l'onglet dédié du panneau droit.
+   Écoute les lignes finales (astr-transcript-line) émises par la pompe de
+   transcription et les empile dans #tr-live-list. Autonome : sans l'onglet
+   (vue client), ne fait rien. */
+(function astraeosTranscriptTab() {
+  'use strict';
+  var list = document.getElementById('tr-live-list');
+  if (!list) return;
+  var empty = document.getElementById('tr-live-empty');
+  var dot = document.getElementById('tr-live-dot');
+  function esc(v) {
+    return String(v == null ? '' : v)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+  function hhmm(iso) {
+    try {
+      var d = new Date(iso);
+      return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+    } catch (e) { return ''; }
+  }
+  document.addEventListener('astr-transcript-line', function (ev) {
+    var d = (ev && ev.detail) ? ev.detail : {};
+    var text = (d.text || '').trim();
+    if (!text) return;
+    if (empty) empty.style.display = 'none';
+    if (dot) dot.style.background = '#27c06b';
+    var who = d.speaker === 'prospect'
+      ? '<span style="color:var(--gold-deep,#9a6c0a); font-weight:700; margin-right:6px;">Prospect</span>'
+      : '<span style="color:#1F5A36; font-weight:700; margin-right:6px;">Vous</span>';
+    var line = document.createElement('div');
+    line.style.cssText = 'margin-bottom:7px; padding-bottom:7px; border-bottom:1px solid rgba(16,45,80,0.06);';
+    line.innerHTML = '<span style="color:var(--navy-300); font-variant-numeric:tabular-nums; font-size:10px; margin-right:7px;">'
+      + esc(hhmm(d.t)) + '</span>' + who + esc(text);
+    list.appendChild(line);
+    var pane = document.getElementById('pane-transcript');
+    if (pane && pane.classList.contains('active')) line.scrollIntoView({ block: 'nearest' });
+  });
 })();
 </script>
 </body>

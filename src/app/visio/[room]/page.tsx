@@ -83,6 +83,14 @@ export default async function VisioRoomPage({
   if (companionTool) {
     src += `&tool=${companionTool}&lien=${encodeURIComponent(safeLien)}`;
   }
+  // Transport Realtime de la transcription (canal par salle) : on passe l'URL
+  // Supabase + la clé anon (toutes deux publiques) au wireframe statique, qui
+  // ne reçoit pas les variables NEXT_PUBLIC_* à la compilation.
+  const sbUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const sbKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (sbUrl && sbKey) {
+    src += `&sb=${encodeURIComponent(sbUrl)}&sbk=${encodeURIComponent(sbKey)}`;
+  }
 
   return (
     <div className="flex min-h-screen flex-col bg-[var(--ivory)]">
