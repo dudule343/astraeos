@@ -483,6 +483,69 @@ async function listFile(slug: string): Promise<EntretienListItem[]> {
     .map(toListItem);
 }
 
+export type EntretienRecent = EntretienListItem & {
+  prospect_slug: string | null;
+  display_name: string | null;
+};
+
+/** Liste globale des entretiens récents (tableau de bord Espace), sans les gros
+ *  blobs (transcript/dci_snapshot). Tri par date décroissante. */
+export async function listRecentEntretiens(limit = 200): Promise<EntretienRecent[]> {
+  if (isSupabaseConfigured()) {
+    try {
+      return await listRecentSupabase(limit);
+    } catch (err) {
+      console.warn("[entretiens-store] Supabase listRecent failed, fallback file:", err);
+    }
+  }
+  return listRecentFile(limit);
+}
+
+async function listRecentSupabase(limit: number): Promise<EntretienRecent[]> {
+  const supabase = createAdminClient();
+  const { data, error } = await supabase
+    .from("entretiens")
+    .select("id, room, prospect_slug, display_name, started_at, ended_at, conseils, articles, rapport")
+    .order("started_at", { ascending: false })
+    .limit(limit);
+  if (error) throw error;
+
+  return ((data ?? []) as Array<{
+    id: string;
+    room: string;
+    prospect_slug: string | null;
+    display_name: string | null;
+    started_at: string;
+    ended_at: string | null;
+    conseils: unknown;
+    articles: unknown;
+    rapport: Record<string, unknown> | null;
+  }>).map((row) => ({
+    id: row.id,
+    room: row.room,
+    prospect_slug: row.prospect_slug ?? null,
+    display_name: row.display_name ?? null,
+    started_at: row.started_at,
+    ended_at: row.ended_at ?? null,
+    nb_conseils: asRecordArray(row.conseils).length,
+    nb_articles: asRecordArray(row.articles).length,
+    a_rapport: row.rapport != null,
+  }));
+}
+
+async function listRecentFile(limit: number): Promise<EntretienRecent[]> {
+  const store = await readFileStore();
+  return store.entretiens
+    .slice()
+    .sort((a, b) => (b.started_at ?? "").localeCompare(a.started_at ?? ""))
+    .slice(0, limit)
+    .map((e) => ({
+      ...toListItem(e),
+      prospect_slug: e.prospect_slug ?? null,
+      display_name: e.display_name ?? null,
+    }));
+}
+
 export async function getEntretien(id: string): Promise<Entretien | null> {
   if (isSupabaseConfigured()) {
     try {

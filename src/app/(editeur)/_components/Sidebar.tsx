@@ -41,6 +41,7 @@ const sections: NavSection[] = [
     title: "Opérations clients",
     items: [
       { href: "/clients", label: "Clients totaux actifs" },
+      { href: "/entretiens", label: "Entretiens visio" },
       { href: "/trial", label: "Période d'essai", badge: { text: "4" } },
       { href: "/client-new", label: "Nouveau client" },
       { href: "/marketplace", label: "Catalogue des packs" },
