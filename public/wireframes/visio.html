@@ -3524,7 +3524,50 @@ function showToast(msg) {
 }
 
 // Initialisation
+// Mode impromptu (aucun client préchargé via ?nom=) : le DCI de démonstration
+// (cas JOUBERT-BERTHOUX) est neutralisé → dossier VIERGE + identités génériques.
+// Le jour où la visio chargera un vrai DCI par client, on remplacera ceci par
+// le chargement réel ; la neutralisation ne s'applique qu'à défaut de client.
+function astraeosIsImpromptu() {
+  try { return !((new URLSearchParams(location.search).get('nom') || '').trim()); }
+  catch (e) { return true; }
+}
+function astraeosNeutralizeDciData() {
+  if (typeof DCI_DATA === 'undefined' || !DCI_DATA || !DCI_DATA.sections) return;
+  var NAME_MAP = {
+    'Camille JOUBERT-WAGNER': 'Client n°1',
+    'Yannick BERTHOUX': 'Client n°2',
+    'Léa': 'Enfant 1', 'Tom': 'Enfant 2', 'Inès': 'Enfant 3'
+  };
+  function mapName(v) { return Object.prototype.hasOwnProperty.call(NAME_MAP, v) ? NAME_MAP[v] : v; }
+  DCI_DATA.sections.forEach(function (s) {
+    (s.groups || []).forEach(function (g) {
+      if (g.person) {
+        g.person.name = g.personId === 'p2' ? 'Client n°2' : (g.personId === 'p1' ? 'Client n°1' : 'Client');
+        g.person.initials = '?';
+      }
+      (g.fields || []).forEach(function (f) {
+        f.value = '';
+        f.status = 'empty';
+        if (f.conf != null) f.conf = null;
+        if (Array.isArray(f.options)) f.options = f.options.map(mapName);
+      });
+    });
+  });
+}
+function astraeosNeutralizeHeader() {
+  var t = document.querySelector('.session-title'); if (t) t.textContent = 'Nouvel entretien';
+  var m = document.querySelector('.session-meta'); if (m) m.textContent = 'Entretien sans dossier préchargé';
+  var c = document.querySelector('.crumb'); if (c) c.innerHTML = '<strong>Nouvel entretien</strong> · dossier vierge';
+  document.querySelectorAll('.video-name-text').forEach(function (el) { el.textContent = 'Vous'; });
+  var dsv = document.querySelector('.ds-line .ds-v'); if (dsv) dsv.textContent = '—';
+}
+
 window.addEventListener('DOMContentLoaded', () => {
+  if (astraeosIsImpromptu()) {
+    astraeosNeutralizeDciData();
+    astraeosNeutralizeHeader();
+  }
   renderNav();
   renderSection();
   triggerAutoSave();
@@ -5038,6 +5081,29 @@ setInterval(() => {
     return parts.join(' · ');
   }
 
+  // Résumé des données DÉJÀ collectées dans le DCI (champs renseignés), envoyé
+  // à l'IA pour que les conseils tiennent compte du dossier ET de la
+  // transcription. Vide en mode impromptu (DCI vierge) → conseils basés sur la
+  // seule transcription.
+  function dciSummary() {
+    try {
+      if (typeof DCI_DATA === 'undefined' || !DCI_DATA || !DCI_DATA.sections) return '';
+      var lines = [];
+      DCI_DATA.sections.forEach(function (s) {
+        var sec = [];
+        (s.groups || []).forEach(function (g) {
+          (g.fields || []).forEach(function (f) {
+            if (f && f.value && String(f.value).trim() && f.status !== 'empty') {
+              sec.push((f.label || '') + ': ' + String(f.value).trim());
+            }
+          });
+        });
+        if (sec.length) lines.push('[' + (s.title || s.id) + '] ' + sec.join(' · '));
+      });
+      return lines.join('\n');
+    } catch (e) { return ''; }
+  }
+
   function injectIaDisconnectedCard() {
     if (iaDisconnectedShown || !insightsPane) return;
     iaDisconnectedShown = true;
@@ -5147,7 +5213,8 @@ setInterval(() => {
     var payload = {
       transcript: finalBuffer.slice(-6000),
       deja_emis: emitted.slice(-80),
-      contexte: contexte().slice(0, 600)
+      contexte: contexte().slice(0, 600),
+      dci: dciSummary().slice(0, 3000)
     };
 
     fetch('/api/visio/conseils', {

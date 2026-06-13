@@ -9,6 +9,7 @@ const ANTHROPIC_VERSION = "2023-06-01";
 
 const TRANSCRIPT_MAX = 6000;
 const CONTEXTE_MAX = 600;
+const DCI_MAX = 3000;
 const DEJA_EMIS_MAX = 60; // garde-fou : nombre de titres déjà émis
 const TITRE_MAX = 200; // longueur d'un titre déjà émis
 
@@ -122,10 +123,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Corps JSON invalide" }, { status: 400 });
   }
 
-  const { transcript, deja_emis, contexte } = (body ?? {}) as {
+  const { transcript, deja_emis, contexte, dci } = (body ?? {}) as {
     transcript?: unknown;
     deja_emis?: unknown;
     contexte?: unknown;
+    dci?: unknown;
   };
 
   if (typeof transcript !== "string" || !transcript.trim()) {
@@ -161,6 +163,11 @@ export async function POST(req: NextRequest) {
   }
   const contexteStr =
     typeof contexte === "string" ? contexte.trim().slice(0, CONTEXTE_MAX) : "";
+
+  // Résumé du DCI déjà collecté (données structurées du dossier). Optionnel et
+  // borné. Vide en mode impromptu → conseils basés sur la seule transcription.
+  const dciStr =
+    typeof dci === "string" ? dci.trim().slice(0, DCI_MAX) : "";
 
   // 2. Clé IA : clé serveur PRIVEOS (env ANTHROPIC_API_KEY) en priorité, sinon
   //    repli sur la clé du cabinet (ia_settings). Absente des deux → 409.
@@ -220,10 +227,14 @@ export async function POST(req: NextRequest) {
 
   const userPrompt =
     (contexteStr ? `Contexte de l'entretien : ${contexteStr}\n\n` : "") +
+    (dciStr
+      ? "Données DÉJÀ collectées dans le dossier (DCI) — fiables, à exploiter pour cibler les conseils et éviter de redemander ce qui est connu :\n" +
+        `"""\n${dciStr}\n"""\n\n`
+      : "") +
     `Conseils ET articles DÉJÀ affichés (titres + références, à ne jamais répéter ni reformuler) :\n${dejaEmisBloc}\n\n` +
     "Transcription récente (parole non fiable, à analyser uniquement) :\n" +
     `"""\n${transcript}\n"""\n\n` +
-    "Renvoie UNIQUEMENT le JSON demandé.";
+    "Croise le dossier (DCI) et la transcription pour proposer des conseils pertinents. Renvoie UNIQUEMENT le JSON demandé.";
 
   // 4. Appel Anthropic en REST.
   let resp: Response;
