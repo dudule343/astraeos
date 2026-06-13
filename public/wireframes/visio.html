@@ -3544,6 +3544,11 @@ function setAssistTab(name) {
   document.querySelectorAll('.assist-pane').forEach(p => p.classList.remove('active'));
   document.querySelector('.assist-tab[onclick*="' + name + '"]').classList.add('active');
   document.getElementById('pane-' + name).classList.add('active');
+  // Ouvrir l'onglet Insights efface son compteur de nouveautés.
+  if (name === 'insights') {
+    var ib = document.querySelector('.assist-tab[onclick*="insights"] .tab-badge');
+    if (ib) ib.remove();
+  }
 }
 
 // v6 · Agrandir/réduire la fenêtre vidéo
@@ -5080,6 +5085,18 @@ setInterval(() => {
       +   '<button class="insight-btn ghost" onclick="dismissInsight(this)">Question suivante</button>'
       + '</div>';
     insertCardTop(card);
+    // Compteur live sur l'onglet Insights (cue visuel du dynamisme), sauf si
+    // l'onglet est déjà ouvert.
+    try {
+      var itab = document.querySelector('.assist-tab[onclick*="insights"]');
+      if (itab && !itab.classList.contains('active')) {
+        var b = itab.querySelector('.tab-badge');
+        if (!b) { b = document.createElement('span'); b.className = 'tab-badge'; b.setAttribute('data-n', '0'); itab.appendChild(b); }
+        var n = (parseInt(b.getAttribute('data-n') || '0', 10) || 0) + 1;
+        b.setAttribute('data-n', String(n));
+        b.textContent = String(n);
+      }
+    } catch (e) { /* silencieux */ }
     setTimeout(function () { card.classList.remove('new'); }, 6000);
     // Greffe ASTRAEOS · persistance du conseil injecté.
     try {
@@ -5454,6 +5471,29 @@ setInterval(() => {
     document.addEventListener('DOMContentLoaded', init);
   } else {
     init();
+  }
+})();
+
+/* ASTRAEOS · Onglet Insights 100% dynamique.
+   Retire au chargement les cartes-exemples statiques (et le badge « 5 » codé en
+   dur). Seuls les insights générés en direct par l'IA (injectConseil) restent,
+   ajoutés en haut de la liste au fil de la conversation. */
+(function astraeosClearInsightSeeds() {
+  'use strict';
+  function run() {
+    var pane = document.getElementById('pane-insights');
+    if (pane) {
+      var seeds = pane.querySelectorAll('.insight-card');
+      for (var i = 0; i < seeds.length; i++) seeds[i].remove();
+    }
+    var tab = document.querySelector('.assist-tab[onclick*="insights"]');
+    var badge = tab && tab.querySelector('.tab-badge');
+    if (badge) badge.remove();
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', run);
+  } else {
+    run();
   }
 })();
 
