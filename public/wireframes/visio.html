@@ -3951,7 +3951,11 @@ setInterval(() => {
         }
       });
 
-      api.addEventListener('videoConferenceJoined', hideStatus);
+      api.addEventListener('videoConferenceJoined', function () {
+        hideStatus();
+        // Signale à la pompe de transcription de démarrer automatiquement.
+        try { document.dispatchEvent(new CustomEvent('astr-conference-joined')); } catch (e) {}
+      });
       // Repli : dès que l'iframe Jitsi est rendue, le voile n'a plus de raison
       // de masquer quoi que ce soit (prejoin, autorisations, file d'attente…).
       var jtsWait = setInterval(function () {
@@ -4573,10 +4577,34 @@ setInterval(() => {
           startWebSpeech();
           return;
         }
-        beginDisplayCapture(data.key);
+        // Salle Jitsi intégrée → micro seul, sans aucun prompt (le micro est
+        // déjà autorisé pour l'appel). Mode compagnon Meet/Zoom → partage de
+        // l'onglet tiers (impossible à éviter : l'audio du prospect est dans
+        // l'autre onglet).
+        if (sttTool) beginDisplayCapture(data.key);
+        else beginMicCapture(data.key);
       })
       .catch(function () {
         setNote('Réseau indisponible pour la transcription complète. Repli sur le micro local.', true);
+        startWebSpeech();
+      });
+  }
+
+  // Capture micro seul (salle Jitsi intégrée) : aucun partage d'onglet, donc
+  // aucun prompt. Le micro est déjà autorisé par Jitsi pour l'appel.
+  function beginMicCapture(token) {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      setNote('Micro non disponible ici. Repli sur la reconnaissance locale.', true);
+      startWebSpeech();
+      return;
+    }
+    navigator.mediaDevices.getUserMedia({ audio: true })
+      .then(function (mic) {
+        dgMicStream = mic;
+        openDeepgramSocket(token, mic, true);
+      })
+      .catch(function () {
+        setNote('Micro refusé. Repli sur la reconnaissance locale.', true);
         startWebSpeech();
       });
   }
@@ -4619,7 +4647,7 @@ setInterval(() => {
       });
   }
 
-  function openDeepgramSocket(token, stream) {
+  function openDeepgramSocket(token, stream, micOnly) {
     var url = 'wss://api.deepgram.com/v1/listen'
       + '?model=nova-2&language=fr&punctuate=true&interim_results=true'
       + '&encoding=linear16&sample_rate=16000&channels=1';
@@ -4648,19 +4676,22 @@ setInterval(() => {
           try { dgWs.send(pcm.buffer); } catch (err) {}
         };
         dgSource.connect(dgProcessor);
-        // Mixe le micro de l'ingénieur : l'audio de l'onglet ne contient que
-        // les voix DISTANTES (le client) — sans ce branchement, la voix de
-        // l'ingénieur n'était pas transcrite.
-        navigator.mediaDevices.getUserMedia({ audio: true })
-          .then(function (mic) {
-            if (!dgAudioCtx) { mic.getTracks().forEach(function (t) { try { t.stop(); } catch (e) {} }); return; }
-            dgMicStream = mic;
-            dgMicSource = dgAudioCtx.createMediaStreamSource(mic);
-            dgMicSource.connect(dgProcessor);
-          })
-          .catch(function () {
-            setNote('Micro refusé : seule la voix du client sera transcrite.', true);
-          });
+        // Mode partage d'onglet (compagnon Meet/Zoom) : l'audio de l'onglet ne
+        // contient que les voix DISTANTES → on mixe le micro de l'ingénieur.
+        // Mode micro seul (salle Jitsi intégrée) : `stream` EST déjà le micro,
+        // pas de second branchement.
+        if (!micOnly) {
+          navigator.mediaDevices.getUserMedia({ audio: true })
+            .then(function (mic) {
+              if (!dgAudioCtx) { mic.getTracks().forEach(function (t) { try { t.stop(); } catch (e) {} }); return; }
+              dgMicStream = mic;
+              dgMicSource = dgAudioCtx.createMediaStreamSource(mic);
+              dgMicSource.connect(dgProcessor);
+            })
+            .catch(function () {
+              setNote('Micro refusé : seule la voix du client sera transcrite.', true);
+            });
+        }
         // destination requise pour que ScriptProcessor s'exécute (gain 0 → silencieux)
         var sink = dgAudioCtx.createGain();
         sink.gain.value = 0;
@@ -4673,6 +4704,8 @@ setInterval(() => {
         emitCaptureState(true);
         if (sttTool) {
           setNote('Transcription complète active : voix de l\'ingénieur (micro) + audio de l\'onglet ' + sttToolLabel + '. L\'IA analyse la conversation.');
+        } else if (micOnly) {
+          setNote('Transcription active (votre micro). L\'IA analyse la conversation.');
         } else {
           setNote('Transcription complète active (les deux voix). L\'IA analyse la conversation.');
         }
@@ -4756,6 +4789,17 @@ setInterval(() => {
 
   startBtn.addEventListener('click', startTranscription);
   pauseBtn.addEventListener('click', pauseTranscription);
+
+  // Démarrage AUTOMATIQUE : dès que la conférence Jitsi est rejointe, on lance
+  // la transcription sans intervention. Le micro est déjà autorisé pour l'appel,
+  // donc zéro prompt. Une seule fois, et seulement si l'ingénieur n'a pas mis
+  // en pause manuellement entre-temps.
+  var autoStarted = false;
+  document.addEventListener('astr-conference-joined', function () {
+    if (autoStarted) return;
+    autoStarted = true;
+    if (userPaused) startTranscription();
+  });
 
   // ============================================================
   // Modale « Connecter la transcription » (Deepgram BYOK)
