@@ -3958,23 +3958,9 @@ setInterval(() => {
         // Signale à la pompe de transcription de démarrer automatiquement.
         try { document.dispatchEvent(new CustomEvent('astr-conference-joined')); } catch (e) {}
       });
-
-      // Réception des lignes de transcription du prospect : son navigateur
-      // transcrit son micro et les diffuse via le canal de données Jitsi
-      // (sendEndpointTextMessage). On les réinjecte dans la pompe locale →
-      // panneau + onglet Transcription + conseils IA, étiquetées « Prospect ».
-      api.addEventListener('endpointTextMessageReceived', function (e) {
-        try {
-          var ed = e && e.data && e.data.eventData ? e.data.eventData : null;
-          var raw = ed && typeof ed.text === 'string' ? ed.text : null;
-          if (!raw || raw.indexOf('astrType') === -1) return;
-          var msg = JSON.parse(raw);
-          if (!msg || msg.astrType !== 'transcript' || !msg.text) return;
-          if (typeof window.__astraeosRemoteTranscript === 'function') {
-            window.__astraeosRemoteTranscript(String(msg.text), msg.t);
-          }
-        } catch (err) { /* pas un message de transcription → on ignore */ }
-      });
+      // NB : la transcription du prospect transite par Supabase Realtime
+      // (canal partagé par salle), pas par le canal de données Jitsi qui
+      // dépend de l'établissement WebRTC. Voir l'IIFE astraeosRealtime.
       // Repli : dès que l'iframe Jitsi est rendue, le voile n'a plus de raison
       // de masquer quoi que ce soit (prejoin, autorisations, file d'attente…).
       var jtsWait = setInterval(function () {
@@ -4475,11 +4461,21 @@ setInterval(() => {
     maybeSendConseils(false);
   }
 
-  // Ligne du prospect reçue via le canal de données Jitsi (envoyée par le
-  // navigateur du client). Exposée pour l'écouteur Jitsi de l'IIFE visio.
+  // Ligne du prospect reçue via Supabase Realtime (diffusée par le navigateur
+  // du client). Réinjectée dans la pompe locale, étiquetée « Prospect ».
   window.__astraeosRemoteTranscript = function (text, t) {
     pushFinalText(String(text == null ? '' : text), 'prospect');
   };
+  // Abonnement au canal Realtime de la salle dès qu'il est disponible.
+  (function subscribeRemoteTranscript() {
+    if (window.__astrRealtime && typeof window.__astrRealtime.onMessage === 'function') {
+      window.__astrRealtime.onMessage(function (d) {
+        if (d && d.text) window.__astraeosRemoteTranscript(String(d.text), d.t);
+      });
+      return;
+    }
+    setTimeout(subscribeRemoteTranscript, 300);
+  })();
 
   // ============================================================
   // État global de capture
@@ -5420,6 +5416,54 @@ setInterval(() => {
   }
 })();
 
+/* ASTRAEOS · Transport Realtime (Supabase) pour la transcription par salle.
+   Canal partagé « realtime:visio:<room> ». Le prospect y diffuse ses lignes,
+   l'ingénieur s'y abonne. URL + clé anon (publiques) passées par l'iframe
+   (?sb=&sbk=). Découplé de Jitsi/WebRTC → fiable quel que soit l'état média. */
+(function astraeosRealtime() {
+  'use strict';
+  var p;
+  try { p = new URLSearchParams(window.location.search); } catch (e) { return; }
+  var room = (p.get('room') || '').replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 64);
+  var sbUrl = p.get('sb');
+  var sbKey = p.get('sbk');
+  if (!room || !sbUrl || !sbKey) return; // params absents → transport indisponible
+  var host = String(sbUrl).replace(/^https?:\/\//, '').replace(/\/+$/, '');
+  var topic = 'realtime:visio:' + room;
+  var ws = null, joined = false, hb = null, refn = 0;
+  var subs = [], outbox = [];
+
+  function raw(obj) { try { ws.send(JSON.stringify(obj)); return true; } catch (e) { return false; } }
+  function flush() { while (outbox.length) { if (!raw(outbox[0])) break; outbox.shift(); } }
+
+  function connect() {
+    try { ws = new WebSocket('wss://' + host + '/realtime/v1/websocket?apikey=' + encodeURIComponent(sbKey) + '&vsn=1.0.0'); }
+    catch (e) { return; }
+    ws.onopen = function () {
+      raw({ topic: topic, event: 'phx_join', payload: { config: { broadcast: { self: false }, presence: { key: '' }, private: false } }, ref: String(++refn), join_ref: '1' });
+      hb = setInterval(function () { raw({ topic: 'phoenix', event: 'heartbeat', payload: {}, ref: String(++refn) }); }, 25000);
+    };
+    ws.onmessage = function (e) {
+      var m; try { m = JSON.parse(e.data); } catch (x) { return; }
+      if (!joined && m.event === 'phx_reply' && m.payload && m.payload.status === 'ok') { joined = true; flush(); }
+      if (m.event === 'broadcast' && m.payload && m.payload.event === 'transcript') {
+        var d = m.payload.payload || {};
+        subs.forEach(function (cb) { try { cb(d); } catch (e2) {} });
+      }
+    };
+    ws.onclose = function () { joined = false; if (hb) { clearInterval(hb); hb = null; } setTimeout(connect, 2000); };
+    ws.onerror = function () {};
+  }
+
+  function broadcast(d) {
+    var msg = { topic: topic, event: 'broadcast', payload: { type: 'broadcast', event: 'transcript', payload: d }, ref: String(++refn) };
+    if (joined) { if (!raw(msg)) outbox.push(msg); } else outbox.push(msg);
+  }
+
+  connect();
+  window.__astrRealtime = { broadcast: broadcast, onMessage: function (cb) { if (typeof cb === 'function') subs.push(cb); } };
+})();
+
 /* ASTRAEOS · Transcription CÔTÉ CLIENT (prospect).
    Le navigateur du prospect transcrit son propre micro (Web Speech, déjà
    autorisé pour l'appel → aucun prompt) et diffuse chaque ligne finale à
@@ -5433,23 +5477,14 @@ setInterval(() => {
   var SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SpeechRec) return; // navigateur sans reconnaissance vocale → pas de capture côté client
 
-  var recog = null, started = false, joined = false;
-  var queue = [];
+  var recog = null, started = false;
 
-  function deliver(msg) {
-    var api = window.__astraeosJitsi;
-    if (joined && api && typeof api.executeCommand === 'function') {
-      try { api.executeCommand('sendEndpointTextMessage', '', msg); return true; }
-      catch (e) { return false; }
-    }
-    return false;
-  }
+  // Diffuse une ligne du prospect à l'ingénieur via le canal Realtime de la
+  // salle (le helper gère sa propre file d'attente avant l'établissement).
   function sendLine(text) {
-    var msg = JSON.stringify({ astrType: 'transcript', t: new Date().toISOString(), text: text });
-    if (!deliver(msg)) queue.push(msg); // canal pas prêt → on garde et on rejoue au flush
-  }
-  function flush() {
-    while (queue.length) { if (!deliver(queue[0])) break; queue.shift(); }
+    if (window.__astrRealtime && typeof window.__astrRealtime.broadcast === 'function') {
+      window.__astrRealtime.broadcast({ t: new Date().toISOString(), text: text });
+    }
   }
   function build() {
     var r = new SpeechRec();
@@ -5475,8 +5510,6 @@ setInterval(() => {
     try { recog = build(); recog.start(); } catch (e) {}
   }
   document.addEventListener('astr-conference-joined', function () {
-    joined = true;
-    flush();
     start();
   });
 })();
