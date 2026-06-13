@@ -97,7 +97,7 @@ export default async function VisioRoomPage({
       <iframe
         src={src}
         title="Visio PRIVEOS"
-        allow="microphone; camera; display-capture"
+        allow="camera *; microphone *; display-capture *; autoplay *"
         className="block w-full flex-1 border-0"
         style={{ height: "100vh" }}
       />

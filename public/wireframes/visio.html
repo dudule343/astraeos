@@ -3671,7 +3671,13 @@ setInterval(() => {
     + '.jts-brand-tile{width:30px;height:30px;border-radius:7px;background:var(--gold,#C68E0E);color:#fff;'
     + 'display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;line-height:1;}'
     + '.jts-brand-text{color:#fff;font-weight:600;font-size:14px;letter-spacing:0.04em;line-height:1;}'
-    + '.jts-brand-text strong{font-weight:800;color:#f0c869;}';
+    + '.jts-brand-text strong{font-weight:800;color:#f0c869;}'
+    // Secours mobile : bouton d'accès Jitsi en plein écran (top-level), car
+    // Safari iOS bloque la caméra dans l'iframe Jitsi cross-origin.
+    + '.jts-fullscreen{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);z-index:6;'
+    + 'display:inline-flex;align-items:center;gap:6px;background:var(--gold,#C68E0E);color:#fff;'
+    + 'font-weight:700;font-size:13px;padding:12px 18px;border-radius:10px;text-decoration:none;'
+    + 'box-shadow:0 6px 20px rgba(0,0,0,0.35);white-space:nowrap;font-family:inherit;}';
   var styleEl = document.createElement('style');
   styleEl.textContent = css;
   document.head.appendChild(styleEl);
@@ -3698,6 +3704,25 @@ setInterval(() => {
   brand.innerHTML = '<div class="jts-brand-tile">P</div>'
     + '<div class="jts-brand-text">PRI<strong>VEOS</strong></div>';
   container.appendChild(brand);
+
+  // Secours mobile : sur Safari iOS, la caméra/micro est bloquée dans l'iframe
+  // Jitsi cross-origin → la vidéo reste blanche. On propose un accès top-level
+  // (qui, lui, autorise la caméra) via un bouton bien visible.
+  var isMobileDevice = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '');
+  if (isMobileDevice) {
+    var fsBtn = document.createElement('a');
+    fsBtn.className = 'jts-fullscreen';
+    fsBtn.textContent = '↗ Rejoindre la visio en plein écran';
+    fsBtn.setAttribute('href', '#');
+    fsBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      var jurl = 'https://' + DOMAIN + '/astraeosPriveos_' + encodeURIComponent(room)
+        + '#config.disableDeepLinking=true&config.prejoinPageEnabled=false'
+        + '&userInfo.displayName=%22' + encodeURIComponent(displayName()) + '%22';
+      try { window.top.location.href = jurl; } catch (err) { window.location.href = jurl; }
+    });
+    container.appendChild(fsBtn);
+  }
 
   function showStatus(msg, isErr) {
     status.textContent = msg;
