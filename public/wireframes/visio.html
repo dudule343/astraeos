@@ -929,6 +929,10 @@ select.v4-modal-input { cursor:pointer; appearance:none; -webkit-appearance:none
           Insights IA
           <span class="tab-badge">5</span>
         </button>
+        <button class="assist-tab" onclick="setAssistTab('transcript')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="13" y2="17"/></svg>
+          Transcription
+        </button>
       </div>
 
       <div class="assist-body">
@@ -1263,6 +1267,18 @@ select.v4-modal-input { cursor:pointer; appearance:none; -webkit-appearance:none
             </div>
             <div id="legal-live-list"></div>
           </div>
+        </div>
+
+        <!-- Pane 5 · Transcription en direct -->
+        <div class="assist-pane" id="pane-transcript">
+          <div style="display:flex; align-items:center; gap:7px; font-size:11px; font-weight:800; letter-spacing:0.04em; text-transform:uppercase; color:var(--navy); margin-bottom:10px;">
+            <span id="tr-live-dot" style="display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--navy-300); transition:background 0.2s;"></span>
+            Transcription en direct
+          </div>
+          <div id="tr-live-empty" style="font-size:10px; color:var(--navy-300); font-style:italic; line-height:1.55;">
+            La transcription de l'entretien s'affichera ici, ligne par ligne, au fil de la conversation. Lancez-la depuis le panneau « Transcription en direct » en bas à gauche de l'écran.
+          </div>
+          <div id="tr-live-list" style="font-size:11.5px; line-height:1.6; color:var(--navy);"></div>
         </div>
 
       </div>
@@ -5327,6 +5343,43 @@ setInterval(() => {
   } else {
     init();
   }
+})();
+
+/* ASTRAEOS · Miroir de la transcription dans l'onglet dédié du panneau droit.
+   Écoute les lignes finales (astr-transcript-line) émises par la pompe de
+   transcription et les empile dans #tr-live-list. Autonome : sans l'onglet
+   (vue client), ne fait rien. */
+(function astraeosTranscriptTab() {
+  'use strict';
+  var list = document.getElementById('tr-live-list');
+  if (!list) return;
+  var empty = document.getElementById('tr-live-empty');
+  var dot = document.getElementById('tr-live-dot');
+  function esc(v) {
+    return String(v == null ? '' : v)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+  function hhmm(iso) {
+    try {
+      var d = new Date(iso);
+      return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+    } catch (e) { return ''; }
+  }
+  document.addEventListener('astr-transcript-line', function (ev) {
+    var d = (ev && ev.detail) ? ev.detail : {};
+    var text = (d.text || '').trim();
+    if (!text) return;
+    if (empty) empty.style.display = 'none';
+    if (dot) dot.style.background = '#27c06b';
+    var line = document.createElement('div');
+    line.style.cssText = 'margin-bottom:7px; padding-bottom:7px; border-bottom:1px solid rgba(16,45,80,0.06);';
+    line.innerHTML = '<span style="color:var(--navy-300); font-variant-numeric:tabular-nums; font-size:10px; margin-right:7px;">'
+      + esc(hhmm(d.t)) + '</span>' + esc(text);
+    list.appendChild(line);
+    var pane = document.getElementById('pane-transcript');
+    if (pane && pane.classList.contains('active')) line.scrollIntoView({ block: 'nearest' });
+  });
 })();
 </script>
 </body>
