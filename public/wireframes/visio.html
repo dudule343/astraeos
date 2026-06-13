@@ -1253,7 +1253,7 @@ select.v4-modal-input { cursor:pointer; appearance:none; -webkit-appearance:none
           </div>
 
           <div style="margin-top:14px; padding:10px 12px; background:var(--ivory); border-radius:6px; font-size:10.5px; color:var(--navy-300); line-height:1.5; text-align:center;">
-            <strong style="color:var(--navy);">5 opportunités identifiées</strong> · l'IA continue d'analyser la conversation en temps réel
+            <strong style="color:var(--navy);" id="insights-count">L'IA analyse en temps réel</strong> · le dossier (DCI) et la conversation
           </div>
 
           <!-- Repères juridiques en direct · articles de loi injectés par l'IA -->
@@ -5143,13 +5143,19 @@ setInterval(() => {
       legalHtml = '<div class="insight-legal"><span class="insight-legal-tag">Repère juridique</span> '
         + esc(c.repere_legal) + '</div>';
     }
+    // Citation déclencheuse (ce qui vient d'être dit ou une donnée du DCI) et
+    // ligne objectif/opportunité, pour le design complet de la carte.
+    var quoteHtml = c.citation ? '<div class="insight-quote">' + esc(c.citation) + '</div>' : '';
+    var objectifHtml = c.objectif ? '<span class="insight-link">→ ' + esc(c.objectif) + '</span>' : '';
     card.innerHTML = ''
       + '<div class="insight-header">'
       +   '<span class="' + t.cls + '">' + esc(t.label) + (c.titre ? ' · ' + esc(c.titre) : '') + '</span>'
       +   '<span class="insight-time">à l\'instant</span>'
       + '</div>'
+      + quoteHtml
       + '<div class="insight-suggestion">' + esc(c.detail) + '</div>'
       + legalHtml
+      + objectifHtml
       + '<div class="insight-actions">'
       +   '<button class="insight-btn" onclick="markInsightAsked(this)">Poser cette question</button>'
       +   '<button class="insight-btn ghost" onclick="dismissInsight(this)">Question suivante</button>'
@@ -5165,6 +5171,15 @@ setInterval(() => {
         var n = (parseInt(b.getAttribute('data-n') || '0', 10) || 0) + 1;
         b.setAttribute('data-n', String(n));
         b.textContent = String(n);
+      }
+    } catch (e) { /* silencieux */ }
+    // Compteur d'opportunités dans l'en-tête de l'onglet Insights.
+    try {
+      var cnt = document.getElementById('insights-count');
+      if (cnt) {
+        var nc = (parseInt(cnt.getAttribute('data-n') || '0', 10) || 0) + 1;
+        cnt.setAttribute('data-n', String(nc));
+        cnt.textContent = nc + (nc > 1 ? ' opportunités identifiées' : ' opportunité identifiée');
       }
     } catch (e) { /* silencieux */ }
     setTimeout(function () { card.classList.remove('new'); }, 6000);
@@ -5204,7 +5219,8 @@ setInterval(() => {
     var enoughTime = (now - lastSentAt) >= SEND_INTERVAL_MS;
     var enoughChars = charsSinceSend >= SEND_CHARS;
     if (!firstSend && !enoughTime && !enoughChars) return;
-    if (!finalBuffer.trim()) return;
+    // Au moins une source : la transcription OU le dossier DCI pré-rempli.
+    if (!finalBuffer.trim() && !dciSummary()) return;
 
     sending = true;
     charsSinceSend = 0;
@@ -5256,6 +5272,13 @@ setInterval(() => {
     if (userPaused) return;
     maybeSendConseils(true);
   }, SEND_INTERVAL_MS);
+
+  // Premiers insights dès qu'il y a un dossier pré-rempli, sans attendre la
+  // conversation : si le DCI contient déjà des données, on lance une analyse
+  // initiale (fromInterval=true → indépendant de l'état pause).
+  setTimeout(function () {
+    if (dciSummary()) maybeSendConseils(true);
+  }, 2500);
 })();
 </script>
 
