@@ -4717,6 +4717,22 @@ setInterval(() => {
       try {
         var Ctx = window.AudioContext || window.webkitAudioContext;
         dgAudioCtx = new Ctx();
+        // L'auto-démarrage (sans clic direct) crée souvent un AudioContext
+        // SUSPENDU → onaudioprocess ne se déclenche jamais, aucun audio
+        // n'atteint Deepgram (transcription connectée mais vide). On le réveille
+        // tout de suite, et on réessaie au premier geste utilisateur si besoin.
+        try { dgAudioCtx.resume(); } catch (e) {}
+        if (dgAudioCtx.state === 'suspended') {
+          var resumeOnGesture = function () {
+            if (dgAudioCtx) { try { dgAudioCtx.resume(); } catch (e) {} }
+            document.removeEventListener('pointerdown', resumeOnGesture, true);
+            document.removeEventListener('keydown', resumeOnGesture, true);
+            document.removeEventListener('touchstart', resumeOnGesture, true);
+          };
+          document.addEventListener('pointerdown', resumeOnGesture, true);
+          document.addEventListener('keydown', resumeOnGesture, true);
+          document.addEventListener('touchstart', resumeOnGesture, true);
+        }
         dgSource = dgAudioCtx.createMediaStreamSource(stream);
         var bufSize = 4096;
         dgProcessor = dgAudioCtx.createScriptProcessor(bufSize, 1, 1);
