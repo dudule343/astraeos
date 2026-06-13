@@ -1276,7 +1276,7 @@ select.v4-modal-input { cursor:pointer; appearance:none; -webkit-appearance:none
             Transcription en direct
           </div>
           <div id="tr-live-empty" style="font-size:10px; color:var(--navy-300); font-style:italic; line-height:1.55;">
-            La transcription de l'entretien s'affichera ici, ligne par ligne, au fil de la conversation. Lancez-la depuis le panneau « Transcription en direct » en bas à gauche de l'écran.
+            La transcription démarre automatiquement et s'affiche ici, ligne par ligne, au fil de la conversation (votre voix et celle du prospect).
           </div>
           <div id="tr-live-list" style="font-size:11.5px; line-height:1.6; color:var(--navy);"></div>
         </div>
@@ -4406,6 +4406,10 @@ setInterval(() => {
     +   '<div class="alt-note" data-alt-note></div>'
     +   '<div class="alt-upsell" data-alt-upsell style="display:none;"></div>'
     + '</div>';
+  // Transcription consolidée dans l'onglet « Transcription » du panneau droit :
+  // le panneau flottant est masqué. Sa logique (Deepgram, démarrage auto…) reste
+  // active et alimente l'onglet via l'event astr-transcript-line.
+  panel.style.display = 'none';
   document.body.appendChild(panel);
 
   var head     = panel.querySelector('[data-alt-toggle]');
