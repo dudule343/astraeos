@@ -26946,42 +26946,48 @@ function collectWizItems(){
   return items;
 }
 function _email(s){ s=(s||'').trim(); return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(s)?s:''; }
+// Mode d'envoi : 'both' (e-mail si adresse + lien toujours généré), 'link'
+// (lien seulement, aucun e-mail) ou 'email'. window.COLLECTE_SEND_MODE permet
+// de le piloter ; défaut 'both' → on a toujours un lien à partager.
 function sendCollecteRequest(two,baseToast){
   const items=collectWizItems();
-  // Participants + message édité par participant
+  const mode=(window.COLLECTE_SEND_MODE==='link'||window.COLLECTE_SEND_MODE==='email')?window.COLLECTE_SEND_MODE:'both';
+  // Participants + message édité par participant. L'e-mail est désormais
+  // OPTIONNEL (mode lien) : on retient un participant dès qu'il a un nom.
   const list=[];
+  const add=(nom,emailRaw,msg)=>{ const nm=(nom||'').trim(); if(!nm)return; list.push({nom:nm,email:_email(emailRaw),message:msg}); };
   if(WIZ_MODE==='prepare'&&PREP_INFO){
-    const e1=_email(PREP_INFO.m1);
-    if(e1)list.push({nom:PREP_INFO.n1,email:e1,message:_val('wiz-mail-1')});
-    if(two){ const e2=_email(PREP_INFO.m2); if(e2)list.push({nom:PREP_INFO.n2,email:e2,message:_val('wiz-mail-2')}); }
+    add(PREP_INFO.n1,PREP_INFO.m1,_val('wiz-mail-1'));
+    if(two)add(PREP_INFO.n2,PREP_INFO.m2,_val('wiz-mail-2'));
   }else{
-    const e1=_email(_val('p1-mail'));
-    const nm1=(_val('p1-prenom')+' '+_val('p1-nom')).trim()||'Nouveau client';
-    if(e1)list.push({nom:nm1,email:e1,message:_val('wiz-mail-1')});
-    if(two){ const e2=_email(_val('p2-mail')); const nm2=(_val('p2-prenom')+' '+_val('p2-nom')).trim()||'Second client'; if(e2)list.push({nom:nm2,email:e2,message:_val('wiz-mail-2')}); }
+    add((_val('p1-prenom')+' '+_val('p1-nom')).trim()||'Nouveau client',_val('p1-mail'),_val('wiz-mail-1'));
+    if(two)add((_val('p2-prenom')+' '+_val('p2-nom')).trim()||'Second client',_val('p2-mail'),_val('wiz-mail-2'));
   }
   if(!list.length)return;
   // Si messages différents entre participants : un appel par participant ; sinon un appel groupé.
   const sameMsg=list.every(p=>p.message===list[0].message);
   const calls=(sameMsg?[list]:list.map(p=>[p]));
-  const done=[],fail=[];
+  const links=[],done=[],fail=[];
   let pending=calls.length;
   const finish=()=>{
     if(--pending>0)return;
-    let extra='';
-    if(fail.length){ extra=' (e-mail non envoyé : '+fail[0]+')'; }
-    else if(done.length){ extra=' E-mail réellement envoyé ✓'; }
-    if(extra)prepToast(baseToast+extra);
+    if(links.length){
+      const url=links[0];
+      try{ if(navigator.clipboard)navigator.clipboard.writeText(url); }catch(e){}
+      prepToast((links.length>1?links.length+' liens de dépôt prêts. ':'Lien de dépôt prêt et copié : ')+(links.length>1?'':url));
+      try{ window.__lastCollecteLinks=links.slice(); }catch(e){}
+    } else if(fail.length){ prepToast(baseToast+' (échec : '+fail[0]+')'); }
   };
   calls.forEach(group=>{
     const msg=group[0].message||'';
     const participants=group.map(p=>({nom:p.nom,email:p.email}));
-    fetch('/api/collecte/send',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({participants,items,message:msg})})
+    fetch('/api/collecte/send',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({participants,items,message:msg,mode})})
       .then(r=>r.json().catch(()=>({})).then(j=>({ok:r.ok,j})))
       .then(({ok,j})=>{
         const results=(j&&j.results)||[];
-        const err=results.find(x=>x&&x.error);
-        if(ok&&j&&j.ok&&!err){ done.push(true); }
+        results.forEach(x=>{ if(x&&x.depotUrl)links.push(x.depotUrl); });
+        const err=results.find(x=>x&&x.error&&!x.depotUrl);
+        if(ok&&j&&j.ok){ done.push(true); }
         else{ fail.push((err&&err.error)||(j&&j.error)||'erreur réseau'); }
         finish();
       })
