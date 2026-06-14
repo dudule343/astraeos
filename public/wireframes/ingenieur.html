@@ -26946,9 +26946,21 @@ function collectWizItems(){
   return items;
 }
 function _email(s){ s=(s||'').trim(); return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(s)?s:''; }
-// Mode d'envoi : 'both' (e-mail si adresse + lien toujours généré), 'link'
-// (lien seulement, aucun e-mail) ou 'email'. window.COLLECTE_SEND_MODE permet
-// de le piloter ; défaut 'both' → on a toujours un lien à partager.
+// Mode d'envoi (radio du wizard) : 'link' (lien seulement, AUCUN e-mail —
+// défaut tant que les e-mails ne sont pas activés), 'email' (e-mail seul) ou
+// 'both'. Piloté par window.COLLECTE_SEND_MODE.
+window.COLLECTE_SEND_MODE = window.COLLECTE_SEND_MODE || 'link';
+function setSendMode(m){
+  window.COLLECTE_SEND_MODE = (m === 'email' || m === 'both') ? m : 'link';
+  var hint = document.getElementById('wiz-sendmode-hint');
+  if (hint) {
+    hint.textContent = window.COLLECTE_SEND_MODE === 'email'
+      ? "Un e-mail sera envoyé au client."
+      : window.COLLECTE_SEND_MODE === 'both'
+        ? "E-mail envoyé + lien copié dans votre presse-papier."
+        : "Le lien sera copié dans votre presse-papier (aucun e-mail).";
+  }
+}
 function sendCollecteRequest(two,baseToast){
   const items=collectWizItems();
   const mode=(window.COLLECTE_SEND_MODE==='link'||window.COLLECTE_SEND_MODE==='email')?window.COLLECTE_SEND_MODE:'both';
@@ -27171,6 +27183,13 @@ document.addEventListener('DOMContentLoaded',function(){if(document.getElementBy
         <textarea class="relance-mail-edit" id="wiz-mail-2"></textarea>
       </div>
     </div>
+      </div>
+      <div class="wiz-sendmode" style="padding:12px 26px; border-top:1px solid var(--navy-100); display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
+        <span style="font-size:11.5px; font-weight:700; color:var(--navy);">Mode d'envoi</span>
+        <label style="display:inline-flex; align-items:center; gap:6px; font-size:12px; cursor:pointer;"><input type="radio" name="wiz-sendmode" value="link" checked onchange="setSendMode('link')"> 🔗 Lien à partager</label>
+        <label style="display:inline-flex; align-items:center; gap:6px; font-size:12px; cursor:pointer;"><input type="radio" name="wiz-sendmode" value="email" onchange="setSendMode('email')"> 📧 E-mail</label>
+        <label style="display:inline-flex; align-items:center; gap:6px; font-size:12px; cursor:pointer;"><input type="radio" name="wiz-sendmode" value="both" onchange="setSendMode('both')"> Les deux</label>
+        <span id="wiz-sendmode-hint" style="font-size:10.5px; color:var(--navy-300); margin-left:auto;">Le lien sera copié dans votre presse-papier.</span>
       </div>
       <div class="prep-footer"><button class="btn btn-ghost btn-sm" onclick="wizGoTo('documents')">← Retour</button><button class="btn btn-gold btn-sm" id="wiz-send-btn" onclick="wizSend()">Envoyer la demande</button></div>
     </div>
