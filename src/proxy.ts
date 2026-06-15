@@ -1,13 +1,34 @@
-import { type NextRequest } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 
 import { updateSession } from "@/lib/supabase/middleware";
 
+// Seul l'apex public (la vitrine) est routé vers le dossier /site.
+// app.astraeos.fr, les previews Vercel et localhost gardent l'app à la racine.
+const MARKETING_HOSTS = new Set(["astraeos.fr", "www.astraeos.fr"]);
+
+// Conservés tels quels sur l'apex : collecte client par token (liens envoyés
+// par e-mail) et routes API.
+function isPublicAppPath(pathname: string): boolean {
+  return pathname.startsWith("/depot") || pathname.startsWith("/api");
+}
+
 /**
  * En Next 16, le « middleware » est renommé `proxy` (runtime Node.js).
- * Rôle actuel : uniquement le rafraîchissement de session Supabase.
+ * Rôles : routage de la vitrine sur l'apex + rafraîchissement de session Supabase.
  * (Le code d'accès cabinet a été retiré — les espaces sont en accès libre.)
  */
 export async function proxy(request: NextRequest) {
+  const host = (request.headers.get("host") ?? "").toLowerCase().split(":")[0];
+
+  if (MARKETING_HOSTS.has(host)) {
+    const { pathname } = request.nextUrl;
+    if (!isPublicAppPath(pathname)) {
+      const url = request.nextUrl.clone();
+      url.pathname = pathname === "/" ? "/site" : `/site${pathname}`;
+      return NextResponse.rewrite(url);
+    }
+  }
+
   return updateSession(request);
 }
 
