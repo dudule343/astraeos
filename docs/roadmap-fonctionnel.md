@@ -24,9 +24,9 @@ Vérif globale : `bash scripts/verify-app.sh`.
 - [x] B5. Profil `/profil` — identité + agréments (table users) ✅
 
 ## 🔜 Bloc C : espace dirigeant (~19 écrans)
-- [ ] C1. Accueil cabinet (dashboard)
-- [ ] C2. Finance (compte de résultat, trésorerie, activité) — brancher Qonto + commissions
-- [ ] C3. Ingénieurs / performance / recrutement / gestion comptes
+- [x] C1. Accueil cabinet `/espace-dirigeant` — revenus + santé cabinet (données réelles) ✅
+- [x] C2. Finance dirigeant — résultat + commissions (souscriptions/commissions) ✅
+- [x] C3. Gestion ingénieurs — classement + KPIs (users + dossiers) ✅
 - [ ] C4. Assets cabinet (overview, financier, assurance, immobilier, honoraires)
 - [ ] C5. Partenaires & apporteurs
 - [ ] C6. Outils (catalogue produits, simulateurs, marketing)

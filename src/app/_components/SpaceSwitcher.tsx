@@ -29,7 +29,7 @@ export function SpaceSwitcher({ active }: { active: Space }) {
           Espace Marque
         </Link>
         <Link
-          href="/dirigeant"
+          href="/espace-dirigeant"
           className={`rounded px-3 py-1.5 text-[11.5px] font-semibold tracking-wide transition-colors ${
             active === "dirigeant"
               ? "bg-[var(--gold)] text-white"
