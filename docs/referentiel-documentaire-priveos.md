@@ -1,0 +1,312 @@
+# Référentiel documentaire PRIVEOS (matrice de collecte)
+
+> Source de vérité pour la collecte de documents (étude patrimoniale). 286 pièces.
+> Statut = état dans la maquette au moment du récap (Dans la maquette / À intégrer).
+
+## Identité et situation familiale  (20 pièces · 0 à intégrer)
+- ✅ [DOC] Pièce d’identité du client
+- ✅ [DOC] Pièce d’identité du conjoint, partenaire ou concubin
+- ✅ [DOC] Pièce d’identité de l’enfant
+- ✅ [DOC] Livret de famille
+- ✅ [INFO] Une personne du foyer est-elle en situation de handicap ?
+- ✅ [DOC] Justificatif de handicap du client, du conjoint ou d’un enfant
+- ✅ [DOC] Justificatif de domicile récent
+- ✅ [INFO] Adresse, téléphone et e-mail du client
+- ✅ [INFO] Adresse, téléphone et e-mail du conjoint, partenaire ou concubin
+- ✅ [INFO] Situation familiale actuelle du client ou du couple
+- ✅ [DOC] Contrat de mariage
+- ✅ [DOC] Avenant ou modification du contrat de mariage
+- ✅ [DOC] Convention de PACS
+- ✅ [DOC] Jugement ou convention de divorce du client
+- ✅ [DOC] Jugement ou convention de divorce du conjoint
+- ✅ [INFO] L’enfant est-il issu du client, du conjoint, du couple ou d’une autre union ?
+- ✅ [INFO] L’enfant est-il adopté ?
+- ✅ [DOC] Jugement d’adoption ou acte établissant l’adoption de l’enfant
+- ✅ [INFO] L’enfant est-il décédé ?
+- ✅ [DOC] Documents relatifs à une mesure de protection
+
+## Budget  (24 pièces · 0 à intégrer)
+- ✅ [DOC] Bulletin de salaire du client au 31 décembre de l’année précédente
+- ✅ [DOC] Bulletin de salaire du conjoint au 31 décembre de l’année précédente
+- ✅ [DOC] Trois derniers bulletins de salaire du client
+- ✅ [DOC] Trois derniers bulletins de salaire du conjoint
+- ✅ [DOC] Attestation de rémunération de gérance ou mandat social du client
+- ✅ [DOC] Attestation de rémunération de gérance ou mandat social du conjoint
+- ✅ [DOC] Attestation URSSAF du client
+- ✅ [DOC] Attestation URSSAF du conjoint
+- ✅ [DOC] Attestation de chiffre d’affaires ou recettes du client
+- ✅ [DOC] Attestation de chiffre d’affaires ou recettes du conjoint
+- ✅ [DOC] Relevés de dividendes perçus par le client
+- ✅ [DOC] Relevés de dividendes perçus par le conjoint
+- ✅ [DOC] IFU relatifs aux revenus financiers du foyer
+- ✅ [DOC] Bulletins ou attestations de pension retraite du client
+- ✅ [DOC] Bulletins ou attestations de pension retraite du conjoint
+- ✅ [DOC] Attestation France Travail ou indemnités chômage du client
+- ✅ [DOC] Attestation France Travail ou indemnités chômage du conjoint
+- ✅ [INFO] Quel est le train de vie annuel estimé du foyer, hors crédits et hors impôts ?
+- ✅ [INFO] Le foyer réalise-t-il un effort d’épargne régulier ?
+- ✅ [INFO] Le foyer verse-t-il des pensions, prestations compensatoires ou aides familiales régulières ?
+- ✅ [DOC] Jugement, convention ou accord relatif à pension alimentaire
+- ✅ [DOC] Jugement ou convention relatif à prestation compensatoire
+- ✅ [INFO] Le foyer anticipe-t-il une dépense importante à court ou moyen terme ?
+- ✅ [INFO] Le foyer anticipe-t-il une rentrée d’argent importante à court ou moyen terme ?
+
+## Fiscalité  (17 pièces · 0 à intégrer)
+- ✅ [DOC] Trois derniers avis d’impôt sur le revenu
+- ✅ [DOC] Dernière déclaration 2042
+- ✅ [DOC] Déclaration 2042-C
+- ✅ [DOC] Déclaration 2047
+- ✅ [DOC] Déclaration 2074
+- ✅ [DOC] Déclaration 2044
+- ✅ [DOC] Déclaration 2031
+- ✅ [DOC] Déclaration 2035
+- ✅ [DOC] Déclaration 2042-RICI
+- ✅ [INFO] Le foyer anticipe-t-il une évolution significative de ses réductions ou crédits d’impôt ?
+- ✅ [DOC] Justificatifs de dispositifs fiscaux immobiliers
+- ✅ [INFO] Un enfant majeur est-il rattaché fiscalement ou aidé financièrement ?
+- ✅ [DOC] Déclaration IFI / 2042-IFI
+- ✅ [DOC] Avis IFI
+- ✅ [INFO] Le foyer a-t-il une situation internationale, une résidence à l’étranger ou des revenus étrangers ?
+- ✅ [DOC] Avis d’imposition étranger ou justificatif fiscal étranger
+- ✅ [INFO] Le foyer dispose-t-il de comptes, contrats ou actifs financiers à l’étranger ?
+
+## Patrimoine professionnel  (41 pièces · 21 à intégrer)
+- ✅ [DOC] Extrait INSEE / SIRENE
+- ✅ [DOC] Attestation URSSAF
+- ✅ [DOC] Attestation de chiffre d’affaires ou recettes
+- ✅ [DOC] Liasse fiscale
+- ⚠️ [DOC] Bilan comptable et compte de résultat
+- ✅ [DOC] Déclaration 2031
+- ✅ [DOC] Déclaration 2035
+- ✅ [DOC] Justificatif d’inscription à l’ordre ou registre professionnel
+- ⚠️ [DOC] Contrats d’assurance professionnelle
+- ✅ [INFO] Le client envisage-t-il de poursuivre, céder, transmettre ou cesser l’activité ?
+- ⚠️ [DOC] Attestation de valorisation de l’activité
+- ⚠️ [DOC] Extrait Kbis ou justificatif d’immatriculation de la société civile
+- ✅ [DOC] Statuts à jour de la société civile
+- ✅ [DOC] Pacte d’associés ou convention extrastatutaire
+- ⚠️ [DOC] Registre des associés ou mouvements de titres
+- ✅ [DOC] Deux derniers bilans, comptes annuels et liasses fiscales
+- ✅ [DOC] Deux derniers PV d’AG ou AGE
+- ⚠️ [DOC] Lettre de mission de l’expert-comptable
+- ✅ [DOC] Dernier relevé bancaire de la société
+- ⚠️ [DOC] Convention de trésorerie
+- ⚠️ [DOC] Contrat de capitalisation, CAT, dépôt ou placement de trésorerie détenu par la société
+- ⚠️ [DOC] Contrats d’assurance homme-clé ou assurances croisées
+- ⚠️ [DOC] Attestation de valorisation par professionnel
+- ⚠️ [DOC] Actes de donation ou cession de parts
+- ⚠️ [DOC] Documents relatifs à l’intégration fiscale ou groupe
+- ✅ [INFO] Le client envisage-t-il de conserver, transmettre, céder ou réorganiser la société ?
+- ⚠️ [DOC] Extrait Kbis de la société commerciale
+- ✅ [DOC] Statuts à jour de la société commerciale
+- ✅ [DOC] Pacte d’associés ou pacte d’actionnaires
+- ✅ [DOC] Deux derniers bilans, comptes annuels et liasses fiscales
+- ✅ [DOC] Deux derniers PV d’AGO et AGE
+- ⚠️ [DOC] Lettre de mission de l’expert-comptable
+- ✅ [DOC] Trois derniers relevés bancaires professionnels
+- ⚠️ [DOC] Attestation de valorisation par expert ou professionnel
+- ⚠️ [DOC] Convention de trésorerie
+- ⚠️ [DOC] Contrats de placement de trésorerie
+- ⚠️ [DOC] Contrats RC professionnelle, homme-clé, mutuelle, prévoyance ou retraite collective
+- ⚠️ [DOC] Accords d’intéressement, participation ou abondement
+- ⚠️ [DOC] Actes de donation ou cession de titres
+- ⚠️ [DOC] Documents relatifs à l’intégration fiscale ou au groupe
+- ✅ [INFO] Le client envisage-t-il de poursuivre, céder, transmettre, ouvrir le capital ou partir avant la retraite ?
+
+## Immobilier  (82 pièces · 69 à intégrer)
+- ⚠️ [INFO] Le foyer est-il propriétaire, locataire ou occupant à titre gratuit de son logement d’usage ?
+- ⚠️ [DOC] Acte authentique d’acquisition du bien d’usage
+- ✅ [DOC] Titre de propriété ou attestation immobilière
+- ⚠️ [DOC] Bail d’habitation du logement d’usage
+- ⚠️ [INFO] Si occupation gratuite, qui met le bien à disposition du foyer ?
+- ⚠️ [DOC] Convention d’occupation gratuite ou mise à disposition écrite
+- ⚠️ [DOC] Statuts de SCI ou société détentrice du bien d’usage
+- ⚠️ [DOC] Convention d’indivision
+- ⚠️ [DOC] Acte de donation ou donation-partage du bien d’usage
+- ✅ [DOC] Déclaration de succession ou attestation immobilière successorale
+- ⚠️ [INFO] La vente s’est-elle faite avec agence immobilière ou chasseur immobilier ?
+- ⚠️ [DOC] DPE du bien d’usage
+- ⚠️ [DOC] DPE du bien locatif
+- ⚠️ [INFO] Des travaux ont-ils été réalisés depuis l’acquisition ou l’entrée dans le patrimoine ?
+- ⚠️ [INFO] Les travaux réalisés sont-ils justifiés par factures ?
+- ⚠️ [INFO] Les travaux ont-ils déjà été déduits fiscalement ?
+- ⚠️ [INFO] Des travaux ont-ils été réalisés sur le bien locatif depuis l’acquisition ?
+- ⚠️ [INFO] Les travaux sont-ils justifiés par factures ?
+- ⚠️ [DOC] Détail des immobilisations ou amortissements (bilan LMP/LMNP ou société d'exploitation)
+- ⚠️ [DOC] Estimation immobilière professionnelle de moins de six mois
+- ⚠️ [INFO] Valeur estimée par le client
+- ⚠️ [DOC] Estimation immobilière professionnelle de moins de six mois
+- ⚠️ [INFO] Valeur estimée par le client
+- ⚠️ [INFO] Le bien génère-t-il des loyers, indemnités ou remboursements de charges ?
+- ⚠️ [DOC] Bail ou convention de mise à disposition partielle
+- ✅ [DOC] Contrat d’assurance habitation, MRH ou PNO
+- ⚠️ [INFO] Montant annuel de cotisation d’assurance habitation, MRH ou PNO
+- ✅ [DOC] Dernier avis de taxe foncière
+- ✅ [DOC] Dernier avis de taxe d’habitation ou taxe résidence secondaire
+- ⚠️ [DOC] Avis de CFE lié au bien
+- ⚠️ [DOC] Appels de charges de copropriété
+- ⚠️ [INFO] Le client envisage-t-il de vendre ce bien ?
+- ⚠️ [INFO] Le client envisage-t-il de vendre le bien locatif ?
+- ⚠️ [DOC] Acte authentique d’acquisition du bien locatif
+- ✅ [DOC] Titre de propriété ou attestation immobilière
+- ⚠️ [INFO] Le bien est-il actuellement loué ou vacant ?
+- ⚠️ [INFO] Quel est le mode d’exploitation du bien ?
+- ⚠️ [DOC] Bail locatif en cours
+- ⚠️ [DOC] État locatif ou relevé de gestion locative
+- ⚠️ [DOC] Mandat de gestion locative
+- ⚠️ [DOC] Avenants au bail
+- ⚠️ [INFO] Montant actuel du loyer hors charges et charges facturées au locataire
+- ⚠️ [INFO] L’indexation prévue au bail est-elle appliquée ?
+- ⚠️ [DOC] Justificatif ou source du loyer de référence applicable
+- ⚠️ [INFO] Les charges sont-elles facturées au forfait ou en provisions ?
+- ⚠️ [DOC] Décompte de charges locatives ou relevé de gestion
+- ⚠️ [INFO] La TEOM est-elle récupérée auprès du locataire ?
+- ⚠️ [DOC] Bail commercial ou professionnel
+- ⚠️ [DOC] Bail notarié
+- ⚠️ [INFO] La taxe foncière et les principales charges sont-elles refacturées au preneur ?
+- ⚠️ [DOC] Acte de cautionnement
+- ✅ [DOC] Contrat d’assurance loyers impayés
+- ⚠️ [DOC] Justificatif de garantie Visale
+- ✅ [DOC] Contrat d’assurance PNO
+- ✅ [INFO] Montant annuel de cotisation PNO
+- ⚠️ [INFO] Le bien est il géré par une agence ou une conciergerie ?
+- ⚠️ [DOC] Contrat / mandat de gestion par agence / conciergerie
+- ✅ [DOC] Dernier avis de taxe foncière
+- ⚠️ [DOC] Avis de CFE lié au bien ou à l’activité locative
+- ⚠️ [DOC] Appels de charges de copropriété
+- ⚠️ [INFO] Frais comptables liés au bien ?
+- ⚠️ [INFO] Montant annuel estimé d’entretien, maintenance, petits travaux et charges diverses
+- ⚠️ [DOC] Déclarations fiscales liées au bien locatif
+- ⚠️ [DOC] IFU ou attestation fiscale de gestionnaire
+- ⚠️ [DOC] Engagement locatif ou justificatifs du dispositif fiscal
+- ⚠️ [DOC] Offre de prêt immobilier initiale
+- ⚠️ [DOC] Avenants au prêt immobilier
+- ✅ [DOC] Dernier tableau d’amortissement actualisé
+- ⚠️ [DOC] Conditions générales du prêt
+- ⚠️ [INFO] Le client envisage-t-il un remboursement anticipé, une vente ou une renégociation ?
+- ⚠️ [DOC] Notice, certificat d’adhésion ou contrat d’assurance emprunteur
+- ⚠️ [DOC] Contrat de délégation d’assurance
+- ⚠️ [DOC] Bulletin de souscription des parts de SCPI
+- ⚠️ [DOC] Attestation de propriété, relevé associé ou relevé annuel SCPI
+- ⚠️ [DOC] IFU SCPI
+- ⚠️ [DOC] Rapport annuel ou bulletin trimestriel de la SCPI
+- ⚠️ [DOC] Fiche Quantalys de la SCPI
+- ⚠️ [DOC] Convention de démembrement des parts de SCPI
+- ⚠️ [DOC] Offre de prêt finançant les parts de SCPI
+- ✅ [DOC] Tableau d’amortissement du prêt SCPI
+- ⚠️ [DOC] Contrat de nantissement des parts de SCPI
+- ✅ [INFO] Le client envisage-t-il de conserver, céder ou renforcer ses parts de SCPI ?
+
+## Actifs financiers  (38 pièces · 33 à intégrer)
+- ⚠️ [INFO] Comptes bancaires détenues et montants
+- ⚠️ [DOC] Relevés de comptes courants récents
+- ⚠️ [DOC] Relevés de livrets réglementés ou comptes sur livret
+- ⚠️ [DOC] Relevés de comptes à terme ou dépôts à terme
+- ✅ [DOC] Contrat de souscription du support financier
+- ⚠️ [DOC] Relevé de situation récent du support financier
+- ⚠️ [DOC] Relevé annuel du support financier
+- ⚠️ [DOC] Historique des versements et retraits
+- ⚠️ [DOC] Relevé de performances historiques
+- ⚠️ [DOC] Conditions tarifaires du contrat ou de l’enveloppe
+- ✅ [DOC] Contrat d’assurance-vie
+- ⚠️ [DOC] Contrat de capitalisation
+- ✅ [DOC] Clause bénéficiaire assurance-vie
+- ⚠️ [DOC] Avenant de clause bénéficiaire
+- ⚠️ [DOC] Historique des primes versées avant et après le 27 septembre 2017
+- ⚠️ [DOC] Historique des primes versées avant et après 70 ans
+- ⚠️ [INFO] Quelle est l’origine des fonds versés sur le contrat ?
+- ✅ [DOC] Contrat d’ouverture PEA ou PEA-PME
+- ⚠️ [DOC] Relevé de portefeuille PEA, PEA-PME ou CTO
+- ⚠️ [DOC] Historique des opérations PEA, PEA-PME ou CTO
+- ⚠️ [DOC] IFU compte-titres ou PEA
+- ⚠️ [DOC] Contrat PER, PERP, Madelin, article 83, article 82, Préfon ou autre retraite
+- ⚠️ [DOC] Relevé de situation du dispositif retraite
+- ⚠️ [DOC] Attestation fiscale des versements retraite
+- ⚠️ [INFO] Le client envisage-t-il une sortie en capital, rente ou mixte ?
+- ⚠️ [DOC] Relevé PEE, PEI, PERCO ou PERCOL
+- ⚠️ [DOC] Accord ou notice d’épargne salariale
+- ⚠️ [DOC] Bulletin de souscription FIP, FCPI, FCPR ou private equity
+- ⚠️ [DOC] Reporting ou relevé FIP, FCPI, FCPR ou private equity
+- ✅ [DOC] Contrat ou bulletin de souscription crowdfunding
+- ⚠️ [DOC] Reporting ou tableau de bord crowdfunding
+- ⚠️ [DOC] Contrat ou relevé d’obligations françaises ou étrangères
+- ⚠️ [DOC] Documentation produit structuré
+- ⚠️ [DOC] Attestation fiscale Girardin industriel
+- ⚠️ [INFO] Le client détient-il des cryptoactifs ?
+- ⚠️ [DOC] Relevé plateforme ou capture datée des cryptoactifs
+- ⚠️ [DOC] Historique des transactions cryptoactifs
+- ⚠️ [INFO] Comment les cryptoactifs sont-ils conservés ?
+
+## Passifs et créances  (12 pièces · 0 à intégrer)
+- ✅ [INFO] Le foyer a-t-il des prêts ou dettes hors crédit immobilier ?
+- ✅ [DOC] Contrat de prêt personnel ou crédit consommation
+- ✅ [DOC] Tableau d’amortissement ou échéancier du prêt hors immobilier
+- ✅ [DOC] Dernier relevé de situation du crédit renouvelable
+- ✅ [DOC] Contrat de prêt familial ou reconnaissance de dette
+- ✅ [DOC] Contrat LOA, LLD ou leasing
+- ✅ [DOC] Échéancier LOA, LLD ou leasing
+- ✅ [DOC] Avis, courrier ou échéancier de dette fiscale
+- ✅ [DOC] Courrier URSSAF ou échéancier social
+- ✅ [INFO] Le client ou le foyer détient-il une créance sur un tiers ?
+- ✅ [DOC] Contrat de prêt consenti ou reconnaissance de dette détenue
+- ✅ [INFO] La créance est-elle remboursée normalement ?
+
+## Retraite  (8 pièces · 0 à intégrer)
+- ✅ [DOC] RIS du client
+- ✅ [DOC] EIG du client
+- ✅ [DOC] RIS du conjoint
+- ✅ [DOC] EIG du conjoint
+- ✅ [INFO] À quel âge le client souhaite-t-il idéalement cesser ou réduire son activité ?
+- ✅ [INFO] À quel âge le conjoint souhaite-t-il idéalement cesser ou réduire son activité ?
+- ✅ [DOC] Justificatifs de rachat de trimestres ou démarches retraite
+- ✅ [DOC] Documents relatifs à retraite supplémentaire ou dispositifs employeur
+
+## Mutuelle et prévoyance  (11 pièces · 0 à intégrer)
+- ✅ [DOC] Contrat de mutuelle santé du client ou du foyer
+- ✅ [DOC] Tableau de garanties mutuelle
+- ✅ [INFO] Montant annuel de cotisation mutuelle
+- ✅ [DOC] Contrat de prévoyance individuelle du client
+- ✅ [DOC] Contrat de prévoyance individuelle du conjoint
+- ✅ [DOC] Tableau de garanties prévoyance
+- ✅ [INFO] Montant annuel de cotisation prévoyance
+- ✅ [DOC] Clause bénéficiaire de l’assurance décès
+- ✅ [DOC] Contrats de prévoyance professionnelle TNS du client
+- ✅ [DOC] Contrats de prévoyance professionnelle TNS du conjoint
+- ✅ [DOC] Contrats de prévoyance collective ou employeur
+
+## Succession et donation  (23 pièces · 0 à intégrer)
+- ✅ [INFO] Le client souhaite-t-il avantager une personne en cas de décès ?
+- ✅ [INFO] Le conjoint souhaite-t-il avantager une personne en cas de décès ?
+- ✅ [DOC] Testament du client
+- ✅ [DOC] Testament du conjoint
+- ✅ [DOC] Donation entre époux
+- ✅ [DOC] Mandat de protection future du client
+- ✅ [DOC] Mandat de protection future du conjoint
+- ✅ [DOC] Mandat à effet posthume
+- ✅ [DOC] Pacte familial, convention familiale ou RAAR
+- ✅ [DOC] Actes de donation consentie par le client
+- ✅ [DOC] Actes de donation consentie par le conjoint
+- ✅ [DOC] Déclarations de dons manuels consentis
+- ✅ [DOC] Actes de donation reçue par le client
+- ✅ [DOC] Actes de donation reçue par le conjoint
+- ✅ [DOC] Déclarations de dons manuels reçus
+- ✅ [DOC] Déclaration de succession reçue par le client
+- ✅ [DOC] Déclaration de succession reçue par le conjoint
+- ✅ [DOC] Acte de notoriété
+- ✅ [DOC] Attestation immobilière
+- ✅ [DOC] Acte de partage successoral
+- ✅ [INFO] Le client pense-t-il recevoir une donation ou succession à court ou moyen terme ?
+- ✅ [INFO] Existe-t-il des prêts familiaux consentis ou reçus ?
+- ✅ [DOC] Contrat de prêt familial ou reconnaissance de dette
+
+## Informations complémentaires  (10 pièces · 0 à intégrer)
+- ✅ [DOC] Questionnaire patrimonial / DCI complété
+- ✅ [DOC] Lettre de mission ou mandat signé
+- ✅ [DOC] Qualification profil risque
+- ✅ [DOC] DER
+- ✅ [DOC] Autorisation de traitement des données personnelles
+- ✅ [INFO] Le client souhaite-t-il transmettre une information complémentaire non couverte par les rubriques standard ?
+- ✅ [DOC] Document libre complémentaire transmis par le client
+- ✅ [INFO] Le client souhaite-t-il ajouter un commentaire libre ou une information non prévue ?
+- ✅ [INFO] Le / les clients posent-ils des limites dans la stratégie ?
+- ✅ [DOC] Document libre complémentaire
