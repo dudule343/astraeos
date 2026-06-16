@@ -65,17 +65,7 @@ export async function advanceConformiteItem(dossierId: string, type: ConformiteT
 
   try {
     const supabase = createAdminClient();
-
-    // tenant_id / cabinet_id du dossier (fallback seed si absent).
-    const { data: d } = await supabase
-      .from("dossiers")
-      .select("tenant_id, cabinet_id")
-      .eq("id", dossierId)
-      .maybeSingle();
-
-    const dossier = (d ?? null) as { tenant_id: string | null; cabinet_id: string | null } | null;
-    const tenantId = dossier?.tenant_id ?? DEFAULT_TENANT_ID;
-    const cabinetId = dossier?.cabinet_id ?? DEFAULT_CABINET_ID;
+    const { tenantId, cabinetId } = await resolveOwner(supabase, dossierId);
 
     // État actuel de la pièce (absente = 'a_faire').
     const { data: existing } = await supabase
@@ -90,25 +80,149 @@ export async function advanceConformiteItem(dossierId: string, type: ConformiteT
     const target = nextStatus(current);
     if (!target) return; // déjà validée : état terminal.
 
-    const now = new Date().toISOString();
-    const tsColumn = timestampColumnFor(target);
+    const ok = await setItemStatus(supabase, {
+      dossierId,
+      tenantId,
+      cabinetId,
+      type,
+      target,
+    });
+    if (!ok) return;
 
-    const { error: upsertError } = await supabase.from("conformite_items").upsert(
-      {
-        tenant_id: tenantId,
-        cabinet_id: cabinetId,
-        dossier_id: dossierId,
-        type,
-        label: labelForType(type),
-        status: target,
-        updated_at: now,
-        ...(tsColumn ? { [tsColumn]: now } : {}),
-      },
-      { onConflict: "dossier_id,type" },
+    revalidatePath(`/dossiers/${dossierId}/conformite`);
+    revalidatePath(`/dossiers/${dossierId}`);
+  } catch {
+    // Table absente ou erreur Postgres : no-op silencieux, pas d'exception UI.
+  }
+}
+
+/* ------------------------------------------------------------------------- *
+ * Helpers internes partagés (avancement isolé + envoi groupé du pack).
+ * ------------------------------------------------------------------------- */
+
+type AdminClient = ReturnType<typeof createAdminClient>;
+
+/** tenant_id / cabinet_id du dossier (fallback seed si absent). */
+async function resolveOwner(
+  supabase: AdminClient,
+  dossierId: string,
+): Promise<{ tenantId: string; cabinetId: string }> {
+  const { data: d } = await supabase
+    .from("dossiers")
+    .select("tenant_id, cabinet_id")
+    .eq("id", dossierId)
+    .maybeSingle();
+  const dossier = (d ?? null) as { tenant_id: string | null; cabinet_id: string | null } | null;
+  return {
+    tenantId: dossier?.tenant_id ?? DEFAULT_TENANT_ID,
+    cabinetId: dossier?.cabinet_id ?? DEFAULT_CABINET_ID,
+  };
+}
+
+/**
+ * Upsert idempotent d'une pièce au statut cible + journalisation timeline.
+ * Factorise la logique commune à advanceConformiteItem et sendConformitePack.
+ * Retourne false si l'upsert échoue (no-op silencieux pour l'appelant).
+ */
+async function setItemStatus(
+  supabase: AdminClient,
+  args: {
+    dossierId: string;
+    tenantId: string;
+    cabinetId: string;
+    type: ConformiteType;
+    target: ConformiteStatus;
+  },
+): Promise<boolean> {
+  const { dossierId, tenantId, cabinetId, type, target } = args;
+  const now = new Date().toISOString();
+  const tsColumn = timestampColumnFor(target);
+
+  const { error: upsertError } = await supabase.from("conformite_items").upsert(
+    {
+      tenant_id: tenantId,
+      cabinet_id: cabinetId,
+      dossier_id: dossierId,
+      type,
+      label: labelForType(type),
+      status: target,
+      updated_at: now,
+      ...(tsColumn ? { [tsColumn]: now } : {}),
+    },
+    { onConflict: "dossier_id,type" },
+  );
+  if (upsertError) return false;
+
+  // Journalise l'événement (non bloquant : un échec n'annule pas l'avancement).
+  await supabase.from("timeline_events").insert({
+    tenant_id: tenantId,
+    cabinet_id: cabinetId,
+    dossier_id: dossierId,
+    event_type: "compliance_review",
+    actor_user_id: DEFAULT_ENGINEER_ID,
+    actor_type: "engineer",
+    title: `${labelForType(type)} · ${STATUS_LABELS[target]}`,
+    description: `La pièce « ${labelForType(type)} » est passée à l'état « ${STATUS_LABELS[target]} ».`,
+    visibility: "internal_only",
+    linked_entity_type: "conformite_item",
+  });
+
+  return true;
+}
+
+/**
+ * Envoi groupé du pack de contractualisation (v40 · espace d'envoi du pack).
+ *
+ * Pour chaque pièce sélectionnée encore « à faire », passe son statut à
+ * « envoyé » (sent_at horodaté) — mock Yousign, PAS d'appel API externe,
+ * cohérent avec l'esprit mock du projet (DCI_DATA). Journalise un seul
+ * timeline_event récapitulatif du pack envoyé.
+ *
+ * Dégradation gracieuse identique : no-op silencieux sans clé service_role
+ * ou si la table conformite_items est absente.
+ */
+export async function sendConformitePack(dossierId: string, selectedTypes: ConformiteType[]) {
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) return;
+
+  const types = selectedTypes.filter((t) => CONFORMITE_TYPES.includes(t));
+  if (types.length === 0) return;
+
+  try {
+    const supabase = createAdminClient();
+    const { tenantId, cabinetId } = await resolveOwner(supabase, dossierId);
+
+    // Statuts actuels des pièces sélectionnées (absentes = 'a_faire').
+    const { data: rows } = await supabase
+      .from("conformite_items")
+      .select("type, status")
+      .eq("dossier_id", dossierId)
+      .in("type", types);
+
+    const byType = new Map(
+      ((rows as Array<{ type: string; status: ConformiteStatus }> | null) ?? []).map((r) => [
+        r.type,
+        r.status,
+      ]),
     );
-    if (upsertError) return;
 
-    // Journalise l'événement (non bloquant : un échec n'annule pas l'avancement).
+    const sent: ConformiteType[] = [];
+    for (const type of types) {
+      const current = byType.get(type) ?? "a_faire";
+      // Seules les pièces encore à préparer sont « envoyées » par le pack.
+      if (current !== "a_faire") continue;
+      const ok = await setItemStatus(supabase, {
+        dossierId,
+        tenantId,
+        cabinetId,
+        type,
+        target: "envoye",
+      });
+      if (ok) sent.push(type);
+    }
+
+    if (sent.length === 0) return; // rien à envoyer : pas de timeline ni revalidate.
+
+    // Événement récapitulatif unique du pack envoyé (au-dessus des events par pièce).
     await supabase.from("timeline_events").insert({
       tenant_id: tenantId,
       cabinet_id: cabinetId,
@@ -116,15 +230,42 @@ export async function advanceConformiteItem(dossierId: string, type: ConformiteT
       event_type: "compliance_review",
       actor_user_id: DEFAULT_ENGINEER_ID,
       actor_type: "engineer",
-      title: `${labelForType(type)} · ${STATUS_LABELS[target]}`,
-      description: `La pièce « ${labelForType(type)} » est passée à l'état « ${STATUS_LABELS[target]} ».`,
+      title: "Pack de contractualisation envoyé",
+      description: `Pack envoyé au client · ${sent.length} pièce(s) en signature électronique (Yousign) + demande de règlement.`,
       visibility: "internal_only",
-      linked_entity_type: "conformite_item",
     });
 
     revalidatePath(`/dossiers/${dossierId}/conformite`);
     revalidatePath(`/dossiers/${dossierId}`);
   } catch {
-    // Table absente ou erreur Postgres : no-op silencieux, pas d'exception UI.
+    // Table absente ou erreur Postgres : no-op silencieux.
+  }
+}
+
+/**
+ * Relance client (placeholder v40) : journalise un timeline_event de relance.
+ * Pas d'envoi d'e-mail réel pour le MVP.
+ */
+export async function relancerClient(dossierId: string) {
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) return;
+  try {
+    const supabase = createAdminClient();
+    const { tenantId, cabinetId } = await resolveOwner(supabase, dossierId);
+
+    await supabase.from("timeline_events").insert({
+      tenant_id: tenantId,
+      cabinet_id: cabinetId,
+      dossier_id: dossierId,
+      event_type: "compliance_review",
+      actor_user_id: DEFAULT_ENGINEER_ID,
+      actor_type: "engineer",
+      title: "Relance client · conformité",
+      description: "Relance envoyée au client pour la signature des documents et le règlement des honoraires.",
+      visibility: "internal_only",
+    });
+
+    revalidatePath(`/dossiers/${dossierId}/conformite`);
+  } catch {
+    // No-op silencieux.
   }
 }
