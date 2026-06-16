@@ -1,0 +1,358 @@
+import type { CatalogEntry } from "./types";
+
+/**
+ * Catégorie « Patrimoine professionnel » du référentiel documentaire.
+ *
+ * Trois blocs :
+ *   1. Activité d'exploitation (entreprise individuelle / société d'exploitation
+ *      / libéral) — déclenché par `detient_entreprise`, affiné par
+ *      `profession_liberale` / `inscrit_ordre_registre` pour les pièces qui ne
+ *      concernent qu'un libéral.
+ *   2. Société civile (SCI non immo / holding patrimoniale civile) —
+ *      déclenché par `detient_societe_civile`.
+ *   3. Société commerciale — déclenché par `detient_societe_commerciale`.
+ *
+ * Les liasses 2031 (BIC) et 2035 (BNC) sont distinguées : la 2035 est propre au
+ * régime des bénéfices non commerciaux (libéral), la 2031 au régime BIC.
+ */
+export const ENTRIES: CatalogEntry[] = [
+  // --- Bloc 1 : activité d'exploitation ---
+  {
+    id: "pro-insee-sirene",
+    category: "Patrimoine professionnel",
+    sub: "Activité d'exploitation",
+    label: "Extrait INSEE / SIRENE",
+    type: "Document",
+    anyOf: ["detient_entreprise"],
+  },
+  {
+    id: "pro-attestation-urssaf",
+    category: "Patrimoine professionnel",
+    sub: "Activité d'exploitation",
+    label: "Attestation URSSAF",
+    type: "Document",
+    anyOf: ["detient_entreprise"],
+  },
+  {
+    id: "pro-attestation-ca-recettes",
+    category: "Patrimoine professionnel",
+    sub: "Activité d'exploitation",
+    label: "Attestation de chiffre d’affaires ou recettes",
+    type: "Document",
+    anyOf: ["detient_entreprise"],
+  },
+  {
+    id: "pro-liasse-fiscale",
+    category: "Patrimoine professionnel",
+    sub: "Activité d'exploitation",
+    label: "Liasse fiscale",
+    type: "Document",
+    anyOf: ["detient_entreprise"],
+  },
+  {
+    id: "pro-bilan-compte-resultat",
+    category: "Patrimoine professionnel",
+    sub: "Activité d'exploitation",
+    label: "Bilan comptable et compte de résultat",
+    type: "Document",
+    anyOf: ["detient_entreprise"],
+  },
+  {
+    id: "pro-declaration-2031",
+    category: "Patrimoine professionnel",
+    sub: "Activité d'exploitation",
+    label: "Déclaration 2031",
+    type: "Document",
+    anyOf: ["detient_entreprise"],
+  },
+  {
+    id: "pro-declaration-2035",
+    category: "Patrimoine professionnel",
+    sub: "Activité d'exploitation",
+    label: "Déclaration 2035",
+    type: "Document",
+    anyOf: ["profession_liberale", "detient_entreprise"],
+  },
+  {
+    id: "pro-inscription-ordre-registre",
+    category: "Patrimoine professionnel",
+    sub: "Activité d'exploitation",
+    label: "Justificatif d’inscription à l’ordre ou registre professionnel",
+    type: "Document",
+    anyOf: ["inscrit_ordre_registre", "profession_liberale"],
+  },
+  {
+    id: "pro-assurance-professionnelle",
+    category: "Patrimoine professionnel",
+    sub: "Activité d'exploitation",
+    label: "Contrats d’assurance professionnelle",
+    type: "Document",
+    anyOf: ["detient_entreprise"],
+  },
+  {
+    id: "pro-q-poursuite-cession-activite",
+    category: "Patrimoine professionnel",
+    sub: "Activité d'exploitation",
+    label:
+      "Le client envisage-t-il de poursuivre, céder, transmettre ou cesser l’activité ?",
+    type: "Information",
+    anyOf: ["detient_entreprise"],
+  },
+  {
+    id: "pro-valorisation-activite",
+    category: "Patrimoine professionnel",
+    sub: "Activité d'exploitation",
+    label: "Attestation de valorisation de l’activité",
+    type: "Document",
+    anyOf: ["detient_entreprise"],
+    allOf: ["projet_cession_transmission_pro"],
+  },
+
+  // --- Bloc 2 : société civile ---
+  {
+    id: "pro-sc-kbis-immatriculation",
+    category: "Patrimoine professionnel",
+    sub: "Société civile",
+    label: "Extrait Kbis ou justificatif d’immatriculation de la société civile",
+    type: "Document",
+    anyOf: ["detient_societe_civile"],
+  },
+  {
+    id: "pro-sc-statuts",
+    category: "Patrimoine professionnel",
+    sub: "Société civile",
+    label: "Statuts à jour de la société civile",
+    type: "Document",
+    anyOf: ["detient_societe_civile"],
+  },
+  {
+    id: "pro-sc-pacte-associes",
+    category: "Patrimoine professionnel",
+    sub: "Société civile",
+    label: "Pacte d’associés ou convention extrastatutaire",
+    type: "Document",
+    anyOf: ["detient_societe_civile"],
+  },
+  {
+    id: "pro-sc-registre-associes",
+    category: "Patrimoine professionnel",
+    sub: "Société civile",
+    label: "Registre des associés ou mouvements de titres",
+    type: "Document",
+    anyOf: ["detient_societe_civile"],
+  },
+  {
+    id: "pro-sc-bilans-liasses",
+    category: "Patrimoine professionnel",
+    sub: "Société civile",
+    label: "Deux derniers bilans, comptes annuels et liasses fiscales",
+    type: "Document",
+    anyOf: ["detient_societe_civile"],
+  },
+  {
+    id: "pro-sc-pv-ag-age",
+    category: "Patrimoine professionnel",
+    sub: "Société civile",
+    label: "Deux derniers PV d’AG ou AGE",
+    type: "Document",
+    anyOf: ["detient_societe_civile"],
+  },
+  {
+    id: "pro-sc-lettre-mission-expert-comptable",
+    category: "Patrimoine professionnel",
+    sub: "Société civile",
+    label: "Lettre de mission de l’expert-comptable",
+    type: "Document",
+    anyOf: ["detient_societe_civile"],
+  },
+  {
+    id: "pro-sc-releve-bancaire",
+    category: "Patrimoine professionnel",
+    sub: "Société civile",
+    label: "Dernier relevé bancaire de la société",
+    type: "Document",
+    anyOf: ["detient_societe_civile"],
+  },
+  {
+    id: "pro-sc-convention-tresorerie",
+    category: "Patrimoine professionnel",
+    sub: "Société civile",
+    label: "Convention de trésorerie",
+    type: "Document",
+    anyOf: ["detient_societe_civile"],
+  },
+  {
+    id: "pro-sc-placement-tresorerie",
+    category: "Patrimoine professionnel",
+    sub: "Société civile",
+    label:
+      "Contrat de capitalisation, CAT, dépôt ou placement de trésorerie détenu par la société",
+    type: "Document",
+    anyOf: ["detient_societe_civile"],
+  },
+  {
+    id: "pro-sc-assurance-homme-cle",
+    category: "Patrimoine professionnel",
+    sub: "Société civile",
+    label: "Contrats d’assurance homme-clé ou assurances croisées",
+    type: "Document",
+    anyOf: ["detient_societe_civile"],
+  },
+  {
+    id: "pro-sc-valorisation-professionnel",
+    category: "Patrimoine professionnel",
+    sub: "Société civile",
+    label: "Attestation de valorisation par professionnel",
+    type: "Document",
+    anyOf: ["detient_societe_civile"],
+  },
+  {
+    id: "pro-sc-donation-cession-parts",
+    category: "Patrimoine professionnel",
+    sub: "Société civile",
+    label: "Actes de donation ou cession de parts",
+    type: "Document",
+    anyOf: ["detient_societe_civile"],
+  },
+  {
+    id: "pro-sc-integration-fiscale-groupe",
+    category: "Patrimoine professionnel",
+    sub: "Société civile",
+    label: "Documents relatifs à l’intégration fiscale ou groupe",
+    type: "Document",
+    anyOf: ["detient_societe_civile"],
+  },
+  {
+    id: "pro-sc-q-conservation-transmission",
+    category: "Patrimoine professionnel",
+    sub: "Société civile",
+    label:
+      "Le client envisage-t-il de conserver, transmettre, céder ou réorganiser la société ?",
+    type: "Information",
+    anyOf: ["detient_societe_civile"],
+  },
+
+  // --- Bloc 3 : société commerciale ---
+  {
+    id: "pro-com-kbis",
+    category: "Patrimoine professionnel",
+    sub: "Société commerciale",
+    label: "Extrait Kbis de la société commerciale",
+    type: "Document",
+    anyOf: ["detient_societe_commerciale"],
+  },
+  {
+    id: "pro-com-statuts",
+    category: "Patrimoine professionnel",
+    sub: "Société commerciale",
+    label: "Statuts à jour de la société commerciale",
+    type: "Document",
+    anyOf: ["detient_societe_commerciale"],
+  },
+  {
+    id: "pro-com-pacte-associes-actionnaires",
+    category: "Patrimoine professionnel",
+    sub: "Société commerciale",
+    label: "Pacte d’associés ou pacte d’actionnaires",
+    type: "Document",
+    anyOf: ["detient_societe_commerciale"],
+  },
+  {
+    id: "pro-com-bilans-liasses",
+    category: "Patrimoine professionnel",
+    sub: "Société commerciale",
+    label: "Deux derniers bilans, comptes annuels et liasses fiscales",
+    type: "Document",
+    anyOf: ["detient_societe_commerciale"],
+  },
+  {
+    id: "pro-com-pv-ago-age",
+    category: "Patrimoine professionnel",
+    sub: "Société commerciale",
+    label: "Deux derniers PV d’AGO et AGE",
+    type: "Document",
+    anyOf: ["detient_societe_commerciale"],
+  },
+  {
+    id: "pro-com-lettre-mission-expert-comptable",
+    category: "Patrimoine professionnel",
+    sub: "Société commerciale",
+    label: "Lettre de mission de l’expert-comptable",
+    type: "Document",
+    anyOf: ["detient_societe_commerciale"],
+  },
+  {
+    id: "pro-com-releves-bancaires",
+    category: "Patrimoine professionnel",
+    sub: "Société commerciale",
+    label: "Trois derniers relevés bancaires professionnels",
+    type: "Document",
+    anyOf: ["detient_societe_commerciale"],
+  },
+  {
+    id: "pro-com-valorisation-expert",
+    category: "Patrimoine professionnel",
+    sub: "Société commerciale",
+    label: "Attestation de valorisation par expert ou professionnel",
+    type: "Document",
+    anyOf: ["detient_societe_commerciale"],
+  },
+  {
+    id: "pro-com-convention-tresorerie",
+    category: "Patrimoine professionnel",
+    sub: "Société commerciale",
+    label: "Convention de trésorerie",
+    type: "Document",
+    anyOf: ["detient_societe_commerciale"],
+  },
+  {
+    id: "pro-com-placement-tresorerie",
+    category: "Patrimoine professionnel",
+    sub: "Société commerciale",
+    label: "Contrats de placement de trésorerie",
+    type: "Document",
+    anyOf: ["detient_societe_commerciale"],
+  },
+  {
+    id: "pro-com-rc-pro-prevoyance-retraite",
+    category: "Patrimoine professionnel",
+    sub: "Société commerciale",
+    label:
+      "Contrats RC professionnelle, homme-clé, mutuelle, prévoyance ou retraite collective",
+    type: "Document",
+    anyOf: ["detient_societe_commerciale"],
+  },
+  {
+    id: "pro-com-interessement-participation",
+    category: "Patrimoine professionnel",
+    sub: "Société commerciale",
+    label: "Accords d’intéressement, participation ou abondement",
+    type: "Document",
+    anyOf: ["detient_societe_commerciale"],
+  },
+  {
+    id: "pro-com-donation-cession-titres",
+    category: "Patrimoine professionnel",
+    sub: "Société commerciale",
+    label: "Actes de donation ou cession de titres",
+    type: "Document",
+    anyOf: ["detient_societe_commerciale"],
+  },
+  {
+    id: "pro-com-integration-fiscale-groupe",
+    category: "Patrimoine professionnel",
+    sub: "Société commerciale",
+    label: "Documents relatifs à l’intégration fiscale ou au groupe",
+    type: "Document",
+    anyOf: ["detient_societe_commerciale"],
+  },
+  {
+    id: "pro-com-q-poursuite-cession-capital",
+    category: "Patrimoine professionnel",
+    sub: "Société commerciale",
+    label:
+      "Le client envisage-t-il de poursuivre, céder, transmettre, ouvrir le capital ou partir avant la retraite ?",
+    type: "Information",
+    anyOf: ["detient_societe_commerciale"],
+  },
+];
