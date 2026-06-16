@@ -4804,43 +4804,256 @@ function checkFinalValid() {
   }
 }
 
+function slugify(s){return String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,48)||'champ';}
+
+// ─── Sérialiseur DCI · produit la forme canonique { sections:[...] } attendue par la visio ───
+// La visio (visio.html ~1450) consomme DCI_DATA = { sections:[{ id,num,title,summary, groups:[
+//   { type:'person', personId, person:{name,initials,role,color}, fields },
+//   { type:'block', title, fields },
+//   { type:'repeatable', title, addLabel, kind, items:[{fields}] } ] }] }.
+// Chaque field = { key, label, value, type, status, options? }. status posé ici : 'validated' si
+// value !== '' sinon 'empty'. Jamais 'ai-*' : ces statuts sont calculés live par la visio.
+
 function serializeAstraeosComplet() {
-  const data = { fields: {}, choices: [], yesno: [], checked: [], assets: [], objectifs: [], by_section: {} };
-  document.querySelectorAll('input, select, textarea').forEach(el => {
-    const key = el.id || el.name || (el.placeholder || '').slice(0, 24);
-    if (!key) return;
-    if (el.type === 'checkbox' || el.type === 'radio') data.fields[key] = el.checked;
-    else data.fields[key] = el.value;
-  });
-  document.querySelectorAll('.choice-card.selected').forEach(el => {
-    data.choices.push(el.querySelector('.choice-card-label')?.textContent.trim() || '');
-  });
-  document.querySelectorAll('.yesno .yesno-option.selected').forEach(el => {
-    data.yesno.push(el.textContent.trim());
-  });
-  document.querySelectorAll('.check-row.checked, .cto-nature-check input:checked').forEach(el => {
-    const lab = el.querySelector ? el.querySelector('.check-label')?.textContent.trim() : el.parentElement?.textContent.trim();
-    if (lab) data.checked.push(lab);
-  });
-  document.querySelectorAll('.asset-row').forEach(row => {
-    data.assets.push({
-      titre: row.querySelector('.asset-row-title')?.textContent.trim(),
-      meta:  row.querySelector('.asset-row-meta')?.textContent.trim(),
-      valeur:row.querySelector('.asset-row-value')?.textContent.trim(),
+  // Mappe un id de conteneur répétable (ou son libellé) vers un kind connu de la visio.
+  const KIND_BY_CONTAINER = {
+    enfantsTable: 'enfant',
+    eventsList: 'evenement', donationsList: 'evenement',
+    assetsListPro: 'societe',
+    assetsListUsg: 'immo-usage',
+    assetsListLoc: 'immo-locatif',
+    assetsListIndi: 'immo-indirect',
+    assetsListAV: 'av',
+    assetsListFin: 'liquidite', assetsListInvest: 'liquidite',
+    assetsListPret: 'emprunt',
+    objectifsList: 'objectif',
+  };
+  function kindFor(container, sectionId) {
+    // l'id porteur peut être le conteneur lui-même ou son sous-conteneur de lignes (ex. #enfantsTable).
+    const id = container.id
+      || container.querySelector(':scope [id]')?.id
+      || '';
+    if (KIND_BY_CONTAINER[id]) return KIND_BY_CONTAINER[id];
+    if (/^assetsList(Or|Crypto|Art|Foncier|AutreAtypique)/.test(id)) return 'liquidite';
+    if (/^assetsListPer/.test(id)) return 'av';
+    // fallback : slug stable dérivé de l'id ou de la section
+    return slugify(id || sectionId);
+  }
+
+  const clean = s => String(s || '').replace(/\*/g, '').replace(/\s+/g, ' ').trim().replace(/\s*:\s*$/, '');
+
+  // Libellé d'un champ depuis son input, en remontant au .field / <label> / contexte de ligne.
+  function labelFor(el, fallbackHeader) {
+    // Ligne de détention/emprunt : le libellé est le nom du détenteur, et la 2ᵉ colonne = quote-part.
+    const detRow = el.closest('.detention-row');
+    if (detRow) {
+      const who = clean(detRow.querySelector('.detention-row-label')?.textContent);
+      const ins = Array.from(detRow.querySelectorAll('input, select'));
+      const pos = ins.indexOf(el);
+      if (who) return pos <= 0 ? `Quote-part · ${who}` : `Détail · ${who}`;
+    }
+    const fieldBox = el.closest('.field');
+    let lab = fieldBox?.querySelector('.field-label')?.textContent
+      || (el.id && document.querySelector(`label[for="${el.id}"]`)?.textContent)
+      || el.closest('label')?.textContent
+      || '';
+    lab = clean(lab);
+    if (lab) return lab;
+    // Label "field-label" frère direct (cas .link-bien-block sans wrapper .field).
+    let sib = el.previousElementSibling;
+    while (sib) { if (sib.classList?.contains('field-label')) { lab = clean(sib.textContent); break; } sib = sib.previousElementSibling; }
+    if (lab) return lab;
+    if (fallbackHeader) return fallbackHeader;
+    return clean(el.placeholder) || el.name || 'Champ';
+  }
+
+  function typeFor(el) {
+    if (el.tagName === 'SELECT') return 'select';
+    if (el.type === 'date') return 'date';
+    if (el.type === 'number') return 'number';
+    const ph = (el.placeholder || '').toLowerCase();
+    if (/jj\/mm\/aaaa|date/.test(ph)) return 'date';
+    if (/montant|€|\bann/.test(ph)) return 'number';
+    return 'text';
+  }
+
+  function optionsFor(el) {
+    if (el.tagName !== 'SELECT') return null;
+    return Array.from(el.options)
+      .map(o => (o.value || o.textContent || '').trim())
+      .filter(o => o && !/^—|^-+$|sélectionnez/i.test(o));
+  }
+
+  // Construit un champ canonique depuis un input, avec key unique dans son groupe.
+  function fieldFrom(el, usedKeys, fallbackHeader) {
+    const label = labelFor(el, fallbackHeader);
+    const value = String(el.value || '').trim();
+    const type = typeFor(el);
+    let key = (el.id && /^[a-z]/i.test(el.id) ? el.id : '') || el.name || slugify(label);
+    key = slugify(key);
+    if (usedKeys.has(key)) { let n = 2; while (usedKeys.has(`${key}-${n}`)) n++; key = `${key}-${n}`; }
+    usedKeys.add(key);
+    const field = { key, label, value, type, status: value !== '' ? 'validated' : 'empty' };
+    if (type === 'select') { const o = optionsFor(el); if (o && o.length) field.options = o; }
+    return field;
+  }
+
+  // Lit les champs saisissables d'un conteneur. `nested` true → on lit TOUT (cas item répétable :
+  // .dyn-row / .obj-block / .asset-detail). Sinon (block/person) on ignore les champs appartenant
+  // à un sous-conteneur répétable imbriqué pour éviter le double comptage.
+  const NESTED_REPEATABLE = '.dyn-row, .asset-row, .asset-detail';
+  function readFields(scope, nested) {
+    const usedKeys = new Set();
+    const fields = [];
+    // En-têtes de tableau pour les lignes inline (.dyn-row) sans .field-label.
+    // Le header vit au niveau du .q-block ; on remonte donc si le scope est une .dyn-row.
+    const headerHost = scope.classList.contains('dyn-row') ? scope.closest('.q-block') : scope;
+    const headerCells = headerHost
+      ? Array.from(headerHost.querySelectorAll('.dyn-table-header > div')).map(d => d.textContent.trim())
+      : [];
+    scope.querySelectorAll('input, select, textarea').forEach(el => {
+      if (el.type === 'checkbox' || el.type === 'radio' || el.type === 'hidden') return;
+      if (el.type === 'button' || el.type === 'submit') return;
+      // Si on lit un block/person, exclure les champs d'un répétable imbriqué (pas le scope lui-même).
+      if (!nested) {
+        const nestedAncestor = el.closest(NESTED_REPEATABLE);
+        if (nestedAncestor && nestedAncestor !== scope) return;
+      }
+      // fallback header par position dans une .dyn-row
+      let fallbackHeader = null;
+      const dynRow = el.closest('.dyn-row');
+      if (dynRow && headerCells.length) {
+        const inputs = Array.from(dynRow.querySelectorAll('input, select, textarea'));
+        const idx = inputs.indexOf(el);
+        if (idx >= 0 && headerCells[idx]) fallbackHeader = headerCells[idx];
+      }
+      fields.push(fieldFrom(el, usedKeys, fallbackHeader));
+    });
+    // Champs Oui/Non (.yesno) : capter l'option sélectionnée comme champ texte.
+    scope.querySelectorAll(':scope .yesno').forEach(yn => {
+      const labelEl = yn.closest('.field')?.querySelector('.field-label')
+        || yn.previousElementSibling;
+      const label = clean(labelEl?.textContent) || 'Choix';
+      const sel = yn.querySelector('.yesno-option.selected');
+      const value = sel ? sel.textContent.trim() : '';
+      let key = slugify(label);
+      if (usedKeys.has(key)) { let n = 2; while (usedKeys.has(`${key}-${n}`)) n++; key = `${key}-${n}`; }
+      usedKeys.add(key);
+      fields.push({ key, label, value, type: 'select', status: value !== '' ? 'validated' : 'empty', options: ['Oui', 'Non'] });
+    });
+    return fields;
+  }
+
+  const sections = [];
+  const allSteps = Array.from(document.querySelectorAll('.section[data-step]'));
+  const maxStep = Math.max(...allSteps.map(s => parseInt(s.dataset.step, 10) || 0));
+  const usedSectionIds = new Set();
+  let secCount = 0;
+
+  allSteps.forEach(section => {
+    const step = parseInt(section.dataset.step, 10);
+    if (step === 1 || step === maxStep) return; // welcome + récap/signature
+    secCount++;
+    const title = section.querySelector('.section-title')?.textContent.trim() || '';
+    const summary = section.querySelector('.section-subtitle')?.textContent.trim() || '';
+    let id = slugify(title);
+    if (usedSectionIds.has(id)) { let n = 2; while (usedSectionIds.has(`${id}-${n}`)) n++; id = `${id}-${n}`; }
+    usedSectionIds.add(id);
+
+    // Conteneurs de groupes candidats : .q-block top-level + .assets-list[id] top-level.
+    const candidates = Array.from(section.querySelectorAll('.q-block, .assets-list[id], #objectifsList'));
+    const topLevel = candidates.filter(c => {
+      // garder uniquement ceux dont aucun ancêtre n'est lui-même un candidat
+      let p = c.parentElement;
+      while (p && p !== section) { if (candidates.includes(p)) return false; p = p.parentElement; }
+      return true;
+    });
+
+    const groups = [];
+    let personIndex = 0;
+
+    function pushBlockFor(container) {
+      const titleEl = container.querySelector(':scope > .q-block-head .q-block-title')
+        || container.querySelector(':scope > .q-block-head .obj-title');
+      const blockTitle = titleEl ? titleEl.textContent.trim() : '';
+      // Personne : un .q-block dont le titre identifie un cocontractant.
+      if (/^client\s*[12]\b/i.test(blockTitle)) {
+        personIndex++;
+        const personId = 'p' + personIndex;
+        const fields = readFields(container);
+        // Nom affiché = "Prénom Nom" reconstitué depuis les champs, sinon le titre du bloc.
+        const get = lab => fields.find(f => slugify(f.label) === lab)?.value || '';
+        const name = [get('prenom'), get('nom')].filter(Boolean).join(' ').trim() || blockTitle;
+        groups.push({
+          type: 'person', personId,
+          person: {
+            name, initials: (name.match(/\b\w/g) || []).slice(0, 2).join('').toUpperCase() || personId.toUpperCase(),
+            role: personIndex === 1 ? 'Premier cocontractant' : 'Second cocontractant',
+            color: personIndex === 1 ? 'var(--navy)' : '#4A6FA5',
+          },
+          fields,
+        });
+        return;
+      }
+      // Répétable de type tableau : .q-block contenant des .dyn-row directes (hors asset-detail).
+      const directDyn = Array.from(container.querySelectorAll('.dyn-row')).filter(r => r.closest('.q-block') === container && !r.closest('.asset-detail'));
+      if (directDyn.length) {
+        const addBtn = container.querySelector('.btn-add-asset');
+        const items = directDyn.map(row => ({ fields: readFields(row, true) }));
+        groups.push({
+          type: 'repeatable', title: blockTitle,
+          addLabel: addBtn ? addBtn.textContent.trim() : 'Ajouter',
+          kind: kindFor(container, id), items,
+        });
+        return;
+      }
+      // Bloc simple.
+      groups.push({ type: 'block', title: blockTitle, fields: readFields(container) });
+    }
+
+    topLevel.forEach(container => {
+      if (container.matches('.assets-list, #objectifsList')) {
+        // Répétable de type cartes : un item par .asset-row (+ son .asset-detail) ou par .obj-block.
+        const isObj = container.id === 'objectifsList' || container.matches('#objectifsList');
+        let items;
+        let groupTitle = '';
+        if (isObj) {
+          items = Array.from(container.querySelectorAll(':scope > .obj-block')).map(b => ({ fields: readFields(b, true) }));
+        } else {
+          const rows = Array.from(container.querySelectorAll(':scope > .asset-row'));
+          items = rows.map(row => {
+            const detailId = (row.getAttribute('onclick') || '').match(/'([^']+)'/);
+            const detail = detailId ? document.getElementById(detailId[1]) : null;
+            const f = [];
+            const titre = row.querySelector('.asset-row-title')?.textContent.trim() || '';
+            if (titre) f.push({ key: 'intitule', label: 'Intitulé', value: titre, type: 'text', status: 'validated' });
+            if (detail) readFields(detail, true).forEach(x => f.push(x));
+            return { fields: f };
+          });
+        }
+        groups.push({
+          type: 'repeatable', title: groupTitle,
+          addLabel: (section.querySelector('.btn-add-asset')?.textContent.trim()) || 'Ajouter',
+          kind: kindFor(container, id), items,
+        });
+        return;
+      }
+      pushBlockFor(container);
+    });
+
+    // Fallback : aucun conteneur structuré → un seul block avec tous les champs de la section.
+    if (groups.length === 0) {
+      const fields = readFields(section);
+      groups.push({ type: 'block', title: '', fields });
+    }
+
+    sections.push({
+      id, num: String(secCount).padStart(2, '0'),
+      title, summary, groups,
     });
   });
-  document.querySelectorAll('.obj-block').forEach((block, idx) => {
-    const selects = block.querySelectorAll('select');
-    data.objectifs.push({
-      rang: idx + 1,
-      values: Array.from(selects).map(s => s.value),
-    });
-  });
-  document.querySelectorAll('.section[data-step]').forEach(s => {
-    const t = s.querySelector('.section-title')?.textContent.trim();
-    if (t) data.by_section[t] = (s.querySelector('.section-subtitle')?.textContent.trim() || '');
-  });
-  return data;
+
+  return { sections };
 }
 
 async function submitForm() {
