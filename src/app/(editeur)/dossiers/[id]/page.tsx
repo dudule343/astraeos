@@ -210,6 +210,12 @@ export default async function FicheDossierPage({ params }: { params: Promise<{ i
               >
                 Collecte des pièces
               </Link>
+              <Link
+                href={`/dossiers/${dossier.id}/etudes`}
+                className="rounded-md border border-[var(--navy-100)] bg-white px-3 py-2 text-[11.5px] font-semibold text-[var(--navy)] hover:border-[var(--gold)]"
+              >
+                Étude patrimoniale
+              </Link>
               {!atStart && (
                 <form action={moveDossierStage.bind(null, dossier.id, "prev")}>
                   <button
