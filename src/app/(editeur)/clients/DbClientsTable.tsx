@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useTransition } from "react";
 import { deleteClientsAction } from "../client-new/actions";
 import { EditClientModal } from "./EditClientModal";
@@ -164,7 +165,12 @@ export function DbClientsTable({ clients }: { clients: DbClient[] }) {
                       />
                     </td>
                     <td className="px-4 py-3">
-                      <div className="font-semibold">{c.raison_sociale ?? "—"}</div>
+                      <Link
+                        href={`/clients/${c.id}`}
+                        className="font-semibold text-[var(--navy)] transition hover:text-[var(--gold)] hover:underline"
+                      >
+                        {c.raison_sociale ?? "—"}
+                      </Link>
                       {c.representant && (
                         <div className="mt-0.5 text-[10.5px] text-[var(--navy-300)]">
                           {c.representant}
