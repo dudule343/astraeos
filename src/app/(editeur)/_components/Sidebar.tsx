@@ -55,6 +55,7 @@ const sections: NavSection[] = [
       { href: "/comms", label: "Communications & annonces" },
       { href: "/roadmap", label: "Roadmap & releases" },
       { href: "/team", label: "Équipe interne" },
+      { href: "/integrations", label: "Intégrations & clés API" },
     ],
   },
 ];
