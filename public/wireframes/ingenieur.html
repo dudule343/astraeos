@@ -28375,5 +28375,18 @@ document.addEventListener('DOMContentLoaded',function(){if(document.getElementBy
   });
 })();
 </script>
+<script>
+/* Correctif : boutons du wireframe appelant des fonctions non définies.
+   "Créer l'espace + envoyer les documents" renvoie vers le vrai flux React
+   de création de client (/client-new). astraeosCloseInvite ferme une modale. */
+function astraeosCreerEspaceClient() {
+  try { (window.top || window).location.href = '/client-new'; }
+  catch (e) { window.location.href = '/client-new'; }
+}
+function astraeosCloseInvite() {
+  var el = document.querySelector('[id*="invite"], [class*="invite-modal"], [class*="modal-invite"]');
+  if (el) { el.style.display = 'none'; el.classList && el.classList.remove('open'); }
+}
+</script>
 </body>
 </html>
