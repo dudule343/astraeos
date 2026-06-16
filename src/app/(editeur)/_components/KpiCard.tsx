@@ -12,6 +12,7 @@ export type KpiBlock = {
   meta?: string;
   metaHighlight?: { text: string; tone: "up" | "down" };
   trend?: "up" | "down";
+  valueTone?: "gold" | "alert";
   compares?: Compare[];
 };
 
@@ -37,8 +38,11 @@ function PhaseTag({ phase }: { phase: "1" | "2" }) {
 }
 
 export function KpiCard({ kpi }: { kpi: KpiBlock }) {
-  const valueClass =
-    kpi.trend === "up"
+  const valueClass = kpi.valueTone
+    ? kpi.valueTone === "gold"
+      ? "text-[var(--gold-deep)]"
+      : "text-[var(--orange-text)]"
+    : kpi.trend === "up"
       ? "text-[var(--green-text)]"
       : kpi.trend === "down"
         ? "text-[var(--red-text)]"
