@@ -73,7 +73,10 @@ export function CollecteBuilder({ initialFacts, defaultParticipant }: Props) {
     return [...byId.values()];
   }, [derived, forcedOn, forcedOff]);
 
-  const grouped = useMemo(() => groupItems(activeItems), [activeItems]);
+  const activeIds = useMemo(() => new Set(activeItems.map((e) => e.id)), [activeItems]);
+  // On affiche TOUT le catalogue (286) : les pièces pré-cochées par les règles
+  // ET les pièces exclues, que l'ingénieur peut cocher à la main.
+  const allGrouped = useMemo(() => groupItems(buildItems({})), []);
 
   // Faits groupés par catégorie pour la colonne gauche.
   const factsByCategory = useMemo(() => {
@@ -246,7 +249,7 @@ export function CollecteBuilder({ initialFacts, defaultParticipant }: Props) {
           </div>
 
           <div className="max-h-[calc(100vh-220px)] overflow-y-auto rounded-md border border-[var(--navy-100)] bg-white">
-            {[...grouped.entries()].map(([category, subs]) => (
+            {[...allGrouped.entries()].map(([category, subs]) => (
               <div key={category} className="border-b border-[var(--navy-100)] last:border-b-0">
                 <div className="bg-[var(--light-blue)] px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--navy)]">
                   {category}
@@ -258,15 +261,17 @@ export function CollecteBuilder({ initialFacts, defaultParticipant }: Props) {
                         {sub}
                       </div>
                     )}
-                    {items.map((item) => (
+                    {items.map((item) => {
+                      const active = activeIds.has(item.id);
+                      return (
                       <label
                         key={item.id}
-                        className="flex cursor-pointer items-start gap-2.5 px-3 py-1.5 hover:bg-[var(--ivory)]"
+                        className={`flex cursor-pointer items-start gap-2.5 px-3 py-1.5 hover:bg-[var(--ivory)] ${active ? "" : "opacity-45"}`}
                       >
                         <input
                           type="checkbox"
-                          checked
-                          onChange={() => toggleItem(item.id, true)}
+                          checked={active}
+                          onChange={() => toggleItem(item.id, active)}
                           className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 accent-[var(--gold)]"
                         />
                         <span className="flex-1 text-[12px] leading-tight text-[var(--navy)]">
@@ -282,7 +287,8 @@ export function CollecteBuilder({ initialFacts, defaultParticipant }: Props) {
                           {item.type}
                         </span>
                       </label>
-                    ))}
+                      );
+                    })}
                   </div>
                 ))}
               </div>
