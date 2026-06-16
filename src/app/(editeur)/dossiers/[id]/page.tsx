@@ -199,6 +199,12 @@ export default async function FicheDossierPage({ params }: { params: Promise<{ i
           actions={
             <>
               <Link
+                href={`/dossiers/${dossier.id}/conformite`}
+                className="rounded-md border border-[var(--navy-100)] bg-white px-3 py-2 text-[11.5px] font-semibold text-[var(--navy)] hover:border-[var(--gold)]"
+              >
+                Conformité / KYC
+              </Link>
+              <Link
                 href={`/dossiers/${dossier.id}/collecte`}
                 className="rounded-md border border-[var(--navy-100)] bg-white px-3 py-2 text-[11.5px] font-semibold text-[var(--navy)] hover:border-[var(--gold)]"
               >
