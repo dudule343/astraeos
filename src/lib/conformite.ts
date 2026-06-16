@@ -182,3 +182,214 @@ export function completionRate(rows: ConformiteRow[]): number {
   const done = rows.filter((r) => r.status === "valide").length;
   return Math.round((done / rows.length) * 100);
 }
+
+/* ------------------------------------------------------------------------- *
+ * Dérivation v40 — page `#page-ing-fiche-conformite-joubert`
+ *
+ * Le pack contractuel v40 = DER + KYC + Lettre de mission. Le mandat reste
+ * en base (CHECKLIST_CONFORMITE, taux global) mais n'est PAS rendu en card.
+ * ------------------------------------------------------------------------- */
+
+/** Les 3 pièces affichées en card v40 (le mandat est exclu de la grille). */
+export const CARD_TYPES = ["der", "kyc", "lettre_mission"] as const;
+
+export type CardType = (typeof CARD_TYPES)[number];
+
+/** État d'un jalon de tracker. */
+export type TrackerState = "done" | "current" | "todo";
+
+export type TrackerStep = {
+  label: string;
+  state: TrackerState;
+  /** Date affichée sous le jalon (déjà formatée), ou null. */
+  date: string | null;
+};
+
+/**
+ * Configuration figée des cards (icône / sous-titre / libellés de jalons),
+ * extraite du wireframe v40. La lettre de mission a 4 jalons (le 4e =
+ * contreseing ingénieur, statut 'valide').
+ */
+export const docCardConfig: Record<
+  CardType,
+  {
+    title: string;
+    subtitle: string;
+    /** Tonalité de l'icône : navy / gold / gold-tint. */
+    iconTone: "navy" | "gold" | "gold-tint";
+    /** Libellé du pill « prêt à l'envoi » (genre accordé). */
+    readyPill: string;
+    /** Libellés des jalons préparé / signé client (+ ingénieur pour LM). */
+    prepared: string;
+    signedClient: string;
+  }
+> = {
+  der: {
+    title: "DER",
+    subtitle: "Document d'Entrée en Relation · 3 champs modifiables (personnes · date · lieu)",
+    iconTone: "navy",
+    readyPill: "● Prêt à l'envoi",
+    prepared: "Préparé",
+    signedClient: "Signé client",
+  },
+  kyc: {
+    title: "KYC",
+    subtitle: "Enveloppe = DCI Complet + Questionnaire de qualification · signé par le client",
+    iconTone: "gold",
+    readyPill: "● Prêt à l'envoi",
+    prepared: "Vérifié",
+    signedClient: "Signé client",
+  },
+  lettre_mission: {
+    title: "Lettre de mission",
+    subtitle: "Honoraires {honoraires} · signée par les 2 parties",
+    iconTone: "gold-tint",
+    readyPill: "● Prête à l'envoi",
+    prepared: "Préparée",
+    signedClient: "Signée client",
+  },
+};
+
+/**
+ * Jalons du tracker d'une pièce, dérivés de `row.status`.
+ *  - a_faire → préparé (done) + à envoyer (current)
+ *  - envoye  → à envoyer (done) + signé client (current)
+ *  - signe   → signé client (done) ; pour la LM, contreseing ingénieur (current)
+ *  - valide  → tous done
+ * La lettre de mission ajoute un 4e jalon « Signée ingénieur » = statut 'valide'.
+ */
+export function trackerStepsFor(
+  row: ConformiteRow,
+  fmtDate: (iso: string | null) => string,
+): TrackerStep[] {
+  const cfg = docCardConfig[row.type as CardType];
+  const isLM = row.type === "lettre_mission";
+  const s = row.status;
+
+  const preparedDate = row.itemId ? fmtDate(row.sent_at ?? row.signed_at ?? row.validated_at) : null;
+
+  const stepPrepared: TrackerStep = {
+    label: cfg.prepared,
+    state: "done",
+    date: preparedDate,
+  };
+
+  const sentState: TrackerState = s === "a_faire" ? "current" : "done";
+  const stepSent: TrackerStep = {
+    label: "À envoyer",
+    state: sentState,
+    date: s === "a_faire" ? "attente" : fmtDate(row.sent_at),
+  };
+
+  // Signé client : current dès l'envoi, done une fois signé/validé.
+  const signedClientState: TrackerState =
+    s === "signe" || s === "valide" ? "done" : s === "envoye" ? "current" : "todo";
+  const stepSignedClient: TrackerStep = {
+    label: cfg.signedClient,
+    state: signedClientState,
+    date: s === "signe" || s === "valide" ? fmtDate(row.signed_at) : "—",
+  };
+
+  if (!isLM) return [stepPrepared, stepSent, stepSignedClient];
+
+  // Lettre de mission : 4e jalon = contreseing ingénieur (statut 'valide').
+  const signedEngState: TrackerState = s === "valide" ? "done" : s === "signe" ? "current" : "todo";
+  const stepSignedEngineer: TrackerStep = {
+    label: "Signée ingénieur",
+    state: signedEngState,
+    date: s === "valide" ? fmtDate(row.validated_at) : "—",
+  };
+  return [stepPrepared, stepSent, stepSignedClient, stepSignedEngineer];
+}
+
+/** Tonalité de la pastille de paiement (5 états du wireframe v40). */
+export type PayState = "attente" | "partiel" | "recu" | "offert" | "annule";
+
+export const PAY_LABELS: Record<PayState, string> = {
+  attente: "En attente",
+  partiel: "Partiel",
+  recu: "Reçu",
+  offert: "Offert",
+  annule: "Annulé",
+};
+
+/** Une condition de passage à l'étape 03 (lignes du bloc conditions v40). */
+export type Stage03Condition = {
+  label: string;
+  meta: string;
+  /** ok = rempli ; wait = en cours ⏳ ; ko = non générée ○. */
+  state: "ok" | "wait" | "ko";
+  /** Texte de la pastille de droite. */
+  pill: string;
+  /** Tonalité de la pastille (light-blue = non générée, pay = paiement). */
+  pillTone: "neutral" | "success" | "light-blue" | "pay";
+};
+
+/** Une pièce est-elle signée (par le client) ? */
+function isSigned(status: ConformiteStatus): boolean {
+  return status === "signe" || status === "valide";
+}
+
+/**
+ * Les 4 conditions de passage à l'étape 03, dérivées des statuts réels +
+ * du signal de paiement. Renvoie aussi le compteur N/4.
+ */
+export function conditionsForStage03(
+  rows: ConformiteRow[],
+  honoraires: string,
+  payState: PayState,
+): { conditions: Stage03Condition[]; filled: number; total: number } {
+  const byType = new Map(rows.map((r) => [r.type, r]));
+  const der = byType.get("der");
+  const kyc = byType.get("kyc");
+  const lm = byType.get("lettre_mission");
+
+  const derOk = der ? isSigned(der.status) : false;
+  const kycOk = kyc ? isSigned(kyc.status) : false;
+  // LM « signée par les 2 parties » = contreseing ingénieur = statut 'valide'.
+  const lmOk = lm?.status === "valide";
+  const lmGenerated = Boolean(lm?.itemId) && lm?.status !== "a_faire";
+  const payOk = payState === "recu" || payState === "offert";
+
+  const conditions: Stage03Condition[] = [
+    {
+      label: "DER daté et signé par le client",
+      meta: derOk
+        ? "Signé électroniquement · Yousign"
+        : "En attente de signature électronique Yousign",
+      state: derOk ? "ok" : "wait",
+      pill: derOk ? "Signé" : "En attente",
+      pillTone: derOk ? "success" : "neutral",
+    },
+    {
+      label: "KYC daté et signé par le client (DCI Complet + Questionnaire de qualification)",
+      meta: kycOk
+        ? "Signé électroniquement · Yousign"
+        : "En attente de consultation et signature électronique",
+      state: kycOk ? "ok" : "wait",
+      pill: kycOk ? "Signé" : "En attente",
+      pillTone: kycOk ? "success" : "neutral",
+    },
+    {
+      label: "Lettre de mission datée et signée par les deux parties",
+      meta: lmOk
+        ? "Signée par le client et contresignée par l'ingénieur"
+        : lmGenerated
+          ? "En attente de signature des deux parties"
+          : "À finaliser par l'ingénieur (honoraires + champs) puis envoyer pour signature",
+      state: lmOk ? "ok" : lmGenerated ? "wait" : "ko",
+      pill: lmOk ? "Signée" : lmGenerated ? "En attente" : "Non générée",
+      pillTone: lmOk ? "success" : lmGenerated ? "neutral" : "light-blue",
+    },
+    {
+      label: `Règlement des honoraires reçu · ${honoraires}`,
+      meta: "Prix total de la mission · virement bancaire attendu · règle PRIVEOS : règlement intégral avant ouverture de l'espace sécurisé (étape 03)",
+      state: payOk ? "ok" : "wait",
+      pill: PAY_LABELS[payState],
+      pillTone: "pay",
+    },
+  ];
+
+  const filled = conditions.filter((c) => c.state === "ok").length;
+  return { conditions, filled, total: conditions.length };
+}
