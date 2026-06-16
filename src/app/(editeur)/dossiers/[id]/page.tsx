@@ -5,6 +5,7 @@ import { Topbar } from "../../_components/Topbar";
 import { KpiCard, type KpiBlock } from "../../_components/KpiCard";
 import { PageHero } from "../../_components/PageHeader";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { moveDossierStage } from "../actions";
 
 export const dynamic = "force-dynamic";
 
@@ -149,6 +150,8 @@ export default async function FicheDossierPage({ params }: { params: Promise<{ i
 
   const { dossier, events } = result;
   const stageIndex = Number(dossier.stage.slice(0, 2)) || 0;
+  const atStart = dossier.stage === "01_prospect";
+  const atEnd = dossier.stage === "06_suivi";
 
   // Timeline : si aucun événement enregistré, on synthétise la création du dossier.
   const displayEvents: TimelineEvent[] =
@@ -192,6 +195,30 @@ export default async function FicheDossierPage({ params }: { params: Promise<{ i
           title={dossier.name}
           description={
             [dossier.representant, dossier.address].filter(Boolean).join(" · ") || undefined
+          }
+          actions={
+            <>
+              {!atStart && (
+                <form action={moveDossierStage.bind(null, dossier.id, "prev")}>
+                  <button
+                    type="submit"
+                    className="rounded-md border border-[var(--navy-100)] bg-white px-3 py-2 text-[11.5px] font-semibold text-[var(--navy)] hover:border-[var(--gold)]"
+                  >
+                    ← Étape précédente
+                  </button>
+                </form>
+              )}
+              {!atEnd && (
+                <form action={moveDossierStage.bind(null, dossier.id, "next")}>
+                  <button
+                    type="submit"
+                    className="rounded-md bg-[var(--gold)] px-3 py-2 text-[11.5px] font-bold text-white hover:brightness-110"
+                  >
+                    Avancer à l&apos;étape suivante →
+                  </button>
+                </form>
+              )}
+            </>
           }
         />
 
