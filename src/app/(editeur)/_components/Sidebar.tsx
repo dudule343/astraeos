@@ -40,9 +40,11 @@ const sections: NavSection[] = [
   {
     title: "Opérations clients",
     items: [
+      { href: "/prospects", label: "Mes prospects" },
       { href: "/clients", label: "Clients totaux actifs" },
       { href: "/dossiers", label: "Pipeline des dossiers" },
       { href: "/entretiens", label: "Entretiens visio" },
+      { href: "/agenda", label: "Mon agenda" },
       { href: "/trial", label: "Période d'essai", badge: { text: "4" } },
       { href: "/client-new", label: "Nouveau client" },
       { href: "/marketplace", label: "Catalogue des packs" },
@@ -55,6 +57,7 @@ const sections: NavSection[] = [
       { href: "/comms", label: "Communications & annonces" },
       { href: "/roadmap", label: "Roadmap & releases" },
       { href: "/team", label: "Équipe interne" },
+      { href: "/profil", label: "Mon profil" },
       { href: "/integrations", label: "Intégrations & clés API" },
     ],
   },

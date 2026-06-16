@@ -18,10 +18,10 @@ Vérif globale : `bash scripts/verify-app.sh`.
 
 ## 🔜 Bloc B : écrans ingénieur secondaires (vraies pages React)
 - [x] B1. Fiche client `/clients/[id]` — lecture clients/personnes/dossiers + liste cliquable ✅
-- [ ] B2. Fiche prospect (détail prospect + DCI soumis)
-- [ ] B3. Agenda + types de RDV (Google Calendar déjà branché, table `rdv`)
+- [x] B2. Prospects `/prospects` — liste des DCI soumis (dci-inbox) + lancer visio ✅
+- [x] B3. Agenda `/agenda` — Google Calendar (statut + events + connexion) ✅
 - [ ] B4. Outils de production / catalogue / simulateurs
-- [ ] B5. Profil & agréments ingénieur
+- [x] B5. Profil `/profil` — identité + agréments (table users) ✅
 
 ## 🔜 Bloc C : espace dirigeant (~19 écrans)
 - [ ] C1. Accueil cabinet (dashboard)
