@@ -10,7 +10,9 @@ const MARKETING_HOSTS = new Set(["astraeos.fr", "www.astraeos.fr"]);
 // (app.astraeos.fr reste l'éditeur à la racine, géré par défaut.)
 const ESPACE_HOSTS: Record<string, string> = {
   "marque.astraeos.fr": "/marque",
-  "dirigeant.astraeos.fr": "/dirigeant",
+  // L'espace dirigeant est désormais une vraie app React (route group
+  // (dirigeant)/espace-dirigeant), plus l'iframe de wireframe.
+  "dirigeant.astraeos.fr": "/espace-dirigeant",
   "ingenieur.astraeos.fr": "/ingenieur",
   "client.astraeos.fr": "/client",
 };
