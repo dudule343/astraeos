@@ -17,7 +17,7 @@ Vérif globale : `bash scripts/verify-app.sh`.
 - [x] A2. Résultat : 0 bouton mort (121+18+19+3 fonctions, toutes définies). Le seul cas (astraeosCreerEspaceClient) avait été corrigé.
 
 ## 🔜 Bloc B : écrans ingénieur secondaires (vraies pages React)
-- [ ] B1. Fiche client `/clients/[id]` (lecture clients/personnes/dossiers)
+- [x] B1. Fiche client `/clients/[id]` — lecture clients/personnes/dossiers + liste cliquable ✅
 - [ ] B2. Fiche prospect (détail prospect + DCI soumis)
 - [ ] B3. Agenda + types de RDV (Google Calendar déjà branché, table `rdv`)
 - [ ] B4. Outils de production / catalogue / simulateurs
