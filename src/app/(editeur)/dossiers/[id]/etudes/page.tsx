@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Topbar } from "../../../_components/Topbar";
 import { KpiCard, type KpiBlock } from "../../../_components/KpiCard";
 import { PageHero } from "../../../_components/PageHeader";
+import { ParcoursStepper } from "../../../_components/ParcoursStepper";
 import {
   ETUDE_PHASES,
   STATUS_LABELS,
@@ -10,9 +11,27 @@ import {
   progressFromPhase,
   nextPhase,
 } from "@/lib/etudes";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { loadEtude, advanceEtudePhase } from "./actions";
 
 export const dynamic = "force-dynamic";
+
+/** Étape courante du dossier (1-6) pour le stepper du parcours. */
+async function fetchStageIndex(dossierId: string): Promise<number> {
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) return 4;
+  try {
+    const supabase = createAdminClient();
+    const { data } = await supabase
+      .from("dossiers")
+      .select("pipeline_stage")
+      .eq("id", dossierId)
+      .maybeSingle();
+    const stage = (data?.pipeline_stage as string | undefined) ?? "04_etudes";
+    return Number(stage.slice(0, 2)) || 4;
+  } catch {
+    return 4;
+  }
+}
 
 const STATE_BADGE: Record<string, { label: string; cls: string }> = {
   done: { label: "Fait", cls: "bg-[var(--green-bg)] text-[var(--green-text)]" },
@@ -28,7 +47,7 @@ const BORDER: Record<string, string> = {
 
 export default async function EtudesPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const etude = await loadEtude(id);
+  const [etude, stageIndex] = await Promise.all([loadEtude(id), fetchStageIndex(id)]);
 
   const current = etude?.current_phase ?? null;
   const progress = progressFromPhase(current, etude?.phase_progress_pct ?? null);
@@ -61,6 +80,8 @@ export default async function EtudesPage({ params }: { params: Promise<{ id: str
         >
           ← Retour à la fiche dossier
         </Link>
+
+        <ParcoursStepper stageIndex={stageIndex} />
 
         <PageHero
           eyebrow="Étape 4 · Production de l'étude"
