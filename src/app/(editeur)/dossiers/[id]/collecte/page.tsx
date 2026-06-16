@@ -1,8 +1,7 @@
 import Link from "next/link";
 
 import { Topbar } from "../../../_components/Topbar";
-import { KpiCard, type KpiBlock } from "../../../_components/KpiCard";
-import { PageHero } from "../../../_components/PageHeader";
+import { ParcoursStepper } from "../../../_components/ParcoursStepper";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { loadSubmissions, type DciKind } from "@/lib/dci-store";
 import { validateDciCanonical } from "@/lib/dci-schema";
@@ -13,9 +12,6 @@ import type { Facts } from "@/lib/collecte-catalog/types";
 import { CollecteBuilder } from "./CollecteBuilder";
 
 export const dynamic = "force-dynamic";
-
-/** Total de référence du référentiel documentaire. */
-const TOTAL_PIECES = 286;
 
 /** Kinds testés dans l'ordre de priorité pour fonder les Facts. */
 const KIND_PRIORITY: DciKind[] = ["complet", "qualification", "simple"];
@@ -49,30 +45,43 @@ async function loadFactsForProspect(slug: string): Promise<{
   return { facts: {}, usedKind: null, displayName: null };
 }
 
-/** Récupère le contact du dossier pour pré-remplir le destinataire. */
-async function fetchDossierContact(
-  id: string,
-): Promise<{ nom: string; email: string } | null> {
+/**
+ * Récupère le contact + l'avancement du dossier : couple (représentant +
+ * conjoint) pour le titre du hero, e-mail pour le destinataire, et
+ * `pipeline_stage` pour le stepper du parcours.
+ */
+async function fetchDossierHeader(id: string): Promise<{
+  couple: string | null;
+  email: string;
+  stage: string;
+} | null> {
   if (!process.env.SUPABASE_SERVICE_ROLE_KEY) return null;
   try {
     const supabase = createAdminClient();
     const { data } = await supabase
       .from("dossiers")
-      .select("clients ( personnes ( first_name, last_name, email ) )")
+      .select("pipeline_stage, clients ( personnes ( first_name, last_name, email ) )")
       .eq("id", id)
       .maybeSingle();
     if (!data) return null;
-    const clientRaw = (data as Record<string, unknown>).clients as
+    const row = data as Record<string, unknown>;
+    const clientRaw = row.clients as
       | { personnes?: Array<{ first_name?: string; last_name?: string; email?: string }> }
       | Array<{ personnes?: Array<{ first_name?: string; last_name?: string; email?: string }> }>
       | null
       | undefined;
     const client = Array.isArray(clientRaw) ? clientRaw[0] : clientRaw;
-    const person = client?.personnes?.[0];
-    if (!person) return null;
+    const personnes = client?.personnes ?? [];
+    const fullName = (p?: { first_name?: string; last_name?: string }) =>
+      p ? `${p.first_name ?? ""} ${p.last_name ?? ""}`.trim() || null : null;
+    const couple = [fullName(personnes[0]), fullName(personnes[1])]
+      .filter(Boolean)
+      .join(" & ");
+    const email = personnes.find((p) => p.email)?.email ?? "";
     return {
-      nom: `${person.first_name ?? ""} ${person.last_name ?? ""}`.trim(),
-      email: person.email ?? "",
+      couple: couple || null,
+      email,
+      stage: (row.pipeline_stage as string) ?? "03_collecte",
     };
   } catch {
     return null;
@@ -92,41 +101,29 @@ export default async function CollectePage({
   // Slug du prospect : query ?prospect=… sinon l'id du dossier.
   const slug = (prospect ?? id).trim();
 
-  const [{ facts, usedKind, displayName }, contact] = await Promise.all([
+  const [{ facts, displayName }, header] = await Promise.all([
     loadFactsForProspect(slug),
-    fetchDossierContact(id),
+    fetchDossierHeader(id),
   ]);
 
-  const initialCount = buildItems(facts).length;
+  // Pièces pré-sélectionnées + nombre de rubriques (catégories) ouvertes par le
+  // moteur sur la situation dérivée du DCI — alimente la detect-line du hero.
+  const initialItems = buildItems(facts);
+  const openCategories = new Set(initialItems.map((e) => e.category)).size;
 
-  const sourceLabel =
-    usedKind === "complet"
-      ? "DCI complet"
-      : usedKind === "qualification"
-        ? "Questionnaire de qualification"
-        : usedKind === "simple"
-          ? "DCI simplifié"
-          : "Aucun DCI (collecte maximale)";
+  const stage = header?.stage ?? "03_collecte";
+  const stageIndex = Number(stage.slice(0, 2)) || 3;
 
-  const kpis: KpiBlock[] = [
-    { label: "Source des faits", value: sourceLabel, meta: `prospect ${slug}` },
-    {
-      label: "Pièces pré-sélectionnées",
-      value: `${initialCount}`,
-      meta: `sur ${TOTAL_PIECES} du référentiel`,
-    },
-    {
-      label: "Faits dérivés du DCI",
-      value: `${Object.keys(facts).length}`,
-      meta: "ajustables à la main",
-    },
-  ];
+  // Titre du hero = nom du foyer (couple du dossier, sinon display_name du DCI).
+  const heroTitle = header?.couple || displayName || "Collecte de documents";
 
   return (
     <>
-      <Topbar current="Collecte conditionnelle" />
+      <Topbar current="Collecte de documents" />
 
       <div className="px-10 py-8">
+        <ParcoursStepper stageIndex={stageIndex} />
+
         <Link
           href={`/dossiers/${id}`}
           className="mb-4 inline-flex items-center gap-1 text-[12px] font-semibold text-[var(--navy-300)] transition hover:text-[var(--navy)]"
@@ -134,23 +131,29 @@ export default async function CollectePage({
           ← Retour à la fiche dossier
         </Link>
 
-        <PageHero
-          eyebrow="Étape 3 · Collecte des pièces"
-          title="Collecte conditionnelle"
-          description="La situation du foyer (dérivée du DCI) croise le référentiel des 286 pièces pour ne demander que les pièces pertinentes. Ajustez les faits à gauche : la liste de pièces à droite se recalcule instantanément."
-        />
-
-        <section className="mb-8 grid grid-cols-1 gap-3 sm:grid-cols-3">
-          {kpis.map((k) => (
-            <KpiCard key={k.label} kpi={k} />
-          ))}
+        {/* HERO v40 · ci-fiche-header */}
+        <section className="mb-6">
+          <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-[var(--gold)]">
+            Étape 03 · Collecte de documents
+          </div>
+          <h1 className="mb-2 text-[28px] font-semibold leading-tight tracking-tight text-[var(--navy)]">
+            {heroTitle}
+          </h1>
+          <div className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-[var(--gold-deep)]">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4">
+              <circle cx="12" cy="12" r="4" />
+            </svg>
+            {openCategories} rubrique{openCategories > 1 ? "s" : ""} ouverte
+            {openCategories > 1 ? "s" : ""} automatiquement par l&apos;IA selon le DCI
+          </div>
         </section>
 
         <CollecteBuilder
           initialFacts={facts}
+          dossierId={id}
           defaultParticipant={{
-            nom: contact?.nom || displayName || "",
-            email: contact?.email || "",
+            nom: header?.couple || displayName || "",
+            email: header?.email || "",
           }}
         />
       </div>
