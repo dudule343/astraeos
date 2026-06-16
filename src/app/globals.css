@@ -8,8 +8,11 @@
   --gold: #C68E0E;
   --gold-300: #DDBB6E;
   --gold-200: #EEDDB6;
+  --gold-100: #F8EFD8;
+  --gold-deep: #A57608;
   --light-blue: #EBF1FA;
   --ivory: #FAF8F3;
+  --ivory-deep: #F2EEE3;
   --medium-400: #695D30;
   --green-bg: #DDE9D7;
   --green-text: #4F6B3F;
@@ -29,7 +32,10 @@
   --color-gold: var(--gold);
   --color-gold-300: var(--gold-300);
   --color-gold-200: var(--gold-200);
+  --color-gold-100: var(--gold-100);
+  --color-gold-deep: var(--gold-deep);
   --color-ivory: var(--ivory);
+  --color-ivory-deep: var(--ivory-deep);
   --color-light-blue: var(--light-blue);
   --color-medium-400: var(--medium-400);
   --font-sans: var(--font-epilogue);
