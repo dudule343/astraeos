@@ -2,6 +2,10 @@
 
 > Source de vérité pour la collecte de documents (étude patrimoniale). 286 pièces.
 > Statut = état dans la maquette au moment du récap (Dans la maquette / À intégrer).
+>
+> **ADAPTATIF** : on ne demande jamais tout. C'est un arbre conditionnel — les items
+> `[INFO]` sont les questions de branchement, les `[DOC]` ne se déclenchent que selon
+> la réponse (et la situation du client issue du DCI/qualification).
 
 ## Identité et situation familiale  (20 pièces · 0 à intégrer)
 - ✅ [DOC] Pièce d’identité du client
