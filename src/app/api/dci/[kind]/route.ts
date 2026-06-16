@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 import { KINDS, loadSubmissions, saveSubmission, type DciKind } from "@/lib/dci-store";
+import { validateDciCanonical } from "@/lib/dci-schema";
 
 function isDciKind(value: string): value is DciKind {
   return (KINDS as string[]).includes(value);
@@ -35,6 +36,13 @@ export async function POST(
   }
   if (!payload || typeof payload !== "object") {
     return NextResponse.json({ error: "payload is required" }, { status: 400 });
+  }
+
+  if (kind === "complet") {
+    const check = validateDciCanonical(payload);
+    if (!check.ok) {
+      return NextResponse.json({ error: `payload DCI invalide: ${check.error}` }, { status: 400 });
+    }
   }
 
   const result = await saveSubmission({
