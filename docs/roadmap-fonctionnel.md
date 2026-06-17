@@ -27,11 +27,12 @@ Vérif globale : `bash scripts/verify-app.sh`.
 - [x] C1. Accueil cabinet `/espace-dirigeant` — revenus + santé cabinet (données réelles) ✅
 - [x] C2. Finance dirigeant — résultat + commissions (souscriptions/commissions) ✅
 - [x] C3. Gestion ingénieurs — classement + KPIs (users + dossiers) ✅
-- [ ] C4. Assets cabinet (overview, financier, assurance, immobilier, honoraires)
-- [ ] C5. Partenaires & apporteurs
+- [x] C3bis. Performance — CA généré + études livrées + funnel pipeline (données réelles) ✅
+- [x] C4. Encours & assets — AUM par classe d'actifs + par produit (souscriptions) ✅
+- [x] C5. Partenaires & apporteurs — volume par producteur (produits.partner_name) ✅
 - [ ] C6. Outils (catalogue produits, simulateurs, marketing)
 - [ ] C7. Référentiel (process, documentation conformité)
-- [ ] C8. Paramétrages (identité, banque, intégrations, conformité, templates)
+- [x] C8. Paramétrages — coordonnées + ORIAS/RC Pro + répartition commissions + accès users ✅
 - [ ] C9. Licenciés / cabinets (réseau)
 
 ## 🔜 Bloc D : visio — compléter
