@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 
 import type { ConformiteType } from "@/lib/conformite";
 
@@ -45,6 +46,7 @@ export function PackSend({
   subject: string;
   bodyHtml: string;
 }) {
+  const router = useRouter();
   const [checked, setChecked] = useState<Record<string, boolean>>(
     Object.fromEntries(pieces.map((p) => [p.id, true])),
   );
@@ -64,6 +66,7 @@ export function PackSend({
     startTransition(async () => {
       await sendConformitePack(dossierId, selectedTypes);
       setSentCount(selectedCount);
+      router.refresh();
     });
   }
 

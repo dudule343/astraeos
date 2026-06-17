@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useFormStatus } from "react-dom";
 import { createClientFromModalAction } from "../client-new/actions";
 
@@ -23,12 +24,16 @@ function SubmitBtn() {
 }
 
 export function NewClientModal({ onClose }: { onClose: () => void }) {
+  const router = useRouter();
   const [state, formAction] = useActionState(createClientFromModalAction, null);
 
   // Ferme la modal automatiquement quand la création réussit
   useEffect(() => {
-    if (state?.ok) onClose();
-  }, [state, onClose]);
+    if (state?.ok) {
+      router.refresh();
+      onClose();
+    }
+  }, [state, onClose, router]);
 
   return (
     <div

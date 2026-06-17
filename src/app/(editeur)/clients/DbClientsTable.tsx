@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { deleteClientsAction } from "../client-new/actions";
 import { EditClientModal } from "./EditClientModal";
@@ -53,6 +54,7 @@ function healthBadge(health: string | null): string {
 }
 
 export function DbClientsTable({ clients }: { clients: DbClient[] }) {
+  const router = useRouter();
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [editing, setEditing] = useState<DbClient | null>(null);
   const [pending, startTransition] = useTransition();
@@ -85,6 +87,7 @@ export function DbClientsTable({ clients }: { clients: DbClient[] }) {
       try {
         await deleteClientsAction(ids);
         setSelected(new Set());
+        router.refresh();
       } catch (e) {
         alert("Erreur : " + (e instanceof Error ? e.message : String(e)));
       }

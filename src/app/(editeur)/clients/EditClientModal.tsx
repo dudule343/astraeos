@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { updateClientAction } from "../client-new/actions";
 import type { DbClient } from "./DbClientsTable";
 
@@ -105,6 +106,7 @@ export function EditClientModal({
   client: DbClient;
   onClose: () => void;
 }) {
+  const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [form, setForm] = useState({
     raison_sociale: client.raison_sociale ?? "",
@@ -134,6 +136,7 @@ export function EditClientModal({
           ...form,
           category: parent ?? client.category ?? undefined,
         });
+        router.refresh();
         onClose();
       } catch (err) {
         alert("Erreur : " + (err instanceof Error ? err.message : String(err)));
