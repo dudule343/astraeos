@@ -19,12 +19,13 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ connected: false, events: [] }, { status: 200 });
   }
   if (tokens.access_token === "demo-token-not-real") {
-    // Mode démo : retourne 3 événements fictifs réalistes
+    // Mode démo (OAuth non configuré) : aucun RDV fictif — agenda vide honnête.
+    // Le bandeau « Mode démonstration » côté UI explique l'absence de données.
     return NextResponse.json({
       connected: true,
       demo: true,
       email: tokens.email,
-      events: demoEvents(),
+      events: [],
     });
   }
 
@@ -119,17 +120,4 @@ export async function POST(req: NextRequest) {
   }
   const created = await res.json();
   return NextResponse.json({ ok: true, event: created });
-}
-
-function demoEvents() {
-  const now = Date.now();
-  const at = (h: number, dur = 60) => ({
-    start: { dateTime: new Date(now + h * 3600_000).toISOString() },
-    end:   { dateTime: new Date(now + (h + dur / 60) * 3600_000).toISOString() },
-  });
-  return [
-    { id: "d1", summary: "Entretien initial · Camille JOUBERT",       ...at(2),    location: "Google Meet" },
-    { id: "d2", summary: "Restitution étude · Olivier CHARPENTIER",   ...at(28),   location: "Cabinet Paris Étoile" },
-    { id: "d3", summary: "RDV signature · Bernard TESSIER",            ...at(52),   location: "Google Meet" },
-  ];
 }

@@ -36,6 +36,45 @@ type EventsResponse = {
   error?: string;
 };
 
+/** Erreur affichable, avec une action concrète quand on sait la résoudre. */
+type AgendaError = { message: string; actionUrl?: string; actionLabel?: string };
+
+/**
+ * Transforme l'erreur brute renvoyée par /api/calendar/events (souvent le JSON
+ * d'erreur de Google) en message actionnable. Cas principal : l'API Google
+ * Calendar est désactivée dans le projet Cloud → on donne le lien pour l'activer.
+ */
+function humanizeCalendarError(raw: string): AgendaError {
+  let message = raw;
+  try {
+    const parsed = JSON.parse(raw) as { error?: { message?: string } };
+    if (parsed?.error?.message) message = parsed.error.message;
+  } catch {
+    // raw n'est pas du JSON Google — on garde le texte tel quel.
+  }
+
+  const projectMatch = /project (\d+)/.exec(message);
+  if (/has not been used|is disabled|API .* disabled/i.test(message) && projectMatch) {
+    return {
+      message:
+        "L'API Google Calendar est désactivée dans votre projet Google Cloud. Activez-la, puis réessayez (la propagation prend 1 à 2 minutes).",
+      actionUrl: `https://console.developers.google.com/apis/api/calendar-json.googleapis.com/overview?project=${projectMatch[1]}`,
+      actionLabel: "Activer l'API Google Calendar",
+    };
+  }
+
+  if (/token refresh failed/i.test(raw)) {
+    return {
+      message:
+        "La connexion à Google a expiré ou été révoquée. Reconnectez votre Google Calendar.",
+    };
+  }
+
+  return {
+    message: `Impossible de récupérer les événements Google Calendar : ${message.slice(0, 200)}`,
+  };
+}
+
 type ParsedEvent = {
   id: string;
   summary: string;
@@ -159,7 +198,7 @@ export function AgendaView() {
   const [events, setEvents] = useState<ParsedEvent[]>([]);
   const [demo, setDemo] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<AgendaError | null>(null);
   const [acting, setActing] = useState(false);
 
   const load = useCallback(async () => {
@@ -176,14 +215,14 @@ export function AgendaView() {
 
       const eventsData = (await eventsRes.json()) as EventsResponse;
       if (eventsData.error) {
-        setError("Impossible de récupérer les événements Google Calendar.");
+        setError(humanizeCalendarError(eventsData.error));
         setEvents([]);
       } else {
         setEvents(parseEvents(eventsData.events ?? []));
       }
       setDemo(Boolean(eventsData.demo) || Boolean(statusData.demo));
     } catch {
-      setError("Connexion au service agenda impossible.");
+      setError({ message: "Connexion au service agenda impossible." });
     } finally {
       setLoading(false);
     }
@@ -211,7 +250,7 @@ export function AgendaView() {
       await fetch(`/api/calendar/disconnect?engineer=${ENGINEER_SLUG}`, { method: "POST" });
       await load();
     } catch {
-      setError("Échec de la déconnexion.");
+      setError({ message: "Échec de la déconnexion." });
     } finally {
       setActing(false);
     }
@@ -253,15 +292,27 @@ export function AgendaView() {
             Agenda indisponible
           </div>
           <p className="mx-auto max-w-md text-[12.5px] leading-relaxed text-[var(--navy-300)]">
-            {error}
+            {error.message}
           </p>
-          <button
-            type="button"
-            onClick={() => void load()}
-            className="mt-4 rounded-md border border-[var(--navy-100)] bg-white px-3 py-2 text-[11.5px] font-semibold text-[var(--navy)] hover:border-[var(--gold)]"
-          >
-            Réessayer
-          </button>
+          <div className="mt-4 flex items-center justify-center gap-2">
+            {error.actionUrl && (
+              <a
+                href={error.actionUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-md bg-[var(--gold)] px-3 py-2 text-[11.5px] font-bold text-white hover:brightness-110"
+              >
+                {error.actionLabel ?? "Ouvrir"} ↗
+              </a>
+            )}
+            <button
+              type="button"
+              onClick={() => void load()}
+              className="rounded-md border border-[var(--navy-100)] bg-white px-3 py-2 text-[11.5px] font-semibold text-[var(--navy)] hover:border-[var(--gold)]"
+            >
+              Réessayer
+            </button>
+          </div>
         </section>
       ) : loading ? (
         <section className="rounded-md border border-[var(--navy-100)] bg-white p-12 text-center text-[12.5px] text-[var(--navy-300)]">
