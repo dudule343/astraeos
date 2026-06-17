@@ -2,6 +2,7 @@ import { Topbar } from "../_components/Topbar";
 import { KpiCard, type KpiBlock } from "../_components/KpiCard";
 import { PageHero } from "../_components/PageHeader";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getSessionContext } from "@/lib/auth/context";
 import { DbClientsTable, type DbClient } from "./DbClientsTable";
 import { ExportCsvButton } from "./ExportCsvButton";
 import { NewClientButton } from "./NewClientButton";
@@ -10,6 +11,13 @@ export const dynamic = "force-dynamic";
 
 async function fetchDbClients(): Promise<DbClient[]> {
   if (!process.env.SUPABASE_SERVICE_ROLE_KEY) return [];
+
+  // Scope obligatoire : on ne lit que les clients du tenant + cabinet de la session.
+  // createAdminClient() bypasse RLS, donc le filtre tenant/cabinet est la seule barrière
+  // anti-fuite cross-tenant tant que l'auth applicative n'est pas branchée sur RLS.
+  const ctx = await getSessionContext();
+  if (!ctx) return [];
+
   try {
     const supabase = createAdminClient();
     const { data: clients } = await supabase
@@ -24,6 +32,8 @@ async function fetchDbClients(): Promise<DbClient[]> {
           dossiers ( internal_notes )
         `,
       )
+      .eq("tenant_id", ctx.tenantId)
+      .eq("cabinet_id", ctx.cabinetId)
       .order("created_at", { ascending: false })
       .limit(100);
 

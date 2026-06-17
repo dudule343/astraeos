@@ -190,9 +190,21 @@ export async function createClientFromModalAction(
 
 export async function deleteClientsAction(ids: string[]) {
   if (!Array.isArray(ids) || ids.length === 0) return;
+
+  const ctx = await getSessionContext();
+  if (!ctx) throw new Error("Session requise");
+
   const supabase = createAdminClient();
-  // ON DELETE CASCADE supprime personnes + dossiers + souscriptions associées
-  const { error } = await supabase.from("clients").delete().in("id", ids);
+  // ON DELETE CASCADE supprime personnes + dossiers + souscriptions associées.
+  // Le scope tenant/cabinet empêche toute suppression cross-tenant : seuls les
+  // clients appartenant au cabinet courant sont effacés, les ids étrangers sont
+  // simplement ignorés par le filtre.
+  const { error } = await supabase
+    .from("clients")
+    .delete()
+    .in("id", ids)
+    .eq("tenant_id", ctx.tenantId)
+    .eq("cabinet_id", ctx.cabinetId);
   if (error) throw new Error(error.message);
   revalidatePath("/clients");
   revalidatePath("/dossiers");
@@ -216,7 +228,23 @@ export type UpdateClientPayload = {
 };
 
 export async function updateClientAction(payload: UpdateClientPayload) {
+  const ctx = await getSessionContext();
+  if (!ctx) throw new Error("Session requise");
+
   const supabase = createAdminClient();
+
+  // 0. Vérifier que le client ciblé appartient bien au cabinet courant.
+  //    Sans ce garde, un payload.id forgé permettrait de muter personnes/dossiers
+  //    d'un autre tenant. On refuse si le client n'existe pas dans ce scope.
+  const { data: ownedClient, error: ownErr } = await supabase
+    .from("clients")
+    .select("id")
+    .eq("id", payload.id)
+    .eq("tenant_id", ctx.tenantId)
+    .eq("cabinet_id", ctx.cabinetId)
+    .maybeSingle();
+  if (ownErr) throw new Error(ownErr.message);
+  if (!ownedClient) throw new Error("Client introuvable");
 
   // 1. Mettre à jour la personne représentant légal
   if (payload.representant || payload.email || payload.phone !== undefined) {
@@ -244,10 +272,13 @@ export async function updateClientAction(payload: UpdateClientPayload) {
   }
 
   // 2. Mettre à jour les notes du dossier (raison sociale, pack, revenu, etc.)
+  //    dossiers porte tenant_id + cabinet_id → on scope explicitement.
   const { data: dossiers } = await supabase
     .from("dossiers")
     .select("id, internal_notes")
     .eq("client_id", payload.id)
+    .eq("tenant_id", ctx.tenantId)
+    .eq("cabinet_id", ctx.cabinetId)
     .limit(1);
 
   const dossierId = dossiers?.[0]?.id as string | undefined;
@@ -268,7 +299,9 @@ export async function updateClientAction(payload: UpdateClientPayload) {
     const { error: dErr } = await supabase
       .from("dossiers")
       .update({ internal_notes: JSON.stringify(notes) })
-      .eq("id", dossiers[0].id);
+      .eq("id", dossiers[0].id)
+      .eq("tenant_id", ctx.tenantId)
+      .eq("cabinet_id", ctx.cabinetId);
     if (dErr) throw new Error(`Dossier : ${dErr.message}`);
   }
 

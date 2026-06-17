@@ -1,11 +1,23 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 import { listEntretiens, upsertEntretien } from "@/lib/entretiens-store";
-import { requireAuth } from "@/lib/auth";
+import { getSessionContext } from "@/lib/auth/context";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 const ROOM_MAX = 64;
 const DISPLAY_MAX = 120;
 const SLUG_MAX = 64;
+
+/**
+ * Le store choisit son backend (Supabase ou fichier local) selon ces variables.
+ * En fallback fichier, les colonnes tenant_id/cabinet_id n'existent pas : on
+ * gate alors par session sans pouvoir filtrer la ligne (mode dev local).
+ */
+function supabaseConfigured(): boolean {
+  return Boolean(
+    process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY,
+  );
+}
 
 function sanitizeRoom(raw: string): string {
   return raw.replace(/[^a-zA-Z0-9_-]/g, "").slice(0, ROOM_MAX);
@@ -15,10 +27,72 @@ function sanitizeSlug(raw: string): string {
   return raw.toLowerCase().replace(/[^a-z0-9-]/g, "").slice(0, SLUG_MAX);
 }
 
+/**
+ * Restreint une liste d'entretiens (par id) à ceux appartenant au tenant/cabinet
+ * courant. En backend Supabase uniquement ; en fallback fichier (colonnes
+ * absentes) on renvoie la liste telle quelle après gating de session.
+ */
+async function scopeToTenant<T extends { id: string }>(
+  items: T[],
+  tenantId: string,
+  cabinetId: string,
+): Promise<T[]> {
+  if (!supabaseConfigured() || items.length === 0) return items;
+  const supabase = createAdminClient();
+  const { data, error } = await supabase
+    .from("entretiens")
+    .select("id")
+    .in("id", items.map((e) => e.id))
+    .eq("tenant_id", tenantId)
+    .eq("cabinet_id", cabinetId);
+  if (error) throw error;
+  const allowed = new Set((data ?? []).map((r) => (r as { id: string }).id));
+  return items.filter((e) => allowed.has(e.id));
+}
+
+/**
+ * Estampille la ligne entretien (id) avec tenant/cabinet à la création, OU
+ * refuse si elle appartient déjà à un autre cabinet. Renvoie une réponse 404
+ * en cas de mismatch (sans fuiter l'existence), null si tout va bien.
+ */
+async function stampTenantOrRefuse(
+  id: string,
+  tenantId: string,
+  cabinetId: string,
+): Promise<NextResponse | null> {
+  const supabase = createAdminClient();
+  const { data, error } = await supabase
+    .from("entretiens")
+    .select("tenant_id, cabinet_id")
+    .eq("id", id)
+    .maybeSingle();
+  if (error) throw error;
+  if (!data) {
+    return NextResponse.json({ error: "Entretien introuvable" }, { status: 404 });
+  }
+
+  const row = data as { tenant_id: string | null; cabinet_id: string | null };
+  if (row.tenant_id == null && row.cabinet_id == null) {
+    const { error: updErr } = await supabase
+      .from("entretiens")
+      .update({ tenant_id: tenantId, cabinet_id: cabinetId })
+      .eq("id", id);
+    if (updErr) throw updErr;
+    return null;
+  }
+
+  if (row.tenant_id !== tenantId || row.cabinet_id !== cabinetId) {
+    return NextResponse.json({ error: "Entretien introuvable" }, { status: 404 });
+  }
+  return null;
+}
+
 /** GET /api/entretiens?prospect=<slug> → liste légère (sans gros blobs). */
 export async function GET(req: NextRequest) {
-  const denied = requireAuth(req);
-  if (denied) return denied;
+  const ctx = await getSessionContext();
+  if (!ctx) {
+    return NextResponse.json({ error: "Authentification requise" }, { status: 401 });
+  }
 
   const slug = req.nextUrl.searchParams.get("prospect");
   if (!slug || !slug.trim()) {
@@ -33,7 +107,10 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ entretiens: [] });
     }
     const entretiens = await listEntretiens(safeSlug);
-    return NextResponse.json({ entretiens });
+    // Scope tenant/cabinet : on ne garde que les entretiens du cabinet courant.
+    // Le store n'expose pas tenant_id ; on filtre les ids via le client admin.
+    const scoped = await scopeToTenant(entretiens, ctx.tenantId, ctx.cabinetId);
+    return NextResponse.json({ entretiens: scoped });
   } catch (err) {
     console.error("[entretiens] GET erreur:", err);
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
@@ -42,8 +119,10 @@ export async function GET(req: NextRequest) {
 
 /** POST /api/entretiens → upsert par room (ne réécrase jamais l'existant). */
 export async function POST(req: NextRequest) {
-  const denied = requireAuth(req);
-  if (denied) return denied;
+  const ctx = await getSessionContext();
+  if (!ctx) {
+    return NextResponse.json({ error: "Authentification requise" }, { status: 401 });
+  }
 
   let body: unknown;
   try {
@@ -97,6 +176,15 @@ export async function POST(req: NextRequest) {
       prospect_slug: safeSlug,
       display_name: safeDisplay,
     });
+
+    // Scope tenant : le store n'écrit pas tenant_id/cabinet_id. À la création on
+    // estampille la ligne avec le contexte courant ; si la room appartient déjà
+    // à un autre cabinet, on refuse (pas d'adoption du tenant de la ligne).
+    if (supabaseConfigured()) {
+      const refused = await stampTenantOrRefuse(e.id, ctx.tenantId, ctx.cabinetId);
+      if (refused) return refused;
+    }
+
     return NextResponse.json({
       id: e.id,
       room: e.room,

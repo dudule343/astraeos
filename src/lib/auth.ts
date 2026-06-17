@@ -1,6 +1,8 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { NextResponse, type NextRequest } from "next/server";
 
+import { getSessionContext } from "@/lib/auth/context";
+
 /**
  * Authentification du cabinet (espace réservé).
  *
@@ -70,17 +72,19 @@ export function readSession(req: NextRequest): boolean {
 }
 
 /**
- * Garde pour handlers d'API : renvoie null si la session est valide,
+ * Garde pour handlers d'API : renvoie null si la requête est autorisée,
  * sinon une réponse 401. À placer en tête de handler :
- *   const denied = requireAuth(req); if (denied) return denied;
+ *   const denied = await requireAuth(req); if (denied) return denied;
  *
- * DÉSACTIVÉE : le code d'accès cabinet a été retiré, les espaces et APIs
- * sont en accès libre. Pour réactiver, restaurer le corps d'origine :
- *   if (readSession(req)) return null;
- *   return NextResponse.json({ error: "Authentification requise" }, { status: 401 });
+ * Gating réel par session : tant que ASTRAEOS_AUTH_ENFORCE n'est pas à "1",
+ * on reste en mode legacy ouvert (aucune garde). Le flag activé, on exige un
+ * contexte de session valide (getSessionContext), sinon 401.
  */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function requireAuth(_req: NextRequest): NextResponse | null {
+export async function requireAuth(_req: NextRequest): Promise<NextResponse | null> {
+  if (process.env.ASTRAEOS_AUTH_ENFORCE !== "1") return null; // mode legacy ouvert (flag off)
+  const ctx = await getSessionContext();
+  if (!ctx) return NextResponse.json({ error: "Authentification requise" }, { status: 401 });
   return null;
 }
 

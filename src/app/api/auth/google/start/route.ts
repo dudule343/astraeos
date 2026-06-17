@@ -1,17 +1,28 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-import { buildAuthorizeUrl, isOAuthConfigured , signState } from "@/lib/google-oauth";
+import {
+  buildAuthorizeUrl,
+  engineerSlugFromContext,
+  isOAuthConfigured,
+  signState,
+} from "@/lib/google-oauth";
+import { getSessionContext } from "@/lib/auth/context";
 
 /**
- * GET /api/auth/google/start?engineer=luc-thilliez
+ * GET /api/auth/google/start
  *
  * - Si OAuth configuré → 302 vers la mire Google officielle.
  * - Sinon → 302 vers /api/auth/google/demo (fallback démo non-fonctionnel).
  *
- * Le `state` contient l'engineer_slug encodé + un nonce signé pour CSRF.
+ * L'OAuth est initié POUR l'ingénieur de la session : le slug encodé dans le
+ * `state` est l'id de session (jamais un ?engineer arbitraire), si bien qu'un
+ * ingénieur ne peut connecter Google que sur son propre store de tokens.
  */
-export function GET(req: NextRequest) {
-  const engineer = req.nextUrl.searchParams.get("engineer") || "luc-thilliez";
+export async function GET(req: NextRequest) {
+  const ctx = await getSessionContext();
+  if (!ctx) return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
+
+  const engineer = engineerSlugFromContext(ctx);
 
   if (!isOAuthConfigured()) {
     const fallback = new URL("/api/auth/google/demo", req.nextUrl.origin);

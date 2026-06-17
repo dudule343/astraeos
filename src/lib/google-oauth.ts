@@ -23,14 +23,38 @@ import path from "node:path";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export type GoogleTokens = {
-  engineer_slug: string;            // identifiant logique de l'ingénieur ("luc-thilliez")
+  engineer_slug: string;            // identifiant logique de l'ingénieur (= ctx.userId)
   email: string;                    // email Google de l'ingénieur connecté
   access_token: string;
   refresh_token: string;
   expires_at: number;               // epoch ms
   scope: string;
   granted_at: string;               // ISO
+  // Scope multi-tenant. Optionnels au niveau du type pour rester compatibles avec
+  // le store fichier legacy et le fallback démo (qui n'ont pas ces colonnes) ;
+  // le vrai flow OAuth (callback) les écrit toujours depuis le contexte de session.
+  tenant_id?: string;
+  cabinet_id?: string;
 };
+
+/**
+ * Identité d'un ingénieur côté tokens Google, dérivée du contexte de session.
+ * Le `slug` est l'id stable de public.users (jamais un param d'URL arbitraire) :
+ * c'est lui qui garantit qu'un ingénieur ne voit/connecte QUE son propre Google.
+ */
+export type EngineerIdentity = {
+  slug: string;
+  tenantId: string;
+  cabinetId: string;
+};
+
+/**
+ * Slug logique de l'ingénieur pour le store de tokens = id de session.
+ * Centralisé ici pour que start/callback/calendar utilisent tous la même clé.
+ */
+export function engineerSlugFromContext(ctx: { userId: string }): string {
+  return ctx.userId;
+}
 
 const TOKENS_PATH = path.join(process.cwd(), ".data", "google-tokens.json");
 
@@ -205,6 +229,8 @@ export async function saveTokens(t: GoogleTokens): Promise<void> {
           expires_at: t.expires_at,
           scope: t.scope,
           granted_at: t.granted_at,
+          tenant_id: t.tenant_id,
+          cabinet_id: t.cabinet_id,
           updated_at: new Date().toISOString(),
         },
         { onConflict: "engineer_slug" },
@@ -222,15 +248,27 @@ export async function saveTokens(t: GoogleTokens): Promise<void> {
   await writeFileTokens(all);
 }
 
-export async function loadTokens(engineer_slug: string): Promise<GoogleTokens | null> {
+/**
+ * Charge les tokens d'un ingénieur. Si `tenantId` est fourni, la lecture est
+ * contrainte à ce tenant (.eq('tenant_id', tenantId)) : un slug d'un autre
+ * tenant ne ramène rien, ce qui empêche toute traversée inter-tenant même si
+ * un slug arbitraire venait à fuiter jusqu'ici.
+ */
+export async function loadTokens(
+  engineer_slug: string,
+  tenantId?: string,
+): Promise<GoogleTokens | null> {
   if (supabaseConfigured()) {
     try {
       const supabase = createAdminClient();
-      const { data, error } = await supabase
+      let query = supabase
         .from("google_tokens")
-        .select("engineer_slug, email, access_token, refresh_token, expires_at, scope, granted_at")
-        .eq("engineer_slug", engineer_slug)
-        .maybeSingle();
+        .select(
+          "engineer_slug, email, access_token, refresh_token, expires_at, scope, granted_at, tenant_id, cabinet_id",
+        )
+        .eq("engineer_slug", engineer_slug);
+      if (tenantId) query = query.eq("tenant_id", tenantId);
+      const { data, error } = await query.maybeSingle();
       if (error) throw error;
       if (data) return { ...data, expires_at: Number(data.expires_at) } as GoogleTokens;
       // Pas de ligne Supabase : on retombe sur le fichier (compat dev / données existantes).
@@ -239,25 +277,47 @@ export async function loadTokens(engineer_slug: string): Promise<GoogleTokens | 
     }
   }
   const all = await readFileTokens();
-  return all.find((x) => x.engineer_slug === engineer_slug) ?? null;
+  // Store fichier = dev/démo uniquement. On tolère les entrées legacy sans
+  // tenant_id (écrites avant le multi-tenant / par le fallback démo) ; dès qu'une
+  // entrée porte un tenant_id, il doit correspondre.
+  return (
+    all.find(
+      (x) =>
+        x.engineer_slug === engineer_slug &&
+        (!tenantId || x.tenant_id == null || x.tenant_id === tenantId),
+    ) ?? null
+  );
 }
 
-export async function deleteTokens(engineer_slug: string): Promise<void> {
+export async function deleteTokens(engineer_slug: string, tenantId?: string): Promise<void> {
   if (supabaseConfigured()) {
     try {
       const supabase = createAdminClient();
-      const { error } = await supabase.from("google_tokens").delete().eq("engineer_slug", engineer_slug);
+      let del = supabase.from("google_tokens").delete().eq("engineer_slug", engineer_slug);
+      if (tenantId) del = del.eq("tenant_id", tenantId);
+      const { error } = await del;
       if (error) throw error;
     } catch (err) {
       console.warn("[google-oauth] Supabase delete échoué, fallback fichier:", err);
     }
   }
   const all = await readFileTokens();
-  await writeFileTokens(all.filter((x) => x.engineer_slug !== engineer_slug));
+  await writeFileTokens(
+    all.filter(
+      (x) =>
+        !(
+          x.engineer_slug === engineer_slug &&
+          (!tenantId || x.tenant_id == null || x.tenant_id === tenantId)
+        ),
+    ),
+  );
 }
 
-export async function getFreshAccessToken(engineer_slug: string): Promise<string | null> {
-  const t = await loadTokens(engineer_slug);
+export async function getFreshAccessToken(
+  engineer_slug: string,
+  tenantId?: string,
+): Promise<string | null> {
+  const t = await loadTokens(engineer_slug, tenantId);
   if (!t) return null;
   // Refresh si moins de 60s restantes
   if (t.expires_at - Date.now() > 60_000) return t.access_token;
@@ -283,6 +343,9 @@ export async function getFreshAccessToken(engineer_slug: string): Promise<string
  * Alias explicite de getFreshAccessToken : nomme l'intention côté appelants
  * (« je veux un token utilisable maintenant »).
  */
-export async function getValidAccessToken(engineer_slug: string): Promise<string | null> {
-  return getFreshAccessToken(engineer_slug);
+export async function getValidAccessToken(
+  engineer_slug: string,
+  tenantId?: string,
+): Promise<string | null> {
+  return getFreshAccessToken(engineer_slug, tenantId);
 }

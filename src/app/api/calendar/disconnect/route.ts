@@ -1,17 +1,17 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 
-import { deleteTokens, loadTokens } from "@/lib/google-oauth";
-import { requireAuth } from "@/lib/auth";
+import { deleteTokens, engineerSlugFromContext, loadTokens } from "@/lib/google-oauth";
+import { getSessionContext } from "@/lib/auth/context";
 
-/** POST /api/calendar/disconnect?engineer=luc-thilliez */
-export async function POST(req: NextRequest) {
-  const denied = requireAuth(req);
-  if (denied) return denied;
+/** POST /api/calendar/disconnect — déconnecte Google de l'ingénieur de la session. */
+export async function POST() {
+  const ctx = await getSessionContext();
+  if (!ctx) return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
 
-  const engineer = req.nextUrl.searchParams.get("engineer") || "luc-thilliez";
+  const engineer = engineerSlugFromContext(ctx);
   try {
     // Révocation best-effort du grant OAuth côté Google avant de purger le store local.
-    const tokens = await loadTokens(engineer);
+    const tokens = await loadTokens(engineer, ctx.tenantId);
     const tokenToRevoke = tokens?.refresh_token || tokens?.access_token;
     if (tokenToRevoke && tokenToRevoke !== "demo-refresh" && tokenToRevoke !== "demo-token-not-real") {
       try {
@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    await deleteTokens(engineer);
+    await deleteTokens(engineer, ctx.tenantId);
     return NextResponse.json({ ok: true, engineer });
   } catch (err) {
     console.error("[calendar/disconnect] erreur:", err);

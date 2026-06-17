@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireAuth } from "@/lib/auth";
+import { getSessionContext } from "@/lib/auth/context";
 
 const BUCKET = "depots";
 
@@ -16,8 +17,11 @@ export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ token: string }> },
 ) {
-  const denied = requireAuth(req);
+  const denied = await requireAuth(req);
   if (denied) return denied;
+
+  const ctx = await getSessionContext();
+  if (!ctx) return NextResponse.json({ error: "Authentification requise" }, { status: 401 });
 
   const { token } = await params;
 
@@ -36,11 +40,11 @@ export async function GET(
 
     const { data: collecte, error } = await supabase
       .from("collectes")
-      .select("id")
+      .select("id, tenant_id")
       .eq("token", token)
       .maybeSingle();
 
-    if (error || !collecte) {
+    if (error || !collecte || collecte.tenant_id !== ctx.tenantId) {
       return NextResponse.json({ error: "Collecte introuvable" }, { status: 404 });
     }
 

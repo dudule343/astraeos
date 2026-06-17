@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireAuth } from "@/lib/auth";
+import { getSessionContext } from "@/lib/auth/context";
 
 /**
  * Vue ingénieur : liste des collectes réelles avec leur avancement.
@@ -21,14 +22,18 @@ type CollecteRow = {
 };
 
 export async function GET(req: NextRequest) {
-  const denied = requireAuth(req);
+  const denied = await requireAuth(req);
   if (denied) return denied;
+  const ctx = await getSessionContext();
+  if (!ctx) return NextResponse.json({ error: "Authentification requise" }, { status: 401 });
   try {
     const supabase = createAdminClient();
 
     const { data: collectes, error } = await supabase
       .from("collectes")
       .select("id, token, client_nom, client_email, created_at, email_sent_at, opened_at, structure")
+      .eq("tenant_id", ctx.tenantId)
+      .eq("cabinet_id", ctx.cabinetId)
       .order("created_at", { ascending: false })
       .limit(50);
 

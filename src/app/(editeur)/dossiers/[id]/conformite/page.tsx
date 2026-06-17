@@ -1,5 +1,7 @@
 import Link from "next/link";
+import { notFound, unstable_rethrow } from "next/navigation";
 
+import { getSessionContext } from "@/lib/auth/context";
 import { Topbar } from "../../../_components/Topbar";
 import { PageHero } from "../../../_components/PageHeader";
 import { ParcoursStepper } from "../../../_components/ParcoursStepper";
@@ -69,6 +71,8 @@ type ConformiteNotes = {
 async function fetchHeader(id: string): Promise<ConformiteHeader | null> {
   if (!process.env.SUPABASE_SERVICE_ROLE_KEY) return null;
   try {
+    const ctx = await getSessionContext();
+    if (!ctx) notFound();
     const supabase = createAdminClient();
     const { data: d } = await supabase
       .from("dossiers")
@@ -83,9 +87,12 @@ async function fetchHeader(id: string): Promise<ConformiteHeader | null> {
         `,
       )
       .eq("id", id)
+      .eq("tenant_id", ctx.tenantId)
+      .eq("cabinet_id", ctx.cabinetId)
       .maybeSingle();
 
-    if (!d) return null;
+    // Dossier hors tenant/cabinet : 404 plutôt qu'un entête générique.
+    if (!d) notFound();
 
     const row = d as Record<string, unknown>;
 
@@ -124,7 +131,10 @@ async function fetchHeader(id: string): Promise<ConformiteHeader | null> {
       revenue: (row.total_revenue_cached as string) ?? notes.revenue ?? null,
       notes,
     };
-  } catch {
+  } catch (e) {
+    // Laisse passer le contrôle de flux Next (notFound) ; n'avale que les
+    // erreurs Supabase/réseau (dégradation gracieuse → entête générique).
+    unstable_rethrow(e);
     return null;
   }
 }

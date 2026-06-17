@@ -1,15 +1,15 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 
-import { isOAuthConfigured, loadTokens } from "@/lib/google-oauth";
-import { requireAuth } from "@/lib/auth";
+import { engineerSlugFromContext, isOAuthConfigured, loadTokens } from "@/lib/google-oauth";
+import { getSessionContext } from "@/lib/auth/context";
 
-/** GET /api/calendar/status?engineer=luc-thilliez */
-export async function GET(req: NextRequest) {
-  const denied = requireAuth(req);
-  if (denied) return denied;
+/** GET /api/calendar/status — statut Google Calendar de l'ingénieur de la session. */
+export async function GET() {
+  const ctx = await getSessionContext();
+  if (!ctx) return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
 
-  const engineer = req.nextUrl.searchParams.get("engineer") || "luc-thilliez";
-  const tokens = await loadTokens(engineer);
+  const engineer = engineerSlugFromContext(ctx);
+  const tokens = await loadTokens(engineer, ctx.tenantId);
   return NextResponse.json({
     oauth_configured: isOAuthConfigured(),
     connected: Boolean(tokens),

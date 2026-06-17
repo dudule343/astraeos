@@ -5,6 +5,7 @@ import { Topbar } from "../../_components/Topbar";
 import { KpiCard, type KpiBlock } from "../../_components/KpiCard";
 import { PageHero } from "../../_components/PageHeader";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getSessionContext } from "@/lib/auth/context";
 import {
   STAGE_LABELS,
   buildJalons,
@@ -54,6 +55,8 @@ async function fetchDossier(
   id: string,
 ): Promise<{ dossier: DossierDetail; etude: EtudeForParcours; conformite: ConformiteForParcours } | null> {
   if (!process.env.SUPABASE_SERVICE_ROLE_KEY) return null;
+  const ctx = await getSessionContext();
+  if (!ctx) return null;
   try {
     const supabase = createAdminClient();
     const { data: d } = await supabase
@@ -66,10 +69,14 @@ async function fetchDossier(
           total_revenue_cached,
           created_at,
           internal_notes,
+          tenant_id,
+          cabinet_id,
           clients ( household_address, personnes ( first_name, last_name, email, phone ) )
         `,
       )
       .eq("id", id)
+      .eq("tenant_id", ctx.tenantId)
+      .eq("cabinet_id", ctx.cabinetId)
       .maybeSingle();
 
     if (!d) return null;
@@ -101,13 +108,17 @@ async function fetchDossier(
           "id, version, status, current_phase, phase_progress_pct, delivered_at, complete_pdf_url, restitution_meeting_id, created_at",
         )
         .eq("dossier_id", id)
+        .eq("tenant_id", ctx.tenantId)
+        .eq("cabinet_id", ctx.cabinetId)
         .order("version", { ascending: false })
         .limit(1)
         .maybeSingle(),
       supabase
         .from("conformite_items")
         .select("type, label, status, signed_at, validated_at")
-        .eq("dossier_id", id),
+        .eq("dossier_id", id)
+        .eq("tenant_id", ctx.tenantId)
+        .eq("cabinet_id", ctx.cabinetId),
     ]);
 
     const etudeRow = etudeRes.data as

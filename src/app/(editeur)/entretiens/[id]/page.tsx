@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { Topbar } from "../../_components/Topbar";
 import { PageHero } from "../../_components/PageHeader";
 import { getEntretien } from "@/lib/entretiens-store";
+import { getSessionContext } from "@/lib/auth/context";
 
 export const dynamic = "force-dynamic";
 
@@ -39,7 +40,9 @@ export default async function EntretienDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const e = await getEntretien(id);
+  const ctx = await getSessionContext();
+  if (!ctx) notFound();
+  const e = await getEntretien(id, ctx.tenantId);
   if (!e) notFound();
 
   const titre = e.display_name || e.prospect_slug || "Entretien sans dossier";

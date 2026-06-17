@@ -4,6 +4,7 @@ import { Topbar } from "../_components/Topbar";
 import { KpiCard, type KpiBlock } from "../_components/KpiCard";
 import { PageHero } from "../_components/PageHeader";
 import { listRecentEntretiens, type EntretienRecent } from "@/lib/entretiens-store";
+import { getSessionContext } from "@/lib/auth/context";
 
 export const dynamic = "force-dynamic";
 
@@ -47,7 +48,8 @@ function computeKpis(items: EntretienRecent[]): KpiBlock[] {
 }
 
 export default async function EntretiensPage() {
-  const items = await listRecentEntretiens(200);
+  const ctx = await getSessionContext();
+  const items = ctx ? await listRecentEntretiens(200, ctx.tenantId) : [];
   const kpis = computeKpis(items);
 
   return (

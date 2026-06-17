@@ -32,6 +32,8 @@ export type TranscriptLine = {
 export type Entretien = {
   id: string;
   room: string;
+  tenant_id: string | null;
+  cabinet_id: string | null;
   prospect_slug: string | null;
   display_name: string | null;
   started_at: string;
@@ -107,6 +109,8 @@ function capTail<T>(arr: T[], cap: number): T[] {
 type EntretienRow = {
   id: string;
   room: string;
+  tenant_id: string | null;
+  cabinet_id: string | null;
   prospect_slug: string | null;
   display_name: string | null;
   started_at: string;
@@ -124,6 +128,8 @@ function rowToEntretien(row: EntretienRow): Entretien {
   return {
     id: row.id,
     room: row.room,
+    tenant_id: row.tenant_id ?? null,
+    cabinet_id: row.cabinet_id ?? null,
     prospect_slug: row.prospect_slug ?? null,
     display_name: row.display_name ?? null,
     started_at: row.started_at,
@@ -139,7 +145,7 @@ function rowToEntretien(row: EntretienRow): Entretien {
 }
 
 const SELECT_FULL =
-  "id, room, prospect_slug, display_name, started_at, ended_at, dci_snapshot, transcript, conseils, articles, notes, rapport, updated_at";
+  "id, room, tenant_id, cabinet_id, prospect_slug, display_name, started_at, ended_at, dci_snapshot, transcript, conseils, articles, notes, rapport, updated_at";
 
 // --- File impl ---------------------------------------------------------------
 
@@ -164,6 +170,10 @@ export type UpsertInput = {
   room: string;
   prospect_slug?: string | null;
   display_name?: string | null;
+  /** Tenant/cabinet du requêteur, fournis par la route (ctx.*). Écrits à la
+   *  création uniquement ; laissés tels quels si absents. */
+  tenant_id?: string | null;
+  cabinet_id?: string | null;
 };
 
 /**
@@ -174,21 +184,25 @@ export async function upsertEntretien(input: UpsertInput): Promise<Entretien> {
   const room = input.room;
   const prospect = input.prospect_slug ?? null;
   const display = input.display_name ?? null;
+  const tenant = input.tenant_id ?? null;
+  const cabinet = input.cabinet_id ?? null;
 
   if (isSupabaseConfigured()) {
     try {
-      return await upsertSupabase(room, prospect, display);
+      return await upsertSupabase(room, prospect, display, tenant, cabinet);
     } catch (err) {
       console.warn("[entretiens-store] Supabase upsert failed, fallback file:", err);
     }
   }
-  return upsertFile(room, prospect, display);
+  return upsertFile(room, prospect, display, tenant, cabinet);
 }
 
 async function upsertSupabase(
   room: string,
   prospect: string | null,
   display: string | null,
+  tenant: string | null,
+  cabinet: string | null,
 ): Promise<Entretien> {
   const supabase = createAdminClient();
 
@@ -220,19 +234,23 @@ async function upsertSupabase(
   }
 
   const now = new Date().toISOString();
+  const insertPayload: Record<string, unknown> = {
+    room,
+    prospect_slug: prospect,
+    display_name: display,
+    started_at: now,
+    transcript: [],
+    conseils: [],
+    articles: [],
+    notes: [],
+    updated_at: now,
+  };
+  if (tenant) insertPayload.tenant_id = tenant;
+  if (cabinet) insertPayload.cabinet_id = cabinet;
+
   const { data: inserted, error: insErr } = await supabase
     .from("entretiens")
-    .insert({
-      room,
-      prospect_slug: prospect,
-      display_name: display,
-      started_at: now,
-      transcript: [],
-      conseils: [],
-      articles: [],
-      notes: [],
-      updated_at: now,
-    })
+    .insert(insertPayload)
     .select(SELECT_FULL)
     .single();
   if (insErr) throw insErr;
@@ -243,6 +261,8 @@ async function upsertFile(
   room: string,
   prospect: string | null,
   display: string | null,
+  tenant: string | null,
+  cabinet: string | null,
 ): Promise<Entretien> {
   const store = await readFileStore();
   const existing = store.entretiens.find((e) => e.room === room);
@@ -267,6 +287,8 @@ async function upsertFile(
   const created: Entretien = {
     id: genId(),
     room,
+    tenant_id: tenant,
+    cabinet_id: cabinet,
     prospect_slug: prospect,
     display_name: display,
     started_at: now,
@@ -506,15 +528,18 @@ export type EntretienListItem = {
   a_rapport: boolean;
 };
 
-export async function listEntretiens(slug: string): Promise<EntretienListItem[]> {
+export async function listEntretiens(
+  slug: string,
+  tenantId?: string | null,
+): Promise<EntretienListItem[]> {
   if (isSupabaseConfigured()) {
     try {
-      return await listSupabase(slug);
+      return await listSupabase(slug, tenantId ?? null);
     } catch (err) {
       console.warn("[entretiens-store] Supabase list failed, fallback file:", err);
     }
   }
-  return listFile(slug);
+  return listFile(slug, tenantId ?? null);
 }
 
 function toListItem(e: Entretien): EntretienListItem {
@@ -529,16 +554,21 @@ function toListItem(e: Entretien): EntretienListItem {
   };
 }
 
-async function listSupabase(slug: string): Promise<EntretienListItem[]> {
+async function listSupabase(
+  slug: string,
+  tenantId: string | null,
+): Promise<EntretienListItem[]> {
   const supabase = createAdminClient();
   // On ne sélectionne pas les gros blobs : conseils/articles servent au comptage
   // mais on évite transcript/dci_snapshot/rapport (volumineux). On reconstruit
   // le compte côté SQL via jsonb_array_length n'étant pas exposé par l'API REST,
   // on récupère conseils/articles (généralement < 200 entrées) pour les compter.
-  const { data, error } = await supabase
+  let query = supabase
     .from("entretiens")
     .select("id, room, started_at, ended_at, conseils, articles, rapport")
-    .eq("prospect_slug", slug)
+    .eq("prospect_slug", slug);
+  if (tenantId) query = query.eq("tenant_id", tenantId);
+  const { data, error } = await query
     .order("started_at", { ascending: false })
     .limit(200);
   if (error) throw error;
@@ -562,10 +592,14 @@ async function listSupabase(slug: string): Promise<EntretienListItem[]> {
   }));
 }
 
-async function listFile(slug: string): Promise<EntretienListItem[]> {
+async function listFile(
+  slug: string,
+  tenantId: string | null,
+): Promise<EntretienListItem[]> {
   const store = await readFileStore();
   return store.entretiens
     .filter((e) => e.prospect_slug === slug)
+    .filter((e) => !tenantId || e.tenant_id === tenantId)
     .sort((a, b) => (b.started_at ?? "").localeCompare(a.started_at ?? ""))
     .map(toListItem);
 }
@@ -577,22 +611,30 @@ export type EntretienRecent = EntretienListItem & {
 
 /** Liste globale des entretiens récents (tableau de bord Espace), sans les gros
  *  blobs (transcript/dci_snapshot). Tri par date décroissante. */
-export async function listRecentEntretiens(limit = 200): Promise<EntretienRecent[]> {
+export async function listRecentEntretiens(
+  limit = 200,
+  tenantId?: string | null,
+): Promise<EntretienRecent[]> {
   if (isSupabaseConfigured()) {
     try {
-      return await listRecentSupabase(limit);
+      return await listRecentSupabase(limit, tenantId ?? null);
     } catch (err) {
       console.warn("[entretiens-store] Supabase listRecent failed, fallback file:", err);
     }
   }
-  return listRecentFile(limit);
+  return listRecentFile(limit, tenantId ?? null);
 }
 
-async function listRecentSupabase(limit: number): Promise<EntretienRecent[]> {
+async function listRecentSupabase(
+  limit: number,
+  tenantId: string | null,
+): Promise<EntretienRecent[]> {
   const supabase = createAdminClient();
-  const { data, error } = await supabase
+  let query = supabase
     .from("entretiens")
-    .select("id, room, prospect_slug, display_name, started_at, ended_at, conseils, articles, rapport")
+    .select("id, room, prospect_slug, display_name, started_at, ended_at, conseils, articles, rapport");
+  if (tenantId) query = query.eq("tenant_id", tenantId);
+  const { data, error } = await query
     .order("started_at", { ascending: false })
     .limit(limit);
   if (error) throw error;
@@ -620,10 +662,14 @@ async function listRecentSupabase(limit: number): Promise<EntretienRecent[]> {
   }));
 }
 
-async function listRecentFile(limit: number): Promise<EntretienRecent[]> {
+async function listRecentFile(
+  limit: number,
+  tenantId: string | null,
+): Promise<EntretienRecent[]> {
   const store = await readFileStore();
   return store.entretiens
     .slice()
+    .filter((e) => !tenantId || e.tenant_id === tenantId)
     .sort((a, b) => (b.started_at ?? "").localeCompare(a.started_at ?? ""))
     .slice(0, limit)
     .map((e) => ({
@@ -633,18 +679,24 @@ async function listRecentFile(limit: number): Promise<EntretienRecent[]> {
     }));
 }
 
-export async function getEntretien(id: string): Promise<Entretien | null> {
+export async function getEntretien(
+  id: string,
+  tenantId?: string | null,
+): Promise<Entretien | null> {
   if (isSupabaseConfigured()) {
     try {
-      return await getSupabase(id);
+      return await getSupabase(id, tenantId ?? null);
     } catch (err) {
       console.warn("[entretiens-store] Supabase get failed, fallback file:", err);
     }
   }
-  return getFile(id);
+  return getFile(id, tenantId ?? null);
 }
 
-async function getSupabase(id: string): Promise<Entretien | null> {
+async function getSupabase(
+  id: string,
+  tenantId: string | null,
+): Promise<Entretien | null> {
   const supabase = createAdminClient();
   const { data, error } = await supabase
     .from("entretiens")
@@ -652,10 +704,20 @@ async function getSupabase(id: string): Promise<Entretien | null> {
     .eq("id", id)
     .maybeSingle();
   if (error) throw error;
-  return data ? rowToEntretien(data as EntretienRow) : null;
+  if (!data) return null;
+  const entretien = rowToEntretien(data as EntretienRow);
+  // Isolation tenant : on refuse l'accès à une ligne d'un autre tenant.
+  if (tenantId && entretien.tenant_id !== tenantId) return null;
+  return entretien;
 }
 
-async function getFile(id: string): Promise<Entretien | null> {
+async function getFile(
+  id: string,
+  tenantId: string | null,
+): Promise<Entretien | null> {
   const store = await readFileStore();
-  return store.entretiens.find((e) => e.id === id) ?? null;
+  const found = store.entretiens.find((e) => e.id === id) ?? null;
+  if (!found) return null;
+  if (tenantId && found.tenant_id !== tenantId) return null;
+  return found;
 }

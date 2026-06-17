@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { Topbar } from "../_components/Topbar";
-import { PageHero, GhostButton } from "../_components/PageHeader";
+import { PageHero } from "../_components/PageHeader";
 import { createClientAction } from "./actions";
 
 function SubmitButton() {
@@ -64,7 +64,7 @@ const steps: {
   {
     num: 2,
     title: "Identité juridique",
-    desc: "Patrimoine Conseil Avignon SAS · SIREN 892 547 318",
+    desc: "Raison sociale, SIREN, ORIAS, représentant légal",
     status: "active",
   },
   {
@@ -349,15 +349,15 @@ function Step2({ onPrev, onNext }: { onPrev: () => void; onNext: () => void }) {
     <>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <Field label="Raison sociale" required>
-          <input name="raison_sociale" className={inputClass} defaultValue="Patrimoine Conseil Avignon SAS" />
+          <input name="raison_sociale" className={inputClass} placeholder="Ex. Cabinet Conseil Patrimoine SAS" />
         </Field>
         <Field label="Nom commercial">
-          <input name="nom_commercial" className={inputClass} defaultValue="Patrimoine Conseil" />
+          <input name="nom_commercial" className={inputClass} placeholder="Nom d'usage du cabinet" />
         </Field>
       </div>
       <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
-        <Field label="SIREN" required help="Vérifié auprès de l'INSEE ✓">
-          <input name="siren" className={inputClass} defaultValue="892 547 318" />
+        <Field label="SIREN" required help="9 chiffres · vérifiable auprès de l'INSEE">
+          <input name="siren" className={inputClass} placeholder="000 000 000" inputMode="numeric" />
         </Field>
         <Field label="Statut juridique">
           <select name="statut_juridique" className={inputClass} defaultValue="SAS">
@@ -368,23 +368,23 @@ function Step2({ onPrev, onNext }: { onPrev: () => void; onNext: () => void }) {
           </select>
         </Field>
         <Field label="Numéro ORIAS" required help="CIF + Courtier en assurance">
-          <input name="numero_orias" className={inputClass} defaultValue="24 002 845" />
+          <input name="numero_orias" className={inputClass} placeholder="00 000 000" />
         </Field>
       </div>
       <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
         <Field label="Adresse siège" required>
-          <input name="adresse_siege" className={inputClass} defaultValue="42 boulevard Saint-Roch, 84000 Avignon" />
+          <input name="adresse_siege" className={inputClass} placeholder="N°, rue, code postal, ville" />
         </Field>
         <Field label="Représentant légal" required>
-          <input name="representant_legal" className={inputClass} defaultValue="Marc DELORME" />
+          <input name="representant_legal" className={inputClass} placeholder="Prénom NOM" />
         </Field>
       </div>
       <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
         <Field label="Email principal" required>
-          <input name="email_principal" className={inputClass} defaultValue="m.delorme@patrimoine-avignon.fr" />
+          <input name="email_principal" type="email" className={inputClass} placeholder="contact@cabinet.fr" />
         </Field>
         <Field label="Téléphone">
-          <input name="telephone" className={inputClass} defaultValue="04 90 12 34 56" />
+          <input name="telephone" type="tel" className={inputClass} placeholder="00 00 00 00 00" />
         </Field>
       </div>
       <div className="mt-5 flex justify-between">
@@ -414,10 +414,10 @@ function Step3({ onPrev, onNext }: { onPrev: () => void; onNext: () => void }) {
         <Field
           label="Sous-domaine"
           required
-          help="URL d'accès des ingénieurs : https://patrimoine-avignon.astraeos.fr"
+          help="URL d'accès des ingénieurs, ex. https://[sous-domaine].astraeos.fr"
         >
           <div className="flex items-center gap-1.5">
-            <input name="sous_domaine" className={`${inputClass} flex-1`} defaultValue="patrimoine-avignon" />
+            <input name="sous_domaine" className={`${inputClass} flex-1`} placeholder="mon-cabinet" />
             <span className="text-[12px] text-[var(--navy-300)]">.astraeos.fr</span>
           </div>
         </Field>
@@ -425,7 +425,7 @@ function Step3({ onPrev, onNext }: { onPrev: () => void; onNext: () => void }) {
           label="Nom de marque affiché"
           help="Visible dans l'interface ingénieur et clients finaux"
         >
-          <input className={inputClass} defaultValue="Patrimoine Conseil" />
+          <input name="nom_marque" className={inputClass} placeholder="Nom affiché dans l'interface" />
         </Field>
       </div>
       <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -454,7 +454,7 @@ function Step3({ onPrev, onNext }: { onPrev: () => void; onNext: () => void }) {
           </select>
         </Field>
         <Field label="Date d'activation" required>
-          <input name="date_activation" type="date" className={inputClass} defaultValue="2026-05-15" />
+          <input name="date_activation" type="date" className={inputClass} />
         </Field>
       </div>
       <div className="mt-5 flex justify-between">
@@ -594,28 +594,14 @@ function Step4({ onPrev, onNext }: { onPrev: () => void; onNext: () => void }) {
   );
 }
 
-const engineers = [
-  {
-    name: "Marc DELORME",
-    email: "m.delorme@patrimoine-avignon.fr",
-    role: { v: "Administrateur", c: "bg-[var(--gold-200)] text-[var(--medium-400)]" },
-  },
-  {
-    name: "Émilie ROBERT",
-    email: "e.robert@patrimoine-avignon.fr",
-    role: { v: "Ingénieure", c: "bg-[var(--light-blue)] text-[var(--navy)]" },
-  },
-];
-
 function Step5({ onPrev, onNext }: { onPrev: () => void; onNext: () => void }) {
   return (
     <>
       <div className="mb-3 flex items-start gap-2 rounded-md border border-[var(--navy-100)] bg-[var(--light-blue)] px-4 py-3 text-[11.5px] text-[var(--navy)]">
         <span>ℹ️</span>
         <div>
-          Les invitations d&apos;ingénieurs se configurent depuis la fiche client après création
-          (les lignes ci-dessous sont un aperçu). Au minimum 1 utilisateur administrateur est
-          requis.
+          Les invitations d&apos;ingénieurs se configurent depuis la fiche client après création.
+          Au minimum 1 utilisateur administrateur sera requis pour activer le compte.
         </div>
       </div>
       <div className="overflow-hidden rounded-md border border-[var(--navy-100)]">
@@ -628,25 +614,13 @@ function Step5({ onPrev, onNext }: { onPrev: () => void; onNext: () => void }) {
               <th className="px-4 py-3 text-center">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-[var(--navy-100)]">
-            {engineers.map((e) => (
-              <tr key={e.email} className="text-[12.5px] text-[var(--navy)]">
-                <td className="px-4 py-3 font-semibold">{e.name}</td>
-                <td className="px-4 py-3">{e.email}</td>
-                <td className="px-4 py-3">
-                  <span
-                    className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-bold ${e.role.c}`}
-                  >
-                    {e.role.v}
-                  </span>
-                </td>
-                <td className="px-4 py-3 text-center">
-                  <GhostButton dataStub={`Modifier l'ingénieur · ${e.name}`}>
-                    Modifier
-                  </GhostButton>
-                </td>
-              </tr>
-            ))}
+          <tbody>
+            <tr>
+              <td colSpan={4} className="px-4 py-8 text-center text-[12px] text-[var(--navy-300)]">
+                Aucun ingénieur ajouté pour l&apos;instant. Ajoute-les ici ou depuis la fiche client
+                après création.
+              </td>
+            </tr>
           </tbody>
         </table>
       </div>
@@ -679,12 +653,12 @@ function Step5({ onPrev, onNext }: { onPrev: () => void; onNext: () => void }) {
 
 const summary = [
   { label: "Type", value: "Cabinet direct" },
-  { label: "Raison sociale", value: "Patrimoine Conseil Avignon SAS" },
-  { label: "SIREN", value: "892 547 318" },
-  { label: "Sous-domaine", value: "patrimoine-avignon.astraeos.fr" },
+  { label: "Raison sociale", value: "selon l'étape 2 · Identité juridique" },
+  { label: "SIREN", value: "selon l'étape 2 · Identité juridique" },
+  { label: "Sous-domaine", value: "selon l'étape 3 · Configuration" },
   { label: "Packs initiaux", value: "selon la sélection à l'étape 4" },
   { label: "Ingénieurs", value: "à inviter depuis la fiche client" },
-  { label: "Revenu /mois facturé", value: "87 €/mois", highlight: true },
+  { label: "Revenu /mois facturé", value: "calculé selon les packs souscrits", highlight: true },
 ];
 
 const documents = [

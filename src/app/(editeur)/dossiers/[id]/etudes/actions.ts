@@ -16,11 +16,26 @@ import {
 export async function loadEtude(dossierId: string): Promise<Etude | null> {
   if (!process.env.SUPABASE_SERVICE_ROLE_KEY) return null;
   try {
+    const ctx = await getSessionContext();
+    if (!ctx) return null;
     const supabase = createAdminClient();
+
+    // Vérifier l'appartenance du dossier au tenant/cabinet courant.
+    const { data: dossier } = await supabase
+      .from("dossiers")
+      .select("id")
+      .eq("id", dossierId)
+      .eq("tenant_id", ctx.tenantId)
+      .eq("cabinet_id", ctx.cabinetId)
+      .maybeSingle();
+    if (!dossier) return null;
+
     const { data } = await supabase
       .from("etudes")
       .select("id, dossier_id, version, status, current_phase, phase_progress_pct, delivered_at")
       .eq("dossier_id", dossierId)
+      .eq("tenant_id", ctx.tenantId)
+      .eq("cabinet_id", ctx.cabinetId)
       .order("version", { ascending: false })
       .limit(1)
       .maybeSingle();
@@ -42,18 +57,25 @@ export async function advanceEtudePhase(dossierId: string) {
     if (!ctx) return;
     const supabase = createAdminClient();
 
+    // Vérifier l'appartenance du dossier AVANT toute écriture. On n'adopte
+    // jamais le tenant de la ligne : on utilise ctx.* et on refuse si mismatch.
     const { data: dossier } = await supabase
       .from("dossiers")
-      .select("tenant_id, cabinet_id")
+      .select("id")
       .eq("id", dossierId)
+      .eq("tenant_id", ctx.tenantId)
+      .eq("cabinet_id", ctx.cabinetId)
       .maybeSingle();
-    const tenant_id = (dossier?.tenant_id as string | null) ?? ctx.tenantId;
-    const cabinet_id = (dossier?.cabinet_id as string | null) ?? ctx.cabinetId;
+    if (!dossier) return;
+    const tenant_id = ctx.tenantId;
+    const cabinet_id = ctx.cabinetId;
 
     const { data: existing } = await supabase
       .from("etudes")
       .select("id, current_phase")
       .eq("dossier_id", dossierId)
+      .eq("tenant_id", ctx.tenantId)
+      .eq("cabinet_id", ctx.cabinetId)
       .order("version", { ascending: false })
       .limit(1)
       .maybeSingle();
@@ -69,6 +91,8 @@ export async function advanceEtudePhase(dossierId: string) {
     if (!existing?.id) {
       await supabase.from("etudes").insert({
         dossier_id: dossierId,
+        tenant_id,
+        cabinet_id,
         version: 1,
         status: "in_progress",
         current_phase: target,
@@ -84,7 +108,9 @@ export async function advanceEtudePhase(dossierId: string) {
           delivered_at: done ? now : null,
           updated_at: now,
         })
-        .eq("id", existing.id);
+        .eq("id", existing.id)
+        .eq("tenant_id", ctx.tenantId)
+        .eq("cabinet_id", ctx.cabinetId);
     }
 
     const targetLabel = ETUDE_PHASES.find((p) => p.key === target)?.label ?? "Étude";
@@ -103,7 +129,9 @@ export async function advanceEtudePhase(dossierId: string) {
       await supabase
         .from("dossiers")
         .update({ pipeline_stage: "05_restituee", stage_entered_at: now })
-        .eq("id", dossierId);
+        .eq("id", dossierId)
+        .eq("tenant_id", ctx.tenantId)
+        .eq("cabinet_id", ctx.cabinetId);
     }
 
     revalidatePath(`/dossiers/${dossierId}/etudes`);

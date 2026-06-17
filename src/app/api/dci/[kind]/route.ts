@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 
 import { KINDS, loadSubmissions, saveSubmission, type DciKind } from "@/lib/dci-store";
 import { validateDciCanonical } from "@/lib/dci-schema";
+import { getSessionContext } from "@/lib/auth/context";
 
 function isDciKind(value: string): value is DciKind {
   return (KINDS as string[]).includes(value);
@@ -61,6 +62,12 @@ export async function GET(
   req: NextRequest,
   ctx: { params: Promise<{ kind: string }> },
 ) {
+  // Lecture DCI d'un prospect : endpoint STAFF, scopé au tenant courant.
+  const session = await getSessionContext();
+  if (!session) {
+    return NextResponse.json({ error: "Authentification requise" }, { status: 401 });
+  }
+
   const { kind } = await ctx.params;
   if (!isDciKind(kind)) {
     return NextResponse.json({ error: `Unknown kind: ${kind}` }, { status: 400 });
@@ -69,6 +76,6 @@ export async function GET(
   if (!slug) {
     return NextResponse.json({ error: "prospect query param required" }, { status: 400 });
   }
-  const { source, submissions } = await loadSubmissions(slug);
+  const { source, submissions } = await loadSubmissions(slug, session.tenantId);
   return NextResponse.json({ source, kind, submission: submissions[kind] });
 }

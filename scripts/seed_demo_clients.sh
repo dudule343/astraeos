@@ -4,8 +4,10 @@
 
 set -e
 
-URL="https://wdnsogrwjjpkbunuuwem.supabase.co"
-SERVICE_ROLE="${SUPABASE_SERVICE_ROLE_KEY:-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndkbnNvZ3J3ampwa2J1bnV1d2VtIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3ODMxMzk5MywiZXhwIjoyMDkzODg5OTkzfQ.lXA8fiZDIa1sTl8dpYq4SGQswRRKoIKnCl6PdVL6VDo}"
+URL="${SUPABASE_URL:-https://wdnsogrwjjpkbunuuwem.supabase.co}"
+# La clé service_role ne doit JAMAIS être en dur dans un fichier suivi par git.
+# Fournis-la par variable d'environnement (échec si absente).
+SERVICE_ROLE="${SUPABASE_SERVICE_ROLE_KEY:?Définis SUPABASE_SERVICE_ROLE_KEY dans l'environnement}"
 TENANT_ID="00000000-0000-0000-0000-000000000010"
 CABINET_ID="00000000-0000-0000-0000-000000000100"
 ENGINEER_ID="00000000-0000-0000-0000-000000001000"

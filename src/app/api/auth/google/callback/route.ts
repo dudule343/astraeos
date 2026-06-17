@@ -1,6 +1,13 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-import { exchangeCodeForTokens, fetchUserEmail, saveTokens, verifyState } from "@/lib/google-oauth";
+import {
+  engineerSlugFromContext,
+  exchangeCodeForTokens,
+  fetchUserEmail,
+  saveTokens,
+  verifyState,
+} from "@/lib/google-oauth";
+import { getSessionContext } from "@/lib/auth/context";
 
 /**
  * GET /api/auth/google/callback?code=...&state=...
@@ -23,7 +30,18 @@ export async function GET(req: NextRequest) {
   if (!verified) {
     return htmlResponse(`<h1>Erreur</h1><p>State invalide ou expiré — relancez la connexion.</p>`, 400);
   }
-  const engineer = verified.engineer;
+
+  // Le tenant/cabinet propriétaires des tokens sont ceux de la SESSION qui finalise
+  // le flow, jamais déduits du state seul. Et le slug du state doit correspondre à
+  // l'utilisateur courant : on n'autorise pas A à finaliser un flow démarré pour B.
+  const ctx = await getSessionContext();
+  if (!ctx) {
+    return htmlResponse(`<h1>Erreur</h1><p>Session expirée — reconnectez-vous puis relancez la connexion Google.</p>`, 401);
+  }
+  const engineer = engineerSlugFromContext(ctx);
+  if (verified.engineer !== engineer) {
+    return htmlResponse(`<h1>Erreur</h1><p>Ce flux de connexion ne correspond pas à votre session — relancez la connexion.</p>`, 403);
+  }
 
   try {
     const tokens = await exchangeCodeForTokens(code);
@@ -36,6 +54,8 @@ export async function GET(req: NextRequest) {
       expires_at: Date.now() + tokens.expires_in * 1000,
       scope: tokens.scope,
       granted_at: new Date().toISOString(),
+      tenant_id: ctx.tenantId,
+      cabinet_id: ctx.cabinetId,
     });
     return htmlResponse(successHtml(email, engineer), 200);
   } catch (err) {

@@ -3,6 +3,7 @@ import { NextResponse, type NextRequest, after } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { analyserDepot } from "@/lib/ia-analyse";
 import { requireAuth } from "@/lib/auth";
+import { getSessionContext } from "@/lib/auth/context";
 
 /**
  * Vue ingénieur : relancer l'analyse IA d'un dépôt.
@@ -22,8 +23,11 @@ export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ token: string }> },
 ) {
-  const denied = requireAuth(req);
+  const denied = await requireAuth(req);
   if (denied) return denied;
+
+  const ctx = await getSessionContext();
+  if (!ctx) return NextResponse.json({ error: "Authentification requise" }, { status: 401 });
 
   const { token } = await params;
 
@@ -35,11 +39,11 @@ export async function POST(
 
   const { data: collecte, error } = await supabase
     .from("collectes")
-    .select("id, structure")
+    .select("id, tenant_id, structure")
     .eq("token", token)
     .maybeSingle();
 
-  if (error || !collecte) {
+  if (error || !collecte || collecte.tenant_id !== ctx.tenantId) {
     return NextResponse.json({ error: "Collecte introuvable" }, { status: 404 });
   }
 

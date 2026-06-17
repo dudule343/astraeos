@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 
 import { createAdminClient } from "@/lib/supabase/admin";
 import { DEFAULT_MODEL } from "@/lib/ia-analyse";
-import { requireAuth } from "@/lib/auth";
+import { getSessionContext } from "@/lib/auth/context";
 
 // Extraction en direct des champs du DCI à partir de la transcription de
 // l'entretien. Le front envoie la transcription récente + la liste des champs
@@ -46,8 +46,10 @@ function extractJson(text: string): { updates?: unknown } | null {
 }
 
 export async function POST(req: NextRequest) {
-  const denied = requireAuth(req);
-  if (denied) return denied;
+  const ctx = await getSessionContext();
+  if (!ctx) {
+    return NextResponse.json({ error: "Authentification requise" }, { status: 401 });
+  }
 
   let body: unknown;
   try {
@@ -93,7 +95,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ updates: [] });
   }
 
-  // Clé IA : env serveur en priorité, sinon clé cabinet (ia_settings).
+  // Clé IA : env serveur en priorité, sinon clé du cabinet de la session
+  // (ia_settings, scopé cabinet_id).
   let apiKey: string;
   let model: string;
   const envApiKey = process.env.ANTHROPIC_API_KEY?.trim();
@@ -106,7 +109,7 @@ export async function POST(req: NextRequest) {
       const { data: settings } = await supabase
         .from("ia_settings")
         .select("api_key, model")
-        .limit(1)
+        .eq("cabinet_id", ctx.cabinetId)
         .maybeSingle();
       if (!settings || !settings.api_key) {
         return NextResponse.json({ error: "IA non connectée" }, { status: 409 });

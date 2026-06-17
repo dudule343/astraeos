@@ -3,6 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { DEFAULT_MODEL } from "@/lib/ia-analyse";
 import { requireAuth } from "@/lib/auth";
+import { getSessionContext } from "@/lib/auth/context";
 
 const ANTHROPIC_URL = "https://api.anthropic.com/v1/messages";
 const ANTHROPIC_VERSION = "2023-06-01";
@@ -126,8 +127,13 @@ function normaliseArticle(raw: unknown): Article | null {
 }
 
 export async function POST(req: NextRequest) {
-  const denied = requireAuth(req);
+  const denied = await requireAuth(req);
   if (denied) return denied;
+
+  const ctx = await getSessionContext();
+  if (!ctx) {
+    return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
+  }
 
   // 1. Validation du corps.
   let body: unknown;
@@ -206,7 +212,7 @@ export async function POST(req: NextRequest) {
       const { data: settings } = await supabase
         .from("ia_settings")
         .select("api_key, model")
-        .limit(1)
+        .eq("cabinet_id", ctx.cabinetId)
         .maybeSingle();
 
       if (!settings || !settings.api_key) {

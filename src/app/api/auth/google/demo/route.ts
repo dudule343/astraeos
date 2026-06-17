@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-import { saveTokens } from "@/lib/google-oauth";
+import { getSessionContext } from "@/lib/auth/context";
+import { saveTokens, loadTokens, isOAuthConfigured } from "@/lib/google-oauth";
 
 /**
  * GET /api/auth/google/demo?engineer=luc-thilliez
@@ -14,7 +15,10 @@ import { saveTokens } from "@/lib/google-oauth";
  *
  * À retirer ou désactiver dès que les vraies credentials Google sont en place.
  */
-export function GET(req: NextRequest) {
+export async function GET(req: NextRequest) {
+  if (!(await getSessionContext())) {
+    return NextResponse.json({ error: "Authentification requise" }, { status: 401 });
+  }
   const engineer = req.nextUrl.searchParams.get("engineer") || "luc-thilliez";
   const html = `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8">
 <title>Se connecter avec Google · Astraeos (démo)</title>
@@ -71,7 +75,32 @@ input:focus { outline: none; border-color: #1a73e8; box-shadow: inset 0 0 0 1px 
 }
 
 export async function POST(req: NextRequest) {
+  if (!(await getSessionContext())) {
+    return NextResponse.json({ error: "Authentification requise" }, { status: 401 });
+  }
+
   const engineer = req.nextUrl.searchParams.get("engineer") || "luc-thilliez";
+
+  // Garde 1 : le fallback démo n'a de sens QUE si le vrai OAuth n'est pas configuré.
+  // Si GOOGLE_CLIENT_ID est en place, on refuse — sinon on dégraderait une vraie
+  // connexion vers un token bidon.
+  if (isOAuthConfigured()) {
+    return NextResponse.json(
+      { error: "OAuth Google configuré : utilisez le vrai flow, pas le fallback démo." },
+      { status: 403 },
+    );
+  }
+
+  // Garde 2 : ne JAMAIS écraser un token réel déjà persisté pour cet ingénieur.
+  // On n'autorise l'écriture démo que s'il n'existe rien, ou un précédent token démo.
+  const existing = await loadTokens(engineer);
+  if (existing && existing.access_token !== "demo-token-not-real") {
+    return NextResponse.json(
+      { error: "Un compte Google réel est déjà connecté pour cet ingénieur." },
+      { status: 409 },
+    );
+  }
+
   const formData = await req.formData();
   const email = String(formData.get("email") || "").trim() || `${engineer}@example.com`;
 

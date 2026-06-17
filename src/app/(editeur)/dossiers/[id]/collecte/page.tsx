@@ -1,5 +1,7 @@
 import Link from "next/link";
+import { notFound, unstable_rethrow } from "next/navigation";
 
+import { getSessionContext } from "@/lib/auth/context";
 import { Topbar } from "../../../_components/Topbar";
 import { ParcoursStepper } from "../../../_components/ParcoursStepper";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -27,7 +29,9 @@ async function loadFactsForProspect(slug: string): Promise<{
   displayName: string | null;
 }> {
   try {
-    const { submissions } = await loadSubmissions(slug);
+    const ctx = await getSessionContext();
+    if (!ctx) return { facts: {}, usedKind: null, displayName: null };
+    const { submissions } = await loadSubmissions(slug, ctx.tenantId);
     for (const kind of KIND_PRIORITY) {
       const sub = submissions[kind];
       if (!sub) continue;
@@ -57,13 +61,18 @@ async function fetchDossierHeader(id: string): Promise<{
 } | null> {
   if (!process.env.SUPABASE_SERVICE_ROLE_KEY) return null;
   try {
+    const ctx = await getSessionContext();
+    if (!ctx) notFound();
     const supabase = createAdminClient();
     const { data } = await supabase
       .from("dossiers")
       .select("pipeline_stage, clients ( personnes ( first_name, last_name, email ) )")
       .eq("id", id)
+      .eq("tenant_id", ctx.tenantId)
+      .eq("cabinet_id", ctx.cabinetId)
       .maybeSingle();
-    if (!data) return null;
+    // Dossier hors tenant/cabinet : 404 plutôt qu'un entête générique.
+    if (!data) notFound();
     const row = data as Record<string, unknown>;
     const clientRaw = row.clients as
       | { personnes?: Array<{ first_name?: string; last_name?: string; email?: string }> }
@@ -83,7 +92,10 @@ async function fetchDossierHeader(id: string): Promise<{
       email,
       stage: (row.pipeline_stage as string) ?? "03_collecte",
     };
-  } catch {
+  } catch (e) {
+    // Laisse passer le contrôle de flux Next (notFound) ; n'avale que les
+    // erreurs Supabase/réseau (dégradation gracieuse → entête générique).
+    unstable_rethrow(e);
     return null;
   }
 }

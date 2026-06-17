@@ -5,6 +5,7 @@ import { Topbar } from "../../_components/Topbar";
 import { KpiCard, type KpiBlock } from "../../_components/KpiCard";
 import { PageHero } from "../../_components/PageHeader";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getSessionContext } from "@/lib/auth/context";
 
 export const dynamic = "force-dynamic";
 
@@ -57,6 +58,13 @@ function parseNotes(raw: unknown): Notes {
 
 async function fetchClient(id: string): Promise<ClientDetail | null> {
   if (!process.env.SUPABASE_SERVICE_ROLE_KEY) return null;
+
+  // Scope obligatoire : la fiche n'est lisible que si le client appartient au
+  // tenant + cabinet de la session. Sans ces filtres, createAdminClient() (qui
+  // bypasse RLS) permettrait de lire n'importe quelle fiche en énumérant les UUID (IDOR).
+  const ctx = await getSessionContext();
+  if (!ctx) return null;
+
   try {
     const supabase = createAdminClient();
     const { data } = await supabase
@@ -72,6 +80,8 @@ async function fetchClient(id: string): Promise<ClientDetail | null> {
         `,
       )
       .eq("id", id)
+      .eq("tenant_id", ctx.tenantId)
+      .eq("cabinet_id", ctx.cabinetId)
       .maybeSingle();
 
     if (!data) return null;

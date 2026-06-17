@@ -50,7 +50,7 @@ const MOCK: QontoPayload = {
 };
 
 export async function GET(req: NextRequest) {
-  const denied = requireAuth(req);
+  const denied = await requireAuth(req);
   if (denied) return denied;
 
   const auth = process.env.QONTO_AUTH;

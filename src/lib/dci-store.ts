@@ -32,6 +32,12 @@ export type Submission = {
   submitted_at: string;        // ISO
   display_name?: string;       // nom affichable côté ingénieur ("Bertrand DUPONT-TOPIN")
   source_ip?: string;
+  // Scoping multi-tenant. À la soumission publique, le tenant n'est en général
+  // pas résoluble (le slug est un identifiant libre du prospect, pas encore
+  // rattaché à un cabinet) → null. La lecture staff scopée par tenant ne
+  // montrera alors que les lignes de son propre tenant.
+  tenant_id?: string | null;
+  cabinet_id?: string | null;
 };
 
 type FileStore = {
@@ -70,7 +76,12 @@ type DciSubmissionRow = {
   source_ip: string | null;
   submitted_at: string;
   updated_at: string;
+  tenant_id: string | null;
+  cabinet_id: string | null;
 };
+
+const ROW_COLUMNS =
+  "prospect_slug, kind, payload, display_name, source_ip, submitted_at, updated_at, tenant_id, cabinet_id";
 
 function rowToSubmission(row: DciSubmissionRow): Submission {
   return {
@@ -80,6 +91,8 @@ function rowToSubmission(row: DciSubmissionRow): Submission {
     submitted_at: row.submitted_at,
     display_name: row.display_name ?? undefined,
     source_ip: row.source_ip ?? undefined,
+    tenant_id: row.tenant_id ?? null,
+    cabinet_id: row.cabinet_id ?? null,
   };
 }
 
@@ -97,18 +110,25 @@ async function saveSupabase(s: Submission): Promise<void> {
         source_ip: s.source_ip ?? null,
         submitted_at: s.submitted_at,
         updated_at: now,
+        tenant_id: s.tenant_id ?? null,
+        cabinet_id: s.cabinet_id ?? null,
       },
       { onConflict: "prospect_slug,kind" },
     );
   if (error) throw error;
 }
 
-async function loadSupabase(slug: string): Promise<Record<DciKind, Submission | null>> {
+async function loadSupabase(
+  slug: string,
+  tenantId?: string,
+): Promise<Record<DciKind, Submission | null>> {
   const supabase = createAdminClient();
-  const { data, error } = await supabase
+  let query = supabase
     .from("dci_submissions")
-    .select("prospect_slug, kind, payload, display_name, source_ip, submitted_at, updated_at")
+    .select(ROW_COLUMNS)
     .eq("prospect_slug", slug);
+  if (tenantId) query = query.eq("tenant_id", tenantId);
+  const { data, error } = await query;
   if (error) throw error;
 
   const byKind = Object.fromEntries(KINDS.map((k) => [k, null])) as Record<DciKind, Submission | null>;
@@ -118,11 +138,12 @@ async function loadSupabase(slug: string): Promise<Record<DciKind, Submission | 
   return byKind;
 }
 
-async function loadAllSupabase(): Promise<Submission[]> {
+async function loadAllSupabase(tenantId: string): Promise<Submission[]> {
   const supabase = createAdminClient();
   const { data, error } = await supabase
     .from("dci_submissions")
-    .select("prospect_slug, kind, payload, display_name, source_ip, submitted_at, updated_at")
+    .select(ROW_COLUMNS)
+    .eq("tenant_id", tenantId)
     .order("updated_at", { ascending: false })
     .limit(500);
   if (error) throw error;
@@ -141,9 +162,16 @@ async function saveFile(s: Submission): Promise<void> {
   await writeFileStore(store);
 }
 
-async function loadFile(slug: string): Promise<Record<DciKind, Submission | null>> {
+async function loadFile(
+  slug: string,
+  tenantId?: string,
+): Promise<Record<DciKind, Submission | null>> {
   const store = await readFileStore();
-  const slug_subs = store.submissions.filter((x) => x.prospect_slug === slug);
+  const slug_subs = store.submissions.filter(
+    (x) =>
+      x.prospect_slug === slug &&
+      (tenantId === undefined || (x.tenant_id ?? null) === tenantId),
+  );
   const byKind = Object.fromEntries(KINDS.map((k) => [k, null])) as Record<DciKind, Submission | null>;
   for (const s of slug_subs) byKind[s.kind] = s;
   return byKind;
@@ -164,32 +192,39 @@ export async function saveSubmission(s: Submission): Promise<{ persisted_to: "su
   return { persisted_to: "file" };
 }
 
-export async function loadSubmissions(slug: string): Promise<{
+export async function loadSubmissions(
+  slug: string,
+  tenantId?: string,
+): Promise<{
   source: "supabase" | "file";
   submissions: Record<DciKind, Submission | null>;
 }> {
   if (isSupabaseConfigured()) {
     try {
-      const submissions = await loadSupabase(slug);
+      const submissions = await loadSupabase(slug, tenantId);
       return { source: "supabase", submissions };
     } catch (err) {
       console.warn("[dci-store] Supabase load failed, falling back to file:", err);
     }
   }
-  return { source: "file", submissions: await loadFile(slug) };
+  return { source: "file", submissions: await loadFile(slug, tenantId) };
 }
 
-export async function loadAllSubmissions(): Promise<{
+export async function loadAllSubmissions(tenantId: string): Promise<{
   source: "supabase" | "file";
   submissions: Submission[];
 }> {
   if (isSupabaseConfigured()) {
     try {
-      return { source: "supabase", submissions: await loadAllSupabase() };
+      return { source: "supabase", submissions: await loadAllSupabase(tenantId) };
     } catch (err) {
       console.warn("[dci-store] Supabase loadAll failed, falling back to file:", err);
     }
   }
+  // Fallback fichier (dev local) : scoper aussi par tenant pour cohérence.
   const store = await readFileStore();
-  return { source: "file", submissions: store.submissions };
+  return {
+    source: "file",
+    submissions: store.submissions.filter((s) => (s.tenant_id ?? null) === tenantId),
+  };
 }

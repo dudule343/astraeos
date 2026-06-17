@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 
 import { createAdminClient } from "@/lib/supabase/admin";
 import { ALLOWED_MODELS, DEFAULT_MODEL } from "@/lib/ia-analyse";
-import { requireAuth } from "@/lib/auth";
+import { getSessionContext } from "@/lib/auth/context";
 
 const ANTHROPIC_URL = "https://api.anthropic.com/v1/messages";
 const ANTHROPIC_VERSION = "2023-06-01";
@@ -22,12 +22,12 @@ function maskKey(key: string): string {
   return `${key.slice(0, 7)}…${key.slice(-4)}`;
 }
 
-async function readSettings() {
+async function readSettings(cabinetId: string) {
   const supabase = createAdminClient();
   const { data } = await supabase
     .from("ia_settings")
     .select("id, provider, api_key, model, label")
-    .limit(1)
+    .eq("cabinet_id", cabinetId)
     .maybeSingle();
   return { supabase, settings: (data as SettingsRow | null) ?? null };
 }
@@ -51,11 +51,13 @@ function publicView(settings: SettingsRow | null) {
   };
 }
 
-export async function GET(req: NextRequest) {
-  const denied = requireAuth(req);
-  if (denied) return denied;
+export async function GET() {
+  const ctx = await getSessionContext();
+  if (!ctx) {
+    return NextResponse.json({ error: "Authentification requise" }, { status: 401 });
+  }
   try {
-    const { settings } = await readSettings();
+    const { settings } = await readSettings(ctx.cabinetId);
     return NextResponse.json(publicView(settings));
   } catch {
     return NextResponse.json(
@@ -66,8 +68,10 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const denied = requireAuth(req);
-  if (denied) return denied;
+  const ctx = await getSessionContext();
+  if (!ctx) {
+    return NextResponse.json({ error: "Authentification requise" }, { status: 401 });
+  }
 
   let payload: { api_key?: unknown; model?: unknown };
   try {
@@ -121,24 +125,31 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Clé valide → upsert mono-ligne.
+  // Clé valide → upsert mono-ligne, scopé au cabinet de la session.
   try {
-    const { supabase, settings } = await readSettings();
+    const { supabase, settings } = await readSettings(ctx.cabinetId);
     const now = new Date().toISOString();
     if (settings) {
       const { error } = await supabase
         .from("ia_settings")
         .update({ provider: "anthropic", api_key: apiKey, model, updated_at: now })
-        .eq("id", settings.id);
+        .eq("id", settings.id)
+        .eq("cabinet_id", ctx.cabinetId);
       if (error) throw error;
     } else {
       const { error } = await supabase
         .from("ia_settings")
-        .insert({ provider: "anthropic", api_key: apiKey, model });
+        .insert({
+          provider: "anthropic",
+          api_key: apiKey,
+          model,
+          tenant_id: ctx.tenantId,
+          cabinet_id: ctx.cabinetId,
+        });
       if (error) throw error;
     }
 
-    const { settings: fresh } = await readSettings();
+    const { settings: fresh } = await readSettings(ctx.cabinetId);
     return NextResponse.json(publicView(fresh));
   } catch {
     return NextResponse.json(
@@ -148,12 +159,14 @@ export async function POST(req: NextRequest) {
   }
 }
 
-export async function DELETE(req: NextRequest) {
-  const denied = requireAuth(req);
-  if (denied) return denied;
+export async function DELETE() {
+  const ctx = await getSessionContext();
+  if (!ctx) {
+    return NextResponse.json({ error: "Authentification requise" }, { status: 401 });
+  }
   try {
-    const { supabase } = await readSettings();
-    await supabase.from("ia_settings").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+    const supabase = createAdminClient();
+    await supabase.from("ia_settings").delete().eq("cabinet_id", ctx.cabinetId);
     return NextResponse.json(publicView(null));
   } catch {
     return NextResponse.json(

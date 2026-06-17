@@ -12,6 +12,7 @@ import {
   nextPhase,
 } from "@/lib/etudes";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getSessionContext } from "@/lib/auth/context";
 import { loadEtude, advanceEtudePhase } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -20,11 +21,15 @@ export const dynamic = "force-dynamic";
 async function fetchStageIndex(dossierId: string): Promise<number> {
   if (!process.env.SUPABASE_SERVICE_ROLE_KEY) return 4;
   try {
+    const ctx = await getSessionContext();
+    if (!ctx) return 4;
     const supabase = createAdminClient();
     const { data } = await supabase
       .from("dossiers")
       .select("pipeline_stage")
       .eq("id", dossierId)
+      .eq("tenant_id", ctx.tenantId)
+      .eq("cabinet_id", ctx.cabinetId)
       .maybeSingle();
     const stage = (data?.pipeline_stage as string | undefined) ?? "04_etudes";
     return Number(stage.slice(0, 2)) || 4;

@@ -6,9 +6,41 @@ import {
   type MergeInput,
   type TranscriptLine,
 } from "@/lib/entretiens-store";
-import { requireAuth } from "@/lib/auth";
+import { getSessionContext } from "@/lib/auth/context";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 const SNAPSHOT_MAX_BYTES = 256 * 1024; // 256 Ko
+
+function supabaseConfigured(): boolean {
+  return Boolean(
+    process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY,
+  );
+}
+
+/**
+ * Vérifie qu'un entretien (id) appartient au tenant/cabinet courant.
+ * - Backend Supabase : lit tenant_id/cabinet_id de la ligne et compare au ctx.
+ * - Fallback fichier (colonnes absentes) : pas de vérification possible, on
+ *   s'appuie sur le gating de session déjà appliqué.
+ * Renvoie true si l'accès est autorisé, false sinon (introuvable ou autre tenant).
+ */
+async function belongsToTenant(
+  id: string,
+  tenantId: string,
+  cabinetId: string,
+): Promise<boolean> {
+  if (!supabaseConfigured()) return true;
+  const supabase = createAdminClient();
+  const { data, error } = await supabase
+    .from("entretiens")
+    .select("tenant_id, cabinet_id")
+    .eq("id", id)
+    .maybeSingle();
+  if (error) throw error;
+  if (!data) return false;
+  const row = data as { tenant_id: string | null; cabinet_id: string | null };
+  return row.tenant_id === tenantId && row.cabinet_id === cabinetId;
+}
 const APPEND_MAX = 500; // garde-fou par appel PATCH (le cap historique vit dans le store)
 const LINE_TEXT_MAX = 4000;
 const WHO_MAX = 120;
@@ -55,19 +87,25 @@ function normaliseRecordAppend(
 
 /** GET /api/entretiens/[id] → l'entretien complet. */
 export async function GET(
-  req: NextRequest,
-  ctx: { params: Promise<{ id: string }> },
+  _req: NextRequest,
+  routeCtx: { params: Promise<{ id: string }> },
 ) {
-  const denied = requireAuth(req);
-  if (denied) return denied;
+  const ctx = await getSessionContext();
+  if (!ctx) {
+    return NextResponse.json({ error: "Authentification requise" }, { status: 401 });
+  }
 
-  const { id } = await ctx.params;
+  const { id } = await routeCtx.params;
   if (!id) {
     return NextResponse.json({ error: "id requis" }, { status: 400 });
   }
   try {
     const entretien = await getEntretien(id);
     if (!entretien) {
+      return NextResponse.json({ error: "Entretien introuvable" }, { status: 404 });
+    }
+    // Scope tenant : refuse l'accès cross-tenant (404 pour ne pas fuiter l'existence).
+    if (!(await belongsToTenant(id, ctx.tenantId, ctx.cabinetId))) {
       return NextResponse.json({ error: "Entretien introuvable" }, { status: 404 });
     }
     return NextResponse.json({ entretien });
@@ -80,12 +118,14 @@ export async function GET(
 /** PATCH /api/entretiens/[id] → merge partiel (append borné sur les arrays). */
 export async function PATCH(
   req: NextRequest,
-  ctx: { params: Promise<{ id: string }> },
+  routeCtx: { params: Promise<{ id: string }> },
 ) {
-  const denied = requireAuth(req);
-  if (denied) return denied;
+  const ctx = await getSessionContext();
+  if (!ctx) {
+    return NextResponse.json({ error: "Authentification requise" }, { status: 401 });
+  }
 
-  const { id } = await ctx.params;
+  const { id } = await routeCtx.params;
   if (!id) {
     return NextResponse.json({ error: "id requis" }, { status: 400 });
   }
@@ -160,6 +200,10 @@ export async function PATCH(
   }
 
   try {
+    // Scope tenant : vérifie l'appartenance AVANT d'écrire (pas d'écriture cross-tenant).
+    if (!(await belongsToTenant(id, ctx.tenantId, ctx.cabinetId))) {
+      return NextResponse.json({ error: "Entretien introuvable" }, { status: 404 });
+    }
     const ok = await mergeEntretien(id, merge);
     if (!ok) {
       return NextResponse.json({ error: "Entretien introuvable" }, { status: 404 });

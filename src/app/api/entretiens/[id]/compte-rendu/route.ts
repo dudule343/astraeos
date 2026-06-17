@@ -4,6 +4,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { DEFAULT_MODEL } from "@/lib/ia-analyse";
 import { getEntretien, saveCompteRendu } from "@/lib/entretiens-store";
 import { requireAuth } from "@/lib/auth";
+import { getSessionContext } from "@/lib/auth/context";
 
 const ANTHROPIC_URL = "https://api.anthropic.com/v1/messages";
 const ANTHROPIC_VERSION = "2023-06-01";
@@ -86,15 +87,22 @@ export async function POST(
   req: NextRequest,
   ctx: { params: Promise<{ id: string }> },
 ) {
-  const denied = requireAuth(req);
+  const denied = await requireAuth(req);
   if (denied) return denied;
+
+  const session = await getSessionContext();
+  if (!session) {
+    return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
+  }
 
   const { id } = await ctx.params;
   if (!id) {
     return NextResponse.json({ error: "id requis" }, { status: 400 });
   }
 
-  const entretien = await getEntretien(id);
+  // Isolation tenant : getEntretien renvoie null pour une ligne d'un autre
+  // tenant → 404, donc pas d'accès cross-tenant.
+  const entretien = await getEntretien(id, session.tenantId);
   if (!entretien) {
     return NextResponse.json({ error: "Entretien introuvable" }, { status: 404 });
   }
@@ -125,7 +133,7 @@ export async function POST(
       const { data: settings } = await supabase
         .from("ia_settings")
         .select("api_key, model")
-        .limit(1)
+        .eq("cabinet_id", session.cabinetId)
         .maybeSingle();
       if (!settings || !settings.api_key) {
         return NextResponse.json({ error: "IA non connectée" }, { status: 409 });

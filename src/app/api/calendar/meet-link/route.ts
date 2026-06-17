@@ -1,15 +1,17 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-import { getValidAccessToken, loadTokens } from "@/lib/google-oauth";
-import { requireAuth } from "@/lib/auth";
+import { engineerSlugFromContext, getValidAccessToken, loadTokens } from "@/lib/google-oauth";
+import { getSessionContext } from "@/lib/auth/context";
 
 /**
  * POST /api/calendar/meet-link
- * Body : { titre?: string, engineer?: string }
+ * Body : { titre?: string }
  *
  * Crée un événement Google Calendar immédiat (durée 1 h) avec une visio
  * Google Meet attachée (conferenceData / hangoutsMeet), en réutilisant les
- * tokens Google persistés de l'ingénieur (refresh transparent si expiré).
+ * tokens Google persistés de l'ingénieur de la SESSION (refresh transparent si
+ * expiré). L'ingénieur n'est jamais un ?engineer/body.engineer arbitraire :
+ * c'est l'id de session, et les tokens sont scopés à son tenant.
  *
  * Réponses :
  *   200 { ok: true, meet_link, event_id }
@@ -17,8 +19,8 @@ import { requireAuth } from "@/lib/auth";
  *   502 { error: "..." }                              → erreur côté Google
  */
 export async function POST(req: NextRequest) {
-  const denied = requireAuth(req);
-  if (denied) return denied;
+  const ctx = await getSessionContext();
+  if (!ctx) return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
 
   let body: Record<string, unknown> = {};
   try {
@@ -32,20 +34,17 @@ export async function POST(req: NextRequest) {
     // Corps vide / non-JSON : on accepte (titre et engineer ont des défauts).
   }
 
-  // Champs optionnels : si fournis, ils doivent être des chaînes.
-  if ("engineer" in body && typeof body.engineer !== "string") {
-    return NextResponse.json({ error: "Payload invalide" }, { status: 400 });
-  }
+  // Champ optionnel : si fourni, il doit être une chaîne. body.engineer est
+  // ignoré — l'ingénieur est toujours celui de la session (anti cross-tenant).
   if ("titre" in body && typeof body.titre !== "string") {
     return NextResponse.json({ error: "Payload invalide" }, { status: 400 });
   }
 
-  const engineer =
-    (typeof body.engineer === "string" && body.engineer.trim()) || "luc-thilliez";
+  const engineer = engineerSlugFromContext(ctx);
   const titre =
     (typeof body.titre === "string" && body.titre.trim()) || "Entretien PRIVEOS";
 
-  const tokens = await loadTokens(engineer);
+  const tokens = await loadTokens(engineer, ctx.tenantId);
   if (!tokens) {
     return NextResponse.json(
       { error: "Google Calendar non connecté" },
@@ -63,7 +62,7 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  const accessToken = await getValidAccessToken(engineer);
+  const accessToken = await getValidAccessToken(engineer, ctx.tenantId);
   if (!accessToken) {
     // Tokens présents mais refresh impossible (refresh_token révoqué, etc.).
     return NextResponse.json(

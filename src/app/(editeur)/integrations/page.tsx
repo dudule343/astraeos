@@ -1,10 +1,19 @@
+import { notFound } from "next/navigation";
+
 import { Topbar } from "../_components/Topbar";
 import { PageHero } from "../_components/PageHeader";
 import { KeyManager } from "./KeyManager";
+import { getSessionContext } from "@/lib/auth/context";
 
 export const dynamic = "force-dynamic";
 
-export default function IntegrationsPage() {
+export default async function IntegrationsPage() {
+  // Page STAFF : pas de session → on ne rend pas la console de clés. Le statut
+  // affiché provient ensuite des endpoints /api/ia-settings et
+  // /api/visio/stt-settings, désormais scopés au cabinet de la session.
+  const ctx = await getSessionContext();
+  if (!ctx) notFound();
+
   return (
     <>
       <Topbar current="Intégrations & clés API" />

@@ -5,6 +5,7 @@ import { KpiCard, type KpiBlock } from "../_components/KpiCard";
 import { PageHero } from "../_components/PageHeader";
 import { ExportDossiersButton } from "./ExportDossiersButton";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getSessionContext } from "@/lib/auth/context";
 import {
   type Dossier,
   isAlerte,
@@ -14,8 +15,6 @@ import {
 } from "@/lib/pipeline";
 
 export const dynamic = "force-dynamic";
-
-const ENGINEER_NAME = "Sarah Kaufmann";
 
 type StageAccent = "gold" | "neutral" | "strong";
 
@@ -75,6 +74,8 @@ const DELIVERED_STAGES = ["05_restituee", "06_suivi"];
 
 async function fetchDossiers(): Promise<Dossier[]> {
   if (!process.env.SUPABASE_SERVICE_ROLE_KEY) return [];
+  const ctx = await getSessionContext();
+  if (!ctx) return [];
   try {
     const supabase = createAdminClient();
     const { data } = await supabase
@@ -95,6 +96,8 @@ async function fetchDossiers(): Promise<Dossier[]> {
           clients ( personnes ( first_name, last_name ) )
         `,
       )
+      .eq("tenant_id", ctx.tenantId)
+      .eq("cabinet_id", ctx.cabinetId)
       .order("stage_entered_at", { ascending: false })
       .limit(200);
 
@@ -136,6 +139,26 @@ async function fetchDossiers(): Promise<Dossier[]> {
     });
   } catch {
     return [];
+  }
+}
+
+/** Nom de l'ingénieur connecté, dérivé de la session (vide si indisponible). */
+async function fetchEngineerName(): Promise<string> {
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) return "";
+  const ctx = await getSessionContext();
+  if (!ctx) return "";
+  try {
+    const supabase = createAdminClient();
+    const { data } = await supabase
+      .from("users")
+      .select("first_name, last_name")
+      .eq("id", ctx.userId)
+      .maybeSingle();
+    if (!data) return "";
+    const profile = data as { first_name: string | null; last_name: string | null };
+    return `${profile.first_name ?? ""} ${profile.last_name ?? ""}`.trim();
+  } catch {
+    return "";
   }
 }
 
@@ -327,7 +350,7 @@ function StageColumn({
 
 export default async function DossiersPage() {
   const now = new Date();
-  const dossiers = await fetchDossiers();
+  const [dossiers, engineerName] = await Promise.all([fetchDossiers(), fetchEngineerName()]);
   const kpis = computeKpis(dossiers, now);
 
   const nActifs = dossiers.filter((d) => ACTIVE_STAGES.includes(d.stage)).length;
@@ -346,7 +369,11 @@ export default async function DossiersPage() {
 
       <div className="px-10 py-8">
         <PageHero
-          eyebrow={`Parcours patrimonial · 6 étapes du dossier · vue par ${ENGINEER_NAME}`}
+          eyebrow={
+            engineerName
+              ? `Parcours patrimonial · 6 étapes du dossier · vue par ${engineerName}`
+              : "Parcours patrimonial · 6 étapes du dossier"
+          }
           title="Pipeline de mes dossiers"
           description={`Vue Kanban de l'ensemble de mes dossiers en cours · ${nActifs} dossiers actifs répartis sur 6 étapes du parcours · ${mLivrees} dossiers déjà livrés en 2026 · ${pSuivi} clients en phase de suivi.`}
           actions={

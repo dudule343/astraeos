@@ -1,7 +1,7 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 
 import { createAdminClient } from "@/lib/supabase/admin";
-import { requireAuth } from "@/lib/auth";
+import { getSessionContext } from "@/lib/auth/context";
 
 // On fabrique une clé Deepgram ÉPHÉMÈRE (TTL court, scope minimal) à partir de
 // la clé maître du cabinet. Cette clé temporaire est sûre à exposer au
@@ -12,13 +12,17 @@ const TTL_SECONDS = 120;
 
 type Project = { project_id?: string };
 
-export async function POST(req: NextRequest) {
-  const denied = requireAuth(req);
-  if (denied) return denied;
+export async function POST() {
+  // Route STAFF : sans session valide, on ne fabrique aucune clé Deepgram et on
+  // n'expose surtout pas la clé maître au navigateur.
+  const ctx = await getSessionContext();
+  if (!ctx) {
+    return NextResponse.json({ error: "Authentification requise" }, { status: 401 });
+  }
 
   // 1. Clé maître Deepgram : clé serveur PRIVEOS (env DEEPGRAM_API_KEY) en
-  //    priorité, sinon repli sur la clé du cabinet (stt_settings). Absente des
-  //    deux → 409 (le front bascule sur Web Speech).
+  //    priorité, sinon repli sur la clé du cabinet de la session (stt_settings).
+  //    Absente des deux → 409 (le front bascule sur Web Speech).
   let masterKey: string;
   const envKey = process.env.DEEPGRAM_API_KEY?.trim();
   if (envKey) {
@@ -29,7 +33,7 @@ export async function POST(req: NextRequest) {
       const { data: settings } = await supabase
         .from("stt_settings")
         .select("api_key")
-        .limit(1)
+        .eq("cabinet_id", ctx.cabinetId)
         .maybeSingle();
 
       if (!settings || !settings.api_key) {
@@ -99,7 +103,8 @@ export async function POST(req: NextRequest) {
     // transcrire mais n'ont pas le scope keys:write pour fabriquer des clés
     // éphémères (HTTP 403). Dans ce cas on renvoie la clé du cabinet telle
     // quelle : elle ne permet que l'usage (transcription), pas la gestion du
-    // compte. À resserrer quand l'authentification des endpoints sera posée.
+    // compte. La route est gatée par session, la clé renvoyée est celle du
+    // cabinet de la session — aucune fuite cross-tenant.
     if (resp.status === 403) {
       return NextResponse.json({ key: masterKey, expires_in: TTL_SECONDS, mode: "direct" });
     }

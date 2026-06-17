@@ -5,6 +5,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { buildCollecteEmail } from "@/lib/collecte-email";
 import { requireAuth } from "@/lib/auth";
+import { getSessionContext } from "@/lib/auth/context";
 
 // Alphabet sans caractères ambigus (pas de l/o/0/1).
 const TOKEN_ALPHABET = "abcdefghijkmnpqrstuvwxyz23456789";
@@ -32,8 +33,11 @@ function generateToken(): string {
 }
 
 export async function POST(req: NextRequest) {
-  const denied = requireAuth(req);
+  const denied = await requireAuth(req);
   if (denied) return denied;
+
+  const ctx = await getSessionContext();
+  if (!ctx) return NextResponse.json({ error: "Authentification requise" }, { status: 401 });
 
   let body: unknown;
   try {
@@ -158,6 +162,8 @@ export async function POST(req: NextRequest) {
         client_nom: nom,
         client_email: email,
         structure,
+        tenant_id: ctx.tenantId,
+        cabinet_id: ctx.cabinetId,
       })
       .select("id")
       .single();

@@ -1,19 +1,21 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-import { getFreshAccessToken, loadTokens } from "@/lib/google-oauth";
-import { requireAuth } from "@/lib/auth";
+import { engineerSlugFromContext, getFreshAccessToken, loadTokens } from "@/lib/google-oauth";
+import { getSessionContext } from "@/lib/auth/context";
 
 /**
- * GET /api/calendar/events?engineer=luc-thilliez&days=7
- * Liste les événements de la semaine.
+ * GET /api/calendar/events?days=7
+ * Liste les événements de la semaine de l'ingénieur de la session.
+ * L'ingénieur est celui de la session (pas un ?engineer arbitraire) et les
+ * tokens sont scopés à son tenant.
  */
 export async function GET(req: NextRequest) {
-  const denied = requireAuth(req);
-  if (denied) return denied;
+  const ctx = await getSessionContext();
+  if (!ctx) return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
 
-  const engineer = req.nextUrl.searchParams.get("engineer") || "luc-thilliez";
+  const engineer = engineerSlugFromContext(ctx);
   const days = parseInt(req.nextUrl.searchParams.get("days") || "7", 10);
-  const tokens = await loadTokens(engineer);
+  const tokens = await loadTokens(engineer, ctx.tenantId);
 
   if (!tokens) {
     return NextResponse.json({ connected: false, events: [] }, { status: 200 });
@@ -29,7 +31,7 @@ export async function GET(req: NextRequest) {
     });
   }
 
-  const accessToken = await getFreshAccessToken(engineer);
+  const accessToken = await getFreshAccessToken(engineer, ctx.tenantId);
   if (!accessToken) {
     return NextResponse.json({ connected: false, error: "Token refresh failed" }, { status: 401 });
   }
@@ -43,26 +45,34 @@ export async function GET(req: NextRequest) {
   url.searchParams.set("orderBy", "startTime");
   url.searchParams.set("maxResults", "50");
 
-  const res = await fetch(url, { headers: { Authorization: `Bearer ${accessToken}` } });
-  if (!res.ok) {
-    const text = await res.text();
-    return NextResponse.json({ connected: true, error: text }, { status: res.status });
+  try {
+    const res = await fetch(url, { headers: { Authorization: `Bearer ${accessToken}` } });
+    if (!res.ok) {
+      const text = await res.text();
+      return NextResponse.json({ connected: true, error: text }, { status: res.status });
+    }
+    const data = (await res.json()) as { items?: unknown[] };
+    return NextResponse.json({ connected: true, email: tokens.email, events: data.items ?? [] });
+  } catch (e) {
+    // Réseau Google injoignable / réponse illisible → erreur JSON propre, pas un 500.
+    return NextResponse.json(
+      { connected: true, error: e instanceof Error ? e.message : "Google Calendar injoignable" },
+      { status: 502 },
+    );
   }
-  const data = (await res.json()) as { items?: unknown[] };
-  return NextResponse.json({ connected: true, email: tokens.email, events: data.items ?? [] });
 }
 
 /**
- * POST /api/calendar/events?engineer=luc-thilliez
+ * POST /api/calendar/events
  * Body : { summary, description, start_iso, end_iso, attendee_email? }
- * Crée un événement dans le calendrier primaire de l'ingénieur.
+ * Crée un événement dans le calendrier primaire de l'ingénieur de la session.
  */
 export async function POST(req: NextRequest) {
-  const denied = requireAuth(req);
-  if (denied) return denied;
+  const ctx = await getSessionContext();
+  if (!ctx) return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
 
-  const engineer = req.nextUrl.searchParams.get("engineer") || "luc-thilliez";
-  const tokens = await loadTokens(engineer);
+  const engineer = engineerSlugFromContext(ctx);
+  const tokens = await loadTokens(engineer, ctx.tenantId);
   if (!tokens) {
     return NextResponse.json({ error: "Engineer not connected" }, { status: 401 });
   }
@@ -89,7 +99,7 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  const accessToken = await getFreshAccessToken(engineer);
+  const accessToken = await getFreshAccessToken(engineer, ctx.tenantId);
   if (!accessToken) return NextResponse.json({ error: "Token refresh failed" }, { status: 401 });
 
   const event = {
@@ -106,18 +116,26 @@ export async function POST(req: NextRequest) {
     },
   };
 
-  const res = await fetch(
-    "https://www.googleapis.com/calendar/v3/calendars/primary/events?conferenceDataVersion=1&sendUpdates=all",
-    {
-      method: "POST",
-      headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
-      body: JSON.stringify(event),
-    },
-  );
-  if (!res.ok) {
-    const text = await res.text();
-    return NextResponse.json({ error: text }, { status: res.status });
+  try {
+    const res = await fetch(
+      "https://www.googleapis.com/calendar/v3/calendars/primary/events?conferenceDataVersion=1&sendUpdates=all",
+      {
+        method: "POST",
+        headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
+        body: JSON.stringify(event),
+      },
+    );
+    if (!res.ok) {
+      const text = await res.text();
+      return NextResponse.json({ error: text }, { status: res.status });
+    }
+    const created = await res.json();
+    return NextResponse.json({ ok: true, event: created });
+  } catch (e) {
+    // Réseau Google injoignable / réponse illisible → erreur JSON propre, pas un 500.
+    return NextResponse.json(
+      { error: e instanceof Error ? e.message : "Google Calendar injoignable" },
+      { status: 502 },
+    );
   }
-  const created = await res.json();
-  return NextResponse.json({ ok: true, event: created });
 }

@@ -144,15 +144,14 @@ export default async function MarketplacePage() {
           </div>
         </section>
 
-        <div className="mb-6 flex flex-wrap gap-1 border-b border-[var(--navy-100)]">
-          {m.tabs.map((t, i) => (
+        {/* Compteurs par catégorie : badges neutres non interactifs. Le catalogue
+            n'a pas de filtrage par onglet câblé (toutes les cartes sont listées
+            ci-dessous) → pas de faux onglet « actif », juste des compteurs honnêtes. */}
+        <div className="mb-6 flex flex-wrap gap-2 border-b border-[var(--navy-100)] pb-3">
+          {m.tabs.map((t) => (
             <span
               key={t.key}
-              className={`-mb-px border-b-2 px-4 py-2 text-[12px] font-semibold ${
-                i === 0
-                  ? "border-[var(--gold)] text-[var(--gold)]"
-                  : "border-transparent text-[var(--navy-300)]"
-              }`}
+              className="rounded-md border border-[var(--navy-100)] bg-[var(--ivory)] px-3 py-1 text-[12px] font-semibold text-[var(--navy-300)]"
             >
               {t.label} ({t.count})
             </span>

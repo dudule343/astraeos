@@ -1,7 +1,7 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 
 import { KINDS, loadAllSubmissions, type DciKind } from "@/lib/dci-store";
-import { requireAuth } from "@/lib/auth";
+import { getSessionContext } from "@/lib/auth/context";
 
 type ProspectEntry = {
   prospect_slug: string;
@@ -10,11 +10,13 @@ type ProspectEntry = {
   last_at: string | null;
 };
 
-export async function GET(req: NextRequest) {
-  const denied = requireAuth(req);
-  if (denied) return denied;
+export async function GET() {
+  const ctx = await getSessionContext();
+  if (!ctx) {
+    return NextResponse.json({ error: "Authentification requise" }, { status: 401 });
+  }
   try {
-    const { source, submissions } = await loadAllSubmissions();
+    const { source, submissions } = await loadAllSubmissions(ctx.tenantId);
 
     const byProspect = new Map<string, ProspectEntry>();
     for (const s of submissions) {

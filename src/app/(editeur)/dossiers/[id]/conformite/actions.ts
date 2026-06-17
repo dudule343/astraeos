@@ -27,13 +27,29 @@ import {
 export async function loadConformiteItems(dossierId: string): Promise<ConformiteItem[]> {
   if (!process.env.SUPABASE_SERVICE_ROLE_KEY) return [];
   try {
+    const ctx = await getSessionContext();
+    if (!ctx) return [];
     const supabase = createAdminClient();
+
+    // Vérifie d'abord l'appartenance du dossier au tenant/cabinet courant :
+    // un dossier d'un autre tenant ne doit jamais exposer ses pièces.
+    const { data: dossier } = await supabase
+      .from("dossiers")
+      .select("id")
+      .eq("id", dossierId)
+      .eq("tenant_id", ctx.tenantId)
+      .eq("cabinet_id", ctx.cabinetId)
+      .maybeSingle();
+    if (!dossier) return [];
+
     const { data, error } = await supabase
       .from("conformite_items")
       .select(
         "id, tenant_id, cabinet_id, dossier_id, type, label, status, sent_at, signed_at, validated_at, created_at, updated_at",
       )
-      .eq("dossier_id", dossierId);
+      .eq("dossier_id", dossierId)
+      .eq("tenant_id", ctx.tenantId)
+      .eq("cabinet_id", ctx.cabinetId);
     if (error) return [];
     return (data as ConformiteItem[] | null) ?? [];
   } catch {
@@ -102,8 +118,11 @@ export async function advanceConformiteItem(dossierId: string, type: ConformiteT
 type AdminClient = ReturnType<typeof createAdminClient>;
 
 /**
- * tenant_id / cabinet_id du dossier (fallback session si absent) + acteur
- * courant (userId). Renvoie null si pas de contexte de session (no-op appelant).
+ * tenant_id / cabinet_id du dossier validés contre le contexte de session +
+ * acteur courant (userId). Renvoie null si pas de contexte de session, si le
+ * dossier est introuvable, ou s'il appartient à un autre tenant/cabinet
+ * (no-op / refus côté appelant). On NE retombe JAMAIS sur le tenant du ctx pour
+ * une ligne d'un autre tenant : isolation stricte.
  */
 async function resolveOwner(
   supabase: AdminClient,
@@ -115,11 +134,17 @@ async function resolveOwner(
     .from("dossiers")
     .select("tenant_id, cabinet_id")
     .eq("id", dossierId)
+    .eq("tenant_id", ctx.tenantId)
+    .eq("cabinet_id", ctx.cabinetId)
     .maybeSingle();
   const dossier = (d ?? null) as { tenant_id: string | null; cabinet_id: string | null } | null;
+  // Dossier hors tenant/cabinet (ou introuvable) : refus, pas d'adoption.
+  if (!dossier || dossier.tenant_id !== ctx.tenantId || dossier.cabinet_id !== ctx.cabinetId) {
+    return null;
+  }
   return {
-    tenantId: dossier?.tenant_id ?? ctx.tenantId,
-    cabinetId: dossier?.cabinet_id ?? ctx.cabinetId,
+    tenantId: ctx.tenantId,
+    cabinetId: ctx.cabinetId,
     userId: ctx.userId,
   };
 }

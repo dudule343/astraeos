@@ -4,7 +4,6 @@ import { useCallback, useEffect, useState } from "react";
 
 import { KpiCard, type KpiBlock } from "../_components/KpiCard";
 
-const ENGINEER_SLUG = "luc-thilliez";
 const DAYS = 14;
 
 type CalendarStatus = {
@@ -206,8 +205,8 @@ export function AgendaView() {
     setError(null);
     try {
       const [statusRes, eventsRes] = await Promise.all([
-        fetch(`/api/calendar/status?engineer=${ENGINEER_SLUG}`, { cache: "no-store" }),
-        fetch(`/api/calendar/events?engineer=${ENGINEER_SLUG}&days=${DAYS}`, { cache: "no-store" }),
+        fetch(`/api/calendar/status`, { cache: "no-store" }),
+        fetch(`/api/calendar/events?days=${DAYS}`, { cache: "no-store" }),
       ]);
 
       const statusData = (await statusRes.json()) as CalendarStatus;
@@ -241,13 +240,13 @@ export function AgendaView() {
   }, [load]);
 
   const handleConnect = () => {
-    window.location.href = `/api/auth/google/start?engineer=${ENGINEER_SLUG}`;
+    window.location.href = `/api/auth/google/start`;
   };
 
   const handleDisconnect = async () => {
     setActing(true);
     try {
-      await fetch(`/api/calendar/disconnect?engineer=${ENGINEER_SLUG}`, { method: "POST" });
+      await fetch(`/api/calendar/disconnect`, { method: "POST" });
       await load();
     } catch {
       setError({ message: "Échec de la déconnexion." });

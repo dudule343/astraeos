@@ -45,6 +45,10 @@ export async function moveDossierStage(dossierId: string, direction: "next" | "p
   if (!d) return;
 
   const row = d as { pipeline_stage: string; tenant_id: string | null; cabinet_id: string | null };
+
+  // Cloisonnement tenant : on refuse toute mutation sur un dossier d'un autre tenant.
+  if (row.tenant_id !== ctx.tenantId) return;
+
   const current = STAGE_ORDER.indexOf(row.pipeline_stage as (typeof STAGE_ORDER)[number]);
   if (current < 0) return;
 
@@ -61,14 +65,15 @@ export async function moveDossierStage(dossierId: string, direction: "next" | "p
   const { error: updateError } = await supabase
     .from("dossiers")
     .update({ pipeline_stage: toStage, stage_entered_at: now })
-    .eq("id", dossierId);
+    .eq("id", dossierId)
+    .eq("tenant_id", ctx.tenantId);
 
   if (updateError) return;
 
   // Journalise l'événement (non bloquant : un échec ne doit pas annuler le passage).
   await supabase.from("timeline_events").insert({
-    tenant_id: row.tenant_id ?? ctx.tenantId,
-    cabinet_id: row.cabinet_id ?? ctx.cabinetId,
+    tenant_id: ctx.tenantId,
+    cabinet_id: ctx.cabinetId,
     dossier_id: dossierId,
     event_type: "stage_changed",
     actor_user_id: ctx.userId,

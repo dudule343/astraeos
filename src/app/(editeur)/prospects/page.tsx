@@ -4,10 +4,10 @@ import { Topbar } from "../_components/Topbar";
 import { KpiCard, type KpiBlock } from "../_components/KpiCard";
 import { PageHero } from "../_components/PageHeader";
 import { KINDS, loadAllSubmissions, type DciKind } from "@/lib/dci-store";
+import { getSessionContext, type SessionContext } from "@/lib/auth/context";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export const dynamic = "force-dynamic";
-
-const ENGINEER_NAME = "Sarah Kaufmann";
 
 const KIND_LABELS: Record<DciKind, string> = {
   rdv: "Prise de RDV",
@@ -31,9 +31,11 @@ type Prospect = {
 };
 
 async function fetchProspects(): Promise<Prospect[]> {
+  const ctx = await getSessionContext();
+  if (!ctx) return [];
   if (!process.env.SUPABASE_SERVICE_ROLE_KEY) return [];
   try {
-    const { submissions } = await loadAllSubmissions();
+    const { submissions } = await loadAllSubmissions(ctx.tenantId);
 
     const byProspect = new Map<string, Prospect>();
     for (const s of submissions) {
@@ -57,6 +59,27 @@ async function fetchProspects(): Promise<Prospect[]> {
     );
   } catch {
     return [];
+  }
+}
+
+/**
+ * Nom de l'ingénieur connecté, lu depuis public.users (ctx.userId = id métier).
+ * Renvoie null si indisponible — l'eyebrow s'affiche alors sans nom.
+ */
+async function fetchEngineerName(ctx: SessionContext): Promise<string | null> {
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) return null;
+  try {
+    const supabase = createAdminClient();
+    const { data } = await supabase
+      .from("users")
+      .select("first_name, last_name")
+      .eq("id", ctx.userId)
+      .maybeSingle();
+    if (!data) return null;
+    const name = `${(data.first_name ?? "").trim()} ${(data.last_name ?? "").trim()}`.trim();
+    return name || null;
+  } catch {
+    return null;
   }
 }
 
@@ -111,8 +134,14 @@ function KindBadge({ kind }: { kind: DciKind }) {
 }
 
 export default async function ProspectsPage() {
+  const ctx = await getSessionContext();
   const prospects = await fetchProspects();
   const kpis = computeKpis(prospects);
+
+  const engineerName = ctx ? await fetchEngineerName(ctx) : null;
+  const eyebrow = engineerName
+    ? `Parcours d'entrée · prospects · vue par ${engineerName}`
+    : "Parcours d'entrée · prospects";
 
   return (
     <>
@@ -120,7 +149,7 @@ export default async function ProspectsPage() {
 
       <div className="px-10 py-8">
         <PageHero
-          eyebrow={`Parcours d'entrée · prospects · vue par ${ENGINEER_NAME}`}
+          eyebrow={eyebrow}
           title="Mes prospects"
           description={`Prospects ayant soumis un document de collecte d'informations (DCI) avant de devenir clients · ${prospects.length} prospect${prospects.length > 1 ? "s" : ""} en cours de qualification.`}
         />

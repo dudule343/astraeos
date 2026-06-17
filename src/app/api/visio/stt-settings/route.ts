@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 import { createAdminClient } from "@/lib/supabase/admin";
-import { requireAuth } from "@/lib/auth";
+import { getSessionContext } from "@/lib/auth/context";
 
 // Endpoint Deepgram utilisé à la fois pour valider la clé (le simple fait de
 // lister les projets exige une clé valide) et, dans stt-token, pour récupérer
@@ -21,12 +21,12 @@ function maskKey(key: string): string {
   return `${key.slice(0, 7)}…${key.slice(-4)}`;
 }
 
-async function readSettings() {
+async function readSettings(cabinetId: string) {
   const supabase = createAdminClient();
   const { data } = await supabase
     .from("stt_settings")
     .select("id, provider, api_key")
-    .limit(1)
+    .eq("cabinet_id", cabinetId)
     .maybeSingle();
   return { supabase, settings: (data as SettingsRow | null) ?? null };
 }
@@ -46,11 +46,13 @@ function publicView(settings: SettingsRow | null) {
   };
 }
 
-export async function GET(req: NextRequest) {
-  const denied = requireAuth(req);
-  if (denied) return denied;
+export async function GET() {
+  const ctx = await getSessionContext();
+  if (!ctx) {
+    return NextResponse.json({ error: "Authentification requise" }, { status: 401 });
+  }
   try {
-    const { settings } = await readSettings();
+    const { settings } = await readSettings(ctx.cabinetId);
     return NextResponse.json(publicView(settings));
   } catch {
     return NextResponse.json(
@@ -61,8 +63,10 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const denied = requireAuth(req);
-  if (denied) return denied;
+  const ctx = await getSessionContext();
+  if (!ctx) {
+    return NextResponse.json({ error: "Authentification requise" }, { status: 401 });
+  }
 
   let payload: { api_key?: unknown };
   try {
@@ -101,24 +105,30 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Clé valide → upsert mono-ligne.
+  // Clé valide → upsert mono-ligne, scopé au cabinet de la session.
   try {
-    const { supabase, settings } = await readSettings();
+    const { supabase, settings } = await readSettings(ctx.cabinetId);
     const now = new Date().toISOString();
     if (settings) {
       const { error } = await supabase
         .from("stt_settings")
         .update({ provider: "deepgram", api_key: apiKey, updated_at: now })
-        .eq("id", settings.id);
+        .eq("id", settings.id)
+        .eq("cabinet_id", ctx.cabinetId);
       if (error) throw error;
     } else {
       const { error } = await supabase
         .from("stt_settings")
-        .insert({ provider: "deepgram", api_key: apiKey });
+        .insert({
+          provider: "deepgram",
+          api_key: apiKey,
+          tenant_id: ctx.tenantId,
+          cabinet_id: ctx.cabinetId,
+        });
       if (error) throw error;
     }
 
-    const { settings: fresh } = await readSettings();
+    const { settings: fresh } = await readSettings(ctx.cabinetId);
     return NextResponse.json(publicView(fresh));
   } catch {
     return NextResponse.json(
@@ -128,15 +138,17 @@ export async function POST(req: NextRequest) {
   }
 }
 
-export async function DELETE(req: NextRequest) {
-  const denied = requireAuth(req);
-  if (denied) return denied;
+export async function DELETE() {
+  const ctx = await getSessionContext();
+  if (!ctx) {
+    return NextResponse.json({ error: "Authentification requise" }, { status: 401 });
+  }
   try {
-    const { supabase } = await readSettings();
+    const supabase = createAdminClient();
     await supabase
       .from("stt_settings")
       .delete()
-      .neq("id", "00000000-0000-0000-0000-000000000000");
+      .eq("cabinet_id", ctx.cabinetId);
     return NextResponse.json(publicView(null));
   } catch {
     return NextResponse.json({ error: "Déconnexion impossible" }, { status: 500 });
