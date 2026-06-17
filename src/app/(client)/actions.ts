@@ -337,3 +337,52 @@ export async function uploadClientDocument(formData: FormData): Promise<UploadRe
     return { ok: false, error: "Une erreur est survenue lors du dépôt." };
   }
 }
+
+// ---------------------------------------------------------------------------
+// deleteClientDocument — le client retire une pièce qu'il a déposée
+// ---------------------------------------------------------------------------
+
+/**
+ * Supprime un document déposé par le client (blob Storage + ligne métier).
+ * Scope strict : le document doit appartenir à un dossier du client connecté
+ * ET avoir été déposé par lui (uploaded_by_user_id). On ne touche jamais aux
+ * pièces générées par le cabinet ni à celles d'un autre client.
+ */
+export async function deleteClientDocument(documentId: string): Promise<ActionResult> {
+  try {
+    const id = String(documentId ?? "").trim();
+    if (!id) return { ok: false, error: "Document manquant." };
+
+    const supabase = createAdminClient();
+    const { data: doc, error: docErr } = await supabase
+      .from("documents")
+      .select("id, dossier_id, storage_url, uploaded_by_user_id")
+      .eq("id", id)
+      .maybeSingle();
+
+    if (docErr || !doc || !doc.dossier_id) {
+      return { ok: false, error: "Document introuvable." };
+    }
+
+    // Le dossier du document doit appartenir au client connecté.
+    const owned = await resolveOwnedDossier(doc.dossier_id as string);
+    if (!owned.ok) return owned;
+
+    // On ne peut retirer QUE ses propres dépôts.
+    if (doc.uploaded_by_user_id !== owned.userId) {
+      return { ok: false, error: "Vous ne pouvez retirer que vos propres pièces." };
+    }
+
+    if (doc.storage_url) {
+      await supabase.storage.from(STORAGE_BUCKET).remove([doc.storage_url as string]).catch(() => {});
+    }
+    const { error: delErr } = await supabase.from("documents").delete().eq("id", id);
+    if (delErr) return { ok: false, error: `Suppression impossible : ${delErr.message}` };
+
+    revalidatePath(`${CLIENT_BASE}/documents`);
+    revalidatePath(CLIENT_BASE);
+    return { ok: true };
+  } catch {
+    return { ok: false, error: "Une erreur est survenue lors de la suppression." };
+  }
+}
