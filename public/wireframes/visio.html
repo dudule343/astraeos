@@ -1648,7 +1648,7 @@ function renderSection() {
     alerts.forEach(a => {
       html += `<div class="v6-cross-alert ${a.level}">
         <div class="v6-cross-alert-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
-        <div class="v6-cross-alert-body"><div class="v6-cross-alert-title">${escDci(a.title)}</div><div class="v6-cross-alert-msg">${a.message}</div></div>
+        <div class="v6-cross-alert-body"><div class="v6-cross-alert-title">${escDci(a.title)}</div><div class="v6-cross-alert-msg">${a.messageHtml}</div></div><!-- messageHtml : HTML de confiance, construit dans checkCrossSectionAlerts ; toute valeur dynamique y est échappée via escDci à la construction -->
       </div>`;
     });
 
@@ -2563,12 +2563,16 @@ function checkCrossSectionAlerts() {
           const prepImmo = it.fields.find(f => f.label.includes('prépondérance immobilière'));
           const dutreil = it.fields.find(f => f.label.includes('Pacte Dutreil'));
           if (prepImmo && prepImmo.value === 'Oui' && dutreil && dutreil.value === 'Oui') {
+            // INVARIANT : messageHtml contient du HTML de confiance (<strong>).
+            // La SEULE valeur dynamique (nom, dérivée de la saisie) est échappée
+            // via escDci AVANT interpolation. Toute future valeur dynamique
+            // insérée ici DOIT passer par escDci — sinon XSS au rendu (l.1651).
             const nom = escDci(it.fields.find(f => f.label.includes('Dénomination'))?.value || 'Cette société');
             alerts.push({
               section: s.id, sectionTitle: s.title,
               level: 'danger',
               title: 'Incompatibilité Pacte Dutreil',
-              message: `<strong>${nom}</strong> est déclarée à <strong>prépondérance immobilière</strong>. Or les sociétés à prépondérance immobilière sont <strong>exclues du dispositif Dutreil</strong> (art. 787 B CGI). Les deux choix ne peuvent pas coexister · à arbitrer avec le client.`
+              messageHtml: `<strong>${nom}</strong> est déclarée à <strong>prépondérance immobilière</strong>. Or les sociétés à prépondérance immobilière sont <strong>exclues du dispositif Dutreil</strong> (art. 787 B CGI). Les deux choix ne peuvent pas coexister · à arbitrer avec le client.`
             });
           }
         });
