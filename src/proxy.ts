@@ -13,7 +13,9 @@ const ESPACE_HOSTS: Record<string, string> = {
   // L'espace dirigeant est désormais une vraie app React (route group
   // (dirigeant)/espace-dirigeant), plus l'iframe de wireframe.
   "dirigeant.astraeos.fr": "/espace-dirigeant",
-  "ingenieur.astraeos.fr": "/ingenieur",
+  // ingenieur.astraeos.fr n'est PLUS un wireframe : il sert l'application
+  // éditeur réelle (le vrai workspace ingénieur). Pas d'entrée ici → la racine
+  // tombe sur le défaut (l'éditeur), scopé par la session une fois l'auth active.
   "client.astraeos.fr": "/client",
 };
 
