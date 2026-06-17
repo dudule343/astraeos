@@ -14,21 +14,25 @@ Composants client (`"use client"`). Vérif `tsc --noEmit` + `npm run build` à c
 
 ---
 
-## Phase 0 — Fondations (additif, zéro risque prod) — ≤5 fichiers
-- [ ] `_cockpit/types.ts` — types DCI_DATA (sections/groups/fields/status), entretien, conseils
-- [ ] `_cockpit/demo-data.ts` — port fidèle du mock JOUBERT-BERTHOUX (l.1450-2119)
-- [ ] `_cockpit/store.tsx` — reducer + Context (DCI, CURRENT_SECTION, CURRENT_FILTER, REC_STATE, EDITING, transcription)
-- [ ] `_cockpit/api.ts` — wrappers fetch (stt-token, dci-extract, conseils, entretiens GET/PATCH, compte-rendu)
-- [ ] `_cockpit/cockpit.module.css` — port du CSS inline (l.8-812 + injections)
-- [ ] Vérif : `tsc` vert
+## Phase 0 — Fondations (additif, zéro risque prod) — FAIT ✅
+- [x] `_cockpit/types.ts` — réutilise les types canoniques de @/lib/dci-schema + overlay session
+- [x] ~~demo-data.ts~~ — INUTILE : DCI_DATA déjà alimenté par /api/dci/complet (pas de mock)
+- [x] `_cockpit/store.tsx` — reducer + Context (DCI, section, filtre, rec, editing, collapse, confirmed, toast)
+- [x] `_cockpit/api.ts` — loadDciComplet (valide via schéma canonique)
+- [x] `_cockpit/cockpit.css` — port verbatim du <style> (802 lignes)
+- [x] Vérif : `tsc` vert
 
-## Phase 1 — Colonne DCI (cœur visible) — ≤5 fichiers
-- [ ] `_cockpit/Cockpit.tsx` — layout 3 colonnes + provider store
-- [ ] `_cockpit/DciNavigation.tsx` — sidebar sections (renderNav)
-- [ ] `_cockpit/DciSection.tsx` — corps section + filtres (renderSection)
-- [ ] `_cockpit/DciField.tsx` — ligne champ + badges IA + valider/rejeter (renderField)
-- [ ] `page.tsx` — branchement `?ui=react` → `<Cockpit/>`
-- [ ] Vérif : `tsc` + build + QA navigateur (nav sections, filtres, édition champ)
+## Phase 1 — Colonne DCI (cœur visible) — FAIT ✅ (commits e1a4ac0, 9ac929a, f6cccae)
+- [x] `_cockpit/Cockpit.tsx` — layout 3 colonnes + provider + chargement DCI réel
+- [x] `_cockpit/DciNavigation.tsx` — sidebar sections (renderNav)
+- [x] `_cockpit/DciSection.tsx` — person/block/repeatable + alertes + filtres + footer
+- [x] `_cockpit/DciField.tsx` — ligne champ + badges IA + valider/rejeter + surlignage v9
+- [x] `_cockpit/EditFieldModal.tsx` — édition champ (text/date/number/select)
+- [x] `_cockpit/render-helpers.ts` — helpers purs (données structurées, JSX → fin du XSS)
+- [x] `page.tsx` — branchement `?ui=react` → `<Cockpit/>`
+- [x] Vérif : `tsc` + build + **QA navigateur runtime** (render API réelle, nav, validate,
+      édition modale, filtre, confirm-section, alerte Dutreil, 0 erreur console) ✅
+- [ ] RESTE Phase 1 : sections 20/21 (customRenderer) — placeholder posé, rendu dédié à faire
 
 ## Phase 2 — Panneau IA à onglets — ≤5 fichiers
 - [ ] `_cockpit/AssistPanel.tsx` — 5 onglets (Agenda, DCI Simplifié, Notes, Insights, Transcript)
