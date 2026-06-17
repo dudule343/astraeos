@@ -2,6 +2,8 @@ import { createServerClient } from "@supabase/ssr";
 import type { User } from "@supabase/supabase-js";
 import { NextResponse, type NextRequest } from "next/server";
 
+import { cookieDomainForHost } from "./cookie-domain";
+
 export type UpdateSessionResult = {
   /** Réponse porteuse des cookies de session rafraîchis. */
   response: NextResponse;
@@ -22,7 +24,10 @@ export async function updateSession(
 
   let supabaseResponse = NextResponse.next({ request });
 
+  const domain = cookieDomainForHost(request.headers.get("host"));
+
   const supabase = createServerClient(url, key, {
+    ...(domain ? { cookieOptions: { domain } } : {}),
     cookies: {
       getAll() {
         return request.cookies.getAll();
