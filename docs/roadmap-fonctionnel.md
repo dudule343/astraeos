@@ -35,9 +35,9 @@ Vérif globale : `bash scripts/verify-app.sh`.
 - [x] C8. Paramétrages — coordonnées + ORIAS/RC Pro + répartition commissions + accès users ✅
 - [ ] C9. Licenciés / cabinets (réseau)
 
-## 🔜 Bloc D : visio — compléter
-- [ ] D1. Compte-rendu enrichi (synthèse patrimoniale IA de fin d'entretien)
-- [ ] D2. Onglet Notes (persistance)
+## ✅ Bloc D : visio — compléter
+- [x] D1. Compte-rendu enrichi — POST /api/entretiens/[id]/compte-rendu, synthèse Markdown IA (DCI+transcript+notes+conseils), modale + Copier, persistée dans rapport.synthese_ia ✅
+- [x] D2. Onglet Notes — saisie + persistance (entretiens.notes jsonb) + réhydratation à la reprise ✅
 
 ## 🔜 Bloc E : fondations transverses
 - [x] E1. Migration `conformite_items` appliquée en prod (via MCP Supabase) — persistance KYC vérifiée ✅
