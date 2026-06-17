@@ -100,12 +100,13 @@ export async function PATCH(
     return NextResponse.json({ error: "Corps doit être un objet" }, { status: 400 });
   }
 
-  const { dci_snapshot, transcript_append, conseils_append, articles_append } =
+  const { dci_snapshot, transcript_append, conseils_append, articles_append, notes_append } =
     body as {
       dci_snapshot?: unknown;
       transcript_append?: unknown;
       conseils_append?: unknown;
       articles_append?: unknown;
+      notes_append?: unknown;
     };
 
   const merge: MergeInput = {};
@@ -148,6 +149,14 @@ export async function PATCH(
       return NextResponse.json({ error: res.error }, { status: 400 });
     }
     merge.articles_append = res;
+  }
+
+  if (notes_append !== undefined) {
+    const res = normaliseTranscriptAppend(notes_append);
+    if ("error" in res) {
+      return NextResponse.json({ error: res.error }, { status: 400 });
+    }
+    merge.notes_append = res;
   }
 
   try {

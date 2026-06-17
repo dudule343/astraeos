@@ -105,6 +105,7 @@ export async function POST(req: NextRequest) {
       transcript: e.transcript,
       conseils: e.conseils,
       articles: e.articles,
+      notes: e.notes,
       ended_at: e.ended_at,
     });
   } catch (err) {

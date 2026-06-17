@@ -21,6 +21,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 export const TRANSCRIPT_CAP = 2000;
 export const CONSEILS_CAP = 200;
 export const ARTICLES_CAP = 200;
+export const NOTES_CAP = 500;
 
 export type TranscriptLine = {
   t: string; // horodatage (ISO ou mm:ss selon l'émetteur)
@@ -39,6 +40,7 @@ export type Entretien = {
   transcript: TranscriptLine[];
   conseils: Record<string, unknown>[];
   articles: Record<string, unknown>[];
+  notes: TranscriptLine[];
   rapport: Record<string, unknown> | null;
   updated_at: string;
 };
@@ -113,6 +115,7 @@ type EntretienRow = {
   transcript: unknown;
   conseils: unknown;
   articles: unknown;
+  notes: unknown;
   rapport: Record<string, unknown> | null;
   updated_at: string;
 };
@@ -129,13 +132,14 @@ function rowToEntretien(row: EntretienRow): Entretien {
     transcript: normaliseTranscriptLines(row.transcript),
     conseils: asRecordArray(row.conseils),
     articles: asRecordArray(row.articles),
+    notes: normaliseTranscriptLines(row.notes),
     rapport: row.rapport ?? null,
     updated_at: row.updated_at,
   };
 }
 
 const SELECT_FULL =
-  "id, room, prospect_slug, display_name, started_at, ended_at, dci_snapshot, transcript, conseils, articles, rapport, updated_at";
+  "id, room, prospect_slug, display_name, started_at, ended_at, dci_snapshot, transcript, conseils, articles, notes, rapport, updated_at";
 
 // --- File impl ---------------------------------------------------------------
 
@@ -226,6 +230,7 @@ async function upsertSupabase(
       transcript: [],
       conseils: [],
       articles: [],
+      notes: [],
       updated_at: now,
     })
     .select(SELECT_FULL)
@@ -270,6 +275,7 @@ async function upsertFile(
     transcript: [],
     conseils: [],
     articles: [],
+    notes: [],
     rapport: null,
     updated_at: now,
   };
@@ -285,6 +291,7 @@ export type MergeInput = {
   transcript_append?: TranscriptLine[];
   conseils_append?: Record<string, unknown>[];
   articles_append?: Record<string, unknown>[];
+  notes_append?: TranscriptLine[];
 };
 
 /** Renvoie false si l'entretien n'existe pas. */
@@ -321,6 +328,9 @@ function applyMerge(current: Entretien, input: MergeInput): void {
       ARTICLES_CAP,
     );
   }
+  if (input.notes_append && input.notes_append.length > 0) {
+    current.notes = capTail([...current.notes, ...input.notes_append], NOTES_CAP);
+  }
   current.updated_at = new Date().toISOString();
 }
 
@@ -344,6 +354,7 @@ async function mergeSupabase(id: string, input: MergeInput): Promise<boolean> {
       transcript: current.transcript,
       conseils: current.conseils,
       articles: current.articles,
+      notes: current.notes,
       updated_at: current.updated_at,
     })
     .eq("id", id);
@@ -403,6 +414,82 @@ async function terminerFile(
   current.ended_at = now;
   current.rapport = rapport;
   current.updated_at = now;
+  await writeFileStore(store);
+  return true;
+}
+
+// --- API publique : compte-rendu IA ------------------------------------------
+
+/**
+ * Enregistre la synthèse IA dans rapport.synthese_ia SANS clôturer l'entretien
+ * (ended_at inchangé) : l'ingénieur peut générer le compte-rendu avant de
+ * cliquer « Terminer ». Fusionne avec un éventuel rapport existant.
+ */
+export async function saveCompteRendu(
+  id: string,
+  markdown: string,
+  model: string,
+): Promise<boolean> {
+  if (isSupabaseConfigured()) {
+    try {
+      return await saveCompteRenduSupabase(id, markdown, model);
+    } catch (err) {
+      console.warn("[entretiens-store] Supabase saveCompteRendu failed, fallback file:", err);
+    }
+  }
+  return saveCompteRenduFile(id, markdown, model);
+}
+
+function buildRapportWithSynthese(
+  existing: Record<string, unknown> | null,
+  markdown: string,
+  model: string,
+): Record<string, unknown> {
+  return {
+    ...(existing ?? {}),
+    synthese_ia: markdown,
+    synthese_model: model,
+    synthese_generated_at: new Date().toISOString(),
+  };
+}
+
+async function saveCompteRenduSupabase(
+  id: string,
+  markdown: string,
+  model: string,
+): Promise<boolean> {
+  const supabase = createAdminClient();
+  const { data: existing, error: selErr } = await supabase
+    .from("entretiens")
+    .select("rapport")
+    .eq("id", id)
+    .maybeSingle();
+  if (selErr) throw selErr;
+  if (!existing) return false;
+
+  const rapport = buildRapportWithSynthese(
+    (existing as { rapport: Record<string, unknown> | null }).rapport ?? null,
+    markdown,
+    model,
+  );
+  const { error: updErr } = await supabase
+    .from("entretiens")
+    .update({ rapport, updated_at: new Date().toISOString() })
+    .eq("id", id);
+  if (updErr) throw updErr;
+  return true;
+}
+
+async function saveCompteRenduFile(
+  id: string,
+  markdown: string,
+  model: string,
+): Promise<boolean> {
+  const store = await readFileStore();
+  const current = store.entretiens.find((e) => e.id === id);
+  if (!current) return false;
+  current.rapport = buildRapportWithSynthese(current.rapport, markdown, model);
+  current.updated_at = new Date().toISOString();
   await writeFileStore(store);
   return true;
 }
