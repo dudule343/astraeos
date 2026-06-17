@@ -39,6 +39,6 @@ Vérif globale : `bash scripts/verify-app.sh`.
 - [ ] D2. Onglet Notes (persistance)
 
 ## 🔜 Bloc E : fondations transverses
-- [ ] E1. Appliquer la migration `conformite_items` en prod (sinon statuts KYC ne persistent pas)
-- [ ] E2. Auth réelle (remplacer le stub `requireAuth` par une vraie vérif session/cookie)
+- [x] E1. Migration `conformite_items` appliquée en prod (via MCP Supabase) — persistance KYC vérifiée ✅
+- [ ] E2. Auth réelle — **différé** (décision 2026-06-17 : espaces gardés en accès libre ; infra `auth.ts` prête à dé-stubber le moment venu)
 - [ ] E3. Multi-tenant réel (retirer les DEFAULT_TENANT/CABINET/ENGINEER hardcodés)

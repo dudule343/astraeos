@@ -549,3 +549,227 @@ export function fmtAnciennete(mois: number): string {
 export function initials(first: string, last: string): string {
   return `${(first[0] ?? "").toUpperCase()}${(last[0] ?? "").toUpperCase()}`;
 }
+
+// ---------------------------------------------------------------------------
+// Encours & assets (AUM) — dérivé des souscriptions du cabinet
+// ---------------------------------------------------------------------------
+
+export type AumCategoryRow = { key: string; label: string; aum: number; subs: number };
+
+/** Encours sous gestion par catégorie de produit. Déduplique par souscription. */
+export function computeAumByCategory(commissions: CabinetCommission[]): AumCategoryRow[] {
+  const map = new Map<string, { aum: number; subs: Set<string> }>();
+  const seen = new Set<string>();
+  for (const c of commissions) {
+    const sub = c.souscription;
+    if (!sub?.id || seen.has(sub.id)) continue;
+    seen.add(sub.id);
+    const cat = sub.produit?.category ?? "autre";
+    const e = map.get(cat) ?? { aum: 0, subs: new Set<string>() };
+    e.aum += sub.amount_initial ?? 0;
+    e.subs.add(sub.id);
+    map.set(cat, e);
+  }
+  return [...map.entries()]
+    .map(([key, v]) => ({ key, label: PRODUIT_CATEGORY_LABELS[key] ?? key, aum: v.aum, subs: v.subs.size }))
+    .sort((a, b) => b.aum - a.aum);
+}
+
+export type AssetClass = "financier" | "immobilier" | "assurance" | "autre";
+
+const ASSET_CLASS_OF: Record<string, AssetClass> = {
+  av_multisupport: "financier",
+  av_lux: "financier",
+  per: "financier",
+  fpci: "financier",
+  structure: "financier",
+  scpi: "immobilier",
+  opci: "immobilier",
+  prevoyance: "assurance",
+  credit: "autre",
+  autre: "autre",
+};
+
+const ASSET_CLASS_LABELS: Record<AssetClass, string> = {
+  financier: "Investissement financier",
+  immobilier: "Investissement immobilier",
+  assurance: "Assurance & prévoyance",
+  autre: "Autre",
+};
+
+export type AumClassRow = {
+  key: AssetClass;
+  label: string;
+  aum: number;
+  subs: number;
+  cats: AumCategoryRow[];
+};
+
+/** Regroupe l'AUM par classe d'actifs (cartes). Classes vides masquées. */
+export function computeAumByAssetClass(rows: AumCategoryRow[]): AumClassRow[] {
+  const order: AssetClass[] = ["financier", "immobilier", "assurance", "autre"];
+  const map = new Map<AssetClass, AumClassRow>();
+  for (const k of order) {
+    map.set(k, { key: k, label: ASSET_CLASS_LABELS[k], aum: 0, subs: 0, cats: [] });
+  }
+  for (const r of rows) {
+    const cls = ASSET_CLASS_OF[r.key] ?? "autre";
+    const entry = map.get(cls);
+    if (!entry) continue;
+    entry.aum += r.aum;
+    entry.subs += r.subs;
+    entry.cats.push(r);
+  }
+  return order.map((k) => map.get(k)).filter((c): c is AumClassRow => !!c && c.cats.length > 0);
+}
+
+// ---------------------------------------------------------------------------
+// Performance — pipeline du cabinet
+// ---------------------------------------------------------------------------
+
+export const PIPELINE_STAGE_LABELS: Record<string, string> = {
+  "01_prospect": "Prospect",
+  "02_compliance": "Conformité",
+  "03_collecte": "Collecte",
+  "04_etudes": "Production",
+  "05_restituee": "Restituée",
+  "06_suivi": "Suivi",
+  "00_archive": "Archivé",
+};
+
+const PIPELINE_ORDER = [
+  "01_prospect",
+  "02_compliance",
+  "03_collecte",
+  "04_etudes",
+  "05_restituee",
+  "06_suivi",
+];
+
+export type PipelineStageRow = { stage: string; label: string; count: number };
+
+/** Compte les dossiers du cabinet par étape de pipeline (ordre métier). */
+export async function fetchPipelineStages(): Promise<PipelineStageRow[]> {
+  try {
+    const supabase = createAdminClient();
+    const { data, error } = await supabase
+      .from("dossiers")
+      .select("pipeline_stage")
+      .eq("cabinet_id", CABINET_ID)
+      .eq("tenant_id", TENANT_ID);
+    if (error || !data) return [];
+    const counts = new Map<string, number>();
+    for (const d of data) {
+      const s = (d.pipeline_stage as string) ?? "01_prospect";
+      counts.set(s, (counts.get(s) ?? 0) + 1);
+    }
+    return PIPELINE_ORDER.map((stage) => ({
+      stage,
+      label: PIPELINE_STAGE_LABELS[stage] ?? stage,
+      count: counts.get(stage) ?? 0,
+    }));
+  } catch {
+    return [];
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Paramétrages — profil du cabinet + accès utilisateurs
+// ---------------------------------------------------------------------------
+
+export type CabinetProfile = {
+  name: string;
+  address_street: string | null;
+  address_city: string | null;
+  address_zipcode: string | null;
+  phone: string | null;
+  email: string | null;
+  orias_number: string | null;
+  rc_pro_insurer: string | null;
+  rc_pro_expiry_date: string | null;
+  contract_start_date: string | null;
+  commission_split_to_owner: number | null;
+  total_aum_cached: number | null;
+  total_clients_cached: number | null;
+  network_rank_cached: number | null;
+};
+
+/** Profil administratif du cabinet courant (table cabinets). */
+export async function fetchCabinetProfile(): Promise<CabinetProfile | null> {
+  try {
+    const supabase = createAdminClient();
+    const { data, error } = await supabase
+      .from("cabinets")
+      .select(
+        "name, address_street, address_city, address_zipcode, phone, email, orias_number, rc_pro_insurer, rc_pro_expiry_date, contract_start_date, commission_split_to_owner, total_aum_cached, total_clients_cached, network_rank_cached",
+      )
+      .eq("id", CABINET_ID)
+      .maybeSingle();
+    if (error || !data) return null;
+    const d = data as Record<string, unknown>;
+    const num = (v: unknown) => (v != null ? Number(v) : null);
+    const str = (v: unknown) => (v != null ? String(v) : null);
+    return {
+      name: (d.name as string) ?? "",
+      address_street: str(d.address_street),
+      address_city: str(d.address_city),
+      address_zipcode: str(d.address_zipcode),
+      phone: str(d.phone),
+      email: str(d.email),
+      orias_number: str(d.orias_number),
+      rc_pro_insurer: str(d.rc_pro_insurer),
+      rc_pro_expiry_date: str(d.rc_pro_expiry_date),
+      contract_start_date: str(d.contract_start_date),
+      commission_split_to_owner: num(d.commission_split_to_owner),
+      total_aum_cached: num(d.total_aum_cached),
+      total_clients_cached: num(d.total_clients_cached),
+      network_rank_cached: num(d.network_rank_cached),
+    };
+  } catch {
+    return null;
+  }
+}
+
+export type CabinetUserAccess = {
+  id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  role: string;
+  last_login_at: string | null;
+  mfa_enabled: boolean;
+  is_active: boolean;
+};
+
+/** Utilisateurs du cabinet (pour la gestion des accès dans Paramétrages). */
+export async function fetchCabinetUsers(): Promise<CabinetUserAccess[]> {
+  try {
+    const supabase = createAdminClient();
+    const { data, error } = await supabase
+      .from("users")
+      .select("id, first_name, last_name, email, role, last_login_at, mfa_enabled, is_active")
+      .eq("cabinet_id", CABINET_ID)
+      .eq("tenant_id", TENANT_ID)
+      .order("role");
+    if (error || !data) return [];
+    return data.map((u) => ({
+      id: u.id as string,
+      first_name: (u.first_name as string) ?? "",
+      last_name: (u.last_name as string) ?? "",
+      email: (u.email as string) ?? "",
+      role: (u.role as string) ?? "",
+      last_login_at: (u.last_login_at as string) ?? null,
+      mfa_enabled: Boolean(u.mfa_enabled),
+      is_active: Boolean(u.is_active),
+    }));
+  } catch {
+    return [];
+  }
+}
+
+export const USER_ROLE_LABELS: Record<string, string> = {
+  director: "Dirigeant",
+  engineer: "Ingénieur",
+  admin: "Administrateur",
+  assistant: "Assistant",
+};
