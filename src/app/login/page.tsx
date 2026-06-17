@@ -4,17 +4,40 @@ import { useState, type FormEvent } from "react";
 
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 
-type Status = "idle" | "sending" | "sent" | "error";
+type Mode = "password" | "magic";
+type Status = "idle" | "working" | "sent" | "error";
+
+const inputStyle: React.CSSProperties = {
+  width: "100%",
+  padding: "12px 14px",
+  fontSize: "14px",
+  fontFamily: "inherit",
+  color: "var(--navy)",
+  background: "var(--ivory)",
+  border: "1px solid var(--navy-100)",
+  borderRadius: "8px",
+  outline: "none",
+  boxSizing: "border-box",
+};
+
+const labelStyle: React.CSSProperties = {
+  display: "block",
+  fontSize: "12.5px",
+  fontWeight: 600,
+  margin: "16px 0 8px",
+};
 
 export default function LoginPage() {
+  const [mode, setMode] = useState<Mode>("password");
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState<string | null>(null);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const trimmed = email.trim();
-    if (!trimmed) return;
+    const mail = email.trim();
+    if (!mail) return;
 
     if (!isSupabaseConfigured()) {
       setStatus("error");
@@ -22,23 +45,34 @@ export default function LoginPage() {
       return;
     }
 
-    setStatus("sending");
+    setStatus("working");
     setError(null);
-
     const supabase = createClient();
-    const { error: otpError } = await supabase.auth.signInWithOtp({
-      email: trimmed,
-      options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
-      },
-    });
 
+    if (mode === "password") {
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: mail,
+        password,
+      });
+      if (signInError) {
+        setStatus("error");
+        setError("E-mail ou mot de passe incorrect.");
+        return;
+      }
+      // Rechargement complet : le proxy/middleware lit alors le cookie de session.
+      window.location.assign("/");
+      return;
+    }
+
+    const { error: otpError } = await supabase.auth.signInWithOtp({
+      email: mail,
+      options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+    });
     if (otpError) {
       setStatus("error");
       setError("Impossible d'envoyer le lien. Vérifiez l'adresse et réessayez.");
       return;
     }
-
     setStatus("sent");
   }
 
@@ -66,7 +100,7 @@ export default function LoginPage() {
           boxShadow: "0 10px 40px rgba(16, 45, 80, 0.08)",
         }}
       >
-        <div style={{ marginBottom: "28px" }}>
+        <div style={{ marginBottom: "20px" }}>
           <div
             style={{
               fontSize: "11px",
@@ -90,8 +124,9 @@ export default function LoginPage() {
               color: "var(--navy-300)",
             }}
           >
-            Saisissez votre e-mail professionnel. Nous vous enverrons un lien de
-            connexion sécurisé.
+            {mode === "password"
+              ? "Saisissez votre e-mail et votre mot de passe."
+              : "Saisissez votre e-mail : nous vous enverrons un lien de connexion."}
           </p>
         </div>
 
@@ -104,9 +139,7 @@ export default function LoginPage() {
               border: "1px solid var(--gold-200)",
             }}
           >
-            <p style={{ margin: 0, fontSize: "15px", fontWeight: 700 }}>
-              Vérifiez votre e-mail
-            </p>
+            <p style={{ margin: 0, fontSize: "15px", fontWeight: 700 }}>Vérifiez votre e-mail</p>
             <p
               style={{
                 margin: "8px 0 0",
@@ -116,20 +149,11 @@ export default function LoginPage() {
               }}
             >
               Un lien de connexion a été envoyé à <strong>{email.trim()}</strong>.
-              Ouvrez-le depuis cet appareil pour accéder à votre espace.
             </p>
           </div>
         ) : (
           <form onSubmit={handleSubmit}>
-            <label
-              htmlFor="email"
-              style={{
-                display: "block",
-                fontSize: "12.5px",
-                fontWeight: 600,
-                marginBottom: "8px",
-              }}
-            >
+            <label htmlFor="email" style={{ ...labelStyle, marginTop: 0 }}>
               Adresse e-mail
             </label>
             <input
@@ -142,35 +166,37 @@ export default function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="vous@cabinet.fr"
-              style={{
-                width: "100%",
-                padding: "12px 14px",
-                fontSize: "14px",
-                fontFamily: "inherit",
-                color: "var(--navy)",
-                background: "var(--ivory)",
-                border: "1px solid var(--navy-100)",
-                borderRadius: "8px",
-                outline: "none",
-                boxSizing: "border-box",
-              }}
+              style={inputStyle}
             />
 
+            {mode === "password" && (
+              <>
+                <label htmlFor="password" style={labelStyle}>
+                  Mot de passe
+                </label>
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  required
+                  autoComplete="current-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  style={inputStyle}
+                />
+              </>
+            )}
+
             {error && (
-              <p
-                style={{
-                  margin: "12px 0 0",
-                  fontSize: "13px",
-                  color: "var(--red-text)",
-                }}
-              >
+              <p style={{ margin: "12px 0 0", fontSize: "13px", color: "var(--red-text)" }}>
                 {error}
               </p>
             )}
 
             <button
               type="submit"
-              disabled={status === "sending"}
+              disabled={status === "working"}
               style={{
                 width: "100%",
                 marginTop: "20px",
@@ -182,12 +208,42 @@ export default function LoginPage() {
                 background: "var(--gold)",
                 border: "none",
                 borderRadius: "8px",
-                cursor: status === "sending" ? "wait" : "pointer",
-                opacity: status === "sending" ? 0.65 : 1,
-                transition: "filter 0.15s ease",
+                cursor: status === "working" ? "wait" : "pointer",
+                opacity: status === "working" ? 0.65 : 1,
               }}
             >
-              {status === "sending" ? "Envoi en cours…" : "Recevoir le lien"}
+              {status === "working"
+                ? mode === "password"
+                  ? "Connexion…"
+                  : "Envoi en cours…"
+                : mode === "password"
+                  ? "Se connecter"
+                  : "Recevoir le lien"}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setMode(mode === "password" ? "magic" : "password");
+                setError(null);
+                setStatus("idle");
+              }}
+              style={{
+                width: "100%",
+                marginTop: "12px",
+                padding: "8px",
+                fontSize: "12.5px",
+                fontWeight: 600,
+                fontFamily: "inherit",
+                color: "var(--navy-300)",
+                background: "transparent",
+                border: "none",
+                cursor: "pointer",
+              }}
+            >
+              {mode === "password"
+                ? "Recevoir plutôt un lien par e-mail"
+                : "Me connecter avec un mot de passe"}
             </button>
           </form>
         )}
