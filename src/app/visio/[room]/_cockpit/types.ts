@@ -6,11 +6,23 @@ import type {
   DciCanonical,
   DciField,
   DciGroup,
+  DciGroupBlock,
+  DciGroupPerson,
+  DciGroupRepeat,
   DciSection,
   DciFieldStatus,
 } from "@/lib/dci-schema";
 
-export type { DciCanonical, DciField, DciGroup, DciSection, DciFieldStatus };
+export type {
+  DciCanonical,
+  DciField,
+  DciGroup,
+  DciGroupBlock,
+  DciGroupPerson,
+  DciGroupRepeat,
+  DciSection,
+  DciFieldStatus,
+};
 
 /** Champ enrichi en session : l'IA peut joindre une confiance, une note de
  *  divergence, et un drapeau `live` (champ tout juste mis à jour → animation). */

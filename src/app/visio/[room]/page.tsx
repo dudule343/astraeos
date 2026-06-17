@@ -1,3 +1,5 @@
+import { Cockpit } from "./_cockpit/Cockpit";
+
 export const metadata = {
   title: "PRIVEOS · Visio",
 };
@@ -9,6 +11,8 @@ type SearchParams = {
   nom?: string;
   tool?: string;
   lien?: string;
+  /** ?ui=react → cockpit React (migration en cours). Défaut : iframe HTML. */
+  ui?: string;
 };
 
 /** Salle Jitsi : on n'accepte que des identifiants alphanumériques + tirets,
@@ -66,7 +70,7 @@ export default async function VisioRoomPage({
   searchParams: Promise<SearchParams>;
 }) {
   const { room } = await params;
-  const { role, prospect, nom, tool, lien } = await searchParams;
+  const { role, prospect, nom, tool, lien, ui } = await searchParams;
 
   const safeRoom = sanitizeRoom(room ?? "");
   const safeRole = sanitizeRole(role);
@@ -77,6 +81,30 @@ export default async function VisioRoomPage({
   // Un lien invalide invalide l'outil : pas de mode compagnon sans destination.
   const companionTool = safeLien ? safeTool : "";
 
+  const sbUrlPublic = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+  const sbKeyPublic = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
+
+  // Cockpit React (migration en cours) derrière ?ui=react. Par défaut : l'iframe
+  // HTML reste servie en prod tant que la version React n'est pas à parité.
+  if (ui === "react") {
+    return (
+      <div className="flex min-h-screen flex-col bg-[var(--ivory)]">
+        <Cockpit
+          params={{
+            room: safeRoom,
+            role: safeRole,
+            prospect: safeProspect,
+            nom: safeNom,
+            tool: companionTool,
+            lien: safeLien,
+            sb: sbUrlPublic,
+            sbk: sbKeyPublic,
+          }}
+        />
+      </div>
+    );
+  }
+
   let src = `/wireframes/visio.html?room=${encodeURIComponent(safeRoom)}&role=${safeRole}`;
   if (safeProspect) src += `&prospect=${encodeURIComponent(safeProspect)}`;
   if (safeNom) src += `&nom=${encodeURIComponent(safeNom)}`;
@@ -86,10 +114,8 @@ export default async function VisioRoomPage({
   // Transport Realtime de la transcription (canal par salle) : on passe l'URL
   // Supabase + la clé anon (toutes deux publiques) au wireframe statique, qui
   // ne reçoit pas les variables NEXT_PUBLIC_* à la compilation.
-  const sbUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const sbKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (sbUrl && sbKey) {
-    src += `&sb=${encodeURIComponent(sbUrl)}&sbk=${encodeURIComponent(sbKey)}`;
+  if (sbUrlPublic && sbKeyPublic) {
+    src += `&sb=${encodeURIComponent(sbUrlPublic)}&sbk=${encodeURIComponent(sbKeyPublic)}`;
   }
 
   return (

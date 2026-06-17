@@ -26,6 +26,12 @@ export type CockpitState = {
   currentFilter: DciFilter;
   recState: RecState;
   editing: EditingRef | null;
+  /** Repli des groupes/cards, par clé `${section}:${gi}` ou `${section}:${gi}:${ii}`. */
+  collapsed: Record<string, boolean>;
+  /** Sections confirmées (footer « Confirmer toute la section »), par id. */
+  confirmed: Record<string, boolean>;
+  /** Message éphémère (équivalent showToast). */
+  toast: string | null;
 };
 
 export type CockpitAction =
@@ -40,7 +46,11 @@ export type CockpitAction =
   | { type: "validateField"; ref: EditingRef }
   // Refuse la proposition IA → champ remis à vide.
   | { type: "rejectField"; ref: EditingRef }
-  | { type: "setRecState"; recState: RecState };
+  | { type: "setRecState"; recState: RecState }
+  | { type: "toggleCollapse"; key: string }
+  // Confirme la section : valide tous les champs IA (ai-suggest/agree/disagree).
+  | { type: "confirmSection"; sectionId: string }
+  | { type: "toast"; message: string | null };
 
 const EMPTY: DciSnapshot = { sections: [] };
 
@@ -125,6 +135,40 @@ function reducer(state: CockpitState, action: CockpitAction): CockpitState {
     }
     case "setRecState":
       return { ...state, recState: action.recState };
+    case "toggleCollapse":
+      return {
+        ...state,
+        collapsed: { ...state.collapsed, [action.key]: !state.collapsed[action.key] },
+      };
+    case "confirmSection": {
+      const sections = state.data.sections.map((s): SessionSection => {
+        if (s.id !== action.sectionId) return s;
+        const validateAi = (f: SessionField): SessionField =>
+          f.status === "ai-suggest" || f.status === "ai-agree" || f.status === "ai-disagree"
+            ? stripAi({ ...f, status: "validated" })
+            : f;
+        const groups = s.groups.map((g) => {
+          if (g.type === "repeatable") {
+            return {
+              ...g,
+              items: g.items.map((it) => ({
+                ...it,
+                fields: it.fields.map((f) => validateAi(f as SessionField)),
+              })),
+            };
+          }
+          return { ...g, fields: g.fields.map((f) => validateAi(f as SessionField)) };
+        });
+        return { ...s, groups };
+      });
+      return {
+        ...state,
+        data: { sections },
+        confirmed: { ...state.confirmed, [action.sectionId]: true },
+      };
+    }
+    case "toast":
+      return { ...state, toast: action.message };
     default:
       return state;
   }
@@ -137,6 +181,9 @@ function initialState(initialSection: string): CockpitState {
     currentFilter: "all",
     recState: "active",
     editing: null,
+    collapsed: {},
+    confirmed: {},
+    toast: null,
   };
 }
 
