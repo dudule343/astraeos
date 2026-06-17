@@ -18,7 +18,7 @@ const ESPACE_HOSTS: Record<string, string> = {
   // ingenieur.astraeos.fr n'est PLUS un wireframe : il sert l'application
   // éditeur réelle (le vrai workspace ingénieur). Pas d'entrée ici → la racine
   // tombe sur le défaut (l'éditeur), scopé par la session une fois l'auth active.
-  "client.astraeos.fr": "/client",
+  "client.astraeos.fr": "/espace-client",
 };
 
 // Conservés tels quels sur l'apex : collecte client par token (liens envoyés
