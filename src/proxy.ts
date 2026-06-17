@@ -9,7 +9,9 @@ const MARKETING_HOSTS = new Set(["astraeos.fr", "www.astraeos.fr"]);
 // Un sous-domaine par espace : la racine du sous-domaine sert la page de l'espace.
 // (app.astraeos.fr reste l'éditeur à la racine, géré par défaut.)
 const ESPACE_HOSTS: Record<string, string> = {
-  "marque.astraeos.fr": "/marque",
+  // Espace marque = vraie app React (route group (marque)/espace-marque),
+  // plus l'iframe de wireframe.
+  "marque.astraeos.fr": "/espace-marque",
   // L'espace dirigeant est désormais une vraie app React (route group
   // (dirigeant)/espace-dirigeant), plus l'iframe de wireframe.
   "dirigeant.astraeos.fr": "/espace-dirigeant",
