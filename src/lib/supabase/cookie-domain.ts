@@ -7,3 +7,25 @@ export function cookieDomainForHost(host: string | null | undefined): string | u
   if (h === "astraeos.fr" || h.endsWith(".astraeos.fr")) return ".astraeos.fr";
   return undefined;
 }
+
+export type SessionCookieOptions = {
+  domain?: string;
+  secure?: boolean;
+  sameSite: "lax";
+  path: "/";
+};
+
+// Options de cookie de session, dérivées du host courant. Source unique pour
+// middleware/server/client.
+// - En prod (astraeos.fr + sous-domaines, HTTPS) : domain partagé + secure:true.
+// - En dev/preview (localhost, *.vercel.app, HTTP) : pas de domain ni de secure
+//   (un cookie Secure serait rejeté sur HTTP → casserait la session locale).
+// sameSite:'lax' et path:'/' dans tous les cas.
+export function cookieOptionsForHost(host: string | null | undefined): SessionCookieOptions {
+  const domain = cookieDomainForHost(host);
+  return {
+    ...(domain ? { domain, secure: true } : {}),
+    sameSite: "lax",
+    path: "/",
+  };
+}

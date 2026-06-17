@@ -5,6 +5,7 @@ import { DEFAULT_MODEL } from "@/lib/ia-analyse";
 import { getEntretien, saveCompteRendu } from "@/lib/entretiens-store";
 import { requireAuth } from "@/lib/auth";
 import { getSessionContext } from "@/lib/auth/context";
+import { clientIp, rateLimit, rateLimitKey } from "@/lib/rate-limit";
 
 const ANTHROPIC_URL = "https://api.anthropic.com/v1/messages";
 const ANTHROPIC_VERSION = "2023-06-01";
@@ -93,6 +94,20 @@ export async function POST(
   const session = await getSessionContext();
   if (!session) {
     return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
+  }
+
+  // Rate-limit (endpoint IA coûteux, génération longue) : 30/min par cabinet+IP.
+  if (
+    !rateLimit(
+      rateLimitKey("entretiens/compte-rendu", session.cabinetId, clientIp(req)),
+      30,
+      60_000,
+    )
+  ) {
+    return NextResponse.json(
+      { error: "Trop de requêtes, réessayez dans un instant." },
+      { status: 429 },
+    );
   }
 
   const { id } = await ctx.params;

@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest, after } from "next/server";
 
 import { createAdminClient } from "@/lib/supabase/admin";
 import { analyserDepot } from "@/lib/ia-analyse";
+import { clientIp, rateLimit, rateLimitKey } from "@/lib/rate-limit";
 
 const MAX_FILE_SIZE = 15 * 1024 * 1024; // 15 Mo
 const BUCKET = "depots";
@@ -41,6 +42,15 @@ export async function POST(
 
   if (!token || token.length > 40) {
     return NextResponse.json({ error: "Token invalide" }, { status: 404 });
+  }
+
+  // Rate-limit (endpoint PUBLIC, anti-DoS) : 10/min par token+IP.
+  const ip = clientIp(req);
+  if (!rateLimit(rateLimitKey("collecte/depot", token, ip), 10, 60_000)) {
+    return NextResponse.json(
+      { error: "Trop de dépôts, réessayez dans un instant." },
+      { status: 429 },
+    );
   }
 
   const supabase = createAdminClient();
@@ -166,7 +176,15 @@ export async function POST(
   // Analyse IA en post-réponse, uniquement pour un dépôt de FICHIER.
   // `after` (Next 16, exporté par next/server) laisse répondre le client sans
   // attendre l'analyse. Si la clé IA n'est pas branchée, analyserDepot ne fait rien.
-  if (hasFile) {
+  //
+  // Garde-fou coût IA : on borne le NOMBRE d'analyses déclenchées par token+IP
+  // (plus serré que le débit de dépôt). Au-delà, le dépôt reste enregistré mais
+  // l'analyse IA est sautée — le flux client n'est pas cassé.
+  const analyseAutorisee =
+    !hasFile ||
+    rateLimit(rateLimitKey("collecte/depot:ia", token, ip), 20, 60_000);
+
+  if (hasFile && analyseAutorisee) {
     after(
       analyserDepot({ collecteId: collecte.id, itemIndex }).catch(() => {
         /* silencieux : l'analyse ne doit jamais impacter le dépôt client */

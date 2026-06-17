@@ -16,3 +16,16 @@ export async function blockClients(): Promise<void> {
     redirect("/espace-client");
   }
 }
+
+/**
+ * Restreint l'accès d'un layout STAFF à une liste blanche de rôles.
+ * - Pas de session → /login.
+ * - Rôle hors liste → /espace-client pour un client (son portail), /login sinon.
+ * À appeler en tête des layouts dont l'accès dépend du rôle exact.
+ */
+export async function requireRole(allowed: string[]): Promise<void> {
+  const ctx = await getSessionContext();
+  if (!ctx || !allowed.includes(ctx.role)) {
+    redirect(ctx?.role === "client" ? "/espace-client" : "/login");
+  }
+}

@@ -6,6 +6,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { buildCollecteEmail } from "@/lib/collecte-email";
 import { requireAuth } from "@/lib/auth";
 import { getSessionContext } from "@/lib/auth/context";
+import { clientIp, rateLimit, rateLimitKey } from "@/lib/rate-limit";
 
 // Alphabet sans caractères ambigus (pas de l/o/0/1).
 const TOKEN_ALPHABET = "abcdefghijkmnpqrstuvwxyz23456789";
@@ -38,6 +39,20 @@ export async function POST(req: NextRequest) {
 
   const ctx = await getSessionContext();
   if (!ctx) return NextResponse.json({ error: "Authentification requise" }, { status: 401 });
+
+  // Rate-limit (envoi e-mail séquentiel coûteux) : 10/min par cabinet+IP.
+  if (
+    !rateLimit(
+      rateLimitKey("collecte/send", ctx.cabinetId, clientIp(req)),
+      10,
+      60_000,
+    )
+  ) {
+    return NextResponse.json(
+      { error: "Trop d'envois, réessayez dans un instant." },
+      { status: 429 },
+    );
+  }
 
   let body: unknown;
   try {

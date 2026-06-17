@@ -66,7 +66,11 @@ export default function LoginPage() {
 
     const { error: otpError } = await supabase.auth.signInWithOtp({
       email: mail,
-      options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        // Pas de self-signup : seuls les comptes provisionnés peuvent se connecter.
+        shouldCreateUser: false,
+      },
     });
     if (otpError) {
       setStatus("error");

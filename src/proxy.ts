@@ -27,15 +27,22 @@ function isPublicAppPath(pathname: string): boolean {
   return pathname.startsWith("/depot") || pathname.startsWith("/api");
 }
 
-// Routes accessibles sans session, même quand le mur d'auth est actif :
-// collecte client par token, API publiques, et le tunnel d'auth lui-même.
-function isUnauthenticatedAllowed(pathname: string): boolean {
+// Routes accessibles sans session, même quand le mur d'auth est actif.
+// FAIL-CLOSED : on n'exempte PAS tout /api. Seules les routes réellement
+// publiques sont autorisées sans session ; tout le reste de /api passe par le
+// gate (et s'auto-garde déjà côté handler — défense en profondeur).
+function isUnauthenticatedAllowed(pathname: string, method: string): boolean {
   return (
+    // Dépôt client par token (liens envoyés par e-mail).
     pathname.startsWith("/depot") ||
-    pathname.startsWith("/api") ||
+    pathname.startsWith("/api/collecte/") ||
+    // Soumission DCI par un prospect : uniquement en POST sur /api/dci/[kind].
+    (method === "POST" && pathname.startsWith("/api/dci/")) ||
+    // Tunnel d'auth (callbacks/login Supabase + OAuth Google).
+    pathname.startsWith("/api/auth/") ||
+    pathname.startsWith("/auth/") ||
     pathname === "/login" ||
-    pathname.startsWith("/login/") ||
-    pathname.startsWith("/auth/")
+    pathname.startsWith("/login/")
   );
 }
 
@@ -73,7 +80,7 @@ export async function proxy(request: NextRequest) {
   // exactement "1". Flag absent/≠"1" ⇒ comportement actuel inchangé.
   if (process.env.ASTRAEOS_AUTH_ENFORCE === "1") {
     const { pathname } = request.nextUrl;
-    if (!user && !isUnauthenticatedAllowed(pathname)) {
+    if (!user && !isUnauthenticatedAllowed(pathname, request.method)) {
       const loginUrl = request.nextUrl.clone();
       loginUrl.pathname = "/login";
       loginUrl.search = "";

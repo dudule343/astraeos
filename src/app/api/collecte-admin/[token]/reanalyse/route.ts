@@ -4,6 +4,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { analyserDepot } from "@/lib/ia-analyse";
 import { requireAuth } from "@/lib/auth";
 import { getSessionContext } from "@/lib/auth/context";
+import { rateLimit, rateLimitKey, clientIp } from "@/lib/rate-limit";
 
 /**
  * Vue ingénieur : relancer l'analyse IA d'un dépôt.
@@ -28,6 +29,18 @@ export async function POST(
 
   const ctx = await getSessionContext();
   if (!ctx) return NextResponse.json({ error: "Authentification requise" }, { status: 401 });
+
+  // analyserDepot relance un appel modèle (coût Anthropic). Même garde que le
+  // chemin public collecte/depot:ia → on borne les ré-analyses pour éviter
+  // l'abus de facturation par un compte staff compromis ou une boucle UI.
+  if (
+    !rateLimit(rateLimitKey("collecte-admin/reanalyse", ctx.cabinetId, clientIp(req)), 20, 60_000)
+  ) {
+    return NextResponse.json(
+      { error: "Trop de ré-analyses, réessayez dans un instant." },
+      { status: 429 },
+    );
+  }
 
   const { token } = await params;
 

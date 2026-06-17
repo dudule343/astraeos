@@ -1,17 +1,17 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies, headers } from "next/headers";
 
-import { cookieDomainForHost } from "./cookie-domain";
+import { cookieOptionsForHost } from "./cookie-domain";
 
 export async function createClient() {
   const cookieStore = await cookies();
-  const domain = cookieDomainForHost((await headers()).get("host"));
+  const cookieOptions = cookieOptionsForHost((await headers()).get("host"));
 
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
-      ...(domain ? { cookieOptions: { domain } } : {}),
+      cookieOptions,
       cookies: {
         getAll() {
           return cookieStore.getAll();

@@ -7,6 +7,10 @@ import { getSessionContext } from "@/lib/auth/context";
 const ANTHROPIC_URL = "https://api.anthropic.com/v1/messages";
 const ANTHROPIC_VERSION = "2023-06-01";
 
+// Seuls les rôles gestionnaires peuvent écrire/supprimer la clé BYOK du cabinet.
+// Un engineer transcrit/analyse mais ne touche pas aux clés.
+const KEY_MANAGER_ROLES = ["cabinet_director", "brand_owner", "editor"];
+
 type SettingsRow = {
   id: string;
   provider: string;
@@ -71,6 +75,9 @@ export async function POST(req: NextRequest) {
   const ctx = await getSessionContext();
   if (!ctx) {
     return NextResponse.json({ error: "Authentification requise" }, { status: 401 });
+  }
+  if (!KEY_MANAGER_ROLES.includes(ctx.role)) {
+    return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
   }
 
   let payload: { api_key?: unknown; model?: unknown };
@@ -163,6 +170,9 @@ export async function DELETE() {
   const ctx = await getSessionContext();
   if (!ctx) {
     return NextResponse.json({ error: "Authentification requise" }, { status: 401 });
+  }
+  if (!KEY_MANAGER_ROLES.includes(ctx.role)) {
+    return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
   }
   try {
     const supabase = createAdminClient();

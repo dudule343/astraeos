@@ -2,7 +2,7 @@
 
 import { createBrowserClient } from "@supabase/ssr";
 
-import { cookieDomainForHost } from "./cookie-domain";
+import { cookieOptionsForHost } from "./cookie-domain";
 
 export function createClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -12,9 +12,9 @@ export function createClient() {
       "Supabase n'est pas encore configuré. Ajoute NEXT_PUBLIC_SUPABASE_URL et NEXT_PUBLIC_SUPABASE_ANON_KEY dans .env.local",
     );
   }
-  const domain =
-    typeof window !== "undefined" ? cookieDomainForHost(window.location.hostname) : undefined;
-  return createBrowserClient(url, key, domain ? { cookieOptions: { domain } } : undefined);
+  const cookieOptions =
+    typeof window !== "undefined" ? cookieOptionsForHost(window.location.hostname) : undefined;
+  return createBrowserClient(url, key, cookieOptions ? { cookieOptions } : undefined);
 }
 
 export function isSupabaseConfigured() {

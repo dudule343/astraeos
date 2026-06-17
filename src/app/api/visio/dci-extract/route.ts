@@ -3,6 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { DEFAULT_MODEL } from "@/lib/ia-analyse";
 import { getSessionContext } from "@/lib/auth/context";
+import { clientIp, rateLimit, rateLimitKey } from "@/lib/rate-limit";
 
 // Extraction en direct des champs du DCI à partir de la transcription de
 // l'entretien. Le front envoie la transcription récente + la liste des champs
@@ -49,6 +50,20 @@ export async function POST(req: NextRequest) {
   const ctx = await getSessionContext();
   if (!ctx) {
     return NextResponse.json({ error: "Authentification requise" }, { status: 401 });
+  }
+
+  // Rate-limit (endpoint IA coûteux) : 30/min par cabinet+IP.
+  if (
+    !rateLimit(
+      rateLimitKey("visio/dci-extract", ctx.cabinetId, clientIp(req)),
+      30,
+      60_000,
+    )
+  ) {
+    return NextResponse.json(
+      { error: "Trop de requêtes, réessayez dans un instant." },
+      { status: 429 },
+    );
   }
 
   let body: unknown;

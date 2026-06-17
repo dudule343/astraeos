@@ -101,12 +101,15 @@ export async function POST() {
 
     // Repli : les clés créées via la console Deepgram (rôle « Default ») savent
     // transcrire mais n'ont pas le scope keys:write pour fabriquer des clés
-    // éphémères (HTTP 403). Dans ce cas on renvoie la clé du cabinet telle
-    // quelle : elle ne permet que l'usage (transcription), pas la gestion du
-    // compte. La route est gatée par session, la clé renvoyée est celle du
-    // cabinet de la session — aucune fuite cross-tenant.
+    // éphémères (HTTP 403). On NE renvoie JAMAIS la clé maître au navigateur :
+    // même scopée transcription, elle n'a ni TTL ni rotation et fuiterait dans
+    // le client. Sans clé éphémère possible, le STT serveur est indisponible →
+    // 503 ; le front bascule sur Web Speech.
     if (resp.status === 403) {
-      return NextResponse.json({ key: masterKey, expires_in: TTL_SECONDS, mode: "direct" });
+      return NextResponse.json(
+        { error: "STT temporairement indisponible" },
+        { status: 503 },
+      );
     }
 
     const msg = await resp.text().catch(() => "");
