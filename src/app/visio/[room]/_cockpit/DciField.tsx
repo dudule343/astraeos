@@ -91,7 +91,10 @@ export function DciField({
         {isProposal && (
           <button
             className="v6-btn-validate"
-            onClick={() => dispatch({ type: "validateField", ref })}
+            onClick={() => {
+              dispatch({ type: "validateField", ref });
+              dispatch({ type: "toast", message: `✓ « ${field.label} » validé` });
+            }}
             title="Valider la proposition de l'IA"
           >
             <CheckIcon />
@@ -100,7 +103,10 @@ export function DciField({
         {isProposal && (
           <button
             className="v6-btn-reject"
-            onClick={() => dispatch({ type: "rejectField", ref })}
+            onClick={() => {
+              dispatch({ type: "rejectField", ref });
+              dispatch({ type: "toast", message: "Proposition IA refusée · champ remis à vide" });
+            }}
             title="Refuser la proposition IA"
           >
             <CrossIcon />

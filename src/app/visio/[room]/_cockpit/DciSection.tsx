@@ -402,7 +402,10 @@ export function DciSection() {
               </div>
               <button
                 className="v6-section-confirm-btn"
-                onClick={() => dispatch({ type: "confirmSection", sectionId: section.id })}
+                onClick={() => {
+                  dispatch({ type: "confirmSection", sectionId: section.id });
+                  dispatch({ type: "toast", message: `Section « ${section.title} » confirmée` });
+                }}
               >
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
                   <polyline points="20 6 9 17 4 12" />
