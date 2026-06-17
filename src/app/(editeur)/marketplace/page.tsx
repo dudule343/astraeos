@@ -1,6 +1,6 @@
 import { Topbar } from "../_components/Topbar";
 import { KpiCard, type KpiBlock } from "../_components/KpiCard";
-import { PageHero, GhostButton, GoldButton } from "../_components/PageHeader";
+import { PageHero } from "../_components/PageHeader";
 import {
   fetchMarketplace,
   fmtEur,
@@ -8,6 +8,7 @@ import {
   fmtSinceMonth,
   PRICING_TAGS,
 } from "./data";
+import { ExportTarifsButton } from "./ExportTarifsButton";
 
 export const dynamic = "force-dynamic";
 
@@ -57,8 +58,15 @@ export default async function MarketplacePage() {
           description="Modules complémentaires proposés aux clients ASTRAEOS — abonnements récurrents, paiements uniques, mises en relation avec partenaires, services à l'unité."
           actions={
             <>
-              <GhostButton>Export tarifs</GhostButton>
-              <GoldButton>＋ Créer un pack</GoldButton>
+              <ExportTarifsButton ranking={m.ranking} />
+              <button
+                type="button"
+                disabled
+                title="Création de pack à venir"
+                className="cursor-not-allowed rounded-md bg-[var(--gold)] px-3 py-2 text-[11.5px] font-bold text-white opacity-50"
+              >
+                ＋ Créer un pack · à venir
+              </button>
             </>
           }
         />
@@ -77,13 +85,11 @@ export default async function MarketplacePage() {
             </div>
             <div className="flex flex-wrap gap-1">
               {/* Pas de fenêtre temporelle modélisée (pas d'historique snapshoté) :
-                  un seul filtre réel actif plutôt que des stubs trompeurs. */}
-              <button
-                type="button"
-                className="rounded-md bg-[var(--navy)] px-3 py-1 text-[11px] font-semibold text-white"
-              >
+                  badge non cliquable plutôt qu'un faux filtre — le classement est
+                  toujours un cumul, il n'y a rien à basculer. */}
+              <span className="rounded-md bg-[var(--navy)] px-3 py-1 text-[11px] font-semibold text-white">
                 Cumul
-              </button>
+              </span>
             </div>
           </div>
           <div>

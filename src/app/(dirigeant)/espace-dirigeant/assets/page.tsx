@@ -1,7 +1,8 @@
 import { Topbar } from "../../_components/Topbar";
+import { ExportButton } from "../../_components/ExportButton";
 import { EmptyState } from "../../_components/EmptyState";
 import { KpiCard, type KpiBlock } from "../../../(editeur)/_components/KpiCard";
-import { PageHero, SectionHeader, GhostButton } from "../../../(editeur)/_components/PageHeader";
+import { PageHero, SectionHeader } from "../../../(editeur)/_components/PageHeader";
 import {
   fetchCabinetCommissions,
   fetchCabinetDossiers,
@@ -32,6 +33,13 @@ export default async function AssetsPage() {
   const clientsServed = new Set(dossiers.map((d) => d.client_id)).size;
 
   const hasData = totalAum > 0;
+
+  const exportRows: (string | number)[][] = byCategory.map((r) => [
+    r.label,
+    r.subs,
+    Math.round(r.aum),
+    totalAum > 0 ? `${Math.round((r.aum / totalAum) * 100)}%` : "—",
+  ]);
 
   const kpis: KpiBlock[] = [
     {
@@ -67,7 +75,14 @@ export default async function AssetsPage() {
           eyebrow="Développement"
           title="Encours & assets sous gestion"
           description="Encours total sous gestion (AUM) du cabinet, répartition par classe d'actifs et par produit. Calculé à partir des souscriptions enregistrées."
-          actions={<GhostButton>Export encours</GhostButton>}
+          actions={
+            <ExportButton
+              label="Export encours"
+              filename="encours-cabinet"
+              headers={["Produit", "Contrats", "Encours (€)", "Part"]}
+              rows={hasData ? exportRows : []}
+            />
+          }
         />
 
         <section className="mb-8 grid grid-cols-2 gap-3 lg:grid-cols-4">

@@ -29,7 +29,7 @@ export default async function TtvPage() {
           eyebrow="Bloc 04 · Vitesse première valeur"
           title="Vitesse première valeur"
           description="Mesurer combien de temps un nouvel utilisateur met avant d'obtenir une première valeur tangible — court = plus de chances de conversion et rétention."
-          actions={<GhostButton>Export</GhostButton>}
+          actions={<GhostButton dataStub="Export Time-to-value">Export</GhostButton>}
         />
 
         <section className="mb-8">

@@ -1668,7 +1668,7 @@ body {
           <div>Nom</div>
           <div></div>
         </div>
-        <div class="dyn-wrap">
+        <div class="dyn-wrap" id="personnesChargeWrap">
           <div class="dyn-row dyn-row-relation">
             <select class="select-input"><option>Père / Mère</option><option>Frère / Sœur</option><option>Grand-parent</option><option>Autre</option></select>
             <input type="text" class="text-input" placeholder="Prénom">
@@ -1676,7 +1676,7 @@ body {
             <div class="dyn-row-remove" onclick="this.parentElement.remove()">×</div>
           </div>
         </div>
-        <button class="dyn-add">
+        <button class="dyn-add" onclick="addPersonneCharge()">
           <svg><use href="#ic-plus"/></svg>
           Ajouter une personne
         </button>
@@ -2808,6 +2808,20 @@ function addEnfant() {
     <div class="dyn-row-remove" onclick="this.parentElement.remove()">×</div>
   `;
   tbl.appendChild(row);
+}
+
+function addPersonneCharge() {
+  const wrap = document.getElementById('personnesChargeWrap');
+  if (!wrap) return;
+  const row = document.createElement('div');
+  row.className = 'dyn-row dyn-row-relation';
+  row.innerHTML = `
+    <select class="select-input"><option>Père / Mère</option><option>Frère / Sœur</option><option>Grand-parent</option><option>Autre</option></select>
+    <input type="text" class="text-input" placeholder="Prénom">
+    <input type="text" class="text-input" placeholder="Nom">
+    <div class="dyn-row-remove" onclick="this.parentElement.remove()">×</div>
+  `;
+  wrap.appendChild(row);
 }
 
 let objCount = 2;

@@ -78,7 +78,7 @@ export default async function AdoptionPage() {
           eyebrow="Bloc 03 · Adoption produit"
           title="Adoption produit"
           description="Mesurer combien d'utilisateurs utilisent réellement la plateforme et à quelle fréquence — qui se connecte, qui revient, qui est dormant."
-          actions={<GhostButton>Export</GhostButton>}
+          actions={<GhostButton dataStub="Export Adoption">Export</GhostButton>}
         />
 
         <section className="mb-8">

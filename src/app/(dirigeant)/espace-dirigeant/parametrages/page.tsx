@@ -1,6 +1,6 @@
 import { Topbar } from "../../_components/Topbar";
 import { EmptyState } from "../../_components/EmptyState";
-import { PageHero, SectionHeader, GhostButton } from "../../../(editeur)/_components/PageHeader";
+import { PageHero, SectionHeader } from "../../../(editeur)/_components/PageHeader";
 import {
   fetchCabinetProfile,
   fetchCabinetUsers,
@@ -55,7 +55,16 @@ export default async function ParametragesPage() {
           eyebrow="Administration"
           title="Paramétrages du cabinet"
           description="Coordonnées, agréments réglementaires, règle de répartition des commissions et gestion des accès des utilisateurs."
-          actions={<GhostButton>Modifier</GhostButton>}
+          actions={
+            <button
+              type="button"
+              data-stub="Modifier le paramétrage du cabinet"
+              data-stub-body="L'édition des coordonnées, agréments et de la règle de répartition des commissions passera par un formulaire sécurisé (server action) côté tête de réseau. Cette fonctionnalité arrivera dans une prochaine itération."
+              className="rounded-md border border-[var(--navy-100)] bg-white px-3 py-2 text-[11.5px] font-semibold text-[var(--navy)] hover:border-[var(--gold)]"
+            >
+              Modifier
+            </button>
+          }
         />
 
         {profile ? (

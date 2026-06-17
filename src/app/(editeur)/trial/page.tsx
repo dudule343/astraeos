@@ -1,9 +1,36 @@
 import { Topbar } from "../_components/Topbar";
 import { KpiCard, type KpiBlock } from "../_components/KpiCard";
-import { PageHero, GhostButton, GoldButton } from "../_components/PageHeader";
+import { PageHero } from "../_components/PageHeader";
 import { fetchTrials, type TrialData } from "./data";
+import { TrialTable } from "./TrialTable";
 
 export const dynamic = "force-dynamic";
+
+// Templates email et démarrage d'essai n'ont aucun backend (pas de table de
+// templates, pas de mutation de statut d'essai). On les rend honnêtement
+// désactivés "à venir" plutôt qu'en faux boutons cliquables.
+function DisabledHeaderAction({
+  children,
+  gold = false,
+}: {
+  children: React.ReactNode;
+  gold?: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      disabled
+      title="Fonctionnalité à venir"
+      className={
+        gold
+          ? "cursor-not-allowed rounded-md bg-[var(--gold)] px-3 py-2 text-[11.5px] font-bold text-white opacity-50"
+          : "cursor-not-allowed rounded-md border border-[var(--navy-100)] bg-white px-3 py-2 text-[11.5px] font-semibold text-[var(--navy-300)] opacity-60"
+      }
+    >
+      {children}
+    </button>
+  );
+}
 
 const DASH = "—";
 
@@ -79,8 +106,8 @@ export default async function TrialPage() {
           description="Suivi des prospects en période d'essai gratuite — coordonnées complètes, étape du parcours, offre proposée, conversion vers un abonnement payant."
           actions={
             <>
-              <GhostButton>📧 Templates email</GhostButton>
-              <GoldButton>Démarrer un essai</GoldButton>
+              <DisabledHeaderAction>📧 Templates email · à venir</DisabledHeaderAction>
+              <DisabledHeaderAction gold>Démarrer un essai · à venir</DisabledHeaderAction>
             </>
           }
         />
@@ -135,114 +162,20 @@ export default async function TrialPage() {
           </div>
         </section>
 
-        <section className="mb-8 rounded-md border border-[var(--navy-100)] bg-white">
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--navy-100)] px-4 py-3">
-            <div className="flex flex-wrap gap-1.5">
-              {[{ label: "Tous", count: data.enCours, active: true }].map((f) => (
-                <button
-                  type="button"
-                  key={f.label}
-                  data-stub={`Filtre essais · ${f.label}`}
-                  className={`rounded-md px-3 py-1.5 text-[11.5px] font-semibold ${
-                    f.active
-                      ? "bg-[var(--navy)] text-white"
-                      : "border border-[var(--navy-100)] bg-white text-[var(--navy)] hover:border-[var(--gold)]"
-                  }`}
-                >
-                  {f.label}
-                  {typeof f.count === "number" ? ` (${f.count})` : ""}
-                </button>
-              ))}
-            </div>
-            <input
-              type="search"
-              placeholder="Rechercher..."
-              className="rounded-md border border-[var(--navy-100)] bg-white px-3 py-1.5 text-[12px] placeholder:text-[var(--navy-300)] focus:border-[var(--gold)] focus:outline-none"
-            />
-          </div>
-          {data.rows.length > 0 ? (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left">
-                <thead>
-                  <tr className="border-b border-[var(--navy-100)] bg-[var(--ivory)] text-[10.5px] font-bold uppercase tracking-[0.08em] text-[var(--navy-300)]">
-                    <th className="px-4 py-3">Contact (Prénom Nom)</th>
-                    <th className="px-4 py-3">Fonction</th>
-                    <th className="px-4 py-3">Cabinet</th>
-                    <th className="px-4 py-3">Coordonnées</th>
-                    <th className="px-4 py-3">Type</th>
-                    <th className="px-4 py-3">Démarré le</th>
-                    <th className="px-4 py-3">Reste</th>
-                    <th className="px-4 py-3">Étape parcours</th>
-                    <th className="px-4 py-3">Offre proposée</th>
-                    <th className="px-4 py-3 text-center">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[var(--navy-100)]">
-                  {data.rows.map((t) => (
-                    <tr
-                      key={t.id}
-                      className="text-[12px] text-[var(--navy)] hover:bg-[var(--light-blue)]"
-                    >
-                      <td className="px-4 py-3 font-semibold">{t.name ?? DASH}</td>
-                      <td className="px-4 py-3 text-[var(--navy-300)]">{t.role ?? DASH}</td>
-                      <td className="px-4 py-3">{t.cabinet ?? DASH}</td>
-                      <td className="px-4 py-3 text-[11px] leading-tight">
-                        {t.email || t.phone ? (
-                          <>
-                            {t.email && <div>📧 {t.email}</div>}
-                            {t.phone && <div>📞 {t.phone}</div>}
-                          </>
-                        ) : (
-                          <span className="text-[var(--navy-300)]">{DASH}</span>
-                        )}
-                      </td>
-                      <td className="px-4 py-3">
-                        <span
-                          className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-bold ${t.type.cls}`}
-                        >
-                          {t.type.v}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-[var(--navy-300)]">{t.startedOn ?? DASH}</td>
-                      <td className="px-4 py-3 text-[var(--navy-300)]">{t.remaining ?? DASH}</td>
-                      <td className="px-4 py-3 text-[var(--navy-300)]">{t.step ?? DASH}</td>
-                      <td className="px-4 py-3 text-[var(--navy-300)]">{t.offer ?? DASH}</td>
-                      <td className="px-4 py-3 text-center">
-                        <div className="flex justify-center gap-1.5">
-                          <GhostButton>📞 Appeler</GhostButton>
-                          <GhostButton>📧 Email</GhostButton>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <div className="p-12 text-center">
-              <div className="mb-3 text-[40px] leading-none">📋</div>
-              <div className="mb-2 text-[16px] font-semibold text-[var(--navy)]">
-                Aucun essai en cours
-              </div>
-              <p className="mx-auto max-w-md text-[12.5px] leading-relaxed text-[var(--navy-300)]">
-                Les comptes clients en période d&apos;essai apparaîtront ici dès qu&apos;un compte
-                passera au statut « essai ».
-              </p>
-            </div>
-          )}
-        </section>
+        <TrialTable rows={data.rows} enCours={data.enCours} />
 
         <section>
           <div className="rounded-md border border-[var(--navy-100)] bg-white">
             <div className="border-b border-[var(--navy-100)] px-4 py-3 text-[13px] font-semibold text-[var(--navy)]">
-              ⚡ Offres incitatives configurables
+              ⚡ Catalogue d&apos;offres incitatives de référence
             </div>
             <div className="p-4">
               <div className="mb-3 flex items-start gap-2 rounded-md border border-[var(--green-text)]/30 bg-[var(--green-bg)] px-4 py-3 text-[11.5px] text-[var(--navy)]">
                 <span>✓</span>
                 <div>
-                  3 offres incitatives configurables, à activer au cas par cas sur les comptes
-                  en période d&apos;essai.
+                  Catalogue de référence des 3 offres incitatives prévues, à appliquer manuellement
+                  au cas par cas. L&apos;activation en un clic depuis cet écran sera ajoutée
+                  ultérieurement.
                 </div>
               </div>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">

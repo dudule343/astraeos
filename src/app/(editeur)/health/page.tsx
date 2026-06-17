@@ -75,7 +75,7 @@ export default async function HealthPage() {
           eyebrow="Bloc 05 · Santé clients"
           title="Santé clients"
           description="Activité et fraîcheur des cabinets du réseau — détection précoce des comptes inactifs à partir des dossiers, études et connexions réelles."
-          actions={<GhostButton>Export</GhostButton>}
+          actions={<GhostButton dataStub="Export Santé clients">Export</GhostButton>}
         />
 
         <section className="mb-8">
@@ -146,7 +146,12 @@ export default async function HealthPage() {
                           {fmtNombre(row.dossiersActifs)}
                         </td>
                         <td className="px-4 py-3 text-center">
-                          <GoldButton>Briefer la relation client</GoldButton>
+                          <GoldButton
+                            dataStub="Briefer la relation client"
+                            dataStubBody="Le déclenchement d'un brief relation client (création d'une tâche de suivi pour ce compte à risque) sera disponible dans une prochaine itération."
+                          >
+                            Briefer la relation client
+                          </GoldButton>
                         </td>
                       </tr>
                     );

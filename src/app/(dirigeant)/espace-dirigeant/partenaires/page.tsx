@@ -1,7 +1,8 @@
 import { Topbar } from "../../_components/Topbar";
+import { ExportButton } from "../../_components/ExportButton";
 import { EmptyState } from "../../_components/EmptyState";
 import { KpiCard, type KpiBlock } from "../../../(editeur)/_components/KpiCard";
-import { PageHero, SectionHeader, GhostButton } from "../../../(editeur)/_components/PageHeader";
+import { PageHero, SectionHeader } from "../../../(editeur)/_components/PageHeader";
 import {
   fetchCabinetCommissions,
   computeBreakdownByPartner,
@@ -24,6 +25,13 @@ export default async function PartenairesPage() {
   const named = byPartner.filter((p) => p.key !== "Sans partenaire");
 
   const hasData = totalVolume > 0 && named.length > 0;
+
+  const exportRows: (string | number)[][] = named.map((p) => [
+    p.label,
+    p.subs,
+    Math.round(p.generated),
+    totalVolume > 0 ? `${Math.round((p.generated / totalVolume) * 100)}%` : "—",
+  ]);
 
   const kpis: KpiBlock[] = [
     {
@@ -54,7 +62,14 @@ export default async function PartenairesPage() {
           eyebrow="Développement"
           title="Partenaires & apporteurs d'affaires"
           description="Volume d'affaires généré par partenaire producteur, dérivé des produits souscrits dans les dossiers du cabinet."
-          actions={<GhostButton>Export partenaires</GhostButton>}
+          actions={
+            <ExportButton
+              label="Export partenaires"
+              filename="partenaires-cabinet"
+              headers={["Partenaire", "Souscriptions", "Volume généré (€)", "Part"]}
+              rows={hasData ? exportRows : []}
+            />
+          }
         />
 
         <section className="mb-8 grid grid-cols-2 gap-3 lg:grid-cols-3">

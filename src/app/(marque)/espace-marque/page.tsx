@@ -1,6 +1,7 @@
 import { Topbar } from "../_components/Topbar";
+import { NetworkExportButton } from "../_components/NetworkExportButton";
 import { KpiCard, type KpiBlock } from "../../(editeur)/_components/KpiCard";
-import { PageHero, SectionHeader, GhostButton } from "../../(editeur)/_components/PageHeader";
+import { PageHero, SectionHeader } from "../../(editeur)/_components/PageHeader";
 import { EmptyState } from "../../(dirigeant)/_components/EmptyState";
 import {
   fetchNetworkCabinets,
@@ -69,7 +70,22 @@ export default async function AccueilReseauPage() {
           eyebrow={`Tableau de bord · ${DATE_FR}`}
           title="Bienvenue sur le réseau PRIVEOS"
           description="Cockpit de la tête de réseau : indicateurs consolidés de l'ensemble des cabinets licenciés, encours sous gestion, parcours patrimonial et classement des licenciés. Tout pour piloter la marque depuis un seul écran."
-          actions={<GhostButton>Exporter la synthèse</GhostButton>}
+          actions={
+            <NetworkExportButton
+              label="Exporter la synthèse"
+              filename="astraeos-reseau-synthese"
+              headers={["Rang", "Cabinet", "Ville", "Dirigeant", "Clients", "CA généré (€)", "Encours (€)"]}
+              rows={ranked.map((c) => [
+                c.rank,
+                c.name,
+                c.city ?? "",
+                c.director ?? "",
+                c.clients,
+                Math.round(c.caGenere),
+                Math.round(c.encours),
+              ])}
+            />
+          }
         />
 
         {/* ---- Cockpit · KPIs consolidés du réseau ---- */}

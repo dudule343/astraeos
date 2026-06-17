@@ -2,7 +2,8 @@ import Link from "next/link";
 
 import { Topbar } from "../_components/Topbar";
 import { KpiCard, type KpiBlock } from "../_components/KpiCard";
-import { PageHero, GhostButton } from "../_components/PageHeader";
+import { PageHero } from "../_components/PageHeader";
+import { ExportDossiersButton } from "./ExportDossiersButton";
 import { createAdminClient } from "@/lib/supabase/admin";
 import {
   type Dossier,
@@ -350,7 +351,7 @@ export default async function DossiersPage() {
           description={`Vue Kanban de l'ensemble de mes dossiers en cours · ${nActifs} dossiers actifs répartis sur 6 étapes du parcours · ${mLivrees} dossiers déjà livrés en 2026 · ${pSuivi} clients en phase de suivi.`}
           actions={
             <>
-              <GhostButton>Exporter</GhostButton>
+              <ExportDossiersButton dossiers={dossiers} />
               <Link
                 href="/client-new"
                 className="rounded-md bg-[var(--gold)] px-3 py-2 text-[11.5px] font-bold text-white hover:brightness-110"

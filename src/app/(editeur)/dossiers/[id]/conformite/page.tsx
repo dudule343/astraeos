@@ -241,6 +241,8 @@ function DocCard({ row, dossierId, honoraires }: { row: ConformiteRow; dossierId
       <div className="mt-3.5 grid grid-cols-3 gap-1.5">
         <button
           type="button"
+          data-stub={`Modifier · ${cfg.title}`}
+          data-stub-body="L'éditeur de pièce réglementaire sera disponible dans une prochaine itération. L'envoi au client se fait via le bouton « Envoyer »."
           className="flex items-center justify-center gap-1 rounded-md border border-[var(--navy-100)] bg-white px-2 py-1.5 text-[10.5px] font-semibold text-[var(--navy)] hover:border-[var(--gold)]"
         >
           Modifier
@@ -261,6 +263,12 @@ function DocCard({ row, dossierId, honoraires }: { row: ConformiteRow; dossierId
         )}
         <button
           type="button"
+          data-stub={isLM ? `Signature · ${cfg.title}` : `Consulter · ${cfg.title}`}
+          data-stub-body={
+            isLM
+              ? "Le parcours de signature électronique (Yousign) sera disponible dans une prochaine itération. La pièce est transmise au client via « Envoyer »."
+              : "L'aperçu PDF de la pièce sera disponible dans une prochaine itération."
+          }
           className="flex items-center justify-center gap-1 rounded-md border border-[var(--navy-100)] bg-white px-2 py-1.5 text-[10.5px] font-semibold text-[var(--navy)] hover:border-[var(--gold)]"
         >
           {isLM ? "Signer" : "Consulter"}

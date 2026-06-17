@@ -1,6 +1,7 @@
 import { Topbar } from "../../_components/Topbar";
+import { NetworkExportButton } from "../../_components/NetworkExportButton";
 import { KpiCard, type KpiBlock } from "../../../(editeur)/_components/KpiCard";
-import { PageHero, SectionHeader, GhostButton } from "../../../(editeur)/_components/PageHeader";
+import { PageHero, SectionHeader } from "../../../(editeur)/_components/PageHeader";
 import { EmptyState } from "../../_components/EmptyState";
 import {
   fetchNetworkCommissions,
@@ -122,7 +123,42 @@ export default async function SyntheseReseauPage() {
           eyebrow="Tableau de bord · synthèse financière du réseau"
           title="Synthèse du réseau"
           description="Vue financière consolidée du réseau PRIVEOS : CA généré et encaissé sur l'ensemble des cabinets du tenant, répartition entre honoraires d'études et apports d'affaires, ventilation des commissions par catégorie de produit."
-          actions={<GhostButton>Export comptable</GhostButton>}
+          actions={
+            <NetworkExportButton
+              label="Export comptable"
+              filename="astraeos-synthese-comptable"
+              headers={[
+                "Source",
+                "Type",
+                "Souscriptions",
+                "Généré (€)",
+                "Encaissé (€)",
+                "Reste à encaisser (€)",
+              ]}
+              rows={[
+                ...sourceRows.map((r) => [
+                  r.source,
+                  r.type,
+                  r.subs,
+                  Math.round(r.gen),
+                  Math.round(r.enc),
+                  Math.round(r.rest),
+                ]),
+                ...(sourceRows.length > 0
+                  ? [
+                      [
+                        "Total réseau",
+                        "",
+                        "",
+                        Math.round(resultat.totalGenere),
+                        Math.round(resultat.totalEncaisse),
+                        Math.round(resultat.resteAEncaisser),
+                      ],
+                    ]
+                  : []),
+              ]}
+            />
+          }
         />
 
         {/* ---- Synthèse · généré vs encaissé ---- */}

@@ -1,6 +1,6 @@
 import { Topbar } from "../_components/Topbar";
 import { type KpiBlock } from "../_components/KpiCard";
-import { PageHero, GhostButton, GoldButton } from "../_components/PageHeader";
+import { PageHero, GoldButton } from "../_components/PageHeader";
 import {
   fetchEditeurCommissions,
   computeEditeurResultat,
@@ -10,6 +10,7 @@ import {
   fmtEur,
 } from "./data";
 import { FinanceTabs, type FinanceData } from "./FinanceTabs";
+import { FinanceExportButton } from "./FinanceExportButton";
 
 export const dynamic = "force-dynamic";
 
@@ -205,8 +206,13 @@ export default async function FinancePage() {
           description="Pilotage financier de l'éditeur ASTRAEOS — chiffre d'affaires généré et encaissé sur la part marque, détail par source et par catégorie de produit, vue consolidée tous cabinets. Charges, trésorerie et prévisionnel à venir."
           actions={
             <>
-              <GhostButton>Export comptable</GhostButton>
-              <GoldButton>🔌 Connexion Qonto</GoldButton>
+              <FinanceExportButton data={data} />
+              <GoldButton
+                dataStub="Connexion Qonto"
+                dataStubBody="La connexion bancaire Qonto (synchronisation des soldes et de la trésorerie) sera disponible dans une prochaine itération. Aucun flux bancaire n'est connecté pour l'instant."
+              >
+                🔌 Connexion Qonto
+              </GoldButton>
             </>
           }
         />

@@ -1,26 +1,17 @@
+import Link from "next/link";
+
 import { Topbar } from "../_components/Topbar";
 import { KpiCard, type KpiBlock } from "../_components/KpiCard";
-import { PageHero, GhostButton, GoldButton } from "../_components/PageHeader";
+import { PageHero } from "../_components/PageHeader";
 import { fetchLeads } from "./data";
+import { LeadsTable } from "./LeadsTable";
+import { ExportLeadsButton } from "./ExportLeadsButton";
 
 export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "ASTRAEOS · Pipeline acquisition",
 };
-
-const sourceClass = {
-  success: "bg-[var(--green-bg)] text-[var(--green-text)]",
-  info: "bg-[var(--light-blue)] text-[var(--navy)]",
-  warning: "bg-[var(--orange-bg)] text-[var(--orange-text)]",
-  purple: "bg-[#E5DCEB] text-[#5B3A6E]",
-} as const;
-
-const stepClass = {
-  warning: "bg-[var(--orange-bg)] text-[var(--orange-text)]",
-  success: "bg-[var(--green-bg)] text-[var(--green-text)]",
-  info: "bg-[var(--light-blue)] text-[var(--navy)]",
-} as const;
 
 export default async function LeadsPage() {
   const data = await fetchLeads();
@@ -77,8 +68,13 @@ export default async function LeadsPage() {
           description="Gestion opérationnelle des leads commerciaux en amont de la période d'essai — qualification, prise de contact, RDV planifiés, propositions d'essai. Vue commerciale du portefeuille."
           actions={
             <>
-              <GhostButton>Export</GhostButton>
-              <GoldButton>＋ Nouveau lead</GoldButton>
+              <ExportLeadsButton leads={data.leads} />
+              <Link
+                href="/clients"
+                className="rounded-md bg-[var(--gold)] px-3 py-2 text-[11.5px] font-bold text-white hover:brightness-110"
+              >
+                ＋ Nouveau lead
+              </Link>
             </>
           }
         />
@@ -94,16 +90,23 @@ export default async function LeadsPage() {
             <div className="text-[13px] font-semibold text-[var(--navy)]">
               Pipeline commercial · 6 étapes
             </div>
-            <GhostButton>Vue kanban ↗</GhostButton>
+            <button
+              type="button"
+              disabled
+              title="Vue kanban à venir"
+              className="cursor-not-allowed rounded-md border border-[var(--navy-100)] bg-white px-3 py-2 text-[11.5px] font-semibold text-[var(--navy-300)] opacity-60"
+            >
+              Vue kanban · à venir
+            </button>
           </div>
           <div className="grid grid-cols-2 gap-2 p-4 sm:grid-cols-3 lg:grid-cols-6">
             {data.pipeline.map((step) => (
               <div
                 key={step.stage}
-                className={`cursor-pointer rounded-md border p-3 transition-all ${
+                className={`rounded-md border p-3 ${
                   step.active
                     ? "border-[var(--gold)] bg-[var(--gold-200)]/30"
-                    : "border-[var(--navy-100)] bg-[var(--ivory)] hover:border-[var(--gold-300)]"
+                    : "border-[var(--navy-100)] bg-[var(--ivory)]"
                 }`}
               >
                 <div
@@ -124,106 +127,7 @@ export default async function LeadsPage() {
           </div>
         </section>
 
-        <section className="rounded-md border border-[var(--navy-100)] bg-white">
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--navy-100)] px-4 py-3">
-            <div className="flex flex-wrap gap-1.5">
-              {[
-                { label: "Tous", count: data.totalCount, active: true },
-                { label: "Hot leads", count: null },
-                { label: "À relancer", count: null },
-                { label: "Sans suite", count: null },
-              ].map((f) => (
-                <button
-                  type="button"
-                  key={f.label}
-                  data-stub={`Filtre · ${f.label}`}
-                  className={`rounded-md px-3 py-1.5 text-[11.5px] font-semibold ${
-                    f.active
-                      ? "bg-[var(--navy)] text-white"
-                      : "border border-[var(--navy-100)] bg-white text-[var(--navy)] hover:border-[var(--gold)]"
-                  }`}
-                >
-                  {f.count != null ? `${f.label} (${f.count})` : f.label}
-                </button>
-              ))}
-            </div>
-            <input
-              type="search"
-              placeholder="Rechercher un lead..."
-              className="rounded-md border border-[var(--navy-100)] bg-white px-3 py-1.5 text-[12px] placeholder:text-[var(--navy-300)] focus:border-[var(--gold)] focus:outline-none"
-            />
-          </div>
-          {data.leads.length > 0 ? (
-            <table className="w-full text-left">
-              <thead>
-                <tr className="border-b border-[var(--navy-100)] bg-[var(--ivory)] text-[10.5px] font-bold uppercase tracking-[0.08em] text-[var(--navy-300)]">
-                  <th className="px-4 py-3">Contact</th>
-                  <th className="px-4 py-3">Cabinet</th>
-                  <th className="px-4 py-3">Source</th>
-                  <th className="px-4 py-3">Étape</th>
-                  <th className="px-4 py-3">Dernier contact</th>
-                  <th className="px-4 py-3">Prochaine action</th>
-                  <th className="px-4 py-3">Affecté à</th>
-                  <th className="px-4 py-3 text-center">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[var(--navy-100)]">
-                {data.leads.map((lead) => (
-                  <tr
-                    key={lead.id}
-                    className="text-[12.5px] text-[var(--navy)] hover:bg-[var(--light-blue)]"
-                  >
-                    <td className="px-4 py-3">
-                      <div className="font-semibold">{lead.name ?? "—"}</div>
-                      <div className="text-[10.5px] font-normal text-[var(--navy-300)]">
-                        {lead.email ?? "—"} · {lead.phone ?? "—"}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 text-[var(--navy-300)]">—</td>
-                    <td className="px-4 py-3">
-                      {lead.source ? (
-                        <span
-                          className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-bold ${sourceClass[lead.source.tone]}`}
-                        >
-                          {lead.source.value}
-                        </span>
-                      ) : (
-                        <span className="text-[var(--navy-300)]">—</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-bold ${stepClass[lead.stageTone]}`}
-                      >
-                        {lead.stageLabel}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-[var(--navy-300)]">{lead.lastContact}</td>
-                    <td className="px-4 py-3 text-[var(--navy-300)]">—</td>
-                    <td className="px-4 py-3 text-[var(--navy-300)]">{lead.assignee ?? "—"}</td>
-                    <td className="px-4 py-3 text-center">
-                      {lead.cta.primary ? (
-                        <GoldButton>{lead.cta.label}</GoldButton>
-                      ) : (
-                        <GhostButton>{lead.cta.label}</GhostButton>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          ) : (
-            <div className="px-4 py-12 text-center">
-              <div className="mb-2 text-[14px] font-semibold text-[var(--navy)]">
-                Aucun lead en amont
-              </div>
-              <p className="mx-auto max-w-md text-[12px] leading-relaxed text-[var(--navy-300)]">
-                Les leads apparaissent ici dès qu&apos;un dossier est ouvert en étape prospect ou
-                conformité pour ce cabinet.
-              </p>
-            </div>
-          )}
-        </section>
+        <LeadsTable leads={data.leads} totalCount={data.totalCount} />
       </div>
     </>
   );

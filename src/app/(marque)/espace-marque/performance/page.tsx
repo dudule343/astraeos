@@ -1,7 +1,8 @@
 import { Topbar } from "../../_components/Topbar";
+import { NetworkExportButton } from "../../_components/NetworkExportButton";
 import { EmptyState } from "../../_components/EmptyState";
 import { KpiCard, type KpiBlock } from "../../../(editeur)/_components/KpiCard";
-import { PageHero, SectionHeader, GhostButton } from "../../../(editeur)/_components/PageHeader";
+import { PageHero, SectionHeader } from "../../../(editeur)/_components/PageHeader";
 import {
   fetchNetworkCabinets,
   computeNetworkPerfKpis,
@@ -61,7 +62,32 @@ export default async function PerformanceLicenciesPage() {
           eyebrow="Tableau de bord · pilotage des cabinets licenciés"
           title="Performance des licenciés"
           description="Classement des cabinets licenciés du réseau par chiffre d'affaires généré, encours sous gestion et rang réseau. Calculé en temps réel à partir des commissions et des cabinets du tenant."
-          actions={<GhostButton>Exporter</GhostButton>}
+          actions={
+            <NetworkExportButton
+              label="Exporter"
+              filename="astraeos-performance-licencies"
+              headers={[
+                "Rang",
+                "Cabinet",
+                "Ville",
+                "Dirigeant",
+                "CA généré (€)",
+                "Encours (€)",
+                "Clients",
+                "Rang réseau",
+              ]}
+              rows={ranked.map((c) => [
+                c.rank,
+                c.name,
+                c.city ?? "",
+                c.director ?? "",
+                Math.round(c.caGenere),
+                Math.round(c.encours),
+                c.clients,
+                c.networkRank != null ? `#${c.networkRank}` : "",
+              ])}
+            />
+          }
         />
 
         <section className="mb-8 grid grid-cols-2 gap-3 lg:grid-cols-4">

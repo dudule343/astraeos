@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Topbar } from "./_components/Topbar";
+import { AlertsPanel } from "./_components/AlertsPanel";
 
 type Compare = {
   period: string;
@@ -179,12 +180,6 @@ const toneClasses = {
   green: { num: "text-[var(--green-text)]", bar: "bg-[var(--green-text)]" },
   orange: { num: "text-[var(--orange-text)]", bar: "bg-[var(--orange-text)]" },
   red: { num: "text-[var(--red-text)]", bar: "bg-[var(--red-text)]" },
-} as const;
-
-const alertLevelClasses = {
-  danger: "bg-[var(--red-bg)] text-[var(--red-text)]",
-  warning: "bg-[var(--orange-bg)] text-[var(--orange-text)]",
-  info: "bg-[var(--light-blue)] text-[var(--navy)]",
 } as const;
 
 export default function HomePage() {
@@ -379,44 +374,7 @@ export default function HomePage() {
         </section>
 
         <section className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-          <div className="rounded-md border border-[var(--navy-100)] bg-white">
-            <div className="flex items-center justify-between border-b border-[var(--navy-100)] px-4 py-3">
-              <div className="text-[13px] font-semibold text-[var(--navy)]">
-                Alertes & actions urgentes
-              </div>
-              <button
-                type="button"
-                data-stub="Filtre alertes · Toutes"
-                className="rounded-md border border-[var(--navy-100)] bg-white px-2.5 py-1 text-[11px] font-semibold text-[var(--navy)] hover:border-[var(--gold)]"
-              >
-                Toutes
-              </button>
-            </div>
-            <div className="divide-y divide-[var(--navy-100)]">
-              {alerts.map((alert) => (
-                <Link
-                  key={alert.title}
-                  href={alert.href}
-                  className="block cursor-pointer px-4 py-3 hover:bg-[var(--light-blue)]"
-                >
-                  <div className="mb-1 flex items-center gap-2 text-[10.5px]">
-                    <span
-                      className={`rounded-full px-2 py-0.5 font-bold uppercase tracking-wider ${alertLevelClasses[alert.level]}`}
-                    >
-                      {alert.levelLabel}
-                    </span>
-                    <span className="text-[var(--navy-300)]">{alert.time}</span>
-                  </div>
-                  <div className="text-[12.5px] font-semibold text-[var(--navy)]">
-                    {alert.title}
-                  </div>
-                  <div className="mt-0.5 text-[11.5px] text-[var(--navy-300)]">
-                    {alert.sub}
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
+          <AlertsPanel alerts={alerts} />
 
           <div className="rounded-md border border-[var(--navy-100)] bg-white">
             <div className="flex items-center justify-between border-b border-[var(--navy-100)] px-4 py-3">

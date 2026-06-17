@@ -45,7 +45,7 @@ export default async function ProductPage() {
           eyebrow="Bloc 06 · Analyse produit"
           title="Analyse produit"
           description="Comprendre comment les utilisateurs utilisent réellement la plateforme — détecter les frictions et identifier les fonctionnalités à valeur. Bloc essentiel mais nécessite le tracking comportemental (Phase 2)."
-          actions={<GhostButton>Export</GhostButton>}
+          actions={<GhostButton dataStub="Export Analyse produit">Export</GhostButton>}
         />
 
         <div className="mb-6 flex items-start gap-2 rounded-md border border-[var(--navy-100)] bg-[var(--light-blue)] px-4 py-3 text-[11.5px] text-[var(--navy)]">

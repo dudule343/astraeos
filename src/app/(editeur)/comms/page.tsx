@@ -70,8 +70,10 @@ export default async function CommsPage() {
           description="Gestion des communications sortantes vers les ingénieurs patrimoniaux des clients ASTRAEOS — newsletter, webinars, mises à jour produit, annonces stratégiques."
           actions={
             <>
-              <GhostButton>Templates</GhostButton>
-              <GoldButton>＋ Nouvelle communication</GoldButton>
+              <GhostButton dataStub="Bibliothèque de templates">Templates</GhostButton>
+              <GoldButton dataStub="Nouvelle communication">
+                ＋ Nouvelle communication
+              </GoldButton>
             </>
           }
         />
@@ -144,7 +146,7 @@ export default async function CommsPage() {
                 {data.notifications.slice(0, 6).map((n) => (
                   <div
                     key={n.id}
-                    className={`cursor-pointer px-4 py-3 hover:bg-[var(--light-blue)] ${n.read ? "" : "bg-[var(--ivory)]"}`}
+                    className={`px-4 py-3 ${n.read ? "" : "bg-[var(--ivory)]"}`}
                   >
                     <div className="mb-1 flex items-center gap-2 text-[10.5px]">
                       <span
@@ -179,7 +181,7 @@ export default async function CommsPage() {
           <SectionHeader
             eyebrow="Bibliothèque"
             title="Templates de communication"
-            right={<GhostButton>＋ Nouveau template</GhostButton>}
+            right={<GhostButton dataStub="Nouveau template">＋ Nouveau template</GhostButton>}
           />
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             {templates.map((t) => (

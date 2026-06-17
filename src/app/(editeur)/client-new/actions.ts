@@ -18,6 +18,10 @@ export async function createClientAction(formData: FormData) {
   const sousDomaine = String(formData.get("sous_domaine") ?? "").trim();
   const modeFacturation = String(formData.get("mode_facturation") ?? "").trim();
   const dateActivation = String(formData.get("date_activation") ?? "").trim();
+  const packs = formData
+    .getAll("packs")
+    .map((p) => String(p).trim())
+    .filter(Boolean);
 
   if (!raisonSociale || !siren || !adresseSiege || !representantLegal || !emailPrincipal) {
     throw new Error("Champs requis manquants : raison sociale, SIREN, adresse, représentant, email");
@@ -58,6 +62,8 @@ export async function createClientAction(formData: FormData) {
     sous_domaine: sousDomaine,
     mode_facturation: modeFacturation,
     date_activation: dateActivation,
+    packs,
+    pack: packs[0] ?? "",
   });
 
   const [personRes, dossierRes] = await Promise.all([

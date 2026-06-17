@@ -1,7 +1,8 @@
 import { Topbar } from "../../_components/Topbar";
+import { NetworkExportButton } from "../../_components/NetworkExportButton";
 import { EmptyState } from "../../../(dirigeant)/_components/EmptyState";
 import { KpiCard, type KpiBlock } from "../../../(editeur)/_components/KpiCard";
-import { PageHero, SectionHeader, GhostButton } from "../../../(editeur)/_components/PageHeader";
+import { PageHero, SectionHeader } from "../../../(editeur)/_components/PageHeader";
 import {
   fetchNetworkCabinets,
   computeNetworkPerfKpis,
@@ -62,7 +63,32 @@ export default async function LicenciesPage() {
           eyebrow={`Réseau · ${kpis.cabinetsCount} licencié${kpis.cabinetsCount > 1 ? "s" : ""}`}
           title="Les licenciés du réseau"
           description="Portefeuille des cabinets de gestion de patrimoine du réseau : implantation, dirigeant, clients servis, chiffre d'affaires généré, encours sous gestion et rang réseau. Tous les cabinets actifs du tenant, classés par chiffre d'affaires généré."
-          actions={<GhostButton>Export</GhostButton>}
+          actions={
+            <NetworkExportButton
+              label="Export"
+              filename="astraeos-licencies"
+              headers={[
+                "Rang",
+                "Cabinet",
+                "Ville",
+                "Dirigeant",
+                "Clients",
+                "CA généré (€)",
+                "Encours (€)",
+                "Rang réseau",
+              ]}
+              rows={ranked.map((c) => [
+                c.rank,
+                c.name,
+                c.city ?? "",
+                c.director ?? "",
+                c.clients,
+                Math.round(c.caGenere),
+                Math.round(c.encours),
+                c.rankCached != null ? `#${c.rankCached}` : "",
+              ])}
+            />
+          }
         />
 
         <section className="mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-[var(--gold)]">

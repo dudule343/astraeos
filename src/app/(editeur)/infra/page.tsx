@@ -71,7 +71,7 @@ export default async function InfraPage() {
           eyebrow="Bloc 08 · Infrastructure"
           title="Infrastructure"
           description="Superviser la stabilité technique de la plateforme — disponibilité, temps de réponse serveur, consommation IA et cloud, jobs automatiques."
-          actions={<GhostButton>Export</GhostButton>}
+          actions={<GhostButton dataStub="Export Infrastructure">Export</GhostButton>}
         />
 
         <section className="mb-8">

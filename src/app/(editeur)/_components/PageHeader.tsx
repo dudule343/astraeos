@@ -53,10 +53,27 @@ export function SectionHeader({
   );
 }
 
-export function GhostButton({ children }: { children: ReactNode }) {
+type StubProps = {
+  children: ReactNode;
+  /** Libellé montré par StubShell. Active le feedback honnête (toast/modale). */
+  dataStub?: string;
+  /** "toast" (par défaut ici) ou "modal". */
+  dataStubMode?: "toast" | "modal";
+  dataStubBody?: string;
+};
+
+export function GhostButton({
+  children,
+  dataStub,
+  dataStubMode = "toast",
+  dataStubBody,
+}: StubProps) {
   return (
     <button
       type="button"
+      data-stub={dataStub}
+      data-stub-mode={dataStub ? dataStubMode : undefined}
+      data-stub-body={dataStubBody}
       className="rounded-md border border-[var(--navy-100)] bg-white px-3 py-2 text-[11.5px] font-semibold text-[var(--navy)] hover:border-[var(--gold)]"
     >
       {children}
@@ -64,10 +81,18 @@ export function GhostButton({ children }: { children: ReactNode }) {
   );
 }
 
-export function GoldButton({ children }: { children: ReactNode }) {
+export function GoldButton({
+  children,
+  dataStub,
+  dataStubMode = "modal",
+  dataStubBody,
+}: StubProps) {
   return (
     <button
       type="button"
+      data-stub={dataStub}
+      data-stub-mode={dataStub ? dataStubMode : undefined}
+      data-stub-body={dataStubBody}
       className="rounded-md bg-[var(--gold)] px-3 py-2 text-[11.5px] font-bold text-white hover:brightness-110"
     >
       {children}

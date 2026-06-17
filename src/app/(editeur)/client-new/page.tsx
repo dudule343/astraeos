@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { Topbar } from "../_components/Topbar";
@@ -180,7 +181,14 @@ export default function ClientNewPage() {
           eyebrow="Opérations clients"
           title="Créer un nouveau client"
           description="Wizard interactif en 6 étapes — cliquer sur l'en-tête d'une étape la déplie. Chaque étape est testable et peut être validée pour passer à la suivante."
-          actions={<GhostButton>Annuler</GhostButton>}
+          actions={
+            <Link
+              href="/clients"
+              className="rounded-md border border-[var(--navy-100)] bg-white px-3 py-2 text-[11.5px] font-semibold text-[var(--navy)] hover:border-[var(--gold)]"
+            >
+              Annuler
+            </Link>
+          }
         />
 
         {hasDraft && (
@@ -544,7 +552,13 @@ function Step4({ onPrev, onNext }: { onPrev: () => void; onNext: () => void }) {
             {packs.map((p) => (
               <tr key={p.name} className="text-[12.5px] text-[var(--navy)]">
                 <td className="px-4 py-3">
-                  <input type="checkbox" defaultChecked={p.checked} className="h-4 w-4" />
+                  <input
+                    type="checkbox"
+                    name="packs"
+                    value={p.name}
+                    defaultChecked={p.checked}
+                    className="h-4 w-4"
+                  />
                 </td>
                 <td className="px-4 py-3 font-semibold">{p.name}</td>
                 <td className="px-4 py-3">
@@ -599,8 +613,9 @@ function Step5({ onPrev, onNext }: { onPrev: () => void; onNext: () => void }) {
       <div className="mb-3 flex items-start gap-2 rounded-md border border-[var(--navy-100)] bg-[var(--light-blue)] px-4 py-3 text-[11.5px] text-[var(--navy)]">
         <span>ℹ️</span>
         <div>
-          Vous pourrez ajouter d&apos;autres ingénieurs plus tard depuis la fiche client. Au minimum 1
-          utilisateur administrateur est requis.
+          Les invitations d&apos;ingénieurs se configurent depuis la fiche client après création
+          (les lignes ci-dessous sont un aperçu). Au minimum 1 utilisateur administrateur est
+          requis.
         </div>
       </div>
       <div className="overflow-hidden rounded-md border border-[var(--navy-100)]">
@@ -626,7 +641,9 @@ function Step5({ onPrev, onNext }: { onPrev: () => void; onNext: () => void }) {
                   </span>
                 </td>
                 <td className="px-4 py-3 text-center">
-                  <GhostButton>Modifier</GhostButton>
+                  <GhostButton dataStub={`Modifier l'ingénieur · ${e.name}`}>
+                    Modifier
+                  </GhostButton>
                 </td>
               </tr>
             ))}
@@ -665,8 +682,8 @@ const summary = [
   { label: "Raison sociale", value: "Patrimoine Conseil Avignon SAS" },
   { label: "SIREN", value: "892 547 318" },
   { label: "Sous-domaine", value: "patrimoine-avignon.astraeos.fr" },
-  { label: "Packs initiaux", value: "3 sélectionnés" },
-  { label: "Ingénieurs", value: "2 invités" },
+  { label: "Packs initiaux", value: "selon la sélection à l'étape 4" },
+  { label: "Ingénieurs", value: "à inviter depuis la fiche client" },
   { label: "Revenu /mois facturé", value: "87 €/mois", highlight: true },
 ];
 

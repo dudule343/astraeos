@@ -1,7 +1,8 @@
 import { Topbar } from "../../_components/Topbar";
+import { ExportButton } from "../../_components/ExportButton";
 import { EmptyState } from "../../_components/EmptyState";
 import { KpiCard, type KpiBlock } from "../../../(editeur)/_components/KpiCard";
-import { PageHero, SectionHeader, GhostButton } from "../../../(editeur)/_components/PageHeader";
+import { PageHero, SectionHeader } from "../../../(editeur)/_components/PageHeader";
 import {
   fetchCabinetCommissions,
   fetchCabinetDossiers,
@@ -63,6 +64,12 @@ export default async function PerformancePage() {
     },
   ];
 
+  const exportRows: (string | number)[][] = pipeline.map((s) => [
+    s.label,
+    s.count,
+    totalDossiers > 0 ? `${Math.round((s.count / totalDossiers) * 100)}%` : "—",
+  ]);
+
   return (
     <>
       <Topbar current="Performance" />
@@ -72,7 +79,14 @@ export default async function PerformancePage() {
           eyebrow="Analyse de performance"
           title="Performance du cabinet"
           description="Chiffre d'affaires généré, volume d'études livrées et conversion du pipeline. Calculé en temps réel à partir des dossiers et commissions du cabinet."
-          actions={<GhostButton>Export performance</GhostButton>}
+          actions={
+            <ExportButton
+              label="Export performance"
+              filename="performance-cabinet"
+              headers={["Étape pipeline", "Dossiers", "Part"]}
+              rows={hasData ? exportRows : []}
+            />
+          }
         />
 
         <section className="mb-8 grid grid-cols-2 gap-3 lg:grid-cols-4">

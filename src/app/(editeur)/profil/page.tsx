@@ -222,7 +222,15 @@ export default async function ProfilPage() {
               ? `Identité, agréments réglementaires et coordonnées de ${fullName} · ${roleLabel}.`
               : "Données non connectées · profil affiché à titre indicatif. Renseignez vos agréments une fois la base reliée."
           }
-          actions={<GhostButton>Modifier le profil</GhostButton>}
+          actions={
+            <GhostButton
+              dataStub="Modifier le profil"
+              dataStubMode="modal"
+              dataStubBody="L'édition du profil (e-mail, téléphone, N° ORIAS, spécialités, MFA) sera disponible dans une prochaine itération. Les informations réglementaires sont pour l'instant en lecture seule."
+            >
+              Modifier le profil
+            </GhostButton>
+          }
         />
 
         <section className="mb-8 grid grid-cols-2 gap-3 lg:grid-cols-4">

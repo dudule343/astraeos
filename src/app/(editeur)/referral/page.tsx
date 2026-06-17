@@ -1,7 +1,31 @@
 import { Topbar } from "../_components/Topbar";
 import { KpiCard, type KpiBlock } from "../_components/KpiCard";
-import { PageHero, SectionHeader, GhostButton, GoldButton } from "../_components/PageHeader";
+import { PageHero, SectionHeader } from "../_components/PageHeader";
 import { fetchReferralData, fmtCount, fmtEur, REFERRAL_COMMISSION_RATE } from "./data";
+import { ReferralTabs } from "./ReferralTabs";
+import { CopyLinkButton } from "./CopyLinkButton";
+
+// Le programme de parrainage SaaS n'a aucun support en base (cf. data.ts) :
+// pas de configuration de taux modifiable, pas d'invitation, pas de listes.
+// Les actions correspondantes sont rendues honnêtement désactivées ("à venir")
+// plutôt qu'en faux boutons cliquables. Seules les actions réellement
+// implémentables (onglets, copie du lien) sont câblées.
+function DisabledAction({ children, ghost = true }: { children: React.ReactNode; ghost?: boolean }) {
+  return (
+    <button
+      type="button"
+      disabled
+      title="Programme de parrainage à venir"
+      className={
+        ghost
+          ? "cursor-not-allowed rounded-md border border-[var(--navy-100)] bg-white px-3 py-2 text-[11.5px] font-semibold text-[var(--navy-300)] opacity-60"
+          : "cursor-not-allowed rounded-md bg-[var(--gold)] px-3 py-2 text-[11.5px] font-bold text-white opacity-50"
+      }
+    >
+      {children}
+    </button>
+  );
+}
 
 export const dynamic = "force-dynamic";
 
@@ -59,8 +83,8 @@ export default async function ReferralPage() {
           description="Permettre aux clients (marques, cabinets directs, mandataires, autres pros) de recommander ASTRAEOS à leur réseau — modèle de rémunération récurrente : 20 % du montant de l'abonnement du filleul, versé chaque mois tant que le filleul reste actif."
           actions={
             <>
-              <GhostButton>Modifier le %</GhostButton>
-              <GoldButton>🔗 Inviter un parrain</GoldButton>
+              <DisabledAction>Modifier le % · à venir</DisabledAction>
+              <DisabledAction ghost={false}>🔗 Inviter un parrain</DisabledAction>
             </>
           }
         />
@@ -82,30 +106,18 @@ export default async function ReferralPage() {
           ))}
         </section>
 
-        <div className="mb-6 flex gap-1 border-b border-[var(--navy-100)]">
-          {["Vue d'ensemble", "Parrains", "Filleuls", "Configuration commission"].map((t, i) => (
-            <button
-              type="button"
-              key={t}
-              data-stub={`Onglet · ${t}`}
-              className={`-mb-px border-b-2 px-4 py-2 text-[12px] font-semibold ${
-                i === 0
-                  ? "border-[var(--gold)] text-[var(--gold)]"
-                  : "border-transparent text-[var(--navy-300)] hover:text-[var(--navy)]"
-              }`}
-            >
-              {t}
-            </button>
-          ))}
-        </div>
+        <ReferralTabs />
 
-        <section className="mb-8 grid grid-cols-1 gap-4 lg:grid-cols-2">
-          <div className="rounded-md border border-[var(--navy-100)] bg-white">
+        <section
+          id="referral-overview"
+          className="mb-8 grid grid-cols-1 gap-4 lg:grid-cols-2"
+        >
+          <div id="referral-sponsors" className="rounded-md border border-[var(--navy-100)] bg-white">
             <div className="flex items-center justify-between border-b border-[var(--navy-100)] px-4 py-3">
               <div className="text-[13px] font-semibold text-[var(--navy)]">
                 👥 Top 5 parrains performants
               </div>
-              <GhostButton>Tous les parrains</GhostButton>
+              <DisabledAction>Tous les parrains</DisabledAction>
             </div>
             <table className="w-full text-left">
               <thead>
@@ -133,10 +145,10 @@ export default async function ReferralPage() {
             </table>
           </div>
 
-          <div className="rounded-md border border-[var(--navy-100)] bg-white">
+          <div id="referral-activity" className="rounded-md border border-[var(--navy-100)] bg-white">
             <div className="flex items-center justify-between border-b border-[var(--navy-100)] px-4 py-3 text-[13px] font-semibold text-[var(--navy)]">
               <span>✓ Activité récente</span>
-              <GhostButton>Tout voir</GhostButton>
+              <DisabledAction>Tout voir</DisabledAction>
             </div>
             <div className="divide-y divide-[var(--navy-100)]">
               {program.activity.length > 0 ? null : (
@@ -190,11 +202,11 @@ export default async function ReferralPage() {
           </section>
         )}
 
-        <section className="mb-8">
+        <section id="referral-config" className="mb-8">
           <SectionHeader
             eyebrow="Configuration du programme"
             title="Modèle de commission en vigueur"
-            right={<GhostButton>Modifier le pourcentage</GhostButton>}
+            right={<DisabledAction>Modifier le pourcentage · à venir</DisabledAction>}
           />
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             <div className="rounded-md border border-[var(--gold-300)] bg-gradient-to-br from-[var(--ivory)] to-[var(--gold-200)] p-5">
@@ -275,7 +287,7 @@ export default async function ReferralPage() {
                 <span className="flex-1 font-mono text-[12px] text-[var(--navy-300)]">
                   https://astraeos.fr/parrainage/&lt;code-parrain&gt;
                 </span>
-                <GhostButton>📋 Copier</GhostButton>
+                <CopyLinkButton value="https://astraeos.fr/parrainage/<code-parrain>" />
               </div>
               <div className="mt-3.5 text-[11.5px] leading-relaxed text-[var(--navy-300)]">
                 Le parrain pourra suivre dans son espace :{" "}

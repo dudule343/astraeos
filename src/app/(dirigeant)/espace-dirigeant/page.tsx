@@ -1,6 +1,7 @@
 import { Topbar } from "../_components/Topbar";
+import { ExportButton } from "../_components/ExportButton";
 import { KpiCard, type KpiBlock } from "../../(editeur)/_components/KpiCard";
-import { PageHero, GhostButton, GoldButton } from "../../(editeur)/_components/PageHeader";
+import { PageHero } from "../../(editeur)/_components/PageHeader";
 import {
   fetchCabinetCommissions,
   fetchCabinetEngineers,
@@ -71,6 +72,14 @@ export default async function DirigeantAccueilPage() {
     },
   ];
 
+  const syntheseRows: (string | number)[][] = [
+    ["Total perçu · cumul", rev.cumulTotal.total, rev.cumulTotal.honoraires, rev.cumulTotal.apports],
+    ["Revenu perçu · mois en cours", rev.mois.total, "", ""],
+    ["Revenu perçu · trimestre en cours", rev.trimestre.total, "", ""],
+    ["Revenu perçu · année cumulée", rev.annee.total, "", ""],
+  ];
+  const syntheseHasData = rev.cumulTotal.total > 0;
+
   const nbIngenieurs = engineers.length;
 
   // Santé du cabinet : pas de table dédiée. Seul nb ingénieurs est dérivable.
@@ -98,8 +107,26 @@ export default async function DirigeantAccueilPage() {
           description="Luc THILLIEZ dirige le Cabinet Paris Étoile accompagné de ses ingénieurs patrimoniaux. Cette vue donne accès aux indicateurs de performance, au compte de résultat, à la trésorerie et au pilotage de l'équipe."
           actions={
             <>
-              <GhostButton>Comité hebdo</GhostButton>
-              <GoldButton>Exporter la synthèse</GoldButton>
+              <button
+                type="button"
+                data-stub="Comité hebdo"
+                data-stub-body="La planification du comité hebdomadaire (ordre du jour, participants, compte-rendu) n'est pas encore branchée en base. Cette fonctionnalité arrivera dans une prochaine itération."
+                className="rounded-md border border-[var(--navy-100)] bg-white px-3 py-2 text-[11.5px] font-semibold text-[var(--navy)] hover:border-[var(--gold)]"
+              >
+                Comité hebdo
+              </button>
+              <ExportButton
+                label="Exporter la synthèse"
+                variant="gold"
+                filename="synthese-cabinet"
+                headers={[
+                  "Indicateur",
+                  "Total perçu (€)",
+                  "dont honoraires (€)",
+                  "dont apports (€)",
+                ]}
+                rows={syntheseHasData ? syntheseRows : []}
+              />
             </>
           }
         />

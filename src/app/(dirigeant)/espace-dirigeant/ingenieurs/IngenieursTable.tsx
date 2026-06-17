@@ -110,6 +110,8 @@ export function IngenieursTable({ rows }: { rows: IngenieurRow[] }) {
                   <td className="px-4 py-2.5 text-center">
                     <button
                       type="button"
+                      data-stub={`Fiche ingénieur · ${ing.name}`}
+                      data-stub-body="La fiche détaillée d'un ingénieur (production dans le temps, portefeuille clients, historique de formation) n'est pas encore modélisée. Elle sera disponible dans une prochaine itération."
                       className="rounded-md border border-[var(--navy-100)] bg-white px-2 py-1 text-[11px] text-[var(--navy)] hover:border-[var(--gold)]"
                     >
                       Voir la fiche

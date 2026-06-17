@@ -61,7 +61,7 @@ export default async function QualityPage() {
           eyebrow="Bloc 07 · Support & qualité"
           title="Support & qualité"
           description="Mesurer la qualité du support et la stabilité produit — gestion des tickets, résolution de bugs, suivi des incidents de plateforme et satisfaction client."
-          actions={<GhostButton>Export</GhostButton>}
+          actions={<GhostButton dataStub="Export Support & qualité">Export</GhostButton>}
         />
 
         <section className="mb-8">

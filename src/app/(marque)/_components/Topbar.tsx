@@ -63,16 +63,28 @@ export function Topbar({ current }: { current: string }) {
       </div>
 
       <div className="flex items-center gap-2.5">
-        <div className="flex h-[34px] w-[34px] cursor-pointer items-center justify-center rounded-md border border-[var(--navy-100)] bg-white text-[var(--navy-300)]">
+        <button
+          type="button"
+          aria-label="Notifications du réseau"
+          data-stub="Notifications du réseau"
+          data-stub-body="Le centre de notifications de la tête de réseau (nouveaux cabinets licenciés, commissions encaissées, alertes conformité) sera disponible dans une prochaine itération."
+          className="flex h-[34px] w-[34px] cursor-pointer items-center justify-center rounded-md border border-[var(--navy-100)] bg-white text-[var(--navy-300)] hover:border-[var(--gold)]"
+        >
           🔔
-        </div>
+        </button>
 
-        <div className="flex h-[34px] items-center gap-2 rounded-full bg-white pr-3 pl-1 ring-1 ring-[var(--navy-100)]">
+        <button
+          type="button"
+          aria-label="Profil et déconnexion"
+          data-stub="Profil · tête de réseau"
+          data-stub-body="Le menu profil (préférences, équipe, déconnexion) sera disponible dans une prochaine itération."
+          className="flex h-[34px] cursor-pointer items-center gap-2 rounded-full bg-white pr-3 pl-1 ring-1 ring-[var(--navy-100)] hover:ring-[var(--gold)]"
+        >
           <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--navy)] text-[11px] font-bold text-white">
             {identity.initials}
           </div>
           <span className="text-[12px] font-semibold text-[var(--navy)]">{identity.name}</span>
-        </div>
+        </button>
       </div>
     </div>
   );

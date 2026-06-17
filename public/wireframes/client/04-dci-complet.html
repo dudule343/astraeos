@@ -2559,8 +2559,8 @@ body.s1-fixed .section[data-step="1"] .welcome-noteinfo { padding: 16px 22px; fo
         </div>
 
         <div class="asset-detail-actions">
-          <button class="asset-detail-delete" onclick="event.stopPropagation()">Supprimer ce bien</button>
-          <button class="asset-detail-save" onclick="event.stopPropagation()">Enregistrer</button>
+          <button class="asset-detail-delete" onclick="deleteAsset(this, event)">Supprimer ce bien</button>
+          <button class="asset-detail-save" onclick="saveAsset(this, event)">Enregistrer</button>
         </div>
       </div>
 
@@ -2715,8 +2715,8 @@ body.s1-fixed .section[data-step="1"] .welcome-noteinfo { padding: 16px 22px; fo
         </div>
 
         <div class="asset-detail-actions">
-          <button class="asset-detail-delete">Supprimer ce bien</button>
-          <button class="asset-detail-save">Enregistrer</button>
+          <button class="asset-detail-delete" onclick="deleteAsset(this, event)">Supprimer ce bien</button>
+          <button class="asset-detail-save" onclick="saveAsset(this, event)">Enregistrer</button>
         </div>
       </div>
 
@@ -2859,8 +2859,8 @@ body.s1-fixed .section[data-step="1"] .welcome-noteinfo { padding: 16px 22px; fo
           </div>
         </div>
         <div class="asset-detail-actions">
-          <button class="asset-detail-delete">Supprimer ce bien</button>
-          <button class="asset-detail-save">Enregistrer</button>
+          <button class="asset-detail-delete" onclick="deleteAsset(this, event)">Supprimer ce bien</button>
+          <button class="asset-detail-save" onclick="saveAsset(this, event)">Enregistrer</button>
         </div>
       </div>
 
@@ -3032,8 +3032,8 @@ body.s1-fixed .section[data-step="1"] .welcome-noteinfo { padding: 16px 22px; fo
           </div>
         </div>
         <div class="asset-detail-actions">
-          <button class="asset-detail-delete">Supprimer ce bien</button>
-          <button class="asset-detail-save">Enregistrer</button>
+          <button class="asset-detail-delete" onclick="deleteAsset(this, event)">Supprimer ce bien</button>
+          <button class="asset-detail-save" onclick="saveAsset(this, event)">Enregistrer</button>
         </div>
       </div>
 
@@ -3161,8 +3161,8 @@ body.s1-fixed .section[data-step="1"] .welcome-noteinfo { padding: 16px 22px; fo
           </div>
         </div>
         <div class="asset-detail-actions">
-          <button class="asset-detail-delete">Supprimer ce bien</button>
-          <button class="asset-detail-save">Enregistrer</button>
+          <button class="asset-detail-delete" onclick="deleteAsset(this, event)">Supprimer ce bien</button>
+          <button class="asset-detail-save" onclick="saveAsset(this, event)">Enregistrer</button>
         </div>
       </div>
 
@@ -3287,8 +3287,8 @@ body.s1-fixed .section[data-step="1"] .welcome-noteinfo { padding: 16px 22px; fo
           </div>
         </div>
         <div class="asset-detail-actions">
-          <button class="asset-detail-delete">Supprimer ce support</button>
-          <button class="asset-detail-save">Enregistrer</button>
+          <button class="asset-detail-delete" onclick="deleteAsset(this, event)">Supprimer ce support</button>
+          <button class="asset-detail-save" onclick="saveAsset(this, event)">Enregistrer</button>
         </div>
       </div>
 
@@ -3374,8 +3374,8 @@ body.s1-fixed .section[data-step="1"] .welcome-noteinfo { padding: 16px 22px; fo
           <div class="field"><label class="field-label">Versement programmé mensuel <span class="opt">facultatif</span></label><input type="text" class="text-input" placeholder="Montant en €"></div>
         </div>
         <div class="asset-detail-actions">
-          <button class="asset-detail-delete">Supprimer ce bien</button>
-          <button class="asset-detail-save">Enregistrer</button>
+          <button class="asset-detail-delete" onclick="deleteAsset(this, event)">Supprimer ce bien</button>
+          <button class="asset-detail-save" onclick="saveAsset(this, event)">Enregistrer</button>
         </div>
       </div>
 
@@ -3431,8 +3431,8 @@ body.s1-fixed .section[data-step="1"] .welcome-noteinfo { padding: 16px 22px; fo
           </div>
         </div>
         <div class="asset-detail-actions">
-          <button class="asset-detail-delete">Supprimer ce bien</button>
-          <button class="asset-detail-save">Enregistrer</button>
+          <button class="asset-detail-delete" onclick="deleteAsset(this, event)">Supprimer ce bien</button>
+          <button class="asset-detail-save" onclick="saveAsset(this, event)">Enregistrer</button>
         </div>
       </div>
 
@@ -3495,8 +3495,8 @@ body.s1-fixed .section[data-step="1"] .welcome-noteinfo { padding: 16px 22px; fo
           <div class="field"><label class="field-label">Désignation bénéficiaire</label><textarea class="text-input" rows="2" placeholder="Ex. : mon conjoint, à défaut mes enfants par parts égales, à défaut mes héritiers" style="resize: vertical; font-family: inherit;"></textarea></div>
         </div>
         <div class="asset-detail-actions">
-          <button class="asset-detail-delete">Supprimer ce contrat</button>
-          <button class="asset-detail-save">Enregistrer</button>
+          <button class="asset-detail-delete" onclick="deleteAsset(this, event)">Supprimer ce contrat</button>
+          <button class="asset-detail-save" onclick="saveAsset(this, event)">Enregistrer</button>
         </div>
       </div>
 
@@ -3545,8 +3545,8 @@ body.s1-fixed .section[data-step="1"] .welcome-noteinfo { padding: 16px 22px; fo
             <textarea class="text-input" rows="2" placeholder="Ex. : mon conjoint, à défaut mes enfants par parts égales, à défaut mes héritiers" style="resize: vertical; font-family: inherit;"></textarea></div>
         </div>
         <div class="asset-detail-actions">
-          <button class="asset-detail-delete">Supprimer ce contrat</button>
-          <button class="asset-detail-save">Enregistrer</button>
+          <button class="asset-detail-delete" onclick="deleteAsset(this, event)">Supprimer ce contrat</button>
+          <button class="asset-detail-save" onclick="saveAsset(this, event)">Enregistrer</button>
         </div>
       </div>
 
@@ -3595,8 +3595,8 @@ body.s1-fixed .section[data-step="1"] .welcome-noteinfo { padding: 16px 22px; fo
             <textarea class="text-input" rows="2" placeholder="Ex. : mon conjoint, à défaut mes enfants par parts égales, à défaut mes héritiers" style="resize: vertical; font-family: inherit;"></textarea></div>
         </div>
         <div class="asset-detail-actions">
-          <button class="asset-detail-delete">Supprimer ce contrat</button>
-          <button class="asset-detail-save">Enregistrer</button>
+          <button class="asset-detail-delete" onclick="deleteAsset(this, event)">Supprimer ce contrat</button>
+          <button class="asset-detail-save" onclick="saveAsset(this, event)">Enregistrer</button>
         </div>
       </div>
 
@@ -3653,8 +3653,8 @@ body.s1-fixed .section[data-step="1"] .welcome-noteinfo { padding: 16px 22px; fo
           <div class="field"><label class="field-label">Versement annuel <span class="opt">facultatif</span></label><input type="text" class="text-input" placeholder="Montant en €"></div>
         </div>
         <div class="asset-detail-actions">
-          <button class="asset-detail-delete">Supprimer</button>
-          <button class="asset-detail-save">Enregistrer</button>
+          <button class="asset-detail-delete" onclick="deleteAsset(this, event)">Supprimer</button>
+          <button class="asset-detail-save" onclick="saveAsset(this, event)">Enregistrer</button>
         </div>
       </div>
 
@@ -3696,8 +3696,8 @@ body.s1-fixed .section[data-step="1"] .welcome-noteinfo { padding: 16px 22px; fo
           <div class="field"><label class="field-label">Versement annuel <span class="opt">facultatif</span></label><input type="text" class="text-input" placeholder="Montant en €"></div>
         </div>
         <div class="asset-detail-actions">
-          <button class="asset-detail-delete">Supprimer</button>
-          <button class="asset-detail-save">Enregistrer</button>
+          <button class="asset-detail-delete" onclick="deleteAsset(this, event)">Supprimer</button>
+          <button class="asset-detail-save" onclick="saveAsset(this, event)">Enregistrer</button>
         </div>
       </div>
 
@@ -3774,8 +3774,8 @@ body.s1-fixed .section[data-step="1"] .welcome-noteinfo { padding: 16px 22px; fo
           </div>
         </div>
           <div class="asset-detail-actions">
-            <button class="asset-detail-delete">Supprimer cet actif</button>
-            <button class="asset-detail-save">Enregistrer</button>
+            <button class="asset-detail-delete" onclick="deleteAsset(this, event)">Supprimer cet actif</button>
+            <button class="asset-detail-save" onclick="saveAsset(this, event)">Enregistrer</button>
           </div>
         </div>
       </div>
@@ -3835,8 +3835,8 @@ body.s1-fixed .section[data-step="1"] .welcome-noteinfo { padding: 16px 22px; fo
           </div>
         </div>
           <div class="asset-detail-actions">
-            <button class="asset-detail-delete">Supprimer cet actif</button>
-            <button class="asset-detail-save">Enregistrer</button>
+            <button class="asset-detail-delete" onclick="deleteAsset(this, event)">Supprimer cet actif</button>
+            <button class="asset-detail-save" onclick="saveAsset(this, event)">Enregistrer</button>
           </div>
         </div>
       </div>
@@ -3898,8 +3898,8 @@ body.s1-fixed .section[data-step="1"] .welcome-noteinfo { padding: 16px 22px; fo
           </div>
         </div>
           <div class="asset-detail-actions">
-            <button class="asset-detail-delete">Supprimer cet actif</button>
-            <button class="asset-detail-save">Enregistrer</button>
+            <button class="asset-detail-delete" onclick="deleteAsset(this, event)">Supprimer cet actif</button>
+            <button class="asset-detail-save" onclick="saveAsset(this, event)">Enregistrer</button>
           </div>
         </div>
       </div>
@@ -3964,8 +3964,8 @@ body.s1-fixed .section[data-step="1"] .welcome-noteinfo { padding: 16px 22px; fo
           </div>
         </div>
           <div class="asset-detail-actions">
-            <button class="asset-detail-delete">Supprimer cet actif</button>
-            <button class="asset-detail-save">Enregistrer</button>
+            <button class="asset-detail-delete" onclick="deleteAsset(this, event)">Supprimer cet actif</button>
+            <button class="asset-detail-save" onclick="saveAsset(this, event)">Enregistrer</button>
           </div>
         </div>
       </div>
@@ -4021,8 +4021,8 @@ body.s1-fixed .section[data-step="1"] .welcome-noteinfo { padding: 16px 22px; fo
           </div>
         </div>
           <div class="asset-detail-actions">
-            <button class="asset-detail-delete">Supprimer cet actif</button>
-            <button class="asset-detail-save">Enregistrer</button>
+            <button class="asset-detail-delete" onclick="deleteAsset(this, event)">Supprimer cet actif</button>
+            <button class="asset-detail-save" onclick="saveAsset(this, event)">Enregistrer</button>
           </div>
         </div>
       </div>
@@ -4207,8 +4207,8 @@ body.s1-fixed .section[data-step="1"] .welcome-noteinfo { padding: 16px 22px; fo
           </div>
         </div>
         <div class="asset-detail-actions">
-          <button class="asset-detail-delete">Supprimer ce prêt</button>
-          <button class="asset-detail-save">Enregistrer</button>
+          <button class="asset-detail-delete" onclick="deleteAsset(this, event)">Supprimer ce prêt</button>
+          <button class="asset-detail-save" onclick="saveAsset(this, event)">Enregistrer</button>
         </div>
       </div>
 
@@ -4317,8 +4317,8 @@ body.s1-fixed .section[data-step="1"] .welcome-noteinfo { padding: 16px 22px; fo
           </div>
         </div>
         <div class="asset-detail-actions">
-          <button class="asset-detail-delete">Supprimer ce prêt</button>
-          <button class="asset-detail-save">Enregistrer</button>
+          <button class="asset-detail-delete" onclick="deleteAsset(this, event)">Supprimer ce prêt</button>
+          <button class="asset-detail-save" onclick="saveAsset(this, event)">Enregistrer</button>
         </div>
       </div>
 
@@ -5103,6 +5103,31 @@ function toggleAsset(row, detailId) {
   row.classList.toggle('open');
 }
 
+// Valide une fiche de bien : referme l'accordéon et confirme l'enregistrement local.
+// Les données sont persistées en une seule fois à l'envoi du DCI (submitForm).
+function saveAsset(btn, ev) {
+  if (ev && ev.stopPropagation) ev.stopPropagation();
+  const detail = btn ? btn.closest('.asset-detail') : null;
+  if (detail) {
+    detail.classList.remove('visible');
+    const row = detail.previousElementSibling;
+    if (row && row.classList.contains('asset-row')) row.classList.remove('open');
+  }
+  flashSave();
+}
+
+// Retire une fiche de bien (et sa ligne récapitulative).
+function deleteAsset(btn, ev) {
+  if (ev && ev.stopPropagation) ev.stopPropagation();
+  if (!btn) return;
+  const detail = btn.closest('.asset-detail');
+  if (!detail) return;
+  const row = detail.previousElementSibling;
+  if (row && row.classList.contains('asset-row')) row.remove();
+  detail.remove();
+  flashSave();
+}
+
 function addEnfant() {
   const tbl = document.getElementById('enfantsTable');
   const row = document.createElement('div');
@@ -5231,7 +5256,7 @@ function detentionTable(prefix) {
 function actionsRow() {
   return `<div class="asset-detail-actions">
     <button class="asset-detail-delete" onclick="this.closest('.asset-detail').previousElementSibling.remove(); this.closest('.asset-detail').remove();">Supprimer</button>
-    <button class="asset-detail-save">Enregistrer</button>
+    <button class="asset-detail-save" onclick="saveAsset(this, event)">Enregistrer</button>
   </div>`;
 }
 

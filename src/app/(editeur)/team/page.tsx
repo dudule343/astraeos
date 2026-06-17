@@ -1,8 +1,9 @@
 import { Topbar } from "../_components/Topbar";
 import { KpiCard, type KpiBlock } from "../_components/KpiCard";
-import { PageHero, GhostButton, GoldButton } from "../_components/PageHeader";
+import { PageHero, GoldButton } from "../_components/PageHeader";
 import { fetchTeam } from "./data";
 import { TeamRoster } from "./TeamRoster";
+import { TeamExportButton } from "./TeamExportButton";
 
 export const dynamic = "force-dynamic";
 
@@ -41,8 +42,13 @@ export default async function TeamPage() {
           description="Collaborateurs rattachés au cabinet, organisés par rôle. Activité par membre (clients, rendez-vous, études, CA) dérivée des dossiers en cours."
           actions={
             <>
-              <GhostButton>Export RH</GhostButton>
-              <GoldButton>＋ Nouveau collaborateur</GoldButton>
+              <TeamExportButton categories={team.categories} />
+              <GoldButton
+                dataStub="Nouveau collaborateur"
+                dataStubBody="La création de collaborateur (invitation, rôle, agréments) sera disponible dans une prochaine itération. Les utilisateurs sont pour l'instant gérés en base."
+              >
+                ＋ Nouveau collaborateur
+              </GoldButton>
             </>
           }
         />

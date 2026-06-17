@@ -6,6 +6,7 @@ import { buildItems } from "@/lib/collecte-catalog";
 import type { CatalogEntry, Facts } from "@/lib/collecte-catalog/types";
 
 import { FACTS_META, FACT_CATEGORY_ORDER, type FactMeta } from "./facts-meta";
+import { moveDossierStage } from "../../actions";
 
 /** Total de référence du catalogue (286 pièces du référentiel documentaire). */
 const TOTAL_PIECES = 286;
@@ -603,12 +604,22 @@ export function CollecteBuilder({
             collecte envoyée au client.
           </div>
         </div>
-        <a
-          href={`/dossiers/${dossierId}`}
-          className="flex-shrink-0 rounded-md bg-[var(--navy)] px-4 py-2.5 text-[12px] font-bold text-white transition hover:brightness-125"
-        >
-          Passer à l&apos;étape suivante →
-        </a>
+        <div className="flex flex-shrink-0 items-center gap-2.5">
+          <a
+            href={`/dossiers/${dossierId}`}
+            className="rounded-md border border-[var(--navy-100)] bg-white px-4 py-2.5 text-[12px] font-semibold text-[var(--navy)] transition hover:border-[var(--gold)]"
+          >
+            ← Retour à la fiche
+          </a>
+          <form action={moveDossierStage.bind(null, dossierId, "next")}>
+            <button
+              type="submit"
+              className="rounded-md bg-[var(--navy)] px-4 py-2.5 text-[12px] font-bold text-white transition hover:brightness-125"
+            >
+              Passer à l&apos;étude (étape 04) →
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );

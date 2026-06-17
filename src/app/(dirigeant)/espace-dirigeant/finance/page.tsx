@@ -1,6 +1,7 @@
 import { Topbar } from "../../_components/Topbar";
+import { ExportButton } from "../../_components/ExportButton";
 import { type KpiBlock } from "../../../(editeur)/_components/KpiCard";
-import { PageHero, GhostButton, GoldButton } from "../../../(editeur)/_components/PageHeader";
+import { PageHero } from "../../../(editeur)/_components/PageHeader";
 import {
   fetchCabinetCommissions,
   fetchCabinetEngineers,
@@ -118,6 +119,15 @@ export default async function FinancePage() {
     hasData,
   };
 
+  const exportRows: (string | number)[][] = sourceRows.map((r) => [
+    r.source,
+    r.type,
+    r.subs,
+    Math.round(r.gen),
+    Math.round(r.enc),
+    Math.round(r.rest),
+  ]);
+
   return (
     <>
       <Topbar current="Finance du cabinet" />
@@ -129,8 +139,27 @@ export default async function FinancePage() {
           description="Vision macro des flux financiers du Cabinet Paris Étoile : CA généré et encaissé, détail des honoraires d'études et des apports d'affaires, répartition des commissions reversées aux ingénieurs. Charges et trésorerie à venir."
           actions={
             <>
-              <GhostButton>Export comptable</GhostButton>
-              <GoldButton>🔌 Connexion bancaire</GoldButton>
+              <ExportButton
+                label="Export comptable"
+                filename="finance-cabinet"
+                headers={[
+                  "Source",
+                  "Type",
+                  "Souscriptions",
+                  "CA généré (€)",
+                  "CA encaissé (€)",
+                  "Reste à encaisser (€)",
+                ]}
+                rows={hasData ? exportRows : []}
+              />
+              <button
+                type="button"
+                data-stub="Connexion bancaire"
+                data-stub-body="L'agrégation bancaire (Qonto ou équivalent) n'est pas encore connectée. Une fois en place, la trésorerie multi-comptes du cabinet sera synchronisée automatiquement."
+                className="rounded-md bg-[var(--gold)] px-3 py-2 text-[11.5px] font-bold text-white hover:brightness-110"
+              >
+                🔌 Connexion bancaire
+              </button>
             </>
           }
         />

@@ -1,6 +1,7 @@
 import { Topbar } from "../../_components/Topbar";
+import { ExportButton } from "../../_components/ExportButton";
 import { KpiCard, type KpiBlock } from "../../../(editeur)/_components/KpiCard";
-import { PageHero, GhostButton, GoldButton } from "../../../(editeur)/_components/PageHeader";
+import { PageHero } from "../../../(editeur)/_components/PageHeader";
 import {
   fetchCabinetEngineers,
   fetchCabinetCommissions,
@@ -80,6 +81,16 @@ export default async function IngenieursPage() {
     orias: s.engineer.orias_number,
   }));
 
+  const exportRows: (string | number)[][] = rows.map((r) => [
+    r.name,
+    r.clients,
+    Math.round(r.ca),
+    r.etudes,
+    r.nouveaux,
+    r.anciennete,
+    r.orias ?? "—",
+  ]);
+
   return (
     <>
       <Topbar current="Ingénieurs" />
@@ -91,8 +102,28 @@ export default async function IngenieursPage() {
           description="Vue agrégée de la production des ingénieurs patrimoniaux du cabinet : classement par CA généré, études générées et nouveaux clients, certifications ORIAS, ancienneté et pilotage de la formation."
           actions={
             <>
-              <GhostButton>Export</GhostButton>
-              <GoldButton>Communication formation</GoldButton>
+              <ExportButton
+                label="Export"
+                filename="ingenieurs-cabinet"
+                headers={[
+                  "Ingénieur",
+                  "Clients servis",
+                  "CA généré (€)",
+                  "Études",
+                  "Nouveaux clients",
+                  "Ancienneté",
+                  "ORIAS",
+                ]}
+                rows={exportRows}
+              />
+              <button
+                type="button"
+                data-stub="Communication formation"
+                data-stub-body="L'envoi d'une communication de formation aux ingénieurs (sélection des destinataires, modèle de message) n'est pas encore branché. Cette fonctionnalité arrivera dans une prochaine itération."
+                className="rounded-md bg-[var(--gold)] px-3 py-2 text-[11.5px] font-bold text-white hover:brightness-110"
+              >
+                Communication formation
+              </button>
             </>
           }
         />

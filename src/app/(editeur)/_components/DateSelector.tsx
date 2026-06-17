@@ -15,6 +15,12 @@ const quickPeriods = [
 
 const compareOptions = ["vs J-1", "vs S-1", "vs M-1", "vs T-1", "vs N-1", "Aucune"];
 
+function fmtDate(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  return d.toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" });
+}
+
 export function DateSelector() {
   const [open, setOpen] = useState(false);
   const [period, setPeriod] = useState("30 jours");
@@ -22,6 +28,11 @@ export function DateSelector() {
   const [from, setFrom] = useState("2026-04-06");
   const [to, setTo] = useState("2026-05-06");
   const ref = useRef<HTMLDivElement>(null);
+
+  // Libellé du déclencheur dérivé de l'état réel (plus de date figée) :
+  // « Personnalisé » montre la plage, sinon le raccourci de période choisi.
+  const triggerLabel =
+    period === "Personnalisé" ? `${fmtDate(from)} → ${fmtDate(to)}` : period;
 
   useEffect(() => {
     if (!open) return;
@@ -40,7 +51,7 @@ export function DateSelector() {
         className="inline-flex h-[34px] items-center gap-2 rounded-md border border-[var(--gold-300)] bg-gradient-to-br from-[var(--ivory)] to-[var(--gold-200)] px-3 text-[11.5px] font-semibold text-[var(--medium-400)] hover:border-[var(--gold)]"
       >
         <span>📅</span>
-        <span>06 mai 2026</span>
+        <span>{triggerLabel}</span>
         <span className="text-[10.5px] font-medium text-[var(--navy-300)]">{compare}</span>
         <span className="text-[10px]">▾</span>
       </button>
@@ -111,7 +122,12 @@ export function DateSelector() {
             </div>
           </div>
 
-          <div className="mt-3.5 flex gap-1.5 border-t border-[var(--navy-100)] pt-3">
+          <div className="mt-3 rounded-md bg-[var(--ivory)] px-2.5 py-1.5 text-[10px] leading-snug text-[var(--navy-300)]">
+            Sélection d&apos;affichage. Le filtrage des données par période sera branché
+            dans une prochaine itération.
+          </div>
+
+          <div className="mt-3 flex gap-1.5 border-t border-[var(--navy-100)] pt-3">
             <button
               type="button"
               onClick={() => setOpen(false)}

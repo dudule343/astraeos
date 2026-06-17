@@ -71,7 +71,7 @@ export default async function AcquisitionPage() {
           eyebrow="Bloc 02 · Acquisition & conversion"
           title="Acquisition & conversion"
           description="Comprendre comment les prospects deviennent clients : du dossier prospect jusqu'à la signature, suivi des origines d'acquisition et de leur conversion."
-          actions={<GhostButton>Export</GhostButton>}
+          actions={<GhostButton dataStub="Export Acquisition">Export</GhostButton>}
         />
 
         <section className="mb-8">
