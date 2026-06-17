@@ -2,12 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 
-import {
-  createAdminClient,
-  DEFAULT_TENANT_ID,
-  DEFAULT_CABINET_ID,
-  DEFAULT_ENGINEER_ID,
-} from "@/lib/supabase/admin";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { getSessionContext } from "@/lib/auth/context";
 import {
   CONFORMITE_TYPES,
   STATUS_LABELS,
@@ -65,7 +61,9 @@ export async function advanceConformiteItem(dossierId: string, type: ConformiteT
 
   try {
     const supabase = createAdminClient();
-    const { tenantId, cabinetId } = await resolveOwner(supabase, dossierId);
+    const owner = await resolveOwner(supabase, dossierId);
+    if (!owner) return;
+    const { tenantId, cabinetId, userId } = owner;
 
     // État actuel de la pièce (absente = 'a_faire').
     const { data: existing } = await supabase
@@ -84,6 +82,7 @@ export async function advanceConformiteItem(dossierId: string, type: ConformiteT
       dossierId,
       tenantId,
       cabinetId,
+      userId,
       type,
       target,
     });
@@ -102,11 +101,16 @@ export async function advanceConformiteItem(dossierId: string, type: ConformiteT
 
 type AdminClient = ReturnType<typeof createAdminClient>;
 
-/** tenant_id / cabinet_id du dossier (fallback seed si absent). */
+/**
+ * tenant_id / cabinet_id du dossier (fallback session si absent) + acteur
+ * courant (userId). Renvoie null si pas de contexte de session (no-op appelant).
+ */
 async function resolveOwner(
   supabase: AdminClient,
   dossierId: string,
-): Promise<{ tenantId: string; cabinetId: string }> {
+): Promise<{ tenantId: string; cabinetId: string; userId: string } | null> {
+  const ctx = await getSessionContext();
+  if (!ctx) return null;
   const { data: d } = await supabase
     .from("dossiers")
     .select("tenant_id, cabinet_id")
@@ -114,8 +118,9 @@ async function resolveOwner(
     .maybeSingle();
   const dossier = (d ?? null) as { tenant_id: string | null; cabinet_id: string | null } | null;
   return {
-    tenantId: dossier?.tenant_id ?? DEFAULT_TENANT_ID,
-    cabinetId: dossier?.cabinet_id ?? DEFAULT_CABINET_ID,
+    tenantId: dossier?.tenant_id ?? ctx.tenantId,
+    cabinetId: dossier?.cabinet_id ?? ctx.cabinetId,
+    userId: ctx.userId,
   };
 }
 
@@ -130,11 +135,12 @@ async function setItemStatus(
     dossierId: string;
     tenantId: string;
     cabinetId: string;
+    userId: string;
     type: ConformiteType;
     target: ConformiteStatus;
   },
 ): Promise<boolean> {
-  const { dossierId, tenantId, cabinetId, type, target } = args;
+  const { dossierId, tenantId, cabinetId, userId, type, target } = args;
   const now = new Date().toISOString();
   const tsColumn = timestampColumnFor(target);
 
@@ -159,7 +165,7 @@ async function setItemStatus(
     cabinet_id: cabinetId,
     dossier_id: dossierId,
     event_type: "compliance_review",
-    actor_user_id: DEFAULT_ENGINEER_ID,
+    actor_user_id: userId,
     actor_type: "engineer",
     title: `${labelForType(type)} · ${STATUS_LABELS[target]}`,
     description: `La pièce « ${labelForType(type)} » est passée à l'état « ${STATUS_LABELS[target]} ».`,
@@ -189,7 +195,9 @@ export async function sendConformitePack(dossierId: string, selectedTypes: Confo
 
   try {
     const supabase = createAdminClient();
-    const { tenantId, cabinetId } = await resolveOwner(supabase, dossierId);
+    const owner = await resolveOwner(supabase, dossierId);
+    if (!owner) return;
+    const { tenantId, cabinetId, userId } = owner;
 
     // Statuts actuels des pièces sélectionnées (absentes = 'a_faire').
     const { data: rows } = await supabase
@@ -214,6 +222,7 @@ export async function sendConformitePack(dossierId: string, selectedTypes: Confo
         dossierId,
         tenantId,
         cabinetId,
+        userId,
         type,
         target: "envoye",
       });
@@ -228,7 +237,7 @@ export async function sendConformitePack(dossierId: string, selectedTypes: Confo
       cabinet_id: cabinetId,
       dossier_id: dossierId,
       event_type: "compliance_review",
-      actor_user_id: DEFAULT_ENGINEER_ID,
+      actor_user_id: userId,
       actor_type: "engineer",
       title: "Pack de contractualisation envoyé",
       description: `Pack envoyé au client · ${sent.length} pièce(s) en signature électronique (Yousign) + demande de règlement.`,
@@ -250,14 +259,16 @@ export async function relancerClient(dossierId: string) {
   if (!process.env.SUPABASE_SERVICE_ROLE_KEY) return;
   try {
     const supabase = createAdminClient();
-    const { tenantId, cabinetId } = await resolveOwner(supabase, dossierId);
+    const owner = await resolveOwner(supabase, dossierId);
+    if (!owner) return;
+    const { tenantId, cabinetId, userId } = owner;
 
     await supabase.from("timeline_events").insert({
       tenant_id: tenantId,
       cabinet_id: cabinetId,
       dossier_id: dossierId,
       event_type: "compliance_review",
-      actor_user_id: DEFAULT_ENGINEER_ID,
+      actor_user_id: userId,
       actor_type: "engineer",
       title: "Relance client · conformité",
       description: "Relance envoyée au client pour la signature des documents et le règlement des honoraires.",

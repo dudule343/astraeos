@@ -1,4 +1,5 @@
-import { createAdminClient, DEFAULT_CABINET_ID, DEFAULT_TENANT_ID } from "@/lib/supabase/admin";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { getSessionContext } from "@/lib/auth/context";
 
 // =========================================================================
 // Accès données du cockpit dirigeant — tenant unique = cabinet courant.
@@ -16,9 +17,6 @@ import { createAdminClient, DEFAULT_CABINET_ID, DEFAULT_TENANT_ID } from "@/lib/
 //     → honoraires d'études = 'study_fee'
 //     → apports d'affaires  = upfront + recurring_management + performance
 // =========================================================================
-
-export const CABINET_ID = DEFAULT_CABINET_ID;
-export const TENANT_ID = DEFAULT_TENANT_ID;
 
 // Date de référence : "aujourd'hui". Le seed n'a pas de données financières,
 // donc les fenêtres temporelles dégradent proprement à 0.
@@ -62,6 +60,8 @@ export type EngineerRow = {
  */
 export async function fetchCabinetCommissions(): Promise<CabinetCommission[]> {
   try {
+    const ctx = await getSessionContext();
+    if (!ctx) return [];
     const supabase = createAdminClient();
     const { data, error } = await supabase
       .from("commissions")
@@ -72,8 +72,8 @@ export async function fetchCabinetCommissions(): Promise<CabinetCommission[]> {
            produit:produits(category, partner_name, name)
          )`,
       )
-      .eq("souscription.cabinet_id", CABINET_ID)
-      .eq("souscription.tenant_id", TENANT_ID);
+      .eq("souscription.cabinet_id", ctx.cabinetId)
+      .eq("souscription.tenant_id", ctx.tenantId);
 
     if (error || !data) return [];
 
@@ -117,12 +117,14 @@ export async function fetchCabinetCommissions(): Promise<CabinetCommission[]> {
 /** Ingénieurs actifs du cabinet (role='engineer'). Dégrade à []. */
 export async function fetchCabinetEngineers(): Promise<EngineerRow[]> {
   try {
+    const ctx = await getSessionContext();
+    if (!ctx) return [];
     const supabase = createAdminClient();
     const { data, error } = await supabase
       .from("users")
       .select("id, first_name, last_name, specialties, orias_number, created_at")
-      .eq("cabinet_id", CABINET_ID)
-      .eq("tenant_id", TENANT_ID)
+      .eq("cabinet_id", ctx.cabinetId)
+      .eq("tenant_id", ctx.tenantId)
       .eq("role", "engineer")
       .eq("is_active", true);
 
@@ -150,12 +152,14 @@ export type DossierLite = {
 /** Dossiers du cabinet (pour études / nouveaux clients par ingénieur). Dégrade à []. */
 export async function fetchCabinetDossiers(): Promise<DossierLite[]> {
   try {
+    const ctx = await getSessionContext();
+    if (!ctx) return [];
     const supabase = createAdminClient();
     const { data, error } = await supabase
       .from("dossiers")
       .select("id, client_id, engineer_id, created_at")
-      .eq("cabinet_id", CABINET_ID)
-      .eq("tenant_id", TENANT_ID);
+      .eq("cabinet_id", ctx.cabinetId)
+      .eq("tenant_id", ctx.tenantId);
 
     if (error || !data) return [];
     return data.map((d) => ({
@@ -651,12 +655,14 @@ export type PipelineStageRow = { stage: string; label: string; count: number };
 /** Compte les dossiers du cabinet par étape de pipeline (ordre métier). */
 export async function fetchPipelineStages(): Promise<PipelineStageRow[]> {
   try {
+    const ctx = await getSessionContext();
+    if (!ctx) return [];
     const supabase = createAdminClient();
     const { data, error } = await supabase
       .from("dossiers")
       .select("pipeline_stage")
-      .eq("cabinet_id", CABINET_ID)
-      .eq("tenant_id", TENANT_ID);
+      .eq("cabinet_id", ctx.cabinetId)
+      .eq("tenant_id", ctx.tenantId);
     if (error || !data) return [];
     const counts = new Map<string, number>();
     for (const d of data) {
@@ -697,13 +703,15 @@ export type CabinetProfile = {
 /** Profil administratif du cabinet courant (table cabinets). */
 export async function fetchCabinetProfile(): Promise<CabinetProfile | null> {
   try {
+    const ctx = await getSessionContext();
+    if (!ctx) return null;
     const supabase = createAdminClient();
     const { data, error } = await supabase
       .from("cabinets")
       .select(
         "name, address_street, address_city, address_zipcode, phone, email, orias_number, rc_pro_insurer, rc_pro_expiry_date, contract_start_date, commission_split_to_owner, total_aum_cached, total_clients_cached, network_rank_cached",
       )
-      .eq("id", CABINET_ID)
+      .eq("id", ctx.cabinetId)
       .maybeSingle();
     if (error || !data) return null;
     const d = data as Record<string, unknown>;
@@ -744,12 +752,14 @@ export type CabinetUserAccess = {
 /** Utilisateurs du cabinet (pour la gestion des accès dans Paramétrages). */
 export async function fetchCabinetUsers(): Promise<CabinetUserAccess[]> {
   try {
+    const ctx = await getSessionContext();
+    if (!ctx) return [];
     const supabase = createAdminClient();
     const { data, error } = await supabase
       .from("users")
       .select("id, first_name, last_name, email, role, last_login_at, mfa_enabled, is_active")
-      .eq("cabinet_id", CABINET_ID)
-      .eq("tenant_id", TENANT_ID)
+      .eq("cabinet_id", ctx.cabinetId)
+      .eq("tenant_id", ctx.tenantId)
       .order("role");
     if (error || !data) return [];
     return data.map((u) => ({

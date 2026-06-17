@@ -2,12 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 
-import {
-  createAdminClient,
-  DEFAULT_TENANT_ID,
-  DEFAULT_CABINET_ID,
-  DEFAULT_ENGINEER_ID,
-} from "@/lib/supabase/admin";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { getSessionContext } from "@/lib/auth/context";
 import {
   ETUDE_PHASES,
   nextPhase,
@@ -42,6 +38,8 @@ export async function loadEtude(dossierId: string): Promise<Etude | null> {
 export async function advanceEtudePhase(dossierId: string) {
   if (!process.env.SUPABASE_SERVICE_ROLE_KEY) return;
   try {
+    const ctx = await getSessionContext();
+    if (!ctx) return;
     const supabase = createAdminClient();
 
     const { data: dossier } = await supabase
@@ -49,8 +47,8 @@ export async function advanceEtudePhase(dossierId: string) {
       .select("tenant_id, cabinet_id")
       .eq("id", dossierId)
       .maybeSingle();
-    const tenant_id = (dossier?.tenant_id as string | null) ?? DEFAULT_TENANT_ID;
-    const cabinet_id = (dossier?.cabinet_id as string | null) ?? DEFAULT_CABINET_ID;
+    const tenant_id = (dossier?.tenant_id as string | null) ?? ctx.tenantId;
+    const cabinet_id = (dossier?.cabinet_id as string | null) ?? ctx.cabinetId;
 
     const { data: existing } = await supabase
       .from("etudes")
@@ -95,7 +93,7 @@ export async function advanceEtudePhase(dossierId: string) {
       cabinet_id,
       dossier_id: dossierId,
       event_type: done ? "study_delivered" : "ai_phase_validated",
-      actor_user_id: DEFAULT_ENGINEER_ID,
+      actor_user_id: ctx.userId,
       actor_type: "engineer",
       title: done ? "Étude restituée au client" : `Phase validée · ${targetLabel}`,
       visibility: "internal_only",

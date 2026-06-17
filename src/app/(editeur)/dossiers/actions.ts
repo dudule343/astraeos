@@ -2,12 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 
-import {
-  createAdminClient,
-  DEFAULT_TENANT_ID,
-  DEFAULT_CABINET_ID,
-  DEFAULT_ENGINEER_ID,
-} from "@/lib/supabase/admin";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { getSessionContext } from "@/lib/auth/context";
 
 const STAGE_ORDER = [
   "01_prospect",
@@ -34,6 +30,9 @@ const STAGE_LABELS: Record<string, string> = {
  */
 export async function moveDossierStage(dossierId: string, direction: "next" | "prev") {
   if (!process.env.SUPABASE_SERVICE_ROLE_KEY) return;
+
+  const ctx = await getSessionContext();
+  if (!ctx) return;
 
   const supabase = createAdminClient();
 
@@ -68,11 +67,11 @@ export async function moveDossierStage(dossierId: string, direction: "next" | "p
 
   // Journalise l'événement (non bloquant : un échec ne doit pas annuler le passage).
   await supabase.from("timeline_events").insert({
-    tenant_id: row.tenant_id ?? DEFAULT_TENANT_ID,
-    cabinet_id: row.cabinet_id ?? DEFAULT_CABINET_ID,
+    tenant_id: row.tenant_id ?? ctx.tenantId,
+    cabinet_id: row.cabinet_id ?? ctx.cabinetId,
     dossier_id: dossierId,
     event_type: "stage_changed",
-    actor_user_id: DEFAULT_ENGINEER_ID,
+    actor_user_id: ctx.userId,
     actor_type: "engineer",
     title: `Passage à l'étape ${STAGE_LABELS[toStage] ?? toStage}`,
     description: `Le dossier est passé de « ${STAGE_LABELS[fromStage] ?? fromStage} » à « ${STAGE_LABELS[toStage] ?? toStage} ».`,

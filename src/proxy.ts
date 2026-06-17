@@ -23,6 +23,18 @@ function isPublicAppPath(pathname: string): boolean {
   return pathname.startsWith("/depot") || pathname.startsWith("/api");
 }
 
+// Routes accessibles sans session, même quand le mur d'auth est actif :
+// collecte client par token, API publiques, et le tunnel d'auth lui-même.
+function isUnauthenticatedAllowed(pathname: string): boolean {
+  return (
+    pathname.startsWith("/depot") ||
+    pathname.startsWith("/api") ||
+    pathname === "/login" ||
+    pathname.startsWith("/login/") ||
+    pathname.startsWith("/auth/")
+  );
+}
+
 /**
  * En Next 16, le « middleware » est renommé `proxy` (runtime Node.js).
  * Rôles : routage de la vitrine sur l'apex + rafraîchissement de session Supabase.
@@ -49,7 +61,29 @@ export async function proxy(request: NextRequest) {
     return NextResponse.rewrite(url);
   }
 
-  return updateSession(request);
+  // Rafraîchit la session Supabase (et propage les cookies). On récupère aussi
+  // l'utilisateur pour le gate d'auth ci-dessous.
+  const { response, user } = await updateSession(request);
+
+  // Gate d'auth — DÉSACTIVÉ par défaut. Ne s'active que si le flag vaut
+  // exactement "1". Flag absent/≠"1" ⇒ comportement actuel inchangé.
+  if (process.env.ASTRAEOS_AUTH_ENFORCE === "1") {
+    const { pathname } = request.nextUrl;
+    if (!user && !isUnauthenticatedAllowed(pathname)) {
+      const loginUrl = request.nextUrl.clone();
+      loginUrl.pathname = "/login";
+      loginUrl.search = "";
+      const redirect = NextResponse.redirect(loginUrl);
+      // On recopie les cookies posés par updateSession pour ne pas perdre
+      // le refresh de session sur la redirection.
+      for (const cookie of response.cookies.getAll()) {
+        redirect.cookies.set(cookie);
+      }
+      return redirect;
+    }
+  }
+
+  return response;
 }
 
 export const config = {

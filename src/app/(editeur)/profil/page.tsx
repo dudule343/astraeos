@@ -1,7 +1,8 @@
 import { Topbar } from "../_components/Topbar";
 import { KpiCard, type KpiBlock } from "../_components/KpiCard";
 import { PageHero, SectionHeader, GhostButton } from "../_components/PageHeader";
-import { createAdminClient, DEFAULT_ENGINEER_ID } from "@/lib/supabase/admin";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { getSessionContext } from "@/lib/auth/context";
 
 export const dynamic = "force-dynamic";
 
@@ -38,6 +39,8 @@ async function fetchEngineer(): Promise<{ engineer: Engineer; fromDb: boolean }>
     return { engineer: PLACEHOLDER, fromDb: false };
   }
   try {
+    const ctx = await getSessionContext();
+    if (!ctx) return { engineer: PLACEHOLDER, fromDb: false };
     const supabase = createAdminClient();
     const { data } = await supabase
       .from("users")
@@ -56,7 +59,7 @@ async function fetchEngineer(): Promise<{ engineer: Engineer; fromDb: boolean }>
           created_at
         `,
       )
-      .eq("id", DEFAULT_ENGINEER_ID)
+      .eq("id", ctx.userId)
       .maybeSingle();
 
     if (!data) return { engineer: PLACEHOLDER, fromDb: false };

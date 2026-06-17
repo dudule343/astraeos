@@ -2,12 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import {
-  createAdminClient,
-  DEFAULT_TENANT_ID,
-  DEFAULT_CABINET_ID,
-  DEFAULT_ENGINEER_ID,
-} from "@/lib/supabase/admin";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { getSessionContext } from "@/lib/auth/context";
 
 export async function createClientAction(formData: FormData) {
   const raisonSociale = String(formData.get("raison_sociale") ?? "").trim();
@@ -27,14 +23,17 @@ export async function createClientAction(formData: FormData) {
     throw new Error("Champs requis manquants : raison sociale, SIREN, adresse, représentant, email");
   }
 
+  const ctx = await getSessionContext();
+  if (!ctx) throw new Error("Session requise");
+
   const supabase = createAdminClient();
 
   // 1. Insert client
   const { data: client, error: clientErr } = await supabase
     .from("clients")
     .insert({
-      tenant_id: DEFAULT_TENANT_ID,
-      cabinet_id: DEFAULT_CABINET_ID,
+      tenant_id: ctx.tenantId,
+      cabinet_id: ctx.cabinetId,
       household_type: "celibataire",
       household_address: adresseSiege,
       acquisition_origin: "captation_directe",
@@ -71,10 +70,10 @@ export async function createClientAction(formData: FormData) {
       phone: telephone || null,
     }),
     supabase.from("dossiers").insert({
-      tenant_id: DEFAULT_TENANT_ID,
-      cabinet_id: DEFAULT_CABINET_ID,
+      tenant_id: ctx.tenantId,
+      cabinet_id: ctx.cabinetId,
       client_id: client.id,
-      engineer_id: DEFAULT_ENGINEER_ID,
+      engineer_id: ctx.userId,
       pipeline_stage: "01_prospect",
       pipeline_entry_date: new Date().toISOString().slice(0, 10),
       internal_notes: internalNotes,
@@ -85,6 +84,7 @@ export async function createClientAction(formData: FormData) {
   if (dossierRes.error) throw new Error(`Dossier : ${dossierRes.error.message}`);
 
   revalidatePath("/clients");
+  revalidatePath("/dossiers");
   revalidatePath("/");
   redirect("/clients");
 }
@@ -115,13 +115,16 @@ export async function createClientFromModalAction(
       };
     }
 
+    const ctx = await getSessionContext();
+    if (!ctx) return { ok: false, error: "Session requise" };
+
     const supabase = createAdminClient();
 
     const { data: client, error: clientErr } = await supabase
       .from("clients")
       .insert({
-        tenant_id: DEFAULT_TENANT_ID,
-        cabinet_id: DEFAULT_CABINET_ID,
+        tenant_id: ctx.tenantId,
+        cabinet_id: ctx.cabinetId,
         household_type: "celibataire",
         household_address: adresseSiege,
         acquisition_origin: "captation_directe",
@@ -157,10 +160,10 @@ export async function createClientFromModalAction(
         phone: telephone || null,
       }),
       supabase.from("dossiers").insert({
-        tenant_id: DEFAULT_TENANT_ID,
-        cabinet_id: DEFAULT_CABINET_ID,
+        tenant_id: ctx.tenantId,
+        cabinet_id: ctx.cabinetId,
         client_id: client.id,
-        engineer_id: DEFAULT_ENGINEER_ID,
+        engineer_id: ctx.userId,
         pipeline_stage: "01_prospect",
         pipeline_entry_date: new Date().toISOString().slice(0, 10),
         internal_notes: internalNotes,
@@ -171,6 +174,7 @@ export async function createClientFromModalAction(
     if (dossierRes.error) return { ok: false, error: `Dossier : ${dossierRes.error.message}` };
 
     revalidatePath("/clients");
+    revalidatePath("/dossiers");
     revalidatePath("/");
     return { ok: true };
   } catch (e) {
@@ -185,6 +189,7 @@ export async function deleteClientsAction(ids: string[]) {
   const { error } = await supabase.from("clients").delete().in("id", ids);
   if (error) throw new Error(error.message);
   revalidatePath("/clients");
+  revalidatePath("/dossiers");
   revalidatePath("/");
 }
 
@@ -239,6 +244,8 @@ export async function updateClientAction(payload: UpdateClientPayload) {
     .eq("client_id", payload.id)
     .limit(1);
 
+  const dossierId = dossiers?.[0]?.id as string | undefined;
+
   if (dossiers && dossiers[0]) {
     let notes: Record<string, unknown> = {};
     if (dossiers[0].internal_notes) {
@@ -260,4 +267,12 @@ export async function updateClientAction(payload: UpdateClientPayload) {
   }
 
   revalidatePath("/clients");
+  revalidatePath(`/clients/${payload.id}`);
+  revalidatePath("/dossiers");
+  // La fiche dossier + la page conformité affichent raison sociale et
+  // représentant (mutés ci-dessus) → les revalider aussi.
+  if (dossierId) {
+    revalidatePath(`/dossiers/${dossierId}`);
+    revalidatePath(`/dossiers/${dossierId}/conformite`);
+  }
 }
