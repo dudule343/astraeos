@@ -19,7 +19,7 @@ export function SpaceSwitcher({ active }: { active: Space }) {
           Espace Éditeur
         </Link>
         <Link
-          href="/marque"
+          href="/espace-marque"
           className={`rounded px-3 py-1.5 text-[11.5px] font-semibold tracking-wide transition-colors ${
             active === "marque"
               ? "bg-[var(--gold)] text-white"
@@ -39,7 +39,7 @@ export function SpaceSwitcher({ active }: { active: Space }) {
           Espace Dirigeant
         </Link>
         <Link
-          href="/ingenieur"
+          href="/mon-activite"
           className={`rounded px-3 py-1.5 text-[11.5px] font-semibold tracking-wide transition-colors ${
             active === "ingenieur"
               ? "bg-[var(--gold)] text-white"
