@@ -1,14 +1,16 @@
 import { SpaceSwitcher } from "../_components/SpaceSwitcher";
 import { StubShell } from "../_components/StubShell";
 import { Sidebar } from "./_components/Sidebar";
+import { blockClients } from "@/lib/auth/guards";
 
 export const metadata = {
   title: "ASTRAEOS · Espace Dirigeant",
 };
 
-export default function DirigeantLayout({
+export default async function DirigeantLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  await blockClients();
   return (
     <div className="min-h-screen bg-[var(--ivory)]">
       <SpaceSwitcher active="dirigeant" />
