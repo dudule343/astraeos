@@ -41,5 +41,9 @@ Vérif globale : `bash scripts/verify-app.sh`.
 
 ## 🔜 Bloc E : fondations transverses
 - [x] E1. Migration `conformite_items` appliquée en prod (via MCP Supabase) — persistance KYC vérifiée ✅
-- [ ] E2. Auth réelle — **différé** (décision 2026-06-17 : espaces gardés en accès libre ; infra `auth.ts` prête à dé-stubber le moment venu)
-- [ ] E3. Multi-tenant réel (retirer les DEFAULT_TENANT/CABINET/ENGINEER hardcodés)
+- [x] E2+E3. **Fondation multi-tenant construite et déployée derrière le flag `ASTRAEOS_AUTH_ENFORCE`** (off) ✅
+  - Auth magic-link (login + callback + `getSessionContext`), gate `proxy.ts`
+  - 7 hardcodes → contexte session ; RLS appliquée en prod (18 tables, role-aware)
+  - **Go-live restant** (flip du flag) : (1) config Supabase Auth e-mail + SMTP Resend, (2) provisionner les comptes auth des users, (3) tester connexion, (4) `ASTRAEOS_AUTH_ENFORCE=1`
+- [x] Fraîcheur : `revalidatePath` sur les mutations (bug « il faut rafraîchir » corrigé) ✅
+- [x] Agenda : erreur Google actionnable + RDV fictifs supprimés — **reste : activer l'API Calendar dans Google Cloud** ✅
