@@ -165,7 +165,7 @@ export default async function EntretienDetailPage({
           {/* DCI snapshot */}
           <section className="rounded-md border border-[var(--navy-100)] bg-white p-5 lg:col-span-2">
             <h2 className="mb-3 text-[11px] font-bold uppercase tracking-wide text-[var(--navy-300)]">
-              DCI capturé en fin d'entretien
+              DCI capturé en fin d&apos;entretien
             </h2>
             {e.dci_snapshot ? (
               <pre className="max-h-[420px] overflow-auto whitespace-pre-wrap rounded bg-[var(--ivory)] p-3 text-[11px] leading-relaxed text-[var(--navy)]">

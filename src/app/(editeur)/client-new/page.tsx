@@ -187,7 +187,7 @@ export default function ClientNewPage() {
           <div className="mb-6 flex items-center justify-between gap-3 rounded-md border border-[var(--green-text)]/30 bg-[var(--green-bg)] px-4 py-3 text-[12px] text-[var(--navy)]">
             <div>
               ✓ <strong>Brouillon restauré</strong> — tes saisies précédentes ont été
-              récupérées automatiquement. L'auto-save est actif : tu peux quitter la page et
+              récupérées automatiquement. L&apos;auto-save est actif : tu peux quitter la page et
               revenir plus tard.
             </div>
             <button
@@ -203,8 +203,8 @@ export default function ClientNewPage() {
         <div className="mb-6 flex items-start gap-2 rounded-md border border-[var(--gold-300)] bg-[var(--gold-200)]/30 px-4 py-3 text-[11.5px] text-[var(--navy)]">
           <span>ℹ️</span>
           <div>
-            <strong>Mode test :</strong> toutes les étapes sont cliquables. Cliquer sur "Continuer"
-            referme l'étape courante et ouvre la suivante. Cliquer à nouveau sur l'en-tête d'une
+            <strong>Mode test :</strong> toutes les étapes sont cliquables. Cliquer sur &quot;Continuer&quot;
+            referme l&apos;étape courante et ouvre la suivante. Cliquer à nouveau sur l&apos;en-tête d&apos;une
             étape précédente la rouvre pour modification. <strong>Auto-save activé</strong> — tes
             saisies sont conservées entre sessions.
           </div>
@@ -599,7 +599,7 @@ function Step5({ onPrev, onNext }: { onPrev: () => void; onNext: () => void }) {
       <div className="mb-3 flex items-start gap-2 rounded-md border border-[var(--navy-100)] bg-[var(--light-blue)] px-4 py-3 text-[11.5px] text-[var(--navy)]">
         <span>ℹ️</span>
         <div>
-          Vous pourrez ajouter d'autres ingénieurs plus tard depuis la fiche client. Au minimum 1
+          Vous pourrez ajouter d&apos;autres ingénieurs plus tard depuis la fiche client. Au minimum 1
           utilisateur administrateur est requis.
         </div>
       </div>

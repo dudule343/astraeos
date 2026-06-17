@@ -32,7 +32,7 @@ export function PlaceholderPage({
           <div className="mb-3 text-[40px] leading-none">🚧</div>
           <div className="mb-2 text-[16px] font-semibold text-[var(--navy)]">Page à venir</div>
           <p className="mx-auto max-w-md text-[12.5px] leading-relaxed text-[var(--navy-300)]">
-            Cette page n'a pas encore été reproduite à partir des wireframes. Elle sera codée dans
+            Cette page n&apos;a pas encore été reproduite à partir des wireframes. Elle sera codée dans
             une prochaine itération.
           </p>
         </section>

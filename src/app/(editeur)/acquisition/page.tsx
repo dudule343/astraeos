@@ -1,145 +1,67 @@
 import { Topbar } from "../_components/Topbar";
 import { KpiCard, type KpiBlock } from "../_components/KpiCard";
 import { PageHero, SectionHeader, GhostButton } from "../_components/PageHeader";
+import { fetchAcquisition, fmtInt, fmtPct, fmtEur } from "./data";
 
-type FunnelStage = {
-  label: string;
-  count: string;
-  pct: string;
-  width: number;
-  highlight?: boolean;
+export const dynamic = "force-dynamic";
+
+export const metadata = {
+  title: "ASTRAEOS · Acquisition & conversion",
 };
 
-const funnel: FunnelStage[] = [
-  { label: "Visiteurs site web", count: "4 280", pct: "100 %", width: 100 },
-  { label: "Leads qualifiés", count: "312", pct: "7,3 %", width: 18 },
-  { label: "Essais gratuits démarrés", count: "42", pct: "1,0 %", width: 9 },
-  { label: "Clients convertis", count: "23", pct: "0,5 %", width: 5, highlight: true },
-];
+export default async function AcquisitionPage() {
+  const a = await fetchAcquisition();
 
-const volumeKpis: KpiBlock[] = [
-  {
-    phase: "1",
-    label: "Visiteurs site web",
-    value: "4 280",
-    meta: "30 derniers jours ·",
-    metaHighlight: { text: "▲ +14 %", tone: "up" },
-  },
-  {
-    phase: "1",
-    label: "Leads qualifiés",
-    value: "312",
-    meta: "contactables ·",
-    metaHighlight: { text: "▲ +8 %", tone: "up" },
-  },
-  {
-    phase: "1",
-    label: "Essais gratuits en cours",
-    value: "4",
-    meta: "démarrés < 30 jours",
-  },
-  {
-    phase: "1",
-    label: "Clients convertis",
-    value: "3",
-    meta: "signés en mai 2026",
-  },
-];
+  const volumeKpis: KpiBlock[] = [
+    {
+      phase: "1",
+      label: "Dossiers ouverts",
+      value: a.dossiersOuverts30j > 0 ? String(a.dossiersOuverts30j) : "—",
+      meta: "30 derniers jours",
+    },
+    {
+      phase: "1",
+      label: "Nouveaux prospects",
+      value: a.nouveauxProspects > 0 ? String(a.nouveauxProspects) : "—",
+      meta: "au stade prospect",
+    },
+    {
+      phase: "1",
+      label: "Dossiers en collecte",
+      value: a.dossiersCollecte > 0 ? String(a.dossiersCollecte) : "—",
+      meta: "collecte en cours",
+    },
+    {
+      phase: "1",
+      label: "Clients convertis",
+      value: a.clientsConvertisMois > 0 ? String(a.clientsConvertisMois) : "—",
+      meta: `signés en ${a.moisLabel}`,
+    },
+  ];
 
-const conversionKpis: KpiBlock[] = [
-  {
-    phase: "1",
-    label: "Coût d'acquisition par canal",
-    value: "3 200",
-    unit: "€",
-    meta: "moyenne pondérée tous canaux",
-  },
-  {
-    phase: "1",
-    label: "Durée moyenne de conversion",
-    value: "28",
-    unit: "jours",
-    meta: "premier contact → signature",
-  },
-  {
-    phase: "1",
-    label: "Taux de conversion global",
-    value: "7,4",
-    unit: "%",
-    meta: "essai → client payant",
-  },
-];
+  const conversionKpis: KpiBlock[] = [
+    {
+      phase: "1",
+      label: "Coût d'acquisition par canal",
+      value: "—",
+      meta: "donnée non disponible",
+    },
+    {
+      phase: "1",
+      label: "Durée moyenne de conversion",
+      value: a.dureeConversionJours != null ? String(a.dureeConversionJours) : "—",
+      unit: a.dureeConversionJours != null ? "jours" : undefined,
+      meta: "entrée pipeline → étude livrée",
+    },
+    {
+      phase: "1",
+      label: "Taux de conversion global",
+      value: fmtPct(a.tauxConversion),
+      unit: a.tauxConversion != null ? "%" : undefined,
+      meta: "dossiers convertis / total",
+    },
+  ];
 
-type SourceRow = {
-  source: string;
-  visitors: string;
-  leads: string;
-  trials: string;
-  converted: string;
-  cost: string;
-  costPer: string;
-  rentability: { value: string; tone: "success" | "warning" };
-};
-
-const sources: SourceRow[] = [
-  {
-    source: "Recommandation client",
-    visitors: "312",
-    leads: "68",
-    trials: "14",
-    converted: "9",
-    cost: "0 €",
-    costPer: "0 €",
-    rentability: { value: "Excellent", tone: "success" },
-  },
-  {
-    source: "Recherche organique",
-    visitors: "1 480",
-    leads: "112",
-    trials: "12",
-    converted: "6",
-    cost: "2 400 €",
-    costPer: "400 €",
-    rentability: { value: "Excellent", tone: "success" },
-  },
-  {
-    source: "LinkedIn Ads",
-    visitors: "1 240",
-    leads: "82",
-    trials: "10",
-    converted: "5",
-    cost: "12 800 €",
-    costPer: "2 560 €",
-    rentability: { value: "Correct", tone: "warning" },
-  },
-  {
-    source: "Salons & événements",
-    visitors: "680",
-    leads: "38",
-    trials: "4",
-    converted: "2",
-    cost: "9 600 €",
-    costPer: "4 800 €",
-    rentability: { value: "Élevé", tone: "warning" },
-  },
-  {
-    source: "Direct",
-    visitors: "568",
-    leads: "12",
-    trials: "2",
-    converted: "1",
-    cost: "0 €",
-    costPer: "0 €",
-    rentability: { value: "Excellent", tone: "success" },
-  },
-];
-
-const badgeToneClass = {
-  success: "bg-[var(--green-bg)] text-[var(--green-text)]",
-  warning: "bg-[var(--orange-bg)] text-[var(--orange-text)]",
-} as const;
-
-export default function AcquisitionPage() {
   return (
     <>
       <Topbar current="02 · Acquisition & conversion" />
@@ -148,51 +70,56 @@ export default function AcquisitionPage() {
         <PageHero
           eyebrow="Bloc 02 · Acquisition & conversion"
           title="Acquisition & conversion"
-          description="Comprendre comment les prospects deviennent clients : visiteur anonyme jusqu'à la signature, suivi des canaux d'acquisition et de leur rentabilité."
+          description="Comprendre comment les prospects deviennent clients : du dossier prospect jusqu'à la signature, suivi des origines d'acquisition et de leur conversion."
           actions={<GhostButton>Export</GhostButton>}
         />
 
         <section className="mb-8">
           <SectionHeader
             eyebrow="Entonnoir de conversion"
-            title="Du visiteur au client signé"
-            right={<GhostButton>30 jours ▾</GhostButton>}
+            title="Du prospect au client signé"
           />
           <div className="rounded-md border border-[var(--navy-100)] bg-white p-4">
-            <div className="flex flex-col gap-2">
-              {funnel.map((stage) => (
-                <div
-                  key={stage.label}
-                  className={`grid grid-cols-[180px_1fr_80px_60px] items-center gap-3 rounded-md border px-3 py-2 ${
-                    stage.highlight
-                      ? "border-[var(--gold)] bg-[var(--gold-200)]/30"
-                      : "border-[var(--navy-100)] bg-[var(--ivory)]"
-                  }`}
-                >
-                  <span
-                    className={`text-[12px] font-semibold ${stage.highlight ? "text-[var(--gold)]" : "text-[var(--navy)]"}`}
+            {a.dossiersActifs > 0 ? (
+              <div className="flex flex-col gap-2">
+                {a.funnel.map((stage) => (
+                  <div
+                    key={stage.stage}
+                    className={`grid grid-cols-[180px_1fr_80px_60px] items-center gap-3 rounded-md border px-3 py-2 ${
+                      stage.highlight
+                        ? "border-[var(--gold)] bg-[var(--gold-200)]/30"
+                        : "border-[var(--navy-100)] bg-[var(--ivory)]"
+                    }`}
                   >
-                    {stage.label}
-                  </span>
-                  <div className="h-3 overflow-hidden rounded-sm bg-[var(--navy-100)]">
-                    <div
-                      className={`h-full rounded-sm ${
-                        stage.highlight ? "bg-[var(--gold)]" : "bg-[var(--navy)]"
-                      }`}
-                      style={{ width: `${stage.width}%` }}
-                    />
+                    <span
+                      className={`text-[12px] font-semibold ${stage.highlight ? "text-[var(--gold)]" : "text-[var(--navy)]"}`}
+                    >
+                      {stage.label}
+                    </span>
+                    <div className="h-3 overflow-hidden rounded-sm bg-[var(--navy-100)]">
+                      <div
+                        className={`h-full rounded-sm ${
+                          stage.highlight ? "bg-[var(--gold)]" : "bg-[var(--navy)]"
+                        }`}
+                        style={{ width: `${stage.width}%` }}
+                      />
+                    </div>
+                    <span
+                      className={`text-right text-[14px] font-bold tabular-nums ${stage.highlight ? "text-[var(--gold)]" : "text-[var(--navy)]"}`}
+                    >
+                      {stage.count > 0 ? fmtInt(stage.count) : "—"}
+                    </span>
+                    <span className="text-right text-[11px] font-semibold text-[var(--navy-300)]">
+                      {stage.count > 0 ? `${stage.pct} %` : "—"}
+                    </span>
                   </div>
-                  <span
-                    className={`text-right text-[14px] font-bold tabular-nums ${stage.highlight ? "text-[var(--gold)]" : "text-[var(--navy)]"}`}
-                  >
-                    {stage.count}
-                  </span>
-                  <span className="text-right text-[11px] font-semibold text-[var(--navy-300)]">
-                    {stage.pct}
-                  </span>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <div className="py-8 text-center text-[12.5px] text-[var(--navy-300)]">
+                Aucun dossier sur la période.
+              </div>
+            )}
           </div>
         </section>
 
@@ -215,50 +142,52 @@ export default function AcquisitionPage() {
 
         <section className="mb-8">
           <SectionHeader
-            eyebrow="Rentabilité par canal"
+            eyebrow="Origine des dossiers"
             title="Performance par source d'acquisition"
-            right={<GhostButton>Comparer périodes</GhostButton>}
           />
           <div className="overflow-hidden rounded-md border border-[var(--navy-100)] bg-white">
             <table className="w-full text-left">
               <thead>
                 <tr className="border-b border-[var(--navy-100)] bg-[var(--ivory)] text-[10.5px] font-bold uppercase tracking-[0.08em] text-[var(--navy-300)]">
                   <th className="px-4 py-3">Source</th>
-                  <th className="px-4 py-3 text-right">Visiteurs</th>
-                  <th className="px-4 py-3 text-right">Leads</th>
-                  <th className="px-4 py-3 text-right">Essais</th>
+                  <th className="px-4 py-3 text-right">Dossiers</th>
                   <th className="px-4 py-3 text-right">Convertis</th>
-                  <th className="px-4 py-3 text-right">Coût total</th>
-                  <th className="px-4 py-3 text-right">Coût par client</th>
-                  <th className="px-4 py-3 text-center">Rentabilité</th>
+                  <th className="px-4 py-3 text-right">Taux de conversion</th>
+                  <th className="px-4 py-3 text-right">AUM généré</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--navy-100)]">
-                {sources.map((row) => (
-                  <tr
-                    key={row.source}
-                    className="text-[12.5px] text-[var(--navy)] hover:bg-[var(--light-blue)]"
-                  >
-                    <td className="px-4 py-3 font-semibold">{row.source}</td>
-                    <td className="px-4 py-3 text-right tabular-nums">{row.visitors}</td>
-                    <td className="px-4 py-3 text-right tabular-nums">{row.leads}</td>
-                    <td className="px-4 py-3 text-right tabular-nums">{row.trials}</td>
-                    <td className="px-4 py-3 text-right font-semibold tabular-nums">
-                      {row.converted}
-                    </td>
-                    <td className="px-4 py-3 text-right tabular-nums">{row.cost}</td>
-                    <td className="px-4 py-3 text-right font-bold tabular-nums text-[var(--gold)]">
-                      {row.costPer}
-                    </td>
-                    <td className="px-4 py-3 text-center">
-                      <span
-                        className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-bold ${badgeToneClass[row.rentability.tone]}`}
-                      >
-                        {row.rentability.value}
-                      </span>
+                {a.sources.length > 0 ? (
+                  a.sources.map((row) => (
+                    <tr
+                      key={row.key}
+                      className="text-[12.5px] text-[var(--navy)] hover:bg-[var(--light-blue)]"
+                    >
+                      <td className="px-4 py-3 font-semibold">{row.label}</td>
+                      <td className="px-4 py-3 text-right tabular-nums">
+                        {fmtInt(row.dossiers)}
+                      </td>
+                      <td className="px-4 py-3 text-right font-semibold tabular-nums">
+                        {row.converted > 0 ? fmtInt(row.converted) : "—"}
+                      </td>
+                      <td className="px-4 py-3 text-right tabular-nums">
+                        {row.convRate != null ? `${fmtPct(row.convRate)} %` : "—"}
+                      </td>
+                      <td className="px-4 py-3 text-right font-bold tabular-nums text-[var(--gold)]">
+                        {fmtEur(row.aum)}
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td
+                      colSpan={5}
+                      className="px-4 py-8 text-center text-[12.5px] text-[var(--navy-300)]"
+                    >
+                      Aucune origine d&apos;acquisition renseignée.
                     </td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>

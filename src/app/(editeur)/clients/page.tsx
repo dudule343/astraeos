@@ -154,10 +154,10 @@ export default async function ClientsPage() {
           <section className="rounded-md border border-dashed border-[var(--navy-100)] bg-white p-12 text-center">
             <div className="mb-3 text-[40px] leading-none">📋</div>
             <div className="mb-2 text-[16px] font-semibold text-[var(--navy)]">
-              Aucun client pour l'instant
+              Aucun client pour l&apos;instant
             </div>
             <p className="mx-auto mb-5 max-w-md text-[12.5px] leading-relaxed text-[var(--navy-300)]">
-              Crée ton premier client via le wizard. Il apparaîtra ici dès qu'il sera activé.
+              Crée ton premier client via le wizard. Il apparaîtra ici dès qu&apos;il sera activé.
             </p>
             <NewClientButton />
           </section>

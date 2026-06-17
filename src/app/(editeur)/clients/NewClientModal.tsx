@@ -201,7 +201,7 @@ export function NewClientModal({ onClose }: { onClose: () => void }) {
               </select>
             </div>
             <div>
-              <label className={labelClass}>Date d'activation</label>
+              <label className={labelClass}>Date d&apos;activation</label>
               <input
                 name="date_activation"
                 type="date"

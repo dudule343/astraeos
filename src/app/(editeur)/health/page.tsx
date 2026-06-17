@@ -1,118 +1,71 @@
 import { Topbar } from "../_components/Topbar";
 import { KpiCard, type KpiBlock } from "../_components/KpiCard";
 import { PageHero, SectionHeader, GhostButton, GoldButton } from "../_components/PageHeader";
+import {
+  fetchSanteClients,
+  fmtJoursDepuis,
+  fmtNombre,
+  pct,
+  type CabinetHealth,
+} from "./data";
 
-const distributionKpis: KpiBlock[] = [
-  {
-    phase: "2",
-    label: "Comptes en bonne santé",
-    value: "15",
-    meta: "65 % du portefeuille · score > 80",
-    trend: "up",
-  },
-  {
-    phase: "2",
-    label: "Comptes en croissance",
-    value: "5",
-    meta: "22 % · expansion en cours",
-  },
-  {
-    phase: "2",
-    label: "Comptes à risque",
-    value: "3",
-    meta: "13 % · score < 60 ou usage en chute",
-    trend: "down",
-  },
-  {
-    phase: "2",
-    label: "Score santé moyen",
-    value: "82",
-    meta: "tous comptes confondus",
-    compares: [
-      { period: "M-1", value: "▲ 78", direction: "up" },
-      { period: "N-1", value: "▲ 71", direction: "up" },
-    ],
-  },
-];
+export const dynamic = "force-dynamic";
 
-type RiskRow = {
-  name: string;
-  initials: string;
-  type: "Cabinet" | "Autre pro";
-  score: { value: string; tone: "warning" | "danger" };
-  signal: string;
-  lastConnection: string;
-  mrr: string;
-  action: string;
+export const metadata = {
+  title: "ASTRAEOS · Santé clients",
 };
 
-const risks: RiskRow[] = [
-  {
-    name: "Cabinet Lyonnais",
-    initials: "L",
-    type: "Cabinet",
-    score: { value: "58", tone: "warning" },
-    signal: "Usage en chute · -42 % vs M-1",
-    lastConnection: "il y a 12 jours",
-    mrr: "1 800 €",
-    action: "Briefer la relation client",
-  },
-  {
-    name: "Bordeaux Patrimoine",
-    initials: "B",
-    type: "Cabinet",
-    score: { value: "42", tone: "danger" },
-    signal: "Aucune étude créée < 30j · 1 ticket support critique",
-    lastConnection: "il y a 18 jours",
-    mrr: "1 200 €",
-    action: "Briefer la relation client",
-  },
-  {
-    name: "Notaire Pollet",
-    initials: "N",
-    type: "Autre pro",
-    score: { value: "54", tone: "warning" },
-    signal: "Facture impayée · 32 jours",
-    lastConnection: "il y a 24 jours",
-    mrr: "820 €",
-    action: "Relance",
-  },
-];
+const typeBadgeClass = "bg-[var(--light-blue)] text-[var(--navy)]";
 
-const components = [
-  {
-    icon: "📊",
-    label: "Usage produit · 40 %",
-    desc: "Sessions par mois · études créées · ratio quotidien/mensuel",
-  },
-  {
-    icon: "👥",
-    label: "Engagement équipe · 25 %",
-    desc: "% ingénieurs actifs · profondeur d'usage",
-  },
-  {
-    icon: "💶",
-    label: "Paiement · 20 %",
-    desc: "Délai de règlement · taux de retard · impayés",
-  },
-  {
-    icon: "🛟",
-    label: "Support · 15 %",
-    desc: "Tickets ouverts · satisfaction · résolution",
-  },
-];
+// Tonalité du badge "jours d'inactivité" : >30j = danger, sinon avertissement.
+function inactiviteTone(days: number | null): "warning" | "danger" {
+  if (days === null) return "danger";
+  return days > 30 ? "danger" : "warning";
+}
 
-const scoreToneClass = {
+const inactiviteToneClass = {
   warning: "bg-[var(--orange-bg)] text-[var(--orange-text)]",
   danger: "bg-[var(--red-bg)] text-[var(--red-text)]",
 } as const;
 
-const typeBadgeClass = {
-  Cabinet: "bg-[var(--light-blue)] text-[var(--navy)]",
-  "Autre pro": "bg-[var(--navy-100)] text-[var(--navy-300)]",
-} as const;
+export default async function HealthPage() {
+  const s = await fetchSanteClients();
 
-export default function HealthPage() {
+  // KPIs dérivés de signaux réels (fraîcheur d'activité des cabinets du réseau).
+  // Pas de "score santé composite" : aucune source en base — on mesure l'activité.
+  const distributionKpis: KpiBlock[] = [
+    {
+      label: "Comptes en bonne santé",
+      value: s.hasData && s.sains > 0 ? String(s.sains) : "—",
+      meta: s.hasData
+        ? `${pct(s.sains, s.totalCabinets)} du réseau · actif < 14 j`
+        : "actif < 14 j",
+      trend: s.sains > 0 ? "up" : undefined,
+    },
+    {
+      label: "Comptes à surveiller",
+      value: s.hasData && s.surveiller > 0 ? String(s.surveiller) : "—",
+      meta: s.hasData
+        ? `${pct(s.surveiller, s.totalCabinets)} · activité 14–30 j`
+        : "activité 14–30 j",
+    },
+    {
+      label: "Comptes à risque",
+      value: s.hasData && s.risque > 0 ? String(s.risque) : "—",
+      meta: s.hasData
+        ? `${pct(s.risque, s.totalCabinets)} · inactif > 30 j ou sans signal`
+        : "inactif > 30 j ou sans signal",
+      trend: s.risque > 0 ? "down" : undefined,
+    },
+    {
+      label: "Cabinets actifs",
+      value: s.hasData && s.totalCabinets > 0 ? `${s.actifs}/${s.totalCabinets}` : "—",
+      meta: "comptes actifs sur le réseau",
+    },
+  ];
+
+  const aRisque: CabinetHealth[] = s.aRisque;
+
   return (
     <>
       <Topbar current="05 · Santé clients" />
@@ -121,14 +74,14 @@ export default function HealthPage() {
         <PageHero
           eyebrow="Bloc 05 · Santé clients"
           title="Santé clients"
-          description="Score composite basé sur usage, engagement, paiement et support — détection précoce des risques de désabonnement."
+          description="Activité et fraîcheur des cabinets du réseau — détection précoce des comptes inactifs à partir des dossiers, études et connexions réelles."
           actions={<GhostButton>Export</GhostButton>}
         />
 
         <section className="mb-8">
           <SectionHeader
             eyebrow="Distribution du portefeuille"
-            title="Répartition par état de santé"
+            title="Répartition par état d'activité"
           />
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {distributionKpis.map((kpi) => (
@@ -138,84 +91,129 @@ export default function HealthPage() {
         </section>
 
         <section className="mb-8">
-          <SectionHeader eyebrow="À surveiller" title="Comptes à risque de désabonnement" />
-          <div className="overflow-hidden rounded-md border border-[var(--navy-100)] bg-white">
-            <table className="w-full text-left">
-              <thead>
-                <tr className="border-b border-[var(--navy-100)] bg-[var(--ivory)] text-[10.5px] font-bold uppercase tracking-[0.08em] text-[var(--navy-300)]">
-                  <th className="px-4 py-3">Compte</th>
-                  <th className="px-4 py-3">Type</th>
-                  <th className="px-4 py-3 text-center">Score santé</th>
-                  <th className="px-4 py-3">Signal d'alerte</th>
-                  <th className="px-4 py-3">Dernière connexion</th>
-                  <th className="px-4 py-3 text-right">MRR à risque</th>
-                  <th className="px-4 py-3 text-center">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[var(--navy-100)]">
-                {risks.map((row) => (
-                  <tr
-                    key={row.name}
-                    className="text-[12.5px] text-[var(--navy)] hover:bg-[var(--light-blue)]"
-                  >
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2.5">
-                        <div className="flex h-7 w-7 items-center justify-center rounded-md bg-[var(--navy)] text-[11px] font-bold text-white">
-                          {row.initials}
-                        </div>
-                        <span className="font-semibold">{row.name}</span>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={`rounded-sm px-1.5 py-0.5 text-[10px] font-semibold ${typeBadgeClass[row.type]}`}
-                      >
-                        {row.type}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-center">
-                      <span
-                        className={`inline-block rounded-full px-2.5 py-0.5 text-[11px] font-bold ${scoreToneClass[row.score.tone]}`}
-                      >
-                        {row.score.value}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">{row.signal}</td>
-                    <td className="px-4 py-3 text-[var(--navy-300)]">{row.lastConnection}</td>
-                    <td className="px-4 py-3 text-right tabular-nums">{row.mrr}</td>
-                    <td className="px-4 py-3 text-center">
-                      <GoldButton>{row.action}</GoldButton>
-                    </td>
+          <SectionHeader eyebrow="À surveiller" title="Comptes inactifs à risque" />
+          {aRisque.length > 0 ? (
+            <div className="overflow-hidden rounded-md border border-[var(--navy-100)] bg-white">
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="border-b border-[var(--navy-100)] bg-[var(--ivory)] text-[10.5px] font-bold uppercase tracking-[0.08em] text-[var(--navy-300)]">
+                    <th className="px-4 py-3">Compte</th>
+                    <th className="px-4 py-3">Type</th>
+                    <th className="px-4 py-3 text-center">Inactivité</th>
+                    <th className="px-4 py-3">Signal d&apos;alerte</th>
+                    <th className="px-4 py-3">Dernière activité</th>
+                    <th className="px-4 py-3 text-right">Dossiers actifs</th>
+                    <th className="px-4 py-3 text-center">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-[var(--navy-100)]">
+                  {aRisque.map((row) => {
+                    const tone = inactiviteTone(row.daysSinceActivity);
+                    return (
+                      <tr
+                        key={row.id}
+                        className="text-[12.5px] text-[var(--navy)] hover:bg-[var(--light-blue)]"
+                      >
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-2.5">
+                            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-[var(--navy)] text-[11px] font-bold text-white">
+                              {row.initials}
+                            </div>
+                            <span className="font-semibold">{row.name}</span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">
+                          <span
+                            className={`rounded-sm px-1.5 py-0.5 text-[10px] font-semibold ${typeBadgeClass}`}
+                          >
+                            Cabinet
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          <span
+                            className={`inline-block rounded-full px-2.5 py-0.5 text-[11px] font-bold ${inactiviteToneClass[tone]}`}
+                          >
+                            {row.daysSinceActivity === null
+                              ? "—"
+                              : `${row.daysSinceActivity} j`}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3">{row.signal}</td>
+                        <td className="px-4 py-3 text-[var(--navy-300)]">
+                          {fmtJoursDepuis(row.daysSinceActivity)}
+                        </td>
+                        <td className="px-4 py-3 text-right tabular-nums">
+                          {fmtNombre(row.dossiersActifs)}
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          <GoldButton>Briefer la relation client</GoldButton>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="rounded-md border border-dashed border-[var(--navy-100)] bg-white p-12 text-center">
+              <div className="mb-3 text-[34px] leading-none">✅</div>
+              <div className="mb-2 text-[15px] font-semibold text-[var(--navy)]">
+                {s.hasData ? "Aucun compte à risque détecté" : "Aucune donnée d'activité"}
+              </div>
+              <p className="mx-auto max-w-md text-[12.5px] leading-relaxed text-[var(--navy-300)]">
+                {s.hasData
+                  ? "Tous les cabinets du réseau ont une activité récente (dossiers, études ou connexions). Aucun compte inactif depuis plus de 30 jours."
+                  : "Les indicateurs de santé se construisent à partir de l'activité réelle des cabinets — dossiers, études livrées et connexions. Aucun signal disponible pour l'instant."}
+              </p>
+            </div>
+          )}
         </section>
 
         <section className="mb-8">
-          <SectionHeader eyebrow="Méthodologie" title="Composantes du score santé" />
+          <SectionHeader eyebrow="Méthodologie" title="Comment l'état d'activité est calculé" />
           <div className="mb-3 flex items-start gap-2 rounded-md border border-[var(--navy-100)] bg-[var(--light-blue)] px-4 py-3 text-[11.5px] text-[var(--navy)]">
             <span>ℹ️</span>
             <div>
-              Le score santé d'un compte est la <strong>moyenne pondérée de 4 dimensions</strong> —
-              usage produit (40 %), engagement de l'équipe (25 %), historique de paiement (20 %),
-              satisfaction support (15 %).
+              L&apos;état d&apos;un compte est dérivé de sa <strong>fraîcheur d&apos;activité
+              réelle</strong> — date de dernière activité des dossiers, dernière connexion des
+              utilisateurs, et études créées sur 30 jours. Aucun score composite ni indicateur de
+              paiement n&apos;est calculé tant que ces sources ne sont pas disponibles en base.
             </div>
           </div>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {components.map((c) => (
-              <div
-                key={c.label}
-                className="rounded-md border border-[var(--navy-100)] bg-white p-5"
-              >
-                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-md bg-[var(--gold-200)] text-xl">
-                  {c.icon}
-                </div>
-                <div className="mb-1 text-[12px] font-semibold text-[var(--navy)]">{c.label}</div>
-                <div className="text-[12px] leading-relaxed text-[var(--navy-300)]">{c.desc}</div>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <div className="rounded-md border border-[var(--navy-100)] bg-white p-5">
+              <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-md bg-[var(--gold-200)] text-xl">
+                🟢
               </div>
-            ))}
+              <div className="mb-1 text-[12px] font-semibold text-[var(--navy)]">
+                Bonne santé · activité &lt; 14 j
+              </div>
+              <div className="text-[12px] leading-relaxed text-[var(--navy-300)]">
+                Dernière activité (dossier, étude ou connexion) il y a moins de 14 jours.
+              </div>
+            </div>
+            <div className="rounded-md border border-[var(--navy-100)] bg-white p-5">
+              <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-md bg-[var(--gold-200)] text-xl">
+                🟠
+              </div>
+              <div className="mb-1 text-[12px] font-semibold text-[var(--navy)]">
+                À surveiller · 14 à 30 j
+              </div>
+              <div className="text-[12px] leading-relaxed text-[var(--navy-300)]">
+                Activité ralentie : aucun signal entre 14 et 30 jours.
+              </div>
+            </div>
+            <div className="rounded-md border border-[var(--navy-100)] bg-white p-5">
+              <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-md bg-[var(--gold-200)] text-xl">
+                🔴
+              </div>
+              <div className="mb-1 text-[12px] font-semibold text-[var(--navy)]">
+                À risque · &gt; 30 j ou sans signal
+              </div>
+              <div className="text-[12px] leading-relaxed text-[var(--navy-300)]">
+                Inactif depuis plus de 30 jours, ou aucune activité enregistrée.
+              </div>
+            </div>
           </div>
         </section>
       </div>

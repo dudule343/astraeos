@@ -1,93 +1,57 @@
 import { Topbar } from "../_components/Topbar";
 import { KpiCard, type KpiBlock } from "../_components/KpiCard";
 import { PageHero, SectionHeader, GhostButton } from "../_components/PageHeader";
+import { fetchQuality, fmtCount, fmtScore } from "./data";
 
-const ticketKpis: KpiBlock[] = [
-  { phase: "1", label: "Tickets ouverts", value: "12", meta: "4 critiques · 8 standards" },
-  {
-    phase: "1",
-    label: "Temps moyen de première réponse",
-    value: "2,4",
-    unit: "h",
-    meta: "objectif < 4h",
-  },
-  {
-    phase: "1",
-    label: "Temps moyen de résolution",
-    value: "8,2",
-    unit: "h",
-    meta: "objectif < 24h",
-  },
-  { phase: "1", label: "Satisfaction support", value: "4,7", unit: "/5", meta: "CSAT moyen" },
-];
+export const dynamic = "force-dynamic";
 
-const stabilityKpis: KpiBlock[] = [
-  {
-    phase: "1",
-    label: "Bugs critiques ouverts",
-    value: "2",
-    meta: "à corriger sous 48h",
-    trend: "down",
-  },
-  {
-    phase: "1",
-    label: "Incidents de plateforme",
-    value: "0",
-    meta: "30 derniers jours · 100 % stable",
-  },
-  {
-    phase: "1",
-    label: "Niveau de service garanti",
-    value: "99,8",
-    unit: "%",
-    meta: "disponibilité contractuelle (SLA)",
-  },
-];
+export const metadata = {
+  title: "ASTRAEOS · Support & qualité",
+};
 
-const resolutionKpis: KpiBlock[] = [
-  {
-    label: "Cette semaine",
-    value: "82",
-    unit: "%",
-    meta: "28 résolus / 34 tickets",
-    compares: [
-      { period: "S-1", value: "▲ 78 %", direction: "up" },
-      { period: "S-2", value: "▲ 76 %", direction: "up" },
-    ],
-  },
-  {
-    label: "Ce mois",
-    value: "79",
-    unit: "%",
-    meta: "112 / 142 tickets",
-    compares: [
-      { period: "M-1", value: "▲ 74 %", direction: "up" },
-      { period: "M-2", value: "▲ 71 %", direction: "up" },
-    ],
-  },
-  {
-    label: "Ce trimestre",
-    value: "76",
-    unit: "%",
-    meta: "324 / 426 tickets",
-    compares: [
-      { period: "T-1", value: "▲ 68 %", direction: "up" },
-      { period: "N-1", value: "▲ 58 %", direction: "up" },
-    ],
-  },
-  {
-    label: "Cette année",
-    value: "73",
-    unit: "%",
-    meta: "986 / 1 350 tickets",
-    compares: [
-      { period: "N-1", value: "▲ 61 %", direction: "up" },
-      { period: "N-2", value: "▲ 52 %", direction: "up" },
-    ],
-  },
-];
+// Encart "état vide honnête" : utilisé pour les blocs dont la source n'existe
+// pas encore en base (support, incidents). On n'affiche aucun chiffre inventé.
+function EmptyNotice({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex items-start gap-2 rounded-md border border-dashed border-[var(--navy-100)] bg-white px-4 py-4 text-[12px] text-[var(--navy-300)]">
+      <span aria-hidden>ℹ️</span>
+      <div>{children}</div>
+    </div>
+  );
+}
 
-export default function QualityPage() {
+export default async function QualityPage() {
+  const q = await fetchQuality();
+
+  // Bloc "Dossiers en attente / en retard" — dérivé de dossiers.stage_entered_at,
+  // last_activity_at, days_in_stage_cached, priority (seules vraies données de
+  // cette page). Pas de comparatifs temporels : aucun historique de snapshots
+  // en base, donc on ne fabrique pas de flèches d'évolution.
+  const dossierKpis: KpiBlock[] = [
+    {
+      label: "Dossiers suivis",
+      value: fmtCount(q.dossiersActifs),
+      meta: "dossiers actifs du cabinet",
+    },
+    {
+      label: "En retard",
+      value: fmtCount(q.enRetard),
+      meta: "plus de 14 jours dans l'étape",
+      trend: q.enRetard > 0 ? "down" : undefined,
+    },
+    {
+      label: "Sans activité récente",
+      value: fmtCount(q.sansActivite),
+      meta: "aucune activité depuis 14 jours",
+    },
+    {
+      label: "Prioritaires bloqués",
+      value: fmtCount(q.prioritairesBloques),
+      meta: "priorité haute/urgente en retard",
+      trend: q.prioritairesBloques > 0 ? "down" : undefined,
+    },
+  ];
+
   return (
     <>
       <Topbar current="07 · Support & qualité" />
@@ -102,38 +66,71 @@ export default function QualityPage() {
 
         <section className="mb-8">
           <SectionHeader eyebrow="Charge support" title="Tickets & délais" />
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {ticketKpis.map((kpi) => (
-              <KpiCard key={kpi.label} kpi={kpi} />
-            ))}
-          </div>
+          <EmptyNotice>
+            Module de support non encore instrumenté — aucune donnée de ticket, de délai de
+            réponse ou de résolution n&apos;est disponible. Ces indicateurs s&apos;afficheront
+            lorsque le suivi des demandes de support sera branché.
+          </EmptyNotice>
         </section>
 
         <section className="mb-8">
           <SectionHeader eyebrow="Stabilité produit" title="Bugs & incidents" />
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-            {stabilityKpis.map((kpi) => (
-              <KpiCard key={kpi.label} kpi={kpi} />
-            ))}
-          </div>
+          <EmptyNotice>
+            Suivi des incidents plateforme et des bugs non disponible — aucune source de
+            supervision (incidents, disponibilité, SLA) n&apos;est connectée. Aucune mesure de
+            fiabilité n&apos;est affichée tant qu&apos;elle n&apos;est pas réellement collectée.
+          </EmptyNotice>
         </section>
 
         <section className="mb-8">
           <SectionHeader
-            eyebrow="Premier niveau de support"
-            title="Taux de résolution niveau 1 · évolution temporelle"
+            eyebrow="Suivi de production"
+            title="Dossiers en attente / en retard"
           />
           <div className="mb-3 flex items-start gap-2 rounded-md border border-[var(--navy-100)] bg-[var(--light-blue)] px-4 py-3 text-[11.5px] text-[var(--navy)]">
             <span>ℹ️</span>
             <div>
-              Pourcentage de tickets résolus directement par l'équipe support de premier niveau,
-              sans escalade vers le développement.
+              Dossiers du cabinet qui stagnent dans leur étape ou sans activité récente, dérivés
+              du temps passé dans chaque étape du pipeline. Indicateur de la charge à traiter en
+              priorité.
+            </div>
+          </div>
+          {q.hasDossiers ? (
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              {dossierKpis.map((kpi) => (
+                <KpiCard key={kpi.label} kpi={kpi} />
+              ))}
+            </div>
+          ) : (
+            <EmptyNotice>Aucun dossier suivi pour l&apos;instant.</EmptyNotice>
+          )}
+        </section>
+
+        <section className="mb-8">
+          <SectionHeader
+            eyebrow="Retour client"
+            title="Satisfaction des études livrées"
+          />
+          <div className="mb-3 flex items-start gap-2 rounded-md border border-[var(--navy-100)] bg-[var(--light-blue)] px-4 py-3 text-[11.5px] text-[var(--navy)]">
+            <span>ℹ️</span>
+            <div>
+              Note moyenne attribuée par les clients aux études patrimoniales livrées (échelle de
+              1 à 10). Distincte d&apos;une satisfaction support : elle mesure la qualité perçue du
+              livrable, pas du service d&apos;assistance.
             </div>
           </div>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {resolutionKpis.map((kpi) => (
-              <KpiCard key={kpi.label} kpi={kpi} />
-            ))}
+            <KpiCard
+              kpi={{
+                label: "Satisfaction étude (moyenne)",
+                value: fmtScore(q.satisfactionMoyenne),
+                unit: q.satisfactionMoyenne != null ? "/10" : undefined,
+                meta:
+                  q.satisfactionCount > 0
+                    ? `sur ${q.satisfactionCount} étude${q.satisfactionCount > 1 ? "s" : ""} notée${q.satisfactionCount > 1 ? "s" : ""}`
+                    : "aucune étude notée pour l'instant",
+              }}
+            />
           </div>
         </section>
       </div>

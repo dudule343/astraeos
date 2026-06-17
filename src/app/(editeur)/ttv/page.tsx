@@ -1,42 +1,25 @@
 import { Topbar } from "../_components/Topbar";
 import { KpiCard, type KpiBlock } from "../_components/KpiCard";
 import { PageHero, SectionHeader, GhostButton } from "../_components/PageHeader";
+import { fetchTtv } from "./data";
 
-const milestoneKpis: KpiBlock[] = [
-  {
-    phase: "1",
-    label: "Connexion initiale",
-    value: "4",
-    unit: "min",
-    meta: "après création compte",
-  },
-  { phase: "1", label: "Premier client ajouté", value: "2,4", unit: "jours", meta: "médiane" },
-  {
-    phase: "1",
-    label: "Première étude patrimoniale",
-    value: "5,8",
-    unit: "jours",
-    meta: "médiane",
-  },
-  { phase: "1", label: "Première simulation", value: "7,2", unit: "jours", meta: "médiane" },
-  {
-    phase: "1",
-    label: "Premier rapport généré",
-    value: "9,4",
-    unit: "jours",
-    meta: "médiane · révèle la valeur",
-  },
-];
+export const dynamic = "force-dynamic";
 
-const onboardingSteps = [
-  { label: "Connexion initiale", pct: 100, ratio: "18/18" },
-  { label: "Premier client ajouté", pct: 94, ratio: "17/18" },
-  { label: "Première étude patrimoniale", pct: 78, ratio: "14/18" },
-  { label: "Première simulation", pct: 61, ratio: "11/18" },
-  { label: "Premier rapport généré", pct: 44, ratio: "8/18" },
-];
+export const metadata = {
+  title: "ASTRAEOS · Vitesse première valeur",
+};
 
-export default function TtvPage() {
+export default async function TtvPage() {
+  const ttv = await fetchTtv();
+
+  const milestoneKpis: KpiBlock[] = ttv.milestones.map((m) => ({
+    phase: "1",
+    label: m.label,
+    value: m.value,
+    unit: m.unit,
+    meta: m.meta,
+  }));
+
   return (
     <>
       <Topbar current="04 · Vitesse première valeur" />
@@ -61,27 +44,41 @@ export default function TtvPage() {
         <section className="mb-8">
           <SectionHeader
             eyebrow="Onboarding"
-            title="Progression des nouveaux ingénieurs (30 derniers jours)"
+            title={`Progression des ingénieurs (${ttv.cohort} ${ttv.cohort > 1 ? "ingénieurs" : "ingénieur"})`}
           />
           <div className="rounded-md border border-[var(--navy-100)] bg-white p-6">
-            <div className="flex flex-col gap-5">
-              {onboardingSteps.map((step) => (
-                <div key={step.label}>
-                  <div className="mb-1.5 flex justify-between text-[11.5px] text-[var(--navy-300)]">
-                    <span>{step.label}</span>
-                    <span>
-                      <strong className="text-[var(--navy)]">{step.pct} %</strong> · {step.ratio}
-                    </span>
+            {ttv.hasData ? (
+              <div className="flex flex-col gap-5">
+                {ttv.funnel.map((step) => (
+                  <div key={step.label}>
+                    <div className="mb-1.5 flex justify-between text-[11.5px] text-[var(--navy-300)]">
+                      <span>{step.label}</span>
+                      {step.tracked && step.pct != null ? (
+                        <span>
+                          <strong className="text-[var(--navy)]">{step.pct} %</strong> ·{" "}
+                          {step.reached}/{step.cohort}
+                        </span>
+                      ) : (
+                        <span className="italic">non suivi</span>
+                      )}
+                    </div>
+                    <div className="h-3 overflow-hidden rounded-sm bg-[var(--navy-100)]">
+                      {step.tracked && step.pct != null && (
+                        <div
+                          className="h-full bg-[var(--navy)]"
+                          style={{ width: `${step.pct}%` }}
+                        />
+                      )}
+                    </div>
                   </div>
-                  <div className="h-3 overflow-hidden rounded-sm bg-[var(--navy-100)]">
-                    <div
-                      className="h-full bg-[var(--navy)]"
-                      style={{ width: `${step.pct}%` }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <div className="py-6 text-center text-[12.5px] text-[var(--navy-300)]">
+                Aucun ingénieur rattaché à ce cabinet pour l&apos;instant. La progression
+                d&apos;onboarding s&apos;affichera dès qu&apos;une équipe sera constituée.
+              </div>
+            )}
           </div>
         </section>
       </div>

@@ -1,87 +1,17 @@
 import { Topbar } from "../_components/Topbar";
 import { KpiCard, type KpiBlock } from "../_components/KpiCard";
 import { PageHero, SectionHeader, GhostButton, GoldButton } from "../_components/PageHeader";
+import { fetchCommsData, fmtDateTime } from "./data";
 
-const kpis: KpiBlock[] = [
-  { label: "Newsletters envoyées", value: "14", meta: "depuis janvier" },
-  { label: "Webinars organisés", value: "8", meta: "~120 participants moyens" },
-  { label: "Taux d'ouverture moyen", value: "72", unit: "%", meta: "▲ +6 pts vs N-1" },
-  { label: "Taux de clic moyen", value: "28", unit: "%", meta: "excellent · benchmark 18 %" },
-];
+export const dynamic = "force-dynamic";
 
-type Comm = {
-  date: string;
-  type: { v: string; cls: string };
-  subject: string;
-  recipients: string;
-  status: { v: string; cls: string };
+export const metadata = {
+  title: "ASTRAEOS · Communications & annonces",
 };
 
-const comms: Comm[] = [
-  {
-    date: "12 mai",
-    type: { v: "Newsletter", cls: "bg-[var(--light-blue)] text-[var(--navy)]" },
-    subject: "Nouveautés produit · mai 2026",
-    recipients: "~280 ingénieurs",
-    status: { v: "Brouillon", cls: "bg-[var(--orange-bg)] text-[var(--orange-text)]" },
-  },
-  {
-    date: "15 mai",
-    type: { v: "Webinar", cls: "bg-[var(--gold-200)] text-[var(--medium-400)]" },
-    subject: "Optimisation patrimoniale post-réforme retraite",
-    recipients: "~150 inscrits",
-    status: { v: "Programmé", cls: "bg-[var(--light-blue)] text-[var(--navy)]" },
-  },
-  {
-    date: "22 mai",
-    type: { v: "Annonce", cls: "bg-[#E5DCEB] text-[#5B3A6E]" },
-    subject: "Lancement Programme de parrainage",
-    recipients: "~280 ingénieurs · 23 clients",
-    status: { v: "Brouillon", cls: "bg-[var(--orange-bg)] text-[var(--orange-text)]" },
-  },
-  {
-    date: "28 mai",
-    type: { v: "Newsletter", cls: "bg-[var(--light-blue)] text-[var(--navy)]" },
-    subject: "Bibliothèque · 14 documents mis à jour",
-    recipients: "~280 ingénieurs",
-    status: { v: "À planifier", cls: "bg-[var(--navy-100)] text-[var(--navy-300)]" },
-  },
-  {
-    date: "3 juin",
-    type: { v: "Webinar", cls: "bg-[var(--gold-200)] text-[var(--medium-400)]" },
-    subject: "Conduite d'entretien : 6 erreurs à éviter",
-    recipients: "à confirmer",
-    status: { v: "À planifier", cls: "bg-[var(--navy-100)] text-[var(--navy-300)]" },
-  },
-];
-
-const performances = [
-  {
-    label: { v: "Excellent", cls: "bg-[var(--green-bg)] text-[var(--green-text)]" },
-    date: "5 mai",
-    title: "Newsletter avril · 78 % d'ouverture",
-    sub: "280 envois · 218 ouvertures · 64 clics",
-  },
-  {
-    label: { v: "Très bon", cls: "bg-[var(--green-bg)] text-[var(--green-text)]" },
-    date: "22 avril",
-    title: "Webinar réforme · 134 participants",
-    sub: "150 inscrits · 89 % de présence",
-  },
-  {
-    label: { v: "Moyen", cls: "bg-[var(--orange-bg)] text-[var(--orange-text)]" },
-    date: "14 avril",
-    title: "Annonce roadmap Q2 · 56 % d'ouverture",
-    sub: "280 envois · 156 ouvertures · 28 clics",
-  },
-  {
-    label: { v: "Excellent", cls: "bg-[var(--green-bg)] text-[var(--green-text)]" },
-    date: "3 avril",
-    title: "Webinar intro · 188 participants",
-    sub: "200 inscrits · 94 % de présence",
-  },
-];
-
+// Templates : contenu produit statique (modèles offerts par ASTRAEOS), pas des
+// données utilisateur. Aucune table comm_templates n'existe — ce ne sont pas
+// des "tells de démo" mais du contenu applicatif, donc conservés en dur.
 const templates = [
   {
     icon: "📧",
@@ -100,7 +30,35 @@ const templates = [
   },
 ];
 
-export default function CommsPage() {
+const PRIORITY_CLS: Record<string, string> = {
+  critical: "bg-[var(--red-bg)] text-[var(--red-text)]",
+  high: "bg-[var(--orange-bg)] text-[var(--orange-text)]",
+  normal: "bg-[var(--light-blue)] text-[var(--navy)]",
+  low: "bg-[var(--navy-100)] text-[var(--navy-300)]",
+};
+
+export default async function CommsPage() {
+  const data = await fetchCommsData();
+
+  // Aucune table de domaine "communications sortantes" (newsletters, webinars,
+  // taux d'ouverture/clic) n'existe : ces KPIs n'ont pas de source réelle →
+  // état vide honnête ("—"), jamais de chiffre inventé. Les deux derniers KPIs
+  // sont alimentés par la boîte de réception réelle de l'utilisateur.
+  const kpis: KpiBlock[] = [
+    { label: "Newsletters envoyées", value: "—", meta: "Aucune communication enregistrée" },
+    { label: "Webinars organisés", value: "—", meta: "Aucun webinar enregistré" },
+    {
+      label: "Notifications reçues",
+      value: data.notifTotal > 0 ? String(data.notifTotal) : "—",
+      meta: data.notifTotal > 0 ? "dans votre boîte de réception" : "Aucune notification",
+    },
+    {
+      label: "Non lues",
+      value: data.notifUnread > 0 ? String(data.notifUnread) : "—",
+      meta: data.notifUnread > 0 ? "à traiter" : "Tout est lu",
+    },
+  ];
+
   return (
     <>
       <Topbar current="Communications & annonces" />
@@ -158,45 +116,62 @@ export default function CommsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--navy-100)]">
-                {comms.map((c) => (
-                  <tr key={c.subject} className="text-[12px] text-[var(--navy)] hover:bg-[var(--light-blue)]">
-                    <td className="px-4 py-3 font-semibold">{c.date}</td>
-                    <td className="px-4 py-3">
-                      <span className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-bold ${c.type.cls}`}>
-                        {c.type.v}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 font-semibold">{c.subject}</td>
-                    <td className="px-4 py-3 text-right tabular-nums">{c.recipients}</td>
-                    <td className="px-4 py-3">
-                      <span className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-bold ${c.status.cls}`}>
-                        {c.status.v}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
+                <tr>
+                  <td
+                    colSpan={5}
+                    className="px-4 py-10 text-center text-[12px] text-[var(--navy-300)]"
+                  >
+                    Aucune communication planifiée. Le calendrier des envois
+                    (newsletters, webinars, annonces) s&apos;affichera ici dès
+                    qu&apos;une communication sera programmée.
+                  </td>
+                </tr>
               </tbody>
             </table>
           </div>
 
           <div className="rounded-md border border-[var(--navy-100)] bg-white">
             <div className="flex items-center justify-between border-b border-[var(--navy-100)] px-4 py-3 text-[13px] font-semibold text-[var(--navy)]">
-              📊 Performance dernières comms
+              📥 Notifications récentes
+              {data.notifUnread > 0 && (
+                <span className="rounded-full bg-[var(--gold-200)] px-2 py-0.5 text-[10px] font-bold text-[var(--medium-400)]">
+                  {data.notifUnread} non lue{data.notifUnread > 1 ? "s" : ""}
+                </span>
+              )}
             </div>
-            <div className="divide-y divide-[var(--navy-100)]">
-              {performances.map((p) => (
-                <div key={p.title} className="cursor-pointer px-4 py-3 hover:bg-[var(--light-blue)]">
-                  <div className="mb-1 flex items-center gap-2 text-[10.5px]">
-                    <span className={`rounded-full px-2 py-0.5 font-bold uppercase tracking-wider ${p.label.cls}`}>
-                      {p.label.v}
-                    </span>
-                    <span className="text-[var(--navy-300)]">{p.date}</span>
+            {data.hasNotifications ? (
+              <div className="divide-y divide-[var(--navy-100)]">
+                {data.notifications.slice(0, 6).map((n) => (
+                  <div
+                    key={n.id}
+                    className={`cursor-pointer px-4 py-3 hover:bg-[var(--light-blue)] ${n.read ? "" : "bg-[var(--ivory)]"}`}
+                  >
+                    <div className="mb-1 flex items-center gap-2 text-[10.5px]">
+                      <span
+                        className={`rounded-full px-2 py-0.5 font-bold uppercase tracking-wider ${PRIORITY_CLS[n.priority] ?? PRIORITY_CLS.normal}`}
+                      >
+                        {n.typeLabel}
+                      </span>
+                      <span className="text-[var(--navy-300)]">
+                        {fmtDateTime(n.createdAt)}
+                      </span>
+                    </div>
+                    <div className="text-[12px] font-semibold text-[var(--navy)]">
+                      {n.title}
+                    </div>
+                    {n.body && (
+                      <div className="mt-0.5 line-clamp-2 text-[11px] text-[var(--navy-300)]">
+                        {n.body}
+                      </div>
+                    )}
                   </div>
-                  <div className="text-[12px] font-semibold text-[var(--navy)]">{p.title}</div>
-                  <div className="mt-0.5 text-[11px] text-[var(--navy-300)]">{p.sub}</div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <div className="px-4 py-10 text-center text-[12px] text-[var(--navy-300)]">
+                Aucune notification reçue pour l&apos;instant.
+              </div>
+            )}
           </div>
         </section>
 

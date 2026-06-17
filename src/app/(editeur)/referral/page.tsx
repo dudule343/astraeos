@@ -1,83 +1,60 @@
 import { Topbar } from "../_components/Topbar";
 import { KpiCard, type KpiBlock } from "../_components/KpiCard";
 import { PageHero, SectionHeader, GhostButton, GoldButton } from "../_components/PageHeader";
+import { fetchReferralData, fmtCount, fmtEur, REFERRAL_COMMISSION_RATE } from "./data";
 
-const kpis: KpiBlock[] = [
-  { label: "Parrains actifs", value: "14", meta: "sur 23 clients · 61 %" },
-  { label: "Filleuls reçus", value: "42", meta: "leads parrainés · cumul depuis janv." },
-  { label: "Filleuls payants", value: "9", meta: "21 % de conversion · vs 7 % autres canaux" },
-  { label: "CA récurrent généré", value: "9 460", unit: "€", meta: "9 abonnements actifs · ~1 050 €/mois" },
-  { label: "Commissions versées", value: "1 892", unit: "€", meta: "20 % du CA récurrent · cumulé" },
-];
+export const dynamic = "force-dynamic";
 
-type Sponsor = {
-  name: string;
-  initials: string;
-  type: "Marque" | "Cabinet" | "Mandataire PRIVEOS" | "Autre pro";
-  filleuls: string;
-  payants: string;
-  ca: string;
-  commission: string;
+export const metadata = {
+  title: "ASTRAEOS · Programme de parrainage",
 };
 
-const sponsors: Sponsor[] = [
-  { name: "PRIVEOS Capital", initials: "P", type: "Marque", filleuls: "12", payants: "4", ca: "348 €/mois", commission: "69,60 €/mois" },
-  { name: "Cabinet Dupont", initials: "D", type: "Cabinet", filleuls: "8", payants: "2", ca: "174 €/mois", commission: "34,80 €/mois" },
-  { name: "Julien VASSEUR", initials: "JV", type: "Mandataire PRIVEOS", filleuls: "6", payants: "2", ca: "174 €/mois", commission: "34,80 €/mois" },
-  { name: "Notaire Mercier", initials: "M", type: "Autre pro", filleuls: "5", payants: "1", ca: "87 €/mois", commission: "17,40 €/mois" },
-  { name: "Mont-Blanc Patrimoine", initials: "MB", type: "Cabinet", filleuls: "3", payants: "0", ca: "— €", commission: "— €" },
-];
+export default async function ReferralPage() {
+  const data = await fetchReferralData();
+  const { program } = data;
+  const ratePct = Math.round(REFERRAL_COMMISSION_RATE * 100);
 
-const typeBadge: Record<Sponsor["type"], string> = {
-  Marque: "bg-[var(--gold-200)] text-[var(--medium-400)]",
-  Cabinet: "bg-[var(--light-blue)] text-[var(--navy)]",
-  "Mandataire PRIVEOS": "bg-[var(--light-blue)] text-[var(--navy)]",
-  "Autre pro": "bg-[var(--navy-100)] text-[var(--navy-300)]",
-};
+  // Programme SaaS de parrainage : aucune source en base. Chaque KPI dégrade
+  // honnêtement à "—" avec une méta neutre — jamais de chiffre inventé.
+  const kpis: KpiBlock[] = [
+    { label: "Parrains actifs", value: fmtCount(program.parrainsActifs), meta: "Programme à venir" },
+    { label: "Filleuls reçus", value: fmtCount(program.filleulsRecus), meta: "Programme à venir" },
+    { label: "Filleuls payants", value: fmtCount(program.filleulsPayants), meta: "Programme à venir" },
+    { label: "CA récurrent généré", value: fmtEur(program.caRecurrent), meta: "Programme à venir" },
+    { label: "Commissions versées", value: fmtEur(program.commissionsVersees), meta: "Programme à venir" },
+  ];
 
-const activity = [
-  {
-    label: { v: "Conversion", cls: "bg-[var(--green-bg)] text-[var(--green-text)]" },
-    time: "il y a 2h",
-    title: "Filleul de PRIVEOS Capital → signature client",
-    sub: "Cabinet Voltaire (Marseille) · abonnement 87 €/mois → 17,40 €/mois pour PRIVEOS",
-  },
-  {
-    label: { v: "Nouveau filleul", cls: "bg-[var(--light-blue)] text-[var(--navy)]" },
-    time: "hier 14h",
-    title: "Cabinet Dupont a parrainé Maxime SOULIER",
-    sub: "Soulier Patrimoine (Bordeaux) · démarrage essai prévu",
-  },
-  {
-    label: { v: "Nouveau filleul", cls: "bg-[var(--light-blue)] text-[var(--navy)]" },
-    time: "il y a 2 jours",
-    title: "Julien VASSEUR a parrainé Notaire LERAY",
-    sub: "Étude Leray & Cie (Nantes) · qualification en cours",
-  },
-  {
-    label: { v: "Commission mensuelle", cls: "bg-[var(--gold-200)] text-[var(--medium-400)]" },
-    time: "1er mai",
-    title: "Versement mensuel des commissions parrainage",
-    sub: "9 commissions versées · total 156,60 €",
-  },
-];
+  // Exemple illustratif paramétrique : sert à expliquer la règle des 20 %.
+  // Aucun client réel impliqué — montant de base assumé comme illustration.
+  const exempleAbonnement = 87;
+  const exempleCommissionMois = exempleAbonnement * REFERRAL_COMMISSION_RATE;
+  const example = [
+    { label: "Abonnement filleul (illustratif)", value: `${exempleAbonnement} €/mois` },
+    { label: "Taux de commission", value: `${ratePct} %` },
+    {
+      label: "Commission mensuelle parrain",
+      value: `${exempleCommissionMois.toLocaleString("fr-FR", { minimumFractionDigits: 2 })} €/mois`,
+      highlight: true,
+    },
+    {
+      label: "Sur 12 mois (filleul fidèle)",
+      value: `${(exempleCommissionMois * 12).toLocaleString("fr-FR", { minimumFractionDigits: 2 })} €/an`,
+      gold: true,
+    },
+    {
+      label: "Sur 36 mois (LTV moyenne)",
+      value: `${(exempleCommissionMois * 36).toLocaleString("fr-FR", { minimumFractionDigits: 2 })} €`,
+      gold: true,
+    },
+  ];
 
-const example = [
-  { label: "Abonnement filleul", value: "87 €/mois" },
-  { label: "Taux de commission", value: "20 %" },
-  { label: "Commission mensuelle parrain", value: "17,40 €/mois", highlight: true },
-  { label: "Sur 12 mois (filleul fidèle)", value: "208,80 €/an", gold: true },
-  { label: "Sur 36 mois (LTV moyenne)", value: "626,40 €", gold: true },
-];
-
-export default function ReferralPage() {
   return (
     <>
       <Topbar current="Programme de parrainage" />
 
       <div className="px-10 py-8">
         <PageHero
-          eyebrow="Acquisition · Programme NEW"
+          eyebrow="Acquisition · Programme à venir"
           title="Programme de parrainage"
           description="Permettre aux clients (marques, cabinets directs, mandataires, autres pros) de recommander ASTRAEOS à leur réseau — modèle de rémunération récurrente : 20 % du montant de l'abonnement du filleul, versé chaque mois tant que le filleul reste actif."
           actions={
@@ -92,9 +69,9 @@ export default function ReferralPage() {
           <span>✓</span>
           <div>
             <strong>Modèle économique simple :</strong> le filleul devient client payant → le
-            parrain perçoit <strong>20 % du montant de l'abonnement</strong> chaque mois, tant que
-            le filleul reste actif. La commission ne s'applique qu'à{" "}
-            <strong>l'abonnement à la solution ASTRAEOS</strong> (pas sur les packs ponctuels ni les
+            parrain perçoit <strong>{ratePct} % du montant de l&apos;abonnement</strong> chaque mois, tant que
+            le filleul reste actif. La commission ne s&apos;applique qu&apos;à{" "}
+            <strong>l&apos;abonnement à la solution ASTRAEOS</strong> (pas sur les packs ponctuels ni les
             commissions partenaires).
           </div>
         </div>
@@ -106,22 +83,20 @@ export default function ReferralPage() {
         </section>
 
         <div className="mb-6 flex gap-1 border-b border-[var(--navy-100)]">
-          {["Vue d'ensemble", "Parrains (14)", "Filleuls (42)", "Configuration commission"].map(
-            (t, i) => (
-              <button
-                type="button"
-                key={t}
-                data-stub={`Onglet · ${t}`}
-                className={`-mb-px border-b-2 px-4 py-2 text-[12px] font-semibold ${
-                  i === 0
-                    ? "border-[var(--gold)] text-[var(--gold)]"
-                    : "border-transparent text-[var(--navy-300)] hover:text-[var(--navy)]"
-                }`}
-              >
-                {t}
-              </button>
-            ),
-          )}
+          {["Vue d'ensemble", "Parrains", "Filleuls", "Configuration commission"].map((t, i) => (
+            <button
+              type="button"
+              key={t}
+              data-stub={`Onglet · ${t}`}
+              className={`-mb-px border-b-2 px-4 py-2 text-[12px] font-semibold ${
+                i === 0
+                  ? "border-[var(--gold)] text-[var(--gold)]"
+                  : "border-transparent text-[var(--navy-300)] hover:text-[var(--navy)]"
+              }`}
+            >
+              {t}
+            </button>
+          ))}
         </div>
 
         <section className="mb-8 grid grid-cols-1 gap-4 lg:grid-cols-2">
@@ -144,27 +119,16 @@ export default function ReferralPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--navy-100)]">
-                {sponsors.map((s) => (
-                  <tr key={s.name} className="text-[12px] text-[var(--navy)] hover:bg-[var(--light-blue)]">
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
-                        <div className="flex h-6 w-6 items-center justify-center rounded-md bg-[var(--navy)] text-[10px] font-bold text-white">
-                          {s.initials}
-                        </div>
-                        <span className="font-semibold">{s.name}</span>
-                      </div>
+                {program.sponsors.length > 0 ? null : (
+                  <tr>
+                    <td
+                      colSpan={6}
+                      className="px-4 py-10 text-center text-[12px] text-[var(--navy-300)]"
+                    >
+                      Aucun parrain — programme à venir.
                     </td>
-                    <td className="px-4 py-3">
-                      <span className={`rounded-sm px-1.5 py-0.5 text-[10px] font-semibold ${typeBadge[s.type]}`}>
-                        {s.type}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-right tabular-nums">{s.filleuls}</td>
-                    <td className="px-4 py-3 text-right font-bold tabular-nums text-[var(--gold)]">{s.payants}</td>
-                    <td className="px-4 py-3 text-right tabular-nums">{s.ca}</td>
-                    <td className="px-4 py-3 text-right font-bold tabular-nums text-[var(--gold)]">{s.commission}</td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>
@@ -175,21 +139,56 @@ export default function ReferralPage() {
               <GhostButton>Tout voir</GhostButton>
             </div>
             <div className="divide-y divide-[var(--navy-100)]">
-              {activity.map((a) => (
-                <div key={a.title} className="cursor-pointer px-4 py-3 hover:bg-[var(--light-blue)]">
-                  <div className="mb-1 flex items-center gap-2 text-[10.5px]">
-                    <span className={`rounded-full px-2 py-0.5 font-bold uppercase tracking-wider ${a.label.cls}`}>
-                      {a.label.v}
-                    </span>
-                    <span className="text-[var(--navy-300)]">{a.time}</span>
-                  </div>
-                  <div className="text-[12.5px] font-semibold text-[var(--navy)]">{a.title}</div>
-                  <div className="mt-0.5 text-[11.5px] text-[var(--navy-300)]">{a.sub}</div>
+              {program.activity.length > 0 ? null : (
+                <div className="px-4 py-10 text-center text-[12px] text-[var(--navy-300)]">
+                  Aucune activité — programme à venir.
                 </div>
-              ))}
+              )}
             </div>
           </div>
         </section>
+
+        {data.hasClientReferralData && (
+          <section className="mb-8">
+            <SectionHeader
+              eyebrow="Donnée réelle disponible"
+              title="Recommandation entre clients finaux"
+              right={
+                <span className="rounded-full bg-[var(--light-blue)] px-2 py-0.5 text-[10px] font-bold text-[var(--navy)]">
+                  Distinct du programme parrainage
+                </span>
+              }
+            />
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+              <KpiCard
+                kpi={{
+                  label: "Clients acquis par recommandation",
+                  value: fmtCount(data.clientReferral.recommandationCount),
+                  meta: "origine d'acquisition = recommandation",
+                }}
+              />
+              <KpiCard
+                kpi={{
+                  label: "Clients rattachés à un parrain",
+                  value: fmtCount(data.clientReferral.parrainesCount),
+                  meta: "client recommandé par un autre client",
+                }}
+              />
+              <KpiCard
+                kpi={{
+                  label: "Clients prescripteurs",
+                  value: fmtCount(data.clientReferral.parrainsDistincts),
+                  meta: "ont recommandé au moins un client",
+                }}
+              />
+            </div>
+            <p className="mt-3 text-[11.5px] leading-relaxed text-[var(--navy-300)]">
+              Ces chiffres mesurent la <strong className="text-[var(--navy)]">recommandation
+              entre vos clients finaux</strong> (donnée réelle de votre portefeuille), et non le
+              programme de parrainage de la solution ASTRAEOS décrit ci-dessus.
+            </p>
+          </section>
+        )}
 
         <section className="mb-8">
           <SectionHeader
@@ -210,24 +209,24 @@ export default function ReferralPage() {
                   </div>
                 </div>
               </div>
-              <div className="mb-2 text-[32px] font-bold leading-none text-[var(--gold)]">20 %</div>
+              <div className="mb-2 text-[32px] font-bold leading-none text-[var(--gold)]">{ratePct} %</div>
               <div className="text-[12.5px] leading-relaxed text-[var(--navy)]">
-                de l'abonnement mensuel à la solution ASTRAEOS payé par le filleul.
+                de l&apos;abonnement mensuel à la solution ASTRAEOS payé par le filleul.
               </div>
               <div className="mt-3.5 border-t border-[var(--gold-300)] pt-3.5 text-[11.5px] leading-relaxed text-[var(--navy-300)]">
-                <strong className="text-[var(--navy)]">Périmètre :</strong> uniquement l'abonnement
-                à la solution. Aucune commission n'est versée sur les packs ponctuels ni sur les
+                <strong className="text-[var(--navy)]">Périmètre :</strong> uniquement l&apos;abonnement
+                à la solution. Aucune commission n&apos;est versée sur les packs ponctuels ni sur les
                 commissions partenaires.
               </div>
             </div>
 
             <div className="rounded-md border border-[var(--navy-100)] bg-white">
               <div className="border-b border-[var(--navy-100)] px-4 py-3 text-[13px] font-semibold text-[var(--navy)]">
-                ℹ️ Exemple concret de calcul
+                ℹ️ Exemple illustratif de calcul
               </div>
               <div className="p-4">
                 <div className="mb-3 text-[13px] font-semibold text-[var(--navy)]">
-                  Cabinet Voltaire (filleul de PRIVEOS Capital) souscrit l'abonnement à 87 €/mois.
+                  Exemple : un filleul souscrit l&apos;abonnement à {exempleAbonnement} €/mois.
                 </div>
                 {example.map((e) => (
                   <div
@@ -250,7 +249,7 @@ export default function ReferralPage() {
                 ))}
                 <div className="mt-3 rounded-md bg-[var(--green-bg)] px-3 py-2.5 text-[11.5px] leading-relaxed text-[var(--green-text)]">
                   <strong>Note :</strong> commission interrompue automatiquement si le filleul
-                  résilie son abonnement.
+                  résilie son abonnement. Chiffres illustratifs, à titre d&apos;exemple.
                 </div>
               </div>
             </div>
@@ -269,25 +268,26 @@ export default function ReferralPage() {
             </div>
             <div className="p-4">
               <div className="mb-3 text-[13px] font-semibold text-[var(--navy)]">
-                Chaque client a un lien de parrainage personnalisé dans son espace :
+                Chaque client aura un lien de parrainage personnalisé dans son espace :
               </div>
               <div className="flex items-center gap-2 rounded-md border border-[var(--gold-300)] bg-[var(--ivory)] px-3 py-2">
                 <span className="text-[var(--gold)]">🔗</span>
-                <span className="flex-1 font-mono text-[12px] text-[var(--navy)]">
-                  https://astraeos.fr/parrainage/PRIVEOS-A2K9X8
+                <span className="flex-1 font-mono text-[12px] text-[var(--navy-300)]">
+                  https://astraeos.fr/parrainage/&lt;code-parrain&gt;
                 </span>
                 <GhostButton>📋 Copier</GhostButton>
               </div>
               <div className="mt-3.5 text-[11.5px] leading-relaxed text-[var(--navy-300)]">
                 Le parrain pourra suivre dans son espace :{" "}
                 <strong className="text-[var(--navy)]">filleuls invités</strong> ·{" "}
-                <strong className="text-[var(--navy)]">filleuls qui ont démarré l'essai</strong> ·{" "}
+                <strong className="text-[var(--navy)]">filleuls qui ont démarré l&apos;essai</strong> ·{" "}
                 <strong className="text-[var(--navy)]">filleuls devenus payants</strong> ·{" "}
                 <strong className="text-[var(--navy)]">commissions mensuelles cumulées</strong> ·{" "}
                 <strong className="text-[var(--navy)]">historique des virements perçus</strong>.
               </div>
               <div className="mt-3.5 rounded-md bg-[#E5DCEB] px-3.5 py-2.5 text-[11.5px] leading-relaxed text-[#5B3A6E]">
                 <strong>À concevoir dans un wireframe ultérieur :</strong> espace parrain côté client.
+                Le lien et le code ci-dessus sont des exemples de présentation.
               </div>
             </div>
           </div>

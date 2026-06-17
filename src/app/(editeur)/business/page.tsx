@@ -1,7 +1,20 @@
-"use client";
+import Link from "next/link";
 
-import { useRouter } from "next/navigation";
 import { Topbar } from "../_components/Topbar";
+import {
+  fetchBusinessData,
+  fmtSigned,
+  fmtInt,
+  fmtEur,
+  STATUS_LABELS,
+  type CompteExpansion,
+} from "./data";
+
+export const dynamic = "force-dynamic";
+
+export const metadata = {
+  title: "ASTRAEOS · Pilotage business",
+};
 
 type Compare = { period: string; value: string; direction: "up" | "down" | "neutral" };
 
@@ -15,215 +28,24 @@ type KpiBlock = {
   compares?: Compare[];
 };
 
-const growthKpis: KpiBlock[] = [
-  {
-    phase: "1",
-    label: "Revenu mensuel récurrent",
-    value: "128 400",
-    unit: "€",
-    meta: "projeté · mai 2026",
-    compares: [
-      { period: "M-1 · avr 2026", value: "▲ 114 200 €", direction: "up" },
-      { period: "N-1 · mai 2025", value: "▲ 41 200 €", direction: "up" },
-    ],
-  },
-  {
-    phase: "1",
-    label: "Revenu annuel récurrent",
-    value: "1,54",
-    unit: "M€",
-    meta: "projection 12 mois glissants",
-    compares: [
-      { period: "M-1", value: "▲ 1,37 M€", direction: "up" },
-      { period: "N-1", value: "▲ 494 K€", direction: "up" },
-    ],
-  },
-  {
-    phase: "1",
-    label: "Croissance mensuelle des revenus récurrents",
-    value: "+12,4",
-    unit: "%",
-    meta: "vs mois précédent",
-    trend: "up",
-    compares: [
-      { period: "M-1", value: "▲ +9,8 %", direction: "up" },
-      { period: "N-1", value: "▲ +5,2 %", direction: "up" },
-    ],
-  },
-];
-
-const volumeKpis: KpiBlock[] = [
-  {
-    phase: "1",
-    label: "Acquisitions",
-    value: "+3",
-    unit: "comptes",
-    meta: "nouveaux clients sur la période",
-    trend: "up",
-  },
-  {
-    phase: "1",
-    label: "Désabonnements",
-    value: "-1",
-    unit: "compte",
-    meta: "départ sur la période",
-    trend: "down",
-  },
-  {
-    phase: "1",
-    label: "Mouvement net",
-    value: "+2",
-    unit: "comptes",
-    meta: "acquisitions − désabonnements",
-    trend: "up",
-  },
-  {
-    phase: "2",
-    label: "Durée moyenne d'utilisation",
-    value: "22",
-    unit: "mois",
-    meta: "temps moyen d'un client sur ASTRAEOS",
-  },
-];
-
-const ltvKpis: KpiBlock[] = [
-  {
-    phase: "1",
-    label: "Valeur de vie client moyenne",
-    value: "42 800",
-    unit: "€",
-    meta: "sur 36 mois en moyenne",
-    compares: [
-      { period: "T-1", value: "▲ 38 200 €", direction: "up" },
-      { period: "N-1", value: "▲ 24 800 €", direction: "up" },
-    ],
-  },
-  {
-    phase: "1",
-    label: "Coût d'acquisition client",
-    value: "3 200",
-    unit: "€",
-    meta: "marketing + ventes amorti sur les acquisitions",
-    compares: [
-      { period: "T-1", value: "▲ 2 800 €", direction: "down" },
-      { period: "N-1", value: "▼ 4 200 €", direction: "up" },
-    ],
-  },
-  {
-    phase: "1",
-    label: "Ratio valeur de vie / coût d'acquisition",
-    value: "13,4",
-    unit: "x",
-    meta: "excellent · seuil sain > 3x",
-    compares: [
-      { period: "T-1", value: "▼ 13,6 x", direction: "neutral" },
-      { period: "N-1", value: "▲ 5,9 x", direction: "up" },
-    ],
-  },
-];
-
-const chartData = [
-  { month: "Juin", height: 32 },
-  { month: "Juil", height: 38 },
-  { month: "Août", height: 46 },
-  { month: "Sept", height: 52 },
-  { month: "Oct", height: 58 },
-  { month: "Nov", height: 64 },
-  { month: "Déc", height: 71 },
-  { month: "Jan", height: 76 },
-  { month: "Fév", height: 79 },
-  { month: "Mars", height: 84 },
-  { month: "Avr", height: 89 },
-  { month: "Mai", height: 100 },
-];
-
-type ExpansionRow = {
-  rank: number;
-  name: string;
-  initials: string;
-  type: "Marque" | "Cabinet" | "Autre pro";
-  subscription: string;
-  packs: string;
-  total: string;
-  m1: { value: string; tone: "success" | "warning" | "neutral" };
-  n1: { value: string; tone: "success" | "warning" | "neutral" };
-};
-
-const expansionRows: ExpansionRow[] = [
-  {
-    rank: 1,
-    name: "PRIVEOS Capital",
-    initials: "P",
-    type: "Marque",
-    subscription: "12 800 €",
-    packs: "3 400 €",
-    total: "198 200 €",
-    m1: { value: "▲ +18 %", tone: "success" },
-    n1: { value: "▲ +210 %", tone: "success" },
-  },
-  {
-    rank: 2,
-    name: "Cabinet Dupont & Associés",
-    initials: "D",
-    type: "Cabinet",
-    subscription: "2 400 €",
-    packs: "2 800 €",
-    total: "36 200 €",
-    m1: { value: "▲ +24 %", tone: "success" },
-    n1: { value: "▲ +145 %", tone: "success" },
-  },
-  {
-    rank: 3,
-    name: "Mont-Blanc Patrimoine",
-    initials: "MB",
-    type: "Cabinet",
-    subscription: "2 100 €",
-    packs: "1 600 €",
-    total: "28 400 €",
-    m1: { value: "▲ +12 %", tone: "success" },
-    n1: { value: "▲ +88 %", tone: "success" },
-  },
-  {
-    rank: 4,
-    name: "Notaire Mercier & Cie",
-    initials: "N",
-    type: "Autre pro",
-    subscription: "1 200 €",
-    packs: "3 200 €",
-    total: "21 600 €",
-    m1: { value: "▲ +32 %", tone: "success" },
-    n1: { value: "N/A", tone: "neutral" },
-  },
-  {
-    rank: 5,
-    name: "Cabinet Lyonnais",
-    initials: "L",
-    type: "Cabinet",
-    subscription: "1 800 €",
-    packs: "800 €",
-    total: "19 800 €",
-    m1: { value: "▲ +4 %", tone: "warning" },
-    n1: { value: "▲ +62 %", tone: "success" },
-  },
-];
-
 const compareDirectionClass = {
   up: "text-[var(--green-text)]",
   down: "text-[var(--red-text)]",
   neutral: "text-[var(--navy-300)]",
 } as const;
 
-const typeBadgeClass: Record<ExpansionRow["type"], string> = {
+const typeBadgeClass: Record<CompteExpansion["type"], string> = {
   Marque: "bg-[var(--gold-200)] text-[var(--medium-400)]",
   Cabinet: "bg-[var(--light-blue)] text-[var(--navy)]",
   "Autre pro": "bg-[var(--navy-100)] text-[var(--navy-300)]",
 };
 
-const badgeToneClass = {
-  success: "bg-[var(--green-bg)] text-[var(--green-text)]",
-  warning: "bg-[var(--orange-bg)] text-[var(--orange-text)]",
-  neutral: "bg-[var(--navy-100)] text-[var(--navy-300)]",
-} as const;
+const statusToneClass: Record<string, string> = {
+  active: "bg-[var(--green-bg)] text-[var(--green-text)]",
+  trialing: "bg-[var(--gold-200)] text-[var(--medium-400)]",
+  suspended: "bg-[var(--orange-bg)] text-[var(--orange-text)]",
+  churned: "bg-[var(--navy-100)] text-[var(--navy-300)]",
+};
 
 function PhaseTag({ phase }: { phase: "1" | "2" }) {
   const isP1 = phase === "1";
@@ -304,8 +126,102 @@ function SectionHeader({
   );
 }
 
-export default function BusinessPage() {
-  const router = useRouter();
+export default async function BusinessPage() {
+  const data = await fetchBusinessData();
+  const { parc, comptes, periodeLabel, windowDays } = data;
+
+  // Bloc A — Croissance des abonnements. Aucune table de facturation
+  // plateforme en base (tenants n'a ni montant ni prix de plan) → état vide
+  // honnête, sans compares fabriqués.
+  const growthKpis: KpiBlock[] = [
+    {
+      phase: "1",
+      label: "Revenu mensuel récurrent",
+      value: "—",
+      unit: "€",
+      meta: "facturation plateforme non connectée",
+    },
+    {
+      phase: "1",
+      label: "Revenu annuel récurrent",
+      value: "—",
+      unit: "€",
+      meta: "facturation plateforme non connectée",
+    },
+    {
+      phase: "1",
+      label: "Croissance mensuelle des revenus récurrents",
+      value: "—",
+      meta: "facturation plateforme non connectée",
+    },
+  ];
+
+  // Bloc C — Mouvement net du parc clients. Réel via tenants.
+  const volumeKpis: KpiBlock[] = [
+    {
+      phase: "1",
+      label: "Acquisitions",
+      value: parc.acquisitionsScoped ? fmtSigned(parc.acquisitions, false) : "—",
+      unit: "comptes",
+      meta: parc.acquisitionsScoped
+        ? `nouveaux clients · ${windowDays} derniers jours`
+        : "date de création indisponible",
+      trend: parc.acquisitions > 0 ? "up" : undefined,
+    },
+    {
+      phase: "1",
+      label: "Désabonnements",
+      value: parc.hasData ? fmtSigned(-parc.desabonnements, false) : "—",
+      unit: "comptes",
+      meta: parc.hasData
+        ? "comptes résiliés (statut churned)"
+        : "aucun compte client en base",
+      trend: parc.desabonnements > 0 ? "down" : undefined,
+    },
+    {
+      phase: "1",
+      label: "Mouvement net",
+      value: parc.hasData ? fmtSigned(parc.mouvementNet, false) : "—",
+      unit: "comptes",
+      meta: "acquisitions − désabonnements",
+      trend:
+        parc.mouvementNet > 0 ? "up" : parc.mouvementNet < 0 ? "down" : undefined,
+    },
+    {
+      phase: "2",
+      label: "Durée moyenne d'utilisation",
+      value: "—",
+      unit: "mois",
+      meta: "date de résiliation non datée en base",
+    },
+  ];
+
+  // Bloc E — Valeur à long terme. Ni revenu par compte (LTV) ni coûts
+  // marketing/ventes (CAC) en base → état vide honnête.
+  const ltvKpis: KpiBlock[] = [
+    {
+      phase: "1",
+      label: "Valeur de vie client moyenne",
+      value: "—",
+      unit: "€",
+      meta: "revenu par compte non disponible",
+    },
+    {
+      phase: "1",
+      label: "Coût d'acquisition client",
+      value: "—",
+      unit: "€",
+      meta: "coûts marketing/ventes non suivis",
+    },
+    {
+      phase: "1",
+      label: "Ratio valeur de vie / coût d'acquisition",
+      value: "—",
+      unit: "x",
+      meta: "dépend de la LTV et du CAC",
+    },
+  ];
+
   return (
     <>
       <Topbar current="01 · Pilotage business" />
@@ -345,6 +261,14 @@ export default function BusinessPage() {
 
         <section className="mb-8">
           <SectionHeader eyebrow="Revenus récurrents" title="Croissance des abonnements" />
+          <div className="mb-3 flex items-start gap-2 rounded-md border border-[var(--navy-100)] bg-[var(--ivory)] px-4 py-2.5 text-[11.5px] text-[var(--navy-300)]">
+            <span>ℹ️</span>
+            <div>
+              La facturation de la plateforme n’est pas encore connectée — aucun montant
+              d’abonnement n’est disponible en base. Ces indicateurs restent vides tant que la source
+              n’existe pas.
+            </div>
+          </div>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {growthKpis.map((kpi) => (
               <KpiCard key={kpi.label} kpi={kpi} />
@@ -353,35 +277,15 @@ export default function BusinessPage() {
         </section>
 
         <section className="mb-8">
-          <SectionHeader
-            eyebrow="Tendance"
-            title="Évolution du revenu mensuel récurrent"
-            right={
-              <button
-                type="button"
-                data-stub="Sélecteur de période"
-                className="rounded-md border border-[var(--navy-100)] bg-white px-3 py-1.5 text-[11px] font-semibold text-[var(--navy)] hover:border-[var(--gold)]"
-              >
-                12 mois ▾
-              </button>
-            }
-          />
-          <div className="rounded-md border border-[var(--navy-100)] bg-white p-6">
-            <div className="flex h-[220px] items-end gap-2">
-              {chartData.map((bar) => (
-                <div key={bar.month} className="flex flex-1 flex-col items-center gap-2">
-                  <div
-                    className="w-full rounded-t-sm bg-gradient-to-t from-[var(--gold)] to-[var(--gold-300)]"
-                    style={{ height: `${bar.height}%` }}
-                  />
-                  <div className="text-[10px] font-semibold text-[var(--navy-300)]">
-                    {bar.month}
-                  </div>
-                </div>
-              ))}
+          <SectionHeader eyebrow="Tendance" title="Évolution du revenu mensuel récurrent" />
+          <div className="flex h-[220px] flex-col items-center justify-center rounded-md border border-[var(--navy-100)] bg-white p-6 text-center">
+            <div className="mb-2 text-[24px]">📊</div>
+            <div className="text-[13px] font-semibold text-[var(--navy)]">
+              Aucune donnée de revenu à afficher
             </div>
-            <div className="mt-6 text-center text-[11.5px] text-[var(--navy-300)]">
-              Croissance constante depuis 12 mois · multiplié par 3,1
+            <div className="mt-1 max-w-md text-[11.5px] text-[var(--navy-300)]">
+              L’historique mensuel du revenu récurrent sera tracé ici dès que la facturation de la
+              plateforme sera connectée.
             </div>
           </div>
         </section>
@@ -393,7 +297,9 @@ export default function BusinessPage() {
             right={
               <div className="flex items-center gap-1.5 text-[11.5px] text-[var(--navy-300)]">
                 <span className="text-[var(--gold)]">📅</span>
-                Période : mai 2026 · ajustable via le sélecteur de date
+                {parc.acquisitionsScoped
+                  ? `Acquisitions : ${windowDays} derniers jours`
+                  : `Période : ${periodeLabel}`}
               </div>
             }
           />
@@ -405,84 +311,86 @@ export default function BusinessPage() {
         </section>
 
         <section className="mb-8">
-          <SectionHeader
-            eyebrow="Top performers"
-            title="Top 5 des comptes en expansion ce trimestre"
-          />
+          <SectionHeader eyebrow="Top performers" title="Top 5 des comptes clients" />
           <div className="mb-3 flex items-start gap-2 rounded-md border border-[var(--navy-100)] bg-[var(--light-blue)] px-4 py-3 text-[11.5px] text-[var(--navy)]">
             <span>ℹ️</span>
             <div>
-              Pour chaque compte : ce qu'il <strong>paie en abonnement</strong>, ce qu'il a{" "}
-              <strong>dépensé chez nous</strong> (packs unitaires), ce qu'il{" "}
-              <strong>nous a apporté</strong> (revenu total) et sa <strong>progression</strong> vs
-              M-1 et N-1.
+              Comptes clients de la plateforme classés par <strong>encours sous gestion</strong>. Le
+              revenu SaaS par compte (abonnement, packs) n’est pas suivi en base — ces colonnes sont
+              donc absentes tant que la facturation n’est pas connectée.
             </div>
           </div>
           <div className="overflow-hidden rounded-md border border-[var(--navy-100)] bg-white">
-            <table className="w-full text-left">
-              <thead>
-                <tr className="border-b border-[var(--navy-100)] bg-[var(--ivory)] text-[10.5px] font-bold uppercase tracking-[0.08em] text-[var(--navy-300)]">
-                  <th className="px-4 py-3">#</th>
-                  <th className="px-4 py-3">Compte</th>
-                  <th className="px-4 py-3">Type</th>
-                  <th className="px-4 py-3 text-right">Abonnement /mois</th>
-                  <th className="px-4 py-3 text-right">Dépensé en packs</th>
-                  <th className="px-4 py-3 text-right">Revenu total apporté</th>
-                  <th className="px-4 py-3 text-center">vs M-1</th>
-                  <th className="px-4 py-3 text-center">vs N-1</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[var(--navy-100)]">
-                {expansionRows.map((row) => (
-                  <tr
-                    key={row.rank}
-                    onClick={() => router.push("/clients")}
-                    className="cursor-pointer text-[12.5px] text-[var(--navy)] hover:bg-[var(--light-blue)]"
-                  >
-                    <td className="px-4 py-3 font-bold text-[var(--navy-300)]">{row.rank}</td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2.5">
-                        <div className="flex h-7 w-7 items-center justify-center rounded-md bg-[var(--navy)] text-[11px] font-bold text-white">
-                          {row.initials}
-                        </div>
-                        <span className="font-semibold">{row.name}</span>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={`rounded-sm px-1.5 py-0.5 text-[10px] font-semibold ${typeBadgeClass[row.type]}`}
-                      >
-                        {row.type}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-right tabular-nums">{row.subscription}</td>
-                    <td className="px-4 py-3 text-right tabular-nums">{row.packs}</td>
-                    <td className="px-4 py-3 text-right font-bold tabular-nums text-[var(--gold)]">
-                      {row.total}
-                    </td>
-                    <td className="px-4 py-3 text-center">
-                      <span
-                        className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-bold ${badgeToneClass[row.m1.tone]}`}
-                      >
-                        {row.m1.value}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-center">
-                      <span
-                        className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-bold ${badgeToneClass[row.n1.tone]}`}
-                      >
-                        {row.n1.value}
-                      </span>
-                    </td>
+            {comptes.length === 0 ? (
+              <div className="px-4 py-10 text-center text-[12.5px] text-[var(--navy-300)]">
+                Aucun compte client à afficher.
+              </div>
+            ) : (
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="border-b border-[var(--navy-100)] bg-[var(--ivory)] text-[10.5px] font-bold uppercase tracking-[0.08em] text-[var(--navy-300)]">
+                    <th className="px-4 py-3">#</th>
+                    <th className="px-4 py-3">Compte</th>
+                    <th className="px-4 py-3">Type</th>
+                    <th className="px-4 py-3 text-right">Encours sous gestion</th>
+                    <th className="px-4 py-3 text-right">Clients</th>
+                    <th className="px-4 py-3 text-center">Abonnement</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-[var(--navy-100)]">
+                  {comptes.map((row) => (
+                    <tr
+                      key={row.rank}
+                      className="text-[12.5px] text-[var(--navy)] hover:bg-[var(--light-blue)]"
+                    >
+                      <td className="px-4 py-3 font-bold text-[var(--navy-300)]">{row.rank}</td>
+                      <td className="px-4 py-3">
+                        <Link href="/clients" className="flex items-center gap-2.5">
+                          <div className="flex h-7 w-7 items-center justify-center rounded-md bg-[var(--navy)] text-[11px] font-bold text-white">
+                            {row.initials}
+                          </div>
+                          <span className="font-semibold">{row.name}</span>
+                        </Link>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span
+                          className={`rounded-sm px-1.5 py-0.5 text-[10px] font-semibold ${typeBadgeClass[row.type]}`}
+                        >
+                          {row.type}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-right font-bold tabular-nums text-[var(--gold)]">
+                        {fmtEur(row.aum)}
+                      </td>
+                      <td className="px-4 py-3 text-right tabular-nums">{fmtInt(row.clients)}</td>
+                      <td className="px-4 py-3 text-center">
+                        {row.status ? (
+                          <span
+                            className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-bold ${statusToneClass[row.status] ?? statusToneClass.churned}`}
+                          >
+                            {STATUS_LABELS[row.status]}
+                          </span>
+                        ) : (
+                          <span className="text-[var(--navy-300)]">—</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
         </section>
 
         <section className="mb-8">
           <SectionHeader eyebrow="Rentabilité long terme" title="Valeur à long terme" />
+          <div className="mb-3 flex items-start gap-2 rounded-md border border-[var(--navy-100)] bg-[var(--ivory)] px-4 py-2.5 text-[11.5px] text-[var(--navy-300)]">
+            <span>ℹ️</span>
+            <div>
+              La valeur de vie et le coût d’acquisition nécessitent le revenu par compte et les coûts
+              marketing/ventes — non suivis en base. Ces indicateurs restent vides.
+            </div>
+          </div>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {ltvKpis.map((kpi) => (
               <KpiCard key={kpi.label} kpi={kpi} />

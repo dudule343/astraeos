@@ -124,11 +124,11 @@ export default async function EntretiensPage() {
           <section className="rounded-md border border-dashed border-[var(--navy-100)] bg-white p-12 text-center">
             <div className="mb-3 text-[40px] leading-none">🎥</div>
             <div className="mb-2 text-[16px] font-semibold text-[var(--navy)]">
-              Aucun entretien pour l'instant
+              Aucun entretien pour l&apos;instant
             </div>
             <p className="mx-auto max-w-md text-[12.5px] leading-relaxed text-[var(--navy-300)]">
               Les entretiens visio menés apparaîtront ici, avec leur transcription, le DCI complété
-              par l'IA, les conseils et le rapport.
+              par l&apos;IA, les conseils et le rapport.
             </p>
           </section>
         )}

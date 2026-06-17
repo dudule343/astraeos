@@ -1,110 +1,67 @@
 import { Topbar } from "../_components/Topbar";
 import { KpiCard, type KpiBlock } from "../_components/KpiCard";
 import { PageHero, SectionHeader, GhostButton } from "../_components/PageHeader";
+import { fetchInfra, fmtEur, fmtBytes } from "./data";
 
-const stabilityKpis: KpiBlock[] = [
-  {
-    phase: "1",
-    label: "Disponibilité 30 jours",
-    value: "99,98",
-    unit: "%",
-    meta: "2 min d'indisponibilité",
-  },
-  { phase: "1", label: "Temps de réponse moyen", value: "142", unit: "ms", meta: "P95 : 380 ms" },
-  {
-    phase: "1",
-    label: "Erreurs serveur 5xx",
-    value: "0,03",
-    unit: "%",
-    meta: "stable · seuil < 0,1 %",
-  },
-  { phase: "1", label: "Incidents 30j", value: "0", meta: "aucun depuis 47 jours" },
-];
+export const dynamic = "force-dynamic";
 
-const aiKpis: KpiBlock[] = [
-  {
-    phase: "1",
-    label: "Tokens consommés ce mois",
-    value: "42,6",
-    unit: "M",
-    meta: "42,6 millions ·",
-    metaHighlight: { text: "▲ +18 %", tone: "up" },
-  },
-  {
-    phase: "1",
-    label: "Coût IA mensuel",
-    value: "3 480",
-    unit: "€",
-    meta: "refacturé aux clients via packs",
-  },
-  { phase: "1", label: "Marge IA brute", value: "68", unit: "%", meta: "revenus IA / coûts IA" },
-];
-
-const cloudKpis: KpiBlock[] = [
-  {
-    phase: "1",
-    label: "Coût cloud mensuel",
-    value: "1 240",
-    unit: "€",
-    meta: "AWS + Cloudflare + Supabase",
-  },
-  {
-    phase: "1",
-    label: "Stockage utilisé",
-    value: "428",
-    unit: "Go",
-    meta: "documents clients + backups",
-  },
-  { phase: "1", label: "Bande passante", value: "2,4", unit: "To", meta: "trafic sortant 30 jours" },
-];
-
-type Job = {
-  name: string;
-  frequency: string;
-  lastRun: string;
-  duration: string;
+export const metadata = {
+  title: "ASTRAEOS · Infrastructure",
 };
 
-const jobs: Job[] = [
-  {
-    name: "Synchronisation ORIAS",
-    frequency: "Quotidien · 03h00",
-    lastRun: "06 mai · 03h00",
-    duration: "42 s",
-  },
-  {
-    name: "Recalcul scores santé",
-    frequency: "Quotidien · 04h00",
-    lastRun: "06 mai · 04h00",
-    duration: "18 s",
-  },
-  {
-    name: "Backup base de données",
-    frequency: "Quotidien · 02h00",
-    lastRun: "06 mai · 02h00",
-    duration: "8 min",
-  },
-  {
-    name: "Génération rapports hebdo",
-    frequency: "Hebdomadaire · lun 06h00",
-    lastRun: "05 mai · 06h00",
-    duration: "2 min",
-  },
-  {
-    name: "Relances facturation",
-    frequency: "Hebdomadaire · jeu 09h00",
-    lastRun: "02 mai · 09h00",
-    duration: "14 s",
-  },
-  {
-    name: "Nettoyage logs > 90 jours",
-    frequency: "Mensuel · 1er du mois",
-    lastRun: "01 mai · 03h30",
-    duration: "3 min",
-  },
-];
+// Métriques supervisées hors application (Supabase Platform / Cloudflare / APM) :
+// aucune table métier ne les stocke → état vide honnête, jamais de chiffre inventé.
+const SUPERVISED = "supervisé hors application";
 
-export default function InfraPage() {
+export default async function InfraPage() {
+  const infra = await fetchInfra();
+  const stockage = fmtBytes(infra.stockageBytes);
+
+  // Bloc 1 — Stabilité / disponibilité. Aucune source en base : tout en "—".
+  const stabilityKpis: KpiBlock[] = [
+    { phase: "1", label: "Disponibilité 30 jours", value: "—", meta: SUPERVISED },
+    { phase: "1", label: "Temps de réponse moyen", value: "—", meta: SUPERVISED },
+    { phase: "1", label: "Erreurs serveur 5xx", value: "—", meta: SUPERVISED },
+    { phase: "1", label: "Incidents 30j", value: "—", meta: SUPERVISED },
+  ];
+
+  // Bloc 2 — Consommation IA. Seul le coût mensuel est dérivable (etudes.total_ai_cost_eur).
+  const aiKpis: KpiBlock[] = [
+    {
+      phase: "1",
+      label: "Tokens consommés ce mois",
+      value: "—",
+      meta: "non mesuré en base",
+    },
+    {
+      phase: "1",
+      label: "Coût IA mensuel",
+      value: fmtEur(infra.coutIaMois),
+      meta:
+        infra.coutIaMois != null
+          ? `${infra.etudesMoisCount} étude${infra.etudesMoisCount > 1 ? "s" : ""} ce mois`
+          : "aucune étude facturée ce mois",
+      valueTone: infra.coutIaMois != null ? "gold" : undefined,
+    },
+    { phase: "1", label: "Marge IA brute", value: "—", meta: "revenus IA non modélisés" },
+  ];
+
+  // Bloc 3 — Infrastructure cloud. Seul le stockage documents est dérivable.
+  const cloudKpis: KpiBlock[] = [
+    { phase: "1", label: "Coût cloud mensuel", value: "—", meta: SUPERVISED },
+    {
+      phase: "1",
+      label: "Stockage documents",
+      value: stockage.value,
+      unit: stockage.unit || undefined,
+      meta:
+        infra.stockageBytes != null
+          ? `${infra.documentsCount} document${infra.documentsCount > 1 ? "s" : ""} client${infra.documentsCount > 1 ? "s" : ""}`
+          : "aucun document stocké",
+    },
+    { phase: "1", label: "Bande passante", value: "—", meta: SUPERVISED },
+  ];
+
   return (
     <>
       <Topbar current="08 · Infrastructure" />
@@ -124,6 +81,11 @@ export default function InfraPage() {
               <KpiCard key={kpi.label} kpi={kpi} />
             ))}
           </div>
+          <p className="mt-2 text-[11px] text-[var(--navy-300)]">
+            Disponibilité, latence, erreurs serveur et incidents sont supervisés au niveau
+            de l&apos;hébergement (Supabase, Cloudflare) et ne sont pas exposés dans
+            l&apos;application.
+          </p>
         </section>
 
         <section className="mb-8">
@@ -136,6 +98,10 @@ export default function InfraPage() {
               <KpiCard key={kpi.label} kpi={kpi} />
             ))}
           </div>
+          <p className="mt-2 text-[11px] text-[var(--navy-300)]">
+            Coût IA dérivé du coût cumulé des études produites ce mois. Le détail tokens et
+            la marge ne sont pas suivis en base.
+          </p>
         </section>
 
         <section className="mb-8">
@@ -148,6 +114,10 @@ export default function InfraPage() {
               <KpiCard key={kpi.label} kpi={kpi} />
             ))}
           </div>
+          <p className="mt-2 text-[11px] text-[var(--navy-300)]">
+            Le stockage reflète le volume réel des documents clients du cabinet. Coût cloud
+            et bande passante sont facturés par l&apos;hébergeur, hors application.
+          </p>
         </section>
 
         <section className="mb-8">
@@ -166,23 +136,16 @@ export default function InfraPage() {
                   <th className="px-4 py-3 text-center">Statut</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[var(--navy-100)]">
-                {jobs.map((job) => (
-                  <tr
-                    key={job.name}
-                    className="text-[12.5px] text-[var(--navy)] hover:bg-[var(--light-blue)]"
+              <tbody>
+                <tr>
+                  <td
+                    colSpan={5}
+                    className="px-4 py-10 text-center text-[12.5px] text-[var(--navy-300)]"
                   >
-                    <td className="px-4 py-3 font-semibold">{job.name}</td>
-                    <td className="px-4 py-3 text-[var(--navy-300)]">{job.frequency}</td>
-                    <td className="px-4 py-3 text-[var(--navy-300)]">{job.lastRun}</td>
-                    <td className="px-4 py-3 text-right tabular-nums">{job.duration}</td>
-                    <td className="px-4 py-3 text-center">
-                      <span className="inline-block rounded-full bg-[var(--green-bg)] px-2 py-0.5 text-[10px] font-bold text-[var(--green-text)]">
-                        OK
-                      </span>
-                    </td>
-                  </tr>
-                ))}
+                    Aucune tâche planifiée enregistrée. Le suivi des jobs automatiques
+                    (cron, exécutions, durées) n&apos;est pas instrumenté en base.
+                  </td>
+                </tr>
               </tbody>
             </table>
           </div>

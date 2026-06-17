@@ -434,7 +434,7 @@ export default function HomePage() {
               <div className="mb-3 grid grid-cols-2 gap-2">
                 <div className="rounded-md border border-[var(--gold-300)] bg-[var(--gold-200)]/40 p-3">
                   <div className="mb-1 text-[10px] font-bold uppercase tracking-wider text-[var(--medium-400)]">
-                    En période d'essai
+                    En période d&apos;essai
                   </div>
                   <div className="flex items-baseline gap-2">
                     <span className="text-[22px] font-bold text-[var(--navy)]">4</span>
