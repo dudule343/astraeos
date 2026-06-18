@@ -53,3 +53,18 @@ html, body {
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
 }
+
+/* « En construction » : tout bouton/élément encore non branché (data-stub) est
+   marqué visiblement (contour pointillé doré + badge 🚧) — l'utilisateur voit
+   d'un coup d'œil ce qui reste à brancher, sans cliquer. CSS pur = React-safe. */
+[data-stub] {
+  outline: 1px dashed var(--gold, #C68E0E);
+  outline-offset: 1px;
+  opacity: 0.92;
+}
+[data-stub]::after {
+  content: " 🚧";
+  font-size: 0.85em;
+  opacity: 0.75;
+  white-space: nowrap;
+}
