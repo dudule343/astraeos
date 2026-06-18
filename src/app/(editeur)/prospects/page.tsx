@@ -207,7 +207,7 @@ export default async function ProspectsPage() {
                       <td className="px-4 py-3 text-[var(--navy-300)]">{fmtDate(p.lastAt)}</td>
                       <td className="px-4 py-3 text-right">
                         <Link
-                          href={`/visio/${p.slug}?prospect=${encodeURIComponent(p.slug)}&role=engineer`}
+                          href={`/visio?prospect=${encodeURIComponent(p.slug)}&nom=${encodeURIComponent(p.name)}`}
                           className="inline-flex items-center gap-1 rounded-md border border-[var(--navy-100)] bg-white px-2.5 py-1.5 text-[11px] font-semibold text-[var(--navy)] transition hover:border-[var(--gold)]"
                         >
                           Lancer la visio →

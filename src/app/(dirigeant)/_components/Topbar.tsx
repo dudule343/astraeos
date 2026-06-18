@@ -23,6 +23,18 @@ function buildIdentity(firstName?: string | null, lastName?: string | null): Ide
 
 export function Topbar({ current }: { current: string }) {
   const [identity, setIdentity] = useState<Identity>(FALLBACK);
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  async function handleSignOut() {
+    if (isSupabaseConfigured()) {
+      try {
+        await createClient().auth.signOut();
+      } catch {
+        /* on redirige quand même vers /login */
+      }
+    }
+    window.location.assign("/login");
+  }
 
   useEffect(() => {
     if (!isSupabaseConfigured()) return;
@@ -72,17 +84,41 @@ export function Topbar({ current }: { current: string }) {
           🔔
         </button>
 
-        <button
-          type="button"
-          data-stub="Mon compte"
-          data-stub-body="Le menu du compte (profil, préférences, déconnexion) n'est pas encore branché dans cet espace. Il arrivera dans une prochaine itération."
-          className="flex h-[34px] items-center gap-2 rounded-full bg-white pr-3 pl-1 ring-1 ring-[var(--navy-100)] hover:ring-[var(--gold)]"
-        >
-          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--navy)] text-[11px] font-bold text-white">
-            {identity.initials}
-          </span>
-          <span className="text-[12px] font-semibold text-[var(--navy)]">{identity.name}</span>
-        </button>
+        <div className="relative">
+          <button
+            type="button"
+            onClick={() => setMenuOpen((v) => !v)}
+            aria-haspopup="menu"
+            aria-expanded={menuOpen}
+            className="flex h-[34px] items-center gap-2 rounded-full bg-white pr-3 pl-1 ring-1 ring-[var(--navy-100)] hover:ring-[var(--gold)]"
+          >
+            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--navy)] text-[11px] font-bold text-white">
+              {identity.initials}
+            </span>
+            <span className="text-[12px] font-semibold text-[var(--navy)]">{identity.name}</span>
+          </button>
+          {menuOpen && (
+            <>
+              <div className="fixed inset-0 z-20" onClick={() => setMenuOpen(false)} />
+              <div className="absolute right-0 z-30 mt-1 w-44 overflow-hidden rounded-lg border border-[var(--navy-100)] bg-white py-1 shadow-lg">
+                <Link
+                  href="/espace-dirigeant/parametrages"
+                  onClick={() => setMenuOpen(false)}
+                  className="block px-3.5 py-2 text-[12.5px] text-[var(--navy)] hover:bg-[var(--ivory)]"
+                >
+                  Paramètres du cabinet
+                </Link>
+                <button
+                  type="button"
+                  onClick={handleSignOut}
+                  className="block w-full px-3.5 py-2 text-left text-[12.5px] font-semibold text-[var(--red-text,#C0392B)] hover:bg-[var(--ivory)]"
+                >
+                  Se déconnecter
+                </button>
+              </div>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );

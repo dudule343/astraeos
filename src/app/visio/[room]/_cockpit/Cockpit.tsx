@@ -2,10 +2,10 @@
 
 // Shell du cockpit visio React. Phase 1 : colonne DCI réelle (nav + section +
 // édition). Colonnes vidéo et assistance = placeholders (Phases 2-3).
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import "./cockpit.css";
-import { loadDciComplet } from "./api";
+import { loadDciComplet, openEntretien, saveDciSnapshot } from "./api";
 import { DciNavigation } from "./DciNavigation";
 import { DciSection } from "./DciSection";
 import { EditFieldModal } from "./EditFieldModal";
@@ -57,18 +57,66 @@ function Toast() {
   return <div className="toast show">{toast}</div>;
 }
 
+type SaveState = "idle" | "saving" | "saved" | "offline";
+
+function AutoSavePill({ state }: { state: SaveState }) {
+  const map: Record<SaveState, { txt: string; color: string }> = {
+    idle: { txt: "Brouillon", color: "var(--navy-300)" },
+    saving: { txt: "Enregistrement…", color: "var(--navy-300)" },
+    saved: { txt: "Enregistré ✓", color: "var(--green-text,#1F5A36)" },
+    offline: { txt: "Non enregistré ⚠", color: "#C0392B" },
+  };
+  const m = map[state];
+  return (
+    <span className="auto-save" style={{ color: m.color }}>
+      {m.txt}
+    </span>
+  );
+}
+
 function CockpitInner({ params }: { params: CockpitParams }) {
   const dispatch = useCockpitDispatch();
+  const { data } = useCockpit();
+  const [entretienId, setEntretienId] = useState<string | null>(null);
+  const [saveState, setSaveState] = useState<SaveState>("idle");
 
+  // Création/reprise de l'entretien (upsert par salle) + hydratation : le
+  // snapshot de session (édité par l'ingénieur) prime ; sinon DCI client brut.
   useEffect(() => {
     let alive = true;
-    loadDciComplet(params.prospect).then((snap) => {
-      if (alive && snap) dispatch({ type: "applySnapshot", snapshot: snap });
-    });
+    (async () => {
+      let hydrated = false;
+      const ent = await openEntretien(params.room, params.prospect, params.nom);
+      if (!alive) return;
+      if (ent) {
+        setEntretienId(ent.id);
+        if (ent.snapshot && ent.snapshot.sections.length) {
+          dispatch({ type: "applySnapshot", snapshot: ent.snapshot });
+          hydrated = true;
+        }
+      } else {
+        setSaveState("offline");
+      }
+      if (!hydrated) {
+        const snap = await loadDciComplet(params.prospect);
+        if (alive && snap) dispatch({ type: "applySnapshot", snapshot: snap });
+      }
+    })();
     return () => {
       alive = false;
     };
-  }, [params.prospect, dispatch]);
+  }, [params.room, params.prospect, params.nom, dispatch]);
+
+  // Sauvegarde débouncée (1,5 s) du DCI édité → PATCH dci_snapshot. La pastille
+  // reflète l'état RÉEL (pas de faux « Enregistré »).
+  useEffect(() => {
+    if (!entretienId || !data.sections.length) return;
+    setSaveState("saving");
+    const t = setTimeout(() => {
+      saveDciSnapshot(entretienId, data).then((ok) => setSaveState(ok ? "saved" : "offline"));
+    }, 1500);
+    return () => clearTimeout(t);
+  }, [data, entretienId]);
 
   return (
     <div className="cockpit">
@@ -95,6 +143,7 @@ function CockpitInner({ params }: { params: CockpitParams }) {
             <div className="dci-live-title-main">DCI Complet · complété en direct par l&apos;IA</div>
             <SectionInfo />
           </div>
+          <AutoSavePill state={saveState} />
           <ProgressPill />
         </div>
         <div className="dci-main">

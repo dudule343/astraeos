@@ -50,6 +50,9 @@ export type CockpitAction =
   | { type: "toggleCollapse"; key: string }
   // Confirme la section : valide tous les champs IA (ai-suggest/agree/disagree).
   | { type: "confirmSection"; sectionId: string }
+  // Ajoute/retire un élément d'un groupe répétable (immuable).
+  | { type: "addItem"; groupIdx: number }
+  | { type: "removeItem"; groupIdx: number; itemIdx: number }
   | { type: "toast"; message: string | null };
 
 const EMPTY: DciSnapshot = { sections: [] };
@@ -166,6 +169,32 @@ function reducer(state: CockpitState, action: CockpitAction): CockpitState {
         data: { sections },
         confirmed: { ...state.confirmed, [action.sectionId]: true },
       };
+    }
+    case "addItem": {
+      const sections = state.data.sections.map((s): SessionSection => {
+        if (s.id !== state.currentSection) return s;
+        const groups = s.groups.map((g, gi) => {
+          if (gi !== action.groupIdx || g.type !== "repeatable") return g;
+          // Nouvel élément : on clone le gabarit du 1er item (mêmes champs),
+          // valeurs vidées et statut 'empty' → prêt à être renseigné.
+          const template = g.items[0]?.fields ?? [];
+          const fields = template.map((f) => ({ ...f, value: "", status: "empty" as const }));
+          return { ...g, items: [...g.items, { fields }] };
+        });
+        return { ...s, groups };
+      });
+      return { ...state, data: { sections } };
+    }
+    case "removeItem": {
+      const sections = state.data.sections.map((s): SessionSection => {
+        if (s.id !== state.currentSection) return s;
+        const groups = s.groups.map((g, gi) => {
+          if (gi !== action.groupIdx || g.type !== "repeatable") return g;
+          return { ...g, items: g.items.filter((_, ii) => ii !== action.itemIdx) };
+        });
+        return { ...s, groups };
+      });
+      return { ...state, data: { sections } };
     }
     case "toast":
       return { ...state, toast: action.message };

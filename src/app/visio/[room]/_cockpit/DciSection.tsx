@@ -147,7 +147,8 @@ function ItemCard({
           className="v6-card-remove"
           onClick={(e) => {
             e.stopPropagation();
-            dispatch({ type: "toast", message: "Suppression d'élément · disponible bientôt" });
+            dispatch({ type: "removeItem", groupIdx: gi, itemIdx: ii });
+            dispatch({ type: "toast", message: "Élément retiré" });
           }}
           title="Retirer"
         >
@@ -222,9 +223,10 @@ function RepeatableGroup({
           )}
           <button
             className="btn-add-item"
-            onClick={() =>
-              dispatch({ type: "toast", message: "Ajout d'élément · disponible bientôt" })
-            }
+            onClick={() => {
+              dispatch({ type: "addItem", groupIdx: gi });
+              dispatch({ type: "toast", message: "Élément ajouté · à renseigner" });
+            }}
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
               <line x1="12" y1="5" x2="12" y2="19" />

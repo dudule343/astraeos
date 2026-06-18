@@ -46,6 +46,7 @@ const sections: NavSection[] = [
       { href: "/dossiers", label: "Pipeline des dossiers" },
       { href: "/collectes", label: "Collectes de documents" },
       { href: "/entretiens", label: "Entretiens visio" },
+      { href: "/visio", label: "Nouvelle visio" },
       { href: "/agenda", label: "Mon agenda" },
       { href: "/trial", label: "Période d'essai" },
       { href: "/client-new", label: "Nouveau client" },
