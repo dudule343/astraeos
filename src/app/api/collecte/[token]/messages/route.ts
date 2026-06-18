@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 import { createAdminClient } from "@/lib/supabase/admin";
+import { clientIp, rateLimit, rateLimitKey } from "@/lib/rate-limit";
 
 /**
  * Messagerie client ↔ conseiller d'une collecte.
@@ -49,6 +50,16 @@ export async function POST(
   { params }: { params: Promise<{ token: string }> },
 ) {
   const { token } = await params;
+
+  // Route publique (token non secret, transite par email/URL). Rate-limit comme
+  // /depot pour éviter le flood (insert service_role → bypass RLS).
+  if (!rateLimit(rateLimitKey("collecte/messages", token, clientIp(req)), 20, 60_000)) {
+    return NextResponse.json(
+      { error: "Trop de messages, réessayez dans un instant." },
+      { status: 429 },
+    );
+  }
+
   const found = await findCollecte(token);
   if (!found) {
     return NextResponse.json({ error: "Collecte introuvable" }, { status: 404 });

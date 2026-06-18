@@ -18,7 +18,10 @@ type SearchParams = {
 /** Salle Jitsi : on n'accepte que des identifiants alphanumériques + tirets,
  *  bornés, pour ne jamais injecter de caractère douteux dans l'URL de l'iframe. */
 function sanitizeRoom(raw: string): string {
-  return raw.replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 64);
+  // Casse canonique minuscule : la salle Jitsi est normalisée en minuscules par
+  // Prosody, et le mapping enregistrement→entretien relit en minuscules. Sans ça,
+  // /visio/Dupont créait un entretien « Dupont » jamais retrouvé (404 recording).
+  return raw.replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 64).toLowerCase();
 }
 
 function sanitizeRole(raw: string | undefined): "engineer" | "client" {

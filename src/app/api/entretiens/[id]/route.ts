@@ -8,6 +8,7 @@ import {
 } from "@/lib/entretiens-store";
 import { getSessionContext } from "@/lib/auth/context";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { validateDciCanonical } from "@/lib/dci-schema";
 
 const SNAPSHOT_MAX_BYTES = 256 * 1024; // 256 Ko
 
@@ -161,6 +162,17 @@ export async function PATCH(
     if (byteSize(dci_snapshot) > SNAPSHOT_MAX_BYTES) {
       return NextResponse.json(
         { error: "dci_snapshot trop volumineux (max 256 Ko)" },
+        { status: 400 },
+      );
+    }
+    // Validation canonique au WRITE : un snapshot corrompu accepté ici serait
+    // rejeté à la relecture (validateDciCanonical) → repli DCI brut → perte
+    // silencieuse des éditions de session. On refuse donc en amont (les clés de
+    // session conf/live/note passent : le validateur n'interdit pas les extras).
+    const check = validateDciCanonical(dci_snapshot);
+    if (!check.ok) {
+      return NextResponse.json(
+        { error: `dci_snapshot invalide: ${check.error}` },
         { status: 400 },
       );
     }

@@ -841,7 +841,7 @@ select.v4-modal-input { cursor:pointer; appearance:none; -webkit-appearance:none
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="13" height="13"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
         <span id="stt-connect-label">Transcription complète</span>
       </button>
-      <span class="session-timer">00:24:18 / 1h30</span>
+      <span class="session-timer">00:00:00 / 1h30</span>
       <button class="v3-end-btn primary" onclick="openModalEndInterview()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="20 6 9 17 4 12"/></svg>
         Terminer l'entretien
@@ -1290,7 +1290,7 @@ select.v4-modal-input { cursor:pointer; appearance:none; -webkit-appearance:none
   <div class="rec-controls" id="rec-controls">
     <div class="rec-controls-status" id="rec-controls-status">
       <span class="rec-dot"></span>
-      <span id="rec-status-label">Enregistrement actif · 00:24:18</span>
+      <span id="rec-status-label">Enregistrement actif · 00:00:00</span>
     </div>
     <div class="rec-controls-buttons">
       <button class="rec-btn rec-btn-pause" id="btn-rec-pause" onclick="openRecAction('pause')" title="Suspendre l'enregistrement (reprise possible)">
@@ -1377,7 +1377,7 @@ select.v4-modal-input { cursor:pointer; appearance:none; -webkit-appearance:none
     </div>
     <div class="v3-modal-body">
       <div class="v3-modal-recap">
-        <div class="v3-modal-recap-line">Durée de l'entretien · <strong id="end-duration">00:24:18</strong></div>
+        <div class="v3-modal-recap-line">Durée de l'entretien · <strong id="end-duration">00:00:00</strong></div>
         <div class="v3-modal-recap-line">Champs DCI complétés · <strong id="end-fields">38 / 100 champs validés</strong></div>
         <div class="v3-modal-recap-line">Sections traitées · <strong id="end-sections">6 sur 21</strong></div>
         <div class="v3-modal-recap-line">Insights IA · opportunités identifiées · <strong style="color:var(--gold-deep);">3</strong></div>
@@ -1411,7 +1411,7 @@ select.v4-modal-input { cursor:pointer; appearance:none; -webkit-appearance:none
           <div class="client-engineer-name-main">Luc THILLIEZ</div>
           <div class="client-engineer-name-sub">Président associé du cabinet PRIVEOS · votre ingénieur patrimonial</div>
         </div>
-        <div class="client-recording">REC · 00:24:18</div>
+        <div class="client-recording">REC · 00:00:00</div>
       </div>
       <div class="client-pip">
         <div class="client-pip-avatar">CJ</div>
@@ -3126,6 +3126,12 @@ setInterval(() => {
     status.classList.add('jts-hidden');
   }
 
+  // État de session partagé entre les (re)démarrages de startJitsi() :
+  //  - astrJoined   : la conférence a réellement été rejointe au moins une fois
+  //  - astrClosing  : fermeture volontaire (readyToClose / kick) → pas de rejoin
+  //  - astrRejoining: une tentative de reconnexion est déjà en cours
+  var astrJoined = false, astrClosing = false, astrRejoining = false;
+
   // ---- Échappement (panneau compagnon) -----------------------------
   function escCompanion(v) {
     return String(v == null ? '' : v)
@@ -3381,6 +3387,8 @@ setInterval(() => {
       });
 
       api.addEventListener('videoConferenceJoined', function () {
+        astrJoined = true;
+        astrRejoining = false;
         hideStatus();
         // Signale à la pompe de transcription de démarrer automatiquement.
         try { document.dispatchEvent(new CustomEvent('astr-conference-joined')); } catch (e) {}
@@ -3391,22 +3399,61 @@ setInterval(() => {
           }, 4000);
         }
       });
-      // Arrêt propre de l'enregistrement à la fermeture de la salle.
+
+      // Perte de connexion / erreur Jitsi : on réaffiche le voile en mode
+      // "reconnexion" et on tente un rejoin. Sans ça, l'utilisateur reste
+      // devant une vidéo figée sans aucun message. readyToClose étant une
+      // fermeture volontaire, il ne déclenche PAS de rejoin (voir plus bas).
+      function astrAttemptRejoin(reason) {
+        if (astrClosing || astrRejoining) return;
+        astrRejoining = true;
+        astrJoined = false;
+        showStatus('Connexion perdue, reconnexion…', true);
+        try { api.executeCommand('hangup'); } catch (e) {}
+        // Laisse Jitsi libérer la session avant de relancer l'iframe.
+        setTimeout(function () {
+          if (astrClosing) return;
+          try { api.dispose(); } catch (e) {}
+          startJitsi();
+        }, 1500);
+      }
+      api.addEventListener('connectionFailed', function () { astrAttemptRejoin('connectionFailed'); });
+      api.addEventListener('errorOccurred', function (ev) {
+        // errorOccurred couvre aussi des erreurs bénignes (devices, etc.).
+        // On ne tente un rejoin que pour les erreurs de connexion/conférence
+        // afin d'éviter une boucle de reconnexion intempestive.
+        var t = (ev && (ev.type || (ev.error && ev.error.name) || ev.name) || '') + '';
+        if (/connection|conference|membersOnly|focus|jingle/i.test(t)) astrAttemptRejoin('errorOccurred:' + t);
+      });
+      api.addEventListener('participantKicked', function (ev) {
+        // Seul notre éviction nous concerne (kicked.local === true selon la version).
+        var k = ev && ev.kicked;
+        if (k && (k.local === true || k.id === undefined)) {
+          astrClosing = true;
+          showStatus('Vous avez été retiré de la salle.', true);
+        }
+      });
+      api.addEventListener('suspendDetected', function () {
+        // Veille système : la session WebRTC est généralement perdue au réveil.
+        astrAttemptRejoin('suspendDetected');
+      });
+
+      // Fermeture volontaire de la salle : arrêt de l'enregistrement +
+      // message de fin. Listener UNIQUE (fusion des deux d'origine).
       api.addEventListener('readyToClose', function () {
+        astrClosing = true;
         try { api.executeCommand('stopRecording', 'file'); } catch (e) {}
+        showStatus('Vidéo terminée. Vous pouvez fermer cet onglet.');
       });
       // NB : la transcription du prospect transite par Supabase Realtime
       // (canal partagé par salle), pas par le canal de données Jitsi qui
       // dépend de l'établissement WebRTC. Voir l'IIFE astraeosRealtime.
-      // Repli : dès que l'iframe Jitsi est rendue, le voile n'a plus de raison
-      // de masquer quoi que ce soit (prejoin, autorisations, file d'attente…).
-      var jtsWait = setInterval(function () {
-        if (container.querySelector('iframe')) { hideStatus(); clearInterval(jtsWait); }
-      }, 500);
-      setTimeout(function () { clearInterval(jtsWait); hideStatus(); }, 8000);
-      api.addEventListener('readyToClose', function () {
-        showStatus('Vidéo terminée. Vous pouvez fermer cet onglet.');
-      });
+      // Dernier filet : si videoConferenceJoined ne se produit jamais
+      // (permissions caméra/micro en attente côté navigateur, jamais de
+      // prejoin ici), on lève le voile après 15 s pour ne pas bloquer l'UI.
+      // On NE se base PLUS sur la simple présence de l'iframe, qui masquait
+      // le voile avant la vraie connexion.
+      setTimeout(function () { if (!astrJoined && !astrClosing && !astrRejoining) hideStatus(); }, 15000);
       // Expose l'instance pour la transcription (captureStream / état).
       window.__astraeosJitsi = api;
     } catch (e) {
@@ -5326,6 +5373,30 @@ setInterval(() => {
   function init() { if (!received) setRec(false); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
+})();
+
+/* ASTRAEOS · Compteur de session RÉEL.
+   Remplace le timer 00:24:18 codé en dur. Tick depuis l'ouverture de la salle.
+   NB : la durée du RAPPORT est recalculée côté serveur (ended_at - started_at) ;
+   cet affichage est purement indicatif. */
+(function astraeosSessionTimer() {
+  'use strict';
+  var start = Date.now();
+  function p(n) { return (n < 10 ? '0' : '') + n; }
+  function fmt(sec) { return p(Math.floor(sec / 3600)) + ':' + p(Math.floor((sec % 3600) / 60)) + ':' + p(sec % 60); }
+  function tick() {
+    var sec = Math.max(0, Math.floor((Date.now() - start) / 1000));
+    var s = fmt(sec);
+    var t = document.querySelector('.session-timer');
+    if (t) t.textContent = s + ' / 1h30';
+    var end = document.getElementById('end-duration');
+    if (end) end.textContent = s;
+    var cli = document.querySelector('.client-recording');
+    if (cli && cli.style.display !== 'none') cli.textContent = 'REC · ' + s;
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', tick);
+  else tick();
+  setInterval(tick, 1000);
 })();
 
 /* ASTRAEOS · Onglet Insights 100% dynamique.

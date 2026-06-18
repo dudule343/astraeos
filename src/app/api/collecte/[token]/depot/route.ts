@@ -72,11 +72,14 @@ export async function POST(
     return NextResponse.json({ error: "Requête multipart attendue" }, { status: 400 });
   }
 
+  // Validation de la CHAÎNE brute : Number("") et Number("  ") valent 0 → une
+  // requête au item_index vide écraserait silencieusement le dépôt de l'item 0
+  // (aggravé par l'upsert onConflict collecte_id,item_index). On exige des chiffres.
   const rawIndex = form.get("item_index");
-  const itemIndex = Number(rawIndex);
-  if (rawIndex === null || !Number.isInteger(itemIndex) || itemIndex < 0) {
+  if (typeof rawIndex !== "string" || !/^\d+$/.test(rawIndex.trim())) {
     return NextResponse.json({ error: "item_index invalide" }, { status: 400 });
   }
+  const itemIndex = Number(rawIndex.trim());
 
   const structure = Array.isArray(collecte.structure) ? collecte.structure : [];
   if (itemIndex >= structure.length) {

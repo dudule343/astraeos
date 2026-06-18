@@ -317,15 +317,48 @@ export type MergeInput = {
 };
 
 /** Renvoie false si l'entretien n'existe pas. */
+/** Borne une ligne de transcript/note au write-boundary : `text` doit être une
+ *  chaîne non vide, bornée à 4000 chars ; `t` une chaîne. Élimine les lignes
+ *  poubelle ({text:null}, {text:12345}, {foo:'bar'}) AVANT écriture — protège
+ *  tous les écrivains (PATCH + transcript-flush) par construction. */
+function sanitizeLines(arr: TranscriptLine[] | undefined): TranscriptLine[] | undefined {
+  if (!Array.isArray(arr)) return undefined;
+  const clean = arr
+    .filter((l) => l && typeof l === "object" && typeof l.text === "string" && l.text.trim() !== "")
+    .map((l) => ({
+      t: typeof l.t === "string" ? l.t : new Date().toISOString(),
+      ...(typeof l.who === "string" ? { who: l.who.slice(0, 80) } : {}),
+      text: l.text.slice(0, 4000),
+    }));
+  return clean.length ? clean : undefined;
+}
+
+/** Ne garde que les objets pour conseils/articles (pas de scalaires/poubelle). */
+function sanitizeRecords(
+  arr: Record<string, unknown>[] | undefined,
+): Record<string, unknown>[] | undefined {
+  if (!Array.isArray(arr)) return undefined;
+  const clean = arr.filter((r) => r && typeof r === "object" && !Array.isArray(r));
+  return clean.length ? clean : undefined;
+}
+
 export async function mergeEntretien(id: string, input: MergeInput): Promise<boolean> {
+  // Sanitisation au WRITE boundary : un seul point protège tous les appelants.
+  const safe: MergeInput = {
+    ...(input.dci_snapshot !== undefined ? { dci_snapshot: input.dci_snapshot } : {}),
+    ...(input.transcript_append ? { transcript_append: sanitizeLines(input.transcript_append) } : {}),
+    ...(input.notes_append ? { notes_append: sanitizeLines(input.notes_append) } : {}),
+    ...(input.conseils_append ? { conseils_append: sanitizeRecords(input.conseils_append) } : {}),
+    ...(input.articles_append ? { articles_append: sanitizeRecords(input.articles_append) } : {}),
+  };
   if (isSupabaseConfigured()) {
     try {
-      return await mergeSupabase(id, input);
+      return await mergeSupabase(id, safe);
     } catch (err) {
       console.warn("[entretiens-store] Supabase merge failed, fallback file:", err);
     }
   }
-  return mergeFile(id, input);
+  return mergeFile(id, safe);
 }
 
 function applyMerge(current: Entretien, input: MergeInput): void {
@@ -402,15 +435,39 @@ export async function terminerEntretien(
   return terminerFile(id, rapport);
 }
 
+/** Durée AUTORITAIRE serveur (ended_at - started_at). Écrase toute durée venue
+ *  du client (le timer DOM était hardcodé à 00:24:18 → rapports faux). */
+function withServerDuration(
+  rapport: Record<string, unknown>,
+  startedAt: string | null | undefined,
+  now: Date,
+): Record<string, unknown> {
+  if (!startedAt) return rapport;
+  const sec = Math.max(0, Math.round((now.getTime() - new Date(startedAt).getTime()) / 1000));
+  const p = (n: number) => String(n).padStart(2, "0");
+  return {
+    ...rapport,
+    duration_s: sec,
+    duration: `${p(Math.floor(sec / 3600))}:${p(Math.floor((sec % 3600) / 60))}:${p(sec % 60)}`,
+  };
+}
+
 async function terminerSupabase(
   id: string,
   rapport: Record<string, unknown>,
 ): Promise<boolean> {
   const supabase = createAdminClient();
-  const now = new Date().toISOString();
+  const now = new Date();
+  const { data: existing } = await supabase
+    .from("entretiens")
+    .select("started_at")
+    .eq("id", id)
+    .maybeSingle();
+  const enriched = withServerDuration(rapport, existing?.started_at as string | undefined, now);
+  const iso = now.toISOString();
   const { data, error } = await supabase
     .from("entretiens")
-    .update({ ended_at: now, rapport, updated_at: now })
+    .update({ ended_at: iso, rapport: enriched, updated_at: iso })
     .eq("id", id)
     .select("id")
     .maybeSingle();
@@ -425,10 +482,11 @@ async function terminerFile(
   const store = await readFileStore();
   const current = store.entretiens.find((e) => e.id === id);
   if (!current) return false;
-  const now = new Date().toISOString();
-  current.ended_at = now;
-  current.rapport = rapport;
-  current.updated_at = now;
+  const now = new Date();
+  const iso = now.toISOString();
+  current.ended_at = iso;
+  current.rapport = withServerDuration(rapport, current.started_at, now);
+  current.updated_at = iso;
   await writeFileStore(store);
   return true;
 }

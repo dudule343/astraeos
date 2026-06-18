@@ -30,6 +30,12 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  // Le proxy (src/proxy.ts) bufferise le corps ; défaut 10 Mo → un dépôt de
+  // pièce de 10-15 Mo (scan mobile) était tronqué silencieusement alors que
+  // l'UI annonce 15 Mo. On aligne à 16 Mo (marge multipart).
+  experimental: {
+    proxyClientMaxBodySize: "16mb",
+  },
   async headers() {
     return [
       {

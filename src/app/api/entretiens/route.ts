@@ -20,7 +20,9 @@ function supabaseConfigured(): boolean {
 }
 
 function sanitizeRoom(raw: string): string {
-  return raw.replace(/[^a-zA-Z0-9_-]/g, "").slice(0, ROOM_MAX);
+  // Casse canonique minuscule (cf. page.tsx) : garantit que entretiens.room
+  // matche la salle Jitsi normalisée → mapping enregistrement fiable.
+  return raw.replace(/[^a-zA-Z0-9_-]/g, "").slice(0, ROOM_MAX).toLowerCase();
 }
 
 function sanitizeSlug(raw: string): string {

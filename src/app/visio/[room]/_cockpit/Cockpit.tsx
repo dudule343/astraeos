@@ -2,7 +2,7 @@
 
 // Shell du cockpit visio React. Phase 1 : colonne DCI réelle (nav + section +
 // édition). Colonnes vidéo et assistance = placeholders (Phases 2-3).
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import "./cockpit.css";
 import { loadDciComplet, openEntretien, saveDciSnapshot } from "./api";
@@ -59,7 +59,7 @@ function Toast() {
 
 type SaveState = "idle" | "saving" | "saved" | "offline";
 
-function AutoSavePill({ state }: { state: SaveState }) {
+function AutoSavePill({ state, onRetry }: { state: SaveState; onRetry: () => void }) {
   const map: Record<SaveState, { txt: string; color: string }> = {
     idle: { txt: "Brouillon", color: "var(--navy-300)" },
     saving: { txt: "Enregistrement…", color: "var(--navy-300)" },
@@ -67,6 +67,18 @@ function AutoSavePill({ state }: { state: SaveState }) {
     offline: { txt: "Non enregistré ⚠", color: "#C0392B" },
   };
   const m = map[state];
+  if (state === "offline") {
+    return (
+      <button
+        className="auto-save"
+        onClick={onRetry}
+        style={{ color: m.color, cursor: "pointer", border: "none", background: "transparent", font: "inherit" }}
+        title="Réessayer l'enregistrement"
+      >
+        {m.txt} · réessayer
+      </button>
+    );
+  }
   return (
     <span className="auto-save" style={{ color: m.color }}>
       {m.txt}
@@ -79,36 +91,59 @@ function CockpitInner({ params }: { params: CockpitParams }) {
   const { data } = useCockpit();
   const [entretienId, setEntretienId] = useState<string | null>(null);
   const [saveState, setSaveState] = useState<SaveState>("idle");
+  // Données courantes accessibles dans les handlers d'unload sans re-binder.
+  const dataRef = useRef(data);
+  dataRef.current = data;
+  const entretienIdRef = useRef<string | null>(null);
+  entretienIdRef.current = entretienId;
 
-  // Création/reprise de l'entretien (upsert par salle) + hydratation : le
-  // snapshot de session (édité par l'ingénieur) prime ; sinon DCI client brut.
-  useEffect(() => {
-    let alive = true;
-    (async () => {
-      let hydrated = false;
+  // Création/reprise de l'entretien AVEC retry (blip réseau / session) : sans
+  // retry, un échec au montage laissait entretienId null à vie → toutes les
+  // éditions perdues. On réessaie (backoff), puis la pastille 'offline' propose
+  // un nouvel essai manuel.
+  const ensureEntretien = useCallback(async (): Promise<string | null> => {
+    for (let attempt = 0; attempt < 3; attempt++) {
       const ent = await openEntretien(params.room, params.prospect, params.nom);
-      if (!alive) return;
       if (ent) {
         setEntretienId(ent.id);
         if (ent.snapshot && ent.snapshot.sections.length) {
           dispatch({ type: "applySnapshot", snapshot: ent.snapshot });
-          hydrated = true;
+        } else {
+          const snap = await loadDciComplet(params.prospect);
+          if (snap) dispatch({ type: "applySnapshot", snapshot: snap });
         }
-      } else {
-        setSaveState("offline");
+        return ent.id;
       }
-      if (!hydrated) {
-        const snap = await loadDciComplet(params.prospect);
-        if (alive && snap) dispatch({ type: "applySnapshot", snapshot: snap });
-      }
-    })();
+      await new Promise((r) => setTimeout(r, 1000 * (attempt + 1)));
+    }
+    setSaveState("offline");
+    return null;
+  }, [params.room, params.prospect, params.nom, dispatch]);
+
+  useEffect(() => {
+    let alive = true;
+    void ensureEntretien().then(() => {
+      if (!alive) return;
+    });
     return () => {
       alive = false;
     };
-  }, [params.room, params.prospect, params.nom, dispatch]);
+  }, [ensureEntretien]);
 
-  // Sauvegarde débouncée (1,5 s) du DCI édité → PATCH dci_snapshot. La pastille
-  // reflète l'état RÉEL (pas de faux « Enregistré »).
+  // Réessai manuel depuis la pastille 'offline' : recrée l'entretien puis sauve
+  // immédiatement le DCI courant.
+  const retrySave = useCallback(async () => {
+    setSaveState("saving");
+    const id = entretienIdRef.current ?? (await ensureEntretien());
+    if (id && dataRef.current.sections.length) {
+      const ok = await saveDciSnapshot(id, dataRef.current);
+      setSaveState(ok ? "saved" : "offline");
+    } else {
+      setSaveState("offline");
+    }
+  }, [ensureEntretien]);
+
+  // Sauvegarde débouncée (1,5 s) du DCI édité → PATCH dci_snapshot. Pastille réelle.
   useEffect(() => {
     if (!entretienId || !data.sections.length) return;
     setSaveState("saving");
@@ -117,6 +152,36 @@ function CockpitInner({ params }: { params: CockpitParams }) {
     }, 1500);
     return () => clearTimeout(t);
   }, [data, entretienId]);
+
+  // Flush de DERNIÈRE CHANCE à la fermeture/masquage de l'onglet ET au démontage :
+  // le PATCH débouncé serait annulé sinon (édition dans les 1,5 s avant fermeture).
+  // keepalive:true survit à l'unload (la route n'accepte que PATCH, pas sendBeacon).
+  useEffect(() => {
+    function flush() {
+      const id = entretienIdRef.current;
+      if (!id || !dataRef.current.sections.length) return;
+      try {
+        fetch(`/api/entretiens/${encodeURIComponent(id)}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ dci_snapshot: dataRef.current }),
+          keepalive: true,
+        });
+      } catch {
+        /* silencieux */
+      }
+    }
+    function onVisibility() {
+      if (document.visibilityState === "hidden") flush();
+    }
+    window.addEventListener("pagehide", flush);
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      flush();
+      window.removeEventListener("pagehide", flush);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, []);
 
   return (
     <div className="cockpit">
@@ -143,7 +208,7 @@ function CockpitInner({ params }: { params: CockpitParams }) {
             <div className="dci-live-title-main">DCI Complet · complété en direct par l&apos;IA</div>
             <SectionInfo />
           </div>
-          <AutoSavePill state={saveState} />
+          <AutoSavePill state={saveState} onRetry={retrySave} />
           <ProgressPill />
         </div>
         <div className="dci-main">
