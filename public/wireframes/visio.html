@@ -4648,6 +4648,15 @@ setInterval(() => {
     sending = true;
     charsSinceSend = 0;
     lastSentAt = now;
+    // M1 · feedback visible pendant la génération (haiku ~quelques s) : évite
+    // l'impression de figement entre deux ticks d'insights.
+    (function () {
+      var el = document.getElementById('insights-count');
+      if (el && !el.getAttribute('data-err')) {
+        el.setAttribute('data-prev', el.textContent);
+        el.textContent = 'Analyse en cours…';
+      }
+    })();
 
     var payload = {
       transcript: finalBuffer.slice(-6000),
@@ -4689,6 +4698,11 @@ setInterval(() => {
       flagIaError(); // réseau indisponible → on le signale (retry au prochain tick)
     }).then(function () {
       sending = false;
+      // Si aucun nouvel insight n'a remplacé le placeholder, on restaure le texte.
+      var el = document.getElementById('insights-count');
+      if (el && el.textContent === 'Analyse en cours…') {
+        el.textContent = el.getAttribute('data-prev') || "L'IA analyse en temps réel";
+      }
     });
   }
 
@@ -5070,6 +5084,27 @@ setInterval(() => {
   // prolongée. Le serveur borne de toute façon à 2000 lignes (append atomique).
   var BUF_HARD_MAX = 8000;
 
+  // Backstop ULTIME contre la perte : on miroite le buffer transcript en
+  // localStorage (clé par salle). Couvre tous les trous — beacon refusé (>64 Ko),
+  // serveur ok:false, batch en vol au crash, onglet tué avant flush. Rejoué au
+  // prochain chargement de la salle, puis purgé une fois persisté en base.
+  function tbufKey() { return 'astr_tbuf_' + (room || 'x'); }
+  function persistBuf() {
+    try {
+      if (transcriptBuf.length) localStorage.setItem(tbufKey(), JSON.stringify(transcriptBuf));
+      else localStorage.removeItem(tbufKey());
+    } catch (e) { /* quota/private mode : best-effort */ }
+  }
+  (function restoreBuf() {
+    try {
+      var raw = localStorage.getItem(tbufKey());
+      if (raw) {
+        var arr = JSON.parse(raw);
+        if (Array.isArray(arr) && arr.length) transcriptBuf = arr.concat(transcriptBuf);
+      }
+    } catch (e) { /* silencieux */ }
+  })();
+
   function flushTranscript() {
     if (!entretienId || !transcriptBuf.length) return;
     var batch = transcriptBuf.splice(0, transcriptBuf.length);
@@ -5078,6 +5113,7 @@ setInterval(() => {
         // Échec réseau : on remet le lot en tête pour le prochain flush (pas de perte).
         transcriptBuf = batch.concat(transcriptBuf);
       }
+      persistBuf(); // succès → backup vidé ; échec → backup conserve le lot
     });
   }
 
@@ -5102,6 +5138,7 @@ setInterval(() => {
     // Plafond mémoire SEULEMENT (8000) : on ne jette plus les 500 dernières en
     // régime normal — c'était une perte silencieuse du début sur réseau dégradé.
     if (transcriptBuf.length > BUF_HARD_MAX) transcriptBuf = transcriptBuf.slice(-BUF_HARD_MAX);
+    persistBuf(); // miroir localStorage à chaque ligne (rejeu si crash)
     clearTimeout(transcriptTimer);
     transcriptTimer = setTimeout(flushTranscript, 5000);
   });
@@ -5134,18 +5171,45 @@ setInterval(() => {
   // Flush de DERNIÈRE CHANCE à la fermeture / masquage de l'onglet. Un fetch est
   // tué à l'unload ; navigator.sendBeacon survit (POST uniquement → route dédiée
   // /transcript-flush). Couvre fermeture d'onglet, refresh, navigation sortante.
+  // Découpe un tableau en lots dont le JSON reste < maxBytes (sendBeacon refuse
+  // ~64 Ko et renvoie false).
+  function chunkBySize(arr, maxBytes) {
+    var chunks = [], cur = [], size = 2;
+    for (var i = 0; i < arr.length; i++) {
+      var s = JSON.stringify(arr[i]).length + 1;
+      if (cur.length && size + s > maxBytes) { chunks.push(cur); cur = []; size = 2; }
+      cur.push(arr[i]); size += s;
+    }
+    if (cur.length) chunks.push(cur);
+    return chunks;
+  }
   function beaconFlush() {
     if (!entretienId) return;
     if (!transcriptBuf.length && !conseilsBuf.length && !articlesBuf.length) return;
     try {
-      var payload = {};
-      if (transcriptBuf.length) payload.transcript_append = transcriptBuf.slice();
-      if (conseilsBuf.length) payload.conseils_append = conseilsBuf.slice();
-      if (articlesBuf.length) payload.articles_append = articlesBuf.slice();
-      var blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
       var url = '/api/entretiens/' + encodeURIComponent(entretienId) + '/transcript-flush';
-      if (navigator.sendBeacon(url, blob)) {
-        transcriptBuf = []; conseilsBuf = []; articlesBuf = [];
+      // Transcript en lots ≤ 50 Ko ; on vérifie CHAQUE envoi et on ne vide que ce
+      // qui est réellement parti (avant : tout le buffer était vidé même si le
+      // beacon échouait sur >64 Ko → perte de la fin de session).
+      var lines = transcriptBuf;
+      transcriptBuf = [];
+      var chunks = chunkBySize(lines, 50000);
+      var sentCount = 0;
+      for (var c = 0; c < chunks.length; c++) {
+        var blob = new Blob([JSON.stringify({ transcript_append: chunks[c] })], { type: 'application/json' });
+        if (navigator.sendBeacon(url, blob)) { sentCount += chunks[c].length; }
+        else { break; } // échec : on garde le reste
+      }
+      // Lignes non envoyées → remises dans le buffer + persistées pour le rejeu.
+      if (sentCount < lines.length) transcriptBuf = lines.slice(sentCount).concat(transcriptBuf);
+      persistBuf();
+      // Conseils/articles (petits) en un lot.
+      var ins = {};
+      if (conseilsBuf.length) ins.conseils_append = conseilsBuf.slice();
+      if (articlesBuf.length) ins.articles_append = articlesBuf.slice();
+      if (ins.conseils_append || ins.articles_append) {
+        var iblob = new Blob([JSON.stringify(ins)], { type: 'application/json' });
+        if (navigator.sendBeacon(url, iblob)) { conseilsBuf = []; articlesBuf = []; }
       }
     } catch (e) { /* silencieux */ }
   }

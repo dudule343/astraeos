@@ -70,9 +70,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "signed url failed" }, { status: 500 });
   }
 
+  // Deadline d'upload (2 h) : un cron (reconcile-stuck-recordings) bascule en
+  // 'failed' au-delà → plus de statut 'uploading' éternel si /complete n'arrive jamais.
+  const now = new Date();
   await supabase
     .from("entretiens")
-    .update({ recording_status: "uploading", recording_started_at: new Date().toISOString() })
+    .update({
+      recording_status: "uploading",
+      recording_started_at: now.toISOString(),
+      recording_upload_deadline: new Date(now.getTime() + 2 * 60 * 60 * 1000).toISOString(),
+    })
     .eq("id", ent.id);
 
   const base = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
