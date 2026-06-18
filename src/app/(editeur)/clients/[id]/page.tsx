@@ -6,6 +6,7 @@ import { KpiCard, type KpiBlock } from "../../_components/KpiCard";
 import { PageHero } from "../../_components/PageHeader";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getSessionContext } from "@/lib/auth/context";
+import { LogoUpload } from "./LogoUpload";
 
 export const dynamic = "force-dynamic";
 
@@ -29,6 +30,7 @@ type ClientDetail = {
   id: string;
   createdAt: string;
   address: string | null;
+  logoPath: string | null;
   cabinet: string | null;
   representant: string | null;
   email: string | null;
@@ -74,6 +76,7 @@ async function fetchClient(id: string): Promise<ClientDetail | null> {
           id,
           created_at,
           household_address,
+          logo_url,
           cabinets ( name ),
           personnes ( first_name, last_name, email, phone ),
           dossiers ( id, pipeline_stage, pipeline_entry_date, internal_notes )
@@ -101,6 +104,7 @@ async function fetchClient(id: string): Promise<ClientDetail | null> {
       id: c.id as string,
       createdAt: c.created_at as string,
       address: (c.household_address as string) ?? null,
+      logoPath: (c.logo_url as string) ?? null,
       cabinet: cabinet?.name ?? null,
       representant: p ? `${p.first_name ?? ""} ${p.last_name ?? ""}`.trim() : null,
       email: p?.email ?? null,
@@ -140,6 +144,18 @@ export default async function FicheClientPage({ params }: { params: Promise<{ id
   const { notes } = client;
   const name = notes.raison_sociale || client.representant || "Client";
 
+  // URL signée du logo (bucket privé) si présent.
+  let logoSignedUrl: string | null = null;
+  if (client.logoPath && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    try {
+      const supabase = createAdminClient();
+      const { data } = await supabase.storage.from("depots").createSignedUrl(client.logoPath, 3600);
+      logoSignedUrl = data?.signedUrl ?? null;
+    } catch {
+      /* logo indisponible : on affiche le placeholder */
+    }
+  }
+
   const kpis: KpiBlock[] = [
     { label: "Pack", value: notes.pack || "—", meta: CATEGORY_LABELS[notes.category ?? ""] ?? "client" },
     { label: "MRR", value: notes.revenue ? String(notes.revenue) : "—", meta: "revenu mensuel récurrent" },
@@ -164,6 +180,23 @@ export default async function FicheClientPage({ params }: { params: Promise<{ id
           title={name}
           description={[client.cabinet, notes.statut_juridique, client.address].filter(Boolean).join(" · ") || undefined}
         />
+
+        {/* Logo du client */}
+        <div className="mb-8 flex items-center gap-4">
+          {logoSignedUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={logoSignedUrl}
+              alt="Logo client"
+              className="h-14 w-14 rounded-md border border-[var(--navy-100)] bg-white object-contain"
+            />
+          ) : (
+            <div className="flex h-14 w-14 items-center justify-center rounded-md border border-dashed border-[var(--navy-100)] text-[10px] text-[var(--navy-300)]">
+              Logo
+            </div>
+          )}
+          <LogoUpload clientId={client.id} hasLogo={!!client.logoPath} />
+        </div>
 
         <section className="mb-8 grid grid-cols-2 gap-3 lg:grid-cols-4">
           {kpis.map((k) => (

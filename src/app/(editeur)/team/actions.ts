@@ -1,22 +1,30 @@
 "use server";
 
+import { randomBytes } from "crypto";
+
 import { revalidatePath } from "next/cache";
 
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getSessionContext } from "@/lib/auth/context";
+import { rateLimit, rateLimitKey } from "@/lib/rate-limit";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-// Rôles qu'un cabinet peut attribuer à un collaborateur (pas brand_owner).
-const ASSIGNABLE_ROLES = new Set(["engineer", "compliance", "editor", "cabinet_director"]);
+// Rôles autorisés à CRÉER un collaborateur (action privilégiée).
+const CREATOR_ROLES = new Set(["cabinet_director", "brand_owner"]);
+// Ce que chaque créateur peut attribuer (pas d'escalade : un directeur ne crée
+// pas un directeur/propriétaire). Le propriétaire réseau peut nommer un directeur.
+const ASSIGNABLE_BY: Record<string, Set<string>> = {
+  cabinet_director: new Set(["engineer", "compliance", "editor"]),
+  brand_owner: new Set(["engineer", "compliance", "editor", "cabinet_director"]),
+};
 
 export type AddCollaboratorResult =
   | { ok: true; email: string; tempPassword: string }
   | { ok: false; error: string };
 
-/** Génère un mot de passe temporaire lisible (≥ 6 car., politique Supabase). */
+/** Mot de passe temporaire fort (entropie crypto). */
 function tempPassword(): string {
-  const part = Math.random().toString(36).slice(2, 8);
-  return `Astra-${part}`;
+  return `Astra-${randomBytes(9).toString("base64url")}`;
 }
 
 /**
@@ -25,8 +33,16 @@ function tempPassword(): string {
  * mot de passe temporaire à transmettre au collaborateur.
  */
 export async function addCollaborator(formData: FormData): Promise<AddCollaboratorResult> {
+  // Action privilégiée : on exige une VRAIE session admin (authUserId non-null),
+  // jamais le contexte legacy (sinon création de compte sans authentification).
   const ctx = await getSessionContext();
-  if (!ctx) return { ok: false, error: "Authentification requise." };
+  if (!ctx || !ctx.authUserId || !CREATOR_ROLES.has(ctx.role)) {
+    return { ok: false, error: "Accès refusé." };
+  }
+  // Rate-limit par cabinet (création de compte = sensible).
+  if (!rateLimit(rateLimitKey("team/add", ctx.cabinetId, "server"), 10, 60_000)) {
+    return { ok: false, error: "Trop de créations, réessayez dans un instant." };
+  }
 
   const firstName = String(formData.get("first_name") ?? "").trim().slice(0, 80);
   const lastName = String(formData.get("last_name") ?? "").trim().slice(0, 80);
@@ -35,7 +51,10 @@ export async function addCollaborator(formData: FormData): Promise<AddCollaborat
 
   if (!firstName || !lastName) return { ok: false, error: "Prénom et nom requis." };
   if (!EMAIL_RE.test(email)) return { ok: false, error: "Adresse e-mail invalide." };
-  if (!ASSIGNABLE_ROLES.has(role)) return { ok: false, error: "Rôle invalide." };
+  // Anti-escalade : on ne peut attribuer qu'un rôle permis par SON rôle.
+  if (!(ASSIGNABLE_BY[ctx.role]?.has(role) ?? false)) {
+    return { ok: false, error: "Rôle non autorisé pour votre profil." };
+  }
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -59,8 +78,9 @@ export async function addCollaborator(formData: FormData): Promise<AddCollaborat
     });
     const data = (await resp.json().catch(() => ({}))) as { id?: string; msg?: string };
     if (!resp.ok || !data.id) {
-      const msg = data.msg ?? `Création impossible (HTTP ${resp.status}).`;
-      return { ok: false, error: msg.includes("already") ? "Cet e-mail a déjà un compte." : msg };
+      // Message générique (anti-énumération de comptes) ; détail loggé serveur.
+      console.error("[team/add] création auth échouée:", resp.status, data.msg);
+      return { ok: false, error: "Création impossible. Vérifiez l'adresse et réessayez." };
     }
     authUserId = data.id;
   } catch {
