@@ -80,7 +80,6 @@ const sections: NavSection[] = [
       { href: `${BASE}/admin-tarification`, label: "Tarification & commissions" },
       { href: `${BASE}/admin-conformite`, label: "Conformité & juridique" },
       { href: `${BASE}/admin-templates`, label: "Templates & communication" },
-      { href: `${BASE}/admin-documents`, label: "Référentiel documentaire" },
       { href: `${BASE}/admin-notifications`, label: "Notifications & alertes" },
       { href: `${BASE}/admin-comptes`, label: "Comptes licenciés" },
       { href: `${BASE}/admin-logs`, label: "Logs application" },

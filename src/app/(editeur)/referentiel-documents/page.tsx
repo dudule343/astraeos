@@ -1,4 +1,4 @@
-import { Topbar } from "../../_components/Topbar";
+import { Topbar } from "../_components/Topbar";
 import { CATALOG } from "@/lib/collecte-catalog";
 import { getCustomTemplateItems, type CustomTemplateItem } from "@/lib/collecte-template";
 import { getSessionContext } from "@/lib/auth/context";
@@ -6,14 +6,14 @@ import { getSessionContext } from "@/lib/auth/context";
 import { addTemplateItem, removeTemplateItem } from "./actions";
 
 export const metadata = {
-  title: "ASTRAEOS · Espace Marque · Référentiel documentaire",
+  title: "ASTRAEOS · Référentiel documentaire",
 };
 
 export const dynamic = "force-dynamic";
 
 type BaseItem = { id: string; category: string; sub?: string; label: string; type: string };
 
-export default async function AdminDocumentsPage() {
+export default async function ReferentielDocumentsPage() {
   const ctx = await getSessionContext();
   const custom = ctx ? await getCustomTemplateItems(ctx.tenantId) : [];
 
@@ -38,7 +38,7 @@ export default async function AdminDocumentsPage() {
       <Topbar current="Référentiel documentaire" />
       <div className="px-10 py-8">
         <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-[var(--gold)]">
-          Administration · Paramétrages
+          Paramétrage de l&apos;outil
         </div>
         <h1 className="mb-2 text-[28px] font-semibold leading-tight tracking-tight text-[var(--navy)]">
           Référentiel documentaire

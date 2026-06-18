@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getSessionContext } from "@/lib/auth/context";
 
-const PAGE = "/espace-marque/admin-documents";
+const PAGE = "/referentiel-documents";
 
 /** Ajoute une pièce au référentiel de collecte du tenant. */
 export async function addTemplateItem(formData: FormData): Promise<void> {
@@ -38,7 +38,6 @@ export async function removeTemplateItem(formData: FormData): Promise<void> {
   if (!id) return;
 
   const supabase = createAdminClient();
-  // Isolation : on ne supprime que dans le tenant courant.
   await supabase
     .from("collecte_template_items")
     .delete()

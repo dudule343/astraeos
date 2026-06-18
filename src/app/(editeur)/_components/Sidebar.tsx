@@ -62,6 +62,7 @@ const sections: NavSection[] = [
       { href: "/team", label: "Équipe interne" },
       { href: "/profil", label: "Mon profil" },
       { href: "/integrations", label: "Intégrations & clés API" },
+      { href: "/referentiel-documents", label: "Référentiel documentaire" },
     ],
   },
 ];
