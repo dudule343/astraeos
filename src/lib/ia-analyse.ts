@@ -170,11 +170,20 @@ export async function analyserDepot({
 }): Promise<void> {
   const supabase = createAdminClient();
 
-  // 1. Clé IA. Si pas branchée, on ne crée rien du tout : return silencieux.
+  // 0. Cabinet de la collecte : la clé BYOK doit être celle de CE cabinet, jamais
+  // une autre (sinon facturation croisée + doc client envoyé via la clé d'autrui).
+  const { data: owner } = await supabase
+    .from("collectes")
+    .select("cabinet_id")
+    .eq("id", collecteId)
+    .maybeSingle();
+  if (!owner || !owner.cabinet_id) return;
+
+  // 1. Clé IA du cabinet. Si pas branchée, on ne crée rien : return silencieux.
   const { data: settings } = await supabase
     .from("ia_settings")
     .select("api_key, model")
-    .limit(1)
+    .eq("cabinet_id", owner.cabinet_id)
     .maybeSingle();
 
   if (!settings || !settings.api_key) return;

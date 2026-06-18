@@ -50,9 +50,13 @@ export async function GET(
       .from("collectes")
       .select("id, tenant_id, client_nom, client_email, created_at, opened_at, structure")
       .eq("token", token)
+      .eq("tenant_id", ctx.tenantId)
+      .eq("cabinet_id", ctx.cabinetId)
       .maybeSingle();
 
-    if (error || !collecte || collecte.tenant_id !== ctx.tenantId) {
+    // Isolation cabinet : le token n'est pas un secret d'autorisation (il transite
+    // par email/URL/logs). On borne tenant + cabinet au niveau requête.
+    if (error || !collecte) {
       return NextResponse.json({ error: "Collecte introuvable" }, { status: 404 });
     }
 

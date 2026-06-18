@@ -34,9 +34,12 @@ export async function POST(
       .from("collectes")
       .select("id, tenant_id")
       .eq("token", token)
+      .eq("tenant_id", ctx.tenantId)
+      .eq("cabinet_id", ctx.cabinetId)
       .maybeSingle();
 
-    if (error || !collecte || collecte.tenant_id !== ctx.tenantId) {
+    // Isolation cabinet : token non secret → on borne tenant + cabinet en requête.
+    if (error || !collecte) {
       return NextResponse.json({ error: "Collecte introuvable" }, { status: 404 });
     }
 
