@@ -3,7 +3,8 @@ import { NextResponse, type NextRequest } from "next/server";
 import { deriveFacts, selectDocuments } from "@/lib/collecte-engine";
 import { loadSubmissions } from "@/lib/dci-store";
 import type { DciCanonical } from "@/lib/dci-schema";
-import type { Facts } from "@/lib/collecte-catalog/types";
+import type { CatalogEntry, Facts } from "@/lib/collecte-catalog/types";
+import { getCustomTemplateItems } from "@/lib/collecte-template";
 import { requireAuth } from "@/lib/auth";
 import { getSessionContext } from "@/lib/auth/context";
 
@@ -32,5 +33,17 @@ export async function GET(req: NextRequest) {
     : {};
   const documents = selectDocuments(facts);
 
-  return NextResponse.json({ facts, documents });
+  // Pièces ajoutées par l'admin (référentiel documentaire) : toujours incluses,
+  // elles ÉTENDENT le template de collecte du tenant.
+  const customItems = await getCustomTemplateItems(ctx.tenantId);
+  const customDocs: CatalogEntry[] = customItems.map((c) => ({
+    id: `custom-${c.id}`,
+    category: c.category,
+    sub: c.sub ?? undefined,
+    label: c.label,
+    type: c.type,
+    always: true,
+  }));
+
+  return NextResponse.json({ facts, documents: [...documents, ...customDocs] });
 }
