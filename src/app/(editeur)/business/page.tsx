@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { Topbar } from "../_components/Topbar";
+import { ExportBusinessButton } from "./ExportBusinessButton";
 import {
   fetchBusinessData,
   fmtSigned,
@@ -241,14 +242,7 @@ export default async function BusinessPage() {
             </p>
           </div>
           <div className="flex flex-shrink-0 gap-2">
-            <button
-              type="button"
-              data-stub="Export Pilotage business"
-              data-stub-mode="toast"
-              className="rounded-md border border-[var(--navy-100)] bg-white px-3 py-2 text-[11.5px] font-semibold text-[var(--navy)] hover:border-[var(--gold)]"
-            >
-              Export
-            </button>
+            <ExportBusinessButton comptes={comptes} />
             <button
               type="button"
               data-stub="Ajouter un widget au cockpit"
