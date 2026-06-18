@@ -3365,16 +3365,35 @@ setInterval(() => {
           DISABLE_VIDEO_BACKGROUND: false,
           TOOLBAR_BUTTONS: [
             'microphone', 'camera', 'desktop', 'tileview',
-            'hangup', 'fullscreen', 'settings'
+            'recording', 'hangup', 'fullscreen', 'settings'
           ],
           MOBILE_APP_PROMO: false
         }
+      });
+
+      // Enregistrement RÉEL (Jibri → fichier). L'indicateur REC ne s'allume que
+      // sur l'état réel renvoyé par Jitsi (recordingStatusChanged), jamais en dur :
+      // l'UI ne prétend plus enregistrer quand ce n'est pas le cas.
+      var astrRole = new URLSearchParams(location.search).get('role');
+      api.addEventListener('recordingStatusChanged', function (ev) {
+        var on = !!(ev && (ev.on === true || ev.on === 'true'));
+        try { document.dispatchEvent(new CustomEvent('astr-recording', { detail: { on: on, mode: ev && ev.mode } })); } catch (e) {}
       });
 
       api.addEventListener('videoConferenceJoined', function () {
         hideStatus();
         // Signale à la pompe de transcription de démarrer automatiquement.
         try { document.dispatchEvent(new CustomEvent('astr-conference-joined')); } catch (e) {}
+        // L'ingénieur (modérateur) lance l'enregistrement fichier ; jamais le client.
+        if (astrRole !== 'client') {
+          setTimeout(function () {
+            try { api.executeCommand('startRecording', { mode: 'file' }); } catch (e) {}
+          }, 4000);
+        }
+      });
+      // Arrêt propre de l'enregistrement à la fermeture de la salle.
+      api.addEventListener('readyToClose', function () {
+        try { api.executeCommand('stopRecording', 'file'); } catch (e) {}
       });
       // NB : la transcription du prospect transite par Supabase Realtime
       // (canal partagé par salle), pas par le canal de données Jitsi qui
@@ -5278,6 +5297,30 @@ setInterval(() => {
   } else {
     init();
   }
+})();
+
+/* ASTRAEOS · Indicateur d'enregistrement HONNÊTE.
+   Le voyant REC ne reflète QUE l'état réel renvoyé par Jibri/Jitsi
+   (event astr-recording). Au repos : « Transcription IA » et badge REC masqué.
+   Fini l'affichage REC codé en dur qui prétendait enregistrer dans le vide. */
+(function astraeosRecIndicator() {
+  'use strict';
+  var received = false;
+  function setRec(on) {
+    received = true;
+    var ind = document.getElementById('rec-indicator');
+    if (ind) { ind.textContent = on ? 'Enregistrement' : 'Transcription IA'; ind.style.opacity = on ? '1' : '0.65'; }
+    var label = document.getElementById('rec-status-label');
+    if (label) label.textContent = on ? 'Enregistrement en cours' : 'Transcription IA active · enregistrement non démarré';
+    var cli = document.querySelector('.client-recording');
+    if (cli) cli.style.display = on ? '' : 'none';
+  }
+  document.addEventListener('astr-recording', function (ev) {
+    setRec(!!(ev && ev.detail && ev.detail.on));
+  });
+  function init() { if (!received) setRec(false); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
 })();
 
 /* ASTRAEOS · Onglet Insights 100% dynamique.
