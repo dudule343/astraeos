@@ -38,6 +38,9 @@ function isUnauthenticatedAllowed(pathname: string, method: string): boolean {
     pathname.startsWith("/api/collecte/") ||
     // Soumission DCI par un prospect : uniquement en POST sur /api/dci/[kind].
     (method === "POST" && pathname.startsWith("/api/dci/")) ||
+    // Webhooks d'enregistrement (finalize Jibri sur le VPS) : authentifiés par
+    // secret partagé (x-recording-secret), pas par session → POST uniquement.
+    (method === "POST" && pathname.startsWith("/api/recordings/")) ||
     // Tunnel d'auth (callbacks/login Supabase + OAuth Google).
     pathname.startsWith("/api/auth/") ||
     pathname.startsWith("/auth/") ||
