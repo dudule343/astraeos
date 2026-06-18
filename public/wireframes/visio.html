@@ -4438,8 +4438,11 @@ setInterval(() => {
   var lastSentAt = 0;
   var sending = false;
   var iaDisconnectedShown = false;
-  var SEND_INTERVAL_MS = 25000;
-  var SEND_CHARS = 400;
+  // Insights temps réel : déclenche vite (8 s OU 180 caractères de nouvelle
+  // parole). ~7 appels/min max < limite 20/min de /api/visio/conseils. Avant :
+  // 25 s → les insights paraissaient lents.
+  var SEND_INTERVAL_MS = 8000;
+  var SEND_CHARS = 180;
 
   var insightsPane = document.getElementById('pane-insights');
   var legalList    = document.getElementById('legal-live-list');
@@ -4677,7 +4680,9 @@ setInterval(() => {
   // ============================================================
   var lastExtractAt = 0;
   var extracting = false;
-  var EXTRACT_INTERVAL_MS = 20000;
+  // Remplissage DCI en direct : toutes les 12 s (avant 20 s) pour que le dossier
+  // se complète plus vite pendant l'entretien.
+  var EXTRACT_INTERVAL_MS = 12000;
 
   // Champs encore vides, candidats au remplissage par l'IA. La section courante
   // (sujet probable de la conversation) est priorisée ; borné côté serveur.
