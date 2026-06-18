@@ -35,11 +35,16 @@ function sanitizeNom(raw: string): string {
   return raw.trim().slice(0, 80);
 }
 
+type SendStatus = "idle" | "sending" | "sent" | "error";
+
 export default function VisioLobby() {
   // Ce composant n'est jamais rendu côté serveur (dynamic ssr:false) :
   // l'initialiseur peut générer l'aléatoire directement.
   const [room] = useState<string>(() => makeRoomId());
   const [copied, setCopied] = useState(false);
+  const [email, setEmail] = useState("");
+  const [sendStatus, setSendStatus] = useState<SendStatus>("idle");
+  const [sendError, setSendError] = useState<string | null>(null);
 
   // ?prospect=<slug>&nom=<display name> dans l'URL du lobby → propagés vers
   // l'entretien (bouton ingénieur + lien client). ssr:false → window dispo.
@@ -70,6 +75,30 @@ export default function VisioLobby() {
     if (prospect) q.set("prospect", prospect);
     if (nom) q.set("nom", nom);
     window.location.href = `/visio/${room}?${q.toString()}`;
+  }
+
+  async function sendByEmail() {
+    const mail = email.trim();
+    if (!mail || sendStatus === "sending") return;
+    setSendStatus("sending");
+    setSendError(null);
+    try {
+      const res = await fetch("/api/visio/invite", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: mail, room, prospect, nom }),
+      });
+      const data = (await res.json().catch(() => ({}))) as { error?: string };
+      if (!res.ok) {
+        setSendStatus("error");
+        setSendError(data.error || "Envoi impossible.");
+        return;
+      }
+      setSendStatus("sent");
+    } catch {
+      setSendStatus("error");
+      setSendError("Erreur réseau.");
+    }
   }
 
   async function copyClientLink() {
@@ -172,6 +201,43 @@ export default function VisioLobby() {
               >
                 {copied ? "Copié ✓" : "Copier"}
               </button>
+            </div>
+
+            {/* Envoi direct par e-mail (Resend) */}
+            <div className="mt-3 border-t border-slate-200 pt-3">
+              <p className="mb-2 text-xs text-slate-500">Ou envoyez-le directement par e-mail :</p>
+              {sendStatus === "sent" ? (
+                <p className="rounded-lg bg-[#1F5A36]/10 px-3 py-2.5 text-xs font-semibold text-[#1F5A36]">
+                  ✓ Invitation envoyée à {email.trim()}.
+                </p>
+              ) : (
+                <>
+                  <div className="flex gap-2">
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => {
+                        setEmail(e.target.value);
+                        if (sendStatus === "error") setSendStatus("idle");
+                      }}
+                      onKeyDown={(e) => e.key === "Enter" && sendByEmail()}
+                      placeholder="email@client.fr"
+                      className="min-w-0 flex-1 rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-xs text-slate-700"
+                    />
+                    <button
+                      type="button"
+                      onClick={sendByEmail}
+                      disabled={!email.trim() || sendStatus === "sending"}
+                      className="shrink-0 rounded-lg bg-[#0A1F38] px-4 py-2.5 text-xs font-semibold text-white transition hover:brightness-125 disabled:opacity-40"
+                    >
+                      {sendStatus === "sending" ? "Envoi…" : "Envoyer"}
+                    </button>
+                  </div>
+                  {sendStatus === "error" && sendError && (
+                    <p className="mt-2 text-xs text-[#C0392B]">{sendError}</p>
+                  )}
+                </>
+              )}
             </div>
           </div>
 
