@@ -14,7 +14,6 @@ export async function addTemplateItem(formData: FormData): Promise<void> {
 
   const category = String(formData.get("category") ?? "").trim().slice(0, 120);
   const label = String(formData.get("label") ?? "").trim().slice(0, 240);
-  const subRaw = String(formData.get("sub") ?? "").trim().slice(0, 120);
   const type = formData.get("type") === "Information" ? "Information" : "Document";
   if (!category || !label) return;
 
@@ -23,7 +22,7 @@ export async function addTemplateItem(formData: FormData): Promise<void> {
     tenant_id: ctx.tenantId,
     cabinet_id: ctx.cabinetId,
     category,
-    sub: subRaw || null,
+    sub: null,
     label,
     type,
   });

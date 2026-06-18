@@ -23,7 +23,12 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "prospect query param required" }, { status: 400 });
   }
 
-  const { submissions } = await loadSubmissions(slug, ctx.tenantId);
+  // Les deux lectures sont indépendantes (DCI client vs pièces custom du tenant)
+  // → en parallèle pour ne pas sérialiser deux allers-retours sur ce chemin.
+  const [{ submissions }, customItems] = await Promise.all([
+    loadSubmissions(slug, ctx.tenantId),
+    getCustomTemplateItems(ctx.tenantId),
+  ]);
   const complet = submissions.complet;
 
   // Garde-fou : pas de DCI complet => facts vides. selectDocuments renvoie alors
@@ -35,7 +40,6 @@ export async function GET(req: NextRequest) {
 
   // Pièces ajoutées par l'admin (référentiel documentaire) : toujours incluses,
   // elles ÉTENDENT le template de collecte du tenant.
-  const customItems = await getCustomTemplateItems(ctx.tenantId);
   const customDocs: CatalogEntry[] = customItems.map((c) => ({
     id: `custom-${c.id}`,
     category: c.category,

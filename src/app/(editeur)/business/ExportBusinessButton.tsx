@@ -1,5 +1,7 @@
 "use client";
 
+import { downloadCsv, rowsToCsv } from "@/lib/csv";
+
 // Export CSV des comptes du parc (données réelles). Remplace le bouton stub.
 type Compte = {
   rank: number;
@@ -12,37 +14,13 @@ type Compte = {
 
 const HEADERS = ["Rang", "Compte", "Type", "Encours sous gestion (€)", "Clients", "Statut"];
 
-function escapeCsvCell(value: string | number | null | undefined): string {
-  if (value === null || value === undefined) return "";
-  const s = String(value);
-  if (/[",\n\r;]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
-  return s;
-}
-
-function toCsv(comptes: Compte[]): string {
-  const rows = comptes.map((c) => [
-    c.rank,
-    c.name,
-    c.type,
-    c.aum,
-    c.clients,
-    c.status ?? "",
-  ]);
-  return [HEADERS, ...rows].map((r) => r.map(escapeCsvCell).join(";")).join("\r\n");
-}
-
 export function ExportBusinessButton({ comptes }: { comptes: Compte[] }) {
   function onExport() {
-    const csv = "﻿" + toCsv(comptes); // BOM → accents corrects dans Excel
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `pilotage-business-${new Date().toISOString().slice(0, 10)}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
+    const csv = rowsToCsv(
+      HEADERS,
+      comptes.map((c) => [c.rank, c.name, c.type, c.aum, c.clients, c.status ?? ""]),
+    );
+    downloadCsv(csv, `pilotage-business-${new Date().toISOString().slice(0, 10)}.csv`);
   }
   return (
     <button
