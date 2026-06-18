@@ -14,6 +14,7 @@ import {
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getSessionContext } from "@/lib/auth/context";
 import { loadEtude, advanceEtudePhase } from "./actions";
+import { EtudeUploadForm } from "./EtudeUploadForm";
 
 export const dynamic = "force-dynamic";
 
@@ -120,6 +121,8 @@ export default async function EtudesPage({ params }: { params: Promise<{ id: str
         <div className="mb-8 h-2 w-full overflow-hidden rounded-full bg-[var(--navy-100)]">
           <div className="h-full rounded-full bg-[var(--gold)]" style={{ width: `${progress}%` }} />
         </div>
+
+        <EtudeUploadForm dossierId={id} />
 
         <div className="space-y-2.5">
           {ETUDE_PHASES.map((p) => {
