@@ -358,30 +358,23 @@ function applyMerge(current: Entretien, input: MergeInput): void {
 
 async function mergeSupabase(id: string, input: MergeInput): Promise<boolean> {
   const supabase = createAdminClient();
-  const { data: existing, error: selErr } = await supabase
-    .from("entretiens")
-    .select(SELECT_FULL)
-    .eq("id", id)
-    .maybeSingle();
-  if (selErr) throw selErr;
-  if (!existing) return false;
-
-  const current = rowToEntretien(existing as EntretienRow);
-  applyMerge(current, input);
-
-  const { error: updErr } = await supabase
-    .from("entretiens")
-    .update({
-      dci_snapshot: current.dci_snapshot,
-      transcript: current.transcript,
-      conseils: current.conseils,
-      articles: current.articles,
-      notes: current.notes,
-      updated_at: current.updated_at,
-    })
-    .eq("id", id);
-  if (updErr) throw updErr;
-  return true;
+  // Append ATOMIQUE via RPC (un seul UPDATE `jsonb ||` borné en queue) : deux
+  // PATCH concurrents (flush transcript + flush insights + dci-extract) ne
+  // s'écrasent plus. Remplace l'ancien read-modify-write sujet au lost update.
+  const { data, error } = await supabase.rpc("append_entretien", {
+    p_id: id,
+    p_transcript: input.transcript_append ?? [],
+    p_conseils: input.conseils_append ?? [],
+    p_articles: input.articles_append ?? [],
+    p_notes: input.notes_append ?? [],
+    p_dci: input.dci_snapshot ?? null,
+    p_transcript_cap: TRANSCRIPT_CAP,
+    p_conseils_cap: CONSEILS_CAP,
+    p_articles_cap: ARTICLES_CAP,
+    p_notes_cap: NOTES_CAP,
+  });
+  if (error) throw error;
+  return data === true;
 }
 
 async function mergeFile(id: string, input: MergeInput): Promise<boolean> {

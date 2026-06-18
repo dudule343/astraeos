@@ -11,7 +11,7 @@ const ANTHROPIC_URL = "https://api.anthropic.com/v1/messages";
 const ANTHROPIC_VERSION = "2023-06-01";
 
 const DCI_MAX = 4500;
-const TRANSCRIPT_MAX = 7000;
+const TRANSCRIPT_MAX = 12000;
 const CONSEILS_MAX = 2500;
 const NOTES_MAX = 2500;
 
@@ -58,8 +58,16 @@ function renderTranscript(transcript: Array<{ who?: string; text: string }>): st
   const text = transcript
     .map((l) => `${l.who ? l.who + " : " : ""}${l.text}`)
     .join("\n");
-  // On garde la fin (le plus récent / les conclusions) si trop long.
-  return text.length > TRANSCRIPT_MAX ? text.slice(text.length - TRANSCRIPT_MAX) : text;
+  if (text.length <= TRANSCRIPT_MAX) return text;
+  // Trop long : on garde le DÉBUT (situation familiale, revenus, objectifs
+  // d'ouverture) ET la FIN (conclusions/engagements), plutôt que de jeter le
+  // début. ~45 % en tête, le reste en queue, partie centrale résumée par un
+  // marqueur explicite (l'IA sait qu'un trou existe).
+  const headLen = Math.floor(TRANSCRIPT_MAX * 0.45);
+  const tailLen = TRANSCRIPT_MAX - headLen;
+  const head = text.slice(0, headLen);
+  const tail = text.slice(text.length - tailLen);
+  return `${head}\n\n[… partie centrale de l'entretien omise pour la longueur …]\n\n${tail}`;
 }
 
 function renderConseils(conseils: Record<string, unknown>[]): string {

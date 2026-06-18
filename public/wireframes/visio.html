@@ -4994,13 +4994,17 @@ setInterval(() => {
   var articlesBuf = [];
   var transcriptTimer = null;
   var insightsTimer = null;
+  // Garde-fou mémoire (non destructif en pratique) : le flush plancher 10 s
+  // draine le buffer en continu, on ne s'en approche jamais hors panne réseau
+  // prolongée. Le serveur borne de toute façon à 2000 lignes (append atomique).
+  var BUF_HARD_MAX = 8000;
 
   function flushTranscript() {
     if (!entretienId || !transcriptBuf.length) return;
     var batch = transcriptBuf.splice(0, transcriptBuf.length);
     patchEntretien({ transcript_append: batch }).then(function (ok) {
       if (!ok) {
-        // Échec : on remet le lot en tête pour le prochain flush.
+        // Échec réseau : on remet le lot en tête pour le prochain flush (pas de perte).
         transcriptBuf = batch.concat(transcriptBuf);
       }
     });
@@ -5024,7 +5028,9 @@ setInterval(() => {
     var d = ev && ev.detail;
     if (!d || !d.text) return;
     transcriptBuf.push({ t: d.t || new Date().toISOString(), text: String(d.text).slice(0, 4000) });
-    if (transcriptBuf.length > 500) transcriptBuf = transcriptBuf.slice(-500);
+    // Plafond mémoire SEULEMENT (8000) : on ne jette plus les 500 dernières en
+    // régime normal — c'était une perte silencieuse du début sur réseau dégradé.
+    if (transcriptBuf.length > BUF_HARD_MAX) transcriptBuf = transcriptBuf.slice(-BUF_HARD_MAX);
     clearTimeout(transcriptTimer);
     transcriptTimer = setTimeout(flushTranscript, 5000);
   });
@@ -5045,6 +5051,36 @@ setInterval(() => {
     if (articlesBuf.length > 200) articlesBuf = articlesBuf.slice(-200);
     clearTimeout(insightsTimer);
     insightsTimer = setTimeout(flushInsights, 5000);
+  });
+
+  // Flush PLANCHER périodique (10 s) : en parole continue, le debounce 5 s ne
+  // tire jamais (chaque ligne le réarme via clearTimeout). Ce tick draine quoi
+  // qu'il arrive → au pire 10 s de transcription en vol, plus la session entière.
+  setInterval(function () {
+    try { flushTranscript(); flushInsights(); } catch (e) { /* silencieux */ }
+  }, 10000);
+
+  // Flush de DERNIÈRE CHANCE à la fermeture / masquage de l'onglet. Un fetch est
+  // tué à l'unload ; navigator.sendBeacon survit (POST uniquement → route dédiée
+  // /transcript-flush). Couvre fermeture d'onglet, refresh, navigation sortante.
+  function beaconFlush() {
+    if (!entretienId) return;
+    if (!transcriptBuf.length && !conseilsBuf.length && !articlesBuf.length) return;
+    try {
+      var payload = {};
+      if (transcriptBuf.length) payload.transcript_append = transcriptBuf.slice();
+      if (conseilsBuf.length) payload.conseils_append = conseilsBuf.slice();
+      if (articlesBuf.length) payload.articles_append = articlesBuf.slice();
+      var blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
+      var url = '/api/entretiens/' + encodeURIComponent(entretienId) + '/transcript-flush';
+      if (navigator.sendBeacon(url, blob)) {
+        transcriptBuf = []; conseilsBuf = []; articlesBuf = [];
+      }
+    } catch (e) { /* silencieux */ }
+  }
+  window.addEventListener('pagehide', beaconFlush);
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'hidden') beaconFlush();
   });
 
   // ---- Clôture : wrap de confirmEndInterview ------------------------------
@@ -5192,7 +5228,22 @@ setInterval(() => {
       });
   };
 
-  // ---- Ouverture : créer/reprendre l'entretien ----------------------------
+  // ---- Ouverture : créer/reprendre l'entretien (avec retries) -------------
+  // L'upsert serveur est idempotent par salle → réessayer ne crée pas de doublon.
+  // Tant que l'id n'est pas obtenu, la transcription captée reste en buffer ;
+  // dès qu'il l'est, on draine (rattrapage). Échec persistant = on le DIT, au
+  // lieu de tourner en mode dégradé muet (cause n°1 des entretiens vides).
+  var openEntretienTries = 0;
+  var dciKickoff = false;
+  function scheduleOpenRetry() {
+    if (entretienId) return;
+    openEntretienTries++;
+    if (openEntretienTries > 6) {
+      try { showToast('⚠ Entretien non enregistré · vérifiez la connexion'); } catch (e) {}
+      return;
+    }
+    setTimeout(openEntretien, Math.min(1500 * openEntretienTries, 8000));
+  }
   function openEntretien() {
     fetch('/api/entretiens', {
       method: 'POST',
@@ -5200,14 +5251,18 @@ setInterval(() => {
       body: JSON.stringify({ room: room, prospect_slug: prospect || undefined, display_name: displayName || undefined })
     }).then(function (r) { return r.ok ? r.json() : null; })
       .then(function (data) {
-        if (!data || !data.id) return;
+        if (!data || !data.id) { scheduleOpenRetry(); return; }
         entretienId = data.id;
         if (data.dci_snapshot) applySnapshotAndRerender(data.dci_snapshot);
         mountNotesUI();
         renderNotes(data.notes || []);
+        // Rattrapage : draine ce qui a été capté AVANT l'obtention de l'id.
+        try { flushTranscript(); flushInsights(); } catch (e) { /* silencieux */ }
       })
-      .catch(function () { /* mode dégradé : l'entretien tourne en local */ })
+      .catch(function () { scheduleOpenRetry(); })
       .then(function () {
+        if (dciKickoff) return;
+        dciKickoff = true;
         loadDciBadge();
         loadDciComplet();
       });
