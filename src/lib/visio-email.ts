@@ -64,7 +64,7 @@ export function buildVisioInviteEmail({
             <table role="presentation" cellpadding="0" cellspacing="0" border="0">
               <tr>
                 <td style="background-color:${GOLD};border-radius:6px;">
-                  <a href="${joinUrl}" target="_blank" style="display:inline-block;padding:14px 32px;color:${NAVY};font-size:16px;font-weight:600;text-decoration:none;font-family:'Epilogue',Helvetica,Arial,sans-serif;">Rejoindre l'entretien</a>
+                  <a href="${escapeHtml(joinUrl)}" target="_blank" style="display:inline-block;padding:14px 32px;color:${NAVY};font-size:16px;font-weight:600;text-decoration:none;font-family:'Epilogue',Helvetica,Arial,sans-serif;">Rejoindre l'entretien</a>
                 </td>
               </tr>
             </table>

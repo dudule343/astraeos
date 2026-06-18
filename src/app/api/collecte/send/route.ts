@@ -61,11 +61,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Corps JSON invalide" }, { status: 400 });
   }
 
-  const { participants, items, message, mode: rawMode } = (body ?? {}) as {
+  const { participants, items, message, mode: rawMode, dossier_id: rawDossierId } = (body ?? {}) as {
     participants?: Participant[];
     items?: Item[];
     message?: string;
     mode?: string;
+    dossier_id?: string;
   };
 
   // Mode d'envoi : "email" (envoi e-mail), "link" (génère seulement le lien à
@@ -156,6 +157,24 @@ export async function POST(req: NextRequest) {
   const from = process.env.RESEND_FROM || "Astraeos <onboarding@resend.dev>";
   const supabase = createAdminClient();
 
+  // Rattachement optionnel au dossier (collecte adaptative) : on valide que le
+  // dossier appartient bien au tenant + cabinet courant avant de l'insérer.
+  // Absent → flux inchangé (collecte non rattachée).
+  let dossierId: string | null = null;
+  if (typeof rawDossierId === "string" && rawDossierId.trim()) {
+    const { data: dossier } = await supabase
+      .from("dossiers")
+      .select("id")
+      .eq("id", rawDossierId.trim())
+      .eq("tenant_id", ctx.tenantId)
+      .eq("cabinet_id", ctx.cabinetId)
+      .maybeSingle();
+    if (!dossier) {
+      return NextResponse.json({ error: "Dossier introuvable" }, { status: 404 });
+    }
+    dossierId = dossier.id;
+  }
+
   const results: Array<{
     email: string | null;
     token: string | null;
@@ -179,6 +198,7 @@ export async function POST(req: NextRequest) {
         structure,
         tenant_id: ctx.tenantId,
         cabinet_id: ctx.cabinetId,
+        dossier_id: dossierId,
       })
       .select("id")
       .single();

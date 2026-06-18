@@ -13,6 +13,8 @@ import { clientIp, rateLimit, rateLimitKey } from "@/lib/rate-limit";
  */
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// Rôles autorisés à envoyer une invitation (sink sensible : e-mail brandé Resend).
+const STAFF_ROLES = new Set(["cabinet_director", "brand_owner", "editor", "compliance", "engineer"]);
 
 function sanitizeRoom(raw: string): string {
   return raw.replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 64).toLowerCase();
@@ -21,10 +23,21 @@ function sanitizeSlug(raw: string): string {
   return raw.toLowerCase().replace(/[^a-z0-9-]/g, "").slice(0, 64);
 }
 
+/** Origine CANONIQUE serveur — jamais dérivée des en-têtes de requête (Host /
+ *  X-Forwarded-Host spoofables → lien de phishing dans l'e-mail). Env override,
+ *  sinon le domaine app connu. */
+function canonicalOrigin(): string {
+  const env = process.env.ASTRAEOS_PUBLIC_ORIGIN?.trim();
+  return (env || "https://app.astraeos.fr").replace(/\/+$/, "");
+}
+
 export async function POST(req: NextRequest) {
+  // Sink sensible (e-mail brandé) : on exige une VRAIE session staff. Le contexte
+  // legacy (authUserId null, flag auth off) est explicitement refusé — sinon
+  // relais e-mail ouvert / amplification de phishing.
   const ctx = await getSessionContext();
-  if (!ctx) {
-    return NextResponse.json({ error: "Authentification requise" }, { status: 401 });
+  if (!ctx || !ctx.authUserId || !STAFF_ROLES.has(ctx.role)) {
+    return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
   }
 
   if (!rateLimit(rateLimitKey("visio/invite", ctx.cabinetId, clientIp(req)), 20, 60_000)) {
@@ -50,10 +63,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Salle invalide" }, { status: 400 });
   }
 
-  const host = req.headers.get("x-forwarded-host") ?? req.headers.get("host") ?? req.nextUrl.host;
-  const proto = req.headers.get("x-forwarded-proto") ?? req.nextUrl.protocol.replace(":", "");
-  const origin = `${proto}://${host}`;
-  let joinUrl = `${origin}/visio/${encodeURIComponent(room)}?role=client`;
+  let joinUrl = `${canonicalOrigin()}/visio/${encodeURIComponent(room)}?role=client`;
   if (prospect) joinUrl += `&prospect=${encodeURIComponent(prospect)}`;
 
   const apiKey = process.env.RESEND_API_KEY;

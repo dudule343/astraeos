@@ -6,6 +6,12 @@ import {
   fetchCabinetUsers,
   USER_ROLE_LABELS,
 } from "../../_data/cabinet";
+import { updateCabinetContact } from "./actions";
+
+const inputClass =
+  "w-full rounded-md border border-[var(--navy-100)] bg-white px-3 py-2 text-[12.5px] text-[var(--navy)] focus:border-[var(--gold)] focus:outline-none";
+const labelClass =
+  "mb-1.5 block text-[10.5px] font-bold uppercase tracking-[0.08em] text-[var(--navy-300)]";
 
 export const dynamic = "force-dynamic";
 
@@ -55,16 +61,6 @@ export default async function ParametragesPage() {
           eyebrow="Administration"
           title="Paramétrages du cabinet"
           description="Coordonnées, agréments réglementaires, règle de répartition des commissions et gestion des accès des utilisateurs."
-          actions={
-            <button
-              type="button"
-              data-stub="Modifier le paramétrage du cabinet"
-              data-stub-body="L'édition des coordonnées, agréments et de la règle de répartition des commissions passera par un formulaire sécurisé (server action) côté tête de réseau. Cette fonctionnalité arrivera dans une prochaine itération."
-              className="rounded-md border border-[var(--navy-100)] bg-white px-3 py-2 text-[11.5px] font-semibold text-[var(--navy)] hover:border-[var(--gold)]"
-            >
-              Modifier
-            </button>
-          }
         />
 
         {profile ? (
@@ -72,13 +68,106 @@ export default async function ParametragesPage() {
             <section>
               <SectionHeader eyebrow="Identité" title="Coordonnées du cabinet" />
               <div className="rounded-md border border-[var(--navy-100)] bg-white p-5">
-                <dl className="grid grid-cols-2 gap-4">
-                  <Field label="Raison sociale" value={profile.name} />
-                  <Field label="Téléphone" value={profile.phone} />
-                  <Field label="E-mail" value={profile.email} />
-                  <Field label="Adresse" value={address} />
-                  <Field label="Client depuis" value={fmtDate(profile.contract_start_date)} />
-                </dl>
+                {/* <details> : bascule entre la fiche en lecture seule (résumé) et
+                    le formulaire éditable, sans JavaScript client. */}
+                <details className="group">
+                  <summary className="flex cursor-pointer list-none items-start justify-between">
+                    <dl className="grid flex-1 grid-cols-2 gap-4">
+                      <Field label="Raison sociale" value={profile.name} />
+                      <Field label="Téléphone" value={profile.phone} />
+                      <Field label="E-mail" value={profile.email} />
+                      <Field label="Adresse" value={address} />
+                      <Field label="Client depuis" value={fmtDate(profile.contract_start_date)} />
+                    </dl>
+                    <span className="ml-4 shrink-0 rounded-md border border-[var(--navy-100)] bg-white px-3 py-2 text-[11.5px] font-semibold text-[var(--navy)] hover:border-[var(--gold)] group-open:hidden">
+                      Modifier
+                    </span>
+                  </summary>
+
+                  <form action={updateCabinetContact} className="mt-4 border-t border-[var(--navy-100)] pt-4">
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                      <div className="md:col-span-2">
+                        <label className={labelClass} htmlFor="cab-name">
+                          Raison sociale <span className="text-[var(--gold)]">*</span>
+                        </label>
+                        <input
+                          id="cab-name"
+                          name="name"
+                          className={inputClass}
+                          defaultValue={profile.name}
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className={labelClass} htmlFor="cab-phone">
+                          Téléphone
+                        </label>
+                        <input
+                          id="cab-phone"
+                          name="phone"
+                          type="tel"
+                          className={inputClass}
+                          defaultValue={profile.phone ?? ""}
+                        />
+                      </div>
+                      <div>
+                        <label className={labelClass} htmlFor="cab-email">
+                          E-mail
+                        </label>
+                        <input
+                          id="cab-email"
+                          name="email"
+                          type="email"
+                          className={inputClass}
+                          defaultValue={profile.email ?? ""}
+                        />
+                      </div>
+                      <div className="md:col-span-2">
+                        <label className={labelClass} htmlFor="cab-street">
+                          Adresse
+                        </label>
+                        <input
+                          id="cab-street"
+                          name="address_street"
+                          className={inputClass}
+                          defaultValue={profile.address_street ?? ""}
+                          placeholder="N° et nom de voie"
+                        />
+                      </div>
+                      <div>
+                        <label className={labelClass} htmlFor="cab-zip">
+                          Code postal
+                        </label>
+                        <input
+                          id="cab-zip"
+                          name="address_zipcode"
+                          className={inputClass}
+                          defaultValue={profile.address_zipcode ?? ""}
+                        />
+                      </div>
+                      <div>
+                        <label className={labelClass} htmlFor="cab-city">
+                          Ville
+                        </label>
+                        <input
+                          id="cab-city"
+                          name="address_city"
+                          className={inputClass}
+                          defaultValue={profile.address_city ?? ""}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="mt-4 flex justify-end">
+                      <button
+                        type="submit"
+                        className="rounded-md bg-[var(--gold)] px-4 py-2 text-[12.5px] font-bold text-white transition-opacity hover:brightness-110"
+                      >
+                        Enregistrer les coordonnées
+                      </button>
+                    </div>
+                  </form>
+                </details>
               </div>
             </section>
 

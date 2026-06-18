@@ -221,6 +221,7 @@ export function CollecteBuilder({
           participants: [{ nom: participant.nom, email: participant.email }],
           items,
           mode: participant.email ? "email" : "link",
+          dossier_id: dossierId,
         }),
       });
       const data = (await res.json().catch(() => ({}))) as {

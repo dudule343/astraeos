@@ -61,6 +61,14 @@ export default async function EntretiensPage() {
           eyebrow="Opérations clients"
           title="Entretiens visio"
           description="L'historique des entretiens menés en visio : transcription, DCI complété en direct par l'IA, conseils et rapport de synthèse. Cliquez un entretien pour voir le détail."
+          actions={
+            <Link
+              href="/visio"
+              className="rounded-md bg-[var(--gold)] px-3 py-2 text-[11.5px] font-bold text-white hover:brightness-110"
+            >
+              + Nouvel entretien visio
+            </Link>
+          }
         />
 
         <section className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -128,10 +136,16 @@ export default async function EntretiensPage() {
             <div className="mb-2 text-[16px] font-semibold text-[var(--navy)]">
               Aucun entretien pour l&apos;instant
             </div>
-            <p className="mx-auto max-w-md text-[12.5px] leading-relaxed text-[var(--navy-300)]">
+            <p className="mx-auto mb-5 max-w-md text-[12.5px] leading-relaxed text-[var(--navy-300)]">
               Les entretiens visio menés apparaîtront ici, avec leur transcription, le DCI complété
               par l&apos;IA, les conseils et le rapport.
             </p>
+            <Link
+              href="/visio"
+              className="inline-block rounded-md bg-[var(--gold)] px-4 py-2 text-[12px] font-bold text-white hover:brightness-110"
+            >
+              + Nouvel entretien visio
+            </Link>
           </section>
         )}
       </div>

@@ -12,6 +12,32 @@ import {
   type EtudePhaseKey,
 } from "@/lib/etudes";
 
+const STORAGE_BUCKET = "depots";
+const MAX_ETUDE_FILE_SIZE = 30 * 1024 * 1024; // 30 Mo (PDF d'étude complet)
+
+// kind d'upload → colonne de la table `etudes` qui reçoit le chemin Storage.
+const ETUDE_KIND_COLUMNS = {
+  complete: "complete_pdf_url",
+  summary: "summary_pdf_url",
+} as const;
+
+type EtudeUploadKind = keyof typeof ETUDE_KIND_COLUMNS;
+
+export type UploadEtudeResult =
+  | { ok: true; storagePath: string }
+  | { ok: false; error: string };
+
+/** Assainit un nom de fichier pour un chemin de stockage. */
+function sanitizeFileName(name: string): string {
+  const cleaned = name
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-zA-Z0-9._-]/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+  return cleaned || "etude";
+}
+
 /** Charge l'étude la plus récente d'un dossier. Dégradation gracieuse. */
 export async function loadEtude(dossierId: string): Promise<Etude | null> {
   if (!process.env.SUPABASE_SERVICE_ROLE_KEY) return null;
@@ -138,5 +164,106 @@ export async function advanceEtudePhase(dossierId: string) {
     revalidatePath(`/dossiers/${dossierId}`);
   } catch {
     /* dégradation gracieuse : ne jamais throw vers l'UI */
+  }
+}
+
+/**
+ * PRODUCTEUR — dépose un PDF d'étude (complète ou synthèse) dans le bucket privé
+ * `depots` et écrit le chemin Storage dans la colonne correspondante de l'étude
+ * la plus récente du dossier (complete_pdf_url / summary_pdf_url).
+ *
+ * Scope strict tenant/cabinet : le dossier ET l'étude doivent appartenir au
+ * cabinet courant (on n'adopte jamais le tenant d'une ligne, on borne par ctx.*).
+ * C'est ce qui rend les liens du portail client réels et signés à la lecture.
+ *
+ * FormData attendu : dossierId, kind ∈ {complete|summary}, file (PDF).
+ */
+export async function uploadEtudeDocument(formData: FormData): Promise<UploadEtudeResult> {
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    return { ok: false, error: "Stockage indisponible." };
+  }
+  try {
+    const ctx = await getSessionContext();
+    if (!ctx) return { ok: false, error: "Authentification requise." };
+
+    const dossierId = String(formData.get("dossierId") ?? "").trim();
+    if (!dossierId) return { ok: false, error: "Dossier manquant." };
+
+    const rawKind = String(formData.get("kind") ?? "");
+    if (rawKind !== "complete" && rawKind !== "summary") {
+      return { ok: false, error: "Type de livrable invalide." };
+    }
+    const kind = rawKind as EtudeUploadKind;
+    const column = ETUDE_KIND_COLUMNS[kind];
+
+    const fileEntry = formData.get("file");
+    if (!(fileEntry instanceof File) || fileEntry.size === 0) {
+      return { ok: false, error: "Aucun fichier fourni." };
+    }
+    const file = fileEntry;
+    if (file.size > MAX_ETUDE_FILE_SIZE) {
+      return { ok: false, error: "Fichier trop volumineux (30 Mo maximum)." };
+    }
+
+    const safeName = sanitizeFileName(file.name);
+    const ext = safeName.includes(".") ? safeName.split(".").pop()!.toLowerCase() : "";
+    const declaredType = (file.type || "").toLowerCase();
+    if (declaredType !== "application/pdf" && ext !== "pdf") {
+      return { ok: false, error: "Le livrable doit être un PDF." };
+    }
+
+    const supabase = createAdminClient();
+
+    // Scope : le dossier doit appartenir au tenant/cabinet courant.
+    const { data: dossier } = await supabase
+      .from("dossiers")
+      .select("id")
+      .eq("id", dossierId)
+      .eq("tenant_id", ctx.tenantId)
+      .eq("cabinet_id", ctx.cabinetId)
+      .maybeSingle();
+    if (!dossier) return { ok: false, error: "Dossier introuvable." };
+
+    // L'étude la plus récente du dossier (celle qu'on enrichit du livrable).
+    // Le scope cabinet est garanti par le contrôle de propriété du dossier
+    // ci-dessus : etudes n'a pas de tenant_id/cabinet_id, on borne par dossier_id.
+    const { data: etude } = await supabase
+      .from("etudes")
+      .select("id")
+      .eq("dossier_id", dossierId)
+      .order("version", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (!etude?.id) return { ok: false, error: "Aucune étude à compléter." };
+
+    const storagePath = `etudes/${dossierId}/${etude.id}/${Date.now()}-${safeName}`;
+    const bytes = new Uint8Array(await file.arrayBuffer());
+
+    const { error: uploadErr } = await supabase.storage
+      .from(STORAGE_BUCKET)
+      .upload(storagePath, bytes, { contentType: "application/pdf", upsert: false });
+    if (uploadErr) {
+      return { ok: false, error: `Échec de l'upload : ${uploadErr.message}` };
+    }
+
+    const { error: updateErr } = await supabase
+      .from("etudes")
+      .update({ [column]: storagePath, updated_at: new Date().toISOString() })
+      .eq("id", etude.id)
+      .eq("dossier_id", dossierId);
+
+    if (updateErr) {
+      // Best-effort cleanup du blob orphelin si l'écriture métier a échoué.
+      await supabase.storage.from(STORAGE_BUCKET).remove([storagePath]).catch(() => {});
+      return { ok: false, error: `Enregistrement impossible : ${updateErr.message}` };
+    }
+
+    revalidatePath(`/dossiers/${dossierId}/etudes`);
+    revalidatePath(`/dossiers/${dossierId}`);
+
+    return { ok: true, storagePath };
+  } catch (err) {
+    console.error("[etudes/uploadEtudeDocument] erreur:", err);
+    return { ok: false, error: "Une erreur est survenue lors du dépôt." };
   }
 }

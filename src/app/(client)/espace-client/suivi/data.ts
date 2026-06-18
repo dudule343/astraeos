@@ -90,7 +90,20 @@ export type ClientEtude = {
   completePdfUrl: string | null;
   summaryPdfUrl: string | null;
   interactiveWebUrl: string | null;
+  /**
+   * Liens de téléchargement vers la route signée du portail. Non null UNIQUEMENT
+   * quand la colonne correspondante est renseignée — c'est ce qui pilote
+   * l'affichage du bouton côté page (lien mort impossible).
+   */
+  completeHref: string | null;
+  summaryHref: string | null;
+  interactiveHref: string | null;
 };
+
+/** Construit l'URL de la route de téléchargement signée pour un kind donné. */
+function etudeHref(etudeId: string, kind: "complete" | "summary" | "interactive"): string {
+  return `/espace-client/suivi/etude/${etudeId}/${kind}`;
+}
 
 /**
  * Étude livrée du dossier du client (la plus récente). On n'expose le rapport
@@ -121,15 +134,25 @@ export async function fetchClientEtude(): Promise<ClientEtude | null> {
 
     if (!delivered) return null;
 
+    const id = data.id as string;
+    const completePdfUrl = (data.complete_pdf_url as string) ?? null;
+    const summaryPdfUrl = (data.summary_pdf_url as string) ?? null;
+    const interactiveWebUrl = (data.interactive_web_url as string) ?? null;
+
     return {
-      id: data.id as string,
+      id,
       version: Number(data.version ?? 1),
       status,
       delivered,
       deliveredAt,
-      completePdfUrl: (data.complete_pdf_url as string) ?? null,
-      summaryPdfUrl: (data.summary_pdf_url as string) ?? null,
-      interactiveWebUrl: (data.interactive_web_url as string) ?? null,
+      completePdfUrl,
+      summaryPdfUrl,
+      interactiveWebUrl,
+      // On n'expose le lien QUE si la colonne est renseignée → le bouton n'apparaît
+      // jamais sans document derrière (fin des liens morts).
+      completeHref: completePdfUrl ? etudeHref(id, "complete") : null,
+      summaryHref: summaryPdfUrl ? etudeHref(id, "summary") : null,
+      interactiveHref: interactiveWebUrl ? etudeHref(id, "interactive") : null,
     };
   } catch {
     return null;

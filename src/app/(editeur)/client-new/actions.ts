@@ -18,6 +18,8 @@ export async function createClientAction(formData: FormData) {
   const sousDomaine = String(formData.get("sous_domaine") ?? "").trim();
   const modeFacturation = String(formData.get("mode_facturation") ?? "").trim();
   const dateActivation = String(formData.get("date_activation") ?? "").trim();
+  // Type de structure choisi à l'étape 1 (marque / cabinet_direct / autre_pro).
+  const category = String(formData.get("category") ?? "").trim() || "cabinet_direct";
   const packs = formData
     .getAll("packs")
     .map((p) => String(p).trim())
@@ -62,6 +64,7 @@ export async function createClientAction(formData: FormData) {
     sous_domaine: sousDomaine,
     mode_facturation: modeFacturation,
     date_activation: dateActivation,
+    category,
     packs,
     pack: packs[0] ?? "",
   });
@@ -113,6 +116,7 @@ export async function createClientFromModalAction(
     const sousDomaine = String(formData.get("sous_domaine") ?? "").trim();
     const modeFacturation = String(formData.get("mode_facturation") ?? "").trim();
     const dateActivation = String(formData.get("date_activation") ?? "").trim();
+    const category = String(formData.get("category") ?? "").trim() || "cabinet_direct";
 
     if (!raisonSociale || !siren || !adresseSiege || !representantLegal || !emailPrincipal) {
       return {
@@ -154,6 +158,7 @@ export async function createClientFromModalAction(
       sous_domaine: sousDomaine,
       mode_facturation: modeFacturation,
       date_activation: dateActivation,
+      category,
     });
 
     const [personRes, dossierRes] = await Promise.all([

@@ -256,19 +256,19 @@ export default async function SuiviPage() {
 
             <div className="grid grid-cols-1 gap-3 p-6 sm:grid-cols-3">
               <ReportLink
-                href={etude.completePdfUrl}
+                href={etude.completeHref}
                 icon="📘"
                 title="Étude complète"
                 subtitle="Document détaillé (PDF)"
               />
               <ReportLink
-                href={etude.summaryPdfUrl}
+                href={etude.summaryHref}
                 icon="📄"
                 title="Synthèse"
                 subtitle="Résumé de restitution (PDF)"
               />
               <ReportLink
-                href={etude.interactiveWebUrl}
+                href={etude.interactiveHref}
                 icon="🌐"
                 title="Version interactive"
                 subtitle="Consulter en ligne"

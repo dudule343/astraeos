@@ -129,6 +129,8 @@ const inputClass =
 export default function ClientNewPage() {
   const [openStep, setOpenStep] = useState<number>(2);
   const [hasDraft, setHasDraft] = useState(false);
+  // Catégorie remontée au parent → le récap (Step6) reflète le vrai choix.
+  const [category, setCategory] = useState<string>("cabinet_direct");
   const formRef = useRef<HTMLFormElement>(null);
 
   const toggle = (n: number) => setOpenStep((cur) => (cur === n ? 0 : n));
@@ -271,7 +273,9 @@ export default function ClientNewPage() {
                     restent dans le formulaire même si la step n'est pas ouverte.
                     On masque les étapes fermées avec `hidden`. */}
                 <div className={isOpen ? "border-t border-[var(--navy-100)] p-5" : "hidden"}>
-                  {step.num === 1 && <Step1 onNext={() => goNext(1)} />}
+                  {step.num === 1 && (
+                    <Step1 onNext={() => goNext(1)} category={category} setCategory={setCategory} />
+                  )}
                   {step.num === 2 && (
                     <Step2 onPrev={() => goPrev(2)} onNext={() => goNext(2)} />
                   )}
@@ -284,7 +288,7 @@ export default function ClientNewPage() {
                   {step.num === 5 && (
                     <Step5 onPrev={() => goPrev(5)} onNext={() => goNext(5)} />
                   )}
-                  {step.num === 6 && <Step6 onPrev={() => goPrev(6)} />}
+                  {step.num === 6 && <Step6 onPrev={() => goPrev(6)} category={category} />}
                 </div>
               </div>
             );
@@ -295,41 +299,64 @@ export default function ClientNewPage() {
   );
 }
 
-function Step1({ onNext }: { onNext: () => void }) {
-  const types = [
-    { icon: "🏷️", label: "Marque", desc: "Franchise · licence · réseau", selected: false },
-    { icon: "🏢", label: "Cabinet direct ✓", desc: "Indépendant ou mandataire", selected: true },
-    { icon: "👥", label: "Autre professionnel", desc: "Notaire · avocat · EC", selected: false },
-  ];
+const structureTypes: {
+  value: string;
+  icon: string;
+  label: string;
+  desc: string;
+}[] = [
+  { value: "marque", icon: "🏷️", label: "Marque", desc: "Franchise · licence · réseau" },
+  { value: "cabinet_direct", icon: "🏢", label: "Cabinet direct", desc: "Indépendant ou mandataire" },
+  { value: "autre_pro", icon: "👥", label: "Autre professionnel", desc: "Notaire · avocat · EC" },
+];
+
+function Step1({
+  onNext,
+  category,
+  setCategory,
+}: {
+  onNext: () => void;
+  category: string;
+  setCategory: (v: string) => void;
+}) {
   return (
     <>
+      {/* La catégorie sélectionnée est transmise à l'action via cet input caché. */}
+      <input type="hidden" name="category" value={category} />
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        {types.map((t) => (
-          <div
-            key={t.label}
-            className={`rounded-lg border-[1.5px] p-4 ${
-              t.selected
-                ? "border-[var(--gold)] bg-[var(--ivory)]"
-                : "border-[var(--navy-100)] opacity-50"
-            }`}
-          >
-            <div
-              className={`mb-2.5 flex h-10 w-10 items-center justify-center rounded-md text-xl ${
-                t.selected
-                  ? "bg-[var(--gold)] text-white"
-                  : "bg-[var(--navy-100)] text-[var(--navy-300)]"
+        {structureTypes.map((t) => {
+          const selected = category === t.value;
+          return (
+            <button
+              type="button"
+              key={t.value}
+              onClick={() => setCategory(t.value)}
+              aria-pressed={selected}
+              className={`rounded-lg border-[1.5px] p-4 text-left transition-all ${
+                selected
+                  ? "border-[var(--gold)] bg-[var(--ivory)]"
+                  : "border-[var(--navy-100)] opacity-50 hover:opacity-100 hover:border-[var(--gold-300)]"
               }`}
             >
-              {t.icon}
-            </div>
-            <div
-              className={`text-[13px] font-bold ${t.selected ? "text-[var(--gold)]" : "text-[var(--navy)]"}`}
-            >
-              {t.label}
-            </div>
-            <div className="mt-1 text-[11.5px] text-[var(--navy-300)]">{t.desc}</div>
-          </div>
-        ))}
+              <div
+                className={`mb-2.5 flex h-10 w-10 items-center justify-center rounded-md text-xl ${
+                  selected
+                    ? "bg-[var(--gold)] text-white"
+                    : "bg-[var(--navy-100)] text-[var(--navy-300)]"
+                }`}
+              >
+                {t.icon}
+              </div>
+              <div
+                className={`flex items-center gap-1 text-[13px] font-bold ${selected ? "text-[var(--gold)]" : "text-[var(--navy)]"}`}
+              >
+                {t.label}
+                {selected && <span>✓</span>}
+              </div>
+              <div className="mt-1 text-[11.5px] text-[var(--navy-300)]">{t.desc}</div>
+            </button>
+          );
+        })}
       </div>
       <div className="mt-5 flex justify-end">
         <button
@@ -668,7 +695,9 @@ const documents = [
   "Notice RGPD",
 ];
 
-function Step6({ onPrev }: { onPrev: () => void }) {
+function Step6({ onPrev, category }: { onPrev: () => void; category: string }) {
+  const categoryLabel =
+    structureTypes.find((t) => t.value === category)?.label ?? "Cabinet direct";
   return (
     <>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -692,7 +721,7 @@ function Step6({ onPrev }: { onPrev: () => void }) {
                 <span
                   className={`font-semibold ${s.highlight ? "text-[var(--gold)]" : "text-[var(--navy)]"}`}
                 >
-                  {s.value}
+                  {s.label === "Type" ? categoryLabel : s.value}
                 </span>
               </div>
             ))}

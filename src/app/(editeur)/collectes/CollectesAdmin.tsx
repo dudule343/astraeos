@@ -18,7 +18,13 @@ type ListItem = {
   last_client_message_at: string | null;
 };
 
-type StructItem = { label: string; type?: "Document" | "Question"; theme?: string; sub?: string };
+type StructItem = {
+  label: string;
+  type?: "Document" | "Question";
+  theme?: string;
+  sub?: string;
+  removed?: boolean;
+};
 type Depot = {
   item_index: number;
   label: string;
@@ -92,6 +98,9 @@ export function CollectesAdmin() {
   const [detailLoading, setDetailLoading] = useState(false);
   const [reply, setReply] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
+  const [showAddItem, setShowAddItem] = useState(false);
+  const [newItemLabel, setNewItemLabel] = useState("");
+  const [addItemErr, setAddItemErr] = useState<string | null>(null);
 
   const loadList = useCallback(async () => {
     try {
@@ -127,7 +136,51 @@ export function CollectesAdmin() {
   useEffect(() => {
     if (activeToken) loadDetail(activeToken);
     else setDetail(null);
+    // Réinitialise le formulaire d'ajout de pièce au changement de collecte.
+    setShowAddItem(false);
+    setNewItemLabel("");
+    setAddItemErr(null);
   }, [activeToken, loadDetail]);
+
+  const addItem = async () => {
+    if (!activeToken || !newItemLabel.trim()) return;
+    setBusy("add-item");
+    setAddItemErr(null);
+    try {
+      const res = await fetch(`/api/collecte-admin/${encodeURIComponent(activeToken)}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "add_item", item: { label: newItemLabel.trim() } }),
+      });
+      if (res.ok) {
+        setNewItemLabel("");
+        setShowAddItem(false);
+        loadDetail(activeToken);
+      } else {
+        const data = (await res.json().catch(() => ({}))) as { error?: string };
+        setAddItemErr(data.error ?? `Erreur HTTP ${res.status}`);
+      }
+    } catch {
+      setAddItemErr("Erreur réseau.");
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const removeItem = async (itemIndex: number) => {
+    if (!activeToken) return;
+    setBusy(`rm-${itemIndex}`);
+    try {
+      const res = await fetch(`/api/collecte-admin/${encodeURIComponent(activeToken)}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "flag_removed", item_index: itemIndex }),
+      });
+      if (res.ok) loadDetail(activeToken);
+    } finally {
+      setBusy(null);
+    }
+  };
 
   const reanalyse = async (itemIndex: number) => {
     if (!activeToken) return;
@@ -275,12 +328,25 @@ export function CollectesAdmin() {
                       border: "1px solid var(--navy-100)",
                       borderRadius: 9,
                       padding: "12px 14px",
+                      opacity: item.removed ? 0.5 : 1,
                     }}
                   >
                     <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
                       <div style={{ minWidth: 0 }}>
-                        <div style={{ fontSize: 13, fontWeight: 600, color: "var(--navy)" }}>
+                        <div
+                          style={{
+                            fontSize: 13,
+                            fontWeight: 600,
+                            color: "var(--navy)",
+                            textDecoration: item.removed ? "line-through" : "none",
+                          }}
+                        >
                           {item.label}
+                          {item.removed && (
+                            <span style={{ marginLeft: 6, fontSize: 10.5, fontWeight: 700, color: "var(--navy-300)" }}>
+                              (retirée)
+                            </span>
+                          )}
                         </div>
                         {(item.theme || item.sub) && (
                           <div style={{ fontSize: 11, color: "var(--navy-300)", marginTop: 2 }}>
@@ -288,20 +354,41 @@ export function CollectesAdmin() {
                           </div>
                         )}
                       </div>
-                      <span
-                        style={{
-                          flexShrink: 0,
-                          fontSize: 10.5,
-                          fontWeight: 700,
-                          padding: "3px 9px",
-                          borderRadius: 999,
-                          background: badge.bg,
-                          color: badge.fg,
-                          height: "fit-content",
-                        }}
-                      >
-                        {badge.label}
-                      </span>
+                      <div style={{ flexShrink: 0, display: "flex", alignItems: "center", gap: 8 }}>
+                        <span
+                          style={{
+                            fontSize: 10.5,
+                            fontWeight: 700,
+                            padding: "3px 9px",
+                            borderRadius: 999,
+                            background: badge.bg,
+                            color: badge.fg,
+                            height: "fit-content",
+                          }}
+                        >
+                          {badge.label}
+                        </span>
+                        {!item.removed && (
+                          <button
+                            onClick={() => removeItem(idx)}
+                            disabled={busy === `rm-${idx}`}
+                            title="Retirer cette pièce de la demande"
+                            style={{
+                              fontSize: 10.5,
+                              fontWeight: 600,
+                              color: "var(--navy-300)",
+                              background: "transparent",
+                              border: "1px solid var(--navy-100)",
+                              borderRadius: 6,
+                              padding: "3px 8px",
+                              cursor: "pointer",
+                              fontFamily: "inherit",
+                            }}
+                          >
+                            {busy === `rm-${idx}` ? "…" : "Retirer"}
+                          </button>
+                        )}
+                      </div>
                     </div>
 
                     {dep ? (
@@ -361,6 +448,103 @@ export function CollectesAdmin() {
                   </div>
                 );
               })}
+            </div>
+
+            {/* Collecte adaptative : demander une pièce complémentaire après l'envoi */}
+            <div style={{ marginBottom: 20 }}>
+              {!showAddItem ? (
+                <button
+                  onClick={() => {
+                    setShowAddItem(true);
+                    setAddItemErr(null);
+                  }}
+                  style={{
+                    fontSize: 12.5,
+                    fontWeight: 600,
+                    color: "var(--gold-deep)",
+                    background: "transparent",
+                    border: "1px dashed var(--gold-200)",
+                    borderRadius: 8,
+                    padding: "9px 14px",
+                    cursor: "pointer",
+                    fontFamily: "inherit",
+                  }}
+                >
+                  + Demander une pièce complémentaire
+                </button>
+              ) : (
+                <div
+                  style={{
+                    border: "1px solid var(--gold-200)",
+                    borderRadius: 9,
+                    padding: 14,
+                    background: "var(--gold-100)",
+                  }}
+                >
+                  <div style={{ fontSize: 12, fontWeight: 700, color: "var(--navy)", marginBottom: 8 }}>
+                    Nouvelle pièce à demander
+                  </div>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <input
+                      value={newItemLabel}
+                      onChange={(e) => setNewItemLabel(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && addItem()}
+                      placeholder="Libellé de la pièce (ex. Dernier avis d'imposition)"
+                      autoFocus
+                      style={{
+                        flex: 1,
+                        padding: "10px 12px",
+                        fontSize: 13,
+                        fontFamily: "inherit",
+                        border: "1px solid var(--navy-100)",
+                        borderRadius: 8,
+                        outline: "none",
+                      }}
+                    />
+                    <button
+                      onClick={addItem}
+                      disabled={busy === "add-item" || !newItemLabel.trim()}
+                      style={{
+                        padding: "10px 18px",
+                        fontSize: 13,
+                        fontWeight: 700,
+                        fontFamily: "inherit",
+                        color: "#fff",
+                        background: "var(--gold)",
+                        border: "none",
+                        borderRadius: 8,
+                        cursor: newItemLabel.trim() ? "pointer" : "default",
+                        opacity: newItemLabel.trim() && busy !== "add-item" ? 1 : 0.6,
+                      }}
+                    >
+                      {busy === "add-item" ? "…" : "Ajouter"}
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowAddItem(false);
+                        setNewItemLabel("");
+                        setAddItemErr(null);
+                      }}
+                      style={{
+                        padding: "10px 14px",
+                        fontSize: 13,
+                        fontWeight: 600,
+                        fontFamily: "inherit",
+                        color: "var(--navy-300)",
+                        background: "transparent",
+                        border: "1px solid var(--navy-100)",
+                        borderRadius: 8,
+                        cursor: "pointer",
+                      }}
+                    >
+                      Annuler
+                    </button>
+                  </div>
+                  {addItemErr && (
+                    <div style={{ marginTop: 8, fontSize: 12, color: "#C0392B" }}>{addItemErr}</div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Fil de messages */}
