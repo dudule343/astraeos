@@ -3352,7 +3352,9 @@ setInterval(() => {
           prejoinConfig: { enabled: false },
           disableDeepLinking: true,
           startWithAudioMuted: false,
-          startWithVideoMuted: false,
+          // Caméra coupée au démarrage : entretien mic-first (moins de friction
+          // de permissions), l'ingénieur rallume sa caméra d'un clic si besoin.
+          startWithVideoMuted: true,
           enableWelcomePage: false,
           disableProfile: true,
           // Jitsi récent pilote le watermark in-call via config.defaultLogoUrl

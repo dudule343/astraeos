@@ -2,6 +2,11 @@ import { redirect } from "next/navigation";
 
 import { getSessionContext } from "./context";
 
+/** Auth réellement appliquée seulement si le flag vaut "1" (sinon app ouverte). */
+function authEnforced(): boolean {
+  return process.env.ASTRAEOS_AUTH_ENFORCE === "1";
+}
+
 /**
  * Empêche un utilisateur de rôle `client` d'accéder aux espaces STAFF
  * (éditeur / dirigeant / marque) : il est renvoyé vers son portail client.
@@ -24,6 +29,8 @@ export async function blockClients(): Promise<void> {
  * À appeler en tête des layouts dont l'accès dépend du rôle exact.
  */
 export async function requireRole(allowed: string[]): Promise<void> {
+  // App ouverte tant que l'auth n'est pas appliquée : aucun gating de rôle.
+  if (!authEnforced()) return;
   const ctx = await getSessionContext();
   if (!ctx || !allowed.includes(ctx.role)) {
     redirect(ctx?.role === "client" ? "/espace-client" : "/login");
