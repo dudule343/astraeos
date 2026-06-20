@@ -89,7 +89,7 @@ export const ROWS: ConformiteRow[] = [
     ],
     payment: { tone: "attente", label: "En attente", meta: "3 900 € TTC" },
     status: { tone: "waiting", label: "Génération en cours" },
-    ficheReady: false,
+    ficheReady: true,
   },
   {
     id: "dupont-topin",
@@ -106,7 +106,7 @@ export const ROWS: ConformiteRow[] = [
     ],
     payment: { tone: "recu", label: "Reçu", meta: "3 900 € · 28/04/2026 · Qonto" },
     status: { tone: "paid", label: "Paiement reçu · prêt étape 03" },
-    ficheReady: false,
+    ficheReady: true,
   },
   {
     id: "moreau",
@@ -123,7 +123,7 @@ export const ROWS: ConformiteRow[] = [
     ],
     payment: { tone: "recu", label: "Reçu", meta: "3 900 € · 02/05/2026 · Qonto" },
     status: { tone: "paid", label: "Paiement reçu · prêt étape 03" },
-    ficheReady: false,
+    ficheReady: true,
   },
   {
     id: "lefebvre-sas",
@@ -141,7 +141,7 @@ export const ROWS: ConformiteRow[] = [
     ],
     payment: { tone: "recu", label: "Reçu", meta: "7 800 € · 15/05/2026 · Virement" },
     status: { tone: "paid", label: "Paiement reçu · prêt étape 03" },
-    ficheReady: false,
+    ficheReady: true,
   },
   {
     id: "leroy",

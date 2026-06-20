@@ -203,3 +203,192 @@
   background: var(--light-blue);
   color: var(--navy);
 }
+
+/* MODALES « Nouveau partenaire » / « Voir » : non présentes dans la maquette
+   (qui n'a aucun handler), ajoutées pour brancher les commandes sans bouton
+   mort. Style aligné sur l'identité de l'espace ingénieur (navy / gold /
+   ivory), n'apparaît qu'à l'ouverture donc n'altère pas le rendu statique. */
+.maquette-ing .pp-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 6vh 16px;
+  background: rgba(13, 27, 42, 0.55);
+  backdrop-filter: blur(2px);
+  overflow-y: auto;
+}
+.maquette-ing .pp-modal {
+  position: relative;
+  width: 100%;
+  max-width: 560px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 24px 60px rgba(13, 27, 42, 0.3);
+  overflow: hidden;
+}
+.maquette-ing .pp-modal-header {
+  position: relative;
+  padding: 24px 28px 18px;
+  border-bottom: 1px solid var(--navy-100);
+  background: var(--ivory);
+}
+.maquette-ing .pp-modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--navy-100);
+  background: white;
+  border-radius: 6px;
+  color: var(--navy-300);
+  cursor: pointer;
+}
+.maquette-ing .pp-modal-close:hover {
+  color: var(--navy);
+  border-color: var(--navy-300);
+}
+.maquette-ing .pp-modal-close svg {
+  width: 14px;
+  height: 14px;
+}
+.maquette-ing .pp-modal-eyebrow {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 6px;
+}
+.maquette-ing .pp-modal-title {
+  font-family: var(--serif);
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--navy);
+  margin: 0 0 6px;
+}
+.maquette-ing .pp-modal-title strong {
+  color: var(--gold-deep);
+}
+.maquette-ing .pp-modal-sub {
+  font-size: 12px;
+  color: var(--navy-300);
+  line-height: 1.55;
+  margin: 0;
+}
+.maquette-ing .pp-modal-body {
+  padding: 22px 28px;
+}
+.maquette-ing .pp-modal-footer {
+  padding: 16px 28px;
+  border-top: 1px solid var(--navy-100);
+  background: var(--ivory);
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+.maquette-ing .pp-btn {
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 9px 18px;
+  border-radius: 6px;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+.maquette-ing .pp-btn-ghost {
+  background: white;
+  border-color: var(--navy-100);
+  color: var(--navy);
+}
+.maquette-ing .pp-btn-ghost:hover {
+  border-color: var(--navy-300);
+}
+.maquette-ing .pp-btn-primary {
+  background: var(--gold);
+  color: var(--navy);
+}
+.maquette-ing .pp-btn-primary:hover {
+  background: var(--gold-deep);
+  color: white;
+}
+
+/* Formulaire « Nouveau partenaire » */
+.maquette-ing .pp-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.maquette-ing .pp-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.maquette-ing .pp-field-full {
+  grid-column: 1 / -1;
+}
+.maquette-ing .pp-field-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--navy);
+}
+.maquette-ing .pp-input {
+  border: 1px solid var(--navy-100);
+  background: white;
+  padding: 8px 10px;
+  border-radius: 5px;
+  font-size: 12.5px;
+  color: var(--navy);
+  font-family: inherit;
+}
+.maquette-ing .pp-input:focus {
+  outline: none;
+  border-color: var(--gold);
+}
+
+/* Fiche détail « Voir » */
+.maquette-ing .pp-detail-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.maquette-ing .pp-detail-row {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 12px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--navy-100);
+}
+.maquette-ing .pp-detail-row:last-child {
+  border-bottom: none;
+}
+.maquette-ing .pp-detail-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--navy-300);
+}
+.maquette-ing .pp-detail-value {
+  font-size: 12.5px;
+  color: var(--navy);
+}
+.maquette-ing .pp-detail-section-label {
+  margin: 18px 0 8px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.maquette-ing .pp-detail-list {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 12.5px;
+  color: var(--navy);
+  line-height: 1.7;
+}

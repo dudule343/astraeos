@@ -3,8 +3,6 @@ import type { ReactNode } from "react";
 
 import "../../_styles/assets.css";
 
-import { PageScaffold } from "../../_components/PageScaffold";
-import { GhostButton, GoldButton } from "@/app/_components/shared/PageHeader";
 import {
   fetchAssetsOverview,
   type AxisCard as AxisCardData,
@@ -41,33 +39,38 @@ const SYNTHESE_ICONS: ReactNode[] = [
   </svg>,
 ];
 
-/** Icônes d'axe (14px) référencées par id dans `_data/assets.ts`. */
+/**
+ * Icônes d'axe (14px) portées à l'identique des <symbol> des <defs> de la
+ * maquette (i-finance, i-shield, i-business, i-doc). Les tracés et la graisse
+ * de trait (stroke-width) sont repris exactement.
+ */
 const AXIS_ICONS: Record<AxisCardData["icon"], ReactNode> = {
+  // #i-finance · portefeuille/carte avec point
   finance: (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-      <line x1="4" y1="19" x2="20" y2="19" />
-      <rect x="5" y="11" width="3" height="6" />
-      <rect x="10.5" y="7" width="3" height="10" />
-      <rect x="16" y="4" width="3" height="13" />
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 7v12a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-9H5a2 2 0 1 1 0-4h12" />
+      <circle cx="17" cy="14" r="1.4" fill="currentColor" />
     </svg>
   ),
+  // #i-shield · bouclier avec coche
   shield: (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 3 L 20 6 V 11 C 20 16 16.5 19.5 12 21 C 7.5 19.5 4 16 4 11 V 6 Z" />
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+      <polyline points="9 12 11 14 15 10" />
     </svg>
   ),
+  // #i-business · courbe ascendante (trending-up)
   business: (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-      <path d="M4 21 V 9 L 12 4 L 20 9 V 21 Z" />
-      <rect x="9" y="13" width="6" height="8" />
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 17l6-6 4 4 8-8" />
+      <path d="M14 7h7v7" />
     </svg>
   ),
+  // #i-doc · document à coin replié
   doc: (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-      <path d="M7 3 L 7 21 L 17 21 L 17 7 L 13 3 Z" />
-      <line x1="10" y1="11" x2="14" y2="11" />
-      <line x1="10" y1="15" x2="14" y2="15" />
-      <polyline points="13 3 13 7 17 7" />
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" />
+      <path d="M14 3v6h6" />
     </svg>
   ),
 };
@@ -147,27 +150,41 @@ export default async function AssetsPage() {
   const data = await fetchAssetsOverview();
 
   return (
-    <PageScaffold
-      eyebrow="Assets du portefeuille · vue d'ensemble personnelle"
-      title="Assets du portefeuille"
-      description="Vue consolidée des assets placés via votre portefeuille personnel · patrimoine sous gestion, contrats actifs, clients servis. Cliquez sur un axe pour ouvrir le détail."
-      actions={
-        <>
-          <GhostButton
-            dataStub="Export des assets"
-            dataStubBody="L'export consolidé de vos assets sera disponible prochainement."
+    <div className="px-10 py-8">
+      {/* HERO · porté de la maquette : `Assets <strong>du portefeuille</strong>` */}
+      <div className="hero">
+        <div>
+          <div className="hero-eyebrow">{data.hero.eyebrow}</div>
+          <h1 className="hero-title">
+            {data.hero.titleLead}
+            <strong>{data.hero.titleStrong}</strong>
+          </h1>
+          <p className="hero-sub">{data.hero.sub}</p>
+        </div>
+        <div className="hero-actions">
+          {/* Boutons inertes dans la maquette : branchés ici sur le feedback
+              honnête global (StubShell) plutôt que sur des coquilles mortes. */}
+          <button
+            type="button"
+            className="btn btn-ghost btn-sm"
+            data-stub="Export des assets"
+            data-stub-mode="toast"
+            data-stub-body="L'export consolidé de vos assets sera disponible prochainement."
           >
             Exporter
-          </GhostButton>
-          <GoldButton
-            dataStub="Sélection de période"
-            dataStubBody="Le filtre par période sera branché sur l'historique de vos souscriptions."
+          </button>
+          <button
+            type="button"
+            className="btn btn-gold btn-sm"
+            data-stub="Sélection de période"
+            data-stub-mode="modal"
+            data-stub-body="Le filtre par période sera branché sur l'historique de vos souscriptions."
           >
             Période · 2026
-          </GoldButton>
-        </>
-      }
-    >
+          </button>
+        </div>
+      </div>
+
       <SectionRule label={data.syntheseHeader.eyebrow} right={data.syntheseHeader.right} />
 
       <div className="ag-kpis ag-kpis-3 ag-mb-20">
@@ -183,6 +200,6 @@ export default async function AssetsPage() {
           <AxisCard key={axis.href} axis={axis} />
         ))}
       </div>
-    </PageScaffold>
+    </div>
   );
 }

@@ -1,10 +1,6 @@
 import Link from "next/link";
 
-import {
-  getFicheClient,
-  visioRoomFor,
-  type HistoItem,
-} from "../../../_data/fiche-client";
+import { getFicheClient, type HistoItem } from "../../../_data/fiche-client";
 import "../../../_styles/fiche-client.css";
 
 export const metadata = {
@@ -83,13 +79,14 @@ export default async function FicheClientPage({
           >
             ← Retour aux clients
           </Link>
-          <Link
-            href="/espace-ingenieur/client-new"
-            className="btn btn-gold btn-sm"
-            style={{ textDecoration: "none" }}
-          >
+          {/*
+            Dans la maquette « Nouvelle étude » est un btn-gold inerte (aucun
+            onclick). On le porte à l'identique en bouton honnête désactivé
+            plutôt qu'en lien de navigation absent de la source.
+          */}
+          <button type="button" className="btn btn-gold btn-sm" disabled title="En cours de construction">
             Nouvelle étude
-          </Link>
+          </button>
         </div>
       </div>
 
@@ -236,14 +233,23 @@ export default async function FicheClientPage({
         <div className="card">
           <div className="card-header">
             <div className="card-title">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="5" width="18" height="16" rx="2" />
-                <path d="M3 9h18M8 3v4M16 3v4" />
-              </svg>
+              {/*
+                La maquette référence ici <use href="#i-cockpit"/>, mais le
+                symbole i-cockpit n'est PAS défini dans les <defs> : la
+                référence est cassée et n'affiche aucun glyphe. On porte ce
+                comportement à l'identique avec un SVG vide (aucun tracé), au
+                lieu d'inventer une icône calendrier absente de la source.
+              */}
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" />
               Historique des rendez-vous
             </div>
           </div>
           <div className="card-body fc-rdv-body">
+            {/*
+              Dans la maquette, AUCUN rendez-vous n'est cliquable : ce sont de
+              simples <div> informatifs. On porte ce comportement à l'identique
+              (le RDV à venir n'ouvre pas de salle visio dans la source).
+            */}
             {fiche.rdvs.map((r, i) => {
               const last = i === fiche.rdvs.length - 1;
               const classes = [
@@ -253,27 +259,11 @@ export default async function FicheClientPage({
               ]
                 .filter(Boolean)
                 .join(" ");
-              const body = (
-                <>
+              return (
+                <div className={classes} key={r.title}>
                   <div className="fc-rdv-when">{r.when}</div>
                   <div className="fc-rdv-title">{r.title}</div>
                   <div className="fc-rdv-meta">{r.meta}</div>
-                </>
-              );
-              // Le RDV à venir (restitution en visio) ouvre la VRAIE salle Jitsi
-              // auto-hébergée (/visio/[room]) déjà câblée dans le repo.
-              return r.upcoming ? (
-                <Link
-                  key={r.title}
-                  href={`/visio/${visioRoomFor(fiche)}`}
-                  className={classes}
-                  style={{ textDecoration: "none", display: "block" }}
-                >
-                  {body}
-                </Link>
-              ) : (
-                <div className={classes} key={r.title}>
-                  {body}
                 </div>
               );
             })}

@@ -6,8 +6,13 @@
 
 export type ClientType = "Personne physique" | "Personne morale";
 
-/** Style de badge de statut, repris des couplets background/color de la maquette. */
-export type StatutVariant = "gold" | "orange" | "info" | "green";
+/**
+ * Style de badge de statut, repris des couplets background/color de la maquette.
+ * La maquette utilise DEUX dorés distincts :
+ *  - "gold"       => var(--gold-100), doré très pâle  (ex. « Restitution demain »)
+ *  - "goldStrong" => rgba(198,142,14,0.15), doré translucide soutenu (ex. « Collecte 67 % »)
+ */
+export type StatutVariant = "gold" | "goldStrong" | "orange" | "info" | "green";
 
 export type Client = {
   /** slug d'URL vers la fiche client ingénieur (route clients/[id]). */
@@ -32,10 +37,26 @@ export type ClientsKpi = {
   compare: { period: string; value: string; direction: "up" | "down" }[];
 };
 
+/**
+ * KPI central « Répartition personnes physiques / personnes morales ».
+ * La maquette ne suit pas le gabarit standard (deux nombres + libellés inline,
+ * un séparateur point médian), d'où ce type dédié plutôt que ClientsKpi.
+ */
+export type ClientsRepartitionKpi = {
+  label: string;
+  nbPhysiques: string;
+  libellePhysiques: string;
+  nbMorales: string;
+  libelleMorales: string;
+  meta: string;
+  compare: { period: string; value: string; direction: "up" | "down" }[];
+};
+
 export type ClientsScreen = {
   heroEyebrow: string;
   heroSub: string;
   kpiClientsActifs: ClientsKpi & { value: string };
+  kpiRepartition: ClientsRepartitionKpi;
   kpiTicketMoyen: ClientsKpi & { valueAmount: string };
   clients: Client[];
   totalPortefeuille: string;
@@ -107,7 +128,7 @@ const CLIENTS: Client[] = [
     caGenere2026: "32 800 €",
     caGold: false,
     statutLabel: "Collecte 67 %",
-    statutVariant: "gold",
+    statutVariant: "goldStrong",
   },
   {
     slug: "lamoureux",
@@ -148,6 +169,18 @@ const SCREEN: ClientsScreen = {
     compare: [
       { period: "M-1", value: "+1", direction: "up" },
       { period: "N-1", value: "+2", direction: "up" },
+    ],
+  },
+  kpiRepartition: {
+    label: "Répartition personnes physiques / personnes morales",
+    nbPhysiques: "6",
+    libellePhysiques: "personnes physiques",
+    nbMorales: "1",
+    libelleMorales: "personne morale",
+    meta: "6 personnes physiques (couples ou seuls) · 1 personne morale (SAS)",
+    compare: [
+      { period: "M-1", value: "P. physiques ▲ +1", direction: "up" },
+      { period: "N-1", value: "P. physiques ▲ +2 · P. morale =", direction: "up" },
     ],
   },
   kpiTicketMoyen: {

@@ -17,6 +17,16 @@ export type Kpi = {
   meta: string;
 };
 
+/**
+ * Filtre rapide d'une toolbar (.qf-perf). `variants: null` = « Tous » (aucun
+ * filtrage). Sinon la ligne est conservée si sa variante profession/profil
+ * appartient à la liste. Les libellés sont repris à l'identique de la maquette.
+ */
+export type FiltrePerf = {
+  label: string;
+  variants: ProfilVariant[] | null;
+};
+
 /** Partenaire recommandable (section 1) : PRIVEOS transmet des clients vers lui. */
 export type PartenaireReco = {
   nom: string;
@@ -64,7 +74,7 @@ export type PartenairesScreen = {
     sectionTitle: string;
     sectionRight: string;
     toolbarCount: string;
-    filtres: string[];
+    filtres: FiltrePerf[];
     partenaires: PartenaireReco[];
     resteLabel: string;
     resteLien: string;
@@ -74,7 +84,7 @@ export type PartenairesScreen = {
     sectionTitle: string;
     sectionRight: string;
     toolbarCount: string;
-    filtres: string[];
+    filtres: FiltrePerf[];
     liste: Apporteur[];
     resteLabel: string;
     resteLien: string;
@@ -101,7 +111,12 @@ const SCREEN: PartenairesScreen = {
     sectionRight:
       "Notaires · Avocats · Experts-comptables que les ingénieurs peuvent activer pour un dossier",
     toolbarCount: "18 partenaires recommandables",
-    filtres: ["Tous", "Notaires (6)", "Avocats (5)", "Experts-comptables (7)"],
+    filtres: [
+      { label: "Tous", variants: null },
+      { label: "Notaires (6)", variants: ["notaire"] },
+      { label: "Avocats (5)", variants: ["avocat"] },
+      { label: "Experts-comptables (7)", variants: ["expert-comptable"] },
+    ],
     partenaires: [
       {
         nom: "Maître Sophie BERNHEIM",
@@ -174,11 +189,11 @@ const SCREEN: PartenairesScreen = {
       "Avocats · Notaires · Comptables · Agents immo · Clients satisfaits · Podcasteurs · Influenceurs",
     toolbarCount: "24 apporteurs d'affaires actifs",
     filtres: [
-      "Tous",
-      "Pros (avocat·notaire·EC)",
-      "Agents immobiliers",
-      "Clients ambassadeurs",
-      "Médias / influence",
+      { label: "Tous", variants: null },
+      { label: "Pros (avocat·notaire·EC)", variants: ["avocat", "notaire", "expert-comptable"] },
+      { label: "Agents immobiliers", variants: ["agent-immo"] },
+      { label: "Clients ambassadeurs", variants: ["ambassadeur"] },
+      { label: "Médias / influence", variants: ["media"] },
     ],
     liste: [
       {

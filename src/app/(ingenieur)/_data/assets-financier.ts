@@ -29,6 +29,8 @@ export type FinancierContractType = {
 export type FinancierClient = {
   initiales: string;
   nom: string;
+  /** Slug d'URL vers la fiche client ingénieur (route clients/[id]). */
+  slug: string;
   contratsActifs: number;
   types: FinancierContractType[];
   dates: string[];
@@ -101,6 +103,7 @@ const SCREEN: AssetsFinancierScreen = {
     {
       initiales: "BD",
       nom: "Bertrand & Monique DUPONT-TOPIN",
+      slug: "dupont-topin",
       contratsActifs: 3,
       types: [
         { label: "Assurance vie luxembourgeoise" },
@@ -113,6 +116,7 @@ const SCREEN: AssetsFinancierScreen = {
     {
       initiales: "AH",
       nom: "Albert & Cécile HUYGHE",
+      slug: "huyghe",
       contratsActifs: 2,
       types: [
         { label: "Assurance vie luxembourgeoise" },
@@ -124,6 +128,7 @@ const SCREEN: AssetsFinancierScreen = {
     {
       initiales: "GL",
       nom: "SAS GROUPE LEFEBVRE",
+      slug: "lefebvre-sas",
       contratsActifs: 2,
       types: [
         { label: "Contrat de capitalisation" },
@@ -135,6 +140,7 @@ const SCREEN: AssetsFinancierScreen = {
     {
       initiales: "MB",
       nom: "Maître BONNARD",
+      slug: "bonnard",
       contratsActifs: 2,
       types: [
         { label: "Assurance vie française" },
@@ -146,6 +152,7 @@ const SCREEN: AssetsFinancierScreen = {
     {
       initiales: "PL",
       nom: "Pierre LAMOUREUX",
+      slug: "lamoureux",
       contratsActifs: 1,
       types: [{ label: "Assurance vie luxembourgeoise" }],
       dates: ["04/03/2024"],
@@ -154,6 +161,7 @@ const SCREEN: AssetsFinancierScreen = {
     {
       initiales: "ML",
       nom: "Maître LACROIX",
+      slug: "lacroix",
       contratsActifs: 1,
       types: [{ label: "Assurance vie française" }],
       dates: ["12/01/2024"],

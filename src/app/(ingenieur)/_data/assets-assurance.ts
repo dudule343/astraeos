@@ -29,6 +29,9 @@ export type AssuranceClient = {
   name: string;
   contracts: AssuranceContract[];
   fees: string;
+  /** Lien vers la fiche client (route clients/[id]). Maquette : la LIGNE entière
+   *  navigue vers `goToPage('ing-fiche-client')`. */
+  ficheHref: string;
 };
 
 export type AssuranceTopProduct = {
@@ -95,6 +98,7 @@ const DATA: AssetsAssurance = {
         { label: "Emprunteur immo", date: "15/10/2025" },
       ],
       fees: "2 400 €",
+      ficheHref: "/espace-ingenieur/clients/dupont-topin",
     },
     {
       clientId: "huyghe",
@@ -105,6 +109,7 @@ const DATA: AssetsAssurance = {
         { label: "Mutuelle dirigeant", date: "14/06/2025" },
       ],
       fees: "1 800 €",
+      ficheHref: "/espace-ingenieur/clients/huyghe",
     },
     {
       clientId: "groupe-lefebvre",
@@ -115,6 +120,7 @@ const DATA: AssetsAssurance = {
         { label: "Homme clé", date: "22/11/2025" },
       ],
       fees: "2 200 €",
+      ficheHref: "/espace-ingenieur/clients/lefebvre-sas",
     },
     {
       clientId: "lamoureux",
@@ -125,6 +131,7 @@ const DATA: AssetsAssurance = {
         { label: "Mutuelle dirigeant", date: "08/09/2024" },
       ],
       fees: "1 400 €",
+      ficheHref: "/espace-ingenieur/clients/lamoureux",
     },
     {
       clientId: "lacroix",
@@ -132,6 +139,7 @@ const DATA: AssetsAssurance = {
       name: "Maître LACROIX",
       contracts: [{ label: "Prévoyance pro", date: "22/02/2024" }],
       fees: "600 €",
+      ficheHref: "/espace-ingenieur/clients/lacroix",
     },
   ],
   total: {

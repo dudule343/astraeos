@@ -48,6 +48,12 @@ export type EtudePrioritaire = {
   /** ligne surlignée (fond gold-100) */
   highlight?: boolean;
   actionLabel: string;
+  /**
+   * Cible de la ligne entière : dans la maquette `<tr onclick="goToPage(
+   * 'ing-fiche-dossier')">`, cliquer la ligne ouvre la fiche dossier. On
+   * navigue vers la fiche dossier de l'espace ingénieur.
+   */
+  dossierHref: string;
 };
 
 export type AlertDot = "orange" | "gold" | "navy";
@@ -160,6 +166,7 @@ const ETUDES: EtudePrioritaire[] = [
     honorairesGold: true,
     highlight: true,
     actionLabel: "Préparer",
+    dossierHref: "/espace-ingenieur/dossiers/etu-2026-014",
   },
   {
     id: "etu-2026-018",
@@ -171,6 +178,7 @@ const ETUDES: EtudePrioritaire[] = [
     echeanceLate: true,
     honoraires: "14 200 €",
     actionLabel: "Reprendre",
+    dossierHref: "/espace-ingenieur/dossiers/etu-2026-018",
   },
   {
     id: "etu-2026-022",
@@ -181,6 +189,7 @@ const ETUDES: EtudePrioritaire[] = [
     echeance: "22/05/2026",
     honoraires: "18 400 €",
     actionLabel: "Continuer",
+    dossierHref: "/espace-ingenieur/dossiers/etu-2026-022",
   },
   {
     id: "etu-2026-027",
@@ -191,6 +200,7 @@ const ETUDES: EtudePrioritaire[] = [
     echeance: "28/05/2026",
     honoraires: "8 600 €",
     actionLabel: "Relancer",
+    dossierHref: "/espace-ingenieur/dossiers/etu-2026-027",
   },
 ];
 

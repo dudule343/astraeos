@@ -79,6 +79,17 @@
   transition: 0.2s;
 }
 
+/* État OFF : piste grisée, bouton ramené à gauche, libellé d'état atténué. */
+.maquette-ing .ref-switch--off .ref-switch-track {
+  background: var(--navy-100);
+}
+.maquette-ing .ref-switch--off .ref-switch-knob {
+  left: 3px;
+}
+.maquette-ing .ref-state--off {
+  color: var(--navy-300);
+}
+
 /* Taille L (toggle global du hero) */
 .maquette-ing .ref-switch--lg {
   width: 42px;
@@ -92,6 +103,9 @@
   width: 16px;
   left: 23px;
   bottom: 3px;
+}
+.maquette-ing .ref-switch--lg.ref-switch--off .ref-switch-knob {
+  left: 3px;
 }
 
 /* Taille M (toggle "À mettre à disposition" zone IA) */
@@ -108,6 +122,9 @@
   left: 17px;
   bottom: 3px;
 }
+.maquette-ing .ref-switch--md.ref-switch--off .ref-switch-knob {
+  left: 3px;
+}
 
 /* Taille S (toggle "Accessible licenciés" en-têtes de cartes) */
 .maquette-ing .ref-switch--sm {
@@ -122,6 +139,9 @@
   width: 10px;
   left: 17px;
   bottom: 3px;
+}
+.maquette-ing .ref-switch--sm.ref-switch--off .ref-switch-knob {
+  left: 3px;
 }
 
 /* Pastille "Accessible licenciés / OUI" en haut à droite des cartes */

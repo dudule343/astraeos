@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 
 import { getSimulateursScreen, type SimulateurIcon } from "../../_data/simulateurs";
 import "../../_styles/simulateurs.css";
+import { SimulateurLauncher } from "./SimulateurLauncher";
 
 export const metadata = {
   title: "ASTRAEOS · Espace Ingénieur · Simulateurs & calculateurs",
@@ -149,16 +150,9 @@ export default function SimulateursPage() {
                 <strong className="sim-title">{sim.title}</strong>
               </div>
               <div className="sim-desc">{sim.description}</div>
-              {/* Les calculateurs n'ont pas encore de moteur branché côté serveur :
-                  bouton honnête désactivé plutôt que mort. */}
-              <button
-                type="button"
-                disabled
-                title="En cours de construction"
-                className="btn btn-gold sim-btn"
-              >
-                Lancer le simulateur
-              </button>
+              {/* Bouton or pleinement actif (identique maquette) + vraie
+                  interaction client : ouvre une modale au clic. */}
+              <SimulateurLauncher title={sim.title} description={sim.description} />
             </div>
           </div>
         ))}

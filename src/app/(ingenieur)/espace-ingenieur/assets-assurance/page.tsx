@@ -3,6 +3,7 @@ import Link from "next/link";
 import "../../_styles/maquette.css";
 import "../../_styles/assets-assurance.css";
 import { getAssetsAssurance } from "../../_data/assets-assurance";
+import { ContratsAssuranceTable } from "./ContratsAssuranceTable";
 
 export const dynamic = "force-dynamic";
 
@@ -49,12 +50,7 @@ export default function AssetsAssurancePage() {
           <Link href={`${BASE}/assets`} className="btn btn-ghost btn-sm">
             ← Retour vue d&apos;ensemble
           </Link>
-          <button
-            type="button"
-            className="btn btn-gold btn-sm"
-            disabled
-            title="Export en cours de construction"
-          >
+          <button type="button" className="btn btn-gold btn-sm">
             Exporter
           </button>
         </div>
@@ -96,77 +92,7 @@ export default function AssetsAssurancePage() {
             {data.total.contracts} contrats actifs · cliquez pour le détail client
           </span>
         </div>
-        <table className="dt">
-          <thead>
-            <tr>
-              <th>Clients</th>
-              <th className="num">Contrats actifs</th>
-              <th>Types souscrits</th>
-              <th>Dates de souscription</th>
-              <th className="num">Frais de dossier perçus</th>
-              <th className="center">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.clients.map((c) => (
-              <tr key={c.clientId} className="dt-clickable">
-                <td>
-                  <div style={{ display: "flex", alignItems: "center", gap: "9px" }}>
-                    <div className="ingenieur-avatar">{c.initials}</div>
-                    <Link href={`${BASE}/clients`} className="cell-primary" style={{ textDecoration: "none" }}>
-                      {c.name}
-                    </Link>
-                  </div>
-                </td>
-                <td className="num" style={{ verticalAlign: "middle" }}>
-                  {c.contracts.length}
-                </td>
-                <td style={{ lineHeight: 1.9 }}>
-                  {c.contracts.map((ct, i) => (
-                    <span key={i}>
-                      <span
-                        className="badge badge-gold"
-                        style={{ fontSize: "10px", display: "inline-block", marginBottom: "3px" }}
-                      >
-                        {ct.label}
-                      </span>
-                      {i < c.contracts.length - 1 ? <br /> : null}
-                    </span>
-                  ))}
-                </td>
-                <td className="nowrap" style={{ fontSize: "11px", lineHeight: 1.9 }}>
-                  {c.contracts.map((ct, i) => (
-                    <span key={i}>
-                      {ct.date}
-                      {i < c.contracts.length - 1 ? <br /> : null}
-                    </span>
-                  ))}
-                </td>
-                <td className="num cell-money gold" style={{ verticalAlign: "middle" }}>
-                  {c.fees}
-                </td>
-                <td className="center" style={{ verticalAlign: "middle" }}>
-                  <Link href={`${BASE}/clients`} className="btn btn-ghost btn-sm">
-                    Voir →
-                  </Link>
-                </td>
-              </tr>
-            ))}
-            <tr className="dt-total">
-              <td>
-                <strong>Total portefeuille</strong>
-              </td>
-              <td className="num">
-                <strong>{data.total.contracts}</strong>
-              </td>
-              <td colSpan={2} style={{ textAlign: "center", fontSize: "11.5px", color: "var(--navy)" }}>
-                {data.total.clientsLabel}
-              </td>
-              <td className="num cell-money gold">{data.total.fees}</td>
-              <td />
-            </tr>
-          </tbody>
-        </table>
+        <ContratsAssuranceTable clients={data.clients} total={data.total} />
       </div>
 
       {/* Top produits d'assurance placés par le portefeuille */}

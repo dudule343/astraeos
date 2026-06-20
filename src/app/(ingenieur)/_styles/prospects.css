@@ -546,3 +546,415 @@
   font-size: 16px;
   color: var(--navy-300);
 }
+
+/* =========================================================================
+ * MODALE « Nouveau prospect » (SPRINT S1A · #modal-nouveau-prospect)
+ * Portage fidèle du <style> de la maquette (.s1a-modal-*, toggle type,
+ * cases à cocher documents, aperçu e-mail conditionnel). Scopé .maquette-ing.
+ * ========================================================================= */
+
+/* Overlay centré */
+.maquette-ing .s1a-modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 31, 58, 0.55);
+  backdrop-filter: blur(3px);
+  z-index: 9000;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 48px 24px;
+  overflow-y: auto;
+}
+.maquette-ing .s1a-modal-overlay.open {
+  display: flex;
+  animation: s1aFadeIn 0.18s ease-out;
+}
+@keyframes s1aFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.maquette-ing .s1a-modal {
+  background: var(--ivory);
+  width: 100%;
+  max-width: 720px;
+  border-radius: 6px;
+  box-shadow:
+    0 24px 60px rgba(10, 31, 58, 0.35),
+    0 0 0 1px rgba(198, 142, 14, 0.18);
+  overflow: hidden;
+  animation: s1aSlideUp 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+}
+@keyframes s1aSlideUp {
+  from {
+    transform: translateY(16px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Header */
+.maquette-ing .s1a-modal-header {
+  background: linear-gradient(135deg, var(--navy) 0%, #1a3866 100%);
+  color: white;
+  padding: 22px 28px 18px;
+  position: relative;
+  border-bottom: 2px solid var(--gold);
+}
+.maquette-ing .s1a-modal-eyebrow {
+  font-size: 9.5px;
+  font-weight: 700;
+  color: var(--gold-300);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.maquette-ing .s1a-modal-title {
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: white;
+  line-height: 1.2;
+}
+.maquette-ing .s1a-modal-title strong {
+  color: var(--gold-300);
+  font-weight: 700;
+}
+.maquette-ing .s1a-modal-sub {
+  font-size: 11.5px;
+  color: rgba(255, 255, 255, 0.65);
+  margin-top: 5px;
+  line-height: 1.5;
+}
+.maquette-ing .s1a-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: all 0.15s;
+}
+.maquette-ing .s1a-modal-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: rotate(90deg);
+}
+.maquette-ing .s1a-modal-close svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Body */
+.maquette-ing .s1a-modal-body {
+  padding: 24px 28px 20px;
+  max-height: calc(100vh - 220px);
+  overflow-y: auto;
+}
+.maquette-ing .s1a-modal-body::-webkit-scrollbar {
+  width: 6px;
+}
+.maquette-ing .s1a-modal-body::-webkit-scrollbar-thumb {
+  background: var(--navy-100);
+  border-radius: 3px;
+}
+
+.maquette-ing .s1a-section {
+  margin-bottom: 22px;
+}
+.maquette-ing .s1a-section-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--gold-deep);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px dashed var(--gold-200);
+}
+.maquette-ing .s1a-section-label::before {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  background: var(--gold);
+  border-radius: 50%;
+}
+
+/* Champs */
+.maquette-ing .s1a-field {
+  margin-bottom: 14px;
+}
+.maquette-ing .s1a-field-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--navy);
+  margin-bottom: 5px;
+  letter-spacing: 0.01em;
+}
+.maquette-ing .s1a-field-label .required {
+  color: var(--gold);
+  margin-left: 2px;
+}
+.maquette-ing .s1a-input,
+.maquette-ing .s1a-select,
+.maquette-ing .s1a-textarea {
+  width: 100%;
+  padding: 9px 12px;
+  background: white;
+  border: 1px solid var(--navy-100);
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 12.5px;
+  color: var(--navy);
+  transition: all 0.15s;
+}
+.maquette-ing .s1a-input:focus,
+.maquette-ing .s1a-select:focus,
+.maquette-ing .s1a-textarea:focus {
+  outline: none;
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(198, 142, 14, 0.12);
+}
+
+.maquette-ing .s1a-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.maquette-ing .s1a-grid-3 {
+  display: grid;
+  grid-template-columns: 80px 1fr 1fr;
+  gap: 12px;
+}
+
+/* Toggle type prospect */
+.maquette-ing .s1a-toggle-group {
+  display: flex;
+  gap: 6px;
+  background: var(--ivory-deep);
+  padding: 4px;
+  border-radius: 5px;
+}
+.maquette-ing .s1a-toggle-btn {
+  flex: 1;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--navy-300);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.maquette-ing .s1a-toggle-btn.active {
+  background: var(--navy);
+  color: white;
+  box-shadow: 0 1px 3px rgba(16, 45, 80, 0.18);
+}
+.maquette-ing .s1a-toggle-btn:hover:not(.active) {
+  background: white;
+  color: var(--navy);
+}
+
+/* Cases à cocher documents */
+.maquette-ing .s1a-checkbox-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 11px 13px;
+  background: white;
+  border: 1px solid var(--navy-100);
+  border-radius: 4px;
+  margin-bottom: 7px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.maquette-ing .s1a-checkbox-row:hover {
+  border-color: var(--gold-300);
+  background: var(--gold-100);
+}
+.maquette-ing .s1a-checkbox-row.checked {
+  border-color: var(--gold);
+  background: var(--gold-100);
+}
+.maquette-ing .s1a-checkbox-box {
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid var(--navy-200);
+  border-radius: 3px;
+  flex-shrink: 0;
+  margin-top: 1px;
+  background: white;
+  display: grid;
+  place-items: center;
+  transition: all 0.15s;
+}
+.maquette-ing .s1a-checkbox-row.checked .s1a-checkbox-box {
+  background: var(--gold);
+  border-color: var(--gold);
+}
+.maquette-ing .s1a-checkbox-row.checked .s1a-checkbox-box::after {
+  content: "✓";
+  color: white;
+  font-size: 11px;
+  font-weight: 800;
+}
+.maquette-ing .s1a-checkbox-content {
+  flex: 1;
+}
+.maquette-ing .s1a-checkbox-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--navy);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.maquette-ing .s1a-checkbox-desc {
+  font-size: 10.5px;
+  color: var(--navy-300);
+  margin-top: 2px;
+  line-height: 1.45;
+}
+.maquette-ing .s1a-checkbox-tag {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 2px;
+  background: var(--light-blue);
+  color: var(--navy);
+}
+
+/* Aperçu e-mail */
+.maquette-ing .s1a-email-preview {
+  background: white;
+  border: 1px solid var(--navy-100);
+  border-radius: 4px;
+  padding: 18px 20px;
+  font-size: 11.5px;
+  line-height: 1.65;
+  color: var(--navy);
+  font-family: "Georgia", serif;
+}
+.maquette-ing .s1a-email-preview .em-meta {
+  font-family: "Epilogue", sans-serif;
+  font-size: 10px;
+  color: var(--navy-300);
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--ivory-deep);
+  margin-bottom: 12px;
+  display: grid;
+  grid-template-columns: 50px 1fr;
+  gap: 6px;
+}
+.maquette-ing .s1a-email-preview .em-meta strong {
+  color: var(--navy);
+  font-weight: 700;
+}
+.maquette-ing .s1a-email-preview .em-sig {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--navy-100);
+  font-family: "Epilogue", sans-serif;
+  font-size: 10.5px;
+  color: var(--navy-300);
+  line-height: 1.55;
+}
+.maquette-ing .s1a-email-preview .em-sig strong {
+  color: var(--navy);
+}
+.maquette-ing .s1a-email-preview .em-link {
+  display: inline-block;
+  padding: 5px 12px;
+  background: var(--navy);
+  color: var(--gold-300);
+  text-decoration: none;
+  border-radius: 3px;
+  font-family: "Epilogue", sans-serif;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  margin: 3px 4px 3px 0;
+}
+.maquette-ing .s1a-email-preview .em-conditional {
+  opacity: 0.4;
+  pointer-events: none;
+}
+.maquette-ing .s1a-email-preview .em-conditional.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Footer */
+.maquette-ing .s1a-modal-footer {
+  padding: 14px 28px;
+  background: var(--ivory-deep);
+  border-top: 1px solid var(--navy-100);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.maquette-ing .s1a-modal-footer-info {
+  font-size: 10.5px;
+  color: var(--navy-300);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.maquette-ing .s1a-modal-footer-actions {
+  display: flex;
+  gap: 8px;
+}
+.maquette-ing .s1a-btn {
+  padding: 9px 18px;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.15s;
+}
+.maquette-ing .s1a-btn-ghost {
+  background: transparent;
+  color: var(--navy);
+  border-color: var(--navy-100);
+}
+.maquette-ing .s1a-btn-ghost:hover {
+  background: white;
+  border-color: var(--navy-300);
+}
+.maquette-ing .s1a-btn-primary {
+  background: var(--gold);
+  color: white;
+  font-weight: 700;
+  box-shadow: 0 1px 3px rgba(198, 142, 14, 0.3);
+}
+.maquette-ing .s1a-btn-primary:hover {
+  background: var(--gold-deep);
+}

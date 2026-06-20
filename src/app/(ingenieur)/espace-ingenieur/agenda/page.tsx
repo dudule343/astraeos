@@ -2,11 +2,12 @@ import Link from "next/link";
 
 import {
   getAgenda,
-  visioRoom,
   type AgendaRdv,
   type KpiCompareCell,
 } from "../../_data/agenda";
 import { CopyLinkButton } from "./CopyLinkButton";
+import { EmptyCell, NewRdvModal, OpenRdvButton } from "./NewRdvModal";
+import "./_styles/agenda.css";
 
 export const metadata = {
   title: "ASTRAEOS · Calendrier & rendez-vous",
@@ -23,27 +24,20 @@ for (let h = 9; h <= 19; h++) {
 const LUNCH_SLOTS = new Set(["12h00", "12h30", "13h00"]);
 
 function EventCard({ rdv }: { rdv: AgendaRdv }) {
-  const inner = (
-    <>
+  // Tout event navigue vers sa fiche, comme la maquette (goToPage) : fiche RDV
+  // pour Joubert/Mercier, fiche client générique pour les autres.
+  return (
+    <Link
+      href={rdv.href}
+      className={`agenda-v2-event ${rdv.variant}`}
+      style={{ textDecoration: "none", display: "block" }}
+    >
       <strong>
         {rdv.hourLabel} · {rdv.surname}
       </strong>
       <div className="ev-meta">{rdv.metaLabel}</div>
-    </>
+    </Link>
   );
-  // RDV en visio : tout le bloc ouvre la VRAIE salle visio existante (/visio/[room]).
-  if (rdv.isVisio) {
-    return (
-      <Link
-        href={`/visio/${visioRoom(rdv)}`}
-        className={`agenda-v2-event ${rdv.variant}`}
-        style={{ textDecoration: "none", display: "block" }}
-      >
-        {inner}
-      </Link>
-    );
-  }
-  return <div className={`agenda-v2-event ${rdv.variant}`}>{inner}</div>;
 }
 
 function KpiCompare({ cells }: { cells: KpiCompareCell[] }) {
@@ -98,14 +92,7 @@ export default function AgendaPage() {
             </svg>
             <span>{data.syncLabel}</span>
           </a>
-          <button
-            type="button"
-            className="btn btn-gold btn-sm"
-            disabled
-            title="En cours de construction"
-          >
-            + Nouveau RDV
-          </button>
+          <OpenRdvButton />
         </div>
       </div>
 
@@ -174,17 +161,17 @@ export default function AgendaPage() {
               {data.weekLabel}
             </div>
             <div style={{ display: "flex", gap: "6px" }}>
-              <button className="btn btn-ghost btn-sm" style={{ fontSize: "11px" }} disabled>
+              <button type="button" className="btn btn-ghost btn-sm" style={{ fontSize: "11px" }}>
                 ‹ Semaine
               </button>
               <button
+                type="button"
                 className="btn btn-ghost btn-sm"
                 style={{ fontSize: "11px", background: "var(--ivory)" }}
-                disabled
               >
                 Aujourd&apos;hui
               </button>
-              <button className="btn btn-ghost btn-sm" style={{ fontSize: "11px" }} disabled>
+              <button type="button" className="btn btn-ghost btn-sm" style={{ fontSize: "11px" }}>
                 Semaine ›
               </button>
             </div>
@@ -219,20 +206,37 @@ export default function AgendaPage() {
                       const rdv = rdvsBySlot.get(`${day.index}:${slot.key}`);
                       const isLunch =
                         LUNCH_SLOTS.has(slot.key) && day.index <= 4 && !rdv;
+                      const isEmpty = !rdv && !isLunch;
                       const classes = [
                         "agenda-v2-cell",
                         slot.half ? "half-line" : "",
                         day.isToday ? "today-col" : "",
                         isLunch ? "lunch" : "",
-                        !rdv && !isLunch ? "is-empty" : "",
+                        isEmpty ? "is-empty" : "",
                       ]
                         .filter(Boolean)
                         .join(" ");
+                      const cellStyle = isLastRow
+                        ? { borderBottom: "none" as const }
+                        : undefined;
+                      // Cellule libre : clic = ouvre la modale avec créneau + jour
+                      // pré-remplis (openModalNouveauRdv de la maquette).
+                      if (isEmpty) {
+                        return (
+                          <EmptyCell
+                            key={`${slot.key}-${day.index}`}
+                            className={classes}
+                            slotKey={slot.key}
+                            dayLabel={day.fullLabel}
+                            style={cellStyle}
+                          />
+                        );
+                      }
                       return (
                         <div
                           key={`${slot.key}-${day.index}`}
                           className={classes}
-                          style={isLastRow ? { borderBottom: "none" } : undefined}
+                          style={cellStyle}
                         >
                           {rdv ? <EventCard rdv={rdv} /> : null}
                         </div>
@@ -398,23 +402,21 @@ export default function AgendaPage() {
                 last
               />
               <div style={{ padding: "10px 16px 14px", background: "var(--ivory)" }}>
-                <button
-                  type="button"
-                  className="types-rdv-config-link"
-                  disabled
-                  title="En cours de construction"
-                >
+                <Link href="/espace-ingenieur/agenda/types" className="types-rdv-config-link">
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
                     <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z" />
                   </svg>
                   Configurer mes types de RDV
-                </button>
+                </Link>
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Modale « Nouveau RDV » (Création RDV directe) — Client Component branché */}
+      <NewRdvModal />
     </div>
   );
 }

@@ -52,7 +52,7 @@ export default function ProfilPage() {
   const { identite, identitePersonnelle, agrements, formation, specialites, notifications, signature } = screen;
 
   return (
-    <div className="px-10 py-8">
+    <div className="ing-profil-content">
       {/* HERO */}
       <div className="hero">
         <div>
@@ -63,12 +63,8 @@ export default function ProfilPage() {
           <p className="hero-sub">{screen.heroSub}</p>
         </div>
         <div className="hero-actions">
-          <button className="btn btn-ghost btn-sm" disabled title="En cours">
-            Annuler
-          </button>
-          <button className="btn btn-gold btn-sm" disabled title="En cours">
-            Fermer
-          </button>
+          <button className="btn btn-ghost btn-sm">Annuler</button>
+          <button className="btn btn-gold btn-sm">Fermer</button>
         </div>
       </div>
 
@@ -285,9 +281,7 @@ export default function ProfilPage() {
             <IconDoc />
             Ma signature email
           </div>
-          <button className="btn btn-ghost btn-sm" disabled title="En cours">
-            Modifier
-          </button>
+          <button className="btn btn-ghost btn-sm">Modifier</button>
         </div>
         <div className="card-body" style={{ padding: "22px" }}>
           <div

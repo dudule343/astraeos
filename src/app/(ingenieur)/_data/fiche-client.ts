@@ -26,7 +26,12 @@ export type HistoItem = {
   variant: "etude" | "immo" | "financier" | "audit";
   title: string;
   meta: string;
-  /** RDV / dossier vers lequel pointe « Voir → » ; null = bouton honnête */
+  /**
+   * Dossier vers lequel pointe « Voir → ». Dans la maquette ce bouton fait
+   * goToPage('ing-fiche-dossier') et ouvre l'écran fiche dossier ingénieur
+   * (#page-ing-fiche-dossier). Cet écran n'a pas encore de route React portée,
+   * donc on garde null = bouton honnête désactivé plutôt qu'un lien mort/404.
+   */
   href: string | null;
 };
 
@@ -108,7 +113,7 @@ export const FICHE_CLIENT_MODELE: FicheClient = {
       variant: "etude",
       title: "Étude patrimoniale réalisée",
       meta: "Stratégie de transmission · livrée le 06/05/2026 · 84 pages · honoraires 12 800 € HT",
-      href: "/espace-ingenieur/dossiers/etu-2026-014",
+      href: null,
     },
     {
       variant: "immo",
@@ -180,9 +185,4 @@ export const FICHE_CLIENT_MODELE: FicheClient = {
  */
 export function getFicheClient(_id: string): FicheClient {
   return FICHE_CLIENT_MODELE;
-}
-
-/** Salle Jitsi auto-hébergée pour le RDV à venir de cette fiche. */
-export function visioRoomFor(fiche: FicheClient): string {
-  return `client-${fiche.id}`;
 }

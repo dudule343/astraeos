@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { getAssetsFinancierScreen } from "../../_data/assets-financier";
 import "../../_styles/assets-financier.css";
+import { PlacementsTable } from "./PlacementsTable";
 
 export const metadata = {
   title: "ASTRAEOS · Investissement financier",
@@ -9,6 +10,7 @@ export const metadata = {
 
 export const dynamic = "force-dynamic";
 
+/** Icône #i-finance de la maquette : portefeuille / carte. */
 const FINANCE_ICON = (
   <svg
     viewBox="0 0 24 24"
@@ -18,15 +20,10 @@ const FINANCE_ICON = (
     strokeLinecap="round"
     strokeLinejoin="round"
   >
-    <line x1="12" y1="1" x2="12" y2="23" />
-    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+    <path d="M3 7v12a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-9H5a2 2 0 1 1 0-4h12" />
+    <circle cx="17" cy="14" r="1.4" fill="currentColor" />
   </svg>
 );
-
-/** Slug stable pour brancher la ligne sur la fiche client réelle. */
-function clientSlug(initiales: string): string {
-  return initiales.toLowerCase();
-}
 
 export default function AssetsFinancierPage() {
   const screen = getAssetsFinancierScreen();
@@ -47,9 +44,16 @@ export default function AssetsFinancierPage() {
           <Link className="btn btn-ghost btn-sm" href="/espace-ingenieur/assets">
             ← Retour vue d&apos;ensemble
           </Link>
-          {/* L'export PDF/Excel du portefeuille n'est pas encore câblé :
-              bouton honnête désactivé plutôt qu'une coquille morte. */}
-          <button className="btn btn-gold btn-sm" disabled title="En cours">
+          {/* Bouton inerte dans la maquette : branché ici sur le feedback
+              honnête global (StubShell), bouton actif comme la vue
+              d'ensemble plutôt qu'une coquille morte. */}
+          <button
+            type="button"
+            className="btn btn-gold btn-sm"
+            data-stub="Export du portefeuille financier"
+            data-stub-mode="toast"
+            data-stub-body="L'export de votre portefeuille financier sera disponible prochainement."
+          >
             Exporter
           </button>
         </div>
@@ -61,8 +65,7 @@ export default function AssetsFinancierPage() {
           <div className="kpi" key={kpi.label}>
             <div className="kpi-label">{kpi.label}</div>
             <div className={`kpi-value${kpi.valueGold ? " gold" : ""}`}>
-              {kpi.value}
-              {kpi.unit ? <span className="unit"> {kpi.unit}</span> : null}
+              {kpi.value} {kpi.unit ? <span className="unit">{kpi.unit}</span> : null}
             </div>
             <div className="kpi-meta">{kpi.meta}</div>
             <div className="kpi-compare-3">
@@ -93,93 +96,7 @@ export default function AssetsFinancierPage() {
             {screen.placementsCount}
           </span>
         </div>
-        <table className="dt">
-          <thead>
-            <tr>
-              <th>Clients</th>
-              <th className="num">Contrats actifs</th>
-              <th>Types souscrits</th>
-              <th>Dates de souscription</th>
-              <th className="num">Encours total</th>
-              <th className="center">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {screen.clients.map((client) => {
-              const href = `/espace-ingenieur/clients/${clientSlug(client.initiales)}`;
-              return (
-                <tr key={client.nom} className="dt-clickable">
-                  <td>
-                    <Link
-                      href={href}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "9px",
-                        textDecoration: "none",
-                      }}
-                    >
-                      <div className="ingenieur-avatar">{client.initiales}</div>
-                      <div className="cell-primary">{client.nom}</div>
-                    </Link>
-                  </td>
-                  <td className="num" style={{ verticalAlign: "middle" }}>
-                    {client.contratsActifs}
-                  </td>
-                  <td style={{ lineHeight: "1.9" }}>
-                    {client.types.map((t, i) => (
-                      <span key={t.label}>
-                        <span
-                          className="badge badge-gold"
-                          style={{
-                            fontSize: "10px",
-                            display: "inline-block",
-                            marginBottom: i < client.types.length - 1 ? "3px" : undefined,
-                          }}
-                        >
-                          {t.label}
-                        </span>
-                        {i < client.types.length - 1 ? <br /> : null}
-                      </span>
-                    ))}
-                  </td>
-                  <td className="nowrap" style={{ fontSize: "11px", lineHeight: "1.9" }}>
-                    {client.dates.map((d, i) => (
-                      <span key={d}>
-                        {d}
-                        {i < client.dates.length - 1 ? <br /> : null}
-                      </span>
-                    ))}
-                  </td>
-                  <td className="num cell-money gold" style={{ verticalAlign: "middle" }}>
-                    {client.encoursTotal}
-                  </td>
-                  <td className="center" style={{ verticalAlign: "middle" }}>
-                    <Link className="btn btn-ghost btn-sm" href={href}>
-                      Voir →
-                    </Link>
-                  </td>
-                </tr>
-              );
-            })}
-            <tr style={{ background: "var(--gold-200)", fontWeight: 700 }}>
-              <td>
-                <strong>Total portefeuille</strong>
-              </td>
-              <td className="num">
-                <strong>{screen.total.contratsActifs}</strong>
-              </td>
-              <td
-                colSpan={2}
-                style={{ textAlign: "center", fontSize: "11.5px", color: "var(--navy)" }}
-              >
-                {screen.total.meta}
-              </td>
-              <td className="num cell-money gold">{screen.total.encoursTotal}</td>
-              <td></td>
-            </tr>
-          </tbody>
-        </table>
+        <PlacementsTable clients={screen.clients} total={screen.total} />
       </div>
 
       {/* Top produits placés par l'ingénieur */}

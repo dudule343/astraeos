@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 
 import { getReferentielScreen } from "../../_data/referentiel";
 import { ModeleActions } from "./ModeleActions";
+import { IaZone, RefSwitch } from "./ReferentielInteractive";
 import "../../_styles/referentiel.css";
 
 export const metadata = {
@@ -58,32 +59,17 @@ const CommsIcon = (
   </svg>
 );
 
-/** Étoile de l'assistant IA (path en losange de la maquette). */
-const SparkIcon = (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M12 2 L 13.5 8.5 L 20 10 L 13.5 11.5 L 12 18 L 10.5 11.5 L 4 10 L 10.5 8.5 Z" />
-    <circle cx="12" cy="10" r="1.5" fill="currentColor" />
-  </svg>
-);
-
-/** Interrupteur doré décoratif (état figé de la maquette). */
-function Switch({ size }: { size: "lg" | "md" | "sm" }) {
-  return (
-    <label className={`ref-switch ref-switch--${size}`}>
-      <input type="checkbox" defaultChecked readOnly />
-      <span className="ref-switch-track" />
-      <span className="ref-switch-knob" />
-    </label>
-  );
-}
-
-/** Pastille « Accessible licenciés / OUI » des en-têtes de cartes. */
-function LicenciePill() {
+/** Pastille « Accessible licenciés / OUI » des en-têtes de cartes (toggle branché). */
+function LicenciePill({ label }: { label: string }) {
   return (
     <div className="ref-pill">
       <span className="ref-pill-label">Accessible licenciés</span>
-      <Switch size="sm" />
-      <span className="ref-pill-state">OUI</span>
+      <RefSwitch
+        size="sm"
+        labelOn="OUI"
+        labelOff="NON"
+        ariaLabel={`Rendre « ${label} » accessible aux licenciés`}
+      />
     </div>
   );
 }
@@ -95,7 +81,7 @@ function RefCardHeader({ icon, title }: { icon: ReactNode; title: string }) {
         {icon}
         {title}
       </div>
-      <LicenciePill />
+      <LicenciePill label={title} />
     </div>
   );
 }
@@ -119,8 +105,12 @@ export default function ReferentielPage() {
           {/* Toggle GLOBAL : mettre en ligne / hors ligne pour les licenciés */}
           <div className="ref-toggle-global">
             <span className="ref-toggle-global-label">Mettre le référentiel en ligne</span>
-            <Switch size="lg" />
-            <span className="ref-toggle-global-state">EN LIGNE</span>
+            <RefSwitch
+              size="lg"
+              labelOn="EN LIGNE"
+              labelOff="HORS LIGNE"
+              ariaLabel="Mettre le référentiel en ligne pour les licenciés"
+            />
           </div>
           <button
             type="button"
@@ -134,59 +124,8 @@ export default function ReferentielPage() {
         </div>
       </div>
 
-      {/* Zone IA */}
-      <div className="card ref-mb-24 ref-ia-card">
-        <div className="ref-ia-pill">
-          <span className="ref-pill-label">À mettre à disposition des licenciés</span>
-          <Switch size="md" />
-          <span className="ref-pill-state">OUI</span>
-        </div>
-        <div className="card-body">
-          <div className="ref-ia-row">
-            <div className="ref-ia-icon">{SparkIcon}</div>
-            <div style={{ flex: 1 }}>
-              <div className="kpi-label" style={{ marginBottom: 4 }}>
-                {ia.eyebrow}
-              </div>
-              <div className="ref-ia-title">{ia.titre}</div>
-              <div className="ref-ia-desc">{ia.description}</div>
-              <div className="ref-ia-form">
-                <input
-                  type="text"
-                  disabled
-                  title="En cours de construction"
-                  placeholder={ia.placeholder}
-                  className="ref-ia-input"
-                />
-                <button
-                  type="button"
-                  className="btn btn-gold"
-                  data-stub="Assistant IA · référentiel"
-                  data-stub-mode="modal"
-                  data-stub-body="L'assistant IA entraîné sur le référentiel PRIVEOS sera connecté à votre espace prochainement."
-                >
-                  {ia.cta}
-                </button>
-              </div>
-              <div className="ref-ia-suggestions">
-                <span className="ref-ia-suggestions-label">Suggestions :</span>
-                {ia.suggestions.map((s) => (
-                  <button
-                    key={s}
-                    type="button"
-                    className="btn btn-ghost btn-sm ref-ia-suggestion"
-                    data-stub={`Assistant IA · ${s}`}
-                    data-stub-mode="modal"
-                    data-stub-body="L'assistant IA entraîné sur le référentiel PRIVEOS sera connecté à votre espace prochainement."
-                  >
-                    {s}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* Zone IA (champ actif + boutons branchés) */}
+      <IaZone ia={ia} />
 
       {/* Manuel opératoire + Contrat-cadre */}
       <div className="ref-grid-2 ref-mb-24">

@@ -75,3 +75,129 @@
   font-size: 13px;
   font-weight: 700;
 }
+
+/*
+ * Modale « Lancer le simulateur ».
+ * Le bouton reste un .btn-gold pleinement actif (curseur pointer, hover
+ * #d39817) à l'identique de la maquette ; au clic il ouvre cette modale
+ * portée du pattern générique `.s1a-modal-*` de la maquette ingénieur v28.
+ */
+.maquette-ing .sim-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 31, 58, 0.55);
+  backdrop-filter: blur(3px);
+  z-index: 9000;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 48px 24px;
+  overflow-y: auto;
+  animation: simFadeIn 0.18s ease-out;
+}
+
+@keyframes simFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.maquette-ing .sim-modal {
+  background: var(--ivory);
+  width: 100%;
+  max-width: 520px;
+  border-radius: 6px;
+  box-shadow:
+    0 24px 60px rgba(10, 31, 58, 0.35),
+    0 0 0 1px rgba(198, 142, 14, 0.18);
+  overflow: hidden;
+  position: relative;
+  animation: simSlideUp 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes simSlideUp {
+  from {
+    transform: translateY(16px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.maquette-ing .sim-modal-header {
+  background: linear-gradient(135deg, var(--navy) 0%, #1a3866 100%);
+  color: white;
+  padding: 22px 28px 18px;
+  position: relative;
+  border-bottom: 2px solid var(--gold);
+}
+
+.maquette-ing .sim-modal-eyebrow {
+  font-size: 9.5px;
+  font-weight: 700;
+  color: var(--gold-300);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.maquette-ing .sim-modal-title {
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: white;
+  line-height: 1.2;
+}
+
+.maquette-ing .sim-modal-title strong {
+  color: var(--gold-300);
+  font-weight: 700;
+}
+
+.maquette-ing .sim-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: all 0.15s;
+}
+
+.maquette-ing .sim-modal-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: rotate(90deg);
+}
+
+.maquette-ing .sim-modal-close svg {
+  width: 14px;
+  height: 14px;
+}
+
+.maquette-ing .sim-modal-body {
+  padding: 24px 28px 28px;
+}
+
+.maquette-ing .sim-modal-desc {
+  font-size: 13px;
+  color: var(--navy-300);
+  line-height: 1.6;
+  margin-bottom: 22px;
+}
+
+.maquette-ing .sim-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+}

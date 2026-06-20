@@ -3,23 +3,15 @@ import Link from "next/link";
 import {
   getCockpit,
   type Alerte,
-  type EtudePrioritaire,
   type Kpi,
   type RdvJour,
   type SanteBar,
-  type StageBadge,
 } from "../_data/tableau-de-bord";
 import "../_styles/tableau-de-bord.css";
+import { EtudesPrioritairesTable } from "./EtudesPrioritairesTable";
 
 export const metadata = {
   title: "ASTRAEOS · Espace Ingénieur",
-};
-
-const STAGE_STYLE: Record<StageBadge["variant"], React.CSSProperties> = {
-  success: {},
-  orange: { background: "rgba(229,124,75,0.15)", color: "var(--orange-text)" },
-  "gold-100": { background: "var(--gold-100)", color: "var(--gold-deep)" },
-  "gold-soft": { background: "rgba(198,142,14,0.15)", color: "var(--gold-deep)" },
 };
 
 const ALERT_DOT: Record<Alerte["dot"], string> = {
@@ -27,60 +19,6 @@ const ALERT_DOT: Record<Alerte["dot"], string> = {
   gold: "var(--gold)",
   navy: "var(--navy-300)",
 };
-
-function StageBadgeEl({ stage }: { stage: StageBadge }) {
-  if (stage.variant === "success") {
-    return (
-      <span className="badge badge-success" style={{ fontSize: "9.5px" }}>
-        {stage.label}
-      </span>
-    );
-  }
-  return (
-    <span className="badge" style={{ ...STAGE_STYLE[stage.variant], fontSize: "9.5px" }}>
-      {stage.label}
-    </span>
-  );
-}
-
-function EtudeRow({ etu }: { etu: EtudePrioritaire }) {
-  return (
-    <tr
-      className="dt-clickable"
-      style={etu.highlight ? { background: "var(--gold-100)" } : undefined}
-    >
-      <td>
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <div className="ingenieur-avatar">{etu.initials}</div>
-          <div>
-            <div className="cell-primary">{etu.client}</div>
-            <div style={{ fontSize: "10px", color: "var(--navy-300)" }}>{etu.ref}</div>
-          </div>
-        </div>
-      </td>
-      <td>
-        <StageBadgeEl stage={etu.stage} />
-      </td>
-      <td className="nowrap" style={etu.echeanceLate ? { color: "var(--orange-text)" } : undefined}>
-        {etu.echeance.includes("·") || etu.echeanceLate ? (
-          <strong>{etu.echeance}</strong>
-        ) : (
-          etu.echeance
-        )}
-      </td>
-      <td className={`num cell-money${etu.honorairesGold ? " gold" : ""}`}>{etu.honoraires}</td>
-      <td className="center">
-        <Link
-          href="/espace-ingenieur/dossiers"
-          className="btn btn-ghost btn-sm"
-          style={{ textDecoration: "none" }}
-        >
-          {etu.actionLabel}
-        </Link>
-      </td>
-    </tr>
-  );
-}
 
 function KpiCell({ kpi }: { kpi: Kpi }) {
   return (
@@ -268,22 +206,7 @@ export default function IngenieurCockpit() {
             </div>
             <span style={{ fontSize: "11px", color: "var(--navy-300)" }}>{d.etudesCount}</span>
           </div>
-          <table className="dt" style={{ fontSize: "12.5px" }}>
-            <thead>
-              <tr>
-                <th>Client</th>
-                <th>Étape</th>
-                <th>Échéance</th>
-                <th className="num">Honoraires</th>
-                <th className="center">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {d.etudes.map((etu) => (
-                <EtudeRow key={etu.id} etu={etu} />
-              ))}
-            </tbody>
-          </table>
+          <EtudesPrioritairesTable etudes={d.etudes} />
         </div>
 
         {/* Mes alertes */}

@@ -29,6 +29,15 @@ export type AxisCard = {
 };
 
 export type AssetsOverview = {
+  /** Hero porté de la maquette : `Assets <strong>du portefeuille</strong>`. */
+  hero: {
+    eyebrow: string;
+    /** Début du H1, rendu au poids de base (600). */
+    titleLead: string;
+    /** Fin du H1, rendue en <strong> (700) comme dans la maquette. */
+    titleStrong: string;
+    sub: string;
+  };
   syntheseHeader: { eyebrow: string; right: string };
   repartitionHeader: { eyebrow: string; right: string };
   synthese: SyntheseKpi[];
@@ -36,6 +45,12 @@ export type AssetsOverview = {
 };
 
 const overview: AssetsOverview = {
+  hero: {
+    eyebrow: "Assets du portefeuille · vue d'ensemble personnelle",
+    titleLead: "Assets ",
+    titleStrong: "du portefeuille",
+    sub: "Vue consolidée des assets placés via votre portefeuille personnel · patrimoine sous gestion, contrats actifs, clients servis. Cliquez sur un axe pour ouvrir le détail.",
+  },
   syntheseHeader: { eyebrow: "Synthèse", right: "Mon portefeuille · 2026" },
   repartitionHeader: {
     eyebrow: "Répartition par axe",

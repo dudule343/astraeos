@@ -3,12 +3,11 @@ import Link from "next/link";
 import {
   assetsImmoKpis,
   immoProjects,
-  immoProjectsTotal,
   programBreakdown,
   type AssetsImmoKpi,
-  type ImmoProjectRow,
 } from "../../_data/assets-immobilier";
 import "../../_styles/assets-immobilier.css";
+import { ProjectsTable } from "./ProjectsTable";
 
 export const metadata = {
   title: "ASTRAEOS · Investissement immobilier",
@@ -60,63 +59,6 @@ function KpiBlock({ kpi }: { kpi: AssetsImmoKpi }) {
   );
 }
 
-function ProjectRow({ row }: { row: ImmoProjectRow }) {
-  return (
-    <tr style={{ cursor: "pointer" }}>
-      <td>
-        <div style={{ display: "flex", alignItems: "center", gap: "9px" }}>
-          <div className="ingenieur-avatar">{row.initials}</div>
-          <div className="cell-primary">{row.clientName}</div>
-        </div>
-      </td>
-      <td style={{ lineHeight: 1.9 }}>
-        {row.types.map((t, i) => (
-          <span key={t}>
-            <span
-              className="badge badge-gold"
-              style={{
-                fontSize: "10px",
-                display: "inline-block",
-                marginBottom: i < row.types.length - 1 ? "3px" : undefined,
-              }}
-            >
-              {t}
-            </span>
-            {i < row.types.length - 1 ? <br /> : null}
-          </span>
-        ))}
-      </td>
-      <td className="nowrap" style={{ fontSize: "11px", lineHeight: 1.9 }}>
-        {row.initiationDates.map((d, i) => (
-          <span key={i}>
-            {d}
-            {i < row.initiationDates.length - 1 ? <br /> : null}
-          </span>
-        ))}
-      </td>
-      <td className="nowrap" style={{ fontSize: "11px", lineHeight: 1.9 }}>
-        {row.deliveryDates.map((d, i) => (
-          <span key={i}>
-            {d}
-            {i < row.deliveryDates.length - 1 ? <br /> : null}
-          </span>
-        ))}
-      </td>
-      <td className="num" style={{ verticalAlign: "middle" }}>
-        {row.projectsTotal}
-      </td>
-      <td className="num" style={{ verticalAlign: "middle" }}>
-        {row.delay}
-      </td>
-      <td className="center" style={{ verticalAlign: "middle" }}>
-        <Link href="/espace-ingenieur/clients" className="btn btn-ghost btn-sm">
-          Voir →
-        </Link>
-      </td>
-    </tr>
-  );
-}
-
 export default function AssetsImmobilierPage() {
   return (
     <div className="maquette-ing assets-immo-page">
@@ -135,12 +77,7 @@ export default function AssetsImmobilierPage() {
           <Link href="/espace-ingenieur/assets" className="btn btn-ghost btn-sm">
             ← Retour vue d&apos;ensemble
           </Link>
-          <button
-            type="button"
-            className="btn btn-gold btn-sm"
-            disabled
-            title="En cours"
-          >
+          <button type="button" className="btn btn-gold btn-sm">
             Exporter
           </button>
         </div>
@@ -164,37 +101,7 @@ export default function AssetsImmobilierPage() {
             {immoProjects.length} projets · cliquez pour le détail client
           </span>
         </div>
-        <table className="dt">
-          <thead>
-            <tr>
-              <th>Clients</th>
-              <th>Types</th>
-              <th>Dates d&apos;initiation</th>
-              <th>Dates de livraison</th>
-              <th className="num">Projets total</th>
-              <th className="num">Délai</th>
-              <th className="center">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {immoProjects.map((row) => (
-              <ProjectRow key={row.clientId} row={row} />
-            ))}
-            <tr style={{ background: "var(--gold-200)", fontWeight: 700 }}>
-              <td>
-                <strong>Total portefeuille</strong>
-              </td>
-              <td colSpan={3} style={{ textAlign: "center", fontSize: "11.5px" }}>
-                {immoProjectsTotal.clientsLabel}
-              </td>
-              <td className="num">
-                <strong>{immoProjectsTotal.projectsTotal}</strong>
-              </td>
-              <td className="num">{immoProjectsTotal.delayAverage}</td>
-              <td />
-            </tr>
-          </tbody>
-        </table>
+        <ProjectsTable />
       </div>
 
       {/* Répartition par type de programme */}

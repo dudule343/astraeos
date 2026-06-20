@@ -23,6 +23,13 @@ export type AgendaRdv = {
   isVisio: boolean;
   /** classe de couleur portée de la maquette (ev-gold / ev-navy / ev-success / ev-internal) */
   variant: "ev-gold" | "ev-navy" | "ev-success" | "ev-internal";
+  /**
+   * Destination du clic, comme la maquette (goToPage) :
+   *  - JOUBERT-BERTHOUX → fiche RDV Joubert,
+   *  - MERCIER → fiche RDV Mercier,
+   *  - tous les autres → fiche client générique.
+   */
+  href: string;
 };
 
 export type AgendaDayHeader = {
@@ -32,6 +39,8 @@ export type AgendaDayHeader = {
   name: string;
   /** numéro du jour dans le mois */
   num: number;
+  /** libellé complet pré-rempli dans la modale ("Lundi 11 mai 2026") */
+  fullLabel: string;
   isToday: boolean;
 };
 
@@ -60,12 +69,24 @@ export type AgendaData = {
   publicLink: string;
 };
 
-/** Salle de visio déterministe pour un RDV (même salle côté ingénieur et client). */
-export function visioRoom(rdv: AgendaRdv): string {
-  return `rdv-${rdv.id}`;
-}
-
 const DAY_NAMES = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
+const DAY_FULL_NAMES = [
+  "Lundi",
+  "Mardi",
+  "Mercredi",
+  "Jeudi",
+  "Vendredi",
+  "Samedi",
+  "Dimanche",
+];
+
+/**
+ * Cible de navigation des events, exactement comme la maquette (goToPage) :
+ * la fiche RDV pour Joubert/Mercier, la fiche client générique pour les autres.
+ */
+const FICHE_CLIENT_HREF = "/espace-ingenieur/clients/dupont-topin";
+const FICHE_RDV_JOUBERT_HREF = "/espace-ingenieur/agenda/joubert";
+const FICHE_RDV_MERCIER_HREF = "/espace-ingenieur/agenda/mercier";
 
 /** Les 14 événements de la maquette, dans l'ordre des créneaux. */
 const RDVS: AgendaRdv[] = [
@@ -78,6 +99,7 @@ const RDVS: AgendaRdv[] = [
     metaLabel: "Suivi conformité · tél.",
     isVisio: false,
     variant: "ev-navy",
+    href: FICHE_CLIENT_HREF,
   },
   {
     id: "marchand",
@@ -88,6 +110,7 @@ const RDVS: AgendaRdv[] = [
     metaLabel: "Suivi annuel · visio",
     isVisio: true,
     variant: "ev-navy",
+    href: FICHE_CLIENT_HREF,
   },
   {
     id: "lacroix",
@@ -98,6 +121,7 @@ const RDVS: AgendaRdv[] = [
     metaLabel: "Suivi trim. · présentiel",
     isVisio: false,
     variant: "ev-success",
+    href: FICHE_CLIENT_HREF,
   },
   {
     id: "lefebvre",
@@ -108,6 +132,7 @@ const RDVS: AgendaRdv[] = [
     metaLabel: "Suivi étude · visio",
     isVisio: true,
     variant: "ev-navy",
+    href: FICHE_CLIENT_HREF,
   },
   {
     id: "bonnard",
@@ -118,6 +143,7 @@ const RDVS: AgendaRdv[] = [
     metaLabel: "Point collecte · cabinet",
     isVisio: false,
     variant: "ev-gold",
+    href: FICHE_CLIENT_HREF,
   },
   {
     id: "joubert-berthoux",
@@ -128,6 +154,7 @@ const RDVS: AgendaRdv[] = [
     metaLabel: "Entretien initial couple · visio",
     isVisio: true,
     variant: "ev-gold",
+    href: FICHE_RDV_JOUBERT_HREF,
   },
   {
     id: "dupont-topin",
@@ -138,6 +165,7 @@ const RDVS: AgendaRdv[] = [
     metaLabel: "Restitution étude · 2h",
     isVisio: false,
     variant: "ev-gold",
+    href: FICHE_CLIENT_HREF,
   },
   {
     id: "lamoureux",
@@ -148,6 +176,7 @@ const RDVS: AgendaRdv[] = [
     metaLabel: "Revue annuelle · visio",
     isVisio: true,
     variant: "ev-gold",
+    href: FICHE_CLIENT_HREF,
   },
   {
     id: "tessier",
@@ -158,6 +187,7 @@ const RDVS: AgendaRdv[] = [
     metaLabel: "Entretien interm. · visio",
     isVisio: true,
     variant: "ev-navy",
+    href: FICHE_CLIENT_HREF,
   },
   {
     id: "charpentier",
@@ -168,6 +198,7 @@ const RDVS: AgendaRdv[] = [
     metaLabel: "1er entretien · cabinet",
     isVisio: false,
     variant: "ev-gold",
+    href: FICHE_CLIENT_HREF,
   },
   {
     id: "mercier",
@@ -178,6 +209,7 @@ const RDVS: AgendaRdv[] = [
     metaLabel: "Entretien initial · visio",
     isVisio: true,
     variant: "ev-gold",
+    href: FICHE_RDV_MERCIER_HREF,
   },
   {
     id: "lefranc",
@@ -188,6 +220,7 @@ const RDVS: AgendaRdv[] = [
     metaLabel: "Suivi étude · visio",
     isVisio: true,
     variant: "ev-navy",
+    href: FICHE_CLIENT_HREF,
   },
   {
     id: "equipe-camille",
@@ -198,6 +231,7 @@ const RDVS: AgendaRdv[] = [
     metaLabel: "Camille (junior) · brief",
     isVisio: false,
     variant: "ev-internal",
+    href: FICHE_CLIENT_HREF,
   },
   {
     id: "aubert",
@@ -208,6 +242,7 @@ const RDVS: AgendaRdv[] = [
     metaLabel: "Suivi conformité · tél.",
     isVisio: false,
     variant: "ev-navy",
+    href: FICHE_CLIENT_HREF,
   },
 ];
 
@@ -216,6 +251,7 @@ const DAYS: AgendaDayHeader[] = DAY_NAMES.map((name, index) => ({
   index,
   name,
   num: 11 + index,
+  fullLabel: `${DAY_FULL_NAMES[index]} ${11 + index} mai 2026`,
   isToday: index === 1,
 }));
 

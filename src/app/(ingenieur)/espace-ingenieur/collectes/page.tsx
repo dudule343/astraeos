@@ -9,6 +9,7 @@ import {
   type CollecteRow,
 } from "../../_data/collectes";
 import "../../_styles/collectes.css";
+import ProgressCell from "./ProgressCell";
 
 export const metadata = {
   title: "ASTRAEOS · Collecte docs & infos",
@@ -92,11 +93,12 @@ const STEP_ICONS: Record<string, React.ReactNode> = {
   ),
 };
 
+/** Picto œil, identique au symbole #i-eye de la maquette (viewBox + géométrie). */
 function EyeIcon() {
   return (
     <svg viewBox="0 0 24 24">
-      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-      <circle cx="12" cy="12" r="3" />
+      <path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7z" />
+      <circle cx="12" cy="12" r="2.8" />
     </svg>
   );
 }
@@ -150,10 +152,6 @@ function ClientCell({ row }: { row: CollecteRow }) {
 }
 
 export default function CollectesPage() {
-  // La cellule de progression et les actions « œil/relance » ouvrent le VRAI
-  // suivi de collecte (analyse IA + conversation + relances), déjà en place.
-  const collecteHref = "/collectes";
-
   return (
     <>
       <div className="pipeline-stepper-v1">
@@ -257,40 +255,15 @@ export default function CollectesPage() {
                     {row.openingMeta}
                   </div>
                 </td>
-                <td>
-                  <Link
-                    href={collecteHref}
-                    title={row.detail ?? "Ouvrir le suivi de collecte des documents"}
-                    style={{ display: "block", textDecoration: "none" }}
-                  >
-                    <div className="progress-cell">
-                      <div className="progress-bar">
-                        <div
-                          className={`progress-bar-fill${row.progressVariant ? ` ${row.progressVariant}` : ""}`}
-                          style={{ width: `${row.pct}%` }}
-                        />
-                      </div>
-                      <div className="progress-text">
-                        <span>
-                          {row.docsCollected}/{row.docsExpected} docs
-                        </span>
-                        <span className="pct">{row.pct} %</span>
-                      </div>
-                    </div>
-                  </Link>
-                </td>
+                <ProgressCell row={row} />
                 <td>
                   <span className={`status-pill-v1 ${row.status}`}>{row.statusLabel}</span>
                 </td>
                 <td className="center">
                   <div className="actions-cell">
-                    <Link
-                      href={collecteHref}
-                      className="action-btn"
-                      title={row.action === "relance" ? "Relancer le client" : "Consulter les documents collectés"}
-                    >
+                    <button className="action-btn" type="button">
                       {row.action === "relance" ? <RelanceIcon /> : <EyeIcon />}
-                    </Link>
+                    </button>
                   </div>
                 </td>
               </tr>

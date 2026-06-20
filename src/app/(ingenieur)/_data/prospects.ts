@@ -65,9 +65,9 @@ const VIEW: ProspectsView = {
   ],
   rows: [
     {
-      // Fiche prospect détaillée pas encore routée -> ligne non cliquable,
-      // bouton "voir" honnêtement désactivé (sera branché quand /prospects/[id] existera).
-      href: null,
+      // Ligne cliquable vers la fiche prospect (page-ing-fiche-prospect-aubert
+      // de la maquette, mappée sur prospects/[id] par le standard de portage).
+      href: "/espace-ingenieur/prospects/aubert",
       highlight: true,
       type: "couple",
       names: ["Jean AUBERT", "Martine AUBERT"],
@@ -79,7 +79,7 @@ const VIEW: ProspectsView = {
       status: { kind: "pill", tone: "sent", label: "DCI complété · 1/3" },
     },
     {
-      href: null,
+      href: "/espace-ingenieur/prospects/mercier",
       type: "seul",
       names: ["Nicolas MERCIER"],
       typeLabel: "Personne seule",
@@ -101,7 +101,7 @@ const VIEW: ProspectsView = {
       status: { kind: "pill", tone: "relance", label: "À relancer" },
     },
     {
-      href: null,
+      href: "/espace-ingenieur/prospects/joubert",
       type: "couple-pacs",
       names: ["Camille JOUBERT", "Yannick BERTHOUX"],
       typeLabel: "Couple PACS",

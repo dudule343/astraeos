@@ -11,3 +11,9 @@
   background: var(--green-bg);
   color: var(--green-text);
 }
+
+/* Conteneur de page — reprend le padding .content de la maquette
+   (--content-pad: 48px → 48px latéraux, 32px haut, 72px bas). */
+.maquette-ing .ing-profil-content {
+  padding: 32px 48px 72px;
+}
