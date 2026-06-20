@@ -51,7 +51,11 @@ export function PackSend({
     Object.fromEntries(pieces.map((p) => [p.id, true])),
   );
   const [pending, startTransition] = useTransition();
-  const [sentCount, setSentCount] = useState<number | null>(null);
+  const [result, setResult] = useState<{
+    sentCount: number;
+    emailSent: boolean;
+    error: string | null;
+  } | null>(null);
 
   const selectedCount = pieces.filter((p) => checked[p.id]).length;
 
@@ -64,8 +68,8 @@ export function PackSend({
       .filter((p) => checked[p.id] && p.type)
       .map((p) => p.type as ConformiteType);
     startTransition(async () => {
-      await sendConformitePack(dossierId, selectedTypes);
-      setSentCount(selectedCount);
+      const res = await sendConformitePack(dossierId, selectedTypes);
+      setResult({ sentCount: res.sentCount, emailSent: res.emailSent, error: res.error });
       router.refresh();
     });
   }
@@ -168,10 +172,17 @@ export function PackSend({
         {/* Action d'envoi groupé */}
         <div className="mt-4 flex items-center justify-between gap-3.5">
           <div className="text-[10.5px] leading-relaxed text-[var(--navy-300)]">
-            {sentCount !== null ? (
-              <strong className="text-[var(--green-text)]">
-                Pack envoyé · {sentCount} pièce(s) en signature (Yousign) + demande de règlement.
-              </strong>
+            {result ? (
+              result.error ? (
+                <strong className="text-[var(--gold-deep)]">
+                  Pièces passées en « envoyé » ({result.sentCount}) · e-mail NON remis : {result.error}
+                </strong>
+              ) : (
+                <strong className="text-[var(--green-text)]">
+                  Pack envoyé au client par e-mail · {result.sentCount} pièce(s) jointe(s) en PDF +
+                  demande de règlement.
+                </strong>
+              )
             ) : (
               <>
                 <strong className="text-[var(--navy)]">{selectedCount} pièces sélectionnées</strong>{" "}

@@ -18,12 +18,17 @@ type ListItem = {
   last_client_message_at: string | null;
 };
 
+type Verdict = "valide" | "refuse" | "a_revoir";
 type StructItem = {
   label: string;
   type?: "Document" | "Question";
   theme?: string;
   sub?: string;
   removed?: boolean;
+  // Verdict humain de l'ingénieur (coexiste avec le verdict IA des analyses).
+  verdict?: Verdict | null;
+  verdict_at?: string;
+  verdict_by?: string;
 };
 type Depot = {
   item_index: number;
@@ -90,6 +95,12 @@ function analyseBadge(status: string | null): { label: string; bg: string; fg: s
   }
 }
 
+const VERDICT_OPTIONS: { key: Verdict; label: string; bg: string; fg: string }[] = [
+  { key: "valide", label: "Validé", bg: "var(--green-bg,#e6f4ec)", fg: "var(--green-text,#1F5A36)" },
+  { key: "refuse", label: "Refusé", bg: "rgba(192,57,43,0.1)", fg: "#C0392B" },
+  { key: "a_revoir", label: "À revoir", bg: "var(--gold-100)", fg: "var(--gold-deep)" },
+];
+
 export function CollectesAdmin() {
   const [list, setList] = useState<ListItem[] | null>(null);
   const [listErr, setListErr] = useState<string | null>(null);
@@ -101,6 +112,7 @@ export function CollectesAdmin() {
   const [showAddItem, setShowAddItem] = useState(false);
   const [newItemLabel, setNewItemLabel] = useState("");
   const [addItemErr, setAddItemErr] = useState<string | null>(null);
+  const [relanceMsg, setRelanceMsg] = useState<{ ok: boolean; text: string } | null>(null);
 
   const loadList = useCallback(async () => {
     try {
@@ -140,6 +152,7 @@ export function CollectesAdmin() {
     setShowAddItem(false);
     setNewItemLabel("");
     setAddItemErr(null);
+    setRelanceMsg(null);
   }, [activeToken, loadDetail]);
 
   const addItem = async () => {
@@ -177,6 +190,47 @@ export function CollectesAdmin() {
         body: JSON.stringify({ action: "flag_removed", item_index: itemIndex }),
       });
       if (res.ok) loadDetail(activeToken);
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  // Verdict humain par pièce : toggle (re-cliquer le même verdict le retire).
+  const setVerdict = async (itemIndex: number, verdict: Verdict) => {
+    if (!activeToken) return;
+    const current = detail?.structure[itemIndex]?.verdict ?? null;
+    const next: Verdict | null = current === verdict ? null : verdict;
+    setBusy(`vd-${itemIndex}`);
+    try {
+      const res = await fetch(`/api/collecte-admin/${encodeURIComponent(activeToken)}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "set_verdict", item_index: itemIndex, verdict: next }),
+      });
+      if (res.ok) loadDetail(activeToken);
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const relancer = async () => {
+    if (!activeToken) return;
+    setBusy("relance");
+    setRelanceMsg(null);
+    try {
+      const res = await fetch(`/api/collecte-admin/${encodeURIComponent(activeToken)}/relance`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+      const data = (await res.json().catch(() => ({}))) as { error?: string; to?: string };
+      if (res.ok) {
+        setRelanceMsg({ ok: true, text: `Rappel envoyé à ${data.to ?? "le client"}.` });
+        loadDetail(activeToken);
+      } else {
+        setRelanceMsg({ ok: false, text: data.error ?? `Erreur HTTP ${res.status}` });
+      }
+    } catch {
+      setRelanceMsg({ ok: false, text: "Erreur réseau." });
     } finally {
       setBusy(null);
     }
@@ -311,10 +365,47 @@ export function CollectesAdmin() {
                   {detail.client_email} · créée {fmtDate(detail.created_at)}
                 </div>
               </div>
-              <div style={{ fontSize: 13, fontWeight: 700, color: "var(--navy)" }}>
-                {detail.progress.done}/{detail.progress.total} pièces
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 8 }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: "var(--navy)" }}>
+                  {detail.progress.done}/{detail.progress.total} pièces
+                </div>
+                <button
+                  onClick={relancer}
+                  disabled={busy === "relance" || !detail.client_email}
+                  title={
+                    detail.client_email
+                      ? "Renvoyer un e-mail de rappel au client"
+                      : "Aucune adresse e-mail sur cette collecte"
+                  }
+                  style={{
+                    fontSize: 12,
+                    fontWeight: 700,
+                    fontFamily: "inherit",
+                    color: detail.client_email ? "var(--navy)" : "var(--navy-300)",
+                    background: "var(--gold-100)",
+                    border: "1px solid var(--gold-200)",
+                    borderRadius: 8,
+                    padding: "7px 14px",
+                    cursor: detail.client_email && busy !== "relance" ? "pointer" : "default",
+                    opacity: detail.client_email && busy !== "relance" ? 1 : 0.6,
+                  }}
+                >
+                  {busy === "relance" ? "Envoi…" : "Relancer le client"}
+                </button>
               </div>
             </div>
+            {relanceMsg && (
+              <div
+                style={{
+                  marginTop: 10,
+                  fontSize: 12.5,
+                  fontWeight: 600,
+                  color: relanceMsg.ok ? "var(--green-text,#1F5A36)" : "#C0392B",
+                }}
+              >
+                {relanceMsg.text}
+              </div>
+            )}
 
             <div style={{ display: "flex", flexDirection: "column", gap: 10, margin: "20px 0" }}>
               {detail.structure.map((item, idx) => {
@@ -443,6 +534,48 @@ export function CollectesAdmin() {
                     {ana?.resume && (
                       <div style={{ marginTop: 8, fontSize: 12, color: "var(--navy)", lineHeight: 1.5 }}>
                         {ana.resume}
+                      </div>
+                    )}
+
+                    {/* Verdict humain de l'ingénieur (coexiste avec le verdict IA). */}
+                    {!item.removed && (
+                      <div
+                        style={{
+                          marginTop: 10,
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 8,
+                          flexWrap: "wrap",
+                        }}
+                      >
+                        <span style={{ fontSize: 11, fontWeight: 700, color: "var(--navy-300)" }}>
+                          Verdict ingénieur :
+                        </span>
+                        {VERDICT_OPTIONS.map((v) => {
+                          const selected = item.verdict === v.key;
+                          return (
+                            <button
+                              key={v.key}
+                              onClick={() => setVerdict(idx, v.key)}
+                              disabled={busy === `vd-${idx}`}
+                              title={v.label}
+                              style={{
+                                fontSize: 11,
+                                fontWeight: 700,
+                                padding: "4px 10px",
+                                borderRadius: 999,
+                                cursor: "pointer",
+                                fontFamily: "inherit",
+                                border: `1px solid ${selected ? v.fg : "var(--navy-100)"}`,
+                                background: selected ? v.bg : "transparent",
+                                color: selected ? v.fg : "var(--navy-300)",
+                                opacity: busy === `vd-${idx}` ? 0.6 : 1,
+                              }}
+                            >
+                              {v.label}
+                            </button>
+                          );
+                        })}
                       </div>
                     )}
                   </div>

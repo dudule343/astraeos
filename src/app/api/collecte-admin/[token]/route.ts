@@ -10,11 +10,18 @@ import { clientIp, rateLimit, rateLimitKey } from "@/lib/rate-limit";
  * Réservé au cabinet (cookie de session).
  */
 
+type Verdict = "valide" | "refuse" | "a_revoir";
+
 type Item = {
   theme?: string;
   sub?: string;
   label: string;
   type?: "Document" | "Question";
+  removed?: boolean;
+  // Verdict humain de l'ingénieur (coexiste avec le verdict IA collecte_analyses).
+  verdict?: Verdict | null;
+  verdict_at?: string;
+  verdict_by?: string;
 };
 
 type Depot = {
@@ -107,7 +114,9 @@ export async function GET(
 // ou marque une pièce comme retirée. L'item_index étant positionnel (dépôts,
 // analyses, messages y sont rattachés), on n'ajoute QU'EN FIN du tableau et on
 // ne retire jamais d'élément du milieu — un retrait est un drapeau {removed:true}.
-type StoredItem = Item & { removed?: boolean };
+type StoredItem = Item;
+
+const VERDICTS: readonly Verdict[] = ["valide", "refuse", "a_revoir"];
 
 export async function PATCH(
   req: NextRequest,
@@ -134,7 +143,12 @@ export async function PATCH(
     return NextResponse.json({ error: "Token invalide" }, { status: 404 });
   }
 
-  let payload: { action?: unknown; item?: unknown; item_index?: unknown };
+  let payload: {
+    action?: unknown;
+    item?: unknown;
+    item_index?: unknown;
+    verdict?: unknown;
+  };
   try {
     payload = await req.json();
   } catch {
@@ -213,6 +227,54 @@ export async function PATCH(
       return NextResponse.json({ error: "Mise à jour impossible" }, { status: 500 });
     }
     return NextResponse.json({ ok: true });
+  }
+
+  // Verdict humain de l'ingénieur par pièce : valide / refuse / a_revoir, ou null
+  // pour retirer le verdict. Stocké dans le JSON structure (pas de table dédiée),
+  // à côté du verdict IA (collecte_analyses).
+  if (payload.action === "set_verdict") {
+    const itemIndex = Number(payload.item_index);
+    if (!Number.isInteger(itemIndex) || itemIndex < 0 || itemIndex >= structure.length) {
+      return NextResponse.json({ error: "item_index invalide" }, { status: 400 });
+    }
+
+    const rawVerdict = payload.verdict;
+    let verdict: Verdict | null;
+    if (rawVerdict === null) {
+      verdict = null;
+    } else if (typeof rawVerdict === "string" && (VERDICTS as readonly string[]).includes(rawVerdict)) {
+      verdict = rawVerdict as Verdict;
+    } else {
+      return NextResponse.json({ error: "Verdict invalide" }, { status: 400 });
+    }
+
+    const next = structure.map((item, i) => {
+      if (i !== itemIndex) return item;
+      if (verdict === null) {
+        // Retire le verdict (et ses métadonnées) sans perdre le reste de l'item.
+        const rest = { ...item };
+        delete rest.verdict;
+        delete rest.verdict_at;
+        delete rest.verdict_by;
+        return rest;
+      }
+      return {
+        ...item,
+        verdict,
+        verdict_at: new Date().toISOString(),
+        verdict_by: ctx.userId,
+      };
+    });
+
+    const { error: upErr } = await supabase
+      .from("collectes")
+      .update({ structure: next })
+      .eq("id", collecte.id);
+
+    if (upErr) {
+      return NextResponse.json({ error: "Mise à jour impossible" }, { status: 500 });
+    }
+    return NextResponse.json({ ok: true, verdict });
   }
 
   return NextResponse.json({ error: "Action inconnue" }, { status: 400 });

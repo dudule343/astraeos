@@ -13,6 +13,8 @@ type BuildCollecteEmailArgs = {
   items: CollecteItem[];
   depotUrl: string;
   message?: string;
+  /** "rappel" adapte objet + intro pour une relance ; défaut = invitation initiale. */
+  variant?: "initial" | "rappel";
 };
 
 const NAVY = "#0B1C35";
@@ -34,8 +36,12 @@ export function buildCollecteEmail({
   items,
   depotUrl,
   message,
+  variant = "initial",
 }: BuildCollecteEmailArgs): { subject: string; html: string } {
-  const subject = "PRIVEOS · Documents nécessaires à votre étude patrimoniale";
+  const isRappel = variant === "rappel";
+  const subject = isRappel
+    ? "PRIVEOS · Rappel · Documents en attente pour votre étude patrimoniale"
+    : "PRIVEOS · Documents nécessaires à votre étude patrimoniale";
 
   const MAX_LISTED = 6;
   const listed = items.slice(0, MAX_LISTED);
@@ -64,10 +70,14 @@ export function buildCollecteEmail({
         </tr>`
       : "";
 
+  const defaultIntro = isRappel
+    ? `Madame, Monsieur,<br><br>Sauf erreur de notre part, certaines pièces nécessaires à votre étude patrimoniale ne nous sont pas encore parvenues. Nous nous permettons de vous adresser ce rappel et vous invitons à les déposer via votre espace sécurisé. Le dépôt est chiffré et réservé à votre conseiller.`
+    : `Madame, Monsieur,<br><br>Afin de finaliser votre étude patrimoniale, nous vous invitons à déposer les pièces ci-dessous via votre espace sécurisé. Le dépôt est chiffré et réservé à votre conseiller.`;
+
   const intro =
     message && message.trim()
       ? escapeHtml(message.trim()).replace(/\r?\n/g, "<br>")
-      : `Madame, Monsieur,<br><br>Afin de finaliser votre étude patrimoniale, nous vous invitons à déposer les pièces ci-dessous via votre espace sécurisé. Le dépôt est chiffré et réservé à votre conseiller.`;
+      : defaultIntro;
 
   const html = `<!DOCTYPE html>
 <html lang="fr">

@@ -16,12 +16,15 @@ import {
   PAY_LABELS,
   type CardType,
   type ConformiteRow,
+  type ConformiteType,
   type TrackerState,
   type PayState,
   type Stage03Condition,
 } from "@/lib/conformite";
+import { PDF_GENERATED_TYPES } from "@/lib/conformite-pdf";
 
-import { loadConformiteItems, advanceConformiteItem, relancerClient } from "./actions";
+import { loadConformiteItems, relancerClient } from "./actions";
+import { DocCardActions } from "./DocCardActions";
 import { PackSend, type PackPiece } from "./PackSend";
 import { moveDossierStage } from "../../actions";
 
@@ -247,43 +250,14 @@ function DocCard({ row, dossierId, honoraires }: { row: ConformiteRow; dossierId
         ))}
       </div>
 
-      {/* Actions */}
-      <div className="mt-3.5 grid grid-cols-3 gap-1.5">
-        <button
-          type="button"
-          data-stub={`Modifier · ${cfg.title}`}
-          data-stub-body="L'éditeur de pièce réglementaire sera disponible dans une prochaine itération. L'envoi au client se fait via le bouton « Envoyer »."
-          className="flex items-center justify-center gap-1 rounded-md border border-[var(--navy-100)] bg-white px-2 py-1.5 text-[10.5px] font-semibold text-[var(--navy)] hover:border-[var(--gold)]"
-        >
-          Modifier
-        </button>
-        {canSend ? (
-          <form action={advanceConformiteItem.bind(null, dossierId, row.type)}>
-            <button
-              type="submit"
-              className="flex w-full items-center justify-center gap-1 rounded-md bg-[var(--gold)] px-2 py-1.5 text-[10.5px] font-bold text-white hover:brightness-110"
-            >
-              Envoyer
-            </button>
-          </form>
-        ) : (
-          <span className="flex items-center justify-center rounded-md bg-[var(--ivory-deep)] px-2 py-1.5 text-[10.5px] font-semibold text-[var(--navy-300)]">
-            Envoyé
-          </span>
-        )}
-        <button
-          type="button"
-          data-stub={isLM ? `Signature · ${cfg.title}` : `Consulter · ${cfg.title}`}
-          data-stub-body={
-            isLM
-              ? "Le parcours de signature électronique (Yousign) sera disponible dans une prochaine itération. La pièce est transmise au client via « Envoyer »."
-              : "L'aperçu PDF de la pièce sera disponible dans une prochaine itération."
-          }
-          className="flex items-center justify-center gap-1 rounded-md border border-[var(--navy-100)] bg-white px-2 py-1.5 text-[10.5px] font-semibold text-[var(--navy)] hover:border-[var(--gold)]"
-        >
-          {isLM ? "Signer" : "Consulter"}
-        </button>
-      </div>
+      {/* Actions réelles (aperçu PDF, envoi, signature Yousign) */}
+      <DocCardActions
+        dossierId={dossierId}
+        type={row.type as ConformiteType}
+        title={cfg.title}
+        canSend={canSend}
+        hasPdf={PDF_GENERATED_TYPES.includes(row.type as ConformiteType)}
+      />
     </div>
   );
 }
