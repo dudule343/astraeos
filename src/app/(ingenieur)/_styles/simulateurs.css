@@ -1,0 +1,77 @@
+/*
+ * Simulateurs & calculateurs · écran maquette `page-ing-out-simulateurs`.
+ * Port fidèle des styles inline de la maquette ingénieur v28.
+ * Chaque sélecteur est scopé sous .maquette-ing. Les classes génériques
+ * (.hero, .card, .card-body, .btn, .btn-gold) viennent de maquette.css et
+ * ne sont pas redéfinies ici.
+ */
+
+/* 6 cartes alignées sur 3 colonnes, hauteur fixe, boutons alignés en bas */
+.maquette-ing .sim-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+/* Carte simulateur : liseré or à gauche, colonne flex pleine hauteur */
+.maquette-ing .sim-card {
+  border-left: 4px solid var(--gold);
+  display: flex;
+  flex-direction: column;
+}
+
+.maquette-ing .sim-card .card-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 260px;
+}
+
+/* En-tête : pictogramme + titre */
+.maquette-ing .sim-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+/* Pictogramme premium dans son cartouche ivoire bordé or */
+.maquette-ing .sim-icon {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  background: var(--ivory);
+  border: 1.5px solid var(--gold);
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  color: var(--gold-deep);
+}
+
+.maquette-ing .sim-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.maquette-ing .sim-title {
+  font-size: 15px;
+  color: var(--navy);
+}
+
+/* Texte descriptif (occupe l'espace pour aligner les boutons) */
+.maquette-ing .sim-desc {
+  font-size: 12px;
+  color: var(--navy-300);
+  line-height: 1.6;
+  flex: 1;
+}
+
+/* Bouton « Lancer le simulateur » aligné en bas */
+.maquette-ing .sim-btn {
+  width: 100%;
+  margin-top: 18px;
+  padding: 12px 16px;
+  font-size: 13px;
+  font-weight: 700;
+}

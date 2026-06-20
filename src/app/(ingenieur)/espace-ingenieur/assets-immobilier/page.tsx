@@ -1,122 +1,252 @@
 import Link from "next/link";
 
-import { KpiCard, type KpiBlock } from "@/app/_components/shared/KpiCard";
+import {
+  assetsImmoKpis,
+  immoProjects,
+  immoProjectsTotal,
+  programBreakdown,
+  type AssetsImmoKpi,
+  type ImmoProjectRow,
+} from "../../_data/assets-immobilier";
+import "../../_styles/assets-immobilier.css";
 
-import { EmptyState, PageScaffold } from "../../_components/PageScaffold";
+export const metadata = {
+  title: "ASTRAEOS · Investissement immobilier",
+};
 
-/**
- * Investissement immobilier (assets du portefeuille).
- *
- * La maquette présente des données de portefeuille (KPIs chiffrés, projets
- * nominatifs, répartition par programme). Aucune source de projets immobiliers
- * client n'est branchée à ce jour : on conserve la STRUCTURE et le contenu
- * statique (types de programmes, libellés, méthodologie) mais on affiche un
- * état honnête à la place des chiffres et des lignes clients fabriqués.
- */
+/** Picto « courbe + flèche » du titre de carte (symbol #i-business). */
+function BusinessIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 17l6-6 4 4 8-8" />
+      <path d="M14 7h7v7" />
+    </svg>
+  );
+}
 
-// Libellés statiques des KPIs repris de la maquette (sans valeur fabriquée).
-const KPIS: KpiBlock[] = [
-  {
-    label: "Montant des investissements immobiliers traités",
-    value: "—",
-    unit: "€",
-    meta: "cumul 2026 · projets réalisés",
-    valueTone: "gold",
-  },
-  {
-    label: "Projets réalisés",
-    value: "—",
-    meta: "aucun projet rattaché à votre portefeuille",
-  },
-  {
-    label: "Ticket moyen par projet",
-    value: "—",
-    unit: "€",
-    meta: "moyenne du portefeuille",
-  },
-];
+/** Picto « barres » du titre de carte (symbol #i-chart). */
+function ChartIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 21h18" />
+      <rect x="5" y="13" width="3" height="6" rx=".5" />
+      <rect x="11" y="9" width="3" height="10" rx=".5" />
+      <rect x="17" y="5" width="3" height="14" rx=".5" />
+    </svg>
+  );
+}
 
-// Catalogue statique des types de programme immobilier (info, pas de la donnée).
-const PROGRAMMES = [
-  "LMNP résidence services",
-  "Projet Denormandie",
-  "Ancien rénové",
-  "Location nue",
-];
+function KpiBlock({ kpi }: { kpi: AssetsImmoKpi }) {
+  return (
+    <div className="kpi">
+      <div className="kpi-label">{kpi.label}</div>
+      <div className={`kpi-value${kpi.valueTone === "gold" ? " gold" : ""}`}>
+        {kpi.value}
+        {kpi.unit ? <span className="unit"> {kpi.unit}</span> : null}
+      </div>
+      <div className="kpi-meta">{kpi.meta}</div>
+      <div className="kpi-compare-3">
+        {kpi.compare.map((c) => (
+          <div key={c.period}>
+            <div className="kpi-compare-3-period">{c.period}</div>
+            <div className={`kpi-compare-3-value ${c.direction}`}>
+              <span className="kpi-compare-3-arrow">{c.direction === "up" ? "▲" : "▼"}</span>
+              {c.value}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ProjectRow({ row }: { row: ImmoProjectRow }) {
+  return (
+    <tr style={{ cursor: "pointer" }}>
+      <td>
+        <div style={{ display: "flex", alignItems: "center", gap: "9px" }}>
+          <div className="ingenieur-avatar">{row.initials}</div>
+          <div className="cell-primary">{row.clientName}</div>
+        </div>
+      </td>
+      <td style={{ lineHeight: 1.9 }}>
+        {row.types.map((t, i) => (
+          <span key={t}>
+            <span
+              className="badge badge-gold"
+              style={{
+                fontSize: "10px",
+                display: "inline-block",
+                marginBottom: i < row.types.length - 1 ? "3px" : undefined,
+              }}
+            >
+              {t}
+            </span>
+            {i < row.types.length - 1 ? <br /> : null}
+          </span>
+        ))}
+      </td>
+      <td className="nowrap" style={{ fontSize: "11px", lineHeight: 1.9 }}>
+        {row.initiationDates.map((d, i) => (
+          <span key={i}>
+            {d}
+            {i < row.initiationDates.length - 1 ? <br /> : null}
+          </span>
+        ))}
+      </td>
+      <td className="nowrap" style={{ fontSize: "11px", lineHeight: 1.9 }}>
+        {row.deliveryDates.map((d, i) => (
+          <span key={i}>
+            {d}
+            {i < row.deliveryDates.length - 1 ? <br /> : null}
+          </span>
+        ))}
+      </td>
+      <td className="num" style={{ verticalAlign: "middle" }}>
+        {row.projectsTotal}
+      </td>
+      <td className="num" style={{ verticalAlign: "middle" }}>
+        {row.delay}
+      </td>
+      <td className="center" style={{ verticalAlign: "middle" }}>
+        <Link href="/espace-ingenieur/clients" className="btn btn-ghost btn-sm">
+          Voir →
+        </Link>
+      </td>
+    </tr>
+  );
+}
 
 export default function AssetsImmobilierPage() {
   return (
-    <PageScaffold
-      eyebrow="Assets du portefeuille · investissement immobilier"
-      title="Investissement immobilier"
-      description="Détail des projets immobiliers de votre portefeuille (LMNP, ancien rénové, Projet Denormandie, location nue)."
-      actions={
-        <>
-          <Link
-            href="/espace-ingenieur/assets"
-            className="rounded-md border border-[var(--navy-100)] bg-white px-3 py-2 text-[11.5px] font-semibold text-[var(--navy)] hover:border-[var(--gold)]"
-          >
+    <div className="maquette-ing assets-immo-page">
+      <div className="hero">
+        <div>
+          <div className="hero-eyebrow">Assets du portefeuille · investissement immobilier</div>
+          <h1 className="hero-title">
+            Investissement <strong>immobilier</strong>
+          </h1>
+          <p className="hero-sub">
+            Détail des projets immobiliers de votre portefeuille (LMNP, ancien rénové,
+            Projet Denormandie, location nue).
+          </p>
+        </div>
+        <div className="hero-actions">
+          <Link href="/espace-ingenieur/assets" className="btn btn-ghost btn-sm">
             ← Retour vue d&apos;ensemble
           </Link>
           <button
             type="button"
+            className="btn btn-gold btn-sm"
             disabled
-            title="En cours de construction · aucune donnée à exporter"
-            className="cursor-not-allowed rounded-md border border-[var(--navy-100)] bg-white px-3 py-2 text-[11.5px] font-semibold text-[var(--navy-300)] opacity-50"
+            title="En cours"
           >
             Exporter
           </button>
-        </>
-      }
-    >
-      <div className="mb-5 grid grid-cols-3 gap-4">
-        {KPIS.map((kpi) => (
-          <KpiCard key={kpi.label} kpi={kpi} />
+        </div>
+      </div>
+
+      {/* 3 KPIs : Volume + Projets + Ticket moyen */}
+      <div className="kpis kpis-3 mb-20">
+        {assetsImmoKpis.map((kpi) => (
+          <KpiBlock key={kpi.label} kpi={kpi} />
         ))}
       </div>
 
-      <section className="mb-5">
-        <div className="mb-3 flex items-end justify-between gap-4">
-          <div className="text-[15px] font-semibold text-[var(--navy)]">
+      {/* Détail de mes projets immobiliers */}
+      <div className="card mb-18">
+        <div className="card-header">
+          <div className="card-title">
+            <BusinessIcon />
             Détail de mes projets immobiliers
           </div>
-          <span className="text-[11px] text-[var(--navy-300)]">
-            cliquez sur un client pour le détail
+          <span style={{ fontSize: "11px", color: "var(--navy-300)" }}>
+            {immoProjects.length} projets · cliquez pour le détail client
           </span>
         </div>
-        <EmptyState>
-          Aucun projet immobilier n&apos;est rattaché à votre portefeuille pour le
-          moment. Les projets (LMNP, ancien rénové, Projet Denormandie, location
-          nue) apparaîtront ici dès qu&apos;une mise en relation sera concrétisée.
-        </EmptyState>
-      </section>
+        <table className="dt">
+          <thead>
+            <tr>
+              <th>Clients</th>
+              <th>Types</th>
+              <th>Dates d&apos;initiation</th>
+              <th>Dates de livraison</th>
+              <th className="num">Projets total</th>
+              <th className="num">Délai</th>
+              <th className="center">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {immoProjects.map((row) => (
+              <ProjectRow key={row.clientId} row={row} />
+            ))}
+            <tr style={{ background: "var(--gold-200)", fontWeight: 700 }}>
+              <td>
+                <strong>Total portefeuille</strong>
+              </td>
+              <td colSpan={3} style={{ textAlign: "center", fontSize: "11.5px" }}>
+                {immoProjectsTotal.clientsLabel}
+              </td>
+              <td className="num">
+                <strong>{immoProjectsTotal.projectsTotal}</strong>
+              </td>
+              <td className="num">{immoProjectsTotal.delayAverage}</td>
+              <td />
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
-      <section>
-        <div className="mb-3 text-[15px] font-semibold text-[var(--navy)]">
-          Répartition par type de programme du portefeuille
+      {/* Répartition par type de programme */}
+      <div className="card mb-24">
+        <div className="card-header">
+          <div className="card-title">
+            <ChartIcon />
+            Répartition par type de programme du portefeuille
+          </div>
         </div>
-        <div className="rounded-md border border-[var(--navy-100)] bg-white p-5">
-          <div className="grid grid-cols-4 gap-4">
-            {PROGRAMMES.map((p) => (
+        <div style={{ padding: "22px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "18px" }}>
+            {programBreakdown.map((p) => (
               <div
-                key={p}
-                className="rounded-lg bg-[var(--ivory)] p-4 text-center opacity-60"
+                key={p.label}
+                style={{
+                  textAlign: "center",
+                  padding: "16px",
+                  background: p.muted ? "var(--ivory)" : "var(--gold-100)",
+                  borderRadius: "8px",
+                  opacity: p.muted ? 0.5 : 1,
+                }}
               >
-                <div className="text-[24px] font-bold leading-none text-[var(--navy-300)]">
-                  —
+                <div
+                  style={{
+                    fontSize: "24px",
+                    fontWeight: 700,
+                    color: p.muted ? "var(--navy-300)" : "var(--gold-deep)",
+                  }}
+                >
+                  {p.count}
                 </div>
-                <div className="mt-2 text-[11.5px] font-semibold text-[var(--navy-300)]">
-                  {p}
+                <div
+                  style={{
+                    fontSize: "11.5px",
+                    color: p.muted ? "var(--navy-300)" : "var(--navy)",
+                    fontWeight: 600,
+                    marginTop: "4px",
+                  }}
+                >
+                  {p.label}
                 </div>
+                {p.share ? (
+                  <div style={{ fontSize: "10px", color: "var(--navy-300)", marginTop: "2px" }}>
+                    {p.share}
+                  </div>
+                ) : null}
               </div>
             ))}
           </div>
-          <p className="mt-4 text-[11px] leading-relaxed text-[var(--navy-300)]">
-            La répartition par programme se calculera à partir des projets de votre
-            portefeuille. Aucun projet n&apos;est encore comptabilisé.
-          </p>
         </div>
-      </section>
-    </PageScaffold>
+      </div>
+    </div>
   );
 }

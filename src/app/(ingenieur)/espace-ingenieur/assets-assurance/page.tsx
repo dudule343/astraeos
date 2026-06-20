@@ -1,151 +1,203 @@
 import Link from "next/link";
 
-import { PageScaffold, EmptyState } from "../../_components/PageScaffold";
+import "../../_styles/maquette.css";
+import "../../_styles/assets-assurance.css";
+import { getAssetsAssurance } from "../../_data/assets-assurance";
 
 export const dynamic = "force-dynamic";
 
-/**
- * Assets du portefeuille · Assurance.
- *
- * La maquette présente 3 KPIs (contrats actifs, clients concernés, frais de dossier),
- * un tableau détaillé des contrats par client, et un tableau « top produits ».
- * Ces chiffres et lignes sont des données dynamiques par client/contrat : il n'existe
- * aucune table de contrats d'assurance dans la base. On reproduit donc fidèlement la
- * structure (hero, KPIs, tableaux, libellés de colonnes et de produits) mais on affiche
- * un état vide honnête tant que la source n'est pas branchée — jamais de fausse donnée.
- */
+const BASE = "/espace-ingenieur";
 
-// Libellés informatifs des KPIs de la maquette (structure, pas la donnée chiffrée).
-const KPI_LABELS = [
-  { label: "Contrats actifs", meta: "tous types confondus · portefeuille" },
-  { label: "Clients concernés", meta: "clients du portefeuille avec assurance" },
-  {
-    label: "Frais de dossier appliqués au client",
-    meta: "cumul 2026 · facturés directement par vous",
-  },
-] as const;
+export const metadata = {
+  title: "ASTRAEOS · Espace Ingénieur · Assets · Assurance",
+};
 
-// Familles de produits d'assurance distribuables (information de la maquette).
-const PRODUITS = [
-  "Mutuelle dirigeant",
-  "Prévoyance pro",
-  "Emprunteur immobilier",
-  "Assurance pro",
-  "Homme clé",
-] as const;
+/* Pictos copiés tels quels depuis les symboles SVG de la maquette. */
+const ShieldIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+    <polyline points="9 12 11 14 15 10" />
+  </svg>
+);
 
-function KpiPlaceholder({ label, meta }: { label: string; meta: string }) {
-  return (
-    <div className="rounded-md border border-[var(--navy-100)] bg-white p-4">
-      <div className="mb-2 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-[var(--navy-300)]">
-        {label}
-      </div>
-      <div className="mb-1 text-[24px] font-bold leading-none text-[var(--navy-300)]">—</div>
-      <div className="text-[11px] text-[var(--navy-300)]">{meta}</div>
-    </div>
-  );
-}
+const QualityIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 3l8 3v6c0 5-3.5 8.5-8 9.5-4.5-1-8-4.5-8-9.5V6l8-3z" />
+    <path d="M9 12l2.5 2.5L16 10" />
+  </svg>
+);
 
 export default function AssetsAssurancePage() {
+  const data = getAssetsAssurance();
+
   return (
-    <PageScaffold
-      eyebrow="Assets du portefeuille · assurance"
-      title="Assurance"
-      description="Détail des contrats d'assurance distribués via votre portefeuille (emprunteur immo, prêt conso, prévoyance pro, mutuelle dirigeant, homme clé). Frais de dossier appliqués au client."
-      actions={
-        <>
-          <Link
-            href="/espace-ingenieur/assets"
-            className="rounded-md border border-[var(--navy-100)] bg-white px-3 py-2 text-[11.5px] font-semibold text-[var(--navy)] hover:border-[var(--gold)]"
-          >
+    <div className="maquette-ing px-10 py-8">
+      {/* HERO */}
+      <div className="hero">
+        <div>
+          <div className="hero-eyebrow">Assets du portefeuille · assurance</div>
+          <h1 className="hero-title">
+            <strong>Assurance</strong>
+          </h1>
+          <p className="hero-sub">
+            Détail des contrats d&apos;assurance distribués via votre portefeuille (emprunteur
+            immo, prêt conso, prévoyance pro, mutuelle dirigeant, homme clé). Frais de dossier
+            appliqués au client.
+          </p>
+        </div>
+        <div className="hero-actions">
+          <Link href={`${BASE}/assets`} className="btn btn-ghost btn-sm">
             ← Retour vue d&apos;ensemble
           </Link>
           <button
             type="button"
+            className="btn btn-gold btn-sm"
             disabled
-            title="En cours de construction · disponible une fois les contrats d'assurance branchés"
-            className="cursor-not-allowed rounded-md bg-[var(--gold)] px-3 py-2 text-[11.5px] font-bold text-white opacity-50"
+            title="Export en cours de construction"
           >
             Exporter
           </button>
-        </>
-      }
-    >
-      {/* 3 KPIs : Contrats actifs · Clients concernés · Frais appliqués clients */}
-      <div className="mb-6 grid grid-cols-3 gap-4">
-        {KPI_LABELS.map((k) => (
-          <KpiPlaceholder key={k.label} label={k.label} meta={k.meta} />
+        </div>
+      </div>
+
+      {/* 3 KPIs : Contrats actifs + Clients + Frais appliqués clients */}
+      <div className="kpis kpis-3 mb-20">
+        {data.kpis.map((kpi) => (
+          <div className="kpi" key={kpi.label}>
+            <div className="kpi-label">{kpi.label}</div>
+            <div className={`kpi-value${kpi.goldValue ? " gold" : ""}`}>
+              {kpi.value}
+              {kpi.unit ? <span className="unit"> {kpi.unit}</span> : null}
+            </div>
+            <div className="kpi-meta">{kpi.meta}</div>
+            <div className="kpi-compare-3">
+              {kpi.compare.map((c) => (
+                <div key={c.period}>
+                  <div className="kpi-compare-3-period">{c.period}</div>
+                  <div className={`kpi-compare-3-value ${c.dir}`}>
+                    <span className="kpi-compare-3-arrow">{c.dir === "up" ? "▲" : "▼"}</span>
+                    {c.delta}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         ))}
       </div>
 
       {/* Détail de mes contrats d'assurance */}
-      <div className="mb-5 rounded-lg border border-[var(--navy-100)] bg-white">
-        <div className="flex items-center justify-between border-b border-[var(--navy-100)] px-5 py-3.5">
-          <div className="text-[13.5px] font-bold text-[var(--navy)]">
+      <div className="card mb-18">
+        <div className="card-header">
+          <div className="card-title">
+            <ShieldIcon />
             Détail de mes contrats d&apos;assurance
           </div>
+          <span style={{ fontSize: "11px", color: "var(--navy-300)" }}>
+            {data.total.contracts} contrats actifs · cliquez pour le détail client
+          </span>
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse text-[12px]">
-            <thead>
-              <tr className="text-left text-[10.5px] font-bold uppercase tracking-[0.08em] text-[var(--navy-300)]">
-                <th className="px-5 py-2.5">Clients</th>
-                <th className="px-5 py-2.5 text-right">Contrats actifs</th>
-                <th className="px-5 py-2.5">Types souscrits</th>
-                <th className="px-5 py-2.5">Dates de souscription</th>
-                <th className="px-5 py-2.5 text-right">Frais de dossier perçus</th>
-                <th className="px-5 py-2.5 text-center">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td
-                  colSpan={6}
-                  className="px-5 py-10 text-center text-[12.5px] text-[var(--navy-300)]"
-                >
-                  Aucun contrat d&apos;assurance pour le moment. Les contrats de vos clients
-                  apparaîtront ici dès que cette rubrique sera branchée sur leurs données.
+        <table className="dt">
+          <thead>
+            <tr>
+              <th>Clients</th>
+              <th className="num">Contrats actifs</th>
+              <th>Types souscrits</th>
+              <th>Dates de souscription</th>
+              <th className="num">Frais de dossier perçus</th>
+              <th className="center">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.clients.map((c) => (
+              <tr key={c.clientId} className="dt-clickable">
+                <td>
+                  <div style={{ display: "flex", alignItems: "center", gap: "9px" }}>
+                    <div className="ingenieur-avatar">{c.initials}</div>
+                    <Link href={`${BASE}/clients`} className="cell-primary" style={{ textDecoration: "none" }}>
+                      {c.name}
+                    </Link>
+                  </div>
+                </td>
+                <td className="num" style={{ verticalAlign: "middle" }}>
+                  {c.contracts.length}
+                </td>
+                <td style={{ lineHeight: 1.9 }}>
+                  {c.contracts.map((ct, i) => (
+                    <span key={i}>
+                      <span
+                        className="badge badge-gold"
+                        style={{ fontSize: "10px", display: "inline-block", marginBottom: "3px" }}
+                      >
+                        {ct.label}
+                      </span>
+                      {i < c.contracts.length - 1 ? <br /> : null}
+                    </span>
+                  ))}
+                </td>
+                <td className="nowrap" style={{ fontSize: "11px", lineHeight: 1.9 }}>
+                  {c.contracts.map((ct, i) => (
+                    <span key={i}>
+                      {ct.date}
+                      {i < c.contracts.length - 1 ? <br /> : null}
+                    </span>
+                  ))}
+                </td>
+                <td className="num cell-money gold" style={{ verticalAlign: "middle" }}>
+                  {c.fees}
+                </td>
+                <td className="center" style={{ verticalAlign: "middle" }}>
+                  <Link href={`${BASE}/clients`} className="btn btn-ghost btn-sm">
+                    Voir →
+                  </Link>
                 </td>
               </tr>
-            </tbody>
-          </table>
-        </div>
+            ))}
+            <tr className="dt-total">
+              <td>
+                <strong>Total portefeuille</strong>
+              </td>
+              <td className="num">
+                <strong>{data.total.contracts}</strong>
+              </td>
+              <td colSpan={2} style={{ textAlign: "center", fontSize: "11.5px", color: "var(--navy)" }}>
+                {data.total.clientsLabel}
+              </td>
+              <td className="num cell-money gold">{data.total.fees}</td>
+              <td />
+            </tr>
+          </tbody>
+        </table>
       </div>
 
       {/* Top produits d'assurance placés par le portefeuille */}
-      <div className="rounded-lg border border-[var(--navy-100)] bg-white">
-        <div className="flex items-center justify-between border-b border-[var(--navy-100)] px-5 py-3.5">
-          <div className="text-[13.5px] font-bold text-[var(--navy)]">
+      <div className="card mb-24">
+        <div className="card-header">
+          <div className="card-title">
+            <QualityIcon />
             Top produits d&apos;assurance placés par le portefeuille
           </div>
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse text-[12px]">
-            <thead>
-              <tr className="text-left text-[10.5px] font-bold uppercase tracking-[0.08em] text-[var(--navy-300)]">
-                <th className="px-5 py-2.5">Produit</th>
-                <th className="px-5 py-2.5 text-right">Contrats</th>
-                <th className="px-5 py-2.5 text-right">Frais perçus</th>
+        <table className="dt" style={{ fontSize: "12px" }}>
+          <thead>
+            <tr>
+              <th>Produit</th>
+              <th className="num">Contrats</th>
+              <th className="num">Frais perçus</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.topProducts.map((p) => (
+              <tr key={p.product}>
+                <td>
+                  <strong>{p.product}</strong>
+                </td>
+                <td className={`num cell-money${p.goldCount ? " gold" : ""}`}>{p.contracts}</td>
+                <td className="num cell-money">{p.fees}</td>
               </tr>
-            </thead>
-            <tbody>
-              {PRODUITS.map((p) => (
-                <tr key={p} className="border-t border-[var(--navy-100)]">
-                  <td className="px-5 py-3 font-semibold text-[var(--navy)]">{p}</td>
-                  <td className="px-5 py-3 text-right text-[var(--navy-300)]">—</td>
-                  <td className="px-5 py-3 text-right text-[var(--navy-300)]">—</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <div className="border-t border-[var(--navy-100)] px-5 py-3">
-          <EmptyState>
-            Le volume placé par famille de produit s&apos;affichera ici une fois les contrats
-            d&apos;assurance de votre portefeuille connectés.
-          </EmptyState>
-        </div>
+            ))}
+          </tbody>
+        </table>
       </div>
-    </PageScaffold>
+    </div>
   );
 }

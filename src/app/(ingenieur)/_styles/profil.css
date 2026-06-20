@@ -1,0 +1,13 @@
+/* ==========================================================================
+   Écran « Profil & agréments » (page-ing-profil) — CSS porté de la maquette v28.
+   Chaque sélecteur est préfixé .maquette-ing. Les classes génériques (hero,
+   card, card-header, card-title, card-body, badge, btn, mb-18) viennent déjà
+   de maquette.css ; ici uniquement ce qui manque pour cet écran.
+   La maquette stylise le reste en inline : on le porte en inline côté TSX.
+   ========================================================================== */
+
+/* Badge « Valide / Tous valides / Compte actif » (badge-success) ---------- */
+.maquette-ing .badge-success {
+  background: var(--green-bg);
+  color: var(--green-text);
+}

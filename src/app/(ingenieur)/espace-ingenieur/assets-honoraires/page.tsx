@@ -1,198 +1,185 @@
 import Link from "next/link";
 
-import { PageScaffold } from "../../_components/PageScaffold";
-import { KpiCard, type KpiBlock } from "@/app/_components/shared/KpiCard";
-import { GoldButton, SectionHeader } from "@/app/_components/shared/PageHeader";
-import { fetchHonoraires, formatEuros, type HonoraireRow } from "./honoraires-data";
-import { TemplateDownloads } from "./TemplateDownloads";
+import {
+  honorairesKpis,
+  etudesMissions,
+  honorairesTotal,
+  repartitionMissions,
+} from "../../_data/assets-honoraires";
+import "../../_styles/assets-honoraires.css";
 
-export const dynamic = "force-dynamic";
+export const metadata = {
+  title: "ASTRAEOS · Honoraires de conseil",
+};
 
-function formatDateFr(date: string | null): string {
-  if (!date) return "—";
-  const t = new Date(date);
-  if (Number.isNaN(t.getTime())) return "—";
-  return t.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" });
-}
-
-function initials(name: string): string {
-  const parts = name.split(/\s+/).filter(Boolean);
-  if (parts.length === 0) return "—";
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-  return `${parts[0].charAt(0)}${parts[parts.length - 1].charAt(0)}`.toUpperCase();
-}
-
-export default async function AssetsHonorairesPage() {
-  const { rows, studyCount, totalHt, averageHt } = await fetchHonoraires();
-  const hasData = rows.length > 0;
-
-  const kpis: KpiBlock[] = [
-    {
-      label: "Études et missions réalisées",
-      value: hasData ? String(studyCount) : "—",
-      valueTone: "gold",
-      meta: "cumul 2026 · portefeuille",
-    },
-    {
-      label: "Honoraires HT facturés",
-      value: hasData ? formatEuros(totalHt).replace(" €", "") : "—",
-      unit: hasData ? "€" : undefined,
-      meta: "cumul 2026 · portefeuille",
-    },
-    {
-      label: "Honoraire moyen",
-      value: hasData && averageHt != null ? formatEuros(averageHt).replace(" €", "") : "—",
-      unit: hasData && averageHt != null ? "€" : undefined,
-      meta: "moyenne du portefeuille",
-    },
-  ];
-
+/** Picto document (sprite #i-doc de la maquette), inliné. */
+function IconDoc() {
   return (
-    <PageScaffold
-      eyebrow="Assets du portefeuille · honoraires de conseil"
-      title="Honoraires de conseil"
-      description="Détail de vos études patrimoniales facturées : études réalisées, frais d'études, honoraires moyens."
-      actions={
-        <>
-          <Link
-            href="/espace-ingenieur/assets"
-            className="rounded-md border border-[var(--navy-100)] bg-white px-3 py-2 text-[11.5px] font-semibold text-[var(--navy)] hover:border-[var(--gold)]"
-          >
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+      <polyline points="14 2 14 8 20 8" />
+      <line x1="8" y1="13" x2="16" y2="13" />
+      <line x1="8" y1="17" x2="16" y2="17" />
+    </svg>
+  );
+}
+
+/** Picto graphique (sprite #i-chart de la maquette), inliné. */
+function IconChart() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="4" y1="20" x2="20" y2="20" />
+      <rect x="6" y="12" width="3" height="6" />
+      <rect x="11" y="8" width="3" height="10" />
+      <rect x="16" y="4" width="3" height="14" />
+    </svg>
+  );
+}
+
+export default function AssetsHonorairesPage() {
+  return (
+    <div className="assets-honoraires-page-wrap">
+      <div className="hero">
+        <div>
+          <div className="hero-eyebrow">Assets du portefeuille · honoraires de conseil</div>
+          <h1 className="hero-title">
+            Honoraires <strong>de conseil</strong>
+          </h1>
+          <p className="hero-sub">
+            Détail de vos études patrimoniales facturées · études réalisées, frais
+            d&apos;études, honoraires moyens.
+          </p>
+        </div>
+        <div className="hero-actions">
+          <Link href="/espace-ingenieur/assets" className="btn btn-ghost btn-sm">
             ← Retour vue d&apos;ensemble
           </Link>
-          <GoldButton
-            dataStub="Export des honoraires"
-            dataStubBody="L'export du détail des honoraires sera disponible prochainement."
+          <button
+            type="button"
+            className="btn btn-gold btn-sm"
+            data-stub="Exporter les honoraires de conseil"
+            data-stub-body="L'export du détail de vos honoraires de conseil sera disponible dans une prochaine itération."
           >
             Exporter
-          </GoldButton>
-        </>
-      }
-    >
-      <div className="mb-5 grid grid-cols-3 gap-4">
-        {kpis.map((kpi) => (
-          <KpiCard key={kpi.label} kpi={kpi} />
+          </button>
+        </div>
+      </div>
+
+      {/* 3 KPIs : Études réalisées + Honoraires + Honoraire moyen */}
+      <div className="kpis kpis-3 mb-20">
+        {honorairesKpis.map((kpi) => (
+          <div className="kpi" key={kpi.label}>
+            <div className="kpi-label">{kpi.label}</div>
+            <div className={`kpi-value${kpi.valueGold ? " gold" : ""}`}>
+              {kpi.value}
+              {kpi.unit ? <span className="unit"> {kpi.unit}</span> : null}
+            </div>
+            <div className="kpi-meta">{kpi.meta}</div>
+            <div className="kpi-compare-3">
+              {kpi.compare.map((c) => (
+                <div key={c.period}>
+                  <div className="kpi-compare-3-period">{c.period}</div>
+                  <div className={`kpi-compare-3-value ${c.dir}`}>
+                    <span className="kpi-compare-3-arrow">{c.dir === "up" ? "▲" : "▼"}</span>
+                    {c.value}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         ))}
       </div>
 
-      <section className="mb-5">
-        <SectionHeader
-          eyebrow="Détail"
-          title="Détail de mes études patrimoniales"
-          right={
-            <span className="text-[11px] text-[var(--navy-300)]">
-              {hasData
-                ? `${studyCount} étude${studyCount > 1 ? "s" : ""} réalisée${studyCount > 1 ? "s" : ""} · cliquez pour le détail client`
-                : "aucune étude facturée pour le moment"}
-            </span>
-          }
-        />
-        {hasData ? (
-          <DetailTable rows={rows} totalHt={totalHt} studyCount={studyCount} />
-        ) : (
-          <EmptyCard>
-            Aucune étude patrimoniale facturée pour le moment. Les études restituées à vos
-            clients apparaîtront ici avec leurs honoraires.
-          </EmptyCard>
-        )}
-      </section>
-
-      <section className="mb-5">
-        <SectionHeader eyebrow="Analyse" title="Répartition par type de mission du portefeuille" />
-        <EmptyCard>
-          La répartition par type de mission (étude patrimoniale, optimisation de la
-          rémunération du gérant, immatriculation de société…) sera disponible dès que la
-          qualification des missions sera renseignée sur vos dossiers.
-        </EmptyCard>
-      </section>
-
-      <section>
-        <SectionHeader eyebrow="Documents" title="Modèles contractuels" />
-        <TemplateDownloads />
-      </section>
-    </PageScaffold>
-  );
-}
-
-function DetailTable({
-  rows,
-  totalHt,
-  studyCount,
-}: {
-  rows: HonoraireRow[];
-  totalHt: number;
-  studyCount: number;
-}) {
-  return (
-    <div className="overflow-hidden rounded-lg border border-[var(--navy-100)] bg-white">
-      <table className="w-full border-collapse text-[12.5px]">
-        <thead>
-          <tr className="bg-[var(--navy)] text-left text-[10.5px] uppercase tracking-[0.06em] text-white">
-            <th className="px-4 py-2.5 font-semibold">Clients</th>
-            <th className="px-4 py-2.5 font-semibold">Entrée en relation</th>
-            <th className="px-4 py-2.5 font-semibold">Date de l&apos;étude</th>
-            <th className="px-4 py-2.5 text-right font-semibold">Honoraires facturés</th>
-            <th className="px-4 py-2.5 text-center font-semibold">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((r, i) => (
-            <tr key={r.id} className={i % 2 === 1 ? "bg-[var(--ivory)]" : "bg-white"}>
-              <td className="border-b border-[var(--navy-100)] px-4 py-2.5">
-                <Link
-                  href={`/dossiers/${r.id}`}
-                  className="flex items-center gap-2.5 hover:text-[var(--gold)]"
-                >
-                  <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full border-[1.5px] border-[var(--gold-300)] bg-[var(--light-blue)] text-[10px] font-bold text-[var(--navy)]">
-                    {initials(r.clientName)}
-                  </span>
-                  <span className="font-semibold text-[var(--navy)]">{r.clientName}</span>
-                </Link>
-              </td>
-              <td className="whitespace-nowrap border-b border-[var(--navy-100)] px-4 py-2.5 text-[11px] text-[var(--navy-300)]">
-                {formatDateFr(r.entryDate)}
-              </td>
-              <td className="whitespace-nowrap border-b border-[var(--navy-100)] px-4 py-2.5 text-[11px] text-[var(--navy-300)]">
-                {formatDateFr(r.studyDate)}
-              </td>
-              <td className="border-b border-[var(--navy-100)] px-4 py-2.5 text-right font-semibold text-[var(--gold-deep)]">
-                {formatEuros(r.honoraires)}
-              </td>
-              <td className="border-b border-[var(--navy-100)] px-4 py-2.5 text-center">
-                <Link
-                  href={`/dossiers/${r.id}`}
-                  className="inline-block rounded-md border border-[var(--navy-100)] bg-white px-3 py-1.5 text-[11px] font-semibold text-[var(--navy)] hover:border-[var(--gold)]"
-                >
-                  Voir →
-                </Link>
-              </td>
+      {/* Détail de mes études patrimoniales */}
+      <div className="card mb-18">
+        <div className="card-header">
+          <div className="card-title">
+            <IconDoc />
+            Détail de mes études patrimoniales
+          </div>
+          <span className="card-header-note">
+            {etudesMissions.length} études réalisées · cliquez pour le détail client
+          </span>
+        </div>
+        <table className="dt">
+          <thead>
+            <tr>
+              <th>Clients</th>
+              <th>Entrée en relation</th>
+              <th>Type de conseil</th>
+              <th>Dates de l&apos;étude</th>
+              <th className="num">Honoraires facturés</th>
+              <th className="center">Actions</th>
             </tr>
-          ))}
-          <tr className="bg-[var(--gold-200)] font-bold text-[var(--navy)]">
-            <td className="px-4 py-2.5">Total portefeuille</td>
-            <td className="px-4 py-2.5 text-center text-[11.5px]" colSpan={2}>
-              {studyCount} étude{studyCount > 1 ? "s" : ""} facturée{studyCount > 1 ? "s" : ""}
-            </td>
-            <td className="px-4 py-2.5 text-right text-[var(--gold-deep)]">
-              {formatEuros(totalHt)}
-            </td>
-            <td className="px-4 py-2.5" />
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
-function EmptyCard({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="rounded-lg border border-dashed border-[var(--navy-100)] bg-white p-10 text-center">
-      <div className="mb-1 text-[13px] font-semibold text-[var(--navy)]">
-        Aucune donnée pour le moment
+          </thead>
+          <tbody>
+            {etudesMissions.map((m) => (
+              <tr className="dt-clickable" key={m.clientId}>
+                <td>
+                  <Link href={`/espace-ingenieur/clients/${m.clientId}`} className="hon-client-cell">
+                    <span className="ingenieur-avatar">{m.initials}</span>
+                    <span className="cell-primary">{m.client}</span>
+                  </Link>
+                </td>
+                <td className="nowrap" style={{ fontSize: "11px" }}>
+                  {m.entreeRelation}
+                </td>
+                <td className="hon-conseil-cell">
+                  {m.typesConseil.map((t, i) => (
+                    <span className="badge badge-gold" key={i}>
+                      {t}
+                    </span>
+                  ))}
+                </td>
+                <td className="nowrap hon-dates-cell">
+                  {m.datesEtude.map((d, i) => (
+                    <span className="hon-date-line" key={i}>
+                      {d}
+                    </span>
+                  ))}
+                </td>
+                <td className="num cell-money gold">{m.honoraires}</td>
+                <td className="center">
+                  <Link href={`/espace-ingenieur/clients/${m.clientId}`} className="btn btn-ghost btn-sm">
+                    Voir →
+                  </Link>
+                </td>
+              </tr>
+            ))}
+            <tr className="hon-total-row">
+              <td>
+                <strong>Total portefeuille</strong>
+              </td>
+              <td className="hon-total-resume" colSpan={3}>
+                {honorairesTotal.resume}
+              </td>
+              <td className="num cell-money gold">{honorairesTotal.montant}</td>
+              <td />
+            </tr>
+          </tbody>
+        </table>
       </div>
-      <p className="mx-auto max-w-lg text-[12px] leading-relaxed text-[var(--navy-300)]">
-        {children}
-      </p>
+
+      {/* Répartition par type de mission du portefeuille */}
+      <div className="card mb-24">
+        <div className="card-header">
+          <div className="card-title">
+            <IconChart />
+            Répartition par type de mission du portefeuille
+          </div>
+        </div>
+        <div className="card-body hon-repartition-body">
+          <div className="hon-repartition-grid">
+            {repartitionMissions.map((r) => (
+              <div className="hon-repartition-tile" key={r.label}>
+                <div className="hon-repartition-count">{r.count}</div>
+                <div className="hon-repartition-label">{r.label}</div>
+                <div className="hon-repartition-meta">{r.meta}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

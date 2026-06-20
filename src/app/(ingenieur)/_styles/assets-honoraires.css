@@ -1,0 +1,238 @@
+/* =========================================================================
+ * Portage fidèle du CSS de la maquette 0 - 030_Wireframes_Ingenieur_v28.html
+ * pour l'écran « Assets · honoraires de conseil » (id page-ing-assets-honoraires).
+ *
+ * Chaque sélecteur est préfixé par .maquette-ing pour scoper le style à
+ * l'espace ingénieur. Les classes génériques hero/kpi/card/btn/badge viennent
+ * déjà de maquette.css (non redéfinies). On ne porte ici que ce qui est
+ * spécifique à cet écran. Valeurs copiées telles quelles depuis la maquette.
+ * ========================================================================= */
+
+/* Conteneur de page (padding identique au shell maquette) ---------------- */
+.maquette-ing .assets-honoraires-page-wrap {
+  padding: 28px 36px 40px;
+}
+
+/* KPIs 3 colonnes -------------------------------------------------------- */
+.maquette-ing .kpis-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+.maquette-ing .kpi-value.gold {
+  color: var(--gold);
+}
+
+/* KPI compare M-1 / T-1 / N-1 ------------------------------------------- */
+.maquette-ing .kpi-compare-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--navy-100);
+}
+.maquette-ing .kpi-compare-3 > div {
+  padding: 0 4px;
+  position: relative;
+}
+.maquette-ing .kpi-compare-3 > div:not(:last-child) {
+  border-right: 1px solid var(--ivory-deep);
+}
+.maquette-ing .kpi-compare-3-period {
+  font-size: 9.5px;
+  font-weight: 700;
+  color: var(--navy-300);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-align: center;
+  margin-bottom: 4px;
+}
+.maquette-ing .kpi-compare-3-value {
+  font-size: 11.5px;
+  font-weight: 700;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+}
+.maquette-ing .kpi-compare-3-value.up {
+  color: #2ea85a;
+}
+.maquette-ing .kpi-compare-3-value.down {
+  color: #d9534f;
+}
+.maquette-ing .kpi-compare-3-arrow {
+  font-size: 10px;
+  line-height: 1;
+}
+
+/* En-tête de carte : sous-libellé à droite ------------------------------ */
+.maquette-ing .card-header-note {
+  font-size: 11px;
+  color: var(--navy-300);
+}
+
+/* Table générique (dt) -------------------------------------------------- */
+.maquette-ing table.dt {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+.maquette-ing table.dt thead {
+  background: var(--navy);
+}
+.maquette-ing table.dt thead th {
+  padding: 10px 16px;
+  text-align: left;
+  color: white;
+  font-weight: 600;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+.maquette-ing table.dt thead th.num,
+.maquette-ing table.dt tbody td.num {
+  text-align: right;
+  font-feature-settings: "tnum" on;
+}
+.maquette-ing table.dt thead th.center,
+.maquette-ing table.dt tbody td.center {
+  text-align: center;
+}
+.maquette-ing table.dt tbody td {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--navy-100);
+  vertical-align: middle;
+  color: #333;
+}
+.maquette-ing table.dt tbody tr:nth-child(even) {
+  background: var(--ivory);
+}
+.maquette-ing table.dt tbody tr.dt-clickable {
+  cursor: pointer;
+}
+.maquette-ing table.dt tbody tr.dt-clickable:hover {
+  background: var(--light-blue);
+}
+.maquette-ing table.dt tbody tr:last-child td {
+  border-bottom: none;
+}
+.maquette-ing td.nowrap {
+  white-space: nowrap;
+}
+.maquette-ing td.cell-primary {
+  font-weight: 600;
+  color: var(--navy);
+}
+.maquette-ing td.cell-money {
+  font-weight: 600;
+  color: var(--navy);
+  font-feature-settings: "tnum" on;
+}
+.maquette-ing td.cell-money.gold {
+  color: var(--gold);
+}
+
+/* Cellules de la colonne « Clients » (avatar + nom) --------------------- */
+.maquette-ing .hon-client-cell {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.maquette-ing .hon-client-cell .cell-primary {
+  font-weight: 600;
+  color: var(--navy);
+}
+.maquette-ing .ingenieur-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--light-blue);
+  color: var(--navy);
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 1.5px solid var(--gold-300);
+}
+
+/* Badges or empilés dans la colonne « Type de conseil » ----------------- */
+.maquette-ing .hon-conseil-cell {
+  line-height: 1.9;
+}
+.maquette-ing .hon-conseil-cell .badge-gold {
+  font-size: 10px;
+  display: inline-block;
+  margin-bottom: 3px;
+}
+.maquette-ing .hon-conseil-cell .badge-gold:last-child {
+  margin-bottom: 0;
+}
+.maquette-ing .badge-gold {
+  background: var(--gold-200);
+  color: var(--medium-400);
+}
+
+/* Cellule « Dates de l'étude » ------------------------------------------ */
+.maquette-ing .hon-dates-cell {
+  font-size: 11px;
+  line-height: 1.9;
+}
+.maquette-ing .hon-dates-cell .hon-date-line {
+  display: block;
+}
+
+/* Ligne de total du portefeuille --------------------------------------- */
+.maquette-ing tr.hon-total-row td {
+  background: var(--gold-200);
+  font-weight: 700;
+}
+.maquette-ing tr.hon-total-row .hon-total-resume {
+  text-align: center;
+  font-size: 11.5px;
+}
+
+/* Répartition par type de mission (3 tuiles or) ------------------------- */
+.maquette-ing .hon-repartition-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+.maquette-ing .hon-repartition-tile {
+  text-align: center;
+  padding: 18px;
+  background: var(--gold-100);
+  border-radius: 8px;
+}
+.maquette-ing .hon-repartition-count {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--gold-deep);
+}
+.maquette-ing .hon-repartition-label {
+  font-size: 12px;
+  color: var(--navy);
+  font-weight: 600;
+  margin-top: 6px;
+}
+.maquette-ing .hon-repartition-meta {
+  font-size: 10px;
+  color: var(--navy-300);
+  margin-top: 3px;
+}
+
+/* Padding du body de carte « répartition » ----------------------------- */
+.maquette-ing .hon-repartition-body {
+  padding: 22px;
+}
+
+/* Utilitaires marges (alignés sur la maquette) ------------------------- */
+.maquette-ing .mb-18 {
+  margin-bottom: 18px;
+}
+.maquette-ing .mb-24 {
+  margin-bottom: 24px;
+}

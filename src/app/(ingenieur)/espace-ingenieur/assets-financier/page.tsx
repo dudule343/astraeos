@@ -1,229 +1,216 @@
 import Link from "next/link";
 
-import { PageScaffold, EmptyState } from "../../_components/PageScaffold";
-import { GoldButton, SectionHeader } from "@/app/_components/shared/PageHeader";
-import { KpiCard, type KpiBlock } from "@/app/_components/shared/KpiCard";
-import {
-  fetchAssetsFinancier,
-  fmtDateFr,
-  fmtEur,
-  type FinancierClient,
-  type TopProduct,
-} from "../../_data/assets-financier";
+import { getAssetsFinancierScreen } from "../../_data/assets-financier";
+import "../../_styles/assets-financier.css";
+
+export const metadata = {
+  title: "ASTRAEOS · Investissement financier",
+};
 
 export const dynamic = "force-dynamic";
 
-export default async function AssetsFinancierPage() {
-  const data = await fetchAssetsFinancier();
+const FINANCE_ICON = (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.6"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <line x1="12" y1="1" x2="12" y2="23" />
+    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+  </svg>
+);
 
-  const kpis: KpiBlock[] = [
-    {
-      label: "Encours sous gestion",
-      value: data.encoursTotal > 0 ? Math.round(data.encoursTotal).toLocaleString("fr-FR") : "—",
-      unit: data.encoursTotal > 0 ? "€" : undefined,
-      valueTone: "gold",
-      meta:
-        data.contratsActifs > 0
-          ? `cumul placé via votre portefeuille · ${data.contratsActifs} contrat${data.contratsActifs > 1 ? "s" : ""} actif${data.contratsActifs > 1 ? "s" : ""}`
-          : "aucun contrat financier actif pour le moment",
-    },
-    {
-      label: "Clients investissement financier",
-      value: data.clientsFinancier > 0 ? String(data.clientsFinancier) : "—",
-      unit: data.clientsServis > 0 ? `/ ${data.clientsServis}` : undefined,
-      meta: "clients en portefeuille concernés",
-    },
-  ];
+/** Slug stable pour brancher la ligne sur la fiche client réelle. */
+function clientSlug(initiales: string): string {
+  return initiales.toLowerCase();
+}
+
+export default function AssetsFinancierPage() {
+  const screen = getAssetsFinancierScreen();
 
   return (
-    <PageScaffold
-      eyebrow="Assets du portefeuille · investissement financier"
-      title="Investissement financier"
-      description="Détail de votre portefeuille financier · contrats placés, encours porté, clients concernés."
-      actions={
-        <>
-          <Link
-            href="/espace-ingenieur/assets"
-            className="rounded-md border border-[var(--navy-100)] bg-white px-3 py-2 text-[11.5px] font-semibold text-[var(--navy)] hover:border-[var(--gold)]"
-          >
+    <div className="px-10 py-8">
+      {/* HERO */}
+      <div className="hero">
+        <div>
+          <div className="hero-eyebrow">{screen.heroEyebrow}</div>
+          <h1 className="hero-title">
+            {screen.heroTitleLead}
+            <strong>{screen.heroTitleStrong}</strong>
+          </h1>
+          <p className="hero-sub">{screen.heroSub}</p>
+        </div>
+        <div className="hero-actions">
+          <Link className="btn btn-ghost btn-sm" href="/espace-ingenieur/assets">
             ← Retour vue d&apos;ensemble
           </Link>
-          <GoldButton
-            dataStub="Export du portefeuille financier"
-            dataStubBody="L'export du détail de vos placements en investissement financier sera disponible dans une prochaine itération."
-          >
+          {/* L'export PDF/Excel du portefeuille n'est pas encore câblé :
+              bouton honnête désactivé plutôt qu'une coquille morte. */}
+          <button className="btn btn-gold btn-sm" disabled title="En cours">
             Exporter
-          </GoldButton>
-        </>
-      }
-    >
-      <div className="mb-5 grid grid-cols-2 gap-4">
-        {kpis.map((k) => (
-          <KpiCard key={k.label} kpi={k} />
+          </button>
+        </div>
+      </div>
+
+      {/* 2 KPIs : Encours sous gestion + Clients */}
+      <div className="kpis kpis-2 mb-20">
+        {screen.kpis.map((kpi) => (
+          <div className="kpi" key={kpi.label}>
+            <div className="kpi-label">{kpi.label}</div>
+            <div className={`kpi-value${kpi.valueGold ? " gold" : ""}`}>
+              {kpi.value}
+              {kpi.unit ? <span className="unit"> {kpi.unit}</span> : null}
+            </div>
+            <div className="kpi-meta">{kpi.meta}</div>
+            <div className="kpi-compare-3">
+              {kpi.compare.map((cell) => (
+                <div key={cell.period}>
+                  <div className="kpi-compare-3-period">{cell.period}</div>
+                  <div className={`kpi-compare-3-value ${cell.direction}`}>
+                    <span className="kpi-compare-3-arrow">
+                      {cell.direction === "up" ? "▲" : "▼"}
+                    </span>
+                    {cell.value}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         ))}
       </div>
 
-      <section className="mb-5">
-        <SectionHeader
-          eyebrow="Portefeuille"
-          title="Détail de mes placements en investissement financier"
-          right={
-            data.contratsActifs > 0 ? (
-              <span className="text-[11px] text-[var(--navy-300)]">
-                {data.contratsActifs} contrat{data.contratsActifs > 1 ? "s" : ""} actif
-                {data.contratsActifs > 1 ? "s" : ""}
-              </span>
-            ) : undefined
-          }
-        />
-        {data.clients.length > 0 ? (
-          <PlacementsTable clients={data.clients} encoursTotal={data.encoursTotal} contrats={data.contratsActifs} clientsFinancier={data.clientsFinancier} clientsServis={data.clientsServis} />
-        ) : (
-          <EmptyState>
-            Aucun placement en investissement financier dans votre portefeuille pour le moment.
-            Les contrats apparaîtront ici dès qu&apos;une souscription financière sera enregistrée.
-          </EmptyState>
-        )}
-      </section>
-
-      <section>
-        <SectionHeader eyebrow="Synthèse" title="Top produits placés par l'ingénieur" />
-        {data.topProducts.length > 0 ? (
-          <TopProductsTable products={data.topProducts} />
-        ) : (
-          <EmptyState>Aucun produit financier placé pour le moment.</EmptyState>
-        )}
-      </section>
-    </PageScaffold>
-  );
-}
-
-function Avatar({ initials }: { initials: string }) {
-  return (
-    <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full border-[1.5px] border-[var(--gold-300)] bg-[var(--light-blue)] text-[10px] font-bold text-[var(--navy)]">
-      {initials}
-    </span>
-  );
-}
-
-function GoldBadge({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="inline-block rounded-sm bg-[var(--gold-200)] px-1.5 py-0.5 text-[10px] font-semibold text-[var(--gold-deep)]">
-      {children}
-    </span>
-  );
-}
-
-function PlacementsTable({
-  clients,
-  encoursTotal,
-  contrats,
-  clientsFinancier,
-  clientsServis,
-}: {
-  clients: FinancierClient[];
-  encoursTotal: number;
-  contrats: number;
-  clientsFinancier: number;
-  clientsServis: number;
-}) {
-  return (
-    <div className="overflow-hidden rounded-lg border border-[var(--navy-100)] bg-white">
-      <table className="w-full border-collapse text-[12.5px]">
-        <thead>
-          <tr className="bg-[var(--navy)] text-left text-[10.5px] uppercase tracking-[0.06em] text-white">
-            <th className="px-4 py-2.5 font-semibold">Clients</th>
-            <th className="px-4 py-2.5 text-right font-semibold">Contrats actifs</th>
-            <th className="px-4 py-2.5 font-semibold">Types souscrits</th>
-            <th className="px-4 py-2.5 font-semibold">Dates de souscription</th>
-            <th className="px-4 py-2.5 text-right font-semibold">Encours total</th>
-            <th className="px-4 py-2.5 text-center font-semibold">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {clients.map((c, i) => (
-            <tr key={c.clientId} className={i % 2 === 1 ? "bg-[var(--ivory)]" : "bg-white"}>
-              <td className="border-b border-[var(--navy-100)] px-4 py-2.5 align-middle">
-                <div className="flex items-center gap-2.5">
-                  <Avatar initials={c.initials} />
-                  <span className="font-semibold text-[var(--navy)]">{c.name}</span>
-                </div>
-              </td>
-              <td className="border-b border-[var(--navy-100)] px-4 py-2.5 text-right align-middle text-[var(--navy)]">
-                {c.contracts.length}
-              </td>
-              <td className="border-b border-[var(--navy-100)] px-4 py-2.5 align-middle leading-[1.9]">
-                <div className="flex flex-col gap-1">
-                  {c.contracts.map((ct, j) => (
-                    <span key={j}>
-                      <GoldBadge>{ct.categoryLabel}</GoldBadge>
-                    </span>
-                  ))}
-                </div>
-              </td>
-              <td className="border-b border-[var(--navy-100)] whitespace-nowrap px-4 py-2.5 align-middle text-[11px] leading-[1.9] text-[var(--navy-300)]">
-                <div className="flex flex-col">
-                  {c.contracts.map((ct, j) => (
-                    <span key={j}>{fmtDateFr(ct.subscriptionDate)}</span>
-                  ))}
-                </div>
-              </td>
-              <td className="border-b border-[var(--navy-100)] px-4 py-2.5 text-right align-middle font-semibold text-[var(--gold-deep)]">
-                {fmtEur(c.totalEncours)}
-              </td>
-              <td className="border-b border-[var(--navy-100)] px-4 py-2.5 text-center align-middle">
-                <Link
-                  href={`/clients/${c.clientId}`}
-                  className="inline-block rounded-md border border-[var(--navy-100)] bg-white px-3 py-1.5 text-[11px] font-semibold text-[var(--navy)] hover:border-[var(--gold)]"
-                >
-                  Voir →
-                </Link>
-              </td>
+      {/* Détail de mes placements */}
+      <div className="card mb-18">
+        <div className="card-header">
+          <div className="card-title">
+            {FINANCE_ICON}
+            {screen.placementsTitle}
+          </div>
+          <span style={{ fontSize: "11px", color: "var(--navy-300)" }}>
+            {screen.placementsCount}
+          </span>
+        </div>
+        <table className="dt">
+          <thead>
+            <tr>
+              <th>Clients</th>
+              <th className="num">Contrats actifs</th>
+              <th>Types souscrits</th>
+              <th>Dates de souscription</th>
+              <th className="num">Encours total</th>
+              <th className="center">Actions</th>
             </tr>
-          ))}
-          <tr className="bg-[var(--gold-200)] font-bold text-[var(--navy)]">
-            <td className="px-4 py-2.5">Total portefeuille</td>
-            <td className="px-4 py-2.5 text-right">{contrats}</td>
-            <td className="px-4 py-2.5 text-center text-[11.5px]" colSpan={2}>
-              {clientsFinancier} client{clientsFinancier > 1 ? "s" : ""}
-              {clientsServis > 0 ? ` sur ${clientsServis}` : ""} · cumul
-            </td>
-            <td className="px-4 py-2.5 text-right text-[var(--gold-deep)]">{fmtEur(encoursTotal)}</td>
-            <td className="px-4 py-2.5" />
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
-function TopProductsTable({ products }: { products: TopProduct[] }) {
-  return (
-    <div className="overflow-hidden rounded-lg border border-[var(--navy-100)] bg-white">
-      <table className="w-full border-collapse text-[12px]">
-        <thead>
-          <tr className="bg-[var(--navy)] text-left text-[10.5px] uppercase tracking-[0.06em] text-white">
-            <th className="px-4 py-2.5 font-semibold">Produit</th>
-            <th className="px-4 py-2.5 text-right font-semibold">Placements</th>
-            <th className="px-4 py-2.5 text-right font-semibold">Encours</th>
-          </tr>
-        </thead>
-        <tbody>
-          {products.map((p, i) => (
-            <tr key={p.label} className={i % 2 === 1 ? "bg-[var(--ivory)]" : "bg-white"}>
-              <td className="border-b border-[var(--navy-100)] px-4 py-2.5 font-semibold text-[var(--navy)]">
-                {p.label}
+          </thead>
+          <tbody>
+            {screen.clients.map((client) => {
+              const href = `/espace-ingenieur/clients/${clientSlug(client.initiales)}`;
+              return (
+                <tr key={client.nom} className="dt-clickable">
+                  <td>
+                    <Link
+                      href={href}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "9px",
+                        textDecoration: "none",
+                      }}
+                    >
+                      <div className="ingenieur-avatar">{client.initiales}</div>
+                      <div className="cell-primary">{client.nom}</div>
+                    </Link>
+                  </td>
+                  <td className="num" style={{ verticalAlign: "middle" }}>
+                    {client.contratsActifs}
+                  </td>
+                  <td style={{ lineHeight: "1.9" }}>
+                    {client.types.map((t, i) => (
+                      <span key={t.label}>
+                        <span
+                          className="badge badge-gold"
+                          style={{
+                            fontSize: "10px",
+                            display: "inline-block",
+                            marginBottom: i < client.types.length - 1 ? "3px" : undefined,
+                          }}
+                        >
+                          {t.label}
+                        </span>
+                        {i < client.types.length - 1 ? <br /> : null}
+                      </span>
+                    ))}
+                  </td>
+                  <td className="nowrap" style={{ fontSize: "11px", lineHeight: "1.9" }}>
+                    {client.dates.map((d, i) => (
+                      <span key={d}>
+                        {d}
+                        {i < client.dates.length - 1 ? <br /> : null}
+                      </span>
+                    ))}
+                  </td>
+                  <td className="num cell-money gold" style={{ verticalAlign: "middle" }}>
+                    {client.encoursTotal}
+                  </td>
+                  <td className="center" style={{ verticalAlign: "middle" }}>
+                    <Link className="btn btn-ghost btn-sm" href={href}>
+                      Voir →
+                    </Link>
+                  </td>
+                </tr>
+              );
+            })}
+            <tr style={{ background: "var(--gold-200)", fontWeight: 700 }}>
+              <td>
+                <strong>Total portefeuille</strong>
               </td>
-              <td className="border-b border-[var(--navy-100)] px-4 py-2.5 text-right text-[var(--navy)]">
-                {p.count}
+              <td className="num">
+                <strong>{screen.total.contratsActifs}</strong>
               </td>
-              <td className="border-b border-[var(--navy-100)] px-4 py-2.5 text-right text-[var(--navy-300)]">
-                {fmtEur(p.encours)}
+              <td
+                colSpan={2}
+                style={{ textAlign: "center", fontSize: "11.5px", color: "var(--navy)" }}
+              >
+                {screen.total.meta}
               </td>
+              <td className="num cell-money gold">{screen.total.encoursTotal}</td>
+              <td></td>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </tbody>
+        </table>
+      </div>
+
+      {/* Top produits placés par l'ingénieur */}
+      <div className="card mb-24">
+        <div className="card-header">
+          <div className="card-title">
+            {FINANCE_ICON}
+            {screen.topProductsTitle}
+          </div>
+        </div>
+        <table className="dt" style={{ fontSize: "12px" }}>
+          <thead>
+            <tr>
+              <th>Produit</th>
+              <th className="num">Placements 2026</th>
+              <th className="num">Encours</th>
+            </tr>
+          </thead>
+          <tbody>
+            {screen.topProducts.map((p, i) => (
+              <tr key={p.label}>
+                <td>
+                  <strong>{p.label}</strong>
+                </td>
+                <td className={i === 0 ? "num cell-money gold" : "num"}>{p.placements}</td>
+                <td className="num cell-money">{p.encours}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

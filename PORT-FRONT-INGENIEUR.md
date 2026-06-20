@@ -112,6 +112,18 @@ Ces données vivent dans `src/app/(ingenieur)/_data/*.ts` (déjà : `agenda.ts`,
 
 À chaque écran terminé : capture maquette vs capture rendu, et tu me montres la comparaison avant de pousser. Pas de "fait" annoncé sans la preuve visuelle.
 
+## React / Next.js : mixer Server et Client Components (obligatoire)
+
+La maquette est interactive (modales, onglets, toggles, recherche, `onclick`, `goToPage`). En App Router, un Server Component NE PEUT PAS porter `onClick`/`useState`. Donc tu **mixes** :
+
+- **Server Component** = la coquille de page (`page.tsx`) + le fetch des données (`_data/`). Pas d'interactivité.
+- **Client Component** (`"use client"`, fichier co-localisé) = TOUT l'interactif, avec vrai `useState`/handlers :
+  - les **modales** (ex. « Nouveau RDV » = la grande popup « Création RDV directe » : type de RDV, client/prospect existant ou nouveau, participants, documents auto, message avec variables `{prenom}`/`{nom}`/`{date}`… ; bouton « Créer le RDV + envoyer »),
+  - les **onglets**, **toggles**, **champs de recherche**, **boutons d'action**.
+- Le bouton qui ouvre une modale (ex. « + Nouveau RDV ») doit RÉELLEMENT l'ouvrir (état client), jamais un `disabled`/stub. Reproduis le comportement exact de la maquette.
+
+Règle : si un écran de la maquette a une interaction, tu la portes en Client Component branché, tu ne la remplaces pas par un bouton mort.
+
 ## Vérification avant de dire "fait"
 
 - `npm run build` (ou le type-check strict du repo) passe sans erreur.

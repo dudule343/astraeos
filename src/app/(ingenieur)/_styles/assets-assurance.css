@@ -1,0 +1,166 @@
+/* =========================================================================
+ * Portage fidèle du CSS de la maquette (0 - 030_Wireframes_Ingenieur_v28.html)
+ * pour l'écran "Assets du portefeuille · Assurance" (page-ing-assets-assurance).
+ *
+ * Chaque sélecteur est préfixé par .maquette-ing pour scoper le style à l'espace
+ * ingénieur. Les variables (--navy, --gold, --ivory, --medium-400…) viennent de
+ * globals.css. Le hero, les boutons, les .kpi, .card et .badge génériques sont
+ * déjà portés dans maquette.css ; on ne complète ici QUE ce qui manque pour cet
+ * écran : grille 3 KPIs, bloc compare 3 colonnes, table .dt, avatar et cellules.
+ * Valeurs copiées telles quelles depuis le <style> de la maquette.
+ * ========================================================================= */
+
+/* Grille 3 KPIs --------------------------------------------------------- */
+.maquette-ing .kpis-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+/* KPI value en or (intention de la maquette : <div class="kpi-value gold">) -- */
+.maquette-ing .kpi-value.gold {
+  color: var(--gold);
+}
+
+/* Bloc comparatif 3 colonnes (S-1 / M-1 / N-1) -------------------------- */
+.maquette-ing .kpi-compare-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--navy-100);
+}
+.maquette-ing .kpi-compare-3 > div {
+  padding: 0 4px;
+  position: relative;
+}
+.maquette-ing .kpi-compare-3 > div:not(:last-child) {
+  border-right: 1px solid var(--ivory-deep);
+}
+.maquette-ing .kpi-compare-3-period {
+  font-size: 9.5px;
+  font-weight: 700;
+  color: var(--navy-300);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-align: center;
+  margin-bottom: 4px;
+}
+.maquette-ing .kpi-compare-3-value {
+  font-size: 11.5px;
+  font-weight: 700;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+}
+.maquette-ing .kpi-compare-3-value.up {
+  color: #2ea85a;
+}
+.maquette-ing .kpi-compare-3-value.down {
+  color: #d9534f;
+}
+.maquette-ing .kpi-compare-3-arrow {
+  font-size: 10px;
+  line-height: 1;
+}
+
+/* Badge or -------------------------------------------------------------- */
+.maquette-ing .badge-gold {
+  background: var(--gold-200);
+  color: var(--medium-400);
+}
+
+/* Table de données (.dt) ------------------------------------------------ */
+.maquette-ing table.dt {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+.maquette-ing table.dt thead {
+  background: var(--navy);
+}
+.maquette-ing table.dt thead th {
+  padding: 10px 16px;
+  text-align: left;
+  color: white;
+  font-weight: 600;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+.maquette-ing table.dt thead th.num,
+.maquette-ing table.dt tbody td.num {
+  text-align: right;
+  font-feature-settings: "tnum" on;
+}
+.maquette-ing table.dt thead th.center,
+.maquette-ing table.dt tbody td.center {
+  text-align: center;
+}
+.maquette-ing table.dt tbody td {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--navy-100);
+  vertical-align: middle;
+  color: #333;
+}
+.maquette-ing table.dt tbody tr:nth-child(even) {
+  background: var(--ivory);
+}
+.maquette-ing table.dt tbody tr.dt-clickable {
+  cursor: pointer;
+}
+.maquette-ing table.dt tbody tr.dt-clickable:hover {
+  background: var(--light-blue);
+}
+.maquette-ing table.dt tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Cellules typées -------------------------------------------------------- */
+.maquette-ing td.cell-primary {
+  font-weight: 600;
+  color: var(--navy);
+}
+.maquette-ing td.cell-money {
+  font-weight: 600;
+  color: var(--navy);
+  font-feature-settings: "tnum" on;
+}
+.maquette-ing td.cell-money.gold {
+  color: var(--gold);
+}
+.maquette-ing .nowrap {
+  white-space: nowrap;
+}
+
+/* Ligne de total surlignée (background gold-200 + bold dans la maquette) -- */
+.maquette-ing table.dt tbody tr.dt-total {
+  background: var(--gold-200);
+  font-weight: 700;
+}
+.maquette-ing table.dt tbody tr.dt-total td {
+  border-bottom: none;
+}
+
+/* Avatar initiales ------------------------------------------------------ */
+.maquette-ing .ingenieur-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--light-blue);
+  color: var(--navy);
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 1.5px solid var(--gold-300);
+}
+
+/* Utilitaire marge supplémentaire --------------------------------------- */
+.maquette-ing .mb-24 {
+  margin-bottom: 24px;
+}

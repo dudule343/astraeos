@@ -1,0 +1,238 @@
+/* Écran maquette `page-ing-assets-overview` (vue d'ensemble des assets).
+   CSS porté à l'identique du <style> de tête de la maquette ingénieur v28.
+   Chaque sélecteur est scopé `.maquette-ing` pour éviter tout conflit avec
+   les autres écrans ; on ne réécrit ici que ce qui n'est pas déjà dans
+   _styles/maquette.css (hero / kpi / card / btn génériques y vivent déjà). */
+
+/* ----- Grilles de KPI ----- */
+.maquette-ing .ag-kpis {
+  display: grid;
+  gap: 16px;
+}
+.maquette-ing .ag-kpis-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+.maquette-ing .ag-mb-20 {
+  margin-bottom: 20px;
+}
+.maquette-ing .ag-mb-14 {
+  margin-bottom: 14px;
+}
+
+/* ----- KPI de synthèse (padding spécifique maquette) ----- */
+.maquette-ing .ag-kpi {
+  position: relative;
+  background: white;
+  border: 1px solid var(--navy-100);
+  border-radius: 8px;
+  padding: 22px 22px 18px;
+}
+.maquette-ing .ag-kpi-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 14px;
+}
+.maquette-ing .ag-kpi-label {
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--navy-300);
+  font-weight: 700;
+  padding-right: 42px;
+  line-height: 1.3;
+}
+.maquette-ing .ag-kpi-icon {
+  width: 34px;
+  height: 34px;
+  background: var(--gold-100);
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  color: var(--gold-deep);
+  flex-shrink: 0;
+}
+.maquette-ing .ag-kpi-icon svg {
+  width: 17px;
+  height: 17px;
+}
+.maquette-ing .ag-kpi-value {
+  font-size: 30px;
+  line-height: 1.05;
+  font-weight: 600;
+  color: var(--navy);
+  font-feature-settings: 'tnum' on;
+}
+.maquette-ing .ag-kpi-value .unit {
+  font-size: 14px;
+  color: var(--navy-300);
+  font-weight: 500;
+}
+.maquette-ing .ag-kpi-meta {
+  font-size: 11px;
+  color: var(--navy-300);
+  margin-top: 4px;
+}
+
+/* ----- Comparatif 3 périodes (M-1 / T-1 / N-1) ----- */
+.maquette-ing .ag-compare {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--navy-100);
+}
+.maquette-ing .ag-compare > div {
+  padding: 0 4px;
+}
+.maquette-ing .ag-compare > div:not(:last-child) {
+  border-right: 1px solid var(--ivory-deep);
+}
+.maquette-ing .ag-compare-period {
+  font-size: 9.5px;
+  font-weight: 700;
+  color: var(--navy-300);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-align: center;
+  margin-bottom: 4px;
+}
+.maquette-ing .ag-compare-value {
+  font-size: 11.5px;
+  font-weight: 700;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+}
+.maquette-ing .ag-compare-value.up {
+  color: #2EA85A;
+}
+.maquette-ing .ag-compare-value.down {
+  color: #D9534F;
+}
+.maquette-ing .ag-compare-arrow {
+  font-size: 10px;
+  line-height: 1;
+}
+
+/* ----- Filet de section (Synthèse / Répartition par axe) ----- */
+.maquette-ing .ag-rule {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+.maquette-ing .ag-rule-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--gold-deep);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+.maquette-ing .ag-rule-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--gold-200), transparent);
+}
+.maquette-ing .ag-rule-right {
+  font-size: 10.5px;
+  color: var(--navy-300);
+}
+
+/* ----- Grille des 4 axes ----- */
+.maquette-ing .ag-axes {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+.maquette-ing .ag-axis {
+  display: flex;
+  flex-direction: column;
+  background: white;
+  border: 1px solid var(--navy-100);
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.maquette-ing .ag-axis:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(16, 45, 80, 0.08);
+}
+.maquette-ing .ag-axis-body {
+  padding: 18px 20px 14px;
+}
+.maquette-ing .ag-axis-head {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 12px;
+}
+.maquette-ing .ag-axis-icon {
+  width: 28px;
+  height: 28px;
+  background: var(--gold-100);
+  border-radius: 7px;
+  display: grid;
+  place-items: center;
+  color: var(--gold-deep);
+}
+.maquette-ing .ag-axis-icon svg {
+  width: 14px;
+  height: 14px;
+}
+.maquette-ing .ag-axis-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--navy);
+  line-height: 1.2;
+}
+.maquette-ing .ag-axis-value {
+  font-family: 'Epilogue', sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--navy);
+  line-height: 1;
+}
+.maquette-ing .ag-axis-value .unit {
+  font-size: 12px;
+  color: var(--gold-deep);
+}
+.maquette-ing .ag-axis-caption {
+  font-size: 10.5px;
+  color: var(--navy-300);
+  margin-top: 4px;
+}
+.maquette-ing .ag-axis-stats {
+  display: flex;
+  gap: 14px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--ivory-deep);
+  font-size: 10.5px;
+}
+.maquette-ing .ag-axis-stat-label {
+  color: var(--navy-300);
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+}
+.maquette-ing .ag-axis-stat-value {
+  font-size: 13px;
+  color: var(--navy);
+}
+.maquette-ing .ag-axis-footer {
+  padding: 8px 20px;
+  background: var(--ivory);
+  text-align: right;
+  font-size: 10px;
+  color: var(--gold-deep);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}

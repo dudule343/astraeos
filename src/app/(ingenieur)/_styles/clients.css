@@ -1,0 +1,122 @@
+/* ==========================================================================
+   Écran « Tous mes clients » (page-ing-clients) — CSS porté de la maquette v28.
+   Chaque sélecteur est préfixé .maquette-ing. On ne réutilise pas les classes
+   génériques déjà présentes dans maquette.css (hero, kpi, kpi-compare, card,
+   badge, btn, mb-20) : ici uniquement ce qui manque pour cet écran.
+   ========================================================================== */
+
+/* Grille 3 KPI (la maquette utilise .kpis.kpis-3) ------------------------- */
+.maquette-ing .kpis-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+/* Tableau de données (table.dt) ------------------------------------------ */
+.maquette-ing table.dt {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+.maquette-ing table.dt thead {
+  background: var(--navy);
+}
+.maquette-ing table.dt thead th {
+  padding: 10px 16px;
+  text-align: left;
+  color: white;
+  font-weight: 600;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+.maquette-ing table.dt thead th.num,
+.maquette-ing table.dt tbody td.num {
+  text-align: right;
+  font-feature-settings: "tnum" on;
+}
+.maquette-ing table.dt thead th.center,
+.maquette-ing table.dt tbody td.center {
+  text-align: center;
+}
+.maquette-ing table.dt tbody td {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--navy-100);
+  vertical-align: middle;
+  color: #333;
+}
+.maquette-ing table.dt tbody tr:nth-child(even) {
+  background: var(--ivory);
+}
+.maquette-ing table.dt tbody tr.dt-clickable {
+  cursor: pointer;
+}
+.maquette-ing table.dt tbody tr.dt-clickable:hover {
+  background: var(--light-blue);
+}
+.maquette-ing table.dt tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Cellules typées --------------------------------------------------------- */
+.maquette-ing td.cell-primary {
+  font-weight: 600;
+  color: var(--navy);
+}
+.maquette-ing td.cell-money {
+  font-weight: 600;
+  color: var(--navy);
+  font-feature-settings: "tnum" on;
+}
+.maquette-ing td.cell-money.gold {
+  color: var(--gold);
+}
+.maquette-ing .nowrap {
+  white-space: nowrap;
+}
+
+/* Avatar ingénieur / initiales client ------------------------------------ */
+.maquette-ing .ingenieur-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--light-blue);
+  color: var(--navy);
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 1.5px solid var(--gold-300);
+}
+
+/* Champ de recherche dans l'en-tête de carte ----------------------------- */
+.maquette-ing .search-wrap {
+  position: relative;
+}
+.maquette-ing .search-wrap svg {
+  position: absolute;
+  left: 9px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--navy-300);
+  width: 14px;
+  height: 14px;
+  pointer-events: none;
+}
+.maquette-ing .search-input {
+  border: 1px solid var(--navy-100);
+  background: white;
+  padding: 5px 10px 5px 28px;
+  border-radius: 4px;
+  font-size: 12px;
+  color: var(--navy);
+  width: 220px;
+  font-family: inherit;
+}
+
+/* Variante de badge utilisée par cet écran ------------------------------- */
+.maquette-ing .badge-success {
+  background: var(--green-bg);
+  color: var(--green-text);
+}

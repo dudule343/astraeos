@@ -1,0 +1,280 @@
+/* ==========================================================================
+   Écran « Mon activité commerciale » (page-ing-activite) — CSS porté de la
+   maquette v28. Chaque sélecteur est préfixé .maquette-ing pour scoper le
+   style à l'espace ingénieur. On réutilise les classes génériques déjà dans
+   maquette.css (hero, kpi, kpi-value, card, card-header, badge, btn, mb-20,
+   mb-18). Ici uniquement ce qui manque pour cet écran : tableau .dt, variantes
+   de badge, et les classes utilitaires reproduisant les styles inline de la
+   maquette (bandeau délais, actions en retard, sources d'acquisition).
+   Variables (--navy, --gold, --ivory…) : voir globals.css.
+   ========================================================================== */
+
+/* Grille 4 KPI ----------------------------------------------------------- */
+.maquette-ing .kpis-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+.maquette-ing .kpi-value.gold {
+  color: var(--gold);
+}
+
+/* Tableau de données (table.dt) ------------------------------------------ */
+.maquette-ing table.dt {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+.maquette-ing table.dt thead {
+  background: var(--navy);
+}
+.maquette-ing table.dt thead th {
+  padding: 10px 16px;
+  text-align: left;
+  color: white;
+  font-weight: 600;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+.maquette-ing table.dt thead th.center,
+.maquette-ing table.dt tbody td.center {
+  text-align: center;
+}
+.maquette-ing table.dt tbody td {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--navy-100);
+  vertical-align: middle;
+  color: #333;
+}
+.maquette-ing table.dt tbody td strong {
+  color: var(--navy);
+}
+.maquette-ing table.dt tbody tr:nth-child(even) {
+  background: var(--ivory);
+}
+.maquette-ing table.dt tbody tr:last-child td {
+  border-bottom: none;
+}
+.maquette-ing .nowrap {
+  white-space: nowrap;
+}
+
+/* Variantes de badge utilisées par cet écran ----------------------------- */
+.maquette-ing .badge-gold {
+  background: var(--gold-100);
+  color: var(--gold-deep);
+}
+.maquette-ing .badge-success {
+  background: var(--green-bg);
+  color: var(--green-text);
+}
+
+/* Bandeau « délais moyens entre les étapes du parcours » ----------------- */
+.maquette-ing .act-delais-header {
+  background: linear-gradient(135deg, var(--navy) 0%, #1a3a66 100%);
+  padding: 18px 22px;
+}
+.maquette-ing .act-delais-header .card-title {
+  color: white;
+  font-size: 14px;
+}
+.maquette-ing .act-delais-header .card-title svg {
+  stroke: var(--gold);
+}
+.maquette-ing .act-delais-header .act-delais-meta {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.65);
+}
+.maquette-ing .act-delais-body {
+  padding: 24px 26px;
+}
+.maquette-ing .act-delais-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0;
+  position: relative;
+}
+.maquette-ing .act-delais-col {
+  position: relative;
+  text-align: center;
+  border-left: 1px solid var(--ivory-deep);
+}
+.maquette-ing .act-delais-col:first-child {
+  border-left: none;
+}
+.maquette-ing .act-delais-col.cumul {
+  border-left: 2px solid var(--gold);
+}
+.maquette-ing .act-delais-step {
+  font-size: 9.5px;
+  font-weight: 700;
+  color: var(--navy-300);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.maquette-ing .act-delais-col.cumul .act-delais-step {
+  color: var(--gold-deep);
+}
+.maquette-ing .act-delais-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--navy);
+}
+.maquette-ing .act-delais-col.cumul .act-delais-value {
+  color: var(--gold-deep);
+}
+.maquette-ing .act-delais-value .unit {
+  font-size: 13px;
+  color: var(--navy-300);
+  font-weight: 400;
+}
+.maquette-ing .act-delais-transition {
+  font-size: 10.5px;
+  color: var(--navy-300);
+  margin-top: 4px;
+}
+.maquette-ing .act-delais-ecart {
+  font-size: 10px;
+  margin-top: 6px;
+}
+.maquette-ing .act-delais-ecart.green {
+  color: #2ea85a;
+}
+.maquette-ing .act-delais-ecart.orange {
+  color: #e57c4b;
+}
+.maquette-ing .act-delais-ecart.neutral {
+  color: var(--navy-300);
+}
+
+/* Bloc « actions en retard + sources d'acquisition » --------------------- */
+.maquette-ing .act-two-col {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+.maquette-ing .act-badge-orange {
+  background: rgba(229, 124, 75, 0.15);
+  color: var(--orange-text);
+  font-size: 10px;
+  font-weight: 700;
+}
+.maquette-ing .act-card-title-orange svg {
+  stroke: var(--orange-text);
+}
+
+/* Actions en retard ------------------------------------------------------ */
+.maquette-ing .act-action-row {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--ivory-deep);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.maquette-ing .act-action-row:last-child {
+  border-bottom: none;
+}
+.maquette-ing .act-action-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.maquette-ing .act-action-dot.orange {
+  background: var(--orange-text);
+  box-shadow: 0 0 0 4px rgba(229, 124, 75, 0.15);
+}
+.maquette-ing .act-action-dot.gold {
+  background: var(--gold);
+  box-shadow: 0 0 0 4px rgba(198, 142, 14, 0.15);
+}
+.maquette-ing .act-action-body {
+  flex: 1;
+}
+.maquette-ing .act-action-titre {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--navy);
+}
+.maquette-ing .act-action-detail {
+  font-size: 10.5px;
+  color: var(--navy-300);
+  margin-top: 2px;
+}
+.maquette-ing .act-action-cta {
+  font-size: 10.5px;
+}
+
+/* Sources d'acquisition -------------------------------------------------- */
+.maquette-ing .act-sources-body {
+  padding: 18px 22px;
+}
+.maquette-ing .act-source {
+  margin-bottom: 14px;
+}
+.maquette-ing .act-source-head {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+.maquette-ing .act-source-head strong {
+  color: var(--navy);
+}
+.maquette-ing .act-source-count.gold {
+  color: var(--gold-deep);
+  font-weight: 700;
+}
+.maquette-ing .act-source-count.navy {
+  color: var(--navy);
+  font-weight: 700;
+}
+.maquette-ing .act-source-bar {
+  height: 6px;
+  background: var(--ivory-deep);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.maquette-ing .act-source-bar > span {
+  display: block;
+  height: 100%;
+}
+.maquette-ing .act-source-bar > span.gold {
+  background: linear-gradient(90deg, var(--gold), var(--gold-deep));
+}
+.maquette-ing .act-source-bar > span.navy {
+  background: linear-gradient(90deg, var(--navy-300), var(--navy));
+}
+.maquette-ing .act-source-bar > span.navy-200 {
+  background: var(--navy-200);
+}
+.maquette-ing .act-sources-lecture {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--ivory-deep);
+  font-size: 10.5px;
+  color: var(--navy-300);
+  line-height: 1.6;
+}
+.maquette-ing .act-sources-lecture strong {
+  color: var(--navy);
+}
+
+/* Carte « prochains rendez-vous » : meta dans l'en-tête ------------------ */
+.maquette-ing .act-card-meta {
+  font-size: 11px;
+  color: var(--navy-300);
+}
+.maquette-ing .act-rdv-date-meta {
+  font-size: 10px;
+  color: var(--navy-300);
+}
+
+/* Réactif : empile les bandeaux sur petits écrans ------------------------ */
+@media (max-width: 980px) {
+  .maquette-ing .act-two-col {
+    grid-template-columns: 1fr;
+  }
+}

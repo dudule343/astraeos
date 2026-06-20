@@ -1,0 +1,205 @@
+/* ==========================================================================
+   Écran « Partenaires & apporteurs d'affaires » (page-ing-partenaires).
+   CSS porté À L'IDENTIQUE de la maquette v28 (<style> de tête).
+   Chaque sélecteur est préfixé .maquette-ing pour scoper l'espace ingénieur.
+   On ne redéfinit pas hero / kpi / kpis-4 / card / badge / btn / mb-20 :
+   déjà présents dans maquette.css. Ici uniquement ce qui manque à cet écran.
+   ========================================================================== */
+
+/* Variables --purple-* de la maquette absentes de globals.css : on les
+   redéclare ici, scopées à l'espace ingénieur, avec les valeurs exactes
+   de la maquette (ligne 16 : --purple-bg #E5DCEB ; --purple-text #5B3A6E). */
+.maquette-ing {
+  --purple-bg: #e5dceb;
+  --purple-text: #5b3a6e;
+}
+
+/* SECTION BLOCK / HEADER (lignes 232-237 de la maquette) ------------------ */
+.maquette-ing .section-block {
+  margin-bottom: 26px;
+}
+.maquette-ing .section-header {
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.maquette-ing .section-eyebrow {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.maquette-ing .section-eyebrow::before {
+  content: "";
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--gold);
+}
+.maquette-ing .section-title {
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--navy);
+  letter-spacing: -0.01em;
+}
+.maquette-ing .section-title em,
+.maquette-ing .section-title strong {
+  font-style: normal;
+  font-weight: 700;
+  color: var(--navy);
+}
+
+/* TABLE WRAP + TOOLBAR (lignes 241-244 de la maquette) -------------------- */
+.maquette-ing .table-wrap {
+  background: white;
+  border: 1px solid var(--navy-100);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.maquette-ing .table-toolbar {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--navy-100);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  background: var(--ivory);
+}
+.maquette-ing .table-toolbar-left {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.maquette-ing .table-toolbar-right {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+/* Filtres rapides .qf-perf : la maquette n'a PAS de règle .qf-perf, ils
+   rendent en bouton natif. On reste fidèle au rendu : aspect natif discret
+   (juste le curseur + famille de police), .active légèrement appuyé. */
+.maquette-ing .qf-perf {
+  font-family: inherit;
+  cursor: pointer;
+}
+.maquette-ing .qf-perf.active {
+  font-weight: 700;
+}
+
+/* TABLE DT (lignes 254-263 de la maquette) -------------------------------- */
+.maquette-ing table.dt {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+.maquette-ing table.dt thead {
+  background: var(--navy);
+}
+.maquette-ing table.dt thead th {
+  padding: 10px 16px;
+  text-align: left;
+  color: white;
+  font-weight: 600;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+.maquette-ing table.dt thead th.num,
+.maquette-ing table.dt tbody td.num {
+  text-align: right;
+  font-feature-settings: "tnum" on;
+}
+.maquette-ing table.dt thead th.center,
+.maquette-ing table.dt tbody td.center {
+  text-align: center;
+}
+.maquette-ing table.dt tbody td {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--navy-100);
+  vertical-align: middle;
+  color: #333;
+}
+.maquette-ing table.dt tbody tr:nth-child(even) {
+  background: var(--ivory);
+}
+.maquette-ing table.dt tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Cellules typées (la maquette utilise div.cell-primary et td.cell-money) - */
+.maquette-ing .cell-primary {
+  font-weight: 600;
+  color: var(--navy);
+}
+.maquette-ing td.cell-money {
+  font-weight: 600;
+  color: var(--navy);
+  font-feature-settings: "tnum" on;
+}
+.maquette-ing td.cell-money.gold {
+  color: var(--gold);
+}
+
+/* Champ de recherche dans la toolbar (lignes 250-252 de la maquette) ------ */
+.maquette-ing .search-wrap {
+  position: relative;
+}
+.maquette-ing .search-wrap svg {
+  position: absolute;
+  left: 9px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--navy-300);
+  width: 14px;
+  height: 14px;
+  pointer-events: none;
+}
+.maquette-ing .search-input {
+  border: 1px solid var(--navy-100);
+  background: white;
+  padding: 5px 10px 5px 28px;
+  border-radius: 4px;
+  font-size: 12px;
+  color: var(--navy);
+  width: 220px;
+  font-family: inherit;
+}
+
+/* Variantes de badge utilisées par cet écran (lignes 215-218) ------------- */
+.maquette-ing .badge-success {
+  background: var(--green-bg);
+  color: var(--green-text);
+}
+.maquette-ing .badge-info {
+  background: var(--light-blue);
+  color: var(--navy);
+}
+
+/* Badges profession / profil : couplets background/color INLINE de la
+   maquette, transposés en classes de variante (mêmes couleurs exactes). */
+.maquette-ing .pp-notaire {
+  background: var(--gold-100);
+  color: var(--gold-deep);
+}
+.maquette-ing .pp-avocat,
+.maquette-ing .pp-agent-immo,
+.maquette-ing .pp-media {
+  background: var(--purple-bg);
+  color: var(--purple-text);
+}
+.maquette-ing .pp-expert-comptable,
+.maquette-ing .pp-ambassadeur {
+  background: var(--light-blue);
+  color: var(--navy);
+}

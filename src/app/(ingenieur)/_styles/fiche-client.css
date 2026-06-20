@@ -1,0 +1,209 @@
+/* =========================================================================
+ * Portage fidèle du CSS de la maquette 030 v28 pour l'écran
+ * « Fiche client » (#page-ing-fiche-client, lignes 4618→4774).
+ *
+ * Chaque sélecteur est préfixé par .maquette-ing pour scoper le style à
+ * l'espace ingénieur. Les classes génériques déjà portées dans maquette.css
+ * (hero / kpi / card / btn / badge) ne sont PAS redéfinies ici : on ne porte
+ * que ce qui est spécifique à cet écran. Variables (--navy, --gold, etc.)
+ * issues de globals.css. Valeurs copiées telles quelles depuis la maquette.
+ * ========================================================================= */
+
+/* Conteneur de page : même padding que le shell maquette --------------- */
+.maquette-ing .fiche-client-wrap {
+  padding: 28px 36px 40px;
+}
+
+/* badge-success (porté de la maquette : .badge-success ligne 215) ------- */
+.maquette-ing .badge-success {
+  background: var(--green-bg);
+  color: var(--green-text);
+}
+
+/* Bandeau d'information « Fiche client modèle » ------------------------- */
+.maquette-ing .fc-info-banner {
+  margin-bottom: 14px;
+  padding: 8px 14px;
+  background: var(--light-blue);
+  border: 1px solid var(--navy-100);
+  border-radius: 6px;
+  font-size: 10.5px;
+  color: var(--navy-300);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.maquette-ing .fc-info-banner svg {
+  flex-shrink: 0;
+}
+.maquette-ing .fc-info-banner strong {
+  color: var(--navy);
+}
+
+/* Grille 2 colonnes (identités du couple, documents/RDV) ---------------- */
+.maquette-ing .fc-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+
+/* Corps des cartes d'identité ------------------------------------------ */
+.maquette-ing .fc-identite-body {
+  padding: 18px 22px;
+  font-size: 12px;
+  line-height: 1.8;
+}
+.maquette-ing .fc-identite-grid {
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  gap: 6px 14px;
+}
+.maquette-ing .fc-identite-grid span {
+  color: var(--navy-300);
+}
+
+/* Carte « Régime de l'union » ------------------------------------------ */
+.maquette-ing .fc-regime-card {
+  border-left: 4px solid var(--gold);
+}
+.maquette-ing .fc-regime-body {
+  padding: 18px 22px;
+}
+.maquette-ing .fc-regime-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+.maquette-ing .fc-regime-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--navy-300);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.maquette-ing .fc-regime-value {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--navy);
+}
+.maquette-ing .fc-regime-value.gold {
+  color: var(--gold);
+}
+
+/* Historique de l'accompagnement --------------------------------------- */
+.maquette-ing .fc-histo-body {
+  padding: 6px 0;
+}
+.maquette-ing .fc-histo-row {
+  padding: 14px 22px;
+  border-bottom: 1px solid var(--ivory-deep);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.maquette-ing .fc-histo-row.last {
+  border-bottom: none;
+}
+.maquette-ing .fc-histo-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.maquette-ing .fc-histo-icon.etude {
+  background: rgba(198, 142, 14, 0.12);
+  color: var(--gold-deep);
+}
+.maquette-ing .fc-histo-icon.immo {
+  background: rgba(31, 128, 73, 0.1);
+  color: #1f8049;
+}
+.maquette-ing .fc-histo-icon.financier {
+  background: rgba(16, 45, 80, 0.08);
+  color: var(--navy);
+}
+.maquette-ing .fc-histo-icon.audit {
+  background: rgba(112, 129, 150, 0.12);
+  color: var(--navy-300);
+}
+.maquette-ing .fc-histo-main {
+  flex: 1;
+}
+.maquette-ing .fc-histo-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--navy);
+}
+.maquette-ing .fc-histo-meta {
+  font-size: 10.5px;
+  color: var(--navy-300);
+  margin-top: 2px;
+}
+
+/* Documents signés & reçus --------------------------------------------- */
+.maquette-ing .fc-doc-body {
+  padding: 0;
+}
+.maquette-ing .fc-doc-row {
+  padding: 12px 22px;
+  border-bottom: 1px solid var(--ivory-deep);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.maquette-ing .fc-doc-row.last {
+  border-bottom: none;
+}
+.maquette-ing .fc-doc-title {
+  font-size: 12px;
+  font-weight: 600;
+}
+.maquette-ing .fc-doc-meta {
+  font-size: 10px;
+  color: var(--navy-300);
+}
+.maquette-ing .fc-doc-actions {
+  display: flex;
+  gap: 6px;
+}
+
+/* Historique des rendez-vous ------------------------------------------- */
+.maquette-ing .fc-rdv-body {
+  padding: 0;
+}
+.maquette-ing .fc-rdv-row {
+  padding: 12px 22px;
+  border-bottom: 1px solid var(--ivory-deep);
+}
+.maquette-ing .fc-rdv-row.last {
+  border-bottom: none;
+}
+.maquette-ing .fc-rdv-row.upcoming {
+  border-left: 3px solid var(--gold);
+}
+.maquette-ing .fc-rdv-when {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--navy-300);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.maquette-ing .fc-rdv-row.upcoming .fc-rdv-when {
+  color: var(--gold-deep);
+}
+.maquette-ing .fc-rdv-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--navy);
+  margin-top: 2px;
+}
+.maquette-ing .fc-rdv-meta {
+  font-size: 10.5px;
+  color: var(--navy-300);
+  margin-top: 2px;
+}

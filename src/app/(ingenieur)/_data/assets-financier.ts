@@ -1,214 +1,182 @@
-import { createAdminClient } from "@/lib/supabase/admin";
-import { getSessionContext } from "@/lib/auth/context";
+// Données d'exemple de l'écran « Assets · investissement financier »
+// (page-ing-assets-financier de la maquette v28), reprises à l'identique :
+// mêmes clients, mêmes contrats, mêmes dates, mêmes encours, mêmes KPI.
+// Source de vérité unique pour la page, comme si l'ingénieur Julien VASSEUR
+// avait saisi ces souscriptions à la main. Aucune valeur n'est dupliquée en
+// dur dans le composant : la page lit tout depuis ce module.
 
-// Détail de l'investissement financier du portefeuille de l'ingénieur, lu sur la
-// table souscriptions réelle (scope tenant + cabinet). Les classes « financier »
-// suivent la même convention que le cockpit : per, structure, av_multisupport,
-// av_lux. L'encours retenu est le total_aum_current s'il est renseigné, sinon le
-// montant initial souscrit. Tout est en try/catch : si Supabase n'est pas branché
-// ou ne renvoie rien, on retombe sur un état vide honnête (aucune fausse donnée).
+export type CompareDirection = "up" | "down";
 
-const FINANCIER = new Set(["per", "structure", "av_multisupport", "av_lux"]);
-
-const CATEGORY_LABELS: Record<string, string> = {
-  av_multisupport: "Assurance vie multisupport",
-  av_lux: "Assurance vie luxembourgeoise",
-  per: "PER",
-  structure: "Produit structuré",
-  scpi: "SCPI",
-  fpci: "FPCI",
-  opci: "OPCI",
-  prevoyance: "Prévoyance",
-  credit: "Crédit",
-  autre: "Autre",
+export type CompareCell = {
+  period: string;
+  value: string;
+  direction: CompareDirection;
 };
 
-export function categoryLabel(cat: string): string {
-  return CATEGORY_LABELS[cat] ?? cat;
-}
+export type FinancierKpi = {
+  label: string;
+  value: string;
+  unit?: string;
+  valueGold?: boolean;
+  meta: string;
+  compare: CompareCell[];
+};
 
-export type FinancierContract = {
-  productName: string;
-  category: string;
-  categoryLabel: string;
-  subscriptionDate: string | null;
-  encours: number;
+export type FinancierContractType = {
+  label: string;
 };
 
 export type FinancierClient = {
-  clientId: string;
-  name: string;
-  initials: string;
-  contracts: FinancierContract[];
-  totalEncours: number;
+  initiales: string;
+  nom: string;
+  contratsActifs: number;
+  types: FinancierContractType[];
+  dates: string[];
+  encoursTotal: string;
+};
+
+export type FinancierTotal = {
+  contratsActifs: number;
+  meta: string;
+  encoursTotal: string;
 };
 
 export type TopProduct = {
   label: string;
-  count: number;
-  encours: number;
+  placements: string;
+  encours: string;
 };
 
-export type AssetsFinancier = {
-  encoursTotal: number;
-  contratsActifs: number;
-  clientsFinancier: number;
-  clientsServis: number;
+export type AssetsFinancierScreen = {
+  heroEyebrow: string;
+  heroTitleLead: string;
+  heroTitleStrong: string;
+  heroSub: string;
+  kpis: FinancierKpi[];
+  placementsTitle: string;
+  placementsCount: string;
   clients: FinancierClient[];
+  total: FinancierTotal;
+  topProductsTitle: string;
   topProducts: TopProduct[];
-  hasData: boolean;
 };
 
-const EMPTY: AssetsFinancier = {
-  encoursTotal: 0,
-  contratsActifs: 0,
-  clientsFinancier: 0,
-  clientsServis: 0,
-  clients: [],
-  topProducts: [],
-  hasData: false,
+const SCREEN: AssetsFinancierScreen = {
+  heroEyebrow: "Assets du portefeuille · investissement financier",
+  heroTitleLead: "Investissement ",
+  heroTitleStrong: "financier",
+  heroSub:
+    "Détail de votre portefeuille financier · contrats placés, encours porté, clients concernés.",
+
+  kpis: [
+    {
+      label: "Encours sous gestion",
+      value: "1 720 000",
+      unit: "€",
+      valueGold: true,
+      meta: "cumul placé via votre portefeuille · 11 contrats actifs",
+      compare: [
+        { period: "S-1", value: "+0,4 %", direction: "up" },
+        { period: "M-1", value: "+2,3 %", direction: "up" },
+        { period: "N-1", value: "+18 %", direction: "up" },
+      ],
+    },
+    {
+      label: "Clients investissement financier",
+      value: "6",
+      unit: "/ 7",
+      meta: "clients en portefeuille concernés",
+      compare: [
+        { period: "S-1", value: "=", direction: "up" },
+        { period: "M-1", value: "+1", direction: "up" },
+        { period: "N-1", value: "+2", direction: "up" },
+      ],
+    },
+  ],
+
+  placementsTitle: "Détail de mes placements en investissement financier",
+  placementsCount: "11 contrats actifs · cliquez pour le détail client",
+
+  clients: [
+    {
+      initiales: "BD",
+      nom: "Bertrand & Monique DUPONT-TOPIN",
+      contratsActifs: 3,
+      types: [
+        { label: "Assurance vie luxembourgeoise" },
+        { label: "Contrat de capitalisation" },
+        { label: "PER" },
+      ],
+      dates: ["22/05/2025", "18/09/2025", "18/04/2026"],
+      encoursTotal: "420 000 €",
+    },
+    {
+      initiales: "AH",
+      nom: "Albert & Cécile HUYGHE",
+      contratsActifs: 2,
+      types: [
+        { label: "Assurance vie luxembourgeoise" },
+        { label: "Contrat de capitalisation" },
+      ],
+      dates: ["15/02/2025", "28/03/2026"],
+      encoursTotal: "380 000 €",
+    },
+    {
+      initiales: "GL",
+      nom: "SAS GROUPE LEFEBVRE",
+      contratsActifs: 2,
+      types: [
+        { label: "Contrat de capitalisation" },
+        { label: "Compte-titres" },
+      ],
+      dates: ["10/06/2025", "12/02/2026"],
+      encoursTotal: "340 000 €",
+    },
+    {
+      initiales: "MB",
+      nom: "Maître BONNARD",
+      contratsActifs: 2,
+      types: [
+        { label: "Assurance vie française" },
+        { label: "PEA" },
+      ],
+      dates: ["18/04/2025", "22/01/2026"],
+      encoursTotal: "280 000 €",
+    },
+    {
+      initiales: "PL",
+      nom: "Pierre LAMOUREUX",
+      contratsActifs: 1,
+      types: [{ label: "Assurance vie luxembourgeoise" }],
+      dates: ["04/03/2024"],
+      encoursTotal: "180 000 €",
+    },
+    {
+      initiales: "ML",
+      nom: "Maître LACROIX",
+      contratsActifs: 1,
+      types: [{ label: "Assurance vie française" }],
+      dates: ["12/01/2024"],
+      encoursTotal: "120 000 €",
+    },
+  ],
+
+  total: {
+    contratsActifs: 11,
+    meta: "6 clients sur 7 · cumul 2026",
+    encoursTotal: "1 720 000 €",
+  },
+
+  topProductsTitle: "Top produits placés par l'ingénieur",
+  topProducts: [
+    { label: "Assurance vie luxembourgeoise", placements: "4", encours: "820 000 €" },
+    { label: "Assurance vie française", placements: "3", encours: "480 000 €" },
+    { label: "Contrat de capitalisation", placements: "2", encours: "240 000 €" },
+    { label: "PEA Découverte", placements: "1", encours: "110 000 €" },
+    { label: "PER Liberté", placements: "1", encours: "70 000 €" },
+  ],
 };
 
-type Personne = { first_name?: string | null; last_name?: string | null };
-type ClientEmbed = { id?: string; personnes?: Personne[] | Personne | null };
-type SubRow = {
-  amount_initial?: number | null;
-  total_aum_current?: number | null;
-  subscription_date?: string | null;
-  client_id?: string | null;
-  produits?: { name?: string | null; category?: string | null } | { name?: string | null; category?: string | null }[] | null;
-  clients?: ClientEmbed | ClientEmbed[] | null;
-};
-
-function initialsOf(name: string): string {
-  const parts = name.trim().split(/\s+/).filter(Boolean);
-  if (parts.length === 0) return "?";
-  if (parts.length === 1) return parts[0]!.slice(0, 2).toUpperCase();
-  return (parts[0]![0]! + parts[parts.length - 1]![0]!).toUpperCase();
-}
-
-function nameOf(client: ClientEmbed | undefined): string {
-  const persons = client?.personnes;
-  const p = Array.isArray(persons) ? persons[0] : persons;
-  if (!p) return "Client sans nom";
-  const name = `${p.first_name ?? ""} ${p.last_name ?? ""}`.trim();
-  return name || "Client sans nom";
-}
-
-export async function fetchAssetsFinancier(): Promise<AssetsFinancier> {
-  try {
-    const ctx = await getSessionContext();
-    if (!ctx) return EMPTY;
-    const supabase = createAdminClient();
-
-    const { data: subs } = await supabase
-      .from("souscriptions")
-      .select(
-        "amount_initial, total_aum_current, subscription_date, client_id, produits(name, category), clients(id, personnes(first_name, last_name))",
-      )
-      .eq("cabinet_id", ctx.cabinetId)
-      .eq("tenant_id", ctx.tenantId);
-
-    // Nombre de clients servis par le cabinet, pour le ratio « 6 / 7 ».
-    const { count: clientsServis } = await supabase
-      .from("clients")
-      .select("id", { count: "exact", head: true })
-      .eq("cabinet_id", ctx.cabinetId)
-      .eq("tenant_id", ctx.tenantId);
-
-    const rows = (subs ?? []) as SubRow[];
-
-    const byClient = new Map<string, FinancierClient>();
-    const byProduct = new Map<string, TopProduct>();
-    let encoursTotal = 0;
-    let contratsActifs = 0;
-
-    for (const raw of rows) {
-      const prod = Array.isArray(raw.produits) ? raw.produits[0] : raw.produits;
-      const cat = prod?.category ?? "";
-      if (!FINANCIER.has(cat)) continue;
-
-      const init = raw.amount_initial != null ? Number(raw.amount_initial) : 0;
-      const aum = raw.total_aum_current != null ? Number(raw.total_aum_current) : 0;
-      const encours = aum > 0 ? aum : init;
-      const cid = raw.client_id ?? "";
-      const clientEmbed = Array.isArray(raw.clients) ? raw.clients[0] : raw.clients;
-      const productName = prod?.name?.trim() || categoryLabel(cat);
-
-      encoursTotal += encours;
-      contratsActifs += 1;
-
-      // Agrégat par client.
-      if (cid) {
-        const existing = byClient.get(cid);
-        const contract: FinancierContract = {
-          productName,
-          category: cat,
-          categoryLabel: categoryLabel(cat),
-          subscriptionDate: raw.subscription_date ?? null,
-          encours,
-        };
-        if (existing) {
-          existing.contracts.push(contract);
-          existing.totalEncours += encours;
-        } else {
-          const name = nameOf(clientEmbed ?? undefined);
-          byClient.set(cid, {
-            clientId: cid,
-            name,
-            initials: initialsOf(name),
-            contracts: [contract],
-            totalEncours: encours,
-          });
-        }
-      }
-
-      // Top produits placés (par libellé de produit réel).
-      const pk = productName;
-      const tp = byProduct.get(pk);
-      if (tp) {
-        tp.count += 1;
-        tp.encours += encours;
-      } else {
-        byProduct.set(pk, { label: productName, count: 1, encours });
-      }
-    }
-
-    const clients = Array.from(byClient.values()).sort(
-      (a, b) => b.totalEncours - a.totalEncours,
-    );
-    const topProducts = Array.from(byProduct.values()).sort(
-      (a, b) => b.encours - a.encours,
-    );
-
-    return {
-      encoursTotal,
-      contratsActifs,
-      clientsFinancier: byClient.size,
-      clientsServis: clientsServis ?? 0,
-      clients,
-      topProducts,
-      hasData: contratsActifs > 0,
-    };
-  } catch {
-    return EMPTY;
-  }
-}
-
-export function fmtEur(n: number): string {
-  if (!Number.isFinite(n) || n === 0) return "—";
-  return `${Math.round(n).toLocaleString("fr-FR")} €`;
-}
-
-export function fmtDateFr(iso: string | null): string {
-  if (!iso) return "—";
-  try {
-    return new Date(iso).toLocaleDateString("fr-FR", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    });
-  } catch {
-    return "—";
-  }
+export function getAssetsFinancierScreen(): AssetsFinancierScreen {
+  return SCREEN;
 }

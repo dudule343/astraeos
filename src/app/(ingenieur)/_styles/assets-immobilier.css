@@ -1,0 +1,312 @@
+/* =========================================================================
+ * Portage fidèle du CSS de la maquette (page-ing-assets-immobilier).
+ * Chaque sélecteur est scopé sous .maquette-ing. Variables de couleur
+ * (--navy, --gold, --ivory…) héritées de globals.css, non redéfinies.
+ * Valeurs copiées telles quelles depuis le <style> de la maquette.
+ * ========================================================================= */
+
+/* Conteneur de page : même respiration que le shell maquette. */
+.maquette-ing.assets-immo-page {
+  padding: 28px 36px 40px;
+}
+
+/* HERO ------------------------------------------------------------------- */
+.maquette-ing .hero {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 40px;
+  margin-bottom: 24px;
+  align-items: center;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--navy-100);
+}
+.maquette-ing .hero-eyebrow {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.maquette-ing .hero-title {
+  font-family: var(--serif, "Cormorant Garamond", serif);
+  font-size: 38px;
+  font-weight: 600;
+  color: var(--navy);
+  line-height: 1.12;
+  letter-spacing: -0.015em;
+  margin-bottom: 10px;
+}
+.maquette-ing .hero-title strong {
+  font-style: normal;
+  font-weight: 700;
+  color: var(--navy);
+}
+.maquette-ing .hero-sub {
+  font-size: 13.5px;
+  color: var(--navy-300);
+  max-width: 1100px;
+  line-height: 1.5;
+}
+.maquette-ing .hero-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/* BUTTONS ---------------------------------------------------------------- */
+.maquette-ing .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  font-family: inherit;
+  border: 1px solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.15s;
+  line-height: 1.4;
+}
+.maquette-ing .btn-gold {
+  background: var(--gold);
+  color: white;
+}
+.maquette-ing .btn-gold:hover {
+  background: #d39817;
+}
+.maquette-ing .btn-ghost {
+  background: white;
+  color: var(--navy);
+  border-color: var(--navy-100);
+}
+.maquette-ing .btn-ghost:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+.maquette-ing .btn-sm {
+  padding: 6px 11px;
+  font-size: 11.5px;
+}
+.maquette-ing .btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* KPIs ------------------------------------------------------------------- */
+.maquette-ing .kpis {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.maquette-ing .kpis-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+.maquette-ing .kpi {
+  background: white;
+  border: 1px solid var(--navy-100);
+  border-radius: 8px;
+  padding: 16px 18px;
+  position: relative;
+}
+.maquette-ing .kpi-label {
+  font-size: 9.5px;
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  line-height: 1.3;
+}
+.maquette-ing .kpi-value {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--navy);
+  letter-spacing: -0.018em;
+  line-height: 1;
+  font-feature-settings: "tnum" on;
+  margin-bottom: 6px;
+}
+.maquette-ing .kpi-value .unit {
+  font-size: 13px;
+  color: var(--navy-300);
+  font-weight: 500;
+}
+.maquette-ing .kpi-meta {
+  font-size: 11px;
+  color: var(--navy-300);
+  line-height: 1.4;
+}
+
+/* KPI compare 3 colonnes (M-1 / T-1 / N-1) ------------------------------- */
+.maquette-ing .kpi-compare-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--navy-100);
+}
+.maquette-ing .kpi-compare-3 > div {
+  padding: 0 4px;
+  position: relative;
+}
+.maquette-ing .kpi-compare-3 > div:not(:last-child) {
+  border-right: 1px solid var(--ivory-deep);
+}
+.maquette-ing .kpi-compare-3-period {
+  font-size: 9.5px;
+  font-weight: 700;
+  color: var(--navy-300);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-align: center;
+  margin-bottom: 4px;
+}
+.maquette-ing .kpi-compare-3-value {
+  font-size: 11.5px;
+  font-weight: 700;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+}
+.maquette-ing .kpi-compare-3-value.up {
+  color: #2ea85a;
+}
+.maquette-ing .kpi-compare-3-value.down {
+  color: #d9534f;
+}
+.maquette-ing .kpi-compare-3-arrow {
+  font-size: 10px;
+  line-height: 1;
+}
+
+/* CARDS ------------------------------------------------------------------ */
+.maquette-ing .card {
+  background: white;
+  border: 1px solid var(--navy-100);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.maquette-ing .card-header {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--navy-100);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.maquette-ing .card-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--navy);
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.maquette-ing .card-title svg {
+  width: 18px;
+  height: 18px;
+  color: var(--gold);
+  flex-shrink: 0;
+}
+
+/* BADGE ------------------------------------------------------------------ */
+.maquette-ing .badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 10.5px;
+  font-weight: 700;
+  line-height: 1.4;
+  white-space: nowrap;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.maquette-ing .badge-gold {
+  background: var(--gold-200);
+  color: var(--medium-400);
+}
+
+/* AVATAR (initiales) ----------------------------------------------------- */
+.maquette-ing .ingenieur-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--light-blue);
+  color: var(--navy);
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 1.5px solid var(--gold-300);
+}
+
+/* TABLES ----------------------------------------------------------------- */
+.maquette-ing table.dt {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+.maquette-ing table.dt thead {
+  background: var(--navy);
+}
+.maquette-ing table.dt thead th {
+  padding: 10px 16px;
+  text-align: left;
+  color: white;
+  font-weight: 600;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+.maquette-ing table.dt thead th.num,
+.maquette-ing table.dt tbody td.num {
+  text-align: right;
+  font-feature-settings: "tnum" on;
+}
+.maquette-ing table.dt thead th.center,
+.maquette-ing table.dt tbody td.center {
+  text-align: center;
+}
+.maquette-ing table.dt tbody td {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--navy-100);
+  vertical-align: middle;
+  color: #333;
+}
+.maquette-ing table.dt tbody tr:nth-child(even) {
+  background: var(--ivory);
+}
+.maquette-ing table.dt tbody tr:last-child td {
+  border-bottom: none;
+}
+.maquette-ing .cell-primary {
+  font-weight: 600;
+  color: var(--navy);
+}
+.maquette-ing .nowrap {
+  white-space: nowrap;
+}
+
+/* Utilitaires marges ----------------------------------------------------- */
+.maquette-ing .mb-18 {
+  margin-bottom: 18px;
+}
+.maquette-ing .mb-20 {
+  margin-bottom: 20px;
+}
+.maquette-ing .mb-24 {
+  margin-bottom: 24px;
+}

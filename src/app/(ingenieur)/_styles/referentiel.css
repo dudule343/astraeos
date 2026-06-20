@@ -1,0 +1,449 @@
+/*
+ * Process & méthodologie · écran maquette `page-ing-ref-process`.
+ * Port fidèle des styles inline de la maquette ingénieur v28.
+ * Chaque sélecteur est scopé sous .maquette-ing. Les classes génériques
+ * (.hero, .hero-eyebrow, .hero-title, .hero-sub, .hero-actions, .card,
+ * .card-header, .card-title, .card-body, .btn, .btn-gold, .btn-ghost,
+ * .btn-sm, .kpi-label) viennent de maquette.css et ne sont pas redéfinies ici.
+ */
+
+/* Espacements et grilles utilisés par la maquette mais absents de maquette.css */
+.maquette-ing .ref-mb-24 {
+  margin-bottom: 24px;
+}
+
+.maquette-ing .ref-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+/* Actions du hero empilées à droite (toggle global + bouton "Mettre à jour") */
+.maquette-ing .ref-hero-actions {
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+/* Bloc "Mettre le référentiel en ligne" du hero */
+.maquette-ing .ref-toggle-global {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: white;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--navy-100);
+}
+
+.maquette-ing .ref-toggle-global-label {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--navy);
+}
+
+.maquette-ing .ref-toggle-global-state {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--gold);
+}
+
+/* Interrupteur "switch" doré (3 tailles : global 42px, large 32px, small 30px) */
+.maquette-ing .ref-switch {
+  position: relative;
+  display: inline-block;
+  margin: 0;
+}
+
+.maquette-ing .ref-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.maquette-ing .ref-switch .ref-switch-track {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--gold);
+  transition: 0.2s;
+}
+
+.maquette-ing .ref-switch .ref-switch-knob {
+  position: absolute;
+  background: white;
+  border-radius: 50%;
+  transition: 0.2s;
+}
+
+/* Taille L (toggle global du hero) */
+.maquette-ing .ref-switch--lg {
+  width: 42px;
+  height: 22px;
+}
+.maquette-ing .ref-switch--lg .ref-switch-track {
+  border-radius: 22px;
+}
+.maquette-ing .ref-switch--lg .ref-switch-knob {
+  height: 16px;
+  width: 16px;
+  left: 23px;
+  bottom: 3px;
+}
+
+/* Taille M (toggle "À mettre à disposition" zone IA) */
+.maquette-ing .ref-switch--md {
+  width: 32px;
+  height: 18px;
+}
+.maquette-ing .ref-switch--md .ref-switch-track {
+  border-radius: 18px;
+}
+.maquette-ing .ref-switch--md .ref-switch-knob {
+  height: 12px;
+  width: 12px;
+  left: 17px;
+  bottom: 3px;
+}
+
+/* Taille S (toggle "Accessible licenciés" en-têtes de cartes) */
+.maquette-ing .ref-switch--sm {
+  width: 30px;
+  height: 16px;
+}
+.maquette-ing .ref-switch--sm .ref-switch-track {
+  border-radius: 16px;
+}
+.maquette-ing .ref-switch--sm .ref-switch-knob {
+  height: 10px;
+  width: 10px;
+  left: 17px;
+  bottom: 3px;
+}
+
+/* Pastille "Accessible licenciés / OUI" en haut à droite des cartes */
+.maquette-ing .ref-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: white;
+  padding: 5px 10px;
+  border-radius: 18px;
+  border: 1px solid var(--gold-200);
+}
+
+.maquette-ing .ref-pill-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--navy);
+}
+
+.maquette-ing .ref-pill-state {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--gold);
+}
+
+/* ── Zone IA ────────────────────────────────────────────────────────────── */
+.maquette-ing .ref-ia-card {
+  border-left: 4px solid var(--gold);
+  background: linear-gradient(135deg, var(--ivory) 0%, white 60%);
+  position: relative;
+}
+
+.maquette-ing .ref-ia-pill {
+  position: absolute;
+  top: 14px;
+  right: 18px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: white;
+  padding: 6px 10px;
+  border-radius: 20px;
+  border: 1px solid var(--gold-200);
+}
+
+.maquette-ing .ref-ia-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+}
+
+.maquette-ing .ref-ia-icon {
+  width: 52px;
+  height: 52px;
+  background: linear-gradient(135deg, var(--gold), var(--gold-deep));
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  color: white;
+  flex-shrink: 0;
+}
+
+.maquette-ing .ref-ia-icon svg {
+  width: 26px;
+  height: 26px;
+}
+
+.maquette-ing .ref-ia-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--navy);
+  margin-bottom: 8px;
+}
+
+.maquette-ing .ref-ia-desc {
+  font-size: 12.5px;
+  color: var(--navy-300);
+  line-height: 1.5;
+  margin-bottom: 14px;
+}
+
+.maquette-ing .ref-ia-form {
+  display: flex;
+  gap: 10px;
+}
+
+.maquette-ing .ref-ia-input {
+  flex: 1;
+  padding: 12px 16px;
+  border: 1px solid var(--navy-100);
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 13px;
+}
+
+.maquette-ing .ref-ia-suggestions {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.maquette-ing .ref-ia-suggestions-label {
+  font-size: 10px;
+  color: var(--navy-300);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+
+.maquette-ing .ref-ia-suggestion {
+  padding: 3px 10px;
+  font-size: 10.5px;
+}
+
+/* ── Cartes Manuel / Contrat : listes de sections ───────────────────────── */
+.maquette-ing .ref-card-desc {
+  font-size: 12.5px;
+  color: var(--navy-300);
+  line-height: 1.6;
+  margin-bottom: 14px;
+}
+
+.maquette-ing .ref-card-desc strong {
+  color: var(--navy);
+}
+
+.maquette-ing .ref-list {
+  display: grid;
+  gap: 6px;
+  font-size: 12px;
+}
+
+.maquette-ing .ref-list-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: var(--ivory);
+  border-radius: 5px;
+  color: var(--navy);
+}
+
+.maquette-ing .ref-list-row--gold {
+  background: var(--gold-100);
+  border-left: 3px solid var(--gold);
+}
+
+.maquette-ing .ref-list-row--gold strong {
+  color: var(--gold-deep);
+}
+
+.maquette-ing .ref-list-link {
+  color: var(--gold);
+  font-weight: 700;
+}
+
+.maquette-ing .ref-card-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.maquette-ing .ref-card-actions .btn {
+  flex: 1;
+}
+
+.maquette-ing .ref-card-note {
+  margin-top: 10px;
+  padding: 8px 10px;
+  background: var(--ivory);
+  border-radius: 5px;
+  font-size: 10.5px;
+  color: var(--navy-300);
+  line-height: 1.5;
+}
+
+/* ── Bibliothèque de modèles ────────────────────────────────────────────── */
+.maquette-ing .ref-modeles-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.maquette-ing .ref-modele {
+  background: var(--ivory);
+  border: 1px solid var(--gold-200);
+  border-radius: 8px;
+  padding: 14px;
+}
+
+.maquette-ing .ref-modele-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.maquette-ing .ref-modele-icon {
+  width: 32px;
+  height: 32px;
+  background: var(--gold-100);
+  border-radius: 6px;
+  display: grid;
+  place-items: center;
+  color: var(--gold);
+}
+
+.maquette-ing .ref-modele-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.maquette-ing .ref-modele-title {
+  font-size: 13px;
+  color: var(--navy);
+}
+
+.maquette-ing .ref-modele-desc {
+  font-size: 11px;
+  color: var(--navy-300);
+  line-height: 1.5;
+}
+
+.maquette-ing .ref-modele-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.maquette-ing .ref-modele-actions .btn {
+  font-size: 10.5px;
+}
+
+/* ── Éléments de communication ──────────────────────────────────────────── */
+.maquette-ing .ref-comm-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.maquette-ing .ref-comm {
+  border-radius: 8px;
+  padding: 18px;
+  text-align: center;
+}
+
+.maquette-ing .ref-comm--navy {
+  background: var(--navy);
+  color: white;
+}
+
+.maquette-ing .ref-comm--white {
+  background: white;
+  border: 1px solid var(--gold-200);
+  color: var(--navy);
+}
+
+.maquette-ing .ref-comm--navy-gradient {
+  background: linear-gradient(135deg, var(--navy), var(--navy-deep));
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.maquette-ing .ref-comm--ivory {
+  background: var(--ivory);
+  border: 1px solid var(--gold-200);
+  color: var(--navy);
+}
+
+.maquette-ing .ref-comm-glow {
+  position: absolute;
+  top: -30px;
+  right: -30px;
+  width: 80px;
+  height: 80px;
+  background: radial-gradient(circle, var(--gold), transparent);
+  opacity: 0.3;
+}
+
+.maquette-ing .ref-comm-logo {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.maquette-ing .ref-comm-logo--gold {
+  color: var(--gold);
+}
+
+.maquette-ing .ref-comm-kicker {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--gold-300);
+}
+
+.maquette-ing .ref-comm-kicker--navy-text {
+  color: var(--gold);
+}
+
+.maquette-ing .ref-comm-line {
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+.maquette-ing .ref-comm-sub {
+  font-size: 9.5px;
+  letter-spacing: 0.18em;
+  margin-top: 4px;
+}
+
+.maquette-ing .ref-comm-sub--gold {
+  color: var(--gold-300);
+}
+
+.maquette-ing .ref-comm-sub--navy {
+  color: var(--navy-300);
+}
+
+.maquette-ing .ref-comm .btn {
+  margin-top: 10px;
+  width: 100%;
+  position: relative;
+  z-index: 1;
+}
