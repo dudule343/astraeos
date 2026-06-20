@@ -4031,12 +4031,9 @@ setInterval(() => {
     return r;
   }
 
-  function startWebSpeech() {
-    if (!SpeechRec) {
-      setNote('Transcription locale indisponible sur ce navigateur (API Web Speech absente). Connectez Deepgram pour la transcription complète.', true);
-      return false;
-    }
-    if (wsRunning) return true; // déjà une reconnaissance en cours → pas de seconde instance
+  // Démarre réellement la reconnaissance Web Speech une fois le micro autorisé.
+  function startWebSpeechRecognizer() {
+    if (wsRunning) return;
     activeMode = 'webspeech';
     setMode('Micro local', false);
     showUpsell();
@@ -4044,6 +4041,43 @@ setInterval(() => {
     try { recog.start(); wsRunning = true; } catch (e) {}
     emitCaptureState(true);
     setNote('Transcription locale active (voix de l\'ingénieur). L\'IA analyse la conversation.');
+  }
+
+  // Repli micro local (Web Speech). NB : la qualité « deux voix » nécessite une
+  // clé Deepgram de rôle Owner (scope keys:write pour les clés éphémères) →
+  // action Marvin. En attendant, Web Speech transcrit la voix de l'ingénieur et
+  // DOIT fonctionner seul. On demande EXPLICITEMENT le micro (getUserMedia)
+  // AVANT de lancer la reconnaissance : dans une iframe, démarrer Web Speech à
+  // froid échoue souvent en `not-allowed` silencieux ; obtenir d'abord le flux
+  // micro force/confirme l'autorisation Chrome, puis la reconnaissance la réutilise.
+  function startWebSpeech() {
+    if (!SpeechRec) {
+      setNote('Transcription locale indisponible sur ce navigateur (API Web Speech absente). Connectez Deepgram pour la transcription complète.', true);
+      return false;
+    }
+    if (wsRunning) return true; // déjà une reconnaissance en cours → pas de seconde instance
+
+    // Si le micro n'est pas accessible (vieux navigateur), on tente quand même
+    // la reconnaissance : SpeechRecognition gère sa propre permission.
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      startWebSpeechRecognizer();
+      return true;
+    }
+
+    setNote('Activation du micro local…');
+    navigator.mediaDevices.getUserMedia({ audio: true })
+      .then(function (mic) {
+        // Le flux ne sert qu'à confirmer/déverrouiller la permission : Web Speech
+        // ouvre sa propre capture. On libère immédiatement pour ne pas garder
+        // deux captures micro concurrentes.
+        try { mic.getTracks().forEach(function (t) { t.stop(); }); } catch (e) {}
+        if (userPaused) return; // l'ingénieur a mis en pause pendant le prompt
+        startWebSpeechRecognizer();
+      })
+      .catch(function () {
+        setNote('Micro refusé. Autorisez le microphone (icône caméra dans la barre Chrome) puis redémarrez la transcription.', true);
+        stopAll(false);
+      });
     return true;
   }
 

@@ -15,8 +15,12 @@ const securityHeaders = [
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
   {
     key: "Permissions-Policy",
-    // La visio a besoin de la caméra/micro en same-origin ; on bloque le reste.
-    value: "camera=(self), microphone=(self), geolocation=(), browsing-topics=()",
+    // La visio a besoin de la caméra/micro/partage d'écran en same-origin ; on
+    // bloque le reste. display-capture est requis pour getDisplayMedia (mode
+    // compagnon Meet/Zoom de la transcription) ; sans lui, Chrome bloque le
+    // partage d'onglet par policy avant même tout prompt utilisateur.
+    value:
+      "camera=(self), microphone=(self), display-capture=(self), geolocation=(), browsing-topics=()",
   },
   // HSTS uniquement en prod (HTTPS) — éviter de l'envoyer en dev/HTTP.
   ...(isProd

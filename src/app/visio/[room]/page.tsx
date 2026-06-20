@@ -126,7 +126,14 @@ export default async function VisioRoomPage({
       <iframe
         src={src}
         title="Visio PRIVEOS"
-        allow="camera *; microphone *; display-capture *; autoplay *"
+        // On délègue micro/caméra/partage à TOUTES les origines (`*`), pas
+        // seulement `self` : l'API Jitsi crée à l'intérieur une iframe
+        // CROSS-ORIGIN (srv1750581.hstgr.cloud). Avec `camera`/`microphone` sans
+        // `*`, Chrome bloque caméra+micro dans cette iframe Jitsi (« problème de
+        // permission »). display-capture sert au partage d'onglet (transcription
+        // compagnon), clipboard-write au lien d'invitation, speaker-selection au
+        // choix de sortie audio Jitsi.
+        allow="camera *; microphone *; display-capture *; autoplay *; clipboard-write *; speaker-selection *"
         className="block w-full flex-1 border-0"
         style={{ height: "100vh" }}
       />

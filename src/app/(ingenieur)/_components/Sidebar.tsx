@@ -127,6 +127,7 @@ const SECTIONS: Section[] = [
     items: [
       { href: BASE, label: "Mon tableau de bord", icon: "cockpit" },
       { href: `${BASE}/agenda`, label: "Calendrier & RDV", icon: "calendar" },
+      { href: "/visio", label: "Démarrer un entretien", icon: "calendar" },
       { href: `${BASE}/activite`, label: "Mon activité commerciale", icon: "chart" },
     ],
   },
