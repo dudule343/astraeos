@@ -1,0 +1,200 @@
+/*
+ * Pipeline Kanban · 6 étapes (page-ing-pipeline, maquette ligne 4779).
+ * Les styles inline de la maquette sont transposés en classes scopées
+ * « .maquette-ing ». Les classes génériques (hero, kpi, btn, badge) viennent
+ * de maquette.css (lecture seule). Variables couleur depuis globals.css.
+ */
+
+.maquette-ing .pipeline-page {
+  padding: 32px 40px;
+}
+
+/* badge-success : porté tel quel (pas défini dans maquette.css) */
+.maquette-ing .badge-success {
+  background: var(--green-bg);
+  color: var(--green-text);
+}
+
+/* ---- Grille Kanban : 6 colonnes égales ---------------------------------- */
+.maquette-ing .pipeline-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 12px;
+}
+
+/* ---- En-tête de colonne ------------------------------------------------- */
+.maquette-ing .pipeline-col-head {
+  padding: 12px 14px;
+  border-radius: 8px 8px 0 0;
+  border: 1px solid var(--navy-100);
+  border-bottom: none;
+}
+
+.maquette-ing .pipeline-col-head.head-gold-soft {
+  background: var(--ivory);
+  border-color: var(--gold-200);
+}
+
+.maquette-ing .pipeline-col-head.head-gold-strong {
+  background: linear-gradient(135deg, var(--ivory), var(--gold-100));
+  border: 1.5px solid var(--gold);
+  border-bottom: none;
+}
+
+.maquette-ing .pipeline-col-head-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.maquette-ing .pipeline-col-title {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--navy-300);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.maquette-ing .pipeline-col-title.title-gold {
+  color: var(--gold-deep);
+}
+
+.maquette-ing .pipeline-col-count {
+  color: white;
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.maquette-ing .pipeline-col-count.count-gold {
+  background: var(--gold);
+}
+
+.maquette-ing .pipeline-col-count.count-navy {
+  background: var(--navy-300);
+}
+
+.maquette-ing .pipeline-col-count.count-gold-300 {
+  background: var(--gold-300);
+}
+
+.maquette-ing .pipeline-col-subtitle {
+  font-size: 10.5px;
+  color: var(--navy-300);
+  margin-top: 4px;
+}
+
+/* ---- Corps de colonne --------------------------------------------------- */
+.maquette-ing .pipeline-col-body {
+  background: white;
+  border: 1px solid var(--navy-100);
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  padding: 10px;
+  min-height: 340px;
+}
+
+.maquette-ing .pipeline-col-body.body-emphasized {
+  border: 1.5px solid var(--gold);
+  border-top: none;
+}
+
+/* ---- Carte dossier ------------------------------------------------------ */
+.maquette-ing .pipeline-card {
+  display: block;
+  text-align: left;
+  width: 100%;
+  padding: 10px 12px;
+  background: var(--ivory);
+  border-radius: 6px;
+  margin-bottom: 8px;
+  border: none;
+  font-family: inherit;
+}
+
+.maquette-ing .pipeline-card:last-child {
+  margin-bottom: 0;
+}
+
+.maquette-ing .pipeline-card.is-linkable {
+  cursor: pointer;
+}
+
+.maquette-ing .pipeline-card.card-alert {
+  background: rgba(229, 124, 75, 0.06);
+  border-left: 3px solid var(--orange-text);
+}
+
+.maquette-ing .pipeline-card.card-highlight {
+  background: var(--gold-100);
+  border-left: 3px solid var(--gold);
+}
+
+.maquette-ing .pipeline-card-name {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--navy);
+}
+
+.maquette-ing .pipeline-card-sub {
+  font-size: 10px;
+  color: var(--navy-300);
+  margin-top: 3px;
+}
+
+.maquette-ing .pipeline-card-badge-row {
+  margin-top: 6px;
+}
+
+/* ---- Badges de carte ---------------------------------------------------- */
+.maquette-ing .pipeline-badge {
+  font-size: 9px;
+}
+
+.maquette-ing .pipeline-badge.badge-gold {
+  background: var(--gold-100);
+  color: var(--gold-deep);
+}
+
+.maquette-ing .pipeline-badge.badge-blue {
+  background: var(--light-blue);
+  color: var(--navy);
+}
+
+.maquette-ing .pipeline-badge.badge-alert {
+  background: rgba(229, 124, 75, 0.15);
+  color: var(--orange-text);
+}
+
+.maquette-ing .pipeline-badge.badge-warn {
+  background: rgba(198, 142, 14, 0.15);
+  color: var(--gold-deep);
+}
+
+.maquette-ing .pipeline-badge.badge-card-success {
+  font-size: 9px;
+}
+
+/* ---- Barre de progression (collecte de documents) ---------------------- */
+.maquette-ing .pipeline-progress {
+  margin-top: 6px;
+  height: 3px;
+  background: var(--ivory-deep);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.maquette-ing .pipeline-progress-fill {
+  height: 100%;
+  background: var(--gold);
+}
+
+/* ---- Pied de colonne « … N autres » ------------------------------------ */
+.maquette-ing .pipeline-col-footer {
+  padding: 8px 12px;
+  text-align: center;
+  font-size: 10.5px;
+  color: var(--navy-300);
+  font-style: italic;
+}

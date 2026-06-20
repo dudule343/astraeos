@@ -1,0 +1,298 @@
+/* =========================================================================
+ * Portage fidèle du CSS de la maquette 030 v28 pour l'écran
+ * « Mes types de rendez-vous » (#page-ing-types-rdv, lignes 7388→7735).
+ *
+ * Chaque sélecteur est préfixé .maquette-ing pour scoper le style à l'espace
+ * ingénieur. Les variables CSS (--navy, --gold, --ivory, …) viennent de
+ * globals.css. On ne touche pas à maquette.css (hero/kpi/card/btn/badge/mb-*
+ * génériques) : ici uniquement les classes propres à cet écran. Valeurs
+ * copiées telles quelles depuis la maquette.
+ * ========================================================================= */
+
+.maquette-ing .rdv-type-card {
+  background: white;
+  border: 1px solid var(--navy-100);
+  border-radius: 6px;
+  padding: 20px 22px;
+  margin-bottom: 14px;
+  position: relative;
+  transition: all 0.18s;
+}
+.maquette-ing .rdv-type-card:hover {
+  box-shadow: 0 4px 14px rgba(16, 45, 80, 0.08);
+  border-color: var(--gold-300);
+}
+.maquette-ing .rdv-type-card.public {
+  border-left: 4px solid var(--gold);
+}
+.maquette-ing .rdv-type-card.private {
+  border-left: 4px solid var(--navy-300);
+}
+.maquette-ing .rdv-type-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px dashed var(--ivory-deep);
+}
+.maquette-ing .rdv-type-duration-badge {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  background: var(--gold-100);
+  color: var(--gold-deep);
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+.maquette-ing .rdv-type-info {
+  flex: 1;
+}
+.maquette-ing .rdv-type-name {
+  font-family: var(--serif);
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--navy);
+  letter-spacing: -0.005em;
+}
+.maquette-ing .rdv-type-desc {
+  font-size: 11.5px;
+  color: var(--navy-300);
+  margin-top: 2px;
+  line-height: 1.45;
+}
+.maquette-ing .rdv-type-visibility-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  border-radius: 10px;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.maquette-ing .rdv-type-visibility-pill.public {
+  background: var(--gold-100);
+  color: var(--gold-deep);
+}
+.maquette-ing .rdv-type-visibility-pill.private {
+  background: var(--light-blue);
+  color: var(--navy);
+}
+.maquette-ing .rdv-type-actions {
+  display: flex;
+  gap: 6px;
+}
+.maquette-ing .rdv-type-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+.maquette-ing .rdv-type-block {
+  background: var(--ivory);
+  padding: 14px 16px;
+  border-radius: 4px;
+}
+.maquette-ing .rdv-type-block-label {
+  font-size: 9.5px;
+  font-weight: 700;
+  color: var(--gold-deep);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.maquette-ing .rdv-type-doc-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  background: white;
+  border: 1px solid var(--gold-300);
+  border-radius: 12px;
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--navy);
+  margin: 2px 4px 2px 0;
+}
+.maquette-ing .rdv-type-doc-chip svg {
+  width: 11px;
+  height: 11px;
+  color: var(--gold-deep);
+}
+.maquette-ing .rdv-type-message-preview {
+  font-size: 11px;
+  line-height: 1.55;
+  color: var(--navy);
+  font-style: italic;
+  padding: 8px 10px;
+  background: white;
+  border-radius: 3px;
+  border-left: 2px solid var(--gold-300);
+}
+.maquette-ing .rdv-type-variable {
+  display: inline-block;
+  padding: 1px 5px;
+  background: var(--gold-100);
+  border-radius: 2px;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  color: var(--gold-deep);
+  font-weight: 700;
+}
+
+/* Conteneur de page (même padding que le shell maquette) ------------------ */
+.maquette-ing .types-rdv-page-wrap {
+  padding: 28px 36px 40px;
+}
+
+/* Bandeau lien public (navy gradient) ------------------------------------ */
+.maquette-ing .types-rdv-public-banner {
+  background: linear-gradient(135deg, var(--navy) 0%, #1a3866 100%);
+  color: white;
+  border: none;
+}
+.maquette-ing .types-rdv-public-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 24px;
+}
+.maquette-ing .types-rdv-public-label {
+  font-size: 9.5px;
+  font-weight: 700;
+  color: var(--gold-300);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.maquette-ing .types-rdv-public-url {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 13px;
+  color: white;
+  word-break: break-all;
+  margin-bottom: 8px;
+}
+.maquette-ing .types-rdv-public-url strong {
+  color: var(--gold-300);
+}
+.maquette-ing .types-rdv-public-btn-gold {
+  background: var(--gold);
+  color: white;
+  border: none;
+  font-size: 10.5px;
+  font-weight: 700;
+}
+.maquette-ing .types-rdv-public-btn-ghost {
+  background: rgba(255, 255, 255, 0.08);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  font-size: 10.5px;
+}
+
+/* Note signature dynamique ----------------------------------------------- */
+.maquette-ing .types-rdv-note {
+  padding: 13px 18px;
+  background: var(--gold-100);
+  border-left: 3px solid var(--gold);
+  border-radius: 3px;
+  margin-bottom: 18px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.maquette-ing .types-rdv-note-icon {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.maquette-ing .types-rdv-note-text {
+  font-size: 11.5px;
+  color: var(--medium-400);
+  line-height: 1.55;
+}
+.maquette-ing .types-rdv-note-text strong {
+  color: var(--navy);
+}
+
+/* Grille mini-jours 7 colonnes (Type 1 et Type 4) ------------------------ */
+.maquette-ing .types-rdv-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 3px;
+  margin-top: 8px;
+}
+.maquette-ing .types-rdv-day {
+  text-align: center;
+  padding: 4px;
+  font-size: 9px;
+  font-weight: 700;
+  border-radius: 3px;
+}
+.maquette-ing .types-rdv-day.on {
+  background: var(--gold);
+  color: white;
+}
+.maquette-ing .types-rdv-day.off {
+  background: var(--ivory-deep);
+  color: var(--navy-300);
+}
+
+/* Disponibilités spécifiques (texte) ------------------------------------- */
+.maquette-ing .types-rdv-dispo {
+  font-size: 11.5px;
+  color: var(--navy);
+  line-height: 1.6;
+}
+.maquette-ing .types-rdv-dispo-sub {
+  color: var(--navy-300);
+}
+.maquette-ing .types-rdv-dispo-sub.italic {
+  font-style: italic;
+}
+
+/* Réservation & tampon (2 colonnes) -------------------------------------- */
+.maquette-ing .types-rdv-resa {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  font-size: 11.5px;
+  color: var(--navy);
+}
+.maquette-ing .types-rdv-resa-label {
+  color: var(--navy-300);
+  font-size: 10px;
+  margin-bottom: 2px;
+}
+
+.maquette-ing .types-rdv-variables-line {
+  font-size: 10px;
+  color: var(--navy-300);
+  margin-top: 6px;
+}
+
+/* Carte "Créer un type personnalisé" (pied de page) ---------------------- */
+.maquette-ing .types-rdv-create {
+  margin-top: 24px;
+  padding: 28px;
+  background: var(--ivory);
+  border: 1.5px dashed var(--gold-300);
+  border-radius: 6px;
+  text-align: center;
+}
+.maquette-ing .types-rdv-create-title {
+  font-family: var(--serif);
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--navy);
+  margin-bottom: 6px;
+}
+.maquette-ing .types-rdv-create-sub {
+  font-size: 11.5px;
+  color: var(--navy-300);
+  margin-bottom: 14px;
+  max-width: 480px;
+  margin-left: auto;
+  margin-right: auto;
+}

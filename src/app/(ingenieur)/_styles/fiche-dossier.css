@@ -1,0 +1,185 @@
+/* =========================================================================
+   Fiche dossier ingénieur · #page-ing-fiche-dossier (maquette 030 v28)
+   Timeline du parcours patrimonial 6 étapes.
+   Sélecteurs scopés '.maquette-ing '. Réutilise les classes génériques de
+   maquette.css (hero, kpis, card, badge, btn-*) en lecture seule.
+   ========================================================================= */
+
+/* KPI value en or / en vert — intention de la maquette
+   (<div class="kpi-value gold">, color:var(--green-text)). */
+.maquette-ing .kpi-value.gold {
+  color: var(--gold);
+}
+.maquette-ing .kpi-value.green {
+  color: var(--green-text);
+}
+
+/* Badge succès (✓ Terminée / ✓ Livrée). */
+.maquette-ing .badge-success {
+  background: var(--green-bg);
+  color: var(--green-text);
+}
+
+/* Conteneur de la timeline : la ligne verticale dorée à 75 %. */
+.maquette-ing .fd-timeline {
+  position: relative;
+  padding-left: 0;
+}
+.maquette-ing .fd-timeline-rail {
+  position: absolute;
+  left: 24px;
+  top: 14px;
+  bottom: 14px;
+  width: 2px;
+  background: linear-gradient(
+    180deg,
+    var(--gold) 0%,
+    var(--gold) 75%,
+    var(--ivory-deep) 75%,
+    var(--ivory-deep) 100%
+  );
+}
+
+/* Rangée d'étape : pastille 50px + carte. */
+.maquette-ing .fd-step {
+  display: grid;
+  grid-template-columns: 50px 1fr;
+  gap: 18px;
+  margin-bottom: 22px;
+  position: relative;
+}
+.maquette-ing .fd-step:last-child {
+  margin-bottom: 0;
+}
+
+/* Pastille numérotée. */
+.maquette-ing .fd-dot {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: var(--gold);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 18px;
+  box-shadow: 0 0 0 4px white;
+  z-index: 1;
+}
+/* Étape courante (étape 6) : pastille creuse cerclée d'or. */
+.maquette-ing .fd-dot.current {
+  background: white;
+  border: 3px solid var(--gold);
+  color: var(--gold);
+}
+
+/* Carte d'étape (cas standard). */
+.maquette-ing .fd-card {
+  padding: 14px 18px;
+  background: var(--ivory);
+  border-radius: 8px;
+  border-left: 3px solid var(--gold);
+}
+.maquette-ing .fd-card.clickable {
+  cursor: pointer;
+  text-decoration: none;
+  display: block;
+}
+/* Étape 5 (production) : dégradé ivoire→or. */
+.maquette-ing .fd-card.rich {
+  background: linear-gradient(135deg, var(--ivory), var(--gold-100));
+  border-left: 3px solid var(--gold);
+}
+/* Étape 6 (à venir) : carte blanche bordure dorée pointillée. */
+.maquette-ing .fd-card.current {
+  background: white;
+  border: 2px dashed var(--gold);
+}
+
+.maquette-ing .fd-card-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.maquette-ing .fd-card.rich .fd-card-row {
+  align-items: flex-start;
+}
+
+.maquette-ing .fd-eyebrow {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--gold-deep);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.maquette-ing .fd-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--navy);
+  margin-top: 3px;
+}
+.maquette-ing .fd-desc {
+  font-size: 11.5px;
+  color: var(--navy-300);
+  margin-top: 4px;
+}
+
+/* Étape 5 : bloc riche. */
+.maquette-ing .fd-rich-main {
+  flex: 1;
+}
+.maquette-ing .fd-rich-subtitle {
+  font-size: 10.5px;
+  color: var(--navy-300);
+  margin-top: 2px;
+  font-style: italic;
+}
+.maquette-ing .fd-rich-parties {
+  font-size: 11.5px;
+  color: var(--navy-300);
+  margin-top: 6px;
+  line-height: 1.7;
+}
+.maquette-ing .fd-rich-livraison {
+  margin-top: 10px;
+  padding: 10px 14px;
+  background: white;
+  border-radius: 6px;
+  border: 1px solid var(--gold-200);
+}
+.maquette-ing .fd-rich-livraison-eyebrow {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--gold-deep);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.maquette-ing .fd-rich-livraison-meta {
+  font-size: 12px;
+  color: var(--navy);
+  margin-top: 2px;
+}
+
+/* Badge spécifiques de l'étape : succès / J-1. */
+.maquette-ing .fd-badge {
+  font-size: 9.5px;
+}
+.maquette-ing .fd-card.rich .fd-badge {
+  margin-left: 14px;
+  flex-shrink: 0;
+}
+.maquette-ing .badge.fd-badge-j1 {
+  background: var(--gold-100);
+  color: var(--gold-deep);
+}
+
+/* Bloc « Actions disponibles maintenant » : grille 4 boutons. */
+.maquette-ing .fd-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+.maquette-ing .fd-actions-grid .btn {
+  padding: 14px;
+}

@@ -1,0 +1,355 @@
+/* =========================================================================
+ * Portage fidèle du CSS de la maquette 030 v28 pour l'écran
+ * « Fiche RDV » (#page-ing-fiche-rdv-mercier lignes 7742→7847,
+ * #page-ing-fiche-rdv-joubert lignes 7849→7957).
+ *
+ * Sélecteurs préfixés .maquette-ing pour scoper le style à l'espace
+ * ingénieur. Les classes génériques déjà portées dans maquette.css
+ * (hero / card / btn / badge) ne sont PAS redéfinies ici. Les styles inline
+ * de la maquette sont transposés en classes nommées, valeurs copiées telles
+ * quelles. Variables (--navy, --gold, etc.) issues de globals.css.
+ * ========================================================================= */
+
+/* Conteneur de page : même padding que les autres écrans ingénieur ------- */
+.maquette-ing .fiche-rdv-wrap {
+  padding: 28px 36px 40px;
+}
+
+/* Barre de retour (page-back-bar de la maquette) ------------------------- */
+.maquette-ing .page-back-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+/* — Hero spécifique fiche RDV (gradient + bordure gold de la maquette) — */
+.maquette-ing .frdv-hero {
+  background: linear-gradient(135deg, rgba(198, 142, 14, 0.1) 0%, white 70%);
+  border: 1px solid var(--gold-300);
+  border-radius: 10px;
+  padding: 24px 28px;
+  margin-bottom: 18px;
+}
+.maquette-ing .frdv-hero-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+}
+.maquette-ing .frdv-hero-main {
+  flex: 1;
+}
+.maquette-ing .frdv-hero .hero-eyebrow {
+  color: var(--gold-deep);
+}
+.maquette-ing .frdv-hero-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* Badges du hero -------------------------------------------------------- */
+.maquette-ing .frdv-tags {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+.maquette-ing .frdv-tag {
+  padding: 5px 11px;
+  border-radius: 12px;
+  font-size: 10.5px;
+  font-weight: 700;
+}
+.maquette-ing .frdv-tag.calendly {
+  background: var(--gold-100);
+  color: var(--gold-deep);
+  letter-spacing: 0.04em;
+}
+.maquette-ing .frdv-tag.docs {
+  background: #e8f5ee;
+  color: #1f5a36;
+}
+.maquette-ing .frdv-tag.statut {
+  background: white;
+  border: 1px solid var(--navy-200);
+  color: var(--navy);
+}
+
+/* — Bouton visio (porté de .s1c-visio-btn, lignes 879→890) — */
+.maquette-ing .s1c-visio-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 16px;
+  border-radius: 8px;
+  font-family: "Epilogue", sans-serif;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  border: none;
+  transition: all 0.16s ease;
+  white-space: nowrap;
+  text-decoration: none;
+}
+.maquette-ing .s1c-visio-btn svg {
+  width: 15px;
+  height: 15px;
+}
+.maquette-ing .s1c-visio-btn.join {
+  background: var(--gold);
+  color: white;
+  box-shadow: 0 3px 10px rgba(198, 142, 14, 0.28);
+}
+.maquette-ing .s1c-visio-btn.join:hover {
+  background: var(--gold-deep);
+  transform: translateY(-1px);
+}
+.maquette-ing .s1c-visio-btn.join .s1c-visio-live {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: white;
+  animation: visioPulse 1.6s infinite;
+}
+@keyframes visioPulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+.maquette-ing .s1c-visio-btn.replay {
+  background: white;
+  color: var(--navy);
+  border: 1px solid var(--navy-200);
+}
+.maquette-ing .s1c-visio-btn.replay:hover {
+  background: var(--navy);
+  color: white;
+  border-color: var(--navy);
+}
+/* Variante grande taille du hero (paddings inline de la maquette) -------- */
+.maquette-ing .s1c-visio-btn.frdv-join-lg {
+  padding: 14px 24px;
+  font-size: 13px;
+  border-radius: 8px;
+}
+.maquette-ing .s1c-visio-btn.frdv-replay-sm {
+  padding: 10px 24px;
+  font-size: 11.5px;
+  border-radius: 8px;
+  justify-content: center;
+}
+
+/* — Cartes (porté de .s1c-chart-card / .s1c-chart-title, lignes 2240→2263) — */
+.maquette-ing .s1c-chart-card {
+  background: white;
+  border: 1px solid var(--navy-100);
+  border-radius: 8px;
+  padding: 16px 18px;
+}
+.maquette-ing .s1c-chart-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--navy);
+  letter-spacing: 0.04em;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.maquette-ing .s1c-chart-title-icon {
+  width: 20px;
+  height: 20px;
+  background: var(--gold-100);
+  border-radius: 4px;
+  display: grid;
+  place-items: center;
+  color: var(--gold-deep);
+}
+.maquette-ing .s1c-chart-title-icon svg {
+  width: 12px;
+  height: 12px;
+}
+
+/* Grille à 2 colonnes (synthèse + objectifs, et cartes documents) -------- */
+.maquette-ing .frdv-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+
+/* Carte « Synthèse client » --------------------------------------------- */
+.maquette-ing .frdv-synthese {
+  margin-top: 12px;
+  font-size: 11.5px;
+  color: var(--navy);
+  line-height: 1.7;
+}
+.maquette-ing .frdv-synthese-row {
+  margin-bottom: 8px;
+}
+.maquette-ing .frdv-synthese-row:last-child {
+  margin-bottom: 0;
+}
+
+/* Carte « Objectifs · DCI Simplifié » ----------------------------------- */
+.maquette-ing .frdv-objectifs {
+  margin-top: 12px;
+}
+.maquette-ing .frdv-objectif {
+  display: flex;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--ivory);
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+.maquette-ing .frdv-objectif:last-child {
+  margin-bottom: 0;
+}
+.maquette-ing .frdv-objectif-rank {
+  width: 22px;
+  height: 22px;
+  color: white;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.maquette-ing .frdv-objectif-rank.gold {
+  background: var(--gold);
+}
+.maquette-ing .frdv-objectif-rank.gold-soft {
+  /* --gold-soft n'est pas défini dans le repo (ni dans la maquette d'origine) :
+     on pose une teinte or intermédiaire pour que la pastille « 2 » reste lisible
+     (dégradé voulu 1 gold → 2 gold doux → 3 navy). */
+  background: var(--gold-300);
+}
+.maquette-ing .frdv-objectif-rank.navy-300 {
+  background: var(--navy-300);
+}
+.maquette-ing .frdv-objectif-body {
+  flex: 1;
+}
+.maquette-ing .frdv-objectif-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--navy);
+}
+.maquette-ing .frdv-objectif-meta {
+  font-size: 10px;
+  color: var(--navy-300);
+  margin-top: 2px;
+}
+
+/* — Carte documents préparatoires complétés — */
+.maquette-ing .frdv-docs-card {
+  margin-bottom: 18px;
+}
+.maquette-ing .frdv-docs-grid {
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.maquette-ing .frdv-doc {
+  padding: 14px 16px;
+  background: white;
+  border: 1px solid var(--navy-100);
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+.maquette-ing .frdv-doc.clickable {
+  cursor: pointer;
+}
+.maquette-ing .frdv-doc.clickable:hover {
+  border-color: var(--gold);
+  box-shadow: 0 4px 12px rgba(198, 142, 14, 0.15);
+}
+.maquette-ing .frdv-doc-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+.maquette-ing .frdv-doc-icon {
+  width: 32px;
+  height: 32px;
+  background: #e8f5ee;
+  border-radius: 6px;
+  display: grid;
+  place-items: center;
+}
+.maquette-ing .frdv-doc-info {
+  flex: 1;
+}
+.maquette-ing .frdv-doc-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--navy);
+}
+.maquette-ing .frdv-doc-date {
+  font-size: 10px;
+  color: var(--navy-300);
+}
+.maquette-ing .frdv-doc-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--navy-100);
+}
+.maquette-ing .frdv-doc-btn {
+  font-size: 10.5px;
+  padding: 5px 10px;
+  background: white;
+  border: 1px solid var(--navy-200);
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: "Epilogue", sans-serif;
+  color: var(--navy);
+}
+.maquette-ing .frdv-doc-btn:hover {
+  border-color: var(--gold);
+  color: var(--gold-deep);
+}
+.maquette-ing .frdv-doc-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.maquette-ing .frdv-doc-btn:disabled:hover {
+  border-color: var(--navy-200);
+  color: var(--navy);
+}
+.maquette-ing .frdv-doc-sent {
+  font-size: 10.5px;
+  padding: 5px 10px;
+  background: #e8f5ee;
+  color: #1f5a36;
+  border-radius: 4px;
+  font-weight: 700;
+}
+
+/* Note v21 en bas de la carte documents --------------------------------- */
+.maquette-ing .frdv-note {
+  margin-top: 14px;
+  padding: 10px 12px;
+  background: var(--ivory);
+  border-radius: 4px;
+  font-size: 10.5px;
+  color: var(--navy-300);
+  line-height: 1.5;
+}
+.maquette-ing .frdv-note strong {
+  color: var(--navy);
+}

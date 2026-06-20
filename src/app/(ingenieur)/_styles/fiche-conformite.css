@@ -1,0 +1,1102 @@
+/*
+ * Écran "Fiche conformité" (étape 02) — CSS porté à l'identique de la maquette
+ * 030 v28 (#page-ing-fiche-conformite-joubert + #modal-der). Sélecteurs
+ * préfixés `.maquette-ing `. Les classes génériques (.hero, .btn, .card,
+ * .card-header, .card-title) viennent de maquette.css ; les variables couleur
+ * de globals.css. Les classes .s1c-bank-banner-ing et .s1c-pay-pill sont déjà
+ * portées par conformite.css (importé par la page) — non redéfinies ici.
+ */
+
+.maquette-ing .fco-wrap {
+  padding: 26px 30px 40px;
+}
+
+/* ── Stepper parcours patrimonial (6 étapes) ──────────────────────────── */
+
+.maquette-ing .s1b-parcours-stepper {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr) auto;
+  gap: 0;
+  background: white;
+  border: 1px solid var(--navy-100);
+  border-radius: 8px;
+  padding: 14px 18px;
+  align-items: center;
+  margin-bottom: 18px;
+  position: relative;
+}
+.maquette-ing .s1b-step {
+  position: relative;
+  padding: 4px 6px;
+  text-align: center;
+}
+.maquette-ing .s1b-step-num {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: white;
+  border: 2px solid var(--navy-100);
+  color: var(--navy-300);
+  font-weight: 700;
+  font-size: 11px;
+  display: grid;
+  place-items: center;
+  margin: 0 auto 6px;
+  transition: all 0.18s;
+}
+.maquette-ing .s1b-step.active .s1b-step-num {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: white;
+  box-shadow: 0 0 0 4px rgba(198, 142, 14, 0.18);
+}
+.maquette-ing .s1b-step.done .s1b-step-num {
+  background: var(--navy);
+  border-color: var(--navy);
+  color: white;
+}
+.maquette-ing .s1b-step-label {
+  font-size: 9.5px;
+  font-weight: 600;
+  color: var(--navy-300);
+  line-height: 1.3;
+  max-width: 90px;
+  margin: 0 auto;
+  letter-spacing: 0.01em;
+}
+.maquette-ing .s1b-step.active .s1b-step-label {
+  color: var(--gold-deep);
+  font-weight: 700;
+}
+.maquette-ing .s1b-step.done .s1b-step-label {
+  color: var(--navy);
+}
+.maquette-ing .s1b-step::after {
+  content: "";
+  position: absolute;
+  top: 17px;
+  left: calc(50% + 18px);
+  width: calc(100% - 36px);
+  height: 2px;
+  background: var(--navy-100);
+  z-index: 0;
+}
+.maquette-ing .s1b-step:last-of-type::after {
+  display: none;
+}
+.maquette-ing .s1b-step.done::after {
+  background: var(--navy);
+}
+.maquette-ing .fco-step-badge {
+  padding: 8px 14px;
+  background: var(--gold-100);
+  border-radius: 14px;
+  font-size: 9.5px;
+  font-weight: 700;
+  color: var(--gold-deep);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-left: 6px;
+}
+
+/* ── Bandeau paiement honoraires (variante gold) ──────────────────────── */
+
+.maquette-ing .fco-bank-banner-gold {
+  border-left-color: var(--gold);
+}
+.maquette-ing .fco-bank-icon-gold {
+  background: var(--gold-100);
+  color: var(--gold-deep);
+}
+.maquette-ing .fco-pay-inline {
+  color: var(--gold-deep);
+  font-weight: 700;
+}
+
+/* ── 3 cartes documents (DER · KYC · LM) ──────────────────────────────── */
+
+.maquette-ing .fco-doc-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.maquette-ing .s1c-doc-card {
+  background: white;
+  border: 1px solid var(--navy-100);
+  border-radius: 8px;
+  padding: 16px 18px;
+  transition: all 0.18s;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+.maquette-ing .s1c-doc-card .s1c-doc-subtitle {
+  min-height: 34px;
+}
+.maquette-ing .s1c-doc-card > .s1c-tracker {
+  margin-top: auto;
+}
+.maquette-ing .s1c-doc-card:hover {
+  border-color: var(--gold-300);
+  box-shadow: 0 3px 10px rgba(16, 45, 80, 0.06);
+}
+.maquette-ing .s1c-doc-card.signed {
+  border-left: 4px solid #1f8049;
+}
+.maquette-ing .s1c-doc-card.pending {
+  border-left: 4px solid var(--gold);
+}
+.maquette-ing .s1c-doc-card.todo {
+  border-left: 4px solid var(--navy-300);
+}
+
+.maquette-ing .s1c-doc-head {
+  display: grid;
+  grid-template-columns: 34px 1fr auto;
+  gap: 12px;
+  margin-bottom: 12px;
+  align-items: start;
+}
+.maquette-ing .s1c-doc-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 6px;
+  display: grid;
+  place-items: center;
+  margin-top: 2px;
+}
+.maquette-ing .s1c-doc-icon.gold {
+  background: var(--gold-100);
+  color: var(--gold-deep);
+}
+.maquette-ing .s1c-doc-icon.navy {
+  background: var(--light-blue);
+  color: var(--navy);
+}
+.maquette-ing .s1c-doc-icon.fco-icon-doc {
+  background: rgba(198, 142, 14, 0.1);
+  color: var(--gold-deep);
+}
+.maquette-ing .s1c-doc-icon svg {
+  width: 17px;
+  height: 17px;
+}
+.maquette-ing .s1c-doc-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--navy);
+}
+.maquette-ing .s1c-doc-subtitle {
+  font-size: 10px;
+  color: var(--navy-300);
+  margin-top: 1px;
+}
+.maquette-ing .s1c-doc-status-pill {
+  font-size: 9px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.maquette-ing .s1c-doc-status-pill.fco-pill-gold {
+  background: rgba(198, 142, 14, 0.15);
+  color: var(--gold-deep);
+}
+
+/* ── Tracker signature horizontal ─────────────────────────────────────── */
+
+.maquette-ing .s1c-tracker {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  margin: 12px 0 4px;
+  position: relative;
+  overflow: hidden;
+}
+.maquette-ing .s1c-tracker-step {
+  position: relative;
+  padding: 0 2px 6px;
+  text-align: center;
+}
+.maquette-ing .s1c-tracker-dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: white;
+  border: 2px solid var(--navy-100);
+  margin: 0 auto 6px;
+  display: grid;
+  place-items: center;
+  font-size: 0;
+  transition: all 0.2s;
+  position: relative;
+  z-index: 2;
+}
+.maquette-ing .s1c-tracker-step.done .s1c-tracker-dot {
+  background: #1f8049;
+  border-color: #1f8049;
+}
+.maquette-ing .s1c-tracker-step.done .s1c-tracker-dot::after {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: white;
+}
+.maquette-ing .s1c-tracker-step.current .s1c-tracker-dot {
+  background: var(--gold);
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(198, 142, 14, 0.18);
+  animation: fcoPulseGold 1.6s ease-in-out infinite;
+}
+@keyframes fcoPulseGold {
+  0%,
+  100% {
+    box-shadow: 0 0 0 3px rgba(198, 142, 14, 0.18);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(198, 142, 14, 0.04);
+  }
+}
+.maquette-ing .s1c-tracker-label {
+  font-size: 9.5px;
+  font-weight: 700;
+  color: var(--navy);
+  letter-spacing: 0.04em;
+  line-height: 1.2;
+}
+.maquette-ing .s1c-tracker-step.done .s1c-tracker-label {
+  color: #1f5a36;
+}
+.maquette-ing .s1c-tracker-step.current .s1c-tracker-label {
+  color: var(--gold-deep);
+  font-weight: 700;
+}
+.maquette-ing .s1c-tracker-date {
+  font-size: 8px;
+  color: var(--navy-300);
+  margin-top: 1px;
+  font-feature-settings: "tnum" on;
+}
+.maquette-ing .s1c-tracker-step::after {
+  content: "";
+  position: absolute;
+  top: 11px;
+  left: calc(50% + 10px);
+  width: calc(100% - 20px);
+  height: 2px;
+  background: var(--navy-100);
+  z-index: 1;
+}
+.maquette-ing .s1c-tracker-step:last-of-type::after {
+  display: none;
+}
+.maquette-ing .s1c-tracker-step.done::after {
+  background: #1f8049;
+}
+
+/* ── Boutons workflow document ────────────────────────────────────────── */
+
+.maquette-ing .s1c-wf-actions {
+  display: flex;
+  gap: 7px;
+  margin-top: 12px;
+  justify-content: center;
+}
+.maquette-ing .s1c-wf-btn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 8px 6px;
+  border-radius: 7px;
+  font-family: "Epilogue", sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.16s ease;
+  white-space: nowrap;
+}
+.maquette-ing .s1c-wf-btn svg {
+  width: 13px;
+  height: 13px;
+  flex-shrink: 0;
+}
+.maquette-ing .s1c-wf-btn.wf-edit {
+  background: white;
+  border-color: var(--navy-200);
+  color: var(--navy);
+}
+.maquette-ing .s1c-wf-btn.wf-edit:hover:not(:disabled) {
+  background: var(--ivory);
+  border-color: var(--navy-300);
+}
+.maquette-ing .s1c-wf-btn.wf-primary {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: white;
+  box-shadow: 0 1px 3px rgba(198, 142, 14, 0.25);
+}
+.maquette-ing .s1c-wf-btn.wf-primary:hover:not(:disabled) {
+  background: var(--gold-deep);
+  border-color: var(--gold-deep);
+}
+.maquette-ing .s1c-wf-btn.wf-view {
+  background: white;
+  border-color: var(--navy);
+  color: var(--navy);
+}
+.maquette-ing .s1c-wf-btn.wf-view:hover:not(:disabled) {
+  background: var(--navy);
+  color: white;
+}
+.maquette-ing .s1c-wf-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── Espace d'envoi groupé du pack ────────────────────────────────────── */
+
+.maquette-ing .s1c-envoi-pack {
+  margin-top: 8px;
+  margin-bottom: 18px;
+  background: white;
+  border: 1px solid var(--navy-100);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.maquette-ing .s1c-envoi-head {
+  padding: 16px 22px;
+  background: linear-gradient(135deg, var(--navy) 0%, #1b3a5f 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.maquette-ing .s1c-envoi-head-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.maquette-ing .s1c-envoi-head-icon svg {
+  width: 20px;
+  height: 20px;
+  stroke: var(--gold-300);
+}
+.maquette-ing .fco-pack-count {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 5px 12px;
+  border-radius: 20px;
+  background: rgba(198, 142, 14, 0.25);
+  color: var(--gold-300);
+  letter-spacing: 0.05em;
+}
+.maquette-ing .s1c-envoi-body {
+  padding: 18px 22px;
+}
+.maquette-ing .fco-envoi-section-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--navy-300);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.maquette-ing .s1c-envoi-piece {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 9px 12px;
+  border: 1px solid var(--navy-100);
+  border-radius: 7px;
+  margin-bottom: 7px;
+  background: white;
+  transition: all 0.15s ease;
+  cursor: pointer;
+}
+.maquette-ing .s1c-envoi-piece:hover {
+  border-color: var(--navy-200);
+  background: var(--ivory);
+}
+.maquette-ing .s1c-envoi-piece input[type="checkbox"] {
+  width: 17px;
+  height: 17px;
+  accent-color: var(--navy);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.maquette-ing .s1c-envoi-piece-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.maquette-ing .s1c-envoi-piece-icon svg {
+  width: 15px;
+  height: 15px;
+}
+.maquette-ing .s1c-envoi-piece-txt {
+  flex: 1;
+}
+.maquette-ing .s1c-envoi-piece-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--navy);
+}
+.maquette-ing .s1c-envoi-piece-meta {
+  font-size: 10px;
+  color: var(--navy-300);
+  margin-top: 1px;
+}
+.maquette-ing .s1c-envoi-piece-tag {
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 20px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.maquette-ing .s1c-envoi-mail {
+  margin-top: 14px;
+  border: 1px solid var(--navy-100);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.maquette-ing .s1c-envoi-mail-header {
+  padding: 10px 14px;
+  background: var(--light-blue);
+  border-bottom: 1px solid var(--navy-100);
+  font-size: 10.5px;
+  color: var(--navy-300);
+}
+.maquette-ing .s1c-envoi-mail-header strong {
+  color: var(--navy);
+}
+.maquette-ing .s1c-envoi-mail-body {
+  padding: 14px 16px;
+  font-size: 12px;
+  line-height: 1.65;
+  color: #333;
+  background: white;
+}
+.maquette-ing .s1c-envoi-mail-body[contenteditable="true"] {
+  outline: none;
+  background: rgba(198, 142, 14, 0.03);
+}
+.maquette-ing .fco-envoi-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 16px;
+  gap: 14px;
+}
+.maquette-ing .fco-envoi-footer-note {
+  font-size: 10.5px;
+  color: var(--navy-300);
+  line-height: 1.5;
+}
+
+/* ── Boutons promote / secondary (action bar + pack) ──────────────────── */
+
+.maquette-ing .s1b-btn-promote {
+  padding: 11px 22px;
+  background: var(--gold);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+  box-shadow: 0 2px 6px rgba(198, 142, 14, 0.25);
+}
+.maquette-ing .s1b-btn-promote:hover:not(:disabled) {
+  background: var(--gold-deep);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(198, 142, 14, 0.35);
+}
+.maquette-ing .s1b-btn-promote.navy {
+  background: var(--navy);
+  box-shadow: 0 2px 6px rgba(16, 45, 80, 0.25);
+}
+.maquette-ing .s1b-btn-promote.navy:hover:not(:disabled) {
+  background: #0a1f38;
+  box-shadow: 0 4px 10px rgba(16, 45, 80, 0.35);
+}
+.maquette-ing .s1b-btn-promote:disabled {
+  background: var(--navy-100);
+  color: var(--navy-300);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+.maquette-ing .s1b-btn-secondary {
+  padding: 10px 18px;
+  background: white;
+  color: var(--navy);
+  border: 1px solid var(--navy-100);
+  border-radius: 5px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.maquette-ing .s1b-btn-secondary:hover:not(:disabled) {
+  border-color: var(--navy);
+}
+.maquette-ing .s1b-btn-secondary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* ── Documents pédagogiques témoins ───────────────────────────────────── */
+
+.maquette-ing .fco-temoin-intro {
+  font-size: 11px;
+  color: var(--navy-300);
+  margin-bottom: 12px;
+  line-height: 1.55;
+}
+.maquette-ing .fco-temoin-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.maquette-ing .s1c-temoin-card {
+  background: linear-gradient(135deg, var(--ivory) 0%, white 100%);
+  border: 1px dashed var(--gold-300);
+  border-radius: 6px;
+  padding: 12px 14px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  transition: all 0.15s;
+  cursor: pointer;
+}
+.maquette-ing .s1c-temoin-card:hover {
+  border-style: solid;
+  border-color: var(--gold);
+  background: var(--gold-100);
+}
+.maquette-ing .s1c-temoin-thumb {
+  width: 36px;
+  height: 46px;
+  background: white;
+  border: 1px solid var(--gold-200);
+  border-radius: 3px;
+  display: grid;
+  place-items: center;
+  color: var(--gold-deep);
+  position: relative;
+  flex-shrink: 0;
+}
+.maquette-ing .s1c-temoin-thumb::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 9px;
+  height: 9px;
+  background: linear-gradient(135deg, transparent 50%, var(--gold-200) 50%);
+}
+.maquette-ing .s1c-temoin-thumb svg {
+  width: 14px;
+  height: 14px;
+}
+.maquette-ing .s1c-temoin-title {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--navy);
+}
+.maquette-ing .s1c-temoin-desc {
+  font-size: 9.5px;
+  color: var(--navy-300);
+  margin-top: 1px;
+  line-height: 1.4;
+}
+.maquette-ing .s1c-temoin-tag {
+  display: inline-block;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gold-deep);
+  background: var(--gold-100);
+  padding: 1px 5px;
+  border-radius: 6px;
+  margin-top: 3px;
+}
+
+/* ── Conditions de passage à l'étape 03 ───────────────────────────────── */
+
+.maquette-ing .s1b-conditions-card {
+  background: white;
+  border: 1px solid var(--navy-100);
+  border-left: 4px solid var(--gold);
+  border-radius: 8px;
+  padding: 18px 22px;
+  margin-bottom: 18px;
+}
+.maquette-ing .s1b-conditions-title {
+  font-family: var(--serif);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--navy);
+  margin-bottom: 4px;
+}
+.maquette-ing .s1b-conditions-sub {
+  font-size: 11px;
+  color: var(--navy-300);
+  margin-bottom: 14px;
+}
+.maquette-ing .s1b-condition-row {
+  display: grid;
+  grid-template-columns: 28px 1fr auto;
+  gap: 12px;
+  padding: 10px 0;
+  align-items: center;
+  border-bottom: 1px dashed var(--ivory-deep);
+}
+.maquette-ing .s1b-condition-row:last-child {
+  border-bottom: none;
+}
+.maquette-ing .s1b-condition-check {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  font-size: 13px;
+}
+.maquette-ing .s1b-condition-check.wait {
+  background: var(--gold-100);
+  color: var(--gold-deep);
+}
+.maquette-ing .s1b-condition-check.ko {
+  background: var(--light-blue);
+  color: var(--navy-300);
+}
+.maquette-ing .s1b-condition-text {
+  font-size: 12.5px;
+  color: var(--navy);
+  font-weight: 600;
+}
+.maquette-ing .s1b-condition-meta {
+  font-size: 10.5px;
+  color: var(--navy-300);
+  margin-top: 2px;
+  font-weight: 400;
+}
+.maquette-ing .fco-cond-badge {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--navy-300);
+  padding: 4px 10px;
+  background: var(--ivory-deep);
+  border-radius: 10px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.maquette-ing .fco-cond-badge.blue {
+  background: var(--light-blue);
+}
+
+/* ── Bandeau d'action ─────────────────────────────────────────────────── */
+
+.maquette-ing .s1b-action-bar {
+  display: flex;
+  gap: 12px;
+  padding: 18px 22px;
+  background: linear-gradient(135deg, var(--ivory) 0%, var(--gold-100) 100%);
+  border: 1px solid var(--gold-200);
+  border-radius: 8px;
+  margin-top: 18px;
+  align-items: center;
+  justify-content: space-between;
+}
+.maquette-ing .s1b-action-info {
+  font-size: 11.5px;
+  color: var(--navy);
+  line-height: 1.5;
+}
+.maquette-ing .s1b-action-info strong {
+  color: var(--gold-deep);
+}
+
+/* ── Modale DER (s1a-modal + barre de mode + page DER) ────────────────── */
+
+.maquette-ing .s1a-modal-overlay,
+.s1a-modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 31, 58, 0.55);
+  backdrop-filter: blur(3px);
+  z-index: 9000;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 48px 24px;
+  overflow-y: auto;
+}
+.maquette-ing .s1a-modal-overlay.open,
+.s1a-modal-overlay.open {
+  display: flex;
+  animation: fcoFadeIn 0.18s ease-out;
+}
+@keyframes fcoFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.s1a-modal {
+  background: var(--ivory);
+  width: 100%;
+  max-width: 720px;
+  border-radius: 6px;
+  box-shadow: 0 24px 60px rgba(10, 31, 58, 0.35),
+    0 0 0 1px rgba(198, 142, 14, 0.18);
+  overflow: hidden;
+  animation: fcoSlideUp 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  font-family: "Epilogue", sans-serif;
+}
+@keyframes fcoSlideUp {
+  from {
+    transform: translateY(16px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+.s1a-modal-header {
+  background: linear-gradient(135deg, var(--navy) 0%, #1a3866 100%);
+  color: white;
+  padding: 22px 28px 18px;
+  position: relative;
+  border-bottom: 2px solid var(--gold);
+}
+.s1a-modal-eyebrow {
+  font-size: 9.5px;
+  font-weight: 700;
+  color: var(--gold-300);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.s1a-modal-title {
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: white;
+  line-height: 1.2;
+}
+.s1a-modal-title strong {
+  color: var(--gold-300);
+  font-weight: 700;
+}
+.s1a-modal-sub {
+  font-size: 11.5px;
+  color: rgba(255, 255, 255, 0.65);
+  margin-top: 5px;
+  line-height: 1.5;
+}
+.s1a-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: all 0.15s;
+}
+.s1a-modal-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: rotate(90deg);
+}
+.s1a-modal-close svg {
+  width: 14px;
+  height: 14px;
+}
+.s1a-modal-body {
+  padding: 0;
+  max-height: calc(100vh - 220px);
+  overflow-y: auto;
+}
+.s1a-modal-body::-webkit-scrollbar {
+  width: 6px;
+}
+.s1a-modal-body::-webkit-scrollbar-thumb {
+  background: var(--navy-100);
+  border-radius: 3px;
+}
+.s1a-modal-footer {
+  padding: 14px 28px;
+  background: var(--ivory-deep);
+  border-top: 1px solid var(--navy-100);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.s1a-modal-footer-info {
+  font-size: 10.5px;
+  color: var(--navy-300);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.s1a-modal-footer-actions {
+  display: flex;
+  gap: 8px;
+}
+.s1a-btn {
+  padding: 9px 18px;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.15s;
+}
+.s1a-btn-ghost {
+  background: transparent;
+  color: var(--navy);
+  border-color: var(--navy-100);
+}
+.s1a-btn-ghost:hover {
+  background: white;
+  border-color: var(--navy-300);
+}
+.s1a-btn-primary {
+  background: var(--gold);
+  color: white;
+  font-weight: 700;
+  box-shadow: 0 1px 3px rgba(198, 142, 14, 0.3);
+}
+.s1a-btn-primary:hover:not(:disabled) {
+  background: var(--gold-deep);
+}
+.s1a-btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Barre de mode Consulter / Modifier */
+.s1c-mode-bar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 10px 14px;
+  background: linear-gradient(180deg, var(--ivory) 0%, white 100%);
+  border-bottom: 1px solid var(--ivory-deep);
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+.s1c-mode-bar-label {
+  font-size: 9.5px;
+  font-weight: 700;
+  color: var(--navy-300);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-right: 4px;
+}
+.s1c-mode-bar button {
+  padding: 6px 14px;
+  background: transparent;
+  border: 1px solid var(--navy-100);
+  border-radius: 14px;
+  font-family: inherit;
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--navy-300);
+  cursor: pointer;
+  letter-spacing: 0.04em;
+  transition: all 0.15s;
+}
+.s1c-mode-bar button.active {
+  background: var(--navy);
+  color: white;
+  border-color: var(--navy);
+  box-shadow: 0 1px 3px rgba(16, 45, 80, 0.18);
+}
+.s1c-mode-bar button:hover:not(.active) {
+  background: var(--ivory-deep);
+  color: var(--navy);
+}
+.fco-mode-bar-meta {
+  margin-left: auto;
+  font-size: 10px;
+  color: var(--navy-300);
+  letter-spacing: 0.02em;
+}
+
+/* Page DER pré-rendue (corps du document) */
+.s1c-der-page {
+  background: white;
+  margin: 24px 28px 20px;
+  padding: 28px 36px;
+  border: 1px solid var(--navy-100);
+  border-radius: 4px;
+  font-family: "Georgia", serif;
+  font-size: 11px;
+  color: var(--navy);
+  line-height: 1.55;
+  box-shadow: 0 1px 3px rgba(16, 45, 80, 0.04);
+}
+.s1c-der-page h2 {
+  font-family: var(--serif);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--navy);
+  margin: 0 0 4px;
+  letter-spacing: -0.01em;
+}
+.s1c-der-page h3 {
+  font-family: "Epilogue", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--navy);
+  letter-spacing: 0.04em;
+  margin: 16px 0 6px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--ivory-deep);
+}
+.s1c-der-page p {
+  margin: 0 0 8px;
+}
+.s1c-der-page .der-disclaimer {
+  font-size: 10px;
+  color: var(--navy-300);
+  font-style: italic;
+  margin-bottom: 14px;
+}
+.s1c-der-page .der-identity {
+  background: var(--ivory);
+  padding: 10px 14px;
+  border-left: 3px solid var(--gold);
+  border-radius: 3px;
+  margin: 12px 0 14px;
+  font-family: "Epilogue", sans-serif;
+  font-size: 10.5px;
+  line-height: 1.5;
+}
+.s1c-der-page .der-identity strong {
+  color: var(--gold-deep);
+  font-weight: 700;
+}
+.s1c-der-page table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: "Epilogue", sans-serif;
+  font-size: 10px;
+  margin: 8px 0 12px;
+}
+.s1c-der-page table th {
+  background: var(--navy);
+  color: white;
+  padding: 7px 10px;
+  text-align: left;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.s1c-der-page table td {
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--ivory-deep);
+  vertical-align: top;
+}
+.s1c-der-page table tr:nth-child(even) td {
+  background: var(--ivory);
+}
+.s1c-der-page .der-sig-zone {
+  margin-top: 22px;
+  padding-top: 14px;
+  border-top: 2px solid var(--gold);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+}
+.s1c-der-page .der-sig-block {
+  padding: 12px;
+  background: var(--ivory);
+  border-radius: 4px;
+  min-height: 80px;
+}
+.s1c-der-page .der-sig-label {
+  font-family: "Epilogue", sans-serif;
+  font-size: 9.5px;
+  font-weight: 700;
+  color: var(--gold-deep);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.s1c-der-page .der-sig-name {
+  font-family: "Epilogue", sans-serif;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--navy);
+}
+.s1c-der-page .der-sig-stamp {
+  font-family: "Brush Script MT", cursive;
+  font-size: 20px;
+  color: var(--gold-deep);
+  margin-top: 10px;
+  font-style: italic;
+}
+
+/* Champs modifiables DER (3 seulement) */
+.s1c-der-editable-field {
+  display: inline-block;
+  padding: 2px 8px;
+  background: var(--gold-100);
+  border: 1px dashed var(--gold-300);
+  border-radius: 3px;
+  font-family: "Epilogue", sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--gold-deep);
+  margin: 0 2px;
+}
+.fco-der-input {
+  background: white;
+  border: 1px solid var(--gold);
+  box-shadow: 0 0 0 2px rgba(198, 142, 14, 0.12);
+  width: auto;
+  min-width: 80px;
+  max-width: 220px;
+}
+.fco-der-input:focus {
+  outline: none;
+}
