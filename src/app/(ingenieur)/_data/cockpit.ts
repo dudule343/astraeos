@@ -49,6 +49,15 @@ export type AgendaItem = {
   label: string;
 };
 
+export type AlertSeverity = "critique" | "moyen" | "info";
+
+export type Alert = {
+  id: string;
+  severity: AlertSeverity;
+  title: string;
+  detail: string;
+};
+
 export type CockpitDashboard = {
   caGenere: number;
   etudesEnCours: number;
@@ -57,9 +66,17 @@ export type CockpitDashboard = {
   prospectsActifs: number;
   dossiersActifs: number;
   rdvAVenir: number;
+  contratsAssurance: number;
+  clientsAssurance: number;
+  encoursFinancier: number;
+  clientsFinancier: number;
+  projetsImmo: number;
+  clientsImmo: number;
+  montantImmo: number;
   pipeline: PipelineStage[];
   priorites: PriorityDossier[];
   agenda: AgendaItem[];
+  alerts: Alert[];
   hasData: boolean;
 };
 
@@ -71,9 +88,17 @@ const EMPTY: CockpitDashboard = {
   prospectsActifs: 0,
   dossiersActifs: 0,
   rdvAVenir: 0,
+  contratsAssurance: 0,
+  clientsAssurance: 0,
+  encoursFinancier: 0,
+  clientsFinancier: 0,
+  projetsImmo: 0,
+  clientsImmo: 0,
+  montantImmo: 0,
   pipeline: PIPELINE_ORDER.map((s) => ({ stage: s, label: STAGE_LABELS[s] ?? s, count: 0 })),
   priorites: [],
   agenda: [],
+  alerts: [],
   hasData: false,
 };
 
@@ -96,6 +121,19 @@ function clientNameOf(row: DossierRow): string {
   if (!p) return "Dossier sans nom";
   const name = `${p.first_name ?? ""} ${p.last_name ?? ""}`.trim();
   return name || "Dossier sans nom";
+}
+
+function surnameOf(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  const last = parts[parts.length - 1] ?? name;
+  return last.toUpperCase();
+}
+
+function daysSince(iso: string | null): number | null {
+  if (!iso) return null;
+  const t = new Date(iso).getTime();
+  if (!Number.isFinite(t)) return null;
+  return Math.max(0, Math.floor((Date.now() - t) / 86_400_000));
 }
 
 function stageNumOf(stage: string): number {
@@ -169,6 +207,40 @@ export async function fetchCockpitDashboard(): Promise<CockpitDashboard> {
         };
       });
 
+    // Alertes dérivées de l'état réel des dossiers en production : conformité
+    // bloquée, collecte incomplète, restitution proche. Pas de table dédiée :
+    // on lit les signaux déjà présents (étape + complétude DCI + ancienneté).
+    const alerts: Alert[] = [];
+    for (const d of dossiers) {
+      if (alerts.length >= 4) break;
+      const stage = d.pipeline_stage ?? "";
+      const name = surnameOf(clientNameOf(d));
+      const age = daysSince(d.stage_entered_at);
+      if (stage === "02_compliance") {
+        alerts.push({
+          id: `alert-${d.id}`,
+          severity: "critique",
+          title: `${name} · conformité en attente`,
+          detail: age != null ? `Étape conformité depuis ${age} jour${age > 1 ? "s" : ""}` : "Conformité à finaliser",
+        });
+      } else if (stage === "03_collecte") {
+        const pct = d.dci_completion_pct != null ? Math.round(Number(d.dci_completion_pct)) : null;
+        alerts.push({
+          id: `alert-${d.id}`,
+          severity: "moyen",
+          title: `${name} · collecte en cours`,
+          detail: pct != null ? `Dossier complété à ${pct} %` : "Documents en attente",
+        });
+      } else if (stage === "05_restituee") {
+        alerts.push({
+          id: `alert-${d.id}`,
+          severity: "info",
+          title: `${name} · restitution à préparer`,
+          detail: "Étude prête, restitution à planifier",
+        });
+      }
+    }
+
     // Études (table etudes) rattachées aux dossiers du cabinet : en cours vs livrées.
     let etudesEnCours = 0;
     let etudesLivrees = 0;
@@ -220,17 +292,52 @@ export async function fetchCockpitDashboard(): Promise<CockpitDashboard> {
       }
     }
 
-    // CA généré : souscriptions du cabinet (amount_initial).
+    // CA généré + ventilation par classe d'actif (via produits.category).
+    // Assurance = av_* / prevoyance ; financier = per / scpi / fpci / opci /
+    // structure (encours) ; immobilier = scpi / opci / fpci (projets).
     let caGenere = 0;
+    let contratsAssurance = 0;
+    let encoursFinancier = 0;
+    let projetsImmo = 0;
+    let montantImmo = 0;
+    const clientsAssuranceSet = new Set<string>();
+    const clientsFinancierSet = new Set<string>();
+    const clientsImmoSet = new Set<string>();
     {
+      const ASSURANCE = new Set(["av_multisupport", "av_lux", "prevoyance"]);
+      const FINANCIER = new Set(["per", "structure", "av_multisupport", "av_lux"]);
+      const IMMO = new Set(["scpi", "opci", "fpci"]);
       const { data: subs } = await supabase
         .from("souscriptions")
-        .select("amount_initial")
+        .select("amount_initial, total_aum_current, client_id, produits(category)")
         .eq("cabinet_id", ctx.cabinetId)
         .eq("tenant_id", ctx.tenantId);
-      for (const s of subs ?? []) {
-        const v = (s as { amount_initial?: number | null }).amount_initial;
-        caGenere += v != null ? Number(v) : 0;
+      type SubRow = {
+        amount_initial?: number | null;
+        total_aum_current?: number | null;
+        client_id?: string | null;
+        produits?: { category?: string | null } | { category?: string | null }[] | null;
+      };
+      for (const raw of (subs ?? []) as SubRow[]) {
+        const init = raw.amount_initial != null ? Number(raw.amount_initial) : 0;
+        const aum = raw.total_aum_current != null ? Number(raw.total_aum_current) : 0;
+        caGenere += init;
+        const prod = Array.isArray(raw.produits) ? raw.produits[0] : raw.produits;
+        const cat = prod?.category ?? "";
+        const cid = raw.client_id ?? "";
+        if (ASSURANCE.has(cat)) {
+          contratsAssurance += 1;
+          if (cid) clientsAssuranceSet.add(cid);
+        }
+        if (FINANCIER.has(cat)) {
+          encoursFinancier += aum > 0 ? aum : init;
+          if (cid) clientsFinancierSet.add(cid);
+        }
+        if (IMMO.has(cat)) {
+          projetsImmo += 1;
+          montantImmo += init;
+          if (cid) clientsImmoSet.add(cid);
+        }
       }
     }
 
@@ -242,9 +349,17 @@ export async function fetchCockpitDashboard(): Promise<CockpitDashboard> {
       prospectsActifs,
       dossiersActifs,
       rdvAVenir,
+      contratsAssurance,
+      clientsAssurance: clientsAssuranceSet.size,
+      encoursFinancier,
+      clientsFinancier: clientsFinancierSet.size,
+      projetsImmo,
+      clientsImmo: clientsImmoSet.size,
+      montantImmo,
       pipeline,
       priorites,
       agenda,
+      alerts,
       hasData: dossiers.length > 0,
     };
   } catch {
