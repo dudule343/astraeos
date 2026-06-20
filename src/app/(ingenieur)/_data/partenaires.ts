@@ -65,9 +65,19 @@ export type Apporteur = {
   statutVariant: StatutVariant;
 };
 
+/**
+ * Segment du sous-titre du hero. `strong: true` => rendu en gras via <strong>,
+ * exactement comme la maquette (ligne 17544 : deux expressions en <strong>).
+ */
+export type HeroSubSegment = {
+  text: string;
+  strong?: boolean;
+};
+
 export type PartenairesScreen = {
   heroEyebrow: string;
-  heroSub: string;
+  /** Sous-titre du hero découpé en segments pour préserver les <strong> de la maquette. */
+  heroSub: HeroSubSegment[];
   kpis: Kpi[];
   reco: {
     sectionEyebrow: string;
@@ -93,8 +103,19 @@ export type PartenairesScreen = {
 
 const SCREEN: PartenairesScreen = {
   heroEyebrow: "Partenaires · environnement professionnel · Cabinet Paris Étoile",
-  heroSub:
-    "Deux populations distinctes : les partenaires recommandables que PRIVEOS active pour ses clients (notaires, avocats, experts comptables identifiés et qualifiés), et les apporteurs d'affaires qui amènent des clients à notre réseau (avocats, notaires, comptables, agents immo, clients satisfaits, podcasteurs...).",
+  heroSub: [
+    { text: "Deux populations distinctes : les " },
+    { text: "partenaires recommandables", strong: true },
+    {
+      text:
+        " que PRIVEOS active pour ses clients (notaires, avocats, experts comptables identifiés et qualifiés), et les ",
+    },
+    { text: "apporteurs d'affaires", strong: true },
+    {
+      text:
+        " qui amènent des clients à notre réseau (avocats, notaires, comptables, agents immo, clients satisfaits, podcasteurs...).",
+    },
+  ],
   kpis: [
     { label: "Partenaires actifs", value: "42", meta: "recommandables + apporteurs" },
     {

@@ -35,7 +35,11 @@ function IconEye() {
 function DocLine({ doc }: { doc: DocStatus }) {
   return (
     <span className="doc-status-line">
-      <strong>{doc.code}</strong> <span className={`tone-${doc.tone}`}>{doc.text}</span>
+      <strong>{doc.code}</strong>{" "}
+      <span className={`tone-${doc.tone}`}>
+        {doc.text}
+        {doc.em ? <em>{doc.em}</em> : null}
+      </span>
     </span>
   );
 }
@@ -143,6 +147,50 @@ export function ConformiteInteractive() {
   const toggleFilter = (next: KpiFilter) =>
     setFilter((current) => (current === next ? null : next));
 
+  const exportCsv = () => {
+    const headers = [
+      "Client",
+      "Type",
+      "Ingénieur",
+      "Supervisé par",
+      "DER",
+      "KYC",
+      "LM",
+      "Paiement",
+      "Montant",
+      "Statut global",
+    ];
+    const docText = (doc?: ConformiteRow["docs"][number]) =>
+      doc ? `${doc.code} ${doc.text}${doc.em ?? ""}`.trim() : "";
+    const escape = (value: string) => `"${value.replace(/"/g, '""')}"`;
+    const lines = visibleRows.map((row) =>
+      [
+        row.names.join(" & "),
+        row.legalRep ? `${row.typeLabel} · ${row.legalRep}` : row.typeLabel,
+        row.cabinet.name,
+        row.supervisor.name,
+        docText(row.docs[0]),
+        docText(row.docs[1]),
+        docText(row.docs[2]),
+        row.payment.label,
+        row.payment.meta,
+        row.status.label,
+      ]
+        .map(escape)
+        .join(";"),
+    );
+    const csv = "﻿" + [headers.map(escape).join(";"), ...lines].join("\r\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "conformite-en-cours.csv";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <>
       {/* KPIs */}
@@ -205,10 +253,19 @@ export function ConformiteInteractive() {
             </div>
           </div>
           <div className="table-toolbar-right">
-            <button className="btn btn-ghost btn-sm" type="button" onClick={() => setFilter(null)}>
+            <button
+              className="btn btn-ghost btn-sm"
+              type="button"
+              disabled
+              title="En cours"
+            >
               Filtres
             </button>
-            <button className="btn btn-ghost btn-sm" type="button">
+            <button
+              className="btn btn-ghost btn-sm"
+              type="button"
+              onClick={exportCsv}
+            >
               Exporter
             </button>
           </div>

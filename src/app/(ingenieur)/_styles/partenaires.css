@@ -85,16 +85,11 @@
   align-items: center;
 }
 
-/* Filtres rapides .qf-perf : la maquette n'a PAS de règle .qf-perf, ils
-   rendent en bouton natif. On reste fidèle au rendu : aspect natif discret
-   (juste le curseur + famille de police), .active légèrement appuyé. */
-.maquette-ing .qf-perf {
-  font-family: inherit;
-  cursor: pointer;
-}
-.maquette-ing .qf-perf.active {
-  font-weight: 700;
-}
+/* Filtres rapides .qf-perf : la maquette n'a AUCUNE règle CSS .qf-perf, ces
+   boutons rendent en natif (l'attribut « active » sur « Tous » n'a aucun effet
+   visuel). On reste donc strictement fidèle : pas de règle .qf-perf, pas de
+   surbrillance .active. Le filtrage reste branché côté React (état actif), il
+   n'a juste pas de matérialisation visuelle, exactement comme la maquette. */
 
 /* TABLE DT (lignes 254-263 de la maquette) -------------------------------- */
 .maquette-ing table.dt {

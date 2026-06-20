@@ -4,6 +4,7 @@ import "../../_styles/maquette.css";
 import "../../_styles/assets-assurance.css";
 import { getAssetsAssurance } from "../../_data/assets-assurance";
 import { ContratsAssuranceTable } from "./ContratsAssuranceTable";
+import { ExportAssuranceButton } from "./ExportAssuranceButton";
 
 export const dynamic = "force-dynamic";
 
@@ -50,9 +51,7 @@ export default function AssetsAssurancePage() {
           <Link href={`${BASE}/assets`} className="btn btn-ghost btn-sm">
             ← Retour vue d&apos;ensemble
           </Link>
-          <button type="button" className="btn btn-gold btn-sm">
-            Exporter
-          </button>
+          <ExportAssuranceButton data={data} />
         </div>
       </div>
 

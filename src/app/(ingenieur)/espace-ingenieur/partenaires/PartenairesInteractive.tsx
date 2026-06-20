@@ -524,7 +524,11 @@ export default function PartenairesInteractive({ screen }: { screen: Partenaires
           <h1 className="hero-title">
             Partenaires &amp; <strong>apporteurs d&apos;affaires</strong>
           </h1>
-          <p className="hero-sub">{screen.heroSub}</p>
+          <p className="hero-sub">
+            {screen.heroSub.map((seg, i) =>
+              seg.strong ? <strong key={i}>{seg.text}</strong> : <span key={i}>{seg.text}</span>,
+            )}
+          </p>
         </div>
         <div className="hero-actions">
           <button type="button" className="btn btn-ghost btn-sm" onClick={exportAll}>

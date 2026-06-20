@@ -17,8 +17,12 @@ export type HonorairesKpi = {
 };
 
 export type EtudeMission = {
-  /** Identifiant client cible de la fiche (clients/[id]). */
-  clientId: string;
+  /**
+   * Identifiant du dossier d'étude. Cible de navigation de la ligne :
+   * la fiche dossier (dossiers/[id], timeline du parcours), comme dans la
+   * maquette où chaque ligne fait goToPage('ing-fiche-dossier').
+   */
+  dossierId: string;
   initials: string;
   client: string;
   entreeRelation: string;
@@ -73,7 +77,7 @@ export const honorairesKpis: HonorairesKpi[] = [
 
 export const etudesMissions: EtudeMission[] = [
   {
-    clientId: "dupont-topin",
+    dossierId: "etu-2026-014",
     initials: "BD",
     client: "Bertrand & Monique DUPONT-TOPIN",
     entreeRelation: "15/03/2025",
@@ -86,7 +90,7 @@ export const etudesMissions: EtudeMission[] = [
     honoraires: "12 800 €",
   },
   {
-    clientId: "lamoureux",
+    dossierId: "etu-2025-lamoureux",
     initials: "PL",
     client: "Pierre LAMOUREUX",
     entreeRelation: "04/03/2024",
@@ -95,7 +99,7 @@ export const etudesMissions: EtudeMission[] = [
     honoraires: "14 200 €",
   },
   {
-    clientId: "huyghe",
+    dossierId: "etu-2026-huyghe",
     initials: "AH",
     client: "Albert & Cécile HUYGHE",
     entreeRelation: "22/01/2025",
@@ -104,7 +108,7 @@ export const etudesMissions: EtudeMission[] = [
     honoraires: "10 800 €",
   },
   {
-    clientId: "lacroix",
+    dossierId: "etu-2025-lacroix",
     initials: "ML",
     client: "Maître LACROIX",
     entreeRelation: "12/01/2024",

@@ -106,6 +106,10 @@ const overview: AssetsOverview = {
     {
       href: "/espace-ingenieur/assets-assurance",
       title: "Assurance",
+      // 2e ligne factice (espace insécable) : porte le `<br>&nbsp;` de la
+      // maquette pour que le titre tienne sur 2 lignes comme ses 3 voisines,
+      // sinon value/caption/stats remontent et cassent l'alignement de la grille.
+      titleLine2: " ",
       icon: "shield",
       value: "9",
       valueUnit: "contrats",

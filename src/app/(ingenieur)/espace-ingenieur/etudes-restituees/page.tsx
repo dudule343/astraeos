@@ -4,7 +4,9 @@ import "../../_styles/maquette.css";
 import "../../_styles/etudes-restituees.css";
 import {
   fetchEtudesRestituees,
+  isValidFilter,
   type EtudeRestituee,
+  type FilterKey,
 } from "../../_data/etudes-restituees";
 
 export const dynamic = "force-dynamic";
@@ -116,8 +118,21 @@ function ClientCell({ row }: { row: EtudeRestituee }) {
   );
 }
 
-export default async function EtudesRestitueesPage() {
-  const data = await fetchEtudesRestituees();
+/** Construit le href d'un filtre rapide : "toutes" = URL nue, sinon ?filtre=clé. */
+function filterHref(key: FilterKey): string {
+  return key === "toutes"
+    ? `${BASE}/etudes-restituees`
+    : `${BASE}/etudes-restituees?filtre=${key}`;
+}
+
+export default async function EtudesRestitueesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ filtre?: string }>;
+}) {
+  const { filtre } = await searchParams;
+  const filter: FilterKey = isValidFilter(filtre) ? filtre : "toutes";
+  const data = await fetchEtudesRestituees(filter);
 
   return (
     <div className="maquette-ing px-10 py-8">
@@ -177,16 +192,18 @@ export default async function EtudesRestitueesPage() {
         ))}
       </div>
 
-      {/* QUICK FILTERS */}
+      {/* QUICK FILTERS — filtrage réel par query param (Server Component) */}
       <div className="qf-bar-v1">
         {data.filters.map((f) => (
-          <button
-            key={f.label}
+          <Link
+            key={f.key}
+            href={filterHref(f.key)}
+            scroll={false}
+            aria-pressed={f.active}
             className={`qf-v1${f.active ? " active" : ""}${f.alert ? " alert" : ""}`}
-            type="button"
           >
             {f.label} <span className="qf-count">{f.count}</span>
-          </button>
+          </Link>
         ))}
       </div>
 
@@ -285,7 +302,9 @@ export default async function EtudesRestitueesPage() {
                   padding: "14px",
                 }}
               >
-                … {data.moreCount} autres études restituées ·{" "}
+                {data.moreCount > 0 ? (
+                  <>… {data.moreCount} autres études restituées · </>
+                ) : null}
                 <Link href={`${BASE}/clients-suivi`} className="dt-more-link">
                   Voir l&apos;intégralité ({data.totalCount})
                 </Link>

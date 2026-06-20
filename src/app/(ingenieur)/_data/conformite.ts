@@ -26,7 +26,10 @@ export type ConformiteKpi = {
 /** Sous-statut d'un document (DER / KYC / LM) avec sa couleur portée de la maquette. */
 export type DocStatus = {
   code: string;
+  /** partie courante du sous-statut (avant l'emphase) */
   text: string;
+  /** suffixe mis en avant en italique (`<em>` dans la maquette, ex. "Non signé") */
+  em?: string;
   tone: "green" | "gold" | "orange" | "navy";
 };
 
@@ -83,8 +86,8 @@ export const ROWS: ConformiteRow[] = [
     cabinet: { name: "Luc THILLIEZ", sub: "Dirigeant-praticien" },
     supervisor: { initials: "LT", name: "Luc THILLIEZ" },
     docs: [
-      { code: "DER", text: "▸ Envoyé · Lu · Non signé", tone: "gold" },
-      { code: "KYC", text: "▸ Envoyé · Non vu", tone: "gold" },
+      { code: "DER", text: "▸ Envoyé · Lu · ", em: "Non signé", tone: "gold" },
+      { code: "KYC", text: "▸ Envoyé · ", em: "Non vu", tone: "gold" },
       { code: "LM", text: "○ À finaliser par l'ingénieur", tone: "navy" },
     ],
     payment: { tone: "attente", label: "En attente", meta: "3 900 € TTC" },
@@ -175,7 +178,7 @@ export const ROWS: ConformiteRow[] = [
     docs: [
       { code: "DER", text: "✓ Signé", tone: "green" },
       { code: "KYC", text: "▸ Lu · Non signé", tone: "orange" },
-      { code: "LM", text: "▸ Envoyée · Non vue", tone: "navy" },
+      { code: "LM", text: "▸ Envoyée · ", em: "Non vue", tone: "navy" },
     ],
     payment: { tone: "attente", label: "En attente", meta: "3 900 € TTC" },
     status: { tone: "waiting", label: "À signer" },
@@ -190,9 +193,9 @@ export const ROWS: ConformiteRow[] = [
     cabinet: { name: "Luc THILLIEZ", sub: "Dirigeant-praticien" },
     supervisor: { initials: "MK", name: "Mathieu KELLER" },
     docs: [
-      { code: "DER", text: "▸ Envoyé · Vu · Non signé", tone: "orange" },
-      { code: "KYC", text: "▸ Envoyé · Vu · Non signé", tone: "orange" },
-      { code: "LM", text: "▸ Envoyé · Vu · Non signé", tone: "orange" },
+      { code: "DER", text: "▸ Envoyé · Vu · ", em: "Non signé", tone: "orange" },
+      { code: "KYC", text: "▸ Envoyé · Vu · ", em: "Non signé", tone: "orange" },
+      { code: "LM", text: "▸ Envoyé · Vu · ", em: "Non signé", tone: "orange" },
     ],
     payment: { tone: "offert", label: "Offert", meta: "Recommandation M. ROCHE" },
     status: { tone: "waiting", label: "À signer" },

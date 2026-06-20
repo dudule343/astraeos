@@ -81,7 +81,13 @@ export function ContratsAssuranceTable({
                 );
               })}
             </td>
-            <td className="nowrap" style={{ fontSize: "11px", lineHeight: 1.9 }}>
+            <td
+              className="nowrap"
+              style={{
+                fontSize: "11px",
+                ...(c.contracts.length > 1 ? { lineHeight: 1.9 } : {}),
+              }}
+            >
               {c.contracts.map((ct, i) => (
                 <span key={i}>
                   {ct.date}

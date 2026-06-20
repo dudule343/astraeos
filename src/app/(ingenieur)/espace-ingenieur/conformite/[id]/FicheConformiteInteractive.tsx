@@ -4,13 +4,13 @@ import { useCallback, useState } from "react";
 
 import {
   DER,
+  DER_PDF_INPUT,
   DOC_CARDS,
   PACK,
   PACK_PIECES,
   type DocCard,
   type PackPiece,
 } from "../../../_data/fiche-conformite";
-import { genererDerPdf } from "./actions";
 
 /* ── Pictos ───────────────────────────────────────────────────────────── */
 
@@ -375,12 +375,27 @@ function DerModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const handleGenerate = useCallback(async () => {
     setGenerating(true);
     try {
-      const dataUri = await genererDerPdf();
-      window.open(dataUri, "_blank", "noopener,noreferrer");
+      const res = await fetch("/api/conformite/der-pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ kind: "der", personnes, lieu, date }),
+      });
+      if (!res.ok) {
+        throw new Error(`Génération PDF échouée (${res.status})`);
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `DER-${DER_PDF_INPUT.dossierId}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
     } finally {
       setGenerating(false);
     }
-  }, []);
+  }, [personnes, lieu, date]);
 
   const editableField = (
     value: string,

@@ -1,12 +1,8 @@
 import Link from "next/link";
 
-import {
-  honorairesKpis,
-  etudesMissions,
-  honorairesTotal,
-  repartitionMissions,
-} from "../../_data/assets-honoraires";
+import { honorairesKpis, etudesMissions, repartitionMissions } from "../../_data/assets-honoraires";
 import "../../_styles/assets-honoraires.css";
+import { HonorairesTable } from "./HonorairesTable";
 
 export const metadata = {
   title: "ASTRAEOS · Honoraires de conseil",
@@ -101,63 +97,7 @@ export default function AssetsHonorairesPage() {
             {etudesMissions.length} études réalisées · cliquez pour le détail client
           </span>
         </div>
-        <table className="dt">
-          <thead>
-            <tr>
-              <th>Clients</th>
-              <th>Entrée en relation</th>
-              <th>Type de conseil</th>
-              <th>Dates de l&apos;étude</th>
-              <th className="num">Honoraires facturés</th>
-              <th className="center">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {etudesMissions.map((m) => (
-              <tr className="dt-clickable" key={m.clientId}>
-                <td>
-                  <Link href={`/espace-ingenieur/clients/${m.clientId}`} className="hon-client-cell">
-                    <span className="ingenieur-avatar">{m.initials}</span>
-                    <span className="cell-primary">{m.client}</span>
-                  </Link>
-                </td>
-                <td className="nowrap" style={{ fontSize: "11px" }}>
-                  {m.entreeRelation}
-                </td>
-                <td className="hon-conseil-cell">
-                  {m.typesConseil.map((t, i) => (
-                    <span className="badge badge-gold" key={i}>
-                      {t}
-                    </span>
-                  ))}
-                </td>
-                <td className="nowrap hon-dates-cell">
-                  {m.datesEtude.map((d, i) => (
-                    <span className="hon-date-line" key={i}>
-                      {d}
-                    </span>
-                  ))}
-                </td>
-                <td className="num cell-money gold">{m.honoraires}</td>
-                <td className="center">
-                  <Link href={`/espace-ingenieur/clients/${m.clientId}`} className="btn btn-ghost btn-sm">
-                    Voir →
-                  </Link>
-                </td>
-              </tr>
-            ))}
-            <tr className="hon-total-row">
-              <td>
-                <strong>Total portefeuille</strong>
-              </td>
-              <td className="hon-total-resume" colSpan={3}>
-                {honorairesTotal.resume}
-              </td>
-              <td className="num cell-money gold">{honorairesTotal.montant}</td>
-              <td />
-            </tr>
-          </tbody>
-        </table>
+        <HonorairesTable />
       </div>
 
       {/* Répartition par type de mission du portefeuille */}

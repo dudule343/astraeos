@@ -159,3 +159,38 @@ const DATA: AssetsAssurance = {
 export function getAssetsAssurance(): AssetsAssurance {
   return DATA;
 }
+
+/**
+ * Construit le contenu CSV du détail des contrats d'assurance à partir de la
+ * source unique (clients). Une ligne par contrat, plus la ligne de total. Sert
+ * au bouton « Exporter » de la page (export réel, pas un bouton mort).
+ */
+export function buildAssuranceCsv(data: AssetsAssurance): string {
+  const sep = ";";
+  const escape = (v: string) =>
+    /[";\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v;
+
+  const header = [
+    "Client",
+    "Contrats actifs",
+    "Type souscrit",
+    "Date de souscription",
+    "Frais de dossier perçus",
+  ];
+
+  const rows: string[][] = [];
+  for (const c of data.clients) {
+    c.contracts.forEach((ct, i) => {
+      rows.push([
+        c.name,
+        i === 0 ? String(c.contracts.length) : "",
+        ct.label,
+        ct.date,
+        i === 0 ? c.fees : "",
+      ]);
+    });
+  }
+  rows.push(["Total portefeuille", String(data.total.contracts), data.total.clientsLabel, "", data.total.fees]);
+
+  return [header, ...rows].map((cols) => cols.map(escape).join(sep)).join("\r\n");
+}

@@ -1,0 +1,184 @@
+/*
+ * Sidebar de l'espace Ingénieur, portée à l'identique de la maquette v28
+ * (0 - 030_Wireframes_Ingenieur_v28.html, lignes 49-73 du <style> et l'aside
+ * lignes 3906-3977). Scopé sous .ing-sidebar pour ne pas collisionner avec le
+ * SpaceSidebar partagé (Tailwind) utilisé par les autres espaces. Les variables
+ * de couleur (--navy, --gold, --ivory…) viennent de globals.css.
+ */
+
+.ing-sidebar {
+  width: 280px;
+  border-right: 1px solid var(--navy-100);
+  padding: 28px 16px 32px;
+  flex-shrink: 0;
+  background: var(--ivory);
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+.ing-sidebar::-webkit-scrollbar {
+  width: 4px;
+}
+.ing-sidebar::-webkit-scrollbar-thumb {
+  background: var(--navy-100);
+  border-radius: 2px;
+}
+
+.ing-sidebar .brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+  padding: 0 12px;
+}
+.ing-sidebar .brand-mark {
+  width: 30px;
+  height: 34px;
+  background: linear-gradient(180deg, var(--gold), var(--medium-400));
+  border-radius: 4px;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 16px;
+}
+.ing-sidebar .brand-name {
+  font-weight: 700;
+  font-size: 19px;
+  color: var(--navy);
+  letter-spacing: 0.08em;
+}
+.ing-sidebar .brand-sub {
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--navy-300);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  margin-left: 40px;
+  margin-top: 3px;
+  margin-bottom: 22px;
+}
+
+.ing-sidebar .nav-section {
+  margin-bottom: 18px;
+}
+.ing-sidebar .nav-section-header {
+  font-size: 9.5px;
+  font-weight: 700;
+  color: var(--navy-300);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: 0 12px;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.ing-sidebar .nav-section-header .dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--gold);
+}
+.ing-sidebar .nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 12px;
+  border-radius: 5px;
+  font-size: 12.5px;
+  color: var(--navy);
+  cursor: pointer;
+  margin-bottom: 1px;
+  transition: background 0.12s;
+  border: none;
+  background: transparent;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+  text-decoration: none;
+  line-height: 1.3;
+}
+.ing-sidebar .nav-item:hover {
+  background: var(--light-blue);
+}
+.ing-sidebar .nav-item.active {
+  background: var(--navy);
+  color: white;
+  font-weight: 500;
+}
+.ing-sidebar .nav-item-num {
+  font-size: 9.5px;
+  font-weight: 700;
+  flex-shrink: 0;
+  width: 22px;
+  text-align: center;
+  background: var(--gold-200);
+  color: var(--medium-400);
+  border-radius: 3px;
+  padding: 1px 0;
+  letter-spacing: 0.06em;
+}
+.ing-sidebar .nav-item.active .nav-item-num {
+  background: var(--gold);
+  color: white;
+}
+.ing-sidebar .nav-item-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  color: var(--navy-300);
+}
+.ing-sidebar .nav-item.active .nav-item-icon {
+  color: var(--gold-300);
+}
+.ing-sidebar .nav-item-label {
+  flex: 1;
+}
+.ing-sidebar .nav-badge {
+  margin-left: auto;
+  background: var(--gold);
+  color: var(--ivory);
+  font-size: 9.5px;
+  font-weight: 700;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ing-sidebar .nav-user {
+  margin-top: 24px;
+  padding: 14px;
+  background: linear-gradient(135deg, var(--ivory) 0%, var(--gold-100) 100%);
+  border: 1px solid var(--gold-200);
+  border-radius: 6px;
+}
+.ing-sidebar .nav-user-eyebrow {
+  font-size: 9.5px;
+  font-weight: 700;
+  color: var(--gold-deep);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.ing-sidebar .nav-user-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--navy);
+}
+.ing-sidebar .nav-user-role {
+  font-size: 11px;
+  color: var(--navy-300);
+  margin-top: 2px;
+}
+.ing-sidebar .nav-user-cabinet {
+  font-size: 10.5px;
+  color: var(--navy-300);
+  margin-top: 2px;
+}

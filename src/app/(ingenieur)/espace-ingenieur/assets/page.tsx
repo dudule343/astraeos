@@ -120,10 +120,13 @@ function AxisCard({ axis }: { axis: AxisCardData }) {
           <div className="ag-axis-icon">{AXIS_ICONS[axis.icon]}</div>
           <div className="ag-axis-title">
             {axis.title}
-            {axis.titleLine2 && (
+            {axis.titleLine2 !== undefined && (
               <>
                 <br />
-                {axis.titleLine2}
+                {/* Une 2e ligne vide doit garder sa hauteur (cf. `<br>&nbsp;`
+                    de la carte Assurance dans la maquette) : on rend un espace
+                    insécable quand la ligne ne contient que des blancs. */}
+                {axis.titleLine2.trim() === "" ? " " : axis.titleLine2}
               </>
             )}
           </div>

@@ -31,13 +31,54 @@ export interface EtudeRestituee {
   nextMeta?: string;
 }
 
+/** Clé de filtre rapide. "toutes" = aucun filtre. */
+export type FilterKey = "toutes" | "suivi" | "decision" | "sans-suite";
+
 export interface EtudesRestitueesData {
   steps: { num: string; label: string; count: string; page: string; active?: boolean }[];
   kpis: { label: string; value: string; unit?: string; meta: string; tone?: "gold" }[];
-  filters: { label: string; count: string; active?: boolean; alert?: boolean }[];
+  filters: { key: FilterKey; label: string; count: string; alert?: boolean; active?: boolean }[];
   rows: EtudeRestituee[];
   moreCount: number;
   totalCount: number;
+}
+
+/**
+ * Rattache un statut de suite à un filtre rapide :
+ * - "signed"  -> convertis en suivi
+ * - "waiting" -> en décision client
+ * - "dormant" -> sans suite
+ */
+const SUITE_TO_FILTER: Record<SuiteTone, FilterKey> = {
+  signed: "suivi",
+  waiting: "decision",
+  dormant: "sans-suite",
+};
+
+export function isValidFilter(value: string | undefined): value is FilterKey {
+  return value === "toutes" || value === "suivi" || value === "decision" || value === "sans-suite";
+}
+
+/**
+ * Renvoie les données filtrées selon la clé demandée. Le filtrage est réel :
+ * les lignes, le filtre actif, le compteur "… N autres" et le total affiché
+ * sont recalculés. "toutes" (défaut) ne filtre rien.
+ */
+export async function fetchEtudesRestituees(
+  filter: FilterKey = "toutes",
+): Promise<EtudesRestitueesData> {
+  const filters = DATA.filters.map((f) => ({ ...f, active: f.key === filter }));
+
+  if (filter === "toutes") {
+    return { ...DATA, filters };
+  }
+
+  const rows = DATA.rows.filter((r) => SUITE_TO_FILTER[r.suiteTone] === filter);
+  // Total réel de la catégorie = le compteur du filtre rapide.
+  const totalCount = Number(DATA.filters.find((f) => f.key === filter)?.count ?? rows.length);
+  const moreCount = Math.max(0, totalCount - rows.length);
+
+  return { ...DATA, filters, rows, moreCount, totalCount };
 }
 
 const DATA: EtudesRestitueesData = {
@@ -56,10 +97,10 @@ const DATA: EtudesRestitueesData = {
     { label: "Délai moyen restitution", value: "42", unit: "jours", meta: "de la collecte à la restitution" },
   ],
   filters: [
-    { label: "Toutes", count: "28", active: true },
-    { label: "Convertis en suivi", count: "24" },
-    { label: "En décision client", count: "3" },
-    { label: "Sans suite", count: "1", alert: true },
+    { key: "toutes", label: "Toutes", count: "28" },
+    { key: "suivi", label: "Convertis en suivi", count: "24" },
+    { key: "decision", label: "En décision client", count: "3" },
+    { key: "sans-suite", label: "Sans suite", count: "1", alert: true },
   ],
   rows: [
     {
@@ -164,7 +205,3 @@ const DATA: EtudesRestitueesData = {
   moreCount: 22,
   totalCount: 28,
 };
-
-export async function fetchEtudesRestituees(): Promise<EtudesRestitueesData> {
-  return DATA;
-}

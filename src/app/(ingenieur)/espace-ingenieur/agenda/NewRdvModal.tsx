@@ -1,6 +1,9 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
+
+import { createRdv, type RdvFormat } from "./actions";
 
 /**
  * Modale « Nouveau rendez-vous » (Création RDV directe) — port fidèle de
@@ -58,6 +61,17 @@ Président associé du cabinet PRIVEOS`;
 
 type Participant = { id: number; nom: string; email: string };
 
+/** Libellés de la liste « Lieu » → format DB du RDV. */
+const LIEU_OPTIONS: { label: string; format: RdvFormat }[] = [
+  { label: "Cabinet · Paris 8e", format: "presentiel" },
+  { label: "Visioconférence Google Meet", format: "visio" },
+  { label: "Téléphone", format: "telephone" },
+  { label: "Au domicile du client", format: "presentiel" },
+  { label: "Autre adresse à préciser", format: "presentiel" },
+];
+
+type SubmitStatus = "idle" | "submitting" | "done";
+
 const EyeIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
     <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z" />
@@ -66,20 +80,35 @@ const EyeIcon = () => (
 );
 
 export function NewRdvModal() {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [date, setDate] = useState("Mardi 12 mai 2026");
   const [heureDebut, setHeureDebut] = useState("14h00");
   const [duree, setDuree] = useState("1h00");
   const [type, setType] = useState<RdvType>("initial");
+  const [lieu, setLieu] = useState(LIEU_OPTIONS[0].label);
   const [clientMode, setClientMode] = useState<"existant" | "nouveau">("existant");
+  const [clientExistant, setClientExistant] = useState(
+    "Bertrand & Monique DUPONT-TOPIN · Couple · ETU-2026-014",
+  );
+  const [nouveauCivilite, setNouveauCivilite] = useState("Monsieur");
+  const [nouveauPrenom, setNouveauPrenom] = useState("");
+  const [nouveauNom, setNouveauNom] = useState("");
+  const [nouveauEmail, setNouveauEmail] = useState("");
+  const [nouveauTel, setNouveauTel] = useState("");
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [nextParticipantId, setNextParticipantId] = useState(1);
   const [docDci, setDocDci] = useState(true);
   const [docQualif, setDocQualif] = useState(true);
   const [message, setMessage] = useState(DEFAULT_MESSAGE);
+  const [submitStatus, setSubmitStatus] = useState<SubmitStatus>("idle");
+  const [toast, setToast] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const close = useCallback(() => {
     setOpen(false);
+    setSubmitStatus("idle");
+    setError(null);
     document.body.style.overflow = "";
   }, []);
 
@@ -122,7 +151,78 @@ export function NewRdvModal() {
     setParticipants((prev) => prev.filter((p) => p.id !== id));
   }
 
-  if (!open) return null;
+  function resolveClientNom(): string {
+    if (clientMode === "existant") {
+      // "Bertrand & Monique DUPONT-TOPIN · …" → on garde l'identité avant le « · ».
+      return clientExistant.split("·")[0].trim();
+    }
+    return `${nouveauPrenom.trim()} ${nouveauNom.trim()}`.trim();
+  }
+
+  async function submit() {
+    if (submitStatus === "submitting") return;
+    setError(null);
+
+    const clientNom = resolveClientNom();
+    if (!clientNom) {
+      setError(
+        clientMode === "existant"
+          ? "Sélectionnez un client dans votre portefeuille."
+          : "Renseignez le prénom et le nom du prospect.",
+      );
+      return;
+    }
+    if (clientMode === "nouveau" && !nouveauEmail.trim()) {
+      setError("L'e-mail du prospect est requis pour lui envoyer l'invitation.");
+      return;
+    }
+
+    const format =
+      LIEU_OPTIONS.find((o) => o.label === lieu)?.format ?? "presentiel";
+
+    setSubmitStatus("submitting");
+    const res = await createRdv({
+      type,
+      format,
+      dateLabel: date,
+      heureDebut,
+      duree,
+      clientNom,
+      attendees: participants.map((p) => ({ nom: p.nom, email: p.email })),
+    });
+
+    if (!res.ok) {
+      setSubmitStatus("idle");
+      setError(res.reason);
+      return;
+    }
+
+    setSubmitStatus("done");
+    setToast(res.message);
+    close();
+    // Visio : on enchaîne directement sur la salle. Sinon retour agenda à jour.
+    if (res.room) {
+      router.push(`/visio/${res.room}?role=engineer`);
+    } else {
+      router.refresh();
+    }
+    setTimeout(() => setToast(null), 4500);
+  }
+
+  if (!open) {
+    // La modale est fermée mais on garde le toast de confirmation visible.
+    if (toast) {
+      return (
+        <div className="rdv-toast" role="status">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2.4">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+          {toast}
+        </div>
+      );
+    }
+    return null;
+  }
 
   return (
     <div
@@ -192,12 +292,14 @@ export function NewRdvModal() {
             <div className="s1a-grid-2">
               <div className="s1a-field">
                 <label className="s1a-field-label">Lieu</label>
-                <select className="s1a-select" defaultValue="Cabinet · Paris 8e">
-                  <option>Cabinet · Paris 8e</option>
-                  <option>Visioconférence Google Meet</option>
-                  <option>Téléphone</option>
-                  <option>Au domicile du client</option>
-                  <option>Autre adresse à préciser</option>
+                <select
+                  className="s1a-select"
+                  value={lieu}
+                  onChange={(e) => setLieu(e.target.value)}
+                >
+                  {LIEU_OPTIONS.map((o) => (
+                    <option key={o.label}>{o.label}</option>
+                  ))}
                 </select>
               </div>
               <div className="s1a-field">
@@ -262,7 +364,8 @@ export function NewRdvModal() {
                     type="text"
                     className="s1a-input"
                     placeholder="ex. DUPONT-TOPIN · Bertrand & Monique · ETU-2026-014"
-                    defaultValue="Bertrand & Monique DUPONT-TOPIN · Couple · ETU-2026-014"
+                    value={clientExistant}
+                    onChange={(e) => setClientExistant(e.target.value)}
                   />
                   <div className="rdv-field-hint">
                     Saisissez nom, prénom ou n° dossier · 7 clients dans votre portefeuille
@@ -274,7 +377,11 @@ export function NewRdvModal() {
                 <div className="s1a-grid-3">
                   <div className="s1a-field">
                     <label className="s1a-field-label">Civilité</label>
-                    <select className="s1a-select" defaultValue="Monsieur">
+                    <select
+                      className="s1a-select"
+                      value={nouveauCivilite}
+                      onChange={(e) => setNouveauCivilite(e.target.value)}
+                    >
                       <option>Monsieur</option>
                       <option>Madame</option>
                     </select>
@@ -283,7 +390,13 @@ export function NewRdvModal() {
                     <label className="s1a-field-label">
                       Prénom<span className="required">*</span>
                     </label>
-                    <input type="text" className="s1a-input" placeholder="Prénom" />
+                    <input
+                      type="text"
+                      className="s1a-input"
+                      placeholder="Prénom"
+                      value={nouveauPrenom}
+                      onChange={(e) => setNouveauPrenom(e.target.value)}
+                    />
                   </div>
                   <div className="s1a-field">
                     <label className="s1a-field-label">
@@ -294,6 +407,8 @@ export function NewRdvModal() {
                       className="s1a-input"
                       placeholder="NOM"
                       style={{ textTransform: "uppercase" }}
+                      value={nouveauNom}
+                      onChange={(e) => setNouveauNom(e.target.value)}
                     />
                   </div>
                 </div>
@@ -302,13 +417,25 @@ export function NewRdvModal() {
                     <label className="s1a-field-label">
                       E-mail<span className="required">*</span>
                     </label>
-                    <input type="email" className="s1a-input" placeholder="email@exemple.com" />
+                    <input
+                      type="email"
+                      className="s1a-input"
+                      placeholder="email@exemple.com"
+                      value={nouveauEmail}
+                      onChange={(e) => setNouveauEmail(e.target.value)}
+                    />
                   </div>
                   <div className="s1a-field">
                     <label className="s1a-field-label">
                       Téléphone<span className="required">*</span>
                     </label>
-                    <input type="tel" className="s1a-input" placeholder="+33 6 …" />
+                    <input
+                      type="tel"
+                      className="s1a-input"
+                      placeholder="+33 6 …"
+                      value={nouveauTel}
+                      onChange={(e) => setNouveauTel(e.target.value)}
+                    />
                   </div>
                 </div>
                 <div className="rdv-create-banner">
@@ -461,18 +588,36 @@ export function NewRdvModal() {
 
         <div className="s1a-modal-footer">
           <div className="s1a-modal-footer-info">
-            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.8">
-              <circle cx="12" cy="12" r="9" />
-              <polyline points="12 6 12 12 16 14" />
-            </svg>
-            <span>RDV ajouté à votre agenda &amp; e-mail envoyé · action tracée &amp; horodatée</span>
+            {error ? (
+              <>
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#C0392B" strokeWidth="2">
+                  <circle cx="12" cy="12" r="9" />
+                  <line x1="12" y1="8" x2="12" y2="13" />
+                  <line x1="12" y1="16.5" x2="12" y2="16.6" />
+                </svg>
+                <span style={{ color: "#C0392B" }}>{error}</span>
+              </>
+            ) : (
+              <>
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.8">
+                  <circle cx="12" cy="12" r="9" />
+                  <polyline points="12 6 12 12 16 14" />
+                </svg>
+                <span>RDV ajouté à votre agenda &amp; e-mail envoyé · action tracée &amp; horodatée</span>
+              </>
+            )}
           </div>
           <div className="s1a-modal-footer-actions">
             <button className="s1a-btn s1a-btn-ghost" onClick={close} type="button">
               Annuler
             </button>
-            <button className="s1a-btn s1a-btn-primary" type="button" onClick={close}>
-              Créer le RDV + envoyer
+            <button
+              className="s1a-btn s1a-btn-primary"
+              type="button"
+              onClick={submit}
+              disabled={submitStatus === "submitting"}
+            >
+              {submitStatus === "submitting" ? "Création…" : "Créer le RDV + envoyer"}
             </button>
           </div>
         </div>
