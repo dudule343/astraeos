@@ -198,7 +198,11 @@ export default async function FicheConformitePage({
           <strong>{ACTION_BAR.conditionsCount}</strong> pour ouvrir l&apos;espace
           sécurisé (étape 03 · Collecte de documents).
           <br />
-          <span style={{ color: "var(--navy-300)" }}>{ACTION_BAR.note}</span>
+          <span style={{ color: "var(--navy-300)" }}>
+            {ACTION_BAR.note.lead}
+            <strong>{ACTION_BAR.note.strong}</strong>
+            {ACTION_BAR.note.tail}
+          </span>
         </div>
         <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
           <button

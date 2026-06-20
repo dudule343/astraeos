@@ -4,8 +4,9 @@
  *
  * Source unique de la page agenda. Les vraies données Supabase seront
  * rebranchées plus tard ; ici on porte les exemples de la maquette pour la
- * fidélité pixel (ingénieur connecté = Julien VASSEUR, semaine du 11 au 17
- * mai 2026, aujourd'hui = mardi 12).
+ * fidélité pixel (ingénieur connecté = Luc THILLIEZ, comme la sidebar et le
+ * profil ; lien public personnel = priveos.com/rdv/luc-thilliez ; semaine du
+ * 11 au 17 mai 2026, aujourd'hui = mardi 12).
  */
 
 /** Un RDV positionné dans la grille semaine. */
@@ -286,7 +287,7 @@ export function getAgenda(): AgendaData {
     avgDurationValue: "1",
     avgDurationUnit: "h 12 min",
     avgDurationMeta: "cumul N-1 · ▼ -8 min",
-    publicSlug: "julien-vasseur",
-    publicLink: "priveos.com/rdv/julien-vasseur",
+    publicSlug: "luc-thilliez",
+    publicLink: "priveos.com/rdv/luc-thilliez",
   };
 }

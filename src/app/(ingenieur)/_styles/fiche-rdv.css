@@ -353,3 +353,568 @@
 .maquette-ing .frdv-note strong {
   color: var(--navy);
 }
+
+/* =========================================================================
+ * MODALES DCI Simplifié + Questionnaire de qualification (portées des
+ * `#modal-dci-simplifie` lignes 18826→20630 et `#modal-questionnaire-qualif`
+ * lignes 20780→21357 de la maquette). Le toggle de mode Consulter/Modifier de
+ * la maquette agit via `body.s1b-mode-readonly` / `body.s1b-mode-edit` ; en
+ * React il est porté par une classe sur l'overlay de la modale, pour rester
+ * auto-contenu à cet écran. La règle buggée `body.s1b-mode-readonly . {…}` de
+ * la maquette (sélecteur vide) est volontairement écartée.
+ * ========================================================================= */
+
+/* — Coquille de modale (mêmes valeurs que la maquette) — */
+.maquette-ing .s1a-modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 31, 58, 0.55);
+  backdrop-filter: blur(3px);
+  z-index: 9000;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 48px 24px;
+  overflow-y: auto;
+}
+.maquette-ing .s1a-modal-overlay.open {
+  display: flex;
+  animation: frdvModalFade 0.18s ease-out;
+}
+@keyframes frdvModalFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.maquette-ing .s1a-modal {
+  background: var(--ivory);
+  width: 100%;
+  max-width: 720px;
+  border-radius: 6px;
+  box-shadow: 0 24px 60px rgba(10, 31, 58, 0.35),
+    0 0 0 1px rgba(198, 142, 14, 0.18);
+  overflow: hidden;
+  animation: frdvModalUp 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  font-family: "Epilogue", sans-serif;
+}
+@keyframes frdvModalUp {
+  from { transform: translateY(16px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.maquette-ing .s1a-modal-header {
+  background: linear-gradient(135deg, var(--navy) 0%, #1a3866 100%);
+  color: white;
+  padding: 22px 28px 18px;
+  position: relative;
+  border-bottom: 2px solid var(--gold);
+}
+.maquette-ing .s1a-modal-eyebrow {
+  font-size: 9.5px;
+  font-weight: 700;
+  color: var(--gold-300);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.maquette-ing .s1a-modal-title {
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: white;
+  line-height: 1.2;
+}
+.maquette-ing .s1a-modal-title strong {
+  color: var(--gold-300);
+  font-weight: 700;
+}
+.maquette-ing .s1a-modal-sub {
+  font-size: 11.5px;
+  color: rgba(255, 255, 255, 0.65);
+  margin-top: 5px;
+  line-height: 1.5;
+}
+.maquette-ing .s1a-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: all 0.15s;
+}
+.maquette-ing .s1a-modal-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: rotate(90deg);
+}
+.maquette-ing .s1a-modal-close svg {
+  width: 14px;
+  height: 14px;
+}
+.maquette-ing .s1a-modal-body {
+  padding: 24px 28px 20px;
+  max-height: calc(100vh - 220px);
+  overflow-y: auto;
+}
+.maquette-ing .s1a-modal-body::-webkit-scrollbar {
+  width: 6px;
+}
+.maquette-ing .s1a-modal-body::-webkit-scrollbar-thumb {
+  background: var(--navy-100);
+  border-radius: 3px;
+}
+.maquette-ing .s1a-modal-footer {
+  padding: 14px 28px;
+  background: var(--ivory-deep);
+  border-top: 1px solid var(--navy-100);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.maquette-ing .s1a-modal-footer-info {
+  font-size: 10.5px;
+  color: var(--navy-300);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.maquette-ing .s1a-modal-footer-actions {
+  display: flex;
+  gap: 8px;
+}
+.maquette-ing .s1a-btn {
+  padding: 9px 18px;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.15s;
+}
+.maquette-ing .s1a-btn-ghost {
+  background: transparent;
+  color: var(--navy);
+  border-color: var(--navy-100);
+}
+.maquette-ing .s1a-btn-ghost:hover {
+  background: white;
+  border-color: var(--navy-300);
+}
+
+/* — Barre de mode Consulter / Modifier — */
+.maquette-ing .s1c-mode-bar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 10px 14px;
+  background: linear-gradient(180deg, var(--ivory) 0%, white 100%);
+  border-bottom: 1px solid var(--ivory-deep);
+}
+.maquette-ing .s1c-mode-bar-label {
+  font-size: 9.5px;
+  font-weight: 700;
+  color: var(--navy-300);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-right: 4px;
+}
+.maquette-ing .s1c-mode-bar button {
+  padding: 6px 14px;
+  background: transparent;
+  border: 1px solid var(--navy-100);
+  border-radius: 14px;
+  font-family: inherit;
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--navy-300);
+  cursor: pointer;
+  letter-spacing: 0.04em;
+  transition: all 0.15s;
+}
+.maquette-ing .s1c-mode-bar button.active {
+  background: var(--navy);
+  color: white;
+  border-color: var(--navy);
+  box-shadow: 0 1px 3px rgba(16, 45, 80, 0.18);
+}
+.maquette-ing .s1c-mode-bar button:hover:not(.active) {
+  background: var(--ivory-deep);
+  color: var(--navy);
+}
+.maquette-ing .s1c-mode-bar-spacer { flex: 1; }
+.maquette-ing .s1c-mode-bar-meta {
+  font-size: 10px;
+  color: var(--navy-300);
+  letter-spacing: 0.02em;
+}
+
+/* — Bannières indicatrices de mode — */
+.maquette-ing .s1b-readonly-banner,
+.maquette-ing .s1b-edit-banner {
+  padding: 10px 16px;
+  font-size: 11px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 4px;
+  margin-bottom: 14px;
+}
+.maquette-ing .s1b-readonly-banner {
+  background: var(--light-blue);
+  color: var(--navy);
+  border-left: 3px solid var(--navy);
+}
+.maquette-ing .s1b-edit-banner {
+  background: var(--gold-100);
+  color: var(--gold-deep);
+  border-left: 3px solid var(--gold);
+}
+/* Le mode (porté sur l'overlay) choisit la bannière affichée */
+.maquette-ing .s1a-modal-overlay.s1b-mode-edit .s1b-readonly-banner { display: none; }
+.maquette-ing .s1a-modal-overlay.s1b-mode-readonly .s1b-edit-banner { display: none; }
+
+/* — Mode lecture : champs verrouillés affichés comme du texte — */
+.maquette-ing .s1a-modal-overlay.s1b-mode-readonly .s1b-editable .s1a-input,
+.maquette-ing .s1a-modal-overlay.s1b-mode-readonly .s1b-editable .s1a-select,
+.maquette-ing .s1a-modal-overlay.s1b-mode-readonly .s1b-editable .s1a-textarea {
+  background: transparent;
+  border: none;
+  padding: 0;
+  font-size: 11.5px;
+  color: var(--navy);
+  font-weight: 500;
+  cursor: default;
+  pointer-events: none !important;
+  user-select: text;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: none !important;
+}
+.maquette-ing .s1a-modal-overlay.s1b-mode-readonly .s1b-editable input,
+.maquette-ing .s1a-modal-overlay.s1b-mode-readonly .s1b-editable select,
+.maquette-ing .s1a-modal-overlay.s1b-mode-readonly .s1b-editable textarea {
+  pointer-events: none !important;
+}
+/* — Mode édition : champs avec bordure gold — */
+.maquette-ing .s1a-modal-overlay.s1b-mode-edit .s1b-editable .s1a-input,
+.maquette-ing .s1a-modal-overlay.s1b-mode-edit .s1b-editable .s1a-select,
+.maquette-ing .s1a-modal-overlay.s1b-mode-edit .s1b-editable .s1a-textarea {
+  background: white;
+  border: 1.5px solid var(--gold);
+  border-radius: 4px;
+  padding: 6px 10px;
+  font-size: 11.5px;
+  color: var(--navy);
+  pointer-events: auto !important;
+}
+.maquette-ing .s1a-modal-overlay.s1b-mode-edit .s1b-editable .s1a-input:focus,
+.maquette-ing .s1a-modal-overlay.s1b-mode-edit .s1b-editable .s1a-select:focus,
+.maquette-ing .s1a-modal-overlay.s1b-mode-edit .s1b-editable .s1a-textarea:focus {
+  outline: none;
+  border-color: var(--gold) !important;
+  box-shadow: 0 0 0 3px rgba(198, 142, 14, 0.12) !important;
+}
+
+/* — Sections / champs génériques de modale (s1a-section, s1a-field…) — */
+.maquette-ing .s1a-section { margin-bottom: 22px; }
+.maquette-ing .s1a-section-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--gold-deep);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px dashed var(--gold-200);
+}
+.maquette-ing .s1a-section-label::before {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  background: var(--gold);
+  border-radius: 50%;
+}
+.maquette-ing .s1a-field { margin-bottom: 14px; }
+.maquette-ing .s1a-field-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--navy);
+  margin-bottom: 5px;
+  letter-spacing: 0.01em;
+}
+.maquette-ing .s1a-input,
+.maquette-ing .s1a-select,
+.maquette-ing .s1a-textarea {
+  width: 100%;
+  padding: 9px 12px;
+  background: white;
+  border: 1px solid var(--navy-100);
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 12.5px;
+  color: var(--navy);
+  transition: all 0.15s;
+}
+.maquette-ing .s1a-input:focus,
+.maquette-ing .s1a-select:focus,
+.maquette-ing .s1a-textarea:focus {
+  outline: none;
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(198, 142, 14, 0.12);
+}
+.maquette-ing .s1a-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* — DCI Simplifié · layout master-detail (onglets à gauche) — */
+.maquette-ing .s1c-dci-simplifie-layout {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 18px;
+  align-items: start;
+}
+.maquette-ing .s1c-dci-simplifie-nav {
+  position: sticky;
+  top: 0;
+  align-self: start;
+  background: var(--ivory);
+  border: 1px solid var(--navy-100);
+  border-radius: 8px;
+  padding: 12px 10px;
+  max-height: calc(100vh - 280px);
+  overflow-y: auto;
+}
+.maquette-ing .s1c-dci-simplifie-nav-title {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--navy-300);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 4px 8px 10px;
+}
+.maquette-ing .s1c-dci-simplifie-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 10px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  font-family: "Epilogue", sans-serif;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--navy);
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.maquette-ing .s1c-dci-simplifie-chip:hover {
+  background: white;
+  border-color: var(--navy-100);
+}
+.maquette-ing .s1c-dci-simplifie-chip.active {
+  background: white;
+  border-color: var(--gold-300);
+  box-shadow: 0 2px 4px rgba(198, 142, 14, 0.08);
+}
+.maquette-ing .s1c-dci-simplifie-chip-num {
+  display: inline-grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  background: var(--navy-100);
+  color: var(--navy);
+  border-radius: 50%;
+  font-size: 10px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+.maquette-ing .s1c-dci-simplifie-chip.active .s1c-dci-simplifie-chip-num {
+  background: var(--gold);
+  color: white;
+}
+.maquette-ing .s1c-dci-simplifie-content {
+  max-height: calc(100vh - 280px);
+  overflow-y: auto;
+  padding-right: 8px;
+}
+.maquette-ing .s1c-dci-simplifie-content .s1b-dci-section {
+  scroll-margin-top: 16px;
+}
+
+/* — Sections DCI (numérotées) + sous-sections + lignes de champ — */
+.maquette-ing .s1b-dci-section {
+  background: white;
+  border: 1px solid var(--navy-100);
+  border-radius: 8px;
+  margin-bottom: 14px;
+  overflow: hidden;
+}
+.maquette-ing .s1b-dci-section-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: linear-gradient(90deg, var(--ivory) 0%, white 100%);
+  border-bottom: 1px solid var(--ivory-deep);
+}
+.maquette-ing .s1b-dci-section-num {
+  width: 28px;
+  height: 28px;
+  background: var(--gold);
+  color: white;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: "Epilogue", sans-serif;
+  flex-shrink: 0;
+}
+.maquette-ing .s1b-dci-section-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--navy);
+  letter-spacing: -0.005em;
+  margin: 0;
+}
+.maquette-ing .s1b-dci-section-body { padding: 14px 16px; }
+.maquette-ing .s1b-dci-subsection { margin-bottom: 12px; }
+.maquette-ing .s1b-dci-subsection:last-child { margin-bottom: 0; }
+.maquette-ing .s1b-dci-subsection-title {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--gold-deep);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 4px 0 8px;
+  margin-bottom: 6px;
+  border-bottom: 1px solid var(--gold-100);
+}
+.maquette-ing .s1b-field-row {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 12px;
+  padding: 7px 4px;
+  align-items: center;
+  border-bottom: 1px dashed var(--ivory-deep);
+}
+.maquette-ing .s1b-field-row:last-child { border-bottom: none; }
+.maquette-ing .s1b-field-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--navy-300);
+  line-height: 1.4;
+}
+
+/* — Accordéon catégories de produits financiers (Qualif) — */
+.maquette-ing .s1b-accordion-actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.maquette-ing .s1b-accordion-actions button {
+  padding: 5px 12px;
+  background: transparent;
+  border: 1px solid var(--navy-100);
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--navy);
+  cursor: pointer;
+  transition: all 0.12s;
+}
+.maquette-ing .s1b-accordion-actions button:hover {
+  background: var(--gold-100);
+  border-color: var(--gold-300);
+}
+.maquette-ing .s1b-accordion-cat {
+  background: white;
+  border: 1px solid var(--navy-100);
+  border-radius: 6px;
+  margin-bottom: 6px;
+  overflow: hidden;
+  transition: all 0.15s;
+}
+.maquette-ing .s1b-accordion-cat.open {
+  border-color: var(--gold-300);
+  box-shadow: 0 2px 6px rgba(16, 45, 80, 0.05);
+}
+.maquette-ing .s1b-accordion-head {
+  display: grid;
+  grid-template-columns: 28px 1fr auto auto;
+  gap: 12px;
+  padding: 12px 16px;
+  align-items: center;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.maquette-ing .s1b-accordion-head:hover { background: var(--ivory); }
+.maquette-ing .s1b-accordion-cat.open .s1b-accordion-head { background: var(--gold-100); }
+.maquette-ing .s1b-accordion-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: var(--light-blue);
+  color: var(--navy);
+  display: grid;
+  place-items: center;
+}
+.maquette-ing .s1b-accordion-cat.open .s1b-accordion-icon {
+  background: var(--gold);
+  color: white;
+}
+.maquette-ing .s1b-accordion-icon svg { width: 14px; height: 14px; }
+.maquette-ing .s1b-accordion-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--navy);
+}
+.maquette-ing .s1b-accordion-resume {
+  font-size: 10px;
+  color: var(--navy-300);
+  margin-top: 1px;
+  letter-spacing: 0.01em;
+}
+.maquette-ing .s1b-accordion-tag {
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 10px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.maquette-ing .s1b-accordion-tag.aucune { background: var(--ivory-deep); color: var(--navy-300); }
+.maquette-ing .s1b-accordion-tag.initie { background: var(--light-blue); color: var(--navy); }
+.maquette-ing .s1b-accordion-tag.avance { background: #e8f5ee; color: #1f8049; }
+.maquette-ing .s1b-accordion-chevron {
+  transition: transform 0.18s;
+  color: var(--navy-300);
+}
+.maquette-ing .s1b-accordion-cat.open .s1b-accordion-chevron { transform: rotate(180deg); }
+.maquette-ing .s1b-accordion-body {
+  display: none;
+  padding: 14px 16px 16px;
+  border-top: 1px solid var(--ivory-deep);
+  background: var(--ivory);
+}
+.maquette-ing .s1b-accordion-cat.open .s1b-accordion-body { display: block; }

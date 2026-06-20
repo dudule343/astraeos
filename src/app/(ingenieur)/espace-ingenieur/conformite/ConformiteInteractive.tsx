@@ -121,7 +121,12 @@ function ConformiteTableRow({ row }: { row: ConformiteRow }) {
               <IconEye />
             </Link>
           ) : (
-            <button type="button" className="action-btn">
+            <button
+              type="button"
+              className="action-btn"
+              disabled
+              title="Fiche conformité indisponible · documents non encore signés"
+            >
               <IconEye />
             </button>
           )}
@@ -146,6 +151,17 @@ export function ConformiteInteractive() {
 
   const toggleFilter = (next: KpiFilter) =>
     setFilter((current) => (current === next ? null : next));
+
+  const hasActiveView = filter !== null || query.trim() !== "";
+
+  // « Voir l'intégralité » : la maquette annonce 18 dossiers mais n'en expose
+  // réellement que ROWS.length (les autres ne sont pas encore synchronisés).
+  // Le lien retire tout filtre/recherche pour afficher l'ensemble des dossiers
+  // chargés, plutôt que de promettre des lignes inexistantes.
+  const showAll = () => {
+    setFilter(null);
+    setQuery("");
+  };
 
   const exportCsv = () => {
     const headers = [
@@ -289,7 +305,17 @@ export function ConformiteInteractive() {
             <tr className="pipe-more-row">
               <td colSpan={7}>
                 … {TOTAL_DOSSIERS - ROWS.length} autres dossiers ·{" "}
-                <button type="button" className="pipe-more-link" onClick={() => setFilter(null)}>
+                <button
+                  type="button"
+                  className="pipe-more-link"
+                  onClick={showAll}
+                  disabled={!hasActiveView}
+                  title={
+                    hasActiveView
+                      ? "Afficher tous les dossiers chargés"
+                      : `${ROWS.length} dossiers synchronisés sur ${TOTAL_DOSSIERS} · les autres arrivent depuis la banque`
+                  }
+                >
                   Voir l&apos;intégralité ({TOTAL_DOSSIERS})
                 </button>
               </td>

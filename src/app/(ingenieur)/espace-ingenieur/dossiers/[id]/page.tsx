@@ -97,13 +97,28 @@ export default async function FicheDossierPage({
             ← Retour pipeline
           </Link>
           {/*
-            Maquette : « Ouvrir l'étude » est un btn-gold sans onclick (inerte).
-            Pas de visualiseur d'étude branché → bouton honnête désactivé plutôt
-            qu'un lien mort.
+            Maquette : « Ouvrir l'étude » est un btn-gold inerte. Si une
+            visionneuse d'étude était branchée (href), on rendrait un lien actif ;
+            faute de back-end, bouton honnêtement désactivé avec titre explicite.
           */}
-          <button type="button" className="btn btn-gold btn-sm" disabled title="En cours de construction">
-            Ouvrir l&apos;étude
-          </button>
+          {dossier.ouvrirEtude.href ? (
+            <Link
+              href={dossier.ouvrirEtude.href}
+              className="btn btn-gold btn-sm"
+              style={{ textDecoration: "none" }}
+            >
+              Ouvrir l&apos;étude
+            </Link>
+          ) : (
+            <button
+              type="button"
+              className="btn btn-gold btn-sm"
+              disabled
+              title={dossier.ouvrirEtude.disabledTitle}
+            >
+              Ouvrir l&apos;étude
+            </button>
+          )}
         </div>
       </div>
 
@@ -170,21 +185,38 @@ export default async function FicheDossierPage({
         <div className="card-body" style={{ padding: "18px 22px" }}>
           <div className="fd-actions-grid">
             {/*
-              Maquette : les 4 boutons d'action n'ont aucun onclick (inertes).
-              Aucun back-end branché pour ces actions → boutons honnêtes
-              désactivés plutôt que morts.
+              Chaque action est branchée sur une vraie feature quand elle existe :
+              « Préparer la restitution » et « Voir le transcript » ouvrent la
+              salle de visioconférence (Jitsi + transcription), « Reporter le RDV »
+              renvoie vers l'agenda. « Ouvrir l'étude » reste désactivé honnête
+              faute de visionneuse PDF (la maquette le rend de toute façon inerte).
             */}
-            {dossier.actions.map((a) => (
-              <button
-                key={a.label}
-                type="button"
-                className={`btn ${a.primary ? "btn-gold" : "btn-ghost"} btn-sm`}
-                disabled
-                title="En cours de construction"
-              >
-                {a.label}
-              </button>
-            ))}
+            {dossier.actions.map((a) => {
+              const className = `btn ${a.primary ? "btn-gold" : "btn-ghost"} btn-sm`;
+              if (a.href) {
+                return (
+                  <Link
+                    key={a.label}
+                    href={a.href}
+                    className={className}
+                    style={{ textDecoration: "none" }}
+                  >
+                    {a.label}
+                  </Link>
+                );
+              }
+              return (
+                <button
+                  key={a.label}
+                  type="button"
+                  className={className}
+                  disabled
+                  title={a.disabledTitle}
+                >
+                  {a.label}
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>

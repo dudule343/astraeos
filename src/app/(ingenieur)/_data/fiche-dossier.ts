@@ -52,6 +52,14 @@ export type FicheDossierAction = {
   label: string;
   /** bouton doré = action principale, sinon ghost */
   primary?: boolean;
+  /**
+   * Destination réelle de l'action. Présent = bouton actif branché sur une
+   * feature existante (salle visio, agenda…). Absent = aucune feature
+   * branchée → bouton honnêtement désactivé avec `disabledTitle`.
+   */
+  href?: string;
+  /** titre explicatif quand l'action n'a pas (encore) de back-end. */
+  disabledTitle?: string;
 };
 
 export type FicheDossier = {
@@ -60,10 +68,25 @@ export type FicheDossier = {
   heroNameLead: string;
   heroNameStrong: string;
   heroSub: string;
+  /**
+   * Action du hero « Ouvrir l'étude » : aucune visionneuse d'étude (84 p.)
+   * n'est branchée → bouton honnête désactivé (la maquette le rend inerte).
+   */
+  ouvrirEtude: { href?: string; disabledTitle?: string };
   kpis: FicheDossierKpi[];
   parcours: ParcoursEtape[];
   actions: FicheDossierAction[];
 };
+
+/**
+ * Construit l'URL d'une salle de visioconférence réelle (Jitsi auto-hébergé +
+ * transcription Deepgram, déjà câblés sous /visio/[room]). Même convention de
+ * nommage que les RDV : `rdv-<slug>-<objet>`. On entre côté ingénieur.
+ */
+function visioHref(room: string, slug: string, nom: string): string {
+  const q = new URLSearchParams({ role: "engineer", prospect: slug, nom });
+  return `/visio/${room}?${q.toString()}`;
+}
 
 const FICHE_DOSSIER_MODELE: FicheDossier = {
   id: "ETU-2026-014",
@@ -72,6 +95,10 @@ const FICHE_DOSSIER_MODELE: FicheDossier = {
   heroNameStrong: "DUPONT-TOPIN",
   heroSub:
     "Étude patrimoniale · régime de l'union · honoraires 12 800 € HT · restitution prévue demain 12/05/2026 à 14h00 (Zoom · 90 min) · dossier piloté de bout en bout par Julien VASSEUR.",
+  ouvrirEtude: {
+    // Pas de visionneuse d'étude (84 p.) branchée → bouton honnête désactivé.
+    disabledTitle: "Ouverture de l'étude — disponible une fois la visionneuse PDF branchée",
+  },
   kpis: [
     {
       label: "Étape actuelle",
@@ -180,10 +207,38 @@ const FICHE_DOSSIER_MODELE: FicheDossier = {
     },
   ],
   actions: [
-    { label: "📋 Préparer la restitution", primary: true },
-    { label: "📄 Ouvrir l'étude (84 p.)" },
-    { label: "📹 Voir le transcript RDV 15/04" },
-    { label: "📅 Reporter le RDV" },
+    {
+      // Restitution = le RDV visio Zoom de l'étape 6 (demain 14h, 90 min).
+      // Branché sur la vraie salle de visioconférence (Jitsi + transcription).
+      label: "📋 Préparer la restitution",
+      primary: true,
+      href: visioHref(
+        "rdv-dupont-topin-restitution",
+        "dupont-topin",
+        "Bertrand & Monique DUPONT-TOPIN",
+      ),
+    },
+    {
+      // L'étude 84 pages n'a pas de visionneuse branchée → désactivé honnête.
+      label: "📄 Ouvrir l'étude (84 p.)",
+      disabledTitle:
+        "Ouverture de l'étude — disponible une fois la visionneuse PDF branchée",
+    },
+    {
+      // RDV découverte du 15/04 enregistré + transcrit (étape 2) : on rouvre la
+      // salle visio pour consulter l'enregistrement et le transcript.
+      label: "📹 Voir le transcript RDV 15/04",
+      href: visioHref(
+        "rdv-dupont-topin-decouverte",
+        "dupont-topin",
+        "Bertrand & Monique DUPONT-TOPIN",
+      ),
+    },
+    {
+      // Reporter = repasser par l'agenda (vraie feature de planification).
+      label: "📅 Reporter le RDV",
+      href: "/espace-ingenieur/agenda",
+    },
   ],
 };
 

@@ -552,3 +552,22 @@
   color: var(--gold-deep);
   font-size: 9.5px;
 }
+
+/* — Édition inline de la note ingénieur (bouton « Modifier ») — */
+.maquette-ing .fp-note-textarea {
+  width: 100%;
+  margin-top: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--gold);
+  border-radius: 6px;
+  background: rgba(198, 142, 14, 0.04);
+  font-family: "Epilogue", sans-serif;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--navy);
+  resize: vertical;
+}
+.maquette-ing .fp-note-textarea:focus {
+  outline: none;
+  border-color: var(--gold-deep);
+}

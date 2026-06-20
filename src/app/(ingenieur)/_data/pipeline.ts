@@ -252,3 +252,30 @@ const SCREEN: PipelineScreen = {
 export function getPipelineScreen(): PipelineScreen {
   return SCREEN;
 }
+
+/**
+ * Construit le CSV du pipeline (une ligne par dossier de chaque colonne),
+ * source unique = SCREEN. Utilisé par le bouton « Exporter » du hero.
+ */
+export function buildPipelineCsv(screen: PipelineScreen = SCREEN): string {
+  const sep = ";";
+  const escape = (v: string) => (/[";\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v);
+
+  const header = ["Étape", "Colonne", "Dossier", "Détail", "Statut", "Collecte"];
+  const rows: string[][] = [];
+
+  for (const col of screen.columns) {
+    for (const card of col.cards) {
+      rows.push([
+        String(col.step),
+        col.title,
+        card.name,
+        card.sub,
+        card.badge ? card.badge.label : "",
+        typeof card.progressPct === "number" ? `${card.progressPct}%` : "",
+      ]);
+    }
+  }
+
+  return [header, ...rows].map((r) => r.map(escape).join(sep)).join("\n");
+}

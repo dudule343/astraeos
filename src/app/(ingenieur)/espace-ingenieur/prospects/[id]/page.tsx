@@ -3,9 +3,22 @@ import Link from "next/link";
 import {
   getFicheProspect,
   type Condition,
+  type Inline,
   type ProspectDoc,
 } from "../../../_data/fiche-prospect";
 import "../../../_styles/fiche-prospect.css";
+import "../../agenda/_styles/agenda.css";
+import { NewRdvModal } from "../../agenda/NewRdvModal";
+import {
+  ConditionRelancerButton,
+  DocActionButton,
+  EnvoyerDocumentButton,
+  FicheProspectProvider,
+  NotesCard,
+  PlanifierRdvButton,
+  RelancerButton,
+  SupprimerButton,
+} from "./FicheProspectInteractive";
 
 export const metadata = {
   title: "ASTRAEOS · Fiche prospect",
@@ -126,6 +139,13 @@ function ConditionCheck({ state }: { state: Condition["state"] }) {
   return <div className={`s1b-condition-check ${state}`}>{glyph}</div>;
 }
 
+/** Rend un texte inline avec exposants ordinaux (« Lyon 6<sup>e</sup> »). */
+function renderInline(parts: Inline[]) {
+  return parts.map((p, i) =>
+    typeof p === "string" ? <span key={i}>{p}</span> : <sup key={i}>{p.sup}</sup>,
+  );
+}
+
 export default async function FicheProspectPage({
   params,
 }: {
@@ -135,6 +155,7 @@ export default async function FicheProspectPage({
   const fiche = getFicheProspect(id);
 
   return (
+    <FicheProspectProvider slug={fiche.slug}>
     <div className="fiche-prospect-wrap">
       {/* HERO */}
       <div className="hero">
@@ -144,7 +165,7 @@ export default async function FicheProspectPage({
             {fiche.heroLead}
             <strong>{fiche.heroStrong}</strong>
           </h1>
-          <p className="hero-sub">{fiche.heroSub}</p>
+          <p className="hero-sub">{renderInline(fiche.heroSub)}</p>
         </div>
         <div className="hero-actions">
           <Link
@@ -154,9 +175,9 @@ export default async function FicheProspectPage({
           >
             ← Retour à mes prospects
           </Link>
-          <button type="button" className="btn btn-ghost btn-sm" disabled title="En cours de construction">
+          <RelancerButton className="btn btn-ghost btn-sm">
             Relancer le client
-          </button>
+          </RelancerButton>
         </div>
       </div>
 
@@ -185,14 +206,12 @@ export default async function FicheProspectPage({
             <ConditionCheck state={c.state} />
             <div>
               <div className="s1b-condition-text">{c.text}</div>
-              <div className="s1b-condition-meta">{c.meta}</div>
+              <div className="s1b-condition-meta">{renderInline(c.meta)}</div>
             </div>
             {c.badge ? (
               <span className={`s1b-condition-badge ${c.badge.tone}`}>{c.badge.label}</span>
             ) : c.action ? (
-              <button type="button" className="s1b-condition-action" disabled title="En cours de construction">
-                {c.action.label}
-              </button>
+              <ConditionRelancerButton label={c.action.label} />
             ) : null}
           </div>
         ))}
@@ -235,9 +254,7 @@ export default async function FicheProspectPage({
               <IconDoc />
               Documents · état d&apos;avancement
             </div>
-            <button type="button" className="btn btn-ghost btn-sm" style={{ fontSize: "10.5px" }} disabled title="En cours de construction">
-              + Envoyer un document
-            </button>
+            <EnvoyerDocumentButton />
           </div>
           <div className="card-body fp-card-body">
             {fiche.documents.map((d) => (
@@ -252,16 +269,14 @@ export default async function FicheProspectPage({
                 <span className={`s1b-doc-status ${d.status.kind}`}>{d.status.label}</span>
                 <div className="s1b-doc-actions">
                   {d.actions.map((a) => (
-                    <button
+                    <DocActionButton
                       key={a.kind}
-                      type="button"
-                      className={`s1c-wf-btn wf-${a.variant}`}
-                      disabled
-                      title="En cours de construction"
-                    >
-                      <DocActionIcon kind={a.kind} />
-                      {a.label}
-                    </button>
+                      kind={a.kind}
+                      label={a.label}
+                      variant={a.variant}
+                      docTitle={d.title}
+                      icon={<DocActionIcon kind={a.kind} />}
+                    />
                   ))}
                 </div>
               </div>
@@ -279,9 +294,7 @@ export default async function FicheProspectPage({
               <IconCalendar />
               Rendez-vous
             </div>
-            <button type="button" className="btn btn-ghost btn-sm" style={{ fontSize: "10.5px" }} disabled title="En cours de construction">
-              + Planifier un RDV
-            </button>
+            <PlanifierRdvButton />
           </div>
           <div className="card-body fp-card-body">
             {fiche.rdvs.map((r) => (
@@ -292,7 +305,7 @@ export default async function FicheProspectPage({
                 </div>
                 <div>
                   <div className="s1b-rdv-title">{r.title}</div>
-                  <div className="s1b-rdv-meta">{r.meta}</div>
+                  <div className="s1b-rdv-meta">{renderInline(r.meta)}</div>
                 </div>
                 <span className={`s1b-doc-status ${r.status.tone}`}>{r.status.label}</span>
               </div>
@@ -304,25 +317,7 @@ export default async function FicheProspectPage({
         </div>
 
         {/* Notes & contexte ingénieur */}
-        <div className="card">
-          <div className="card-header">
-            <div className="card-title">
-              <IconEdit />
-              Notes &amp; contexte ingénieur
-            </div>
-            <button type="button" className="btn btn-ghost btn-sm" style={{ fontSize: "10.5px" }} disabled title="En cours de construction">
-              Modifier
-            </button>
-          </div>
-          <div className="card-body fp-card-body">
-            <div className="s1b-note">
-              <div className="note-meta">{fiche.note.meta}</div>
-              {fiche.note.segments.map((seg, i) =>
-                seg.strong ? <strong key={i}>{seg.text}</strong> : <span key={i}>{seg.text}</span>,
-              )}
-            </div>
-          </div>
-        </div>
+        <NotesCard meta={fiche.note.meta} segments={fiche.note.segments} icon={<IconEdit />} />
       </div>
 
       {/* Bandeau d'action · faire avancer en étape 02 */}
@@ -333,18 +328,20 @@ export default async function FicheProspectPage({
           <span style={{ color: "var(--navy-300)" }}>{fiche.actionBar.infoSub}</span>
         </div>
         <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-          <button type="button" className="s1b-btn-danger" disabled title="En cours de construction">
-            Supprimer
-          </button>
-          <button type="button" className="s1b-btn-secondary" disabled title="En cours de construction">
+          <SupprimerButton />
+          <RelancerButton className="s1b-btn-secondary">
             Relancer le client
-          </button>
+          </RelancerButton>
           <button type="button" className="s1b-btn-promote" disabled title="Conditions non remplies">
             Faire avancer en étape 02
           </button>
         </div>
       </div>
+
+      {/* Modale « Nouveau RDV » (créneau pré-rempli) — ouverte par + Planifier un RDV */}
+      <NewRdvModal />
     </div>
+    </FicheProspectProvider>
   );
 }
 

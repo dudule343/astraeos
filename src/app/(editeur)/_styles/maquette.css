@@ -1,0 +1,342 @@
+/* PORTÉ MÉCANIQUEMENT depuis reference/wireframes-editeur.html (<style> de tête).
+   Ne pas éditer à la main : régénéré par scripts/scope-editeur-css.mjs.
+   Tous les sélecteurs sont scopés sous .maquette-edit (sauf :root et @keyframes). */
+
+:root {
+    --navy: #102D50; --navy-300: #708196; --navy-200: #A4AEBB; --navy-100: #DBE0E4;
+    --gold: #C68E0E; --gold-300: #DDBB6E; --gold-200: #EEDDB6;
+    --light-blue: #EBF1FA; --ivory: #FAF8F3; --medium-400: #695D30;
+    --green-bg: #DDE9D7; --green-text: #4F6B3F;
+    --red-bg: #F5DDD7; --red-text: #8B3A2A;
+    --orange-bg: #FBE7CE; --orange-text: #8B5A2A;
+    --purple-bg: #E5DCEB; --purple-text: #5B3A6E;
+    --sidebar-w: 280px; --content-pad: 40px;
+  }.maquette-edit * { box-sizing: border-box; margin: 0; padding: 0; }.maquette-edit, .maquette-edit { font-family: 'Epilogue', sans-serif; background: var(--ivory); color: #333; font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+
+  /* INTRO */
+  .maquette-edit .doc-intro { background: linear-gradient(135deg, var(--navy) 0%, #1a3866 100%); color: white; padding: 56px 48px; text-align: center; }.maquette-edit .doc-intro-eyebrow { font-size: 10px; font-weight: 700; color: var(--gold-300); letter-spacing: 0.22em; text-transform: uppercase; margin-bottom: 14px; }.maquette-edit .doc-intro h1 { font-size: 32px; font-weight: 600; letter-spacing: -0.018em; line-height: 1.18; margin-bottom: 10px; }.maquette-edit .doc-intro h1 strong { color: var(--gold-300); font-weight: 700; }.maquette-edit .doc-intro p { font-size: 14.5px; color: rgba(255,255,255,0.72); max-width: 720px; margin: 0 auto; line-height: 1.6; }.maquette-edit .doc-intro-meta { display: flex; justify-content: center; gap: 28px; margin-top: 22px; font-size: 11.5px; flex-wrap: wrap; }.maquette-edit .doc-intro-meta span { display: inline-flex; align-items: center; gap: 6px; color: rgba(255,255,255,0.6); }.maquette-edit .doc-intro-meta strong { color: var(--gold-300); font-weight: 700; }.maquette-edit .doc-intro-cta { margin-top: 28px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }.maquette-edit .doc-intro-cta a { display: inline-flex; align-items: center; gap: 7px; padding: 8px 14px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: white; text-decoration: none; border-radius: 5px; font-size: 12px; font-weight: 500; }.maquette-edit .doc-intro-cta a:hover { background: rgba(255,255,255,0.12); }.maquette-edit .doc-intro-cta a.primary { background: var(--gold); border-color: var(--gold); font-weight: 700; }
+
+  /* APP */
+  .maquette-edit .app { display: flex; min-height: 100vh; }
+
+  /* SIDEBAR */
+  .maquette-edit .sidebar { width: var(--sidebar-w); border-right: 1px solid var(--navy-100); padding: 28px 16px 32px; flex-shrink: 0; background: var(--ivory); position: sticky; top: 0; height: 100vh; overflow-y: auto; }.maquette-edit .sidebar::-webkit-scrollbar { width: 4px; }.maquette-edit .sidebar::-webkit-scrollbar-thumb { background: var(--navy-100); border-radius: 2px; }.maquette-edit .brand { margin-bottom: 26px; padding: 0 8px; }.maquette-edit .brand-row { display: flex; align-items: center; gap: 10px; }.maquette-edit .brand-mark { width: 30px; height: 34px; background: linear-gradient(180deg, var(--gold), var(--medium-400)); border-radius: 4px; color: white; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 16px; }.maquette-edit .brand-name { font-weight: 700; font-size: 19px; color: var(--navy); letter-spacing: 0.08em; }.maquette-edit .brand-sub { font-size: 9px; font-weight: 600; color: var(--navy-300); letter-spacing: 0.22em; text-transform: uppercase; margin-left: 40px; margin-top: 3px; }.maquette-edit .nav-section { margin-bottom: 18px; }.maquette-edit .nav-section-header { font-size: 9.5px; font-weight: 700; color: var(--navy-300); letter-spacing: 0.18em; text-transform: uppercase; padding: 0 12px; margin-bottom: 6px; display: flex; align-items: center; gap: 7px; }.maquette-edit .nav-section-header .dot { width: 4px; height: 4px; border-radius: 50%; background: var(--gold); }.maquette-edit .nav-item { display: flex; align-items: center; gap: 10px; padding: 7px 12px; border-radius: 5px; font-size: 12.5px; color: var(--navy); cursor: pointer; margin-bottom: 1px; transition: background 0.12s; border: none; background: transparent; width: 100%; text-align: left; font-family: inherit; text-decoration: none; line-height: 1.3; }.maquette-edit .nav-item:hover { background: var(--light-blue); }.maquette-edit .nav-item.active { background: var(--navy); color: white; font-weight: 500; }.maquette-edit .nav-item-num { font-size: 9.5px; font-weight: 700; flex-shrink: 0; width: 22px; text-align: center; background: var(--gold-200); color: var(--medium-400); border-radius: 3px; padding: 1px 0; letter-spacing: 0.06em; }.maquette-edit .nav-item.active .nav-item-num { background: var(--gold); color: white; }.maquette-edit .nav-item-icon { width: 18px; height: 18px; flex-shrink: 0; color: var(--navy-300); }.maquette-edit .nav-item.active .nav-item-icon { color: var(--gold-300); }.maquette-edit .nav-badge { margin-left: auto; background: var(--gold); color: var(--ivory); font-size: 9.5px; font-weight: 700; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }.maquette-edit .nav-badge.alert { background: var(--red-text); }.maquette-edit .nav-badge.new { background: var(--green-text); }
+
+  /* MAIN */
+  .maquette-edit .main { flex: 1; min-width: 0; }.maquette-edit .topbar { display: flex; align-items: center; gap: 14px; padding: 14px var(--content-pad); border-bottom: 1px solid var(--navy-100); background: var(--ivory); position: sticky; top: 0; z-index: 10; }.maquette-edit .breadcrumb { flex: 1; display: flex; align-items: center; gap: 10px; font-size: 12.5px; color: var(--navy-300); }.maquette-edit .breadcrumb a { color: var(--navy-300); text-decoration: none; cursor: pointer; }.maquette-edit .breadcrumb a:hover { color: var(--gold); }.maquette-edit .breadcrumb .current { color: var(--navy); font-weight: 600; }.maquette-edit .breadcrumb .sep { opacity: 0.5; }.maquette-edit .topbar-right { display: flex; align-items: center; gap: 10px; }
+
+  /* SÉLECTEUR DE DATE GLOBAL */
+  .maquette-edit .date-selector { position: relative; }.maquette-edit .date-selector-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 7px 12px; height: 34px;
+    background: linear-gradient(135deg, var(--ivory), var(--gold-200));
+    border: 1px solid var(--gold-300);
+    border-radius: 6px;
+    font-size: 11.5px; font-weight: 600;
+    color: var(--medium-400);
+    cursor: pointer;
+    font-family: inherit;
+  }.maquette-edit .date-selector-btn:hover { border-color: var(--gold); }.maquette-edit .date-selector-btn svg { width: 14px; height: 14px; color: var(--gold); }.maquette-edit .date-selector-btn-period { font-weight: 500; color: var(--navy-300); font-size: 10.5px; }.maquette-edit .date-popover {
+    display: none;
+    position: absolute; top: calc(100% + 4px); right: 0;
+    width: 360px;
+    background: white;
+    border: 1px solid var(--navy-100);
+    border-radius: 8px;
+    box-shadow: 0 6px 24px rgba(16,45,80,0.12);
+    z-index: 100;
+    padding: 16px;
+  }.maquette-edit .date-popover.open { display: block; }.maquette-edit .date-popover-section { margin-bottom: 14px; }.maquette-edit .date-popover-section:last-child { margin-bottom: 0; }.maquette-edit .date-popover-label { font-size: 9.5px; font-weight: 700; color: var(--navy-300); letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 8px; }.maquette-edit .date-quick-options { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }.maquette-edit .date-quick-option {
+    padding: 6px 0; text-align: center;
+    font-size: 11px; font-weight: 600;
+    background: var(--ivory); border: 1px solid var(--navy-100);
+    border-radius: 4px; cursor: pointer; color: var(--navy);
+    font-family: inherit;
+  }.maquette-edit .date-quick-option:hover { background: var(--light-blue); border-color: var(--gold); }.maquette-edit .date-quick-option.active { background: var(--navy); color: white; border-color: var(--navy); }.maquette-edit .date-range-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }.maquette-edit .date-range-input {
+    width: 100%;
+    padding: 6px 10px;
+    border: 1px solid var(--navy-100);
+    border-radius: 5px;
+    font-size: 11.5px; color: var(--navy);
+    font-family: inherit; background: white;
+  }.maquette-edit .date-compare-options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }.maquette-edit .date-popover-actions { display: flex; gap: 6px; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--navy-100); }.maquette-edit .icon-btn { width: 34px; height: 34px; border: 1px solid var(--navy-100); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: var(--navy); cursor: pointer; background: white; position: relative; }.maquette-edit .icon-btn .dot { position: absolute; top: 7px; right: 8px; width: 5px; height: 5px; background: var(--gold); border-radius: 50%; }.maquette-edit .user-pill { display: flex; align-items: center; gap: 9px; padding: 4px 14px 4px 4px; border: 1px solid var(--navy-100); border-radius: 24px; background: white; cursor: pointer; }.maquette-edit .user-avatar { width: 26px; height: 26px; border-radius: 50%; background: var(--navy); color: var(--gold); font-weight: 700; font-size: 10.5px; display: flex; align-items: center; justify-content: center; border: 1.5px solid var(--gold); flex-shrink: 0; }.maquette-edit .user-name { font-size: 12.5px; font-weight: 500; color: var(--navy); }.maquette-edit .content { padding: 32px var(--content-pad) 72px; max-width: 1700px; }.maquette-edit .page { display: none; }.maquette-edit .page.active { display: block; }
+
+  /* HERO sur une ligne */
+  .maquette-edit .hero { display: grid; grid-template-columns: 1fr auto; gap: 40px; margin-bottom: 24px; align-items: center; padding-bottom: 18px; border-bottom: 1px solid var(--navy-100); }.maquette-edit .hero-eyebrow { font-size: 10.5px; font-weight: 700; color: var(--gold); letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 10px; display: flex; align-items: center; gap: 9px; }.maquette-edit .hero-eyebrow::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--gold); }.maquette-edit .hero-title { font-size: 28px; font-weight: 600; color: var(--navy); line-height: 1.18; letter-spacing: -0.012em; margin-bottom: 8px; }.maquette-edit .hero-sub { font-size: 13.5px; color: var(--navy-300); max-width: 1100px; line-height: 1.5; }.maquette-edit .hero-actions { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+
+  /* BUTTONS */
+  .maquette-edit .btn { display: inline-flex; align-items: center; gap: 7px; padding: 8px 14px; border-radius: 6px; font-size: 12.5px; font-weight: 600; font-family: inherit; border: 1px solid transparent; cursor: pointer; text-decoration: none; transition: all 0.15s; line-height: 1.4; }.maquette-edit .btn-primary { background: var(--navy); color: white; }.maquette-edit .btn-primary:hover { background: #1a3866; }.maquette-edit .btn-gold { background: var(--gold); color: white; }.maquette-edit .btn-gold:hover { background: #d39817; }.maquette-edit .btn-ghost { background: white; color: var(--navy); border-color: var(--navy-100); }.maquette-edit .btn-ghost:hover { border-color: var(--gold); color: var(--gold); }.maquette-edit .btn-sm { padding: 6px 11px; font-size: 11.5px; }.maquette-edit .btn svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+  /* KPIs */
+  .maquette-edit .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }.maquette-edit .kpis-3 { grid-template-columns: repeat(3, 1fr); }.maquette-edit .kpis-5 { grid-template-columns: repeat(5, 1fr); }.maquette-edit .kpis-6 { grid-template-columns: repeat(6, 1fr); gap: 10px; }.maquette-edit .kpis-7 { grid-template-columns: repeat(7, 1fr); gap: 10px; }.maquette-edit .kpi { background: white; border: 1px solid var(--navy-100); border-radius: 8px; padding: 16px 18px; transition: box-shadow 0.15s; cursor: default; position: relative; }.maquette-edit .kpi.clickable { cursor: pointer; }.maquette-edit .kpi.clickable:hover { box-shadow: 0 2px 8px rgba(16,45,80,0.08); border-color: var(--gold); }.maquette-edit .kpi-label { font-size: 9.5px; font-weight: 700; color: var(--gold); letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 8px; line-height: 1.3; }.maquette-edit .kpi-value { font-size: 24px; font-weight: 600; color: var(--navy); letter-spacing: -0.018em; line-height: 1; font-feature-settings: 'tnum' on; margin-bottom: 6px; }.maquette-edit .kpi-value .unit { font-size: 13px; color: var(--navy-300); font-weight: 500; }.maquette-edit .kpi-meta { font-size: 11px; color: var(--navy-300); line-height: 1.4; }.maquette-edit .kpi-meta strong { color: var(--gold); font-weight: 700; }.maquette-edit .kpi-meta strong.alert { color: var(--red-text); }.maquette-edit .kpi-meta strong.up { color: var(--green-text); }.maquette-edit .kpi-meta strong.down { color: var(--red-text); }.maquette-edit .kpis-6 .kpi, .maquette-edit .kpis-7 .kpi { padding: 14px; }.maquette-edit .kpis-6 .kpi-value, .maquette-edit .kpis-7 .kpi-value { font-size: 20px; }.maquette-edit .kpis-6 .kpi-label, .maquette-edit .kpis-7 .kpi-label { font-size: 9px; letter-spacing: 0.1em; }
+
+  /* KPI compare M-1 / N-1 */
+  .maquette-edit .kpi-compare { display: grid; grid-template-columns: 1fr 1fr; gap: 0; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--navy-100); }.maquette-edit .kpi-compare-cell { font-size: 9.5px; line-height: 1.3; }.maquette-edit .kpi-compare-cell:first-child { border-right: 1px solid var(--navy-100); padding-right: 6px; }.maquette-edit .kpi-compare-cell:last-child { padding-left: 6px; }.maquette-edit .kpi-compare-period { color: var(--navy-300); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; font-size: 8.5px; margin-bottom: 2px; }.maquette-edit .kpi-compare-value { color: var(--navy); font-weight: 600; font-size: 11px; font-feature-settings: 'tnum' on; }.maquette-edit .kpi-compare-value.up { color: var(--green-text); }.maquette-edit .kpi-compare-value.down { color: var(--red-text); }
+
+  /* Phase tag */
+  .maquette-edit .phase-tag { position: absolute; top: 8px; right: 8px; font-size: 8.5px; font-weight: 700; letter-spacing: 0.06em; padding: 2px 6px; border-radius: 3px; text-transform: uppercase; }.maquette-edit .phase-tag.p1 { background: var(--green-bg); color: var(--green-text); }.maquette-edit .phase-tag.p2 { background: var(--purple-bg); color: var(--purple-text); }
+
+  /* BADGES */
+  .maquette-edit .badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 12px; font-size: 10.5px; font-weight: 700; line-height: 1.4; white-space: nowrap; letter-spacing: 0.04em; text-transform: uppercase; }.maquette-edit .badge-success { background: var(--green-bg); color: var(--green-text); }.maquette-edit .badge-danger { background: var(--red-bg); color: var(--red-text); }.maquette-edit .badge-warning { background: var(--orange-bg); color: var(--orange-text); }.maquette-edit .badge-info { background: var(--light-blue); color: var(--navy); }.maquette-edit .badge-gold { background: var(--gold-200); color: var(--medium-400); }.maquette-edit .badge-purple { background: var(--purple-bg); color: var(--purple-text); }.maquette-edit .badge-neutral { background: var(--navy-100); color: var(--navy-300); }.maquette-edit .badge-dot::before { content: ''; display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+
+  /* CARDS */
+  .maquette-edit .card { background: white; border: 1px solid var(--navy-100); border-radius: 8px; overflow: hidden; }.maquette-edit .card-header { padding: 14px 20px; border-bottom: 1px solid var(--navy-100); display: flex; align-items: center; justify-content: space-between; gap: 12px; }.maquette-edit .card-title { font-size: 14px; font-weight: 700; color: var(--navy); display: flex; align-items: center; gap: 9px; }.maquette-edit .card-title svg { width: 18px; height: 18px; color: var(--gold); flex-shrink: 0; }.maquette-edit .card-subtitle { font-size: 11.5px; color: var(--navy-300); margin-top: 2px; }.maquette-edit .card-body { padding: 18px 20px; }.maquette-edit .section-block { margin-bottom: 26px; }.maquette-edit .section-header { margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; }.maquette-edit .section-eyebrow { font-size: 10px; font-weight: 700; color: var(--gold); letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 5px; display: flex; align-items: center; gap: 7px; }.maquette-edit .section-eyebrow::before { content: ''; width: 4px; height: 4px; border-radius: 50%; background: var(--gold); }.maquette-edit .section-title { font-size: 18px; font-weight: 600; color: var(--navy); letter-spacing: -0.012em; }
+
+  /* TABLES */
+  .maquette-edit .table-wrap { background: white; border: 1px solid var(--navy-100); border-radius: 8px; overflow: hidden; }.maquette-edit .table-toolbar { padding: 12px 16px; border-bottom: 1px solid var(--navy-100); display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; background: var(--ivory); }.maquette-edit .table-toolbar-left { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }.maquette-edit .table-toolbar-right { display: flex; gap: 8px; align-items: center; }.maquette-edit .qf { display: inline-flex; align-items: center; gap: 5px; padding: 4px 11px; background: white; border: 1px solid var(--navy-100); border-radius: 4px; font-size: 11.5px; color: var(--navy); cursor: pointer; font-weight: 500; font-family: inherit; }.maquette-edit .qf:hover { border-color: var(--gold); }.maquette-edit .qf.active { background: var(--navy); color: white; border-color: var(--navy); }.maquette-edit .qf-count { background: var(--navy-100); color: var(--navy-300); padding: 0 5px; border-radius: 8px; font-size: 9.5px; font-weight: 700; }.maquette-edit .qf.active .qf-count { background: var(--gold); color: white; }.maquette-edit .search-input { border: 1px solid var(--navy-100); background: white; padding: 5px 10px 5px 28px; border-radius: 4px; font-size: 12px; color: var(--navy); width: 220px; font-family: inherit; }.maquette-edit .search-wrap { position: relative; }.maquette-edit .search-wrap svg { position: absolute; left: 9px; top: 50%; transform: translateY(-50%); color: var(--navy-300); width: 14px; height: 14px; pointer-events: none; }.maquette-edit table.dt { width: 100%; border-collapse: collapse; font-size: 12.5px; }.maquette-edit table.dt thead { background: var(--navy); }.maquette-edit table.dt thead th { padding: 10px 16px; text-align: left; color: white; font-weight: 600; font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.06em; white-space: nowrap; }.maquette-edit table.dt thead th.num, .maquette-edit table.dt tbody td.num { text-align: right; font-feature-settings: 'tnum' on; }.maquette-edit table.dt thead th.center, .maquette-edit table.dt tbody td.center { text-align: center; }.maquette-edit table.dt tbody td { padding: 10px 16px; border-bottom: 1px solid var(--navy-100); vertical-align: middle; color: #333; }.maquette-edit table.dt tbody tr:nth-child(even) { background: var(--ivory); }.maquette-edit table.dt tbody tr.dt-clickable { cursor: pointer; }.maquette-edit table.dt tbody tr.dt-clickable:hover { background: var(--light-blue); }.maquette-edit table.dt tbody tr:last-child td { border-bottom: none; }.maquette-edit td.cell-id { font-family: 'JetBrains Mono', monospace; color: var(--navy-300); font-size: 11px; }.maquette-edit td.cell-primary { font-weight: 600; color: var(--navy); }.maquette-edit td.cell-money { font-weight: 600; color: var(--navy); font-feature-settings: 'tnum' on; }.maquette-edit td.cell-money.gold { color: var(--gold); }.maquette-edit tr.dt-section td { background: linear-gradient(90deg, var(--gold-200) 0%, var(--ivory) 100%) !important; color: var(--medium-400); font-weight: 700; font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; padding: 10px 16px; border-bottom: 1px solid var(--gold-300) !important; }
+
+  /* TABS */
+  .maquette-edit .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--navy-100); margin-bottom: 20px; overflow-x: auto; }.maquette-edit .tab { padding: 9px 16px; font-size: 12.5px; font-weight: 500; color: var(--navy-300); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; white-space: nowrap; background: none; border-top: none; border-left: none; border-right: none; font-family: inherit; }.maquette-edit .tab:hover { color: var(--navy); }.maquette-edit .tab.active { color: var(--navy); border-bottom-color: var(--gold); font-weight: 700; }.maquette-edit .tab-panel { display: none; }.maquette-edit .tab-panel.active { display: block; }
+
+  /* TT pills */
+  .maquette-edit .tt { display: inline-flex; align-items: center; gap: 5px; padding: 2px 9px; border-radius: 10px; font-size: 10.5px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }.maquette-edit .tt-marque { background: var(--gold-200); color: var(--medium-400); }.maquette-edit .tt-cabinet { background: var(--light-blue); color: var(--navy); }.maquette-edit .tt-pro { background: var(--purple-bg); color: var(--purple-text); }
+
+  /* Logos */
+  .maquette-edit .tlogo { width: 32px; height: 32px; border-radius: 6px; display: grid; place-items: center; font-size: 12px; font-weight: 800; color: white; flex-shrink: 0; }.maquette-edit .tlogo-priveos { background: linear-gradient(135deg, #102D50, #1a3866); }.maquette-edit .tlogo-dupont { background: linear-gradient(135deg, #5B3A6E, #7e5293); }.maquette-edit .tlogo-montblanc { background: linear-gradient(135deg, #475467, #667085); }.maquette-edit .tlogo-1 { background: linear-gradient(135deg, var(--gold), var(--gold-300)); }.maquette-edit .tlogo-2 { background: linear-gradient(135deg, var(--green-text), #6B8B5A); }.maquette-edit .tlogo-3 { background: linear-gradient(135deg, #1a3866, #2E4163); }.maquette-edit .tlogo-pro { background: linear-gradient(135deg, var(--purple-text), #7e5293); }.maquette-edit .tlogo-sm { width: 26px; height: 26px; font-size: 10px; border-radius: 5px; }
+
+  /* GRIDS */
+  .maquette-edit .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }.maquette-edit .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }.maquette-edit .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }.maquette-edit .grid-2-1 { display: grid; grid-template-columns: 2fr 1fr; gap: 14px; }.maquette-edit .grid-1-2 { display: grid; grid-template-columns: 1fr 2fr; gap: 14px; }.maquette-edit .mb-12 { margin-bottom: 12px; }.maquette-edit .mb-16 { margin-bottom: 16px; }.maquette-edit .mb-20 { margin-bottom: 20px; }.maquette-edit .mb-24 { margin-bottom: 24px; }.maquette-edit .mb-32 { margin-bottom: 32px; }
+
+  /* Charts */
+  .maquette-edit .chart-area { position: relative; height: 180px; background: var(--ivory); border-radius: 6px; padding: 14px; }.maquette-edit .chart-bars { display: flex; align-items: flex-end; gap: 6px; height: 100%; padding: 0 4px; }.maquette-edit .chart-bar { flex: 1; background: linear-gradient(180deg, var(--gold) 0%, var(--gold-300) 100%); border-radius: 2px 2px 0 0; position: relative; min-height: 4px; }.maquette-edit .chart-bar.navy { background: linear-gradient(180deg, var(--navy) 0%, #1a3866 100%); }.maquette-edit .chart-bar.green { background: linear-gradient(180deg, var(--green-text) 0%, #6B8B5A 100%); }.maquette-edit .chart-bar-label { position: absolute; bottom: -22px; left: 0; right: 0; text-align: center; font-size: 10px; color: var(--navy-300); }
+
+  /* Info bar */
+  .maquette-edit .info-bar { background: linear-gradient(135deg, var(--ivory), #FFFCF5); border: 1px solid var(--gold-300); border-left: 4px solid var(--gold); border-radius: 8px; padding: 12px 18px; margin-bottom: 18px; display: flex; align-items: center; gap: 12px; font-size: 12.5px; }.maquette-edit .info-bar.alert { background: linear-gradient(135deg, var(--red-bg), #FCE8E0); border-color: var(--red-bg); border-left-color: var(--red-text); }.maquette-edit .info-bar.success { background: linear-gradient(135deg, var(--green-bg), #E8F0DF); border-color: var(--green-bg); border-left-color: var(--green-text); }.maquette-edit .info-bar svg { width: 20px; height: 20px; color: var(--gold); flex-shrink: 0; }.maquette-edit .info-bar.alert svg { color: var(--red-text); }.maquette-edit .info-bar.success svg { color: var(--green-text); }.maquette-edit .info-bar strong { color: var(--navy); }
+
+  /* Forms */
+  .maquette-edit .form-group { margin-bottom: 14px; }.maquette-edit .form-label { display: block; font-size: 11.5px; font-weight: 700; color: var(--navy); letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 6px; }.maquette-edit .form-label .req { color: var(--red-text); margin-left: 2px; }.maquette-edit .form-help { font-size: 11.5px; color: var(--navy-300); margin-top: 4px; line-height: 1.4; }.maquette-edit .form-input, .maquette-edit .form-select, .maquette-edit .form-textarea { width: 100%; padding: 8px 12px; border: 1px solid var(--navy-100); border-radius: 5px; font-size: 13px; color: var(--navy); font-family: inherit; background: white; }.maquette-edit .form-input:focus, .maquette-edit .form-select:focus, .maquette-edit .form-textarea:focus { outline: none; border-color: var(--gold); }.maquette-edit .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }.maquette-edit .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+
+  /* Wizard ACCORDÉON v5 */
+  .maquette-edit .wizard-step-card {
+    background: white;
+    border: 1px solid var(--navy-100);
+    border-radius: 8px;
+    margin-bottom: 10px;
+    overflow: hidden;
+    transition: all 0.2s;
+  }.maquette-edit .wizard-step-card.active {
+    border-color: var(--gold);
+    border-width: 2px;
+    box-shadow: 0 4px 16px rgba(198,142,14,0.08);
+  }.maquette-edit .wizard-step-card.completed { border-left: 4px solid var(--green-text); }.maquette-edit .wizard-step-header {
+    display: flex; align-items: center; gap: 14px;
+    padding: 14px 20px;
+    cursor: pointer;
+    background: white;
+    transition: background 0.15s;
+  }.maquette-edit .wizard-step-card.active .wizard-step-header { background: linear-gradient(135deg, var(--ivory), var(--gold-200)); }.maquette-edit .wizard-step-card:not(.active) .wizard-step-header:hover { background: var(--ivory); }.maquette-edit .wizard-step-num {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    display: grid; place-items: center;
+    font-size: 13px; font-weight: 700;
+    background: var(--ivory); color: var(--navy-300);
+    border: 1.5px solid var(--navy-100);
+    flex-shrink: 0;
+  }.maquette-edit .wizard-step-card.active .wizard-step-num {
+    background: var(--gold); color: white; border-color: var(--gold);
+  }.maquette-edit .wizard-step-card.completed .wizard-step-num {
+    background: var(--green-text); color: white; border-color: var(--green-text);
+  }.maquette-edit .wizard-step-info { flex: 1; min-width: 0; }.maquette-edit .wizard-step-title {
+    font-size: 14px; font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 2px;
+  }.maquette-edit .wizard-step-desc {
+    font-size: 11.5px;
+    color: var(--navy-300);
+  }.maquette-edit .wizard-step-status {
+    flex-shrink: 0;
+    display: flex; align-items: center; gap: 8px;
+  }.maquette-edit .wizard-step-toggle {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--ivory);
+    border: 1px solid var(--navy-100);
+    display: grid; place-items: center;
+    color: var(--navy-300);
+    transition: transform 0.2s;
+  }.maquette-edit .wizard-step-card.active .wizard-step-toggle { transform: rotate(180deg); background: var(--gold); color: white; border-color: var(--gold); }.maquette-edit .wizard-step-toggle svg { width: 14px; height: 14px; }.maquette-edit .wizard-step-body {
+    display: none;
+    padding: 0 20px 20px;
+    border-top: 1px solid var(--navy-100);
+  }.maquette-edit .wizard-step-card.active .wizard-step-body { display: block; padding-top: 18px; }
+
+  /* Kanban */
+  .maquette-edit .kanban-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }.maquette-edit .kb-col { background: var(--ivory); border: 1px solid var(--navy-100); border-radius: 8px; padding: 14px; min-height: 240px; }.maquette-edit .kb-col-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; padding: 0 4px; }.maquette-edit .kb-col-title { font-size: 11px; font-weight: 700; color: var(--gold); letter-spacing: 0.14em; text-transform: uppercase; display: flex; align-items: center; gap: 6px; }.maquette-edit .kb-col-title svg { width: 14px; height: 14px; }.maquette-edit .kb-col-count { font-size: 11px; font-weight: 700; color: var(--navy); background: white; padding: 2px 9px; border-radius: 10px; border: 1px solid var(--navy-100); }.maquette-edit .kb-card { background: white; border: 1px solid var(--navy-100); border-radius: 6px; padding: 10px 12px; margin-bottom: 8px; cursor: pointer; transition: all 0.15s; }.maquette-edit .kb-card:hover { border-color: var(--gold); box-shadow: 0 2px 8px rgba(16,45,80,0.06); }.maquette-edit .kb-card-title { font-size: 12px; font-weight: 600; color: var(--navy); margin-bottom: 4px; }.maquette-edit .kb-card-meta { font-size: 10.5px; color: var(--navy-300); display: flex; gap: 6px; align-items: center; }.maquette-edit .kb-card-amount { font-weight: 700; color: var(--gold); font-size: 12px; margin-top: 4px; }
+
+  /* Pack cards premium */
+  .maquette-edit .pack-card { background: white; border: 1px solid var(--navy-100); border-radius: 10px; padding: 22px 22px 20px; transition: all 0.2s; position: relative; overflow: hidden; }.maquette-edit .pack-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--gold), var(--gold-300)); opacity: 0; transition: opacity 0.2s; }.maquette-edit .pack-card:hover { border-color: var(--gold); box-shadow: 0 4px 16px rgba(16,45,80,0.08); transform: translateY(-1px); }.maquette-edit .pack-card:hover::before { opacity: 1; }.maquette-edit .pack-card-icon { width: 48px; height: 48px; border-radius: 10px; background: linear-gradient(135deg, var(--ivory), var(--gold-200)); color: var(--gold); display: grid; place-items: center; margin-bottom: 16px; border: 1px solid var(--gold-300); }.maquette-edit .pack-card-icon svg { width: 24px; height: 24px; }.maquette-edit .pack-card-name { font-size: 14.5px; font-weight: 700; color: var(--navy); margin-bottom: 6px; letter-spacing: -0.01em; }.maquette-edit .pack-card-desc { font-size: 12px; color: var(--navy-300); line-height: 1.5; margin-bottom: 16px; min-height: 36px; }.maquette-edit .pack-card-bullets { list-style: none; margin-bottom: 16px; }.maquette-edit .pack-card-bullets li { font-size: 11.5px; color: var(--navy); padding: 3px 0 3px 16px; position: relative; }.maquette-edit .pack-card-bullets li::before { content: ''; position: absolute; left: 2px; top: 8px; width: 4px; height: 4px; border-radius: 50%; background: var(--gold); }.maquette-edit .pack-card-meta { display: flex; justify-content: space-between; align-items: center; padding-top: 14px; border-top: 1px solid var(--navy-100); font-size: 11.5px; color: var(--navy-300); }.maquette-edit .pack-card-price { font-size: 16px; font-weight: 700; color: var(--gold); }.maquette-edit .pack-card-price-period { font-size: 11px; color: var(--navy-300); font-weight: 500; }.maquette-edit .pack-pricing-tag { position: absolute; top: 16px; right: 16px; padding: 3px 9px; border-radius: 12px; font-size: 9.5px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }.maquette-edit .pack-pricing-tag.recur { background: var(--gold-200); color: var(--medium-400); }.maquette-edit .pack-pricing-tag.once { background: var(--purple-bg); color: var(--purple-text); }.maquette-edit .pack-pricing-tag.unit { background: var(--light-blue); color: var(--navy); }.maquette-edit .pack-pricing-tag.partner { background: var(--green-bg); color: var(--green-text); }
+
+  /* Alert list */
+  .maquette-edit .alert-item { padding: 11px 16px; border-bottom: 1px solid var(--navy-100); cursor: pointer; }.maquette-edit .alert-item:last-child { border-bottom: none; }.maquette-edit .alert-item:hover { background: var(--ivory); }.maquette-edit .alert-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; font-size: 10.5px; color: var(--navy-300); }.maquette-edit .alert-title { font-size: 12.5px; font-weight: 600; color: var(--navy); }.maquette-edit .alert-sub { font-size: 11.5px; color: var(--navy-300); margin-top: 2px; }
+
+  /* Pipeline stepper */
+  .maquette-edit .pipeline-stepper { display: grid; grid-template-columns: repeat(2, 1fr); background: white; border: 1px solid var(--navy-100); border-radius: 10px; padding: 14px 0; margin-bottom: 18px; overflow: hidden; }.maquette-edit .stepper-item { padding: 14px 16px; border-right: 1px solid var(--navy-100); display: flex; flex-direction: column; gap: 6px; cursor: pointer; transition: all 0.15s; }.maquette-edit .stepper-item:last-child { border-right: none; }.maquette-edit .stepper-item:hover { background: var(--light-blue); }.maquette-edit .stepper-item.active { background: linear-gradient(135deg, var(--ivory), var(--gold-200)); }.maquette-edit .stepper-badge { width: 36px; height: 36px; border-radius: 50%; background: var(--ivory); border: 1.5px solid var(--gold-300); color: var(--gold); display: flex; align-items: center; justify-content: center; margin-bottom: 4px; }.maquette-edit .stepper-badge svg { width: 18px; height: 18px; }.maquette-edit .stepper-item.active .stepper-badge { background: var(--gold); color: white; border-color: var(--gold); }.maquette-edit .stepper-label { font-size: 10.5px; font-weight: 600; color: var(--navy-300); letter-spacing: 0.04em; line-height: 1.3; }.maquette-edit .stepper-item.active .stepper-label { color: var(--navy); font-weight: 700; }.maquette-edit .stepper-count { font-size: 16px; font-weight: 700; color: var(--navy); font-feature-settings: 'tnum' on; }.maquette-edit .stepper-item.active .stepper-count { color: var(--medium-400); }.maquette-edit .stepper-meta { font-size: 10.5px; color: var(--navy-300); }
+
+  /* Pipeline 6 colonnes (acquisition) */
+  .maquette-edit .pipeline-6 { display: grid; grid-template-columns: repeat(6, 1fr); }
+
+  /* Funnel */
+  .maquette-edit .funnel-stage { display: flex; align-items: center; gap: 14px; padding: 14px 18px; background: white; border: 1px solid var(--navy-100); border-radius: 8px; margin-bottom: 6px; position: relative; }.maquette-edit .funnel-bar { height: 8px; background: var(--navy-100); border-radius: 4px; overflow: hidden; flex: 1; }.maquette-edit .funnel-bar-fill { height: 100%; background: linear-gradient(90deg, var(--gold), var(--gold-300)); }.maquette-edit .funnel-label { width: 200px; font-size: 12.5px; font-weight: 600; color: var(--navy); }.maquette-edit .funnel-num { width: 100px; text-align: right; font-size: 14px; font-weight: 700; color: var(--navy); font-feature-settings: 'tnum' on; }.maquette-edit .funnel-pct { width: 80px; text-align: right; font-size: 11.5px; color: var(--navy-300); }
+
+  /* SCORE PREMIUM */
+  .maquette-edit .score-premium { position: relative; width: 160px; height: 160px; margin: 0 auto; }.maquette-edit .score-premium svg { width: 100%; height: 100%; }.maquette-edit .score-premium-track { fill: none; stroke: var(--navy-100); stroke-width: 8; }.maquette-edit .score-premium-fill { fill: none; stroke: url(#scoreGradient); stroke-width: 8; stroke-linecap: round; transform: rotate(-90deg); transform-origin: center; filter: drop-shadow(0 2px 4px rgba(198,142,14,0.3)); }.maquette-edit .score-premium-center { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; flex-direction: column; }.maquette-edit .score-premium-num { font-size: 38px; font-weight: 700; color: var(--navy); letter-spacing: -0.02em; line-height: 1; font-feature-settings: 'tnum' on; }.maquette-edit .score-premium-num .unit-small { font-size: 14px; color: var(--navy-300); font-weight: 500; }.maquette-edit .score-premium-label { font-size: 9px; color: var(--gold); letter-spacing: 0.18em; text-transform: uppercase; margin-top: 6px; font-weight: 700; }
+
+  /* Score block list */
+  .maquette-edit .score-block-list { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }.maquette-edit .score-block-item { padding: 14px 18px; border-bottom: 1px solid var(--navy-100); cursor: pointer; transition: background 0.15s; display: flex; align-items: center; gap: 14px; }.maquette-edit .score-block-item:nth-child(odd) { border-right: 1px solid var(--navy-100); }.maquette-edit .score-block-item:hover { background: var(--ivory); }.maquette-edit .score-block-icon { width: 36px; height: 36px; border-radius: 8px; background: linear-gradient(135deg, var(--ivory), var(--gold-200)); border: 1px solid var(--gold-300); display: grid; place-items: center; color: var(--gold); flex-shrink: 0; }.maquette-edit .score-block-icon svg { width: 18px; height: 18px; }.maquette-edit .score-block-content { flex: 1; min-width: 0; }.maquette-edit .score-block-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }.maquette-edit .score-block-name { font-size: 12px; font-weight: 600; color: var(--navy); line-height: 1.3; }.maquette-edit .score-block-num { font-size: 13px; font-weight: 700; flex-shrink: 0; margin-left: 8px; font-feature-settings: 'tnum' on; }.maquette-edit .score-block-num.green { color: var(--green-text); }.maquette-edit .score-block-num.orange { color: var(--orange-text); }.maquette-edit .score-block-num.red { color: var(--red-text); }.maquette-edit .score-block-bar { height: 4px; background: var(--navy-100); border-radius: 2px; overflow: hidden; }.maquette-edit .score-block-bar-fill { height: 100%; border-radius: 2px; }.maquette-edit .score-block-bar-fill.green { background: var(--green-text); }.maquette-edit .score-block-bar-fill.orange { background: var(--orange-text); }.maquette-edit .score-block-bar-fill.red { background: var(--red-text); }
+
+  /* Icon badges */
+  .maquette-edit .icon-badge { width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, var(--ivory), var(--gold-200)); border: 1px solid var(--gold-300); display: grid; place-items: center; color: var(--gold); flex-shrink: 0; }.maquette-edit .icon-badge svg { width: 16px; height: 16px; }.maquette-edit .icon-badge.lg { width: 44px; height: 44px; border-radius: 10px; }.maquette-edit .icon-badge.lg svg { width: 22px; height: 22px; }.maquette-edit .icon-badge.navy { background: linear-gradient(135deg, var(--navy), #1a3866); border-color: var(--navy); color: var(--gold-300); }.maquette-edit svg.ico { width: 16px; height: 16px; flex-shrink: 0; }.maquette-edit .arrow-up { color: var(--green-text); }.maquette-edit .arrow-down { color: var(--red-text); }
+
+  /* Roadmap */
+  .maquette-edit .roadmap-col { background: var(--ivory); border: 1px solid var(--navy-100); border-radius: 8px; padding: 14px; }.maquette-edit .roadmap-col-header { font-size: 11px; font-weight: 700; color: var(--gold); letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 12px; padding: 0 4px; display: flex; justify-content: space-between; align-items: center; }.maquette-edit .roadmap-card { background: white; border: 1px solid var(--navy-100); border-radius: 6px; padding: 12px; margin-bottom: 8px; }.maquette-edit .roadmap-card-title { font-size: 12.5px; font-weight: 600; color: var(--navy); margin-bottom: 4px; }.maquette-edit .roadmap-card-meta { font-size: 10.5px; color: var(--navy-300); }
+
+  /* === Parrainage cards === */
+  .maquette-edit .referral-card {
+    background: white;
+    border: 1px solid var(--navy-100);
+    border-radius: 8px;
+    padding: 18px;
+    transition: all 0.15s;
+  }.maquette-edit .referral-card:hover { border-color: var(--gold); box-shadow: 0 2px 8px rgba(16,45,80,0.06); }.maquette-edit .referral-card-link {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 12px;
+    background: var(--ivory);
+    border: 1px dashed var(--gold-300);
+    border-radius: 5px;
+    margin: 10px 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    color: var(--navy);
+    cursor: pointer;
+  }.maquette-edit .referral-card-link:hover { background: var(--gold-200); }.maquette-edit .row-recommender {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 3px 9px;
+    background: linear-gradient(135deg, var(--ivory), var(--gold-200));
+    border: 1px solid var(--gold-300);
+    border-radius: 12px;
+    font-size: 10.5px; font-weight: 700;
+    color: var(--medium-400);
+  }.maquette-edit .row-recommender svg { width: 11px; height: 11px; color: var(--gold); }
+
+  /* === Team category headers === */
+  .maquette-edit .team-category-header {
+    background: linear-gradient(90deg, var(--navy) 0%, #1a3866 100%);
+    color: white;
+    padding: 10px 16px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }.maquette-edit .team-category-header svg { width: 14px; height: 14px; color: var(--gold-300); }.maquette-edit .team-category-header .count {
+    margin-left: auto;
+    background: var(--gold);
+    padding: 1px 9px;
+    border-radius: 10px;
+    font-size: 9.5px;
+  }
+
+  /* Compact KPI for finance details */
+  .maquette-edit .finance-detail-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--navy-100);
+  }.maquette-edit .finance-detail-row:last-child { border-bottom: none; }.maquette-edit .finance-detail-label { font-size: 12px; color: var(--navy); font-weight: 500; }.maquette-edit .finance-detail-value { font-size: 13px; color: var(--navy); font-weight: 700; font-feature-settings: 'tnum' on; }.maquette-edit .finance-detail-pct { font-size: 11px; color: var(--navy-300); margin-left: 8px; }
+
+  /* === v6 : Drawer drilldown équipe === */
+  .maquette-edit .team-drawer {
+    display: none;
+    position: fixed;
+    top: 0; right: 0; bottom: 0;
+    width: 540px; max-width: 92vw;
+    background: var(--ivory);
+    border-left: 1px solid var(--navy-100);
+    box-shadow: -4px 0 24px rgba(16,45,80,0.12);
+    z-index: 200;
+    overflow-y: auto;
+    padding: 0;
+  }.maquette-edit .team-drawer.open { display: block; animation: slideInDrawer 0.22s ease-out; }
+  @keyframes slideInDrawer { from { transform: translateX(40px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }.maquette-edit .team-drawer-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(16,45,80,0.32);
+    z-index: 199;
+    backdrop-filter: blur(2px);
+  }.maquette-edit .team-drawer-overlay.open { display: block; }.maquette-edit .team-drawer-header {
+    background: linear-gradient(135deg, var(--navy) 0%, #1a3866 100%);
+    color: white;
+    padding: 24px;
+    position: sticky; top: 0; z-index: 1;
+  }.maquette-edit .team-drawer-close {
+    position: absolute; top: 14px; right: 14px;
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.1);
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    display: grid; place-items: center;
+  }.maquette-edit .team-drawer-close:hover { background: rgba(255,255,255,0.2); }.maquette-edit .team-drawer-avatar {
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    background: var(--gold);
+    color: var(--navy);
+    display: grid; place-items: center;
+    font-weight: 700; font-size: 22px;
+    border: 2px solid var(--gold-300);
+    margin-bottom: 14px;
+  }.maquette-edit .team-drawer-name { font-size: 20px; font-weight: 700; color: white; }.maquette-edit .team-drawer-role { font-size: 13px; color: var(--gold-300); margin-top: 3px; }.maquette-edit .team-drawer-contact {
+    display: flex; gap: 14px;
+    margin-top: 14px;
+    font-size: 11.5px;
+    color: rgba(255,255,255,0.7);
+  }.maquette-edit .team-drawer-contact span { display: inline-flex; align-items: center; gap: 5px; }.maquette-edit .team-drawer-body { padding: 20px 24px; }.maquette-edit .activity-week-grid {
+    display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px;
+    margin-bottom: 14px;
+  }.maquette-edit .activity-day {
+    aspect-ratio: 1;
+    border-radius: 4px;
+    display: grid; place-items: center;
+    font-size: 11px; font-weight: 700;
+    color: var(--navy);
+  }.maquette-edit .activity-day.activity-0 { background: var(--ivory); border: 1px solid var(--navy-100); color: var(--navy-300); }.maquette-edit .activity-day.activity-1 { background: var(--gold-200); border: 1px solid var(--gold-300); }.maquette-edit .activity-day.activity-2 { background: var(--gold-300); border: 1px solid var(--gold); color: var(--medium-400); }.maquette-edit .activity-day.activity-3 { background: var(--gold); color: white; border: 1px solid var(--gold); }
+
+  /* === v6 : Stepper item cliquable highlight === */
+  .maquette-edit .stepper-item.filtering { background: linear-gradient(135deg, var(--ivory), var(--gold-200)) !important; box-shadow: inset 0 0 0 2px var(--gold); }
+
+  /* === v6 : Pack ranking row === */
+  .maquette-edit .pack-rank-row {
+    display: grid;
+    grid-template-columns: 36px 1fr auto auto;
+    gap: 14px;
+    align-items: center;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--navy-100);
+    transition: background 0.12s;
+  }.maquette-edit .pack-rank-row:hover { background: var(--ivory); }.maquette-edit .pack-rank-num {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--ivory);
+    border: 1.5px solid var(--gold-300);
+    display: grid; place-items: center;
+    font-size: 11px; font-weight: 700;
+    color: var(--gold);
+  }.maquette-edit .pack-rank-row:nth-child(1) .pack-rank-num, .maquette-edit .pack-rank-row:nth-child(2) .pack-rank-num, .maquette-edit .pack-rank-row:nth-child(3) .pack-rank-num { background: var(--gold); color: white; border-color: var(--gold); }.maquette-edit .pack-rank-name { font-size: 12.5px; font-weight: 600; color: var(--navy); }.maquette-edit .pack-rank-bar {
+    width: 180px; height: 6px;
+    background: var(--navy-100);
+    border-radius: 3px; overflow: hidden;
+  }.maquette-edit .pack-rank-bar-fill { height: 100%; background: linear-gradient(90deg, var(--gold), var(--gold-300)); }.maquette-edit .pack-rank-pct { font-size: 12px; font-weight: 700; color: var(--gold); min-width: 56px; text-align: right; font-feature-settings: 'tnum' on; }.maquette-edit .pack-rank-ca { font-size: 11.5px; color: var(--navy-300); min-width: 80px; text-align: right; font-feature-settings: 'tnum' on; }
+
+  /* === v6 : Modal édition prévisionnel === */
+  .maquette-edit .previ-edit-row {
+    display: none;
+    background: linear-gradient(135deg, var(--ivory) 0%, var(--gold-200) 100%);
+    border-left: 4px solid var(--gold);
+    padding: 18px 24px;
+  }.maquette-edit .previ-edit-row.open { display: table-row; }.maquette-edit .previ-edit-row td { padding: 0 !important; }.maquette-edit .previ-edit-content { padding: 18px 24px; }.maquette-edit .previ-edit-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+
+  /* === v6 : YTD pill === */
+  .maquette-edit .ytd-pill { display: inline-flex; align-items: center; gap: 4px; padding: 1px 8px; background: var(--gold-200); color: var(--medium-400); border-radius: 10px; font-size: 9.5px; font-weight: 700; letter-spacing: 0.04em; }

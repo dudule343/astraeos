@@ -27,10 +27,13 @@ export type HistoItem = {
   title: string;
   meta: string;
   /**
-   * Dossier vers lequel pointe « Voir → ». Dans la maquette ce bouton fait
-   * goToPage('ing-fiche-dossier') et ouvre l'écran fiche dossier ingénieur
-   * (#page-ing-fiche-dossier). Cet écran n'a pas encore de route React portée,
-   * donc on garde null = bouton honnête désactivé plutôt qu'un lien mort/404.
+   * Dossier vers lequel pointe « Voir → ». Dans la maquette, seule la première
+   * ligne (étude patrimoniale) fait goToPage('ing-fiche-dossier') et ouvre la
+   * fiche dossier ingénieur (#page-ing-fiche-dossier) ; les autres lignes ont
+   * un bouton « Voir → » inerte (aucun onclick). On porte ce comportement à
+   * l'identique : href renseigné → vrai <Link> vers la route dossier portée
+   * (src/app/(ingenieur)/espace-ingenieur/dossiers/[id]) ; href null → bouton
+   * honnête désactivé, fidèle à l'inertie de la maquette.
    */
   href: string | null;
 };
@@ -113,7 +116,9 @@ export const FICHE_CLIENT_MODELE: FicheClient = {
       variant: "etude",
       title: "Étude patrimoniale réalisée",
       meta: "Stratégie de transmission · livrée le 06/05/2026 · 84 pages · honoraires 12 800 € HT",
-      href: null,
+      // Maquette : onclick="goToPage('ing-fiche-dossier')" → ouvre la fiche
+      // dossier ETU-2026-014 (le dossier de l'étude, cf. lettre de mission).
+      href: "/espace-ingenieur/dossiers/ETU-2026-014",
     },
     {
       variant: "immo",

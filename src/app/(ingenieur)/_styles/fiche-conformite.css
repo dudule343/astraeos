@@ -741,7 +741,7 @@
   color: var(--gold-deep);
 }
 
-/* ── Modale DER (s1a-modal + barre de mode + page DER) ────────────────── */
+/* ── Modale DER (s1a-modal + page DER pré-rendue) ─────────────────────── */
 
 .maquette-ing .s1a-modal-overlay,
 .s1a-modal-overlay {
@@ -912,56 +912,6 @@
   cursor: not-allowed;
 }
 
-/* Barre de mode Consulter / Modifier */
-.s1c-mode-bar {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  padding: 10px 14px;
-  background: linear-gradient(180deg, var(--ivory) 0%, white 100%);
-  border-bottom: 1px solid var(--ivory-deep);
-  position: sticky;
-  top: 0;
-  z-index: 5;
-}
-.s1c-mode-bar-label {
-  font-size: 9.5px;
-  font-weight: 700;
-  color: var(--navy-300);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  margin-right: 4px;
-}
-.s1c-mode-bar button {
-  padding: 6px 14px;
-  background: transparent;
-  border: 1px solid var(--navy-100);
-  border-radius: 14px;
-  font-family: inherit;
-  font-size: 10.5px;
-  font-weight: 600;
-  color: var(--navy-300);
-  cursor: pointer;
-  letter-spacing: 0.04em;
-  transition: all 0.15s;
-}
-.s1c-mode-bar button.active {
-  background: var(--navy);
-  color: white;
-  border-color: var(--navy);
-  box-shadow: 0 1px 3px rgba(16, 45, 80, 0.18);
-}
-.s1c-mode-bar button:hover:not(.active) {
-  background: var(--ivory-deep);
-  color: var(--navy);
-}
-.fco-mode-bar-meta {
-  margin-left: auto;
-  font-size: 10px;
-  color: var(--navy-300);
-  letter-spacing: 0.02em;
-}
-
 /* Page DER pré-rendue (corps du document) */
 .s1c-der-page {
   background: white;
@@ -1088,15 +1038,4 @@
   font-weight: 600;
   color: var(--gold-deep);
   margin: 0 2px;
-}
-.fco-der-input {
-  background: white;
-  border: 1px solid var(--gold);
-  box-shadow: 0 0 0 2px rgba(198, 142, 14, 0.12);
-  width: auto;
-  min-width: 80px;
-  max-width: 220px;
-}
-.fco-der-input:focus {
-  outline: none;
 }

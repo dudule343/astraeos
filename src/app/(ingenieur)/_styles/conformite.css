@@ -609,6 +609,9 @@
   padding: 0;
   font: inherit;
 }
+.maquette-ing .pipe-more-link:disabled {
+  cursor: default;
+}
 .maquette-ing .pipe-legend {
   margin-top: 14px;
   padding: 12px 14px;

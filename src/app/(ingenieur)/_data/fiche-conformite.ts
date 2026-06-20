@@ -272,8 +272,17 @@ export const CONDITIONS: ConditionRow[] = [
 
 export const ACTION_BAR = {
   conditionsCount: "0/4 conditions remplies",
-  note:
-    "L'étape 03 ne s'ouvre qu'une fois les 3 documents signés (DER · KYC · LM) et les 3 900 € TTC reçus. Délai client espace sécurisé : 30 jours pour transmettre les documents patrimoniaux.",
+  /**
+   * Note rendue en 3 fragments car la maquette met « et » en gras
+   * (l. 6963 : « …signés (DER · KYC · LM) <strong>et</strong> les 3 900 € TTC reçus »).
+   */
+  note: {
+    lead:
+      "L'étape 03 ne s'ouvre qu'une fois les 3 documents signés (DER · KYC · LM) ",
+    strong: "et",
+    tail:
+      " les 3 900 € TTC reçus. Délai client espace sécurisé : 30 jours pour transmettre les documents patrimoniaux.",
+  },
 };
 
 /* ── Contenu du document DER (modale, pré-rendu) ──────────────────────── */

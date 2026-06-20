@@ -11,10 +11,18 @@
 
 export type ConditionState = "ok" | "wait" | "ko";
 
+/**
+ * Fragment de texte inline avec exposant ordinal optionnel. La maquette écrit
+ * « Lyon 6<sup>e</sup> », « Paris 16<sup>e</sup> » : on conserve ce vrai exposant
+ * typographique au lieu d'une chaîne plate « 6e ». Un fragment string reste du
+ * texte normal, un fragment { sup } est rendu en <sup>.
+ */
+export type Inline = string | { sup: string };
+
 export type Condition = {
   state: ConditionState;
   text: string;
-  meta: string;
+  meta: Inline[];
   /** Pastille de statut à droite (Validé / Planifié) ou bouton d'action (Relancer). */
   badge?: { label: string; tone: "ok" | "info" };
   action?: { label: string };
@@ -39,15 +47,17 @@ export type ProspectRdv = {
   day: string;
   month: string;
   title: string;
-  meta: string;
+  meta: Inline[];
   status: { label: string; tone: "todo" };
 };
 
 export type FicheProspect = {
+  /** Slug du dossier prospect (sert au lien vers la fiche conformité réelle). */
+  slug: string;
   eyebrow: string;
   heroLead: string;
   heroStrong: string;
-  heroSub: string;
+  heroSub: Inline[];
   conditions: {
     title: string;
     sub: string;
@@ -70,11 +80,15 @@ export type FicheProspect = {
 };
 
 const AUBERT: FicheProspect = {
+  slug: "aubert",
   eyebrow: "Étape 01 · Prospects actifs · Dossier PR-2026-AUB · contact initial 05/05/2026",
   heroLead: "Jean & Martine ",
   heroStrong: "AUBERT",
-  heroSub:
-    "Couple · marié sous communauté légale · 58 et 56 ans · Lyon 6e · 2 enfants majeurs · recommandés par M. ROCHE (client en suivi).",
+  heroSub: [
+    "Couple · marié sous communauté légale · 58 et 56 ans · Lyon 6",
+    { sup: "e" },
+    " · 2 enfants majeurs · recommandés par M. ROCHE (client en suivi).",
+  ],
   conditions: {
     title: "Conditions de passage à l'étape 02 · Conformité en cours",
     sub: "1 condition sur 3 remplie · les 2 actions restantes débloquent le passage en conformité.",
@@ -82,19 +96,22 @@ const AUBERT: FicheProspect = {
       {
         state: "ok",
         text: "DCI Simplifié complété par le client",
-        meta: "Reçu le 09/05/2026 · 25 questions renseignées",
+        meta: ["Reçu le 09/05/2026 · 25 questions renseignées"],
         badge: { label: "Validé", tone: "ok" },
       },
       {
         state: "wait",
         text: "Questionnaire de qualification client complété",
-        meta: "Envoyé le 05/05 · en attente de complétion · 6 jours sans relance",
+        meta: ["Envoyé le 05/05 · en attente de complétion · 6 jours sans relance"],
         action: { label: "Relancer" },
       },
       {
         state: "ko",
         text: "Entretien initial réalisé (visio enregistrée)",
-        meta: "RDV planifié pour le jeudi 14/05/2026 à 11h00 · cabinet Paris 16e",
+        meta: [
+          "RDV planifié pour le jeudi 14/05/2026 à 11h00 · cabinet Paris 16",
+          { sup: "e" },
+        ],
         badge: { label: "Planifié", tone: "info" },
       },
     ],
@@ -166,7 +183,11 @@ const AUBERT: FicheProspect = {
       day: "14",
       month: "Mai",
       title: "Entretien initial · 1h",
-      meta: "Jeudi 14/05 à 11h00 · cabinet Paris 16e · présentiel",
+      meta: [
+        "Jeudi 14/05 à 11h00 · cabinet Paris 16",
+        { sup: "e" },
+        " · présentiel",
+      ],
       status: { label: "⏰ À venir", tone: "todo" },
     },
   ],

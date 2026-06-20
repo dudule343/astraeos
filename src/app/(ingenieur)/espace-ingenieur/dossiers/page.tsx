@@ -3,6 +3,8 @@ import Link from "next/link";
 import { getPipelineScreen, type CardBadge, type PipelineCard } from "../../_data/pipeline";
 import "../../_styles/pipeline.css";
 
+import { ExportPipelineButton } from "./ExportPipelineButton";
+
 export const metadata = {
   title: "ASTRAEOS · Pipeline de mes dossiers",
 };
@@ -78,10 +80,8 @@ export default function PipelinePage() {
           <p className="hero-sub">{screen.hero.sub}</p>
         </div>
         <div className="hero-actions">
-          {/* Export non branché : bouton honnêtement désactivé. */}
-          <button className="btn btn-ghost btn-sm" disabled>
-            Exporter
-          </button>
+          <ExportPipelineButton screen={screen} />
+          {/* Maquette : goToPage('ing-detail-etape-1') → écran « Étape 1 · création espace client », porté en /espace-ingenieur/client-new. */}
           <Link className="btn btn-gold btn-sm" href="/espace-ingenieur/client-new">
             + Nouveau dossier
           </Link>

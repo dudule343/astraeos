@@ -120,7 +120,15 @@ const PIECE_TAG_STYLE: Record<PackPiece["tagTone"], React.CSSProperties> = {
 
 /* ── 3 cartes documents avec leur workflow ─────────────────────────────── */
 
-export function DocCardsRow({ onOpenDer }: { onOpenDer: () => void }) {
+export function DocCardsRow({
+  onOpenDer,
+  onGenerateLm,
+  lmBusy,
+}: {
+  onOpenDer: () => void;
+  onGenerateLm: () => void;
+  lmBusy: boolean;
+}) {
   return (
     <div className="fco-doc-grid">
       {DOC_CARDS.map((card) => (
@@ -154,10 +162,21 @@ export function DocCardsRow({ onOpenDer }: { onOpenDer: () => void }) {
           </div>
 
           <div className="s1c-wf-actions">
-            {/* Modifier : seul le DER a un vrai contenu pré-rendu modifiable. */}
+            {/* Modifier : DER ouvre le document pré-rendu ; LM génère son PDF réel
+                (lib/conformite-pdf · kind lettre_mission) ; KYC = enveloppe, WIP. */}
             {card.key === "der" ? (
               <button type="button" className="s1c-wf-btn wf-edit" onClick={onOpenDer}>
                 <IconEdit /> Modifier
+              </button>
+            ) : card.key === "lm" ? (
+              <button
+                type="button"
+                className="s1c-wf-btn wf-edit"
+                onClick={onGenerateLm}
+                disabled={lmBusy}
+                title="Génère la lettre de mission (PDF réel)"
+              >
+                <IconEdit /> {lmBusy ? "Génération…" : "Modifier"}
               </button>
             ) : (
               <button
@@ -180,10 +199,21 @@ export function DocCardsRow({ onOpenDer }: { onOpenDer: () => void }) {
               <IconSend /> Envoyer
             </button>
 
-            {/* Consulter / Signer : le DER ouvre le document réel. */}
+            {/* Consulter / Signer : DER ouvre le document réel ; LM produit le
+                PDF signable réel ; KYC = aperçu enveloppe, WIP. */}
             {card.key === "der" ? (
               <button type="button" className="s1c-wf-btn wf-view" onClick={onOpenDer}>
                 <IconView /> {card.viewLabel}
+              </button>
+            ) : card.key === "lm" ? (
+              <button
+                type="button"
+                className="s1c-wf-btn wf-view"
+                onClick={onGenerateLm}
+                disabled={lmBusy}
+                title="Génère la lettre de mission signable (PDF réel)"
+              >
+                <IconSign /> {lmBusy ? "Génération…" : card.viewLabel}
               </button>
             ) : (
               <button
@@ -192,7 +222,7 @@ export function DocCardsRow({ onOpenDer }: { onOpenDer: () => void }) {
                 disabled
                 title="Aperçu en cours de construction"
               >
-                {card.key === "lm" ? <IconSign /> : <IconView />} {card.viewLabel}
+                <IconView /> {card.viewLabel}
               </button>
             )}
           </div>
@@ -352,68 +382,91 @@ export function EnvoiPack() {
 
 /* ── Modale DER : 3 champs éditables + génération PDF réelle ───────────── */
 
+/**
+ * Télécharge un PDF de conformité réellement généré côté serveur
+ * (lib/conformite-pdf.ts via /api/conformite/der-pdf).
+ */
+async function downloadConformitePdf(
+  body: Record<string, unknown>,
+  filename: string,
+) {
+  const res = await fetch("/api/conformite/der-pdf", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    throw new Error(`Génération PDF échouée (${res.status})`);
+  }
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
 export function DerModalControls() {
   const [open, setOpen] = useState(false);
+  const [lmBusy, setLmBusy] = useState(false);
   const openModal = useCallback(() => setOpen(true), []);
   const closeModal = useCallback(() => setOpen(false), []);
 
+  const handleGenerateLm = useCallback(async () => {
+    setLmBusy(true);
+    try {
+      await downloadConformitePdf(
+        { kind: "lettre_mission" },
+        `Lettre-de-mission-${DER_PDF_INPUT.dossierId}.pdf`,
+      );
+    } finally {
+      setLmBusy(false);
+    }
+  }, []);
+
   return (
     <>
-      <DocCardsRow onOpenDer={openModal} />
+      <DocCardsRow
+        onOpenDer={openModal}
+        onGenerateLm={handleGenerateLm}
+        lmBusy={lmBusy}
+      />
       <DerModal open={open} onClose={closeModal} />
     </>
   );
 }
 
 function DerModal({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const [edit, setEdit] = useState(false);
-  const [personnes, setPersonnes] = useState(DER.fields.personnes);
-  const [lieu, setLieu] = useState(DER.fields.lieu);
-  const [date, setDate] = useState(DER.fields.date);
   const [generating, setGenerating] = useState(false);
 
   const handleGenerate = useCallback(async () => {
     setGenerating(true);
     try {
-      const res = await fetch("/api/conformite/der-pdf", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ kind: "der", personnes, lieu, date }),
-      });
-      if (!res.ok) {
-        throw new Error(`Génération PDF échouée (${res.status})`);
-      }
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `DER-${DER_PDF_INPUT.dossierId}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
+      await downloadConformitePdf(
+        {
+          kind: "der",
+          personnes: DER.fields.personnes,
+          lieu: DER.fields.lieu,
+          date: DER.fields.date,
+        },
+        `DER-${DER_PDF_INPUT.dossierId}.pdf`,
+      );
     } finally {
       setGenerating(false);
     }
-  }, [personnes, lieu, date]);
+  }, []);
 
-  const editableField = (
-    value: string,
-    onChange: (v: string) => void,
-    title: string,
-  ) =>
-    edit ? (
-      <input
-        className="s1c-der-editable-field fco-der-input"
-        value={value}
-        title={title}
-        onChange={(e) => onChange(e.target.value)}
-      />
-    ) : (
-      <span className="s1c-der-editable-field" title={title}>
-        {value}
-      </span>
-    );
+  // Comme dans la maquette (#modal-der), les 3 champs personnes/lieu/date sont
+  // de simples <span class="s1c-der-editable-field"> non éditables : pas de
+  // barre de mode dans la modale. Leurs valeurs alimentent la génération PDF.
+  const staticField = (value: string, title: string) => (
+    <span className="s1c-der-editable-field" title={title}>
+      {value}
+    </span>
+  );
 
   return (
     <div
@@ -437,28 +490,6 @@ function DerModal({ open, onClose }: { open: boolean; onClose: () => void }) {
         </div>
 
         <div className="s1a-modal-body">
-          {/* Barre de mode Consulter / Modifier */}
-          <div className="s1c-mode-bar fco-mode-bar">
-            <span className="s1c-mode-bar-label">Mode</span>
-            <button
-              type="button"
-              className={!edit ? "active" : ""}
-              onClick={() => setEdit(false)}
-            >
-              Consulter
-            </button>
-            <button
-              type="button"
-              className={edit ? "active" : ""}
-              onClick={() => setEdit(true)}
-            >
-              Modifier
-            </button>
-            <span className="fco-mode-bar-meta">
-              3 champs modifiables : personnes · lieu · date
-            </span>
-          </div>
-
           <div className="s1c-der-page">
             <h2>Document d&apos;Entrée en Relation</h2>
             <div className="der-disclaimer">
@@ -746,17 +777,16 @@ function DerModal({ open, onClose }: { open: boolean; onClose: () => void }) {
               <div className="der-sig-block">
                 <div className="der-sig-label">
                   Signature{" "}
-                  {editableField(
-                    personnes,
-                    setPersonnes,
+                  {staticField(
+                    DER.fields.personnes,
                     "Champ modifiable · Le Client (singulier) ou Les Clients (pluriel)",
                   )}
                 </div>
                 <div style={{ marginTop: 6, fontSize: "10.5px", color: "var(--navy)" }}>
                   Fait à{" "}
-                  {editableField(lieu, setLieu, "Champ modifiable · lieu de signature")},
+                  {staticField(DER.fields.lieu, "Champ modifiable · lieu de signature")},
                   le{" "}
-                  {editableField(date, setDate, "Champ modifiable · date de signature")}
+                  {staticField(DER.fields.date, "Champ modifiable · date de signature")}
                 </div>
                 <div style={{ marginTop: 8, fontSize: "10.5px", color: "var(--navy)" }}>
                   <strong>Mme Camille JOUBERT</strong> &amp;{" "}

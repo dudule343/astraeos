@@ -1,6 +1,7 @@
 import Link from "next/link";
 
-import { getFicheRdv, type FicheRdv, type RdvDoc } from "../../../_data/fiche-rdv";
+import { getFicheRdv, type FicheRdv } from "../../../_data/fiche-rdv";
+import { FicheRdvDocs } from "./FicheRdvDocs";
 import "../../../_styles/fiche-rdv.css";
 
 export const metadata = {
@@ -18,50 +19,6 @@ function visioHref(fiche: FicheRdv): string {
     nom: fiche.nom,
   });
   return `/visio/${fiche.room}?${q.toString()}`;
-}
-
-function CheckIcon() {
-  return (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="#1F8049"
-      strokeWidth="2.4"
-    >
-      <polyline points="20 6 9 17 4 12" />
-    </svg>
-  );
-}
-
-function DocCard({ doc }: { doc: RdvDoc }) {
-  // Pas de backend de consultation/téléchargement de DCI/qualif côté ingénieur :
-  // boutons honnêtement désactivés plutôt que morts (PORT-FRONT règle visio/PDF).
-  const consulterTitle =
-    "Consultation du document — disponible une fois le viewer DCI branché";
-  return (
-    <div className="frdv-doc">
-      <div className="frdv-doc-head">
-        <div className="frdv-doc-icon">
-          <CheckIcon />
-        </div>
-        <div className="frdv-doc-info">
-          <div className="frdv-doc-title">{doc.title}</div>
-          <div className="frdv-doc-date">{doc.date}</div>
-        </div>
-      </div>
-      <div className="frdv-doc-actions">
-        <button type="button" className="frdv-doc-btn" disabled title={consulterTitle}>
-          Consulter
-        </button>
-        <button type="button" className="frdv-doc-btn" disabled title={consulterTitle}>
-          Télécharger
-        </button>
-        <span className="frdv-doc-sent">Envoyé au client</span>
-      </div>
-    </div>
-  );
 }
 
 export default async function FicheRdvPage({
@@ -211,11 +168,7 @@ export default async function FicheRdvPage({
           </span>
           {fiche.docsCardTitle}
         </div>
-        <div className="frdv-docs-grid">
-          {fiche.docs.map((doc) => (
-            <DocCard key={doc.id} doc={doc} />
-          ))}
-        </div>
+        <FicheRdvDocs fiche={fiche} />
         <div className="frdv-note">
           <strong>Note v21</strong> · {fiche.noteV21}
         </div>
