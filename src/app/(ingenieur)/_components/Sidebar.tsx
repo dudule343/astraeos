@@ -20,7 +20,6 @@ const sections: NavSection[] = [
     title: "Mes clients",
     items: [
       { href: `${BASE}/clients`, label: "Tous mes clients", badge: { text: "7" } },
-      { href: `${BASE}/clients/exemple`, label: "Fiche client (exemple)" },
     ],
   },
   {

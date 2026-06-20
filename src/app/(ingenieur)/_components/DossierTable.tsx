@@ -35,7 +35,7 @@ export function DossierTable({
             >
               <td className="border-b border-[var(--navy-100)] px-4 py-2.5">
                 <Link
-                  href={`/espace-ingenieur/dossiers`}
+                  href={`/dossiers/${d.id}`}
                   className="flex items-center gap-2.5 hover:text-[var(--gold)]"
                 >
                   <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full border-[1.5px] border-[var(--gold-300)] bg-[var(--light-blue)] text-[10px] font-bold text-[var(--navy)]">

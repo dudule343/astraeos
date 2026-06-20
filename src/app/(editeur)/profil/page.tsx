@@ -342,6 +342,44 @@ export default async function ProfilPage() {
             )}
           </div>
         </section>
+
+        <section className="mt-6">
+          <div className="rounded-md border border-[var(--navy-100)] bg-white p-6">
+            <SectionHeader
+              eyebrow="Communication"
+              title="Ma signature email"
+              right={
+                <GhostButton
+                  dataStub="Modifier la signature email"
+                  dataStubMode="modal"
+                  dataStubBody="La personnalisation de la signature email (mise en page, lien de prise de rendez-vous, mentions du cabinet) sera disponible dans une prochaine itération. Pour l'instant, la signature est générée automatiquement à partir de votre identité et de vos agréments."
+                >
+                  Modifier
+                </GhostButton>
+              }
+            />
+            <div className="rounded-md border border-[var(--gold-200)] bg-[var(--ivory)] p-5 text-[12px] leading-relaxed">
+              <div className="flex items-center gap-4">
+                <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-[var(--navy)] text-[18px] font-bold text-[var(--gold)]">
+                  {initials(engineer.firstName, engineer.lastName)}
+                </div>
+                <div>
+                  <div className="font-bold text-[var(--navy)]">{fullName}</div>
+                  <div className="text-[11px] text-[var(--navy-300)]">{roleLabel}</div>
+                  <div className="mt-1 text-[11px] text-[var(--navy-300)]">
+                    {engineer.email ?? "e-mail non renseigné"}
+                    {engineer.phone ? ` · ${engineer.phone}` : ""}
+                  </div>
+                </div>
+              </div>
+              <div className="mt-3.5 border-t border-[var(--gold-200)] pt-3 text-[10.5px] leading-relaxed text-[var(--navy-300)]">
+                {engineer.oriasNumber
+                  ? `Immatriculation ORIAS n° ${engineer.oriasNumber} · CIF (AMF) · courtier en assurance (DDA)`
+                  : "Immatriculation ORIAS non renseignée · CIF (AMF) · courtier en assurance (DDA)"}
+              </div>
+            </div>
+          </div>
+        </section>
       </div>
     </>
   );

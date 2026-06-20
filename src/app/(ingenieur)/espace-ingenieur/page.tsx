@@ -1,7 +1,6 @@
 import Link from "next/link";
 
 import { Topbar } from "../../(editeur)/_components/Topbar";
-import { GoldButton } from "@/app/_components/shared/PageHeader";
 import {
   fetchCockpitDashboard,
   fmtEur,
@@ -254,12 +253,12 @@ export default async function IngenieurCockpit() {
             </p>
           </div>
           <div className="flex flex-shrink-0 gap-2">
-            <GoldButton
-              dataStub="Créer un espace client"
-              dataStubBody="Le wizard de création d'espace client est accessible depuis « Tous mes clients »."
+            <Link
+              href="/espace-ingenieur/client-new"
+              className="rounded-md bg-[var(--gold)] px-3 py-2 text-[11.5px] font-bold text-white hover:brightness-110"
             >
               + Créer un espace client
-            </GoldButton>
+            </Link>
           </div>
         </section>
 
