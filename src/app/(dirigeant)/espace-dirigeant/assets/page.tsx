@@ -1,186 +1,502 @@
-import { Topbar } from "../../_components/Topbar";
-import { ExportButton } from "../../_components/ExportButton";
-import { EmptyState } from "../../_components/EmptyState";
-import { KpiCard, type KpiBlock } from "@/app/_components/shared/KpiCard";
-import { PageHero, SectionHeader } from "@/app/_components/shared/PageHeader";
-import {
-  fetchCabinetCommissions,
-  fetchCabinetDossiers,
-  fetchCabinetProfile,
-  computeAumByCategory,
-  computeAumByAssetClass,
-  fmtEur,
-  fmtEurCell,
-} from "../../_data/cabinet";
-
-export const dynamic = "force-dynamic";
+import Link from "next/link";
+import { DirigeantTopbar } from "../../_components/DirigeantTopbar";
 
 export const metadata = {
-  title: "ASTRAEOS · Espace Dirigeant · Encours & assets",
+  title: "ASTRAEOS · Espace Dirigeant · Assets · Vue d'ensemble",
 };
 
-export default async function AssetsPage() {
-  const [commissions, dossiers, profile] = await Promise.all([
-    fetchCabinetCommissions(),
-    fetchCabinetDossiers(),
-    fetchCabinetProfile(),
-  ]);
-
-  const byCategory = computeAumByCategory(commissions);
-  const byClass = computeAumByAssetClass(byCategory);
-  const totalAum = byCategory.reduce((acc, r) => acc + r.aum, 0);
-  const totalSubs = byCategory.reduce((acc, r) => acc + r.subs, 0);
-  const clientsServed = new Set(dossiers.map((d) => d.client_id)).size;
-
-  const hasData = totalAum > 0;
-
-  const exportRows: (string | number)[][] = byCategory.map((r) => [
-    r.label,
-    r.subs,
-    Math.round(r.aum),
-    totalAum > 0 ? `${Math.round((r.aum / totalAum) * 100)}%` : "—",
-  ]);
-
-  const kpis: KpiBlock[] = [
-    {
-      label: "Encours total (AUM)",
-      value: fmtEur(totalAum || profile?.total_aum_cached || 0),
-      unit: totalAum > 0 || profile?.total_aum_cached ? "€" : undefined,
-      meta: "somme des souscriptions du cabinet",
-      valueTone: "gold",
-    },
-    {
-      label: "Contrats actifs",
-      value: totalSubs > 0 ? String(totalSubs) : "—",
-      meta: "souscriptions en portefeuille",
-    },
-    {
-      label: "Clients servis",
-      value: clientsServed > 0 ? String(clientsServed) : "—",
-      meta: "clients avec au moins un dossier",
-    },
-    {
-      label: "Rang réseau",
-      value: profile?.network_rank_cached ? `#${profile.network_rank_cached}` : "—",
-      meta: "classement du cabinet dans le réseau",
-    },
-  ];
-
+export default function Page() {
   return (
     <>
-      <Topbar current="Encours & assets" />
+      <DirigeantTopbar current="Assets · Vue d'ensemble" />
+      <div className="content">
+        <div className="hero">
+          <div>
+            <div className="hero-eyebrow">Assets du cabinet · vue d&apos;ensemble · Cabinet Paris Étoile</div>
+            <h1 className="hero-title">
+              Assets <strong>du cabinet</strong>
+            </h1>
+            <p className="hero-sub">
+              Vue consolidée des 4 axes patrimoniaux placés par le cabinet · investissement financier, assurance,
+              investissement immobilier et honoraires de conseil. Synthèse des volumes, revenus perçus et performance par
+              axe.
+            </p>
+          </div>
+          <div className="hero-actions">
+            <button className="btn btn-ghost btn-sm">Export</button>
+          </div>
+        </div>
 
-      <div className="px-10 py-8">
-        <PageHero
-          eyebrow="Développement"
-          title="Encours & assets sous gestion"
-          description="Encours total sous gestion (AUM) du cabinet, répartition par classe d'actifs et par produit. Calculé à partir des souscriptions enregistrées."
-          actions={
-            <ExportButton
-              label="Export encours"
-              filename="encours-cabinet"
-              headers={["Produit", "Contrats", "Encours (€)", "Part"]}
-              rows={hasData ? exportRows : []}
-            />
-          }
-        />
-
-        <section className="mb-8 grid grid-cols-2 gap-3 lg:grid-cols-4">
-          {kpis.map((k) => (
-            <KpiCard key={k.label} kpi={k} />
-          ))}
-        </section>
-
-        {hasData ? (
-          <>
-            <section className="mb-8">
-              <SectionHeader eyebrow="Répartition" title="Par classe d'actifs" />
-              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                {byClass.map((c) => {
-                  const pct = totalAum > 0 ? Math.round((c.aum / totalAum) * 100) : 0;
-                  return (
-                    <div
-                      key={c.key}
-                      className="rounded-md border border-[var(--navy-100)] bg-white p-4"
-                    >
-                      <div className="mb-1 flex items-baseline justify-between">
-                        <div className="text-[13px] font-semibold text-[var(--navy)]">{c.label}</div>
-                        <div className="text-[11px] font-semibold text-[var(--navy-300)]">{pct}%</div>
-                      </div>
-                      <div className="mb-2 text-[22px] font-bold leading-none text-[var(--gold-deep)]">
-                        {fmtEurCell(c.aum)}
-                      </div>
-                      <div className="mb-3 h-1.5 overflow-hidden rounded-full bg-[var(--navy-100)]">
-                        <div
-                          className="h-full rounded-full bg-[var(--gold)]"
-                          style={{ width: `${pct}%` }}
-                        />
-                      </div>
-                      <ul className="space-y-1">
-                        {c.cats.map((cat) => (
-                          <li
-                            key={cat.key}
-                            className="flex items-center justify-between text-[11.5px] text-[var(--navy-300)]"
-                          >
-                            <span>
-                              {cat.label}{" "}
-                              <span className="text-[10px]">
-                                · {cat.subs} contrat{cat.subs > 1 ? "s" : ""}
-                              </span>
-                            </span>
-                            <span className="tabular-nums text-[var(--navy)]">{fmtEurCell(cat.aum)}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  );
-                })}
+        {/* 4 KPIs globaux avec pictogrammes */}
+        <div className="kpis kpis-4 mb-20">
+          <Link
+            href="/espace-dirigeant/assets/financier"
+            className="kpi clickable"
+            style={{ position: "relative" }}
+          >
+            <div
+              style={{
+                position: "absolute",
+                top: "14px",
+                right: "14px",
+                width: "36px",
+                height: "36px",
+                background: "linear-gradient(135deg, var(--gold), var(--gold-deep))",
+                borderRadius: "9px",
+                display: "grid",
+                placeItems: "center",
+                color: "white",
+                boxShadow: "0 2px 6px rgba(198,142,14,0.2)",
+              }}
+            >
+              <svg
+                style={{ width: "18px", height: "18px" }}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <rect x="3" y="4" width="18" height="16" rx="1.5" />
+                <circle cx="11" cy="12" r="3.2" />
+                <line x1="11" y1="12" x2="11" y2="9.5" />
+                <line x1="11" y1="12" x2="13.2" y2="13.5" />
+                <line x1="18.5" y1="7" x2="18.5" y2="10" />
+                <line x1="18.5" y1="14" x2="18.5" y2="17" />
+              </svg>
+            </div>
+            <div className="kpi-label" style={{ paddingRight: "48px" }}>
+              Total revenu Asset · An cumulé
+            </div>
+            <div className="kpi-value">
+              496 500 <span className="unit">€</span>
+            </div>
+            <div className="kpi-meta">commissions + honoraires + frais</div>
+            <div className="kpi-compare">
+              <div className="kpi-compare-cell">
+                <div className="kpi-compare-period">M-1</div>
+                <div className="kpi-compare-value up">▲ +12 %</div>
               </div>
-            </section>
-
-            <section>
-              <SectionHeader eyebrow="Détail" title="Encours par produit" />
-              <div className="overflow-x-auto rounded-md border border-[var(--navy-100)] bg-white">
-                <table className="w-full text-left">
-                  <thead>
-                    <tr className="border-b border-[var(--navy-100)] bg-[var(--ivory)] text-[10.5px] font-bold uppercase tracking-[0.08em] text-[var(--navy-300)]">
-                      <th className="px-4 py-3">Produit</th>
-                      <th className="px-4 py-3 text-right">Contrats</th>
-                      <th className="px-4 py-3 text-right">Encours</th>
-                      <th className="px-4 py-3 text-right">Part</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[var(--navy-100)]">
-                    {byCategory.map((r) => (
-                      <tr key={r.key} className="text-[12px] text-[var(--navy)]">
-                        <td className="px-4 py-3 font-semibold">{r.label}</td>
-                        <td className="px-4 py-3 text-right tabular-nums">{r.subs}</td>
-                        <td className="px-4 py-3 text-right tabular-nums">{fmtEurCell(r.aum)}</td>
-                        <td className="px-4 py-3 text-right tabular-nums">
-                          {totalAum > 0 ? `${Math.round((r.aum / totalAum) * 100)}%` : "—"}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                  <tfoot>
-                    <tr className="border-t border-[var(--navy-100)] bg-[var(--ivory)] text-[12px] font-bold text-[var(--navy)]">
-                      <td className="px-4 py-3">Total</td>
-                      <td className="px-4 py-3 text-right tabular-nums">{totalSubs}</td>
-                      <td className="px-4 py-3 text-right tabular-nums">{fmtEurCell(totalAum)}</td>
-                      <td className="px-4 py-3 text-right tabular-nums">100%</td>
-                    </tr>
-                  </tfoot>
-                </table>
+              <div className="kpi-compare-cell">
+                <div className="kpi-compare-period">N-1</div>
+                <div className="kpi-compare-value up">▲ +18 %</div>
               </div>
-            </section>
-          </>
-        ) : (
-          <EmptyState
-            icon="📊"
-            title="Aucun encours enregistré"
-            hint="L'encours sous gestion se calcule à partir des souscriptions des clients du cabinet. Dès qu'un produit est souscrit dans un dossier, il apparaît ici réparti par classe d'actifs."
-          />
-        )}
+            </div>
+          </Link>
+
+          <div className="kpi" style={{ position: "relative" }}>
+            <div
+              style={{
+                position: "absolute",
+                top: "14px",
+                right: "14px",
+                width: "36px",
+                height: "36px",
+                background: "linear-gradient(135deg, var(--gold), var(--gold-deep))",
+                borderRadius: "9px",
+                display: "grid",
+                placeItems: "center",
+                color: "white",
+                boxShadow: "0 2px 6px rgba(198,142,14,0.2)",
+              }}
+            >
+              <svg
+                style={{ width: "18px", height: "18px" }}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M18.5 6.5 C 16.8 4.8 14.5 4 12 4 C 7.5 4 4.5 7.5 4.5 12 C 4.5 16.5 7.5 20 12 20 C 14.5 20 16.8 19.2 18.5 17.5" />
+                <line x1="3" y1="10" x2="14" y2="10" />
+                <line x1="3" y1="14" x2="14" y2="14" />
+              </svg>
+            </div>
+            <div className="kpi-label" style={{ paddingRight: "48px" }}>
+              Patrimoine sous gestion
+            </div>
+            <div className="kpi-value">
+              8 200 000 <span className="unit">€</span>
+            </div>
+            <div className="kpi-meta">cumul placé via le cabinet</div>
+            <div className="kpi-compare">
+              <div className="kpi-compare-cell">
+                <div className="kpi-compare-period">M-1</div>
+                <div className="kpi-compare-value up">▲ +180 000 €</div>
+              </div>
+              <div className="kpi-compare-cell">
+                <div className="kpi-compare-period">N-1</div>
+                <div className="kpi-compare-value up">▲ +22 %</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="kpi" style={{ position: "relative" }}>
+            <div
+              style={{
+                position: "absolute",
+                top: "14px",
+                right: "14px",
+                width: "36px",
+                height: "36px",
+                background: "linear-gradient(135deg, var(--gold), var(--gold-deep))",
+                borderRadius: "9px",
+                display: "grid",
+                placeItems: "center",
+                color: "white",
+                boxShadow: "0 2px 6px rgba(198,142,14,0.2)",
+              }}
+            >
+              <svg
+                style={{ width: "18px", height: "18px" }}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M7 3 L 7 21 L 17 21 L 17 7 L 13 3 Z" />
+                <line x1="10" y1="11" x2="14" y2="11" />
+                <line x1="10" y1="15" x2="14" y2="15" />
+                <polyline points="13 3 13 7 17 7" />
+              </svg>
+            </div>
+            <div className="kpi-label" style={{ paddingRight: "48px" }}>
+              Contrats actifs
+            </div>
+            <div className="kpi-value">76</div>
+            <div className="kpi-meta">tous axes confondus</div>
+            <div className="kpi-compare">
+              <div className="kpi-compare-cell">
+                <div className="kpi-compare-period">M-1</div>
+                <div className="kpi-compare-value up">▲ +6</div>
+              </div>
+              <div className="kpi-compare-cell">
+                <div className="kpi-compare-period">N-1</div>
+                <div className="kpi-compare-value up">▲ +18</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="kpi" style={{ position: "relative" }}>
+            <div
+              style={{
+                position: "absolute",
+                top: "14px",
+                right: "14px",
+                width: "36px",
+                height: "36px",
+                background: "linear-gradient(135deg, var(--gold), var(--gold-deep))",
+                borderRadius: "9px",
+                display: "grid",
+                placeItems: "center",
+                color: "white",
+                boxShadow: "0 2px 6px rgba(198,142,14,0.2)",
+              }}
+            >
+              <svg
+                style={{ width: "18px", height: "18px" }}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <circle cx="9" cy="8" r="3.5" />
+                <path d="M2.5 21 v -2 a 4 4 0 0 1 4 -4 h 5 a 4 4 0 0 1 4 4 v 2" />
+                <circle cx="17" cy="9" r="2.5" />
+                <path d="M15 21 v -1.5 a 3 3 0 0 1 3 -3 h 1.5 a 3 3 0 0 1 3 3 v 1.5" />
+              </svg>
+            </div>
+            <div className="kpi-label" style={{ paddingRight: "48px" }}>
+              Clients servis
+            </div>
+            <div className="kpi-value">28</div>
+            <div className="kpi-meta">portefeuille actif du cabinet</div>
+            <div className="kpi-compare">
+              <div className="kpi-compare-cell">
+                <div className="kpi-compare-period">M-1</div>
+                <div className="kpi-compare-value up">▲ +2</div>
+              </div>
+              <div className="kpi-compare-cell">
+                <div className="kpi-compare-period">N-1</div>
+                <div className="kpi-compare-value up">▲ +8</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 4 cartes Assets (cliquables) */}
+        <div className="section-block">
+          <div className="section-header">
+            <div>
+              <div className="section-eyebrow">Détail par axe · cumul depuis janvier 2026</div>
+              <div className="section-title">
+                <strong>Les 4 axes du cabinet</strong>
+              </div>
+            </div>
+            <span style={{ fontSize: "11.5px", color: "var(--navy-300)" }}>Cliquer pour voir le détail</span>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
+            {/* Investissement financier */}
+            <Link
+              href="/espace-dirigeant/assets/financier"
+              className="card clickable"
+              style={{ borderLeft: "4px solid var(--gold)", cursor: "pointer" }}
+            >
+              <div className="card-header">
+                <div className="card-title">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    style={{ width: "18px", height: "18px" }}
+                  >
+                    <path d="M3 18 V 8 L 9 8 V 18 Z M 10 18 V 4 L 16 4 V 18 Z M 17 18 V 12 L 23 12 V 18 Z" />
+                  </svg>
+                  Investissement financier
+                </div>
+                <span style={{ fontSize: "18px", color: "var(--gold)" }}>→</span>
+              </div>
+              <div className="card-body" style={{ padding: "18px 22px" }}>
+                <div
+                  style={{
+                    fontFamily: "'Epilogue',sans-serif",
+                    fontSize: "32px",
+                    fontWeight: 700,
+                    color: "var(--navy)",
+                    lineHeight: 1,
+                  }}
+                >
+                  233 700 <span style={{ fontSize: "14px", color: "var(--gold-deep)" }}>€</span>
+                </div>
+                <div style={{ fontSize: "11.5px", color: "var(--navy-300)", marginTop: "6px" }}>
+                  An cumulé · frais d&apos;entrée + récurrence
+                </div>
+                <div
+                  style={{
+                    display: "flex",
+                    gap: "18px",
+                    marginTop: "14px",
+                    paddingTop: "14px",
+                    borderTop: "1px solid var(--ivory-deep)",
+                    fontSize: "11px",
+                  }}
+                >
+                  <div>
+                    <div style={{ color: "var(--navy-300)" }}>Frais d&apos;entrée</div>
+                    <strong style={{ fontSize: "13px" }}>185 000 €</strong>
+                  </div>
+                  <div>
+                    <div style={{ color: "var(--navy-300)" }}>Récurrence</div>
+                    <strong style={{ fontSize: "13px" }}>48 700 €</strong>
+                  </div>
+                  <div>
+                    <div style={{ color: "var(--navy-300)" }}>Patrimoine</div>
+                    <strong style={{ fontSize: "13px" }}>5 800 000 €</strong>
+                  </div>
+                </div>
+              </div>
+            </Link>
+
+            {/* Assurance */}
+            <Link
+              href="/espace-dirigeant/assets/assurance"
+              className="card clickable"
+              style={{ borderLeft: "4px solid var(--gold)", cursor: "pointer" }}
+            >
+              <div className="card-header">
+                <div className="card-title">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    style={{ width: "18px", height: "18px" }}
+                  >
+                    <path d="M12 2 L 4 5 V 11 C 4 16 8 20 12 22 C 16 20 20 16 20 11 V 5 Z" />
+                    <polyline points="8 12 11 15 16 9" />
+                  </svg>
+                  Assurance
+                </div>
+                <span style={{ fontSize: "18px", color: "var(--gold)" }}>→</span>
+              </div>
+              <div className="card-body" style={{ padding: "18px 22px" }}>
+                <div
+                  style={{
+                    fontFamily: "'Epilogue',sans-serif",
+                    fontSize: "32px",
+                    fontWeight: 700,
+                    color: "var(--navy)",
+                    lineHeight: 1,
+                  }}
+                >
+                  68 400 <span style={{ fontSize: "14px", color: "var(--gold-deep)" }}>€</span>
+                </div>
+                <div style={{ fontSize: "11.5px", color: "var(--navy-300)", marginTop: "6px" }}>
+                  An cumulé · frais d&apos;entrée + commissions
+                </div>
+                <div
+                  style={{
+                    display: "flex",
+                    gap: "18px",
+                    marginTop: "14px",
+                    paddingTop: "14px",
+                    borderTop: "1px solid var(--ivory-deep)",
+                    fontSize: "11px",
+                  }}
+                >
+                  <div>
+                    <div style={{ color: "var(--navy-300)" }}>Contrats actifs</div>
+                    <strong style={{ fontSize: "13px" }}>38</strong>
+                  </div>
+                  <div>
+                    <div style={{ color: "var(--navy-300)" }}>Frais d&apos;entrée</div>
+                    <strong style={{ fontSize: "13px" }}>68 400 €</strong>
+                  </div>
+                  <div>
+                    <div style={{ color: "var(--navy-300)" }}>Récurrence</div>
+                    <strong style={{ fontSize: "13px" }}>14 200 €</strong>
+                  </div>
+                </div>
+              </div>
+            </Link>
+
+            {/* Investissement immobilier */}
+            <Link
+              href="/espace-dirigeant/assets/immobilier"
+              className="card clickable"
+              style={{ borderLeft: "4px solid var(--gold)", cursor: "pointer" }}
+            >
+              <div className="card-header">
+                <div className="card-title">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    style={{ width: "18px", height: "18px" }}
+                  >
+                    <path d="M3 9 L 12 3 L 21 9 V 21 H 3 Z M 9 21 V 12 H 15 V 21" />
+                  </svg>
+                  Investissement immobilier
+                </div>
+                <span style={{ fontSize: "18px", color: "var(--gold)" }}>→</span>
+              </div>
+              <div className="card-body" style={{ padding: "18px 22px" }}>
+                <div
+                  style={{
+                    fontFamily: "'Epilogue',sans-serif",
+                    fontSize: "32px",
+                    fontWeight: 700,
+                    color: "var(--navy)",
+                    lineHeight: 1,
+                  }}
+                >
+                  32 400 <span style={{ fontSize: "14px", color: "var(--gold-deep)" }}>€</span>
+                </div>
+                <div style={{ fontSize: "11.5px", color: "var(--navy-300)", marginTop: "6px" }}>
+                  An cumulé · rémunération apport
+                </div>
+                <div
+                  style={{
+                    display: "flex",
+                    gap: "18px",
+                    marginTop: "14px",
+                    paddingTop: "14px",
+                    borderTop: "1px solid var(--ivory-deep)",
+                    fontSize: "11px",
+                  }}
+                >
+                  <div>
+                    <div style={{ color: "var(--navy-300)" }}>Frais d&apos;entrée perçus</div>
+                    <strong style={{ fontSize: "13px" }}>32 400 €</strong>
+                  </div>
+                  <div>
+                    <div style={{ color: "var(--navy-300)" }}>Volume placé</div>
+                    <strong style={{ fontSize: "13px" }}>600 000 €</strong>
+                  </div>
+                  <div>
+                    <div style={{ color: "var(--navy-300)" }}>Projets réalisés</div>
+                    <strong style={{ fontSize: "13px" }}>2</strong>
+                  </div>
+                </div>
+              </div>
+            </Link>
+
+            {/* Honoraires de conseil */}
+            <Link
+              href="/espace-dirigeant/assets/honoraires"
+              className="card clickable"
+              style={{ borderLeft: "4px solid var(--gold)", cursor: "pointer" }}
+            >
+              <div className="card-header">
+                <div className="card-title">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    style={{ width: "18px", height: "18px" }}
+                  >
+                    <path d="M7 3 H 17 V 21 H 7 Z" />
+                    <line x1="10" y1="8" x2="14" y2="8" />
+                    <line x1="10" y1="12" x2="14" y2="12" />
+                    <line x1="10" y1="16" x2="14" y2="16" />
+                  </svg>
+                  Honoraires de conseil
+                </div>
+                <span style={{ fontSize: "18px", color: "var(--gold)" }}>→</span>
+              </div>
+              <div className="card-body" style={{ padding: "18px 22px" }}>
+                <div
+                  style={{
+                    fontFamily: "'Epilogue',sans-serif",
+                    fontSize: "32px",
+                    fontWeight: 700,
+                    color: "var(--navy)",
+                    lineHeight: 1,
+                  }}
+                >
+                  162 400 <span style={{ fontSize: "14px", color: "var(--gold-deep)" }}>€</span>
+                </div>
+                <div style={{ fontSize: "11.5px", color: "var(--navy-300)", marginTop: "6px" }}>
+                  An cumulé · honoraires études patrimoniales
+                </div>
+                <div
+                  style={{
+                    display: "flex",
+                    gap: "18px",
+                    marginTop: "14px",
+                    paddingTop: "14px",
+                    borderTop: "1px solid var(--ivory-deep)",
+                    fontSize: "11px",
+                  }}
+                >
+                  <div>
+                    <div style={{ color: "var(--navy-300)" }}>Études réalisées</div>
+                    <strong style={{ fontSize: "13px" }}>14</strong>
+                  </div>
+                  <div>
+                    <div style={{ color: "var(--navy-300)" }}>Frais d&apos;études</div>
+                    <strong style={{ fontSize: "13px" }}>162 400 €</strong>
+                  </div>
+                  <div>
+                    <div style={{ color: "var(--navy-300)" }}>Honoraire moyen</div>
+                    <strong style={{ fontSize: "13px" }}>11 600 €</strong>
+                  </div>
+                </div>
+              </div>
+            </Link>
+          </div>
+        </div>
       </div>
     </>
   );

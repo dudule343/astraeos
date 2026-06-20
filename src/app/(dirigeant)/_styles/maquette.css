@@ -1,0 +1,479 @@
+/* PORTÉ MÉCANIQUEMENT depuis reference/wireframes-dirigeant.html (tous les <style>).
+   Ne pas éditer à la main : régénéré par scripts/scope-dirigeant-css.mjs.
+   Tous les sélecteurs sont scopés sous .maquette-dir (sauf :root et @keyframes). */
+
+:root {
+    --navy: #102D50; --navy-300: #708196; --navy-200: #A4AEBB; --navy-100: #DBE0E4; --navy-deep: #0A1F3A;
+    --gold: #C68E0E; --gold-300: #DDBB6E; --gold-200: #EEDDB6; --gold-100: #F8EFD8; --gold-deep: #A57608;
+    --light-blue: #EBF1FA; --ivory: #FAF8F3; --ivory-deep: #F2EEE3; --medium-400: #695D30;
+    --green-bg: #DDE9D7; --green-text: #4F6B3F;
+    --red-bg: #F5DDD7; --red-text: #8B3A2A;
+    --orange-bg: #FBE7CE; --orange-text: #8B5A2A;
+    --purple-bg: #E5DCEB; --purple-text: #5B3A6E;
+    --sidebar-w: 280px; --content-pad: 48px;
+    --serif: 'Cormorant Garamond', Georgia, serif;
+  }.maquette-dir * { box-sizing: border-box; margin: 0; padding: 0; }.maquette-dir, .maquette-dir { font-family: 'Epilogue', sans-serif; background: var(--ivory); color: #333; font-size: 14px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+
+  /* === RAFFINEMENT V2 PRIVEOS : titres serif, accents gold renforcés === */
+  .maquette-dir .v2-serif { font-family: var(--serif); font-weight: 600; letter-spacing: -0.005em; }.maquette-dir .gold-rule { height: 1px; background: linear-gradient(90deg, var(--gold) 0%, transparent 100%); margin: 14px 0; }.maquette-dir .gold-accent { color: var(--gold); font-family: 'Epilogue', sans-serif; font-style: normal; font-weight: 700; }
+  /* Police pour grands chiffres : Epilogue gras (pas serif italique) */
+  .maquette-dir .figure-big { font-family: 'Epilogue', sans-serif; font-weight: 700; letter-spacing: -0.02em; line-height: 1; font-feature-settings: 'tnum' on; color: var(--navy); }.maquette-dir .figure-big .currency { color: var(--gold); font-weight: 600; margin-left: 4px; }
+
+  /* INTRO */
+  .maquette-dir .doc-intro { background: linear-gradient(135deg, var(--navy) 0%, #1a3866 100%); color: white; padding: 56px 48px; text-align: center; }.maquette-dir .doc-intro-eyebrow { font-size: 10px; font-weight: 700; color: var(--gold-300); letter-spacing: 0.22em; text-transform: uppercase; margin-bottom: 14px; }.maquette-dir .doc-intro h1 { font-size: 32px; font-weight: 600; letter-spacing: -0.018em; line-height: 1.18; margin-bottom: 10px; }.maquette-dir .doc-intro h1 strong { color: var(--gold-300); font-weight: 700; }.maquette-dir .doc-intro p { font-size: 14.5px; color: rgba(255,255,255,0.72); max-width: 720px; margin: 0 auto; line-height: 1.6; }.maquette-dir .doc-intro-meta { display: flex; justify-content: center; gap: 28px; margin-top: 22px; font-size: 11.5px; flex-wrap: wrap; }.maquette-dir .doc-intro-meta span { display: inline-flex; align-items: center; gap: 6px; color: rgba(255,255,255,0.6); }.maquette-dir .doc-intro-meta strong { color: var(--gold-300); font-weight: 700; }.maquette-dir .doc-intro-cta { margin-top: 28px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }.maquette-dir .doc-intro-cta a { display: inline-flex; align-items: center; gap: 7px; padding: 8px 14px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: white; text-decoration: none; border-radius: 5px; font-size: 12px; font-weight: 500; }.maquette-dir .doc-intro-cta a:hover { background: rgba(255,255,255,0.12); }.maquette-dir .doc-intro-cta a.primary { background: var(--gold); border-color: var(--gold); font-weight: 700; }
+
+  /* APP */
+  .maquette-dir .app { display: flex; min-height: 100vh; }
+
+  /* SIDEBAR */
+  .maquette-dir .sidebar { width: var(--sidebar-w); border-right: 1px solid var(--navy-100); padding: 28px 16px 32px; flex-shrink: 0; background: var(--ivory); position: sticky; top: 0; height: 100vh; overflow-y: auto; }.maquette-dir .sidebar::-webkit-scrollbar { width: 4px; }.maquette-dir .sidebar::-webkit-scrollbar-thumb { background: var(--navy-100); border-radius: 2px; }.maquette-dir .brand { margin-bottom: 26px; padding: 0 8px; }.maquette-dir .brand-row { display: flex; align-items: center; gap: 10px; }.maquette-dir .brand-mark { width: 30px; height: 34px; background: linear-gradient(180deg, var(--gold), var(--medium-400)); border-radius: 4px; color: white; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 16px; }.maquette-dir .brand-name { font-weight: 700; font-size: 19px; color: var(--navy); letter-spacing: 0.08em; }.maquette-dir .brand-sub { font-size: 9px; font-weight: 600; color: var(--navy-300); letter-spacing: 0.22em; text-transform: uppercase; margin-left: 40px; margin-top: 3px; }.maquette-dir .nav-section { margin-bottom: 18px; }.maquette-dir .nav-section-header { font-size: 9.5px; font-weight: 700; color: var(--navy-300); letter-spacing: 0.18em; text-transform: uppercase; padding: 0 12px; margin-bottom: 6px; display: flex; align-items: center; gap: 7px; }.maquette-dir .nav-subgroup-header { font-size: 9px; font-weight: 700; color: var(--gold-deep); letter-spacing: 0.14em; text-transform: uppercase; padding: 10px 12px 4px 12px; margin-top: 4px; border-top: 1px dashed var(--gold-200); position: relative; }.maquette-dir .nav-subgroup-header::before { content: ''; position: absolute; left: 12px; top: 9px; height: 1px; background: var(--gold-200); width: 14px; display: none; }.maquette-dir .nav-item-sub { padding-left: 20px !important; }.maquette-dir .nav-item-sub .nav-item-icon { opacity: 0.85; }.maquette-dir .nav-section-header .dot { width: 4px; height: 4px; border-radius: 50%; background: var(--gold); }.maquette-dir .nav-item { display: flex; align-items: center; gap: 10px; padding: 7px 12px; border-radius: 5px; font-size: 12.5px; color: var(--navy); cursor: pointer; margin-bottom: 1px; transition: background 0.12s; border: none; background: transparent; width: 100%; text-align: left; font-family: inherit; text-decoration: none; line-height: 1.3; }.maquette-dir .nav-item:hover { background: var(--light-blue); }.maquette-dir .nav-item.active { background: var(--navy); color: white; font-weight: 500; }.maquette-dir .nav-item-num { font-size: 9.5px; font-weight: 700; flex-shrink: 0; width: 22px; text-align: center; background: var(--gold-200); color: var(--medium-400); border-radius: 3px; padding: 1px 0; letter-spacing: 0.06em; }.maquette-dir .nav-item.active .nav-item-num { background: var(--gold); color: white; }.maquette-dir .nav-item-icon { width: 18px; height: 18px; flex-shrink: 0; color: var(--navy-300); }.maquette-dir .nav-item.active .nav-item-icon { color: var(--gold-300); }.maquette-dir .nav-badge { margin-left: auto; background: var(--gold); color: var(--ivory); font-size: 9.5px; font-weight: 700; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }.maquette-dir .nav-badge.alert { background: var(--red-text); }.maquette-dir .nav-badge.new { background: var(--green-text); }
+
+  /* MAIN */
+  .maquette-dir .main { flex: 1; min-width: 0; }.maquette-dir .topbar { display: flex; align-items: center; gap: 14px; padding: 14px var(--content-pad); border-bottom: 1px solid var(--navy-100); background: var(--ivory); position: sticky; top: 0; z-index: 10; }.maquette-dir .breadcrumb { flex: 1; display: flex; align-items: center; gap: 10px; font-size: 12.5px; color: var(--navy-300); }.maquette-dir .breadcrumb a { color: var(--navy-300); text-decoration: none; cursor: pointer; }.maquette-dir .breadcrumb a:hover { color: var(--gold); }.maquette-dir .breadcrumb .current { color: var(--navy); font-weight: 600; }.maquette-dir .breadcrumb .sep { opacity: 0.5; }.maquette-dir .topbar-right { display: flex; align-items: center; gap: 10px; }
+
+  /* SÉLECTEUR DE DATE GLOBAL */
+  .maquette-dir .date-selector { position: relative; }.maquette-dir .date-selector-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 7px 12px; height: 34px;
+    background: linear-gradient(135deg, var(--ivory), var(--gold-200));
+    border: 1px solid var(--gold-300);
+    border-radius: 6px;
+    font-size: 11.5px; font-weight: 600;
+    color: var(--medium-400);
+    cursor: pointer;
+    font-family: inherit;
+  }.maquette-dir .date-selector-btn:hover { border-color: var(--gold); }.maquette-dir .date-selector-btn svg { width: 14px; height: 14px; color: var(--gold); }.maquette-dir .date-selector-btn-period { font-weight: 500; color: var(--navy-300); font-size: 10.5px; }.maquette-dir .date-popover {
+    display: none;
+    position: absolute; top: calc(100% + 4px); right: 0;
+    width: 360px;
+    background: white;
+    border: 1px solid var(--navy-100);
+    border-radius: 8px;
+    box-shadow: 0 6px 24px rgba(16,45,80,0.12);
+    z-index: 100;
+    padding: 16px;
+  }.maquette-dir .date-popover.open { display: block; }.maquette-dir .date-popover-section { margin-bottom: 14px; }.maquette-dir .date-popover-section:last-child { margin-bottom: 0; }.maquette-dir .date-popover-label { font-size: 9.5px; font-weight: 700; color: var(--navy-300); letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 8px; }.maquette-dir .date-quick-options { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }.maquette-dir .date-quick-option {
+    padding: 6px 0; text-align: center;
+    font-size: 11px; font-weight: 600;
+    background: var(--ivory); border: 1px solid var(--navy-100);
+    border-radius: 4px; cursor: pointer; color: var(--navy);
+    font-family: inherit;
+  }.maquette-dir .date-quick-option:hover { background: var(--light-blue); border-color: var(--gold); }.maquette-dir .date-quick-option.active { background: var(--navy); color: white; border-color: var(--navy); }.maquette-dir .date-range-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }.maquette-dir .date-range-input {
+    width: 100%;
+    padding: 6px 10px;
+    border: 1px solid var(--navy-100);
+    border-radius: 5px;
+    font-size: 11.5px; color: var(--navy);
+    font-family: inherit; background: white;
+  }.maquette-dir .date-compare-options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }.maquette-dir .date-popover-actions { display: flex; gap: 6px; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--navy-100); }.maquette-dir .icon-btn { width: 34px; height: 34px; border: 1px solid var(--navy-100); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: var(--navy); cursor: pointer; background: white; position: relative; }.maquette-dir .icon-btn .dot { position: absolute; top: 7px; right: 8px; width: 5px; height: 5px; background: var(--gold); border-radius: 50%; }.maquette-dir .user-pill { display: flex; align-items: center; gap: 9px; padding: 4px 14px 4px 4px; border: 1px solid var(--navy-100); border-radius: 24px; background: white; cursor: pointer; }.maquette-dir .user-avatar { width: 26px; height: 26px; border-radius: 50%; background: var(--navy); color: var(--gold); font-weight: 700; font-size: 10.5px; display: flex; align-items: center; justify-content: center; border: 1.5px solid var(--gold); flex-shrink: 0; }.maquette-dir .user-name { font-size: 12.5px; font-weight: 500; color: var(--navy); }.maquette-dir .content { padding: 32px var(--content-pad) 72px; max-width: 1700px; }.maquette-dir .page { display: none; }.maquette-dir .page.active { display: block; }
+
+  /* HERO sur une ligne */
+  .maquette-dir .hero { display: grid; grid-template-columns: 1fr auto; gap: 40px; margin-bottom: 24px; align-items: center; padding-bottom: 18px; border-bottom: 1px solid var(--navy-100); }.maquette-dir .hero-eyebrow { font-size: 10.5px; font-weight: 700; color: var(--gold); letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 10px; display: flex; align-items: center; gap: 9px; }.maquette-dir .hero-eyebrow::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--gold); }.maquette-dir .hero-title { font-family: var(--serif); font-size: 38px; font-weight: 600; color: var(--navy); line-height: 1.12; letter-spacing: -0.015em; margin-bottom: 10px; }.maquette-dir .hero-title em, .maquette-dir .hero-title strong { font-style: normal; font-weight: 700; color: var(--navy); }.maquette-dir .hero-title .gold-word { color: var(--gold); font-weight: 700; }.maquette-dir .hero-sub { font-size: 13.5px; color: var(--navy-300); max-width: 1100px; line-height: 1.5; }.maquette-dir .hero-actions { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+
+  /* BUTTONS */
+  .maquette-dir .btn { display: inline-flex; align-items: center; gap: 7px; padding: 8px 14px; border-radius: 6px; font-size: 12.5px; font-weight: 600; font-family: inherit; border: 1px solid transparent; cursor: pointer; text-decoration: none; transition: all 0.15s; line-height: 1.4; }.maquette-dir .btn-primary { background: var(--navy); color: white; }.maquette-dir .btn-primary:hover { background: #1a3866; }.maquette-dir .btn-gold { background: var(--gold); color: white; }.maquette-dir .btn-gold:hover { background: #d39817; }.maquette-dir .btn-ghost { background: white; color: var(--navy); border-color: var(--navy-100); }.maquette-dir .btn-ghost:hover { border-color: var(--gold); color: var(--gold); }.maquette-dir .btn-sm { padding: 6px 11px; font-size: 11.5px; }.maquette-dir .btn svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+  /* KPIs */
+  .maquette-dir .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }.maquette-dir .kpis-3 { grid-template-columns: repeat(3, 1fr); }.maquette-dir .kpis-5 { grid-template-columns: repeat(5, 1fr); }.maquette-dir .kpis-6 { grid-template-columns: repeat(6, 1fr); gap: 10px; }.maquette-dir .kpis-7 { grid-template-columns: repeat(7, 1fr); gap: 10px; }.maquette-dir .kpi { background: white; border: 1px solid var(--navy-100); border-radius: 8px; padding: 16px 18px; transition: box-shadow 0.15s; cursor: default; position: relative; }.maquette-dir .kpi.clickable { cursor: pointer; }.maquette-dir .kpi.clickable:hover { box-shadow: 0 2px 8px rgba(16,45,80,0.08); border-color: var(--gold); }.maquette-dir .kpi-label { font-size: 9.5px; font-weight: 700; color: var(--gold); letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 8px; line-height: 1.3; }.maquette-dir .kpi-value { font-size: 24px; font-weight: 600; color: var(--navy); letter-spacing: -0.018em; line-height: 1; font-feature-settings: 'tnum' on; margin-bottom: 6px; }.maquette-dir .kpi-value .unit { font-size: 13px; color: var(--navy-300); font-weight: 500; }.maquette-dir .kpi-meta { font-size: 11px; color: var(--navy-300); line-height: 1.4; }.maquette-dir .kpi-meta strong { color: var(--gold); font-weight: 700; }.maquette-dir .kpi-meta strong.alert { color: var(--red-text); }.maquette-dir .kpi-meta strong.up { color: var(--green-text); }.maquette-dir .kpi-meta strong.down { color: var(--red-text); }.maquette-dir .kpis-6 .kpi, .maquette-dir .kpis-7 .kpi { padding: 14px; }.maquette-dir .kpis-6 .kpi-value, .maquette-dir .kpis-7 .kpi-value { font-size: 20px; }.maquette-dir .kpis-6 .kpi-label, .maquette-dir .kpis-7 .kpi-label { font-size: 9px; letter-spacing: 0.1em; }
+
+  /* KPI compare M-1 / N-1 */
+  .maquette-dir .kpi-compare { display: grid; grid-template-columns: 1fr 1fr; gap: 0; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--navy-100); }.maquette-dir .kpi-compare-cell { font-size: 9.5px; line-height: 1.3; }.maquette-dir .kpi-compare-cell:first-child { border-right: 1px solid var(--navy-100); padding-right: 6px; }.maquette-dir .kpi-compare-cell:last-child { padding-left: 6px; }.maquette-dir .kpi-compare-period { color: var(--navy-300); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; font-size: 8.5px; margin-bottom: 2px; }.maquette-dir .kpi-compare-value { color: var(--navy); font-weight: 600; font-size: 11px; font-feature-settings: 'tnum' on; }.maquette-dir .kpi-compare-value.up { color: var(--green-text); }.maquette-dir .kpi-compare-value.down { color: var(--red-text); }
+
+  /* Phase tag */
+  .maquette-dir .phase-tag { position: absolute; top: 8px; right: 8px; font-size: 8.5px; font-weight: 700; letter-spacing: 0.06em; padding: 2px 6px; border-radius: 3px; text-transform: uppercase; }.maquette-dir .phase-tag.p1 { background: var(--green-bg); color: var(--green-text); }.maquette-dir .phase-tag.p2 { background: var(--purple-bg); color: var(--purple-text); }
+
+  /* BADGES */
+  .maquette-dir .badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 12px; font-size: 10.5px; font-weight: 700; line-height: 1.4; white-space: nowrap; letter-spacing: 0.04em; text-transform: uppercase; }.maquette-dir .badge-success { background: var(--green-bg); color: var(--green-text); }.maquette-dir .badge-danger { background: var(--red-bg); color: var(--red-text); }.maquette-dir .badge-warning { background: var(--orange-bg); color: var(--orange-text); }.maquette-dir .badge-info { background: var(--light-blue); color: var(--navy); }.maquette-dir .badge-gold { background: var(--gold-200); color: var(--medium-400); }.maquette-dir .badge-purple { background: var(--purple-bg); color: var(--purple-text); }.maquette-dir .badge-neutral { background: var(--navy-100); color: var(--navy-300); }.maquette-dir .badge-dot::before { content: ''; display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+
+  /* CARDS */
+  .maquette-dir .card { background: white; border: 1px solid var(--navy-100); border-radius: 8px; overflow: hidden; }.maquette-dir .card-header { padding: 14px 20px; border-bottom: 1px solid var(--navy-100); display: flex; align-items: center; justify-content: space-between; gap: 12px; }.maquette-dir .card-title { font-size: 14px; font-weight: 700; color: var(--navy); display: flex; align-items: center; gap: 9px; }.maquette-dir .card-title svg { width: 18px; height: 18px; color: var(--gold); flex-shrink: 0; }.maquette-dir .card-subtitle { font-size: 11.5px; color: var(--navy-300); margin-top: 2px; }.maquette-dir .card-body { padding: 18px 20px; }.maquette-dir .section-block { margin-bottom: 26px; }.maquette-dir .section-header { margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; }.maquette-dir .section-eyebrow { font-size: 10px; font-weight: 700; color: var(--gold); letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 5px; display: flex; align-items: center; gap: 7px; }.maquette-dir .section-eyebrow::before { content: ''; width: 4px; height: 4px; border-radius: 50%; background: var(--gold); }.maquette-dir .section-title { font-family: var(--serif); font-size: 22px; font-weight: 700; color: var(--navy); letter-spacing: -0.01em; }.maquette-dir .section-title em, .maquette-dir .section-title strong { font-style: normal; font-weight: 700; color: var(--navy); }.maquette-dir .section-title .gold-word { color: var(--gold); font-weight: 700; }
+
+  /* TABLES */
+  .maquette-dir .table-wrap { background: white; border: 1px solid var(--navy-100); border-radius: 8px; overflow: hidden; }.maquette-dir .table-toolbar { padding: 12px 16px; border-bottom: 1px solid var(--navy-100); display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; background: var(--ivory); }.maquette-dir .table-toolbar-left { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }.maquette-dir .table-toolbar-right { display: flex; gap: 8px; align-items: center; }.maquette-dir .qf { display: inline-flex; align-items: center; gap: 5px; padding: 4px 11px; background: white; border: 1px solid var(--navy-100); border-radius: 4px; font-size: 11.5px; color: var(--navy); cursor: pointer; font-weight: 500; font-family: inherit; }.maquette-dir .qf:hover { border-color: var(--gold); }.maquette-dir .qf.active { background: var(--navy); color: white; border-color: var(--navy); }.maquette-dir .qf-count { background: var(--navy-100); color: var(--navy-300); padding: 0 5px; border-radius: 8px; font-size: 9.5px; font-weight: 700; }.maquette-dir .qf.active .qf-count { background: var(--gold); color: white; }.maquette-dir .search-input { border: 1px solid var(--navy-100); background: white; padding: 5px 10px 5px 28px; border-radius: 4px; font-size: 12px; color: var(--navy); width: 220px; font-family: inherit; }.maquette-dir .search-wrap { position: relative; }.maquette-dir .search-wrap svg { position: absolute; left: 9px; top: 50%; transform: translateY(-50%); color: var(--navy-300); width: 14px; height: 14px; pointer-events: none; }.maquette-dir table.dt { width: 100%; border-collapse: collapse; font-size: 12.5px; }.maquette-dir table.dt thead { background: var(--navy); }.maquette-dir table.dt thead th { padding: 10px 16px; text-align: left; color: white; font-weight: 600; font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.06em; white-space: nowrap; }.maquette-dir table.dt thead th.num, .maquette-dir table.dt tbody td.num { text-align: right; font-feature-settings: 'tnum' on; }.maquette-dir table.dt thead th.center, .maquette-dir table.dt tbody td.center { text-align: center; }.maquette-dir table.dt tbody td { padding: 10px 16px; border-bottom: 1px solid var(--navy-100); vertical-align: middle; color: #333; }.maquette-dir table.dt tbody tr:nth-child(even) { background: var(--ivory); }.maquette-dir table.dt tbody tr.dt-clickable { cursor: pointer; }.maquette-dir table.dt tbody tr.dt-clickable:hover { background: var(--light-blue); }.maquette-dir table.dt tbody tr:last-child td { border-bottom: none; }.maquette-dir td.cell-id { font-family: 'JetBrains Mono', monospace; color: var(--navy-300); font-size: 11px; }.maquette-dir td.cell-primary { font-weight: 600; color: var(--navy); }.maquette-dir td.cell-money { font-weight: 600; color: var(--navy); font-feature-settings: 'tnum' on; }.maquette-dir td.cell-money.gold { color: var(--gold); }.maquette-dir tr.dt-section td { background: linear-gradient(90deg, var(--gold-200) 0%, var(--ivory) 100%) !important; color: var(--medium-400); font-weight: 700; font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; padding: 10px 16px; border-bottom: 1px solid var(--gold-300) !important; }
+
+  /* TABS */
+  .maquette-dir .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--navy-100); margin-bottom: 20px; overflow-x: auto; }.maquette-dir .tab { padding: 9px 16px; font-size: 12.5px; font-weight: 500; color: var(--navy-300); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; white-space: nowrap; background: none; border-top: none; border-left: none; border-right: none; font-family: inherit; }.maquette-dir .tab:hover { color: var(--navy); }.maquette-dir .tab.active { color: var(--navy); border-bottom-color: var(--gold); font-weight: 700; }.maquette-dir .tab-panel { display: none; }.maquette-dir .tab-panel.active { display: block; }
+
+  /* TT pills */
+  .maquette-dir .tt { display: inline-flex; align-items: center; gap: 5px; padding: 2px 9px; border-radius: 10px; font-size: 10.5px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }.maquette-dir .tt-marque { background: var(--gold-200); color: var(--medium-400); }.maquette-dir .tt-cabinet { background: var(--light-blue); color: var(--navy); }.maquette-dir .tt-pro { background: var(--purple-bg); color: var(--purple-text); }
+
+  /* Logos */
+  .maquette-dir .tlogo { width: 32px; height: 32px; border-radius: 6px; display: grid; place-items: center; font-size: 12px; font-weight: 800; color: white; flex-shrink: 0; }.maquette-dir .tlogo-priveos { background: linear-gradient(135deg, #102D50, #1a3866); }.maquette-dir .tlogo-dupont { background: linear-gradient(135deg, #5B3A6E, #7e5293); }.maquette-dir .tlogo-montblanc { background: linear-gradient(135deg, #475467, #667085); }.maquette-dir .tlogo-1 { background: linear-gradient(135deg, var(--gold), var(--gold-300)); }.maquette-dir .tlogo-2 { background: linear-gradient(135deg, var(--green-text), #6B8B5A); }.maquette-dir .tlogo-3 { background: linear-gradient(135deg, #1a3866, #2E4163); }.maquette-dir .tlogo-pro { background: linear-gradient(135deg, var(--purple-text), #7e5293); }.maquette-dir .tlogo-sm { width: 26px; height: 26px; font-size: 10px; border-radius: 5px; }
+
+  /* GRIDS */
+  .maquette-dir .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }.maquette-dir .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }.maquette-dir .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }.maquette-dir .grid-2-1 { display: grid; grid-template-columns: 2fr 1fr; gap: 14px; }.maquette-dir .grid-1-2 { display: grid; grid-template-columns: 1fr 2fr; gap: 14px; }.maquette-dir .mb-12 { margin-bottom: 12px; }.maquette-dir .mb-16 { margin-bottom: 16px; }.maquette-dir .mb-20 { margin-bottom: 20px; }.maquette-dir .mb-24 { margin-bottom: 24px; }.maquette-dir .mb-32 { margin-bottom: 32px; }
+
+  /* Charts */
+  .maquette-dir .chart-area { position: relative; height: 180px; background: var(--ivory); border-radius: 6px; padding: 14px; }.maquette-dir .chart-bars { display: flex; align-items: flex-end; gap: 6px; height: 100%; padding: 0 4px; }.maquette-dir .chart-bar { flex: 1; background: linear-gradient(180deg, var(--gold) 0%, var(--gold-300) 100%); border-radius: 2px 2px 0 0; position: relative; min-height: 4px; }.maquette-dir .chart-bar.navy { background: linear-gradient(180deg, var(--navy) 0%, #1a3866 100%); }.maquette-dir .chart-bar.green { background: linear-gradient(180deg, var(--green-text) 0%, #6B8B5A 100%); }.maquette-dir .chart-bar-label { position: absolute; bottom: -22px; left: 0; right: 0; text-align: center; font-size: 10px; color: var(--navy-300); }
+
+  /* Info bar */
+  .maquette-dir .info-bar { background: linear-gradient(135deg, var(--ivory), #FFFCF5); border: 1px solid var(--gold-300); border-left: 4px solid var(--gold); border-radius: 8px; padding: 12px 18px; margin-bottom: 18px; display: flex; align-items: center; gap: 12px; font-size: 12.5px; }.maquette-dir .info-bar.alert { background: linear-gradient(135deg, var(--red-bg), #FCE8E0); border-color: var(--red-bg); border-left-color: var(--red-text); }.maquette-dir .info-bar.success { background: linear-gradient(135deg, var(--green-bg), #E8F0DF); border-color: var(--green-bg); border-left-color: var(--green-text); }.maquette-dir .info-bar svg { width: 20px; height: 20px; color: var(--gold); flex-shrink: 0; }.maquette-dir .info-bar.alert svg { color: var(--red-text); }.maquette-dir .info-bar.success svg { color: var(--green-text); }.maquette-dir .info-bar strong { color: var(--navy); }
+
+  /* Forms */
+  .maquette-dir .form-group { margin-bottom: 14px; }.maquette-dir .form-label { display: block; font-size: 11.5px; font-weight: 700; color: var(--navy); letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 6px; }.maquette-dir .form-label .req { color: var(--red-text); margin-left: 2px; }.maquette-dir .form-help { font-size: 11.5px; color: var(--navy-300); margin-top: 4px; line-height: 1.4; }.maquette-dir .form-input, .maquette-dir .form-select, .maquette-dir .form-textarea { width: 100%; padding: 8px 12px; border: 1px solid var(--navy-100); border-radius: 5px; font-size: 13px; color: var(--navy); font-family: inherit; background: white; }.maquette-dir .form-input:focus, .maquette-dir .form-select:focus, .maquette-dir .form-textarea:focus { outline: none; border-color: var(--gold); }.maquette-dir .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }.maquette-dir .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+
+  /* Wizard ACCORDÉON v5 */
+  .maquette-dir .wizard-step-card {
+    background: white;
+    border: 1px solid var(--navy-100);
+    border-radius: 8px;
+    margin-bottom: 10px;
+    overflow: hidden;
+    transition: all 0.2s;
+  }.maquette-dir .wizard-step-card.active {
+    border-color: var(--gold);
+    border-width: 2px;
+    box-shadow: 0 4px 16px rgba(198,142,14,0.08);
+  }.maquette-dir .wizard-step-card.completed { border-left: 4px solid var(--green-text); }.maquette-dir .wizard-step-header {
+    display: flex; align-items: center; gap: 14px;
+    padding: 14px 20px;
+    cursor: pointer;
+    background: white;
+    transition: background 0.15s;
+  }.maquette-dir .wizard-step-card.active .wizard-step-header { background: linear-gradient(135deg, var(--ivory), var(--gold-200)); }.maquette-dir .wizard-step-card:not(.active) .wizard-step-header:hover { background: var(--ivory); }.maquette-dir .wizard-step-num {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    display: grid; place-items: center;
+    font-size: 13px; font-weight: 700;
+    background: var(--ivory); color: var(--navy-300);
+    border: 1.5px solid var(--navy-100);
+    flex-shrink: 0;
+  }.maquette-dir .wizard-step-card.active .wizard-step-num {
+    background: var(--gold); color: white; border-color: var(--gold);
+  }.maquette-dir .wizard-step-card.completed .wizard-step-num {
+    background: var(--green-text); color: white; border-color: var(--green-text);
+  }.maquette-dir .wizard-step-info { flex: 1; min-width: 0; }.maquette-dir .wizard-step-title {
+    font-size: 14px; font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 2px;
+  }.maquette-dir .wizard-step-desc {
+    font-size: 11.5px;
+    color: var(--navy-300);
+  }.maquette-dir .wizard-step-status {
+    flex-shrink: 0;
+    display: flex; align-items: center; gap: 8px;
+  }.maquette-dir .wizard-step-toggle {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--ivory);
+    border: 1px solid var(--navy-100);
+    display: grid; place-items: center;
+    color: var(--navy-300);
+    transition: transform 0.2s;
+  }.maquette-dir .wizard-step-card.active .wizard-step-toggle { transform: rotate(180deg); background: var(--gold); color: white; border-color: var(--gold); }.maquette-dir .wizard-step-toggle svg { width: 14px; height: 14px; }.maquette-dir .wizard-step-body {
+    display: none;
+    padding: 0 20px 20px;
+    border-top: 1px solid var(--navy-100);
+  }.maquette-dir .wizard-step-card.active .wizard-step-body { display: block; padding-top: 18px; }
+
+  /* Kanban */
+  .maquette-dir .kanban-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }.maquette-dir .kb-col { background: var(--ivory); border: 1px solid var(--navy-100); border-radius: 8px; padding: 14px; min-height: 240px; }.maquette-dir .kb-col-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; padding: 0 4px; }.maquette-dir .kb-col-title { font-size: 11px; font-weight: 700; color: var(--gold); letter-spacing: 0.14em; text-transform: uppercase; display: flex; align-items: center; gap: 6px; }.maquette-dir .kb-col-title svg { width: 14px; height: 14px; }.maquette-dir .kb-col-count { font-size: 11px; font-weight: 700; color: var(--navy); background: white; padding: 2px 9px; border-radius: 10px; border: 1px solid var(--navy-100); }.maquette-dir .kb-card { background: white; border: 1px solid var(--navy-100); border-radius: 6px; padding: 10px 12px; margin-bottom: 8px; cursor: pointer; transition: all 0.15s; }.maquette-dir .kb-card:hover { border-color: var(--gold); box-shadow: 0 2px 8px rgba(16,45,80,0.06); }.maquette-dir .kb-card-title { font-size: 12px; font-weight: 600; color: var(--navy); margin-bottom: 4px; }.maquette-dir .kb-card-meta { font-size: 10.5px; color: var(--navy-300); display: flex; gap: 6px; align-items: center; }.maquette-dir .kb-card-amount { font-weight: 700; color: var(--gold); font-size: 12px; margin-top: 4px; }
+
+  /* Pack cards premium */
+  .maquette-dir .pack-card { background: white; border: 1px solid var(--navy-100); border-radius: 10px; padding: 22px 22px 20px; transition: all 0.2s; position: relative; overflow: hidden; }.maquette-dir .pack-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--gold), var(--gold-300)); opacity: 0; transition: opacity 0.2s; }.maquette-dir .pack-card:hover { border-color: var(--gold); box-shadow: 0 4px 16px rgba(16,45,80,0.08); transform: translateY(-1px); }.maquette-dir .pack-card:hover::before { opacity: 1; }.maquette-dir .pack-card-icon { width: 48px; height: 48px; border-radius: 10px; background: linear-gradient(135deg, var(--ivory), var(--gold-200)); color: var(--gold); display: grid; place-items: center; margin-bottom: 16px; border: 1px solid var(--gold-300); }.maquette-dir .pack-card-icon svg { width: 24px; height: 24px; }.maquette-dir .pack-card-name { font-size: 14.5px; font-weight: 700; color: var(--navy); margin-bottom: 6px; letter-spacing: -0.01em; }.maquette-dir .pack-card-desc { font-size: 12px; color: var(--navy-300); line-height: 1.5; margin-bottom: 16px; min-height: 36px; }.maquette-dir .pack-card-bullets { list-style: none; margin-bottom: 16px; }.maquette-dir .pack-card-bullets li { font-size: 11.5px; color: var(--navy); padding: 3px 0 3px 16px; position: relative; }.maquette-dir .pack-card-bullets li::before { content: ''; position: absolute; left: 2px; top: 8px; width: 4px; height: 4px; border-radius: 50%; background: var(--gold); }.maquette-dir .pack-card-meta { display: flex; justify-content: space-between; align-items: center; padding-top: 14px; border-top: 1px solid var(--navy-100); font-size: 11.5px; color: var(--navy-300); }.maquette-dir .pack-card-price { font-size: 16px; font-weight: 700; color: var(--gold); }.maquette-dir .pack-card-price-period { font-size: 11px; color: var(--navy-300); font-weight: 500; }.maquette-dir .pack-pricing-tag { position: absolute; top: 16px; right: 16px; padding: 3px 9px; border-radius: 12px; font-size: 9.5px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }.maquette-dir .pack-pricing-tag.recur { background: var(--gold-200); color: var(--medium-400); }.maquette-dir .pack-pricing-tag.once { background: var(--purple-bg); color: var(--purple-text); }.maquette-dir .pack-pricing-tag.unit { background: var(--light-blue); color: var(--navy); }.maquette-dir .pack-pricing-tag.partner { background: var(--green-bg); color: var(--green-text); }
+
+  /* Alert list */
+  .maquette-dir .alert-item { padding: 11px 16px; border-bottom: 1px solid var(--navy-100); cursor: pointer; }.maquette-dir .alert-item:last-child { border-bottom: none; }.maquette-dir .alert-item:hover { background: var(--ivory); }.maquette-dir .alert-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; font-size: 10.5px; color: var(--navy-300); }.maquette-dir .alert-title { font-size: 12.5px; font-weight: 600; color: var(--navy); }.maquette-dir .alert-sub { font-size: 11.5px; color: var(--navy-300); margin-top: 2px; }
+
+  /* Pipeline stepper */
+  .maquette-dir .pipeline-stepper { display: grid; grid-template-columns: repeat(2, 1fr); background: white; border: 1px solid var(--navy-100); border-radius: 10px; padding: 14px 0; margin-bottom: 18px; overflow: hidden; }.maquette-dir .stepper-item { padding: 14px 16px; border-right: 1px solid var(--navy-100); display: flex; flex-direction: column; gap: 6px; cursor: pointer; transition: all 0.15s; }.maquette-dir .stepper-item:last-child { border-right: none; }.maquette-dir .stepper-item:hover { background: var(--light-blue); }.maquette-dir .stepper-item.active { background: linear-gradient(135deg, var(--ivory), var(--gold-200)); }.maquette-dir .stepper-badge { width: 36px; height: 36px; border-radius: 50%; background: var(--ivory); border: 1.5px solid var(--gold-300); color: var(--gold); display: flex; align-items: center; justify-content: center; margin-bottom: 4px; }.maquette-dir .stepper-badge svg { width: 18px; height: 18px; }.maquette-dir .stepper-item.active .stepper-badge { background: var(--gold); color: white; border-color: var(--gold); }.maquette-dir .stepper-label { font-size: 10.5px; font-weight: 600; color: var(--navy-300); letter-spacing: 0.04em; line-height: 1.3; }.maquette-dir .stepper-item.active .stepper-label { color: var(--navy); font-weight: 700; }.maquette-dir .stepper-count { font-size: 16px; font-weight: 700; color: var(--navy); font-feature-settings: 'tnum' on; }.maquette-dir .stepper-item.active .stepper-count { color: var(--medium-400); }.maquette-dir .stepper-meta { font-size: 10.5px; color: var(--navy-300); }
+
+  /* Pipeline 6 colonnes (acquisition) */
+  .maquette-dir .pipeline-6 { display: grid; grid-template-columns: repeat(6, 1fr); }
+
+  /* Funnel */
+  .maquette-dir .funnel-stage { display: flex; align-items: center; gap: 14px; padding: 14px 18px; background: white; border: 1px solid var(--navy-100); border-radius: 8px; margin-bottom: 6px; position: relative; }.maquette-dir .funnel-bar { height: 8px; background: var(--navy-100); border-radius: 4px; overflow: hidden; flex: 1; }.maquette-dir .funnel-bar-fill { height: 100%; background: linear-gradient(90deg, var(--gold), var(--gold-300)); }.maquette-dir .funnel-label { width: 200px; font-size: 12.5px; font-weight: 600; color: var(--navy); }.maquette-dir .funnel-num { width: 100px; text-align: right; font-size: 14px; font-weight: 700; color: var(--navy); font-feature-settings: 'tnum' on; }.maquette-dir .funnel-pct { width: 80px; text-align: right; font-size: 11.5px; color: var(--navy-300); }
+
+  /* SCORE PREMIUM */
+  .maquette-dir .score-premium { position: relative; width: 160px; height: 160px; margin: 0 auto; }.maquette-dir .score-premium svg { width: 100%; height: 100%; }.maquette-dir .score-premium-track { fill: none; stroke: var(--navy-100); stroke-width: 8; }.maquette-dir .score-premium-fill { fill: none; stroke: url(#scoreGradient); stroke-width: 8; stroke-linecap: round; transform: rotate(-90deg); transform-origin: center; filter: drop-shadow(0 2px 4px rgba(198,142,14,0.3)); }.maquette-dir .score-premium-center { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; flex-direction: column; }.maquette-dir .score-premium-num { font-size: 38px; font-weight: 700; color: var(--navy); letter-spacing: -0.02em; line-height: 1; font-feature-settings: 'tnum' on; }.maquette-dir .score-premium-num .unit-small { font-size: 14px; color: var(--navy-300); font-weight: 500; }.maquette-dir .score-premium-label { font-size: 9px; color: var(--gold); letter-spacing: 0.18em; text-transform: uppercase; margin-top: 6px; font-weight: 700; }
+
+  /* Score block list */
+  .maquette-dir .score-block-list { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }.maquette-dir .score-block-item { padding: 14px 18px; border-bottom: 1px solid var(--navy-100); cursor: pointer; transition: background 0.15s; display: flex; align-items: center; gap: 14px; }.maquette-dir .score-block-item:nth-child(odd) { border-right: 1px solid var(--navy-100); }.maquette-dir .score-block-item:hover { background: var(--ivory); }.maquette-dir .score-block-icon { width: 36px; height: 36px; border-radius: 8px; background: linear-gradient(135deg, var(--ivory), var(--gold-200)); border: 1px solid var(--gold-300); display: grid; place-items: center; color: var(--gold); flex-shrink: 0; }.maquette-dir .score-block-icon svg { width: 18px; height: 18px; }.maquette-dir .score-block-content { flex: 1; min-width: 0; }.maquette-dir .score-block-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }.maquette-dir .score-block-name { font-size: 12px; font-weight: 600; color: var(--navy); line-height: 1.3; }.maquette-dir .score-block-num { font-size: 13px; font-weight: 700; flex-shrink: 0; margin-left: 8px; font-feature-settings: 'tnum' on; }.maquette-dir .score-block-num.green { color: var(--green-text); }.maquette-dir .score-block-num.orange { color: var(--orange-text); }.maquette-dir .score-block-num.red { color: var(--red-text); }.maquette-dir .score-block-bar { height: 4px; background: var(--navy-100); border-radius: 2px; overflow: hidden; }.maquette-dir .score-block-bar-fill { height: 100%; border-radius: 2px; }.maquette-dir .score-block-bar-fill.green { background: var(--green-text); }.maquette-dir .score-block-bar-fill.orange { background: var(--orange-text); }.maquette-dir .score-block-bar-fill.red { background: var(--red-text); }
+
+  /* Icon badges */
+  .maquette-dir .icon-badge { width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, var(--ivory), var(--gold-200)); border: 1px solid var(--gold-300); display: grid; place-items: center; color: var(--gold); flex-shrink: 0; }.maquette-dir .icon-badge svg { width: 16px; height: 16px; }.maquette-dir .icon-badge.lg { width: 44px; height: 44px; border-radius: 10px; }.maquette-dir .icon-badge.lg svg { width: 22px; height: 22px; }.maquette-dir .icon-badge.navy { background: linear-gradient(135deg, var(--navy), #1a3866); border-color: var(--navy); color: var(--gold-300); }.maquette-dir svg.ico { width: 16px; height: 16px; flex-shrink: 0; }.maquette-dir .arrow-up { color: var(--green-text); }.maquette-dir .arrow-down { color: var(--red-text); }
+
+  /* Roadmap */
+  .maquette-dir .roadmap-col { background: var(--ivory); border: 1px solid var(--navy-100); border-radius: 8px; padding: 14px; }.maquette-dir .roadmap-col-header { font-size: 11px; font-weight: 700; color: var(--gold); letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 12px; padding: 0 4px; display: flex; justify-content: space-between; align-items: center; }.maquette-dir .roadmap-card { background: white; border: 1px solid var(--navy-100); border-radius: 6px; padding: 12px; margin-bottom: 8px; }.maquette-dir .roadmap-card-title { font-size: 12.5px; font-weight: 600; color: var(--navy); margin-bottom: 4px; }.maquette-dir .roadmap-card-meta { font-size: 10.5px; color: var(--navy-300); }
+
+  /* === Parrainage cards === */
+  .maquette-dir .referral-card {
+    background: white;
+    border: 1px solid var(--navy-100);
+    border-radius: 8px;
+    padding: 18px;
+    transition: all 0.15s;
+  }.maquette-dir .referral-card:hover { border-color: var(--gold); box-shadow: 0 2px 8px rgba(16,45,80,0.06); }.maquette-dir .referral-card-link {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 12px;
+    background: var(--ivory);
+    border: 1px dashed var(--gold-300);
+    border-radius: 5px;
+    margin: 10px 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    color: var(--navy);
+    cursor: pointer;
+  }.maquette-dir .referral-card-link:hover { background: var(--gold-200); }.maquette-dir .row-recommender {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 3px 9px;
+    background: linear-gradient(135deg, var(--ivory), var(--gold-200));
+    border: 1px solid var(--gold-300);
+    border-radius: 12px;
+    font-size: 10.5px; font-weight: 700;
+    color: var(--medium-400);
+  }.maquette-dir .row-recommender svg { width: 11px; height: 11px; color: var(--gold); }
+
+  /* === Team category headers === */
+  .maquette-dir .team-category-header {
+    background: linear-gradient(90deg, var(--navy) 0%, #1a3866 100%);
+    color: white;
+    padding: 10px 16px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }.maquette-dir .team-category-header svg { width: 14px; height: 14px; color: var(--gold-300); }.maquette-dir .team-category-header .count {
+    margin-left: auto;
+    background: var(--gold);
+    padding: 1px 9px;
+    border-radius: 10px;
+    font-size: 9.5px;
+  }
+
+  /* Compact KPI for finance details */
+  .maquette-dir .finance-detail-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--navy-100);
+  }.maquette-dir .finance-detail-row:last-child { border-bottom: none; }.maquette-dir .finance-detail-label { font-size: 12px; color: var(--navy); font-weight: 500; }.maquette-dir .finance-detail-value { font-size: 13px; color: var(--navy); font-weight: 700; font-feature-settings: 'tnum' on; }.maquette-dir .finance-detail-pct { font-size: 11px; color: var(--navy-300); margin-left: 8px; }
+
+  /* === v6 : Drawer drilldown équipe === */
+  .maquette-dir .team-drawer {
+    display: none;
+    position: fixed;
+    top: 0; right: 0; bottom: 0;
+    width: 540px; max-width: 92vw;
+    background: var(--ivory);
+    border-left: 1px solid var(--navy-100);
+    box-shadow: -4px 0 24px rgba(16,45,80,0.12);
+    z-index: 200;
+    overflow-y: auto;
+    padding: 0;
+  }.maquette-dir .team-drawer.open { display: block; animation: slideInDrawer 0.22s ease-out; }
+  @keyframes slideInDrawer { from { transform: translateX(40px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }.maquette-dir .team-drawer-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(16,45,80,0.32);
+    z-index: 199;
+    backdrop-filter: blur(2px);
+  }.maquette-dir .team-drawer-overlay.open { display: block; }.maquette-dir .team-drawer-header {
+    background: linear-gradient(135deg, var(--navy) 0%, #1a3866 100%);
+    color: white;
+    padding: 24px;
+    position: sticky; top: 0; z-index: 1;
+  }.maquette-dir .team-drawer-close {
+    position: absolute; top: 14px; right: 14px;
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.1);
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    display: grid; place-items: center;
+  }.maquette-dir .team-drawer-close:hover { background: rgba(255,255,255,0.2); }.maquette-dir .team-drawer-avatar {
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    background: var(--gold);
+    color: var(--navy);
+    display: grid; place-items: center;
+    font-weight: 700; font-size: 22px;
+    border: 2px solid var(--gold-300);
+    margin-bottom: 14px;
+  }.maquette-dir .team-drawer-name { font-size: 20px; font-weight: 700; color: white; }.maquette-dir .team-drawer-role { font-size: 13px; color: var(--gold-300); margin-top: 3px; }.maquette-dir .team-drawer-contact {
+    display: flex; gap: 14px;
+    margin-top: 14px;
+    font-size: 11.5px;
+    color: rgba(255,255,255,0.7);
+  }.maquette-dir .team-drawer-contact span { display: inline-flex; align-items: center; gap: 5px; }.maquette-dir .team-drawer-body { padding: 20px 24px; }.maquette-dir .activity-week-grid {
+    display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px;
+    margin-bottom: 14px;
+  }.maquette-dir .activity-day {
+    aspect-ratio: 1;
+    border-radius: 4px;
+    display: grid; place-items: center;
+    font-size: 11px; font-weight: 700;
+    color: var(--navy);
+  }.maquette-dir .activity-day.activity-0 { background: var(--ivory); border: 1px solid var(--navy-100); color: var(--navy-300); }.maquette-dir .activity-day.activity-1 { background: var(--gold-200); border: 1px solid var(--gold-300); }.maquette-dir .activity-day.activity-2 { background: var(--gold-300); border: 1px solid var(--gold); color: var(--medium-400); }.maquette-dir .activity-day.activity-3 { background: var(--gold); color: white; border: 1px solid var(--gold); }
+
+  /* === v6 : Stepper item cliquable highlight === */
+  .maquette-dir .stepper-item.filtering { background: linear-gradient(135deg, var(--ivory), var(--gold-200)) !important; box-shadow: inset 0 0 0 2px var(--gold); }
+
+  /* === v6 : Pack ranking row === */
+  .maquette-dir .pack-rank-row {
+    display: grid;
+    grid-template-columns: 36px 1fr auto auto;
+    gap: 14px;
+    align-items: center;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--navy-100);
+    transition: background 0.12s;
+  }.maquette-dir .pack-rank-row:hover { background: var(--ivory); }.maquette-dir .pack-rank-num {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--ivory);
+    border: 1.5px solid var(--gold-300);
+    display: grid; place-items: center;
+    font-size: 11px; font-weight: 700;
+    color: var(--gold);
+  }.maquette-dir .pack-rank-row:nth-child(1) .pack-rank-num, .maquette-dir .pack-rank-row:nth-child(2) .pack-rank-num, .maquette-dir .pack-rank-row:nth-child(3) .pack-rank-num { background: var(--gold); color: white; border-color: var(--gold); }.maquette-dir .pack-rank-name { font-size: 12.5px; font-weight: 600; color: var(--navy); }.maquette-dir .pack-rank-bar {
+    width: 180px; height: 6px;
+    background: var(--navy-100);
+    border-radius: 3px; overflow: hidden;
+  }.maquette-dir .pack-rank-bar-fill { height: 100%; background: linear-gradient(90deg, var(--gold), var(--gold-300)); }.maquette-dir .pack-rank-pct { font-size: 12px; font-weight: 700; color: var(--gold); min-width: 56px; text-align: right; font-feature-settings: 'tnum' on; }.maquette-dir .pack-rank-ca { font-size: 11.5px; color: var(--navy-300); min-width: 80px; text-align: right; font-feature-settings: 'tnum' on; }
+
+  /* === v6 : Modal édition prévisionnel === */
+  .maquette-dir .previ-edit-row {
+    display: none;
+    background: linear-gradient(135deg, var(--ivory) 0%, var(--gold-200) 100%);
+    border-left: 4px solid var(--gold);
+    padding: 18px 24px;
+  }.maquette-dir .previ-edit-row.open { display: table-row; }.maquette-dir .previ-edit-row td { padding: 0 !important; }.maquette-dir .previ-edit-content { padding: 18px 24px; }.maquette-dir .previ-edit-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+
+  /* === v6 : pill cumul === */
+  .maquette-dir .ytd-pill { display: inline-flex; align-items: center; gap: 4px; padding: 1px 8px; background: var(--gold-200); color: var(--medium-400); border-radius: 10px; font-size: 9.5px; font-weight: 700; letter-spacing: 0.04em; }
+
+  /* === V3 : CSS PIPELINE V1 — repris fidèlement === */
+  .maquette-dir .pipeline-stepper-v1 {
+    background: white;
+    border: 1px solid var(--navy-100);
+    border-radius: 8px;
+    padding: 16px 20px;
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 0;
+    margin-bottom: 22px;
+  }.maquette-dir .stepper-item-v1 {
+    padding: 10px 12px 8px;
+    border-right: 1px solid var(--navy-100);
+    cursor: pointer;
+    transition: background 0.15s;
+    position: relative;
+  }.maquette-dir .stepper-item-v1:last-child { border-right: none; }.maquette-dir .stepper-item-v1:hover { background: var(--light-blue); border-radius: 5px; }.maquette-dir .stepper-item-v1:hover .stepper-badge-v1 { transform: scale(1.05); }.maquette-dir .stepper-item-v1.active { background: linear-gradient(135deg, var(--ivory) 0%, var(--gold-200) 100%); border-radius: 5px; border-right: none; }.maquette-dir .stepper-item-v1.active + .stepper-item-v1 { border-left: 1px solid var(--navy-100); }.maquette-dir .stepper-badge-v1 {
+    position: relative; width: 40px; height: 40px; border-radius: 50%;
+    background: var(--gold-200); border: 1.5px solid var(--gold-300); color: var(--medium-400);
+    display: flex; align-items: center; justify-content: center; margin-bottom: 10px;
+    transition: all 0.2s ease; box-shadow: 0 1px 3px rgba(198,142,14,0.10);
+  }.maquette-dir .stepper-badge-v1 svg { width: 20px; height: 20px; }.maquette-dir .stepper-badge-v1::before {
+    content: attr(data-step); position: absolute; top: -4px; right: -5px;
+    background: white; color: var(--gold); font-size: 8px; font-weight: 800;
+    letter-spacing: 0.08em; padding: 2px 5px; border-radius: 8px;
+    border: 1.2px solid var(--gold); line-height: 1; box-shadow: 0 1px 2px rgba(16,45,80,0.08);
+  }.maquette-dir .stepper-item-v1.active .stepper-badge-v1 {
+    background: linear-gradient(135deg, var(--gold) 0%, var(--medium-400) 100%);
+    border-color: var(--gold); color: white;
+    box-shadow: 0 2px 8px rgba(198,142,14,0.30);
+  }.maquette-dir .stepper-item-v1.active .stepper-badge-v1::before {
+    background: var(--gold); color: white; border-color: white;
+    box-shadow: 0 1px 3px rgba(198,142,14,0.25);
+  }.maquette-dir .stepper-label-v1 { font-size: 11px; font-weight: 600; color: var(--navy-300); letter-spacing: 0.04em; line-height: 1.3; }.maquette-dir .stepper-item-v1.active .stepper-label-v1 { color: var(--navy); font-weight: 700; }.maquette-dir .stepper-count-v1 { font-size: 13px; font-weight: 700; color: var(--navy); margin-top: 4px; font-feature-settings: 'tnum' on; }.maquette-dir .stepper-item-v1.active .stepper-count-v1 { color: var(--medium-400); }
+
+  /* HERO V1 (avec period control) */
+  .maquette-dir .hero-v1 { display: grid; grid-template-columns: 1fr auto; gap: 40px; margin-bottom: 28px; align-items: end; }.maquette-dir .hero-eyebrow-v1 { font-size: 10.5px; font-weight: 700; color: var(--gold); letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 14px; display: flex; align-items: center; gap: 9px; }.maquette-dir .hero-eyebrow-v1::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--gold); }.maquette-dir .step-pill-v1 { background: var(--gold-200); color: var(--medium-400); padding: 2px 8px; border-radius: 3px; font-weight: 700; }
+
+  /* Period control */
+  .maquette-dir .period-control { background: linear-gradient(135deg, var(--ivory) 0%, #FFFCF5 100%); border: 1px solid var(--gold-300); border-left: 4px solid var(--gold); border-radius: 8px; padding: 16px 20px 14px; min-width: 280px; max-width: 320px; }.maquette-dir .period-control-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }.maquette-dir .period-control-icon { width: 28px; height: 28px; border-radius: 6px; background: var(--gold); color: white; display: flex; align-items: center; justify-content: center; }.maquette-dir .period-control-icon svg { width: 14px; height: 14px; stroke-width: 2; }.maquette-dir .period-control-label { font-size: 9.5px; font-weight: 700; color: var(--gold); letter-spacing: 0.18em; text-transform: uppercase; }.maquette-dir .period-control-sub { font-size: 10.5px; color: var(--navy-300); margin-top: 8px; line-height: 1.4; }.maquette-dir .date-picker-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 12px; border: 1px solid var(--navy-100); border-radius: 6px; background: white; font-size: 13px; font-weight: 600; color: var(--navy); cursor: pointer; transition: all 0.15s; font-family: inherit; justify-content: space-between; }.maquette-dir .date-picker-btn:hover { border-color: var(--gold); }.maquette-dir .date-picker-btn svg { width: 12px; height: 12px; stroke-width: 2; }
+
+  /* CLIENT/CABINET/INGÉNIEUR cells v1 */
+  .maquette-dir .client-cell { display: flex; flex-direction: column; gap: 2px; min-width: 180px; }.maquette-dir .client-name { font-weight: 600; color: var(--navy); line-height: 1.35; }.maquette-dir .client-name-line { font-weight: 600; color: var(--navy); line-height: 1.35; display: block; }.maquette-dir .client-name-line + .client-name-line { margin-top: 1px; }.maquette-dir .client-type { font-size: 10.5px; color: var(--navy-300); letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600; margin-top: 3px; align-self: flex-start; }.maquette-dir .client-type.couple { color: var(--gold); }.maquette-dir .client-type.personne-morale { display: inline-block; padding: 2px 8px; background: var(--navy); color: white; border-radius: 3px; letter-spacing: 0.06em; font-weight: 700; align-self: flex-start; width: fit-content; }.maquette-dir .cabinet-cell { display: flex; flex-direction: column; gap: 1px; }.maquette-dir .cabinet-cell .name { font-weight: 600; color: var(--navy); font-size: 12.5px; }.maquette-dir .cabinet-cell .city { font-size: 10.5px; color: var(--navy-300); }.maquette-dir .ingenieur-cell { display: flex; align-items: center; gap: 9px; white-space: nowrap; }.maquette-dir .ingenieur-avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--light-blue); color: var(--navy); font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 1.5px solid var(--gold-300); }.maquette-dir .ingenieur-name { font-size: 12.5px; font-weight: 500; color: var(--navy); }.maquette-dir .study-type { display: inline-block; padding: 3px 9px; border-radius: 3px; font-size: 10.5px; font-weight: 600; letter-spacing: 0.04em; white-space: nowrap; }.maquette-dir .study-type.patrimoine { background: rgba(198,142,14,0.12); color: var(--medium-400); }.maquette-dir .study-type.immo-direct { background: var(--light-blue); color: var(--navy); }.maquette-dir .study-type.fin-direct { background: rgba(16,45,80,0.08); color: var(--navy); }.maquette-dir .study-type.assurance { background: var(--green-bg); color: var(--green-text); }.maquette-dir .study-type.societe { background: var(--gold-200); color: var(--medium-400); }.maquette-dir .date-cell { font-size: 12.5px; color: var(--navy); font-weight: 500; font-feature-settings: 'tnum' on; }.maquette-dir .date-cell.alert { color: var(--red-text); font-weight: 700; }.maquette-dir .date-cell-meta { font-size: 10.5px; color: var(--navy-300); margin-top: 1px; }.maquette-dir .date-cell.alert + .date-cell-meta { color: var(--red-text); font-weight: 600; }.maquette-dir .progress-cell { min-width: 130px; display: flex; flex-direction: column; gap: 4px; }.maquette-dir .progress-bar { height: 6px; background: var(--navy-100); border-radius: 3px; overflow: hidden; }.maquette-dir .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--gold-300), var(--gold)); border-radius: 3px; }.maquette-dir .progress-bar-fill.complete { background: linear-gradient(90deg, #94d077, var(--green-text)); }.maquette-dir .progress-bar-fill.alert { background: linear-gradient(90deg, #d97a5b, var(--red-text)); }.maquette-dir .progress-text { display: flex; justify-content: space-between; font-size: 11px; color: var(--navy-300); }.maquette-dir .progress-text .pct { font-weight: 700; color: var(--navy); font-feature-settings: 'tnum' on; }
+
+  /* Status pills v1 */
+  .maquette-dir .status-pill-v1 { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px 3px 9px; border-radius: 12px; font-size: 10.5px; font-weight: 600; letter-spacing: 0.04em; white-space: nowrap; }.maquette-dir .status-pill-v1::before { content: ''; width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }.maquette-dir .status-pill-v1.met { background: var(--light-blue); color: var(--navy); }.maquette-dir .status-pill-v1.met::before { background: var(--navy); }.maquette-dir .status-pill-v1.sent { background: var(--gold-200); color: var(--medium-400); }.maquette-dir .status-pill-v1.sent::before { background: var(--gold); }.maquette-dir .status-pill-v1.waiting { background: rgba(112,129,150,0.15); color: var(--navy-300); }.maquette-dir .status-pill-v1.waiting::before { background: var(--navy-300); }.maquette-dir .status-pill-v1.relance { background: var(--green-bg); color: var(--green-text); }.maquette-dir .status-pill-v1.relance::before { background: var(--green-text); }.maquette-dir .status-pill-v1.dormant { background: var(--red-bg); color: var(--red-text); }.maquette-dir .status-pill-v1.dormant::before { background: var(--red-text); }.maquette-dir .status-pill-v1.signed { background: var(--green-bg); color: var(--green-text); }.maquette-dir .status-pill-v1.signed::before { background: var(--green-text); }.maquette-dir .status-pill-v1.paid { background: rgba(198,142,14,0.18); color: var(--medium-400); }.maquette-dir .status-pill-v1.paid::before { background: var(--gold); }
+
+  /* Quick filters v1 (légère variante visuelle) */
+  .maquette-dir .qf-bar-v1 { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }.maquette-dir .qf-v1 { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; background: white; border: 1px solid var(--navy-100); border-radius: 18px; font-size: 12px; font-weight: 600; color: var(--navy); cursor: pointer; transition: all 0.15s; font-family: inherit; }.maquette-dir .qf-v1:hover { border-color: var(--gold); }.maquette-dir .qf-v1.active { background: var(--navy); color: white; border-color: var(--navy); }.maquette-dir .qf-v1 .qf-count { background: var(--ivory); color: var(--navy-300); font-weight: 700; font-size: 10.5px; padding: 1px 7px; border-radius: 9px; font-feature-settings: 'tnum' on; }.maquette-dir .qf-v1.active .qf-count { background: var(--gold); color: white; }.maquette-dir .qf-v1.alert { border-color: var(--red-bg); }.maquette-dir .qf-v1.alert .qf-count { background: var(--red-bg); color: var(--red-text); }
+
+  /* Action buttons v1 */
+  .maquette-dir .actions-cell { display: flex; gap: 4px; }.maquette-dir .action-btn { width: 28px; height: 28px; border: 1px solid var(--navy-100); border-radius: 5px; background: white; color: var(--navy-300); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.15s; }.maquette-dir .action-btn:hover { border-color: var(--gold); color: var(--gold); }.maquette-dir .action-btn svg { width: 12px; height: 12px; stroke-width: 2; fill: none; stroke: currentColor; }
+
+
+  /* Colorations rangées tableau selon type client */
+  .maquette-dir .pipe-row-couple { background: rgba(255, 232, 174, 0.22) !important; }.maquette-dir .pipe-row-pm { background: rgba(112, 129, 150, 0.10) !important; border-left: 3px solid var(--navy) !important; }.maquette-dir .pipe-row-seul { background: rgba(235, 241, 250, 0.55) !important; }.maquette-dir .pipe-row-couple:hover { background: rgba(255, 232, 174, 0.35) !important; }.maquette-dir .pipe-row-pm:hover { background: rgba(112, 129, 150, 0.18) !important; }.maquette-dir .pipe-row-seul:hover { background: rgba(235, 241, 250, 0.85) !important; }
+  /* Étoiles trustpilot : empêcher le retour à la ligne */
+  .maquette-dir .trustpilot-stars { white-space: nowrap; display: inline-block; }
+
+
+    /* Toggle Rôle Dirigeant / Ingénieur */
+    .maquette-dir .role-toggle-wrap { padding: 14px 12px; margin-bottom: 12px; background: var(--navy); border-radius: 8px; }.maquette-dir .role-toggle-label { font-size: 9px; font-weight: 700; color: var(--gold-300); letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 8px; padding: 0 2px; }.maquette-dir .role-toggle { display: flex; gap: 4px; background: rgba(255,255,255,0.06); border-radius: 6px; padding: 3px; }.maquette-dir .role-toggle-btn { flex: 1; padding: 8px 10px; background: transparent; border: none; color: rgba(255,255,255,0.65); font-family: inherit; font-size: 11.5px; font-weight: 600; cursor: pointer; border-radius: 5px; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.18s; }.maquette-dir .role-toggle-btn svg { width: 13px; height: 13px; }.maquette-dir .role-toggle-btn:hover { color: white; background: rgba(255,255,255,0.06); }.maquette-dir .role-toggle-btn.active { background: var(--gold); color: white; font-weight: 700; box-shadow: 0 1px 2px rgba(0,0,0,0.15); }
+    /* Nav items Doc 3 désactivés */
+    .maquette-dir .nav-item[disabled] { opacity: 0.55; cursor: not-allowed; }.maquette-dir .nav-item[disabled]:hover { background: transparent; }.maquette-dir .nav-item[disabled] .nav-badge { background: var(--gold-100); color: var(--gold-deep); border: 1px solid var(--gold-200); font-size: 8.5px; }
+
+
+/* ---- bloc <style> suivant ---- */
+
+
+          .maquette-dir .hover-month .hover-tooltip { visibility: hidden; pointer-events: none; }.maquette-dir .hover-month:hover .hover-tooltip { visibility: visible; }.maquette-dir .hover-month:hover .hover-zone { fill: rgba(198,142,14,0.06); }.maquette-dir .hover-month .hover-zone { cursor: pointer; }.maquette-dir .ve-toggle-btn { padding:14px; border-radius:8px; font-size:13px; font-weight:700; font-family:inherit; cursor:pointer; transition:all 0.15s; }.maquette-dir .ve-toggle-btn.active { background:var(--navy); color:white; border:1px solid var(--navy); }.maquette-dir .ve-toggle-btn:not(.active) { background:white; color:var(--navy); border:1px solid var(--navy-100); font-weight:600; }.maquette-dir .ve-toggle-btn:not(.active):hover { border-color:var(--gold); }.maquette-dir .ve-graph-block { display:none; }.maquette-dir .ve-graph-block.active { display:block; }
+        
+
+/* ---- bloc <style> suivant ---- */
+
+
+          .maquette-dir .cdr-table { table-layout: fixed; width: 100%; font-size: 12.5px; }.maquette-dir .cdr-table thead tr { height: 60px; }.maquette-dir .cdr-table thead th { padding: 10px 10px !important; vertical-align: middle; background: var(--ivory); color: var(--navy); font-size: 13px; font-weight: 700; line-height: 1.25; }.maquette-dir .cdr-table thead th .sub { font-weight: 400; color: var(--navy-300); font-size: 11px; display: block; margin-top: 3px; }.maquette-dir .cdr-table thead tr.cdr-thead-supra th { height: 36px; }.maquette-dir .cdr-table thead tr.cdr-thead-supra { height: 36px; }.maquette-dir .cdr-table thead th.divider { border-left: 2px solid var(--navy-100); }.maquette-dir .cdr-table tbody tr { height: 38px; }.maquette-dir .cdr-table tbody td { padding: 8px 10px !important; vertical-align: middle; line-height: 1.2; border-bottom: 1px solid var(--ivory-deep); font-size: 12px; }.maquette-dir .cdr-table tbody td.divider { border-left: 2px solid var(--navy-100); }.maquette-dir .cdr-table tbody td.label-cell { color: var(--navy); }.maquette-dir .cdr-table tbody td.num { text-align: right; }.maquette-dir .cdr-table tbody td.cell-prev { color: var(--navy-300); }.maquette-dir .cdr-table tbody tr.kpi-line { background: var(--navy) !important; }.maquette-dir .cdr-table tbody tr.kpi-line td { color: white !important; font-weight: 700; }.maquette-dir .cdr-table tbody tr.kpi-line td.divider { border-left-color: rgba(255,255,255,0.25); }.maquette-dir .cdr-table tbody tr.kpi-line td strong { color: white !important; }.maquette-dir .cdr-table tbody tr.kpi-line td.cell-money { color: #F5C969 !important; }.maquette-dir .cdr-table tbody tr.kpi-line td.cell-prev, .maquette-dir .cdr-table tbody tr.kpi-line td.cell-prev strong { color: rgba(255,255,255,0.65) !important; }.maquette-dir .cdr-table tbody tr.kpi-line td.cell-diff, .maquette-dir .cdr-table tbody tr.kpi-line td.cell-diff strong, .maquette-dir .cdr-table tbody tr.kpi-line td.cell-diff span { color: white !important; font-weight: 700; }.maquette-dir .cdr-table tbody tr.kpi-line-final { background: linear-gradient(90deg, var(--navy), #1a4373) !important; height: 46px; border-top: 2px solid var(--gold) !important; }.maquette-dir .cdr-table tbody tr.kpi-line-final td { padding-top: 11px !important; padding-bottom: 11px !important; font-size: 13.5px; }.maquette-dir .cdr-table tbody tr.kpi-line-final td.cell-money { font-size: 15.5px; }
+        
+
+/* ---- bloc <style> suivant ---- */
+
+
+          .maquette-dir .hover-month .hover-tooltip { visibility: hidden; pointer-events: none; }.maquette-dir .hover-month:hover .hover-tooltip { visibility: visible; }.maquette-dir .hover-month:hover .hover-zone { fill: rgba(198,142,14,0.06); }.maquette-dir .hover-month .hover-zone { cursor: pointer; }.maquette-dir .tr-toggle-btn { padding:14px; border-radius:8px; font-size:13px; font-weight:700; font-family:inherit; cursor:pointer; transition:all 0.15s; }.maquette-dir .tr-toggle-btn.active { background:var(--navy); color:white; border:1px solid var(--navy); }.maquette-dir .tr-toggle-btn:not(.active) { background:white; color:var(--navy); border:1px solid var(--navy-100); font-weight:600; }.maquette-dir .tr-toggle-btn:not(.active):hover { border-color:var(--gold); }.maquette-dir .tr-graph-block { display:none; }.maquette-dir .tr-graph-block.active { display:block; }
+        
+
+/* ---- bloc <style> suivant ---- */
+
+
+          .maquette-dir .hover-month .hover-tooltip { visibility: hidden; pointer-events: none; }.maquette-dir .hover-month:hover .hover-tooltip { visibility: visible; }.maquette-dir .hover-month:hover .hover-zone { fill: rgba(198,142,14,0.06); }.maquette-dir .hover-month .hover-zone { cursor: pointer; }
+        
+
+/* ---- bloc <style> suivant ---- */
+
+
+          .maquette-dir .activite-drawer-overlay { position: fixed; inset: 0; background: rgba(16,45,80,0.5); z-index: 999; display: none; }.maquette-dir .activite-drawer-overlay.open { display: flex; justify-content: flex-end; }.maquette-dir .activite-drawer { width: 920px; max-width: 92vw; height: 100%; background: var(--ivory); overflow-y: auto; box-shadow: -8px 0 24px rgba(0,0,0,0.18); animation: slideIn 0.25s ease-out; }
+          @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }.maquette-dir .activite-drawer-header { background: var(--navy); color: white; padding: 22px 28px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 2; }.maquette-dir .activite-drawer-close { background: transparent; border: 1px solid rgba(255,255,255,0.3); color: white; padding: 6px 14px; border-radius: 5px; cursor: pointer; font-family: inherit; font-size: 12px; }.maquette-dir .activite-drawer-close:hover { background: rgba(255,255,255,0.12); }.maquette-dir .activite-clic-cell { cursor: pointer; transition: background 0.15s; }.maquette-dir .activite-clic-cell:hover { background: var(--gold-100) !important; }
+        
+
+/* ---- bloc <style> suivant ---- */
+
+
+        .maquette-dir /* Comparateur */
+        .qf-licencies { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; background: white; border: 1px solid var(--navy-100); border-radius: 16px; font-size: 11.5px; font-weight: 600; color: var(--navy); cursor: pointer; transition: all 0.15s; font-family: inherit; }.maquette-dir .qf-licencies:hover { border-color: var(--gold); }.maquette-dir .qf-licencies.active { background: var(--navy); color: white; border-color: var(--navy); }.maquette-dir .qf-licencies .qf-count { background: var(--ivory); color: var(--navy-300); font-weight: 700; font-size: 10px; padding: 1px 6px; border-radius: 8px; }.maquette-dir .qf-licencies.active .qf-count { background: var(--gold); color: white; }.maquette-dir #compare-bar.active { display: flex; }.maquette-dir .compare-mode .compare-col { display: table-cell !important; }.maquette-dir .compare-checkbox { width: 16px; height: 16px; accent-color: var(--gold); cursor: pointer; }
+      
+
+/* ---- bloc <style> suivant ---- */
+
+
+          .maquette-dir .perf-checkbox-cell { display: none; }.maquette-dir .perf-compare-mode .perf-checkbox-cell { display: table-cell; }.maquette-dir .perf-compare-mode .perf-checkbox { display: inline-block !important; }
+          /* Hover mini-graph + drawer chart */
+          .maquette-dir .hover-mini .hover-tooltip, .maquette-dir .hover-month .hover-tooltip { visibility: hidden; pointer-events: none; }.maquette-dir .hover-mini:hover .hover-tooltip, .maquette-dir .hover-month:hover .hover-tooltip { visibility: visible; }.maquette-dir .hover-mini:hover .hover-zone, .maquette-dir .hover-month:hover .hover-zone { fill: rgba(198,142,14,0.08); }.maquette-dir .hover-mini .hover-zone, .maquette-dir .hover-month .hover-zone { cursor: pointer; }
+        
+
+/* ---- bloc <style> suivant ---- */
+
+
+          .maquette-dir .perf-drawer-overlay { position: fixed; inset: 0; background: rgba(16,45,80,0.5); z-index: 999; display: none; }.maquette-dir .perf-drawer-overlay.open { display: flex; justify-content: flex-end; }.maquette-dir .perf-drawer { width: 920px; max-width: 92vw; height: 100%; background: var(--ivory); overflow-y: auto; box-shadow: -8px 0 24px rgba(0,0,0,0.18); animation: slideInPerf 0.25s ease-out; }
+          @keyframes slideInPerf { from { transform: translateX(100%); } to { transform: translateX(0); } }.maquette-dir .perf-drawer-header { background: var(--navy); color: white; padding: 22px 28px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 2; }.maquette-dir .perf-drawer-close { background: transparent; border: 1px solid rgba(255,255,255,0.3); color: white; padding: 6px 14px; border-radius: 5px; cursor: pointer; font-family: inherit; font-size: 12px; }.maquette-dir .perf-drawer-close:hover { background: rgba(255,255,255,0.12); }.maquette-dir .perf-compare-overlay { position: fixed; inset: 0; background: rgba(16,45,80,0.5); z-index: 999; display: none; }.maquette-dir .perf-compare-overlay.open { display: flex; justify-content: flex-end; }.maquette-dir .perf-compare-drawer { width: 1280px; max-width: 96vw; height: 100%; background: var(--ivory); overflow-y: auto; box-shadow: -8px 0 24px rgba(0,0,0,0.18); animation: slideInPerf 0.25s ease-out; }
+        
+
+/* ---- bloc <style> suivant ---- */
+
+
+            .maquette-dir .sort-pill-group { display: inline-flex; align-items: center; gap: 6px; background: white; border: 1px solid var(--navy-100); border-radius: 8px; padding: 4px; }.maquette-dir .sort-pill { padding: 7px 14px; border: none; background: transparent; color: var(--navy); font-family: inherit; font-size: 12px; font-weight: 600; cursor: pointer; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; transition: all 0.15s; }.maquette-dir .sort-pill:hover { background: var(--ivory); }.maquette-dir .sort-pill.active { background: var(--navy); color: white; font-weight: 700; box-shadow: 0 1px 3px rgba(16,45,80,0.15); }.maquette-dir .sort-pill svg { width: 12px; height: 12px; }.maquette-dir .sort-label { font-size: 11.5px; color: var(--navy-300); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; padding: 0 6px 0 4px; }
+          
+
+/* ---- bloc <style> suivant ---- */
+
+
+          .maquette-dir .immo-drawer-overlay { position: fixed; inset: 0; background: rgba(16,45,80,0.5); z-index: 999; display: none; }.maquette-dir .immo-drawer-overlay.open { display: flex; justify-content: flex-end; }.maquette-dir .immo-drawer { width: 760px; max-width: 92vw; height: 100%; background: var(--ivory); overflow-y: auto; box-shadow: -8px 0 24px rgba(0,0,0,0.18); animation: slideInImmo 0.25s ease-out; }
+          @keyframes slideInImmo { from { transform: translateX(100%); } to { transform: translateX(0); } }.maquette-dir .immo-drawer-header { background: var(--navy); color: white; padding: 22px 28px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 2; }.maquette-dir .immo-drawer-close { background: transparent; border: 1px solid rgba(255,255,255,0.3); color: white; padding: 6px 14px; border-radius: 5px; cursor: pointer; font-family: inherit; font-size: 12px; }.maquette-dir .immo-drawer-close:hover { background: rgba(255,255,255,0.12); }
