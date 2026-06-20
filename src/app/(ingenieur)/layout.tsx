@@ -2,6 +2,7 @@ import { SpaceSwitcher } from "../_components/SpaceSwitcher";
 import { StubShell } from "../_components/StubShell";
 import { Sidebar } from "./_components/Sidebar";
 import { blockClients } from "@/lib/auth/guards";
+import "./_styles/maquette.css";
 
 export const metadata = {
   title: "ASTRAEOS · Espace Ingénieur",
@@ -19,7 +20,9 @@ export default async function IngenieurLayout({
       <SpaceSwitcher active="ingenieur" />
       <div className="flex">
         <Sidebar />
-        <main className="min-w-0 flex-1">{children}</main>
+        <main className="min-w-0 flex-1">
+          <div className="maquette-ing">{children}</div>
+        </main>
       </div>
       <StubShell />
     </div>

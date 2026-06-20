@@ -1,0 +1,447 @@
+/* =========================================================================
+ * Portage fidèle du CSS de la maquette public/wireframes/ingenieur.html
+ * pour l'écran "Calendrier & rendez-vous" (agenda).
+ *
+ * Chaque sélecteur est préfixé par .maquette-ing pour scoper le style à
+ * l'espace ingénieur sans polluer le reste de l'app. Les variables CSS
+ * (--navy, --gold, --ivory, etc.) viennent de globals.css — non redéfinies ici.
+ * Valeurs copiées telles quelles depuis la maquette.
+ * ========================================================================= */
+
+/* HERO ------------------------------------------------------------------- */
+.maquette-ing .hero {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 40px;
+  margin-bottom: 24px;
+  align-items: center;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--navy-100);
+}
+.maquette-ing .hero-eyebrow {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.maquette-ing .hero-eyebrow::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--gold);
+}
+.maquette-ing .hero-title {
+  font-family: var(--serif);
+  font-size: 38px;
+  font-weight: 600;
+  color: var(--navy);
+  line-height: 1.12;
+  letter-spacing: -0.015em;
+  margin-bottom: 10px;
+}
+.maquette-ing .hero-title em,
+.maquette-ing .hero-title strong {
+  font-style: normal;
+  font-weight: 700;
+  color: var(--navy);
+}
+.maquette-ing .hero-sub {
+  font-size: 13.5px;
+  color: var(--navy-300);
+  max-width: 1100px;
+  line-height: 1.5;
+}
+.maquette-ing .hero-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/* BUTTONS ---------------------------------------------------------------- */
+.maquette-ing .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  font-family: inherit;
+  border: 1px solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.15s;
+  line-height: 1.4;
+}
+.maquette-ing .btn-gold {
+  background: var(--gold);
+  color: white;
+}
+.maquette-ing .btn-gold:hover {
+  background: #d39817;
+}
+.maquette-ing .btn-ghost {
+  background: white;
+  color: var(--navy);
+  border-color: var(--navy-100);
+}
+.maquette-ing .btn-ghost:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+.maquette-ing .btn-sm {
+  padding: 6px 11px;
+  font-size: 11.5px;
+}
+.maquette-ing .btn svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+.maquette-ing .btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* KPIs ------------------------------------------------------------------- */
+.maquette-ing .kpis {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.maquette-ing .kpis-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+.maquette-ing .kpi {
+  background: white;
+  border: 1px solid var(--navy-100);
+  border-radius: 8px;
+  padding: 16px 18px;
+  transition: box-shadow 0.15s;
+  cursor: default;
+  position: relative;
+}
+.maquette-ing .kpi-label {
+  font-size: 9.5px;
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  line-height: 1.3;
+}
+.maquette-ing .kpi-value {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--navy);
+  letter-spacing: -0.018em;
+  line-height: 1;
+  font-feature-settings: "tnum" on;
+  margin-bottom: 6px;
+}
+.maquette-ing .kpi-value .unit {
+  font-size: 13px;
+  color: var(--navy-300);
+  font-weight: 500;
+}
+.maquette-ing .kpi-meta {
+  font-size: 11px;
+  color: var(--navy-300);
+  line-height: 1.4;
+}
+.maquette-ing .kpi-meta strong {
+  color: var(--gold);
+  font-weight: 700;
+}
+
+/* KPI compare M-1 / N-1 -------------------------------------------------- */
+.maquette-ing .kpi-compare {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--navy-100);
+}
+.maquette-ing .kpi-compare-cell {
+  font-size: 9.5px;
+  line-height: 1.3;
+}
+.maquette-ing .kpi-compare-cell:first-child {
+  border-right: 1px solid var(--navy-100);
+  padding-right: 6px;
+}
+.maquette-ing .kpi-compare-cell:last-child {
+  padding-left: 6px;
+}
+.maquette-ing .kpi-compare-period {
+  color: var(--navy-300);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-size: 8.5px;
+  margin-bottom: 2px;
+}
+.maquette-ing .kpi-compare-value {
+  color: var(--navy);
+  font-weight: 600;
+  font-size: 11px;
+  font-feature-settings: "tnum" on;
+}
+.maquette-ing .kpi-compare-value.up {
+  color: var(--green-text);
+}
+.maquette-ing .kpi-compare-value.down {
+  color: var(--red-text);
+}
+
+/* CARDS ------------------------------------------------------------------ */
+.maquette-ing .card {
+  background: white;
+  border: 1px solid var(--navy-100);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.maquette-ing .card-header {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--navy-100);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.maquette-ing .card-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--navy);
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.maquette-ing .card-title svg {
+  width: 18px;
+  height: 18px;
+  color: var(--gold);
+  flex-shrink: 0;
+}
+.maquette-ing .card-body {
+  padding: 18px 20px;
+}
+
+/* BADGE ------------------------------------------------------------------ */
+.maquette-ing .badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 10.5px;
+  font-weight: 700;
+  line-height: 1.4;
+  white-space: nowrap;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* Utilitaires marges ----------------------------------------------------- */
+.maquette-ing .mb-20 {
+  margin-bottom: 20px;
+}
+.maquette-ing .mb-18 {
+  margin-bottom: 18px;
+}
+
+/* ========================================================================= */
+/* GRILLE AGENDA SEMAINE (vue v2)                                            */
+/* ========================================================================= */
+.maquette-ing .agenda-v2-grid {
+  display: grid;
+  grid-template-columns: 56px repeat(7, 1fr);
+  border-top: 1px solid var(--ivory-deep);
+  font-family: "Epilogue", sans-serif;
+}
+.maquette-ing .agenda-v2-day-header {
+  padding: 10px 6px;
+  text-align: center;
+  border-right: 1px solid var(--ivory-deep);
+  border-bottom: 1px solid var(--ivory-deep);
+  background: var(--ivory);
+}
+.maquette-ing .agenda-v2-day-header.today {
+  background: var(--gold-100);
+}
+.maquette-ing .agenda-v2-day-header .day-name {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--navy-300);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.maquette-ing .agenda-v2-day-header.today .day-name {
+  color: var(--gold-deep);
+}
+.maquette-ing .agenda-v2-day-header .day-num {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--navy);
+  margin-top: 1px;
+}
+.maquette-ing .agenda-v2-day-header.today .day-num {
+  color: var(--gold-deep);
+  font-weight: 700;
+}
+
+.maquette-ing .agenda-v2-time-label {
+  padding: 4px 8px 0 0;
+  font-size: 9.5px;
+  font-weight: 700;
+  color: var(--navy-300);
+  text-align: right;
+  border-right: 1px solid var(--ivory-deep);
+  font-feature-settings: "tnum" on;
+}
+.maquette-ing .agenda-v2-time-label.half {
+  font-size: 8.5px;
+  font-weight: 500;
+  color: var(--navy-200);
+  letter-spacing: 0.02em;
+}
+
+.maquette-ing .agenda-v2-cell {
+  padding: 2px 3px;
+  min-height: 26px;
+  border-right: 1px solid var(--ivory-deep);
+  border-bottom: 1px dotted var(--navy-100);
+  position: relative;
+  transition: background 0.12s;
+  cursor: cell;
+}
+.maquette-ing .agenda-v2-cell.half-line {
+  border-bottom: 1px solid var(--ivory-deep);
+}
+.maquette-ing .agenda-v2-cell:hover {
+  background: rgba(198, 142, 14, 0.06);
+}
+.maquette-ing .agenda-v2-cell.is-empty:hover::after {
+  content: "+ Cliquez pour créer un RDV";
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8.5px;
+  color: var(--gold-deep);
+  font-style: italic;
+  font-weight: 600;
+  pointer-events: none;
+  opacity: 0.7;
+  letter-spacing: 0.01em;
+}
+.maquette-ing .agenda-v2-cell.lunch {
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 4px,
+    rgba(112, 129, 150, 0.06) 4px,
+    rgba(112, 129, 150, 0.06) 8px
+  );
+  cursor: not-allowed;
+}
+.maquette-ing .agenda-v2-cell.lunch:hover {
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 4px,
+    rgba(112, 129, 150, 0.06) 4px,
+    rgba(112, 129, 150, 0.06) 8px
+  );
+}
+.maquette-ing .agenda-v2-cell.lunch:hover::after {
+  content: none;
+}
+.maquette-ing .agenda-v2-cell.today-col {
+  background: rgba(198, 142, 14, 0.025);
+}
+
+.maquette-ing .agenda-v2-event {
+  padding: 4px 7px;
+  border-radius: 4px;
+  font-size: 9.5px;
+  line-height: 1.35;
+  cursor: pointer;
+  transition: transform 0.12s, box-shadow 0.12s;
+  position: relative;
+  z-index: 2;
+}
+.maquette-ing .agenda-v2-event:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(16, 45, 80, 0.15);
+}
+.maquette-ing .agenda-v2-event strong {
+  display: block;
+  font-weight: 700;
+  color: var(--navy);
+  font-size: 9.5px;
+}
+.maquette-ing .agenda-v2-event .ev-meta {
+  color: var(--navy-300);
+  font-size: 9px;
+  margin-top: 1px;
+}
+.maquette-ing .agenda-v2-event.ev-gold {
+  background: var(--gold-100);
+  border-left: 3px solid var(--gold);
+}
+.maquette-ing .agenda-v2-event.ev-navy {
+  background: var(--light-blue);
+  border-left: 3px solid var(--navy);
+}
+.maquette-ing .agenda-v2-event.ev-success {
+  background: #e8f5ee;
+  border-left: 3px solid #2ea85a;
+}
+.maquette-ing .agenda-v2-event.ev-alert {
+  background: rgba(229, 124, 75, 0.15);
+  border-left: 3px solid var(--orange-text);
+}
+.maquette-ing .agenda-v2-event.ev-internal {
+  background: rgba(112, 129, 150, 0.12);
+  border-left: 3px solid var(--navy-300);
+}
+
+/* Lien "configurer mes types de RDV" ------------------------------------ */
+.maquette-ing .types-rdv-config-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 10px;
+  background: var(--ivory);
+  border: 1px dashed var(--gold-300);
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--gold-deep);
+  cursor: pointer;
+  margin-top: 8px;
+  transition: all 0.15s;
+}
+.maquette-ing .types-rdv-config-link:hover {
+  background: var(--gold-100);
+  border-color: var(--gold);
+  border-style: solid;
+}
+
+/* Conteneur global de la page (padding identique au shell maquette) ------ */
+.maquette-ing .agenda-page-wrap {
+  padding: 28px 36px 40px;
+}
