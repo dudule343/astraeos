@@ -331,7 +331,7 @@
   background: rgba(198, 142, 14, 0.06);
 }
 .maquette-ing .agenda-v2-cell.is-empty:hover::after {
-  content: "+ Cliquez pour créer un RDV";
+  content: "+ Cliquez-glissez pour créer un RDV";
   position: absolute;
   inset: 0;
   display: flex;

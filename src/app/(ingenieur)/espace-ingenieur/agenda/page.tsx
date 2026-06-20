@@ -1,9 +1,12 @@
 import Link from "next/link";
 
-import { fetchAgenda, type AgendaRdv } from "../../_data/agenda";
+import {
+  getAgenda,
+  visioRoom,
+  type AgendaRdv,
+  type KpiCompareCell,
+} from "../../_data/agenda";
 import { CopyLinkButton } from "./CopyLinkButton";
-
-export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "ASTRAEOS · Calendrier & rendez-vous",
@@ -19,24 +22,13 @@ for (let h = 9; h <= 19; h++) {
 /** Plage déjeuner (12h, 12h30, 13h) bloquée du lundi au vendredi. */
 const LUNCH_SLOTS = new Set(["12h00", "12h30", "13h00"]);
 
-/** Salle de visio déterministe pour un RDV (même salle côté ingénieur et client). */
-function visioRoom(rdv: AgendaRdv): string {
-  return `rdv-${rdv.id.slice(0, 8)}`;
-}
-
 function EventCard({ rdv }: { rdv: AgendaRdv }) {
-  const hourLabel = rdv.slotKey.replace("h00", "h");
   const inner = (
     <>
       <strong>
-        {hourLabel} · {rdv.surname}
+        {rdv.hourLabel} · {rdv.surname}
       </strong>
-      <div className="ev-meta">
-        {rdv.typeLabel} · {rdv.formatLabel}
-        {rdv.isVisio ? (
-          <span style={{ color: "var(--gold-deep)", fontWeight: 700 }}> · Visio →</span>
-        ) : null}
-      </div>
+      <div className="ev-meta">{rdv.metaLabel}</div>
     </>
   );
   // RDV en visio : tout le bloc ouvre la VRAIE salle visio existante (/visio/[room]).
@@ -54,8 +46,23 @@ function EventCard({ rdv }: { rdv: AgendaRdv }) {
   return <div className={`agenda-v2-event ${rdv.variant}`}>{inner}</div>;
 }
 
-export default async function AgendaPage() {
-  const data = await fetchAgenda();
+function KpiCompare({ cells }: { cells: KpiCompareCell[] }) {
+  return (
+    <div className="kpi-compare">
+      {cells.map((cell) => (
+        <div className="kpi-compare-cell" key={cell.period}>
+          <div className="kpi-compare-period">{cell.period}</div>
+          <div className={`kpi-compare-value ${cell.direction}`}>
+            {cell.direction === "up" ? "▲" : "▼"} {cell.value}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export default function AgendaPage() {
+  const data = getAgenda();
   const { days, rdvsBySlot } = data;
 
   return (
@@ -68,9 +75,9 @@ export default async function AgendaPage() {
             Calendrier &amp; <strong>rendez-vous</strong>
           </h1>
           <p className="hero-sub">
-            Vue semaine de votre agenda · connecté à Google Calendar et lien
-            public personnel de prise de RDV (style Calendly) à partager à vos
-            clients.
+            Vue semaine de votre agenda · connecté à Google Calendar (sync
+            activée) et lien public personnel de prise de RDV (style Calendly) à
+            partager à vos clients.
           </p>
         </div>
         <div className="hero-actions">
@@ -89,7 +96,7 @@ export default async function AgendaPage() {
               <circle cx="12" cy="12" r="9" />
               <path d="M8 12 L 11 15 L 16 9" />
             </svg>
-            <span>Connecter Google Calendar</span>
+            <span>{data.syncLabel}</span>
           </a>
           <button
             type="button"
@@ -102,30 +109,27 @@ export default async function AgendaPage() {
         </div>
       </div>
 
-      {/* 4 KPIs */}
+      {/* 4 KPIs avec comparaisons */}
       <div className="kpis kpis-4 mb-20">
         <div className="kpi">
           <div className="kpi-label">RDV cette semaine</div>
           <div className="kpi-value">{data.kpiWeekCount}</div>
-          <div className="kpi-meta">
-            {data.kpiWeekPresentiel} en présentiel · {data.kpiWeekVisio} en visio
-          </div>
+          <div className="kpi-meta">{data.kpiWeekMeta}</div>
+          <KpiCompare cells={data.kpiWeekCompare} />
         </div>
         <div className="kpi">
           <div className="kpi-label">RDV ce mois</div>
           <div className="kpi-value">{data.kpiMonthCount}</div>
           <div className="kpi-meta">{data.kpiMonthLabel}</div>
+          <KpiCompare cells={data.kpiMonthCompare} />
         </div>
         <div className="kpi">
           <div className="kpi-label">Durée moyenne</div>
           <div className="kpi-value">
-            {data.avgDurationLabel ? (
-              <span className="unit">{data.avgDurationLabel}</span>
-            ) : (
-              "—"
-            )}
+            {data.avgDurationValue}{" "}
+            <span className="unit">{data.avgDurationUnit}</span>
           </div>
-          <div className="kpi-meta">sur les RDV de la semaine</div>
+          <div className="kpi-meta">{data.avgDurationMeta}</div>
         </div>
         <div className="kpi">
           <div className="kpi-label">Mon lien public</div>
@@ -264,6 +268,7 @@ export default async function AgendaPage() {
               </span>
               <LegendItem bg="var(--gold-100)" border="var(--gold)" label="Entretien initial" />
               <LegendItem bg="var(--light-blue)" border="var(--navy)" label="Entretien intermédiaire" />
+              <LegendItem bg="var(--gold-100)" border="var(--gold-deep)" label="Restitution de l'étude" />
               <LegendItem bg="#E8F5EE" border="#2EA85A" label="Entretien de suivi" />
               <LegendItem
                 bg="rgba(112,129,150,0.12)"
