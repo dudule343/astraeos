@@ -19,37 +19,39 @@ for (let h = 9; h <= 19; h++) {
 /** Plage déjeuner (12h, 12h30, 13h) bloquée du lundi au vendredi. */
 const LUNCH_SLOTS = new Set(["12h00", "12h30", "13h00"]);
 
-function VisioLink() {
-  return (
-    <>
-      {" · "}
-      <Link
-        href="/visio"
-        style={{
-          color: "var(--gold-deep)",
-          fontWeight: 700,
-          textDecoration: "none",
-        }}
-      >
-        Visio →
-      </Link>
-    </>
-  );
+/** Salle de visio déterministe pour un RDV (même salle côté ingénieur et client). */
+function visioRoom(rdv: AgendaRdv): string {
+  return `rdv-${rdv.id.slice(0, 8)}`;
 }
 
 function EventCard({ rdv }: { rdv: AgendaRdv }) {
   const hourLabel = rdv.slotKey.replace("h00", "h");
-  return (
-    <div className={`agenda-v2-event ${rdv.variant}`}>
+  const inner = (
+    <>
       <strong>
         {hourLabel} · {rdv.surname}
       </strong>
       <div className="ev-meta">
         {rdv.typeLabel} · {rdv.formatLabel}
-        {rdv.isVisio ? <VisioLink /> : null}
+        {rdv.isVisio ? (
+          <span style={{ color: "var(--gold-deep)", fontWeight: 700 }}> · Visio →</span>
+        ) : null}
       </div>
-    </div>
+    </>
   );
+  // RDV en visio : tout le bloc ouvre la VRAIE salle visio existante (/visio/[room]).
+  if (rdv.isVisio) {
+    return (
+      <Link
+        href={`/visio/${visioRoom(rdv)}`}
+        className={`agenda-v2-event ${rdv.variant}`}
+        style={{ textDecoration: "none", display: "block" }}
+      >
+        {inner}
+      </Link>
+    );
+  }
+  return <div className={`agenda-v2-event ${rdv.variant}`}>{inner}</div>;
 }
 
 export default async function AgendaPage() {
