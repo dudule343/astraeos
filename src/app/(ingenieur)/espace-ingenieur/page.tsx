@@ -1,8 +1,8 @@
 import Link from "next/link";
 
 import { Topbar } from "../../(editeur)/_components/Topbar";
-import { KpiCard, type KpiBlock } from "../../(editeur)/_components/KpiCard";
-import { PageHero, SectionHeader, GoldButton } from "../../(editeur)/_components/PageHeader";
+import { KpiCard, type KpiBlock } from "@/app/_components/shared/KpiCard";
+import { PageHero, SectionHeader, GoldButton } from "@/app/_components/shared/PageHeader";
 import {
   fetchCockpitDashboard,
   fmtEur,

@@ -3,7 +3,7 @@ import { notFound, unstable_rethrow } from "next/navigation";
 
 import { getSessionContext } from "@/lib/auth/context";
 import { Topbar } from "../../../_components/Topbar";
-import { PageHero } from "../../../_components/PageHeader";
+import { PageHero } from "@/app/_components/shared/PageHeader";
 import { ParcoursStepper } from "../../../_components/ParcoursStepper";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { STAGE_LABELS } from "@/lib/dossier-parcours";

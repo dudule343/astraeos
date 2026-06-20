@@ -1,7 +1,7 @@
 import Link from "next/link";
 
-import { KpiCard, type KpiBlock } from "../../(editeur)/_components/KpiCard";
-import { PageHero, SectionHeader } from "../../(editeur)/_components/PageHeader";
+import { KpiCard, type KpiBlock } from "@/app/_components/shared/KpiCard";
+import { PageHero, SectionHeader } from "@/app/_components/shared/PageHeader";
 import { ParcoursStepper } from "../../(editeur)/_components/ParcoursStepper";
 import { CLIENT_BASE } from "../_components/nav";
 import { fetchClientDossier, getClientContext, fmtDate } from "../_data/client";

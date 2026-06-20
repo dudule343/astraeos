@@ -1,4 +1,4 @@
-import { PageHero, SectionHeader } from "../../../(editeur)/_components/PageHeader";
+import { PageHero, SectionHeader } from "@/app/_components/shared/PageHeader";
 import { fetchClientDossier, fmtDate, PIPELINE_STAGE_LABELS } from "../../_data/client";
 import { fetchClientUpcomingRdv, fetchClientEtude } from "./data";
 import { AgendaButton } from "./AgendaButton";

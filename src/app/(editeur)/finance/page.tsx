@@ -1,6 +1,6 @@
 import { Topbar } from "../_components/Topbar";
-import { type KpiBlock } from "../_components/KpiCard";
-import { PageHero, GoldButton } from "../_components/PageHeader";
+import { type KpiBlock } from "@/app/_components/shared/KpiCard";
+import { PageHero, GoldButton } from "@/app/_components/shared/PageHeader";
 import {
   fetchEditeurCommissions,
   computeEditeurResultat,

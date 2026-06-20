@@ -1,6 +1,6 @@
 import { Topbar } from "../_components/Topbar";
-import { KpiCard, type KpiBlock } from "../_components/KpiCard";
-import { PageHero, SectionHeader, GhostButton } from "../_components/PageHeader";
+import { KpiCard, type KpiBlock } from "@/app/_components/shared/KpiCard";
+import { PageHero, SectionHeader, GhostButton } from "@/app/_components/shared/PageHeader";
 import { fetchQuality, fmtCount, fmtScore } from "./data";
 
 export const dynamic = "force-dynamic";

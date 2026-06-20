@@ -1,8 +1,8 @@
 import Link from "next/link";
 
 import { Topbar } from "../_components/Topbar";
-import { KpiCard, type KpiBlock } from "../_components/KpiCard";
-import { PageHero } from "../_components/PageHeader";
+import { KpiCard, type KpiBlock } from "@/app/_components/shared/KpiCard";
+import { PageHero } from "@/app/_components/shared/PageHeader";
 import { listRecentEntretiens, type EntretienRecent } from "@/lib/entretiens-store";
 import { getSessionContext } from "@/lib/auth/context";
 

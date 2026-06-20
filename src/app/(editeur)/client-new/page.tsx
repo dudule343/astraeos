@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { Topbar } from "../_components/Topbar";
-import { PageHero } from "../_components/PageHeader";
+import { PageHero } from "@/app/_components/shared/PageHeader";
 import { createClientAction } from "./actions";
 
 function SubmitButton() {

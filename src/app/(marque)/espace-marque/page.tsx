@@ -1,7 +1,7 @@
 import { Topbar } from "../_components/Topbar";
 import { NetworkExportButton } from "../_components/NetworkExportButton";
-import { KpiCard, type KpiBlock } from "../../(editeur)/_components/KpiCard";
-import { PageHero, SectionHeader } from "../../(editeur)/_components/PageHeader";
+import { KpiCard, type KpiBlock } from "@/app/_components/shared/KpiCard";
+import { PageHero, SectionHeader } from "@/app/_components/shared/PageHeader";
 import { EmptyState } from "../../(dirigeant)/_components/EmptyState";
 import {
   fetchNetworkCabinets,

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { KpiCard, type KpiBlock } from "../../../(editeur)/_components/KpiCard";
+import { KpiCard, type KpiBlock } from "@/app/_components/shared/KpiCard";
 
 export type EngineerCommissionRow = {
   initiales: string;

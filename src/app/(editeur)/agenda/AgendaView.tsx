@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 
-import { KpiCard, type KpiBlock } from "../_components/KpiCard";
+import { KpiCard, type KpiBlock } from "@/app/_components/shared/KpiCard";
 
 const DAYS = 14;
 

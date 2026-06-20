@@ -1,6 +1,6 @@
 import { Topbar } from "../../_components/Topbar";
 import { EmptyState } from "../../_components/EmptyState";
-import { PageHero, SectionHeader } from "../../../(editeur)/_components/PageHeader";
+import { PageHero, SectionHeader } from "@/app/_components/shared/PageHeader";
 import {
   fetchCabinetProfile,
   fetchCabinetUsers,

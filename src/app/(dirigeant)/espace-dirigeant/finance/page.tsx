@@ -1,7 +1,7 @@
 import { Topbar } from "../../_components/Topbar";
 import { ExportButton } from "../../_components/ExportButton";
-import { type KpiBlock } from "../../../(editeur)/_components/KpiCard";
-import { PageHero } from "../../../(editeur)/_components/PageHeader";
+import { type KpiBlock } from "@/app/_components/shared/KpiCard";
+import { PageHero } from "@/app/_components/shared/PageHeader";
 import {
   fetchCabinetCommissions,
   fetchCabinetEngineers,

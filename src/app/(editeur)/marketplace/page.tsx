@@ -1,6 +1,6 @@
 import { Topbar } from "../_components/Topbar";
-import { KpiCard, type KpiBlock } from "../_components/KpiCard";
-import { PageHero } from "../_components/PageHeader";
+import { KpiCard, type KpiBlock } from "@/app/_components/shared/KpiCard";
+import { PageHero } from "@/app/_components/shared/PageHeader";
 import {
   fetchMarketplace,
   fmtEur,

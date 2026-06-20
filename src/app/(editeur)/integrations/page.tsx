@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { Topbar } from "../_components/Topbar";
-import { PageHero } from "../_components/PageHeader";
+import { PageHero } from "@/app/_components/shared/PageHeader";
 import { KeyManager } from "./KeyManager";
 import { getSessionContext } from "@/lib/auth/context";
 

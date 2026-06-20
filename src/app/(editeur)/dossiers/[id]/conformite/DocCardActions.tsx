@@ -69,7 +69,7 @@ export function DocCardActions({
         router.refresh();
       } else if (res.reason === "yousign_non_configure") {
         setMsg(
-          "Signature électronique non configurée (YOUSIGN_API_KEY absente). Utilisez « Envoyer » pour transmettre la pièce par e-mail.",
+          "🚧 Signature électronique : en cours de mise en place. En attendant, utilisez « Envoyer » pour transmettre la pièce par e-mail.",
         );
       } else {
         setMsg(res.reason);

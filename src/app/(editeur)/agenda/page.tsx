@@ -1,5 +1,5 @@
 import { Topbar } from "../_components/Topbar";
-import { PageHero } from "../_components/PageHeader";
+import { PageHero } from "@/app/_components/shared/PageHeader";
 import { AgendaView } from "./AgendaView";
 
 export const dynamic = "force-dynamic";

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { Topbar } from "../../_components/Topbar";
-import { PageHero } from "../../_components/PageHeader";
+import { PageHero } from "@/app/_components/shared/PageHeader";
 import { getEntretien } from "@/lib/entretiens-store";
 import { getSessionContext } from "@/lib/auth/context";
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { KpiCard, type KpiBlock } from "../_components/KpiCard";
+import { KpiCard, type KpiBlock } from "@/app/_components/shared/KpiCard";
 
 export type FinanceData = {
   kpis: KpiBlock[];
