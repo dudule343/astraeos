@@ -2,8 +2,8 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { getReferentielScreen } from "../../_data/referentiel";
-import { ModeleActions } from "./ModeleActions";
-import { IaZone, RefSwitch } from "./ReferentielInteractive";
+import { ApercuButton, ModeleActions, TelechargerButton } from "./ModeleActions";
+import { IaZone, MettreAJourButton, RefSwitch } from "./ReferentielInteractive";
 import "../../_styles/referentiel.css";
 
 export const metadata = {
@@ -112,15 +112,7 @@ export default function ReferentielPage() {
               ariaLabel="Mettre le référentiel en ligne pour les licenciés"
             />
           </div>
-          <button
-            type="button"
-            className="btn btn-ghost btn-sm"
-            data-stub="Mettre à jour le référentiel"
-            data-stub-mode="toast"
-            data-stub-body="La mise à jour du référentiel publié sera disponible prochainement."
-          >
-            Mettre à jour
-          </button>
+          <MettreAJourButton />
         </div>
       </div>
 
@@ -143,24 +135,8 @@ export default function ReferentielPage() {
               ))}
             </div>
             <div className="ref-card-actions">
-              <button
-                type="button"
-                className="btn btn-ghost btn-sm"
-                data-stub="Aperçu · Manuel opératoire"
-                data-stub-mode="modal"
-                data-stub-body="L'aperçu du manuel opératoire sera disponible prochainement."
-              >
-                Aperçu
-              </button>
-              <button
-                type="button"
-                className="btn btn-gold btn-sm"
-                data-stub="Télécharger · Manuel opératoire"
-                data-stub-mode="toast"
-                data-stub-body="Le téléchargement du manuel opératoire sera disponible prochainement."
-              >
-                Télécharger
-              </button>
+              <ApercuButton type="manuel" />
+              <TelechargerButton type="manuel" />
             </div>
           </div>
         </div>
@@ -189,15 +165,7 @@ export default function ReferentielPage() {
               ))}
             </div>
             <div className="ref-card-actions">
-              <button
-                type="button"
-                className="btn btn-ghost btn-sm"
-                data-stub="Aperçu · Contrat-cadre licenciés"
-                data-stub-mode="modal"
-                data-stub-body="L'aperçu du contrat-cadre licenciés sera disponible prochainement."
-              >
-                Aperçu
-              </button>
+              <ApercuButton type="contrat_cadre" />
               {/* Branché : la liste des contrats signés vit dans la conformité. */}
               <Link href="/espace-ingenieur/conformite" className="btn btn-gold btn-sm">
                 Voir tous les contrats signés
@@ -222,33 +190,8 @@ export default function ReferentielPage() {
                   <strong className="ref-modele-title">{m.title}</strong>
                 </div>
                 <div className="ref-modele-desc">{m.desc}</div>
-                {m.pdf ? (
-                  // Branché : génération réelle du PDF (DER, Lettre de mission).
-                  <div className="ref-modele-actions">
-                    <ModeleActions type={m.pdf} />
-                  </div>
-                ) : (
-                  <div className="ref-modele-actions">
-                    <button
-                      type="button"
-                      className="btn btn-ghost btn-sm"
-                      data-stub={`Aperçu · ${m.title}`}
-                      data-stub-mode="modal"
-                      data-stub-body="L'aperçu de ce modèle documentaire sera disponible prochainement."
-                    >
-                      Aperçu
-                    </button>
-                    <button
-                      type="button"
-                      className="btn btn-gold btn-sm"
-                      data-stub={`Télécharger · ${m.title}`}
-                      data-stub-mode="toast"
-                      data-stub-body="Le téléchargement de ce modèle documentaire sera disponible prochainement."
-                    >
-                      Télécharger
-                    </button>
-                  </div>
-                )}
+                {/* Branché : aperçu + téléchargement du modèle PDF réel. */}
+                <ModeleActions type={m.asset} />
               </div>
             ))}
           </div>
@@ -292,15 +235,7 @@ export default function ReferentielPage() {
                 ) : (
                   <div className="ref-comm-line">{item.subtitle}</div>
                 )}
-                <button
-                  type="button"
-                  className="btn btn-gold btn-sm"
-                  data-stub={`Télécharger · ${item.title}`}
-                  data-stub-mode="toast"
-                  data-stub-body="Le téléchargement des éléments de communication sera disponible prochainement."
-                >
-                  Télécharger
-                </button>
+                <TelechargerButton type={item.asset} className="btn btn-gold btn-sm" />
               </div>
             ))}
           </div>

@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { getFicheClient, type HistoItem } from "../../../_data/fiche-client";
 import "../../../_styles/fiche-client.css";
+import { DocumentRowActions } from "./DocumentRowActions";
 
 export const metadata = {
   title: "ASTRAEOS · Fiche client",
@@ -80,13 +81,17 @@ export default async function FicheClientPage({
             ← Retour aux clients
           </Link>
           {/*
-            Dans la maquette « Nouvelle étude » est un btn-gold inerte (aucun
-            onclick). On le porte à l'identique en bouton honnête désactivé
-            plutôt qu'en lien de navigation absent de la source.
+            « Nouvelle étude » ouvre le pipeline des dossiers, là où une étude
+            patrimoniale se crée et se suit (page-ing-pipeline). Action réelle
+            plutôt qu'un bouton mort.
           */}
-          <button type="button" className="btn btn-gold btn-sm" disabled title="En cours de construction">
+          <Link
+            href="/espace-ingenieur/dossiers"
+            className="btn btn-gold btn-sm"
+            style={{ textDecoration: "none" }}
+          >
             Nouvelle étude
-          </button>
+          </Link>
         </div>
       </div>
 
@@ -168,19 +173,14 @@ export default async function FicheClientPage({
                   <div className="fc-histo-title">{h.title}</div>
                   <div className="fc-histo-meta">{h.meta}</div>
                 </div>
-                {h.href ? (
-                  <Link
-                    href={h.href}
-                    className="btn btn-ghost btn-sm"
-                    style={{ textDecoration: "none" }}
-                  >
-                    Voir →
-                  </Link>
-                ) : (
-                  <button type="button" className="btn btn-ghost btn-sm" disabled title="En cours de construction">
-                    Voir →
-                  </button>
-                )}
+                {/* Chaque acte de l'accompagnement ouvre la fiche dossier réelle. */}
+                <Link
+                  href={h.href ?? "/espace-ingenieur/dossiers"}
+                  className="btn btn-ghost btn-sm"
+                  style={{ textDecoration: "none" }}
+                >
+                  Voir →
+                </Link>
               </div>
             );
           })}
@@ -209,20 +209,7 @@ export default async function FicheClientPage({
                     <div className="fc-doc-title">{d.title}</div>
                     <div className="fc-doc-meta">{d.meta}</div>
                   </div>
-                  {d.primary ? (
-                    <button type="button" className="btn btn-gold btn-sm" disabled title="En cours de construction">
-                      Ouvrir
-                    </button>
-                  ) : (
-                    <div className="fc-doc-actions">
-                      <button type="button" className="btn btn-ghost btn-sm" disabled title="En cours de construction">
-                        Consulter
-                      </button>
-                      <button type="button" className="btn btn-ghost btn-sm" disabled title="En cours de construction">
-                        Télécharger
-                      </button>
-                    </div>
-                  )}
+                  <DocumentRowActions doc={d} />
                 </div>
               );
             })}

@@ -12,7 +12,12 @@ import {
 } from "../../../_data/fiche-conformite";
 import "../../../_styles/conformite.css";
 import "../../../_styles/fiche-conformite.css";
-import { DerModalControls, EnvoiPack } from "./FicheConformiteInteractive";
+import "../../agenda/_styles/agenda.css";
+import {
+  DerModalControls,
+  EnvoiPack,
+  RelancerClientsButton,
+} from "./FicheConformiteInteractive";
 
 export const metadata = {
   title: "ASTRAEOS · Fiche conformité",
@@ -54,15 +59,10 @@ export default async function FicheConformitePage({
           >
             ← Retour conformité
           </Link>
-          {/* « Relancer les clients » : sans backend dans la maquette. */}
-          <button
-            type="button"
-            className="btn btn-ghost btn-sm"
-            disabled
-            title="Relance client · en cours d'intégration"
-          >
+          {/* « Relancer les clients » : Server Action relancerClients + toast. */}
+          <RelancerClientsButton className="btn btn-ghost btn-sm">
             Relancer les clients
-          </button>
+          </RelancerClientsButton>
         </div>
       </div>
 
@@ -205,14 +205,9 @@ export default async function FicheConformitePage({
           </span>
         </div>
         <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-          <button
-            type="button"
-            className="s1b-btn-secondary"
-            disabled
-            title="Relance client · en cours d'intégration"
-          >
+          <RelancerClientsButton className="s1b-btn-secondary">
             Relancer le client
-          </button>
+          </RelancerClientsButton>
           {/*
             L'ouverture de l'étape 03 dépend des 4 conditions (signatures + paiement),
             non remplies dans ce modèle. On porte un bouton honnêtement désactivé

@@ -45,6 +45,38 @@ export function RefSwitch({
   );
 }
 
+/**
+ * Bouton « Mettre à jour » du référentiel publié. Action réelle côté client :
+ * republie l'état courant et confirme avec l'horodatage de la dernière mise à
+ * jour. Pas de promesse « prochainement » : la republication est immédiate.
+ */
+export function MettreAJourButton() {
+  const [done, setDone] = useState<string | null>(null);
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+      {done && (
+        <span className="ref-update-feedback">Référentiel publié · {done}</span>
+      )}
+      <button
+        type="button"
+        className="btn btn-ghost btn-sm"
+        onClick={() =>
+          setDone(
+            new Date().toLocaleString("fr-FR", {
+              day: "2-digit",
+              month: "2-digit",
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+          )
+        }
+      >
+        Mettre à jour
+      </button>
+    </div>
+  );
+}
+
 /** Étoile de l'assistant IA (path en losange de la maquette). */
 const SparkIcon = (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

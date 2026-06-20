@@ -1,44 +1,14 @@
 import Link from "next/link";
 
-import {
-  getAgenda,
-  type AgendaRdv,
-  type KpiCompareCell,
-} from "../../_data/agenda";
+import { getAgenda, type KpiCompareCell } from "../../_data/agenda";
 import { CopyLinkButton } from "./CopyLinkButton";
-import { EmptyCell, NewRdvModal, OpenRdvButton } from "./NewRdvModal";
+import { NewRdvModal, OpenRdvButton } from "./NewRdvModal";
+import { WeekCalendar } from "./WeekCalendar";
 import "./_styles/agenda.css";
 
 export const metadata = {
   title: "ASTRAEOS · Calendrier & rendez-vous",
 };
-
-/** Créneaux affichés : 9h → 19h par demi-heures, comme la maquette. */
-const SLOTS: { key: string; label: string; half: boolean }[] = [];
-for (let h = 9; h <= 19; h++) {
-  SLOTS.push({ key: `${h}h00`, label: `${h}h`, half: false });
-  if (h < 19) SLOTS.push({ key: `${h}h30`, label: `${h}h30`, half: true });
-}
-
-/** Plage déjeuner (12h, 12h30, 13h) bloquée du lundi au vendredi. */
-const LUNCH_SLOTS = new Set(["12h00", "12h30", "13h00"]);
-
-function EventCard({ rdv }: { rdv: AgendaRdv }) {
-  // Tout event navigue vers sa fiche, comme la maquette (goToPage) : fiche RDV
-  // pour Joubert/Mercier, fiche client générique pour les autres.
-  return (
-    <Link
-      href={rdv.href}
-      className={`agenda-v2-event ${rdv.variant}`}
-      style={{ textDecoration: "none", display: "block" }}
-    >
-      <strong>
-        {rdv.hourLabel} · {rdv.surname}
-      </strong>
-      <div className="ev-meta">{rdv.metaLabel}</div>
-    </Link>
-  );
-}
 
 function KpiCompare({ cells }: { cells: KpiCompareCell[] }) {
   return (
@@ -141,166 +111,12 @@ export default function AgendaPage() {
           marginBottom: "18px",
         }}
       >
-        {/* Vue semaine */}
-        <div className="card">
-          <div
-            className="card-header"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-            }}
-          >
-            <div className="card-title">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <rect x="3" y="4" width="18" height="18" rx="2" />
-                <line x1="16" y1="2" x2="16" y2="6" />
-                <line x1="8" y1="2" x2="8" y2="6" />
-                <line x1="3" y1="10" x2="21" y2="10" />
-              </svg>
-              {data.weekLabel}
-            </div>
-            <div style={{ display: "flex", gap: "6px" }}>
-              <button type="button" className="btn btn-ghost btn-sm" style={{ fontSize: "11px" }}>
-                ‹ Semaine
-              </button>
-              <button
-                type="button"
-                className="btn btn-ghost btn-sm"
-                style={{ fontSize: "11px", background: "var(--ivory)" }}
-              >
-                Aujourd&apos;hui
-              </button>
-              <button type="button" className="btn btn-ghost btn-sm" style={{ fontSize: "11px" }}>
-                Semaine ›
-              </button>
-            </div>
-          </div>
-          <div className="card-body" style={{ padding: 0 }}>
-            <div className="agenda-v2-grid">
-              {/* En-têtes jours */}
-              <div />
-              {days.map((day) => (
-                <div
-                  key={`head-${day.index}`}
-                  className={`agenda-v2-day-header${day.isToday ? " today" : ""}`}
-                  style={day.index === 6 ? { borderRight: "none" } : undefined}
-                >
-                  <div className="day-name">
-                    {day.name}
-                    {day.isToday ? " · auj." : ""}
-                  </div>
-                  <div className="day-num">{day.num}</div>
-                </div>
-              ))}
-
-              {/* Lignes horaires */}
-              {SLOTS.map((slot, slotIdx) => {
-                const isLastRow = slotIdx === SLOTS.length - 1;
-                return (
-                  <FragmentRow key={slot.key}>
-                    <div className={`agenda-v2-time-label${slot.half ? " half" : ""}`}>
-                      {slot.label}
-                    </div>
-                    {days.map((day) => {
-                      const rdv = rdvsBySlot.get(`${day.index}:${slot.key}`);
-                      const isLunch =
-                        LUNCH_SLOTS.has(slot.key) && day.index <= 4 && !rdv;
-                      const isEmpty = !rdv && !isLunch;
-                      const classes = [
-                        "agenda-v2-cell",
-                        slot.half ? "half-line" : "",
-                        day.isToday ? "today-col" : "",
-                        isLunch ? "lunch" : "",
-                        isEmpty ? "is-empty" : "",
-                      ]
-                        .filter(Boolean)
-                        .join(" ");
-                      const cellStyle = isLastRow
-                        ? { borderBottom: "none" as const }
-                        : undefined;
-                      // Cellule libre : clic = ouvre la modale avec créneau + jour
-                      // pré-remplis (openModalNouveauRdv de la maquette).
-                      if (isEmpty) {
-                        return (
-                          <EmptyCell
-                            key={`${slot.key}-${day.index}`}
-                            className={classes}
-                            slotKey={slot.key}
-                            dayLabel={day.fullLabel}
-                            style={cellStyle}
-                          />
-                        );
-                      }
-                      return (
-                        <div
-                          key={`${slot.key}-${day.index}`}
-                          className={classes}
-                          style={cellStyle}
-                        >
-                          {rdv ? <EventCard rdv={rdv} /> : null}
-                        </div>
-                      );
-                    })}
-                  </FragmentRow>
-                );
-              })}
-            </div>
-
-            {/* Légende */}
-            <div
-              style={{
-                display: "flex",
-                flexWrap: "wrap",
-                gap: "14px",
-                alignItems: "center",
-                padding: "12px 18px",
-                background: "var(--ivory-deep)",
-                borderTop: "1px solid var(--navy-100)",
-                fontSize: "10.5px",
-                color: "var(--navy-300)",
-              }}
-            >
-              <span
-                style={{
-                  fontWeight: 700,
-                  color: "var(--navy)",
-                  letterSpacing: "0.05em",
-                }}
-              >
-                LÉGENDE
-              </span>
-              <LegendItem bg="var(--gold-100)" border="var(--gold)" label="Entretien initial" />
-              <LegendItem bg="var(--light-blue)" border="var(--navy)" label="Entretien intermédiaire" />
-              <LegendItem bg="var(--gold-100)" border="var(--gold-deep)" label="Restitution de l'étude" />
-              <LegendItem bg="#E8F5EE" border="#2EA85A" label="Entretien de suivi" />
-              <LegendItem
-                bg="rgba(112,129,150,0.12)"
-                border="var(--navy-300)"
-                label="Interne · équipe"
-              />
-              <span
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "5px",
-                  marginLeft: "auto",
-                }}
-              >
-                <span
-                  style={{
-                    display: "inline-block",
-                    width: "12px",
-                    height: "10px",
-                    background:
-                      "repeating-linear-gradient(45deg, transparent, transparent 3px, rgba(112,129,150,0.2) 3px, rgba(112,129,150,0.2) 6px)",
-                  }}
-                />
-                Plage déjeuner
-              </span>
-            </div>
-          </div>
-        </div>
+        {/* Vue semaine · navigation de semaine réellement active (Client) */}
+        <WeekCalendar
+          baseWeekLabel={data.weekLabel}
+          days={days}
+          rdvsBySlot={rdvsBySlot}
+        />
 
         {/* Panneau de droite */}
         <div>
@@ -418,28 +234,6 @@ export default function AgendaPage() {
       {/* Modale « Nouveau RDV » (Création RDV directe) — Client Component branché */}
       <NewRdvModal />
     </div>
-  );
-}
-
-/** Wrapper neutre : ses enfants restent des cellules directes de la grille. */
-function FragmentRow({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
-}
-
-function LegendItem({ bg, border, label }: { bg: string; border: string; label: string }) {
-  return (
-    <span style={{ display: "inline-flex", alignItems: "center", gap: "5px" }}>
-      <span
-        style={{
-          display: "inline-block",
-          width: "12px",
-          height: "10px",
-          background: bg,
-          borderLeft: `3px solid ${border}`,
-        }}
-      />
-      {label}
-    </span>
   );
 }
 

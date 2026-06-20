@@ -6,11 +6,61 @@ import {
   DER,
   DER_PDF_INPUT,
   DOC_CARDS,
+  KYC,
+  KYC_DONUT,
+  KYC_FISCAL_BARS,
+  KYC_KPIS,
+  KYC_MATRIX,
+  KYC_NET_BARS,
   PACK,
   PACK_PIECES,
   type DocCard,
   type PackPiece,
 } from "../../../_data/fiche-conformite";
+import { relancerClients } from "./actions";
+
+/* ── « Relancer le(s) client(s) » : Server Action réelle + toast ──────────
+   La maquette laissait ces boutons inertes ; on les branche sur
+   relancerClients (trace horodatée + e-mail de rappel) avec confirmation
+   visuelle, comme la fiche prospect. ────────────────────────────────────── */
+
+export function RelancerClientsButton({
+  className,
+  children,
+}: {
+  className: string;
+  children: React.ReactNode;
+}) {
+  const [toast, setToast] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  const onClick = useCallback(async () => {
+    setBusy(true);
+    try {
+      const res = await relancerClients(DER_PDF_INPUT.dossierId);
+      setToast(res.message);
+      window.setTimeout(() => setToast(null), 4500);
+    } finally {
+      setBusy(false);
+    }
+  }, []);
+
+  return (
+    <>
+      <button type="button" className={className} onClick={onClick} disabled={busy}>
+        {children}
+      </button>
+      {toast ? (
+        <div className="rdv-toast" role="status">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2.4">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+          {toast}
+        </div>
+      ) : null}
+    </>
+  );
+}
 
 /* ── Pictos ───────────────────────────────────────────────────────────── */
 
@@ -122,10 +172,12 @@ const PIECE_TAG_STYLE: Record<PackPiece["tagTone"], React.CSSProperties> = {
 
 export function DocCardsRow({
   onOpenDer,
+  onOpenKyc,
   onGenerateLm,
   lmBusy,
 }: {
   onOpenDer: () => void;
+  onOpenKyc: () => void;
   onGenerateLm: () => void;
   lmBusy: boolean;
 }) {
@@ -163,7 +215,8 @@ export function DocCardsRow({
 
           <div className="s1c-wf-actions">
             {/* Modifier : DER ouvre le document pré-rendu ; LM génère son PDF réel
-                (lib/conformite-pdf · kind lettre_mission) ; KYC = enveloppe, WIP. */}
+                (lib/conformite-pdf · kind lettre_mission) ; KYC ouvre l'enveloppe
+                (DCI Complet + Questionnaire · synthèse patrimoniale). */}
             {card.key === "der" ? (
               <button type="button" className="s1c-wf-btn wf-edit" onClick={onOpenDer}>
                 <IconEdit /> Modifier
@@ -182,8 +235,8 @@ export function DocCardsRow({
               <button
                 type="button"
                 className="s1c-wf-btn wf-edit"
-                disabled
-                title="Édition en cours de construction"
+                onClick={onOpenKyc}
+                title="Ouvrir l'enveloppe KYC (DCI Complet + Questionnaire de qualification)"
               >
                 <IconEdit /> Modifier
               </button>
@@ -200,7 +253,7 @@ export function DocCardsRow({
             </button>
 
             {/* Consulter / Signer : DER ouvre le document réel ; LM produit le
-                PDF signable réel ; KYC = aperçu enveloppe, WIP. */}
+                PDF signable réel ; KYC ouvre l'enveloppe (synthèse patrimoniale). */}
             {card.key === "der" ? (
               <button type="button" className="s1c-wf-btn wf-view" onClick={onOpenDer}>
                 <IconView /> {card.viewLabel}
@@ -219,8 +272,8 @@ export function DocCardsRow({
               <button
                 type="button"
                 className="s1c-wf-btn wf-view"
-                disabled
-                title="Aperçu en cours de construction"
+                onClick={onOpenKyc}
+                title="Consulter l'enveloppe KYC (DCI Complet + Questionnaire de qualification)"
               >
                 <IconView /> {card.viewLabel}
               </button>
@@ -411,9 +464,24 @@ async function downloadConformitePdf(
 
 export function DerModalControls() {
   const [open, setOpen] = useState(false);
+  // Deep-link `?doc=kyc|dci|qualif` (envoyé par la fiche prospect, bouton
+  // « Consulter » de la ligne DCI Complet) : ouvre d'emblée l'enveloppe KYC.
+  const [kycOpen, setKycOpen] = useState(() => {
+    if (typeof window === "undefined") return false;
+    const doc = new URLSearchParams(window.location.search).get("doc");
+    return doc === "kyc" || doc === "dci" || doc === "qualif";
+  });
+  // Remonte la modale KYC à chaque ouverture pour repartir de l'état initial
+  // (Consulter · onglet Synthèse), comme openModalKYC() de la maquette.
+  const [kycKey, setKycKey] = useState(0);
   const [lmBusy, setLmBusy] = useState(false);
   const openModal = useCallback(() => setOpen(true), []);
   const closeModal = useCallback(() => setOpen(false), []);
+  const openKyc = useCallback(() => {
+    setKycKey((k) => k + 1);
+    setKycOpen(true);
+  }, []);
+  const closeKyc = useCallback(() => setKycOpen(false), []);
 
   const handleGenerateLm = useCallback(async () => {
     setLmBusy(true);
@@ -431,10 +499,12 @@ export function DerModalControls() {
     <>
       <DocCardsRow
         onOpenDer={openModal}
+        onOpenKyc={openKyc}
         onGenerateLm={handleGenerateLm}
         lmBusy={lmBusy}
       />
       <DerModal open={open} onClose={closeModal} />
+      <KycModal key={kycKey} open={kycOpen} onClose={closeKyc} />
     </>
   );
 }
@@ -835,6 +905,307 @@ function DerModal({ open, onClose }: { open: boolean; onClose: () => void }) {
               disabled={generating}
             >
               {generating ? "Génération…" : "Générer le PDF"}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── Modale KYC · enveloppe réglementaire (DCI Complet + Questionnaire) ─────
+ * Port fidèle de #modal-kyc (maquette 030 v28). Le document de tête affiché est
+ * la Synthèse patrimoniale (#kyc-tab-synthese) : KPIs, donut par classe d'actifs,
+ * barchart par titulaire, indicateurs fiscaux et tableau matriciel par actif.
+ * La barre de mode (Consulter / Modifier) reproduit le toggle de la maquette ;
+ * les onglets DCI Complet (21 sections) et Questionnaire (18 sections) sont
+ * présents et sélectionnables (le détail intégral de ces sous-documents se
+ * remplit via l'outil de collecte / DCI du dossier). */
+
+type KycTab = "synthese" | "dci" | "qualif";
+
+function KycModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+  // L'état initial (Consulter · onglet Synthèse) est garanti par le remontage
+  // de la modale à chaque ouverture (`key` côté parent), comme openModalKYC().
+  const [mode, setMode] = useState<"readonly" | "edit">("readonly");
+  const [tab, setTab] = useState<KycTab>("synthese");
+
+  return (
+    <div
+      className={`s1a-modal-overlay${open ? " open" : ""}`}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div className="s1a-modal" role="dialog" aria-modal="true" style={{ maxWidth: 1150 }}>
+        <div className="s1a-modal-header">
+          <button className="s1a-modal-close" onClick={onClose} aria-label="Fermer">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
+              <path d="M18 6 L 6 18 M 6 6 L 18 18" />
+            </svg>
+          </button>
+          <div className="s1a-modal-eyebrow">{KYC.eyebrow}</div>
+          <h2 className="s1a-modal-title">
+            KYC · <strong>{KYC.client}</strong>
+          </h2>
+          <p className="s1a-modal-sub">{KYC.sub}</p>
+        </div>
+
+        {/* Barre de mode Consulter / Modifier */}
+        <div className="s1c-mode-bar">
+          <span className="s1c-mode-bar-label">Mode</span>
+          <button
+            type="button"
+            className={mode === "readonly" ? "active" : undefined}
+            onClick={() => setMode("readonly")}
+          >
+            Consulter
+          </button>
+          <button
+            type="button"
+            className={mode === "edit" ? "active" : undefined}
+            onClick={() => setMode("edit")}
+          >
+            Modifier
+          </button>
+          <span className="s1c-mode-bar-spacer" />
+          <span className="s1c-mode-bar-meta">{KYC.modeMeta}</span>
+        </div>
+
+        {/* Onglets : Synthèse · DCI Complet · Questionnaire */}
+        <div className="s1c-tabs">
+          <button
+            type="button"
+            className={`s1c-tab${tab === "synthese" ? " active" : ""}`}
+            onClick={() => setTab("synthese")}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M3 3v18h18" />
+              <polyline points="7 14 12 9 16 13 21 7" />
+            </svg>
+            Synthèse patrimoniale
+          </button>
+          <button
+            type="button"
+            className={`s1c-tab${tab === "dci" ? " active" : ""}`}
+            onClick={() => setTab("dci")}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
+              <line x1="9" y1="13" x2="15" y2="13" />
+            </svg>
+            DCI Complet <span className="s1c-tab-count">21 sections</span>
+          </button>
+          <button
+            type="button"
+            className={`s1c-tab${tab === "qualif" ? " active" : ""}`}
+            onClick={() => setTab("qualif")}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="9" />
+              <path d="M9 12l2 2 4-4" />
+            </svg>
+            Questionnaire de qualification <span className="s1c-tab-count">18 sections</span>
+          </button>
+        </div>
+
+        <div className="s1a-modal-body" style={{ paddingTop: 0 }}>
+          {tab === "synthese" ? (
+            <div className="s1c-tab-content">
+              {/* KPIs · 4 chiffres clés */}
+              <div className="s1c-synth-kpis">
+                {KYC_KPIS.map((kpi) => (
+                  <div className="s1c-synth-kpi" key={kpi.label}>
+                    <div className="s1c-synth-kpi-label">{kpi.label}</div>
+                    <div className="s1c-synth-kpi-value">
+                      {kpi.value}
+                      <span className="unit">{kpi.unit}</span>
+                    </div>
+                    <div className="s1c-synth-kpi-meta">{kpi.meta}</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* 2 graphiques : donut par classe + barchart par titulaire */}
+              <div className="s1c-charts-row">
+                <div className="s1c-chart-card">
+                  <div className="s1c-chart-title">
+                    <span className="s1c-chart-title-icon">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4">
+                        <circle cx="12" cy="12" r="9" />
+                        <path d="M12 3v9l8 4" />
+                      </svg>
+                    </span>
+                    Répartition par classe d&apos;actifs (brut)
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "center", alignItems: "center", padding: "8px 0" }}>
+                    <svg viewBox="0 0 360 360" style={{ width: 340, height: 340 }} aria-label="Répartition patrimoine">
+                      {KYC_DONUT.map((seg) => (
+                        <circle
+                          key={seg.color}
+                          cx="180"
+                          cy="180"
+                          r="100"
+                          fill="none"
+                          stroke={seg.color}
+                          strokeWidth="38"
+                          strokeDasharray={seg.dasharray}
+                          strokeDashoffset={seg.dashoffset}
+                          transform="rotate(-90 180 180)"
+                        >
+                          <title>{`${seg.label} · ${seg.legendValue}`}</title>
+                        </circle>
+                      ))}
+                      <text x="180" y="160" textAnchor="middle" fontFamily="Epilogue" fontSize="10.5" fontWeight="700" fill="#C68E0E" letterSpacing="0.14em">PATRIMOINE BRUT</text>
+                      <text x="180" y="195" textAnchor="middle" fontFamily="Epilogue" fontSize="28" fontWeight="700" fill="#102D50" style={{ letterSpacing: "-0.02em" }}>2 955 400 €</text>
+                      <text x="180" y="220" textAnchor="middle" fontFamily="Epilogue" fontSize="11" fontWeight="600" fill="#708196" letterSpacing="0.04em">4 classes d&apos;actifs</text>
+                    </svg>
+                  </div>
+                  <div className="s1c-donut-legend">
+                    {KYC_DONUT.map((seg) => (
+                      <div className="s1c-donut-legend-row" key={seg.color}>
+                        <span className="s1c-donut-legend-dot" style={{ background: seg.color }} />
+                        <span className="s1c-donut-legend-label">{seg.label}</span>
+                        <span className="s1c-donut-legend-value">{seg.legendValue}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div style={{ marginTop: 10, padding: "8px 10px", background: "var(--ivory)", borderRadius: 4, fontSize: "9.5px", color: "var(--navy-300)", textAlign: "center" }}>
+                    Survol des segments · détail par classe d&apos;actifs
+                  </div>
+                </div>
+
+                <div className="s1c-chart-card">
+                  <div className="s1c-chart-title">
+                    <span className="s1c-chart-title-icon">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4">
+                        <line x1="3" y1="20" x2="21" y2="20" />
+                        <rect x="5" y="13" width="3" height="7" />
+                        <rect x="10.5" y="9" width="3" height="11" />
+                        <rect x="16" y="5" width="3" height="15" />
+                      </svg>
+                    </span>
+                    Patrimoine net du foyer
+                  </div>
+                  <div style={{ marginTop: 14 }}>
+                    {KYC_NET_BARS.map((bar) => (
+                      <div className="s1c-barchart-row" key={bar.label} title={bar.title}>
+                        <div className="s1c-barchart-label">{bar.label}</div>
+                        <div className="s1c-barchart-track">
+                          <div className="s1c-barchart-fill" style={{ width: bar.width, background: bar.color }} />
+                        </div>
+                        <div className="s1c-barchart-value">{bar.value}</div>
+                      </div>
+                    ))}
+                  </div>
+                  <div style={{ marginTop: 14, padding: "10px 12px", background: "var(--ivory)", borderRadius: 4, fontSize: 10, color: "var(--navy-300)", lineHeight: 1.5 }}>
+                    <strong style={{ color: "var(--navy)" }}>Régime PACS séparation</strong> · chaque actif individuel reste la propriété exclusive du titulaire. L&apos;indivision RP suit les quote-parts d&apos;apport (60/40). La SCI est détenue 50/50 mais les revenus suivent la quote-part.
+                  </div>
+
+                  <div style={{ marginTop: 18, paddingTop: 14, borderTop: "1px dashed var(--navy-200)" }}>
+                    <div style={{ fontSize: "10.5px", fontWeight: 700, color: "var(--gold-deep)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 10 }}>
+                      Indicateurs fiscaux et financiers
+                    </div>
+                    {KYC_FISCAL_BARS.map((bar) => (
+                      <div className="s1c-barchart-row" key={bar.label} title={bar.title}>
+                        <div className="s1c-barchart-label">{bar.label}</div>
+                        <div className="s1c-barchart-track">
+                          <div className="s1c-barchart-fill" style={{ width: bar.width, background: bar.color }} />
+                        </div>
+                        <div className="s1c-barchart-value">{bar.value}</div>
+                      </div>
+                    ))}
+                    <div style={{ marginTop: 10, padding: "8px 10px", background: "var(--ivory)", borderRadius: 4, fontSize: "9.5px", color: "var(--navy-300)", lineHeight: 1.45 }}>
+                      <strong style={{ color: "var(--navy)" }}>TMI 30 %</strong> · foyer 4 parts · revenu net imposable ≈ 138 000 € · charge fiscale annuelle (IR + PS + TF) ≈ 47 000 €
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Tableau matriciel par titulaire */}
+              <div className="s1c-chart-card" style={{ marginBottom: 14 }}>
+                <div className="s1c-chart-title">
+                  <span className="s1c-chart-title-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                      <polyline points="14 2 14 8 20 8" />
+                      <line x1="9" y1="13" x2="15" y2="13" />
+                    </svg>
+                  </span>
+                  Détail patrimonial matriciel · par actif &amp; par titulaire
+                </div>
+                <table className="s1c-synth-table" style={{ marginTop: 10 }}>
+                  <thead>
+                    <tr>
+                      <th style={{ width: "38%" }}>Actif</th>
+                      <th className="right">Camille JOUBERT</th>
+                      <th className="right">Yannick BERTHOUX</th>
+                      <th className="right">Commun · SCI · enfants</th>
+                      <th className="right">Dette</th>
+                      <th className="right">Valeur nette</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {KYC_MATRIX.map((row, i) => (
+                      <tr className={row.kind} key={`${row.asset}-${i}`}>
+                        <td>
+                          {row.cat ? (
+                            <span className="s1c-synth-table-cat" style={{ background: row.cat.bg }}>
+                              {row.cat.label}
+                            </span>
+                          ) : null}
+                          {row.cat ? " " : null}
+                          {row.asset}
+                        </td>
+                        <td className="right">{row.camille}</td>
+                        <td className="right">{row.yannick}</td>
+                        <td className="right">{row.commun}</td>
+                        <td className="right" style={row.detteNeg ? { color: "#C0392B" } : undefined}>
+                          {row.dette}
+                        </td>
+                        <td className="right">{row.net}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                <div style={{ marginTop: 10, padding: "8px 12px", background: "var(--ivory)", borderRadius: 4, fontSize: "9.5px", color: "var(--navy-300)", lineHeight: 1.5 }}>
+                  Colonne <strong style={{ color: "var(--navy)" }}>Commun</strong> regroupe : indivision RP (part résiduelle), SCI BERTHOUX-JOUBERT IMMO 50/50, livrets enfants et compte commun. La somme des 3 colonnes titulaires = valeur brute. Dette = imputée globalement.
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="s1c-tab-content">
+              <div style={{ padding: "26px 22px", background: "white", border: "1px solid var(--navy-100)", borderRadius: 8, fontSize: "11.5px", color: "var(--navy-300)", lineHeight: 1.6 }}>
+                {tab === "dci" ? (
+                  <>
+                    Le <strong style={{ color: "var(--navy)" }}>DCI Complet</strong> (21 sections · situation patrimoniale détaillée par titulaire) se renseigne et se signe via l&apos;espace de collecte sécurisé du dossier. La synthèse de ces données est consultable dans l&apos;onglet <strong style={{ color: "var(--navy)" }}>Synthèse patrimoniale</strong>.
+                  </>
+                ) : (
+                  <>
+                    Le <strong style={{ color: "var(--navy)" }}>Questionnaire de qualification client</strong> (18 sections · profil investisseur, connaissance &amp; expérience, tolérance au risque) se renseigne et se signe par le client dans l&apos;espace de collecte sécurisé du dossier.
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="s1a-modal-footer">
+          <div className="s1a-modal-footer-info">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.8">
+              <circle cx="12" cy="12" r="9" />
+              <polyline points="9 12 11 14 15 10" />
+            </svg>
+            <span>
+              {mode === "edit"
+                ? "Mode édition · les valeurs se renseignent au fil de la collecte"
+                : "Enveloppe KYC · signature électronique Yousign · 2 signatures requises"}
+            </span>
+          </div>
+          <div className="s1a-modal-footer-actions">
+            <button type="button" className="s1a-btn s1a-btn-ghost" onClick={onClose}>
+              Fermer
             </button>
           </div>
         </div>

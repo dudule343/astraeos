@@ -2,7 +2,11 @@ import Link from "next/link";
 
 import { getFicheRdv, type FicheRdv } from "../../../_data/fiche-rdv";
 import { FicheRdvDocs } from "./FicheRdvDocs";
+import { ModifierRdvButton } from "./ModifierRdvButton";
 import "../../../_styles/fiche-rdv.css";
+// La modale « Modifier le RDV » (NewRdvModal) réutilise les styles s1a-modal
+// de l'agenda : on les charge aussi sur la fiche.
+import "../_styles/agenda.css";
 
 export const metadata = {
   title: "ASTRAEOS · Fiche rendez-vous",
@@ -84,24 +88,10 @@ export default async function FicheRdvPage({
               Rejoindre en visio
             </Link>
             {fiche.hasModifier ? (
-              <button
-                type="button"
-                className="s1c-visio-btn replay frdv-replay-sm"
-                disabled
-                title="Modification du RDV — bientôt disponible"
-              >
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  style={{ width: "14px", height: "14px" }}
-                >
-                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                  <path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z" />
-                </svg>
-                Modifier le RDV
-              </button>
+              <ModifierRdvButton
+                clientNom={fiche.nom}
+                dateLabel={fiche.sub.split("·")[0].trim()}
+              />
             ) : null}
           </div>
         </div>

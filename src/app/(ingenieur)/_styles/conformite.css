@@ -632,6 +632,83 @@
   color: var(--navy-300);
 }
 
+/* Panneau de filtres (bouton « Filtres ») -------------------------------- */
+.maquette-ing .conf-filter-wrap {
+  position: relative;
+}
+.maquette-ing .btn.conf-filter-active {
+  border-color: var(--gold);
+  color: var(--navy);
+}
+.maquette-ing .conf-filter-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  margin-left: 6px;
+  padding: 0 4px;
+  border-radius: 8px;
+  background: var(--gold);
+  color: var(--navy);
+  font-size: 10px;
+  font-weight: 700;
+}
+.maquette-ing .conf-filter-pop {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 30;
+  min-width: 200px;
+  padding: 10px;
+  background: white;
+  border: 1px solid var(--navy-100);
+  border-radius: 6px;
+  box-shadow: 0 8px 24px rgba(20, 33, 61, 0.12);
+}
+.maquette-ing .conf-filter-pop-title {
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--navy-300);
+  margin-bottom: 8px;
+}
+.maquette-ing .conf-filter-opt {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 2px;
+  cursor: pointer;
+}
+.maquette-ing .conf-filter-opt input {
+  accent-color: var(--gold);
+  cursor: pointer;
+}
+.maquette-ing .conf-filter-clear {
+  margin-top: 8px;
+  width: 100%;
+  padding: 5px 0;
+  border: 1px solid var(--navy-100);
+  border-radius: 4px;
+  background: var(--ivory);
+  color: var(--navy-300);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.maquette-ing .conf-filter-clear:hover {
+  color: var(--navy);
+  border-color: var(--navy-300);
+}
+.maquette-ing .conf-empty-row td {
+  text-align: center;
+  font-size: 12px;
+  color: var(--navy-300);
+  padding: 22px 14px;
+}
+
 /* Utilitaire marge ------------------------------------------------------- */
 .maquette-ing .mb-20 {
   margin-bottom: 20px;

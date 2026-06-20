@@ -2,70 +2,129 @@
 
 import { useState } from "react";
 
-import { getModelePdfBase64, type ModeleType } from "./actions";
+import { getRefAssetBase64, type RefAssetType } from "./actions";
 
-function base64ToBlobUrl(base64: string): string {
+function base64ToBlobUrl(base64: string, mime: string): string {
   const binary = atob(base64);
   const bytes = new Uint8Array(binary.length);
   for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
-  return URL.createObjectURL(new Blob([bytes], { type: "application/pdf" }));
+  return URL.createObjectURL(new Blob([bytes], { type: mime }));
+}
+
+function triggerDownload(url: string, filename: string) {
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
 }
 
 /**
- * Boutons Aperçu / Télécharger d'un modèle réellement généré (DER, Lettre de
- * mission). Appelle la server action qui produit le PDF via les builders
- * réglementaires, puis ouvre / télécharge le document. Aucune fausse donnée :
- * le PDF est le gabarit vierge PRIVEOS.
+ * Hook commun : génère la ressource via la server action puis l'ouvre (aperçu)
+ * ou la télécharge. Toute ressource du référentiel passe par là — aucun bouton
+ * mort.
  */
-export function ModeleActions({ type }: { type: ModeleType }) {
+function useRefAsset() {
   const [busy, setBusy] = useState<null | "preview" | "download">(null);
   const [error, setError] = useState<string | null>(null);
 
-  async function run(mode: "preview" | "download") {
+  async function run(type: RefAssetType, mode: "preview" | "download") {
     setBusy(mode);
     setError(null);
-    const res = await getModelePdfBase64(type);
+    const res = await getRefAssetBase64(type);
     setBusy(null);
     if (!res.ok) {
       setError(res.reason);
       return;
     }
-    const url = base64ToBlobUrl(res.base64);
+    const url = base64ToBlobUrl(res.base64, res.mime);
     if (mode === "preview") {
       window.open(url, "_blank", "noopener,noreferrer");
-      window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
     } else {
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = res.filename;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
+      triggerDownload(url, res.filename);
     }
+    window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
   }
 
+  return { busy, error, run };
+}
+
+/**
+ * Boutons Aperçu / Télécharger d'un modèle de la bibliothèque documentaire
+ * (DER, lettre de mission, manuel, KYC, questionnaire, étude, dossier, contrat).
+ * Style btn-ghost / btn-gold de la maquette.
+ */
+export function ModeleActions({ type }: { type: RefAssetType }) {
+  const { busy, error, run } = useRefAsset();
   return (
-    <div>
-      <div className="flex gap-1.5">
-        <button
-          type="button"
-          disabled={busy !== null}
-          onClick={() => run("preview")}
-          className="rounded-md border border-[var(--navy-100)] bg-white px-2.5 py-1.5 text-[10.5px] font-semibold text-[var(--navy)] hover:border-[var(--gold)] disabled:opacity-50"
-        >
-          {busy === "preview" ? "..." : "Aperçu"}
-        </button>
-        <button
-          type="button"
-          disabled={busy !== null}
-          onClick={() => run("download")}
-          className="rounded-md bg-[var(--gold)] px-2.5 py-1.5 text-[10.5px] font-bold text-white hover:brightness-110 disabled:opacity-50"
-        >
-          {busy === "download" ? "..." : "Télécharger"}
-        </button>
-      </div>
-      {error && <div className="mt-1.5 text-[10px] text-[var(--red-text)]">{error}</div>}
+    <div className="ref-modele-actions">
+      <button
+        type="button"
+        className="btn btn-ghost btn-sm"
+        disabled={busy !== null}
+        onClick={() => run(type, "preview")}
+      >
+        {busy === "preview" ? "..." : "Aperçu"}
+      </button>
+      <button
+        type="button"
+        className="btn btn-gold btn-sm"
+        disabled={busy !== null}
+        onClick={() => run(type, "download")}
+      >
+        {busy === "download" ? "..." : "Télécharger"}
+      </button>
+      {error && <div className="ref-modele-error">{error}</div>}
     </div>
+  );
+}
+
+/**
+ * Bouton « Aperçu » seul (carte Manuel / Contrat), ouvre le PDF dans un onglet.
+ */
+export function ApercuButton({ type, className }: { type: RefAssetType; className?: string }) {
+  const { busy, error, run } = useRefAsset();
+  return (
+    <>
+      <button
+        type="button"
+        className={className ?? "btn btn-ghost btn-sm"}
+        disabled={busy !== null}
+        onClick={() => run(type, "preview")}
+      >
+        {busy === "preview" ? "..." : "Aperçu"}
+      </button>
+      {error && <span className="ref-modele-error">{error}</span>}
+    </>
+  );
+}
+
+/**
+ * Bouton « Télécharger » seul (carte Manuel, cartes communication), déclenche
+ * le téléchargement du fichier réel.
+ */
+export function TelechargerButton({
+  type,
+  className,
+  label = "Télécharger",
+}: {
+  type: RefAssetType;
+  className?: string;
+  label?: string;
+}) {
+  const { busy, error, run } = useRefAsset();
+  return (
+    <>
+      <button
+        type="button"
+        className={className ?? "btn btn-gold btn-sm"}
+        disabled={busy !== null}
+        onClick={() => run(type, "download")}
+      >
+        {busy === "download" ? "..." : label}
+      </button>
+      {error && <span className="ref-modele-error">{error}</span>}
+    </>
   );
 }

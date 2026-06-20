@@ -38,11 +38,26 @@ export type HistoItem = {
   href: string | null;
 };
 
+/**
+ * Action réelle déclenchée par les boutons d'une ligne document.
+ *  - "pdf:der" / "pdf:lettre_mission" → génération + téléchargement du PDF réel
+ *    via /api/conformite/der-pdf (lib/conformite-pdf.ts), comme la fiche
+ *    conformité. Les deux boutons « Consulter / Télécharger » produisent le
+ *    document (Consulter l'ouvre dans un onglet, Télécharger le sauvegarde).
+ *  - "link" → navigation vers l'outil réel du repo (collecte, dossier) où le
+ *    document peut être consulté/récupéré.
+ */
+export type DocumentAction =
+  | { kind: "pdf"; pdf: "der" | "lettre_mission" }
+  | { kind: "link"; href: string };
+
 export type DocumentSigne = {
   title: string;
   meta: string;
   /** dernier doc = bouton doré « Ouvrir », les autres « Consulter / Télécharger » */
   primary?: boolean;
+  /** action réelle des boutons de la ligne (jamais un bouton mort) */
+  action: DocumentAction;
 };
 
 export type RdvHisto = {
@@ -124,38 +139,49 @@ export const FICHE_CLIENT_MODELE: FicheClient = {
       variant: "immo",
       title: "Investissement immobilier réalisé",
       meta: "SCPI Corum Origin · 80 000 € · souscription accompagnée le 02/05/2026",
-      href: null,
+      // Chaque acte de l'accompagnement vit dans le dossier patrimonial du
+      // client : « Voir → » ouvre la vraie fiche dossier où l'investissement
+      // a été tracé (route portée dossiers/[id]).
+      href: "/espace-ingenieur/dossiers/ETU-2026-014",
     },
     {
       variant: "financier",
       title: "Investissement financier réalisé",
       meta: "Contrat d'assurance-vie Linxea Spirit 2 · versement initial 150 000 € le 30/04/2026",
-      href: null,
+      href: "/espace-ingenieur/dossiers/ETU-2026-014",
     },
     {
       variant: "audit",
       title: "Audit patrimonial initial réalisé",
       meta: "Premier accompagnement · livré le 22/05/2025 · honoraires 8 600 € HT",
-      href: null,
+      href: "/espace-ingenieur/dossiers/ETU-2026-014",
     },
   ],
   documents: [
     {
       title: "Lettre de mission · ETU-2026-014",
       meta: "Signée le 28/04/2026 · Yousign",
+      // Génère la vraie lettre de mission (PDF pdf-lib) via /api/conformite/der-pdf.
+      action: { kind: "pdf", pdf: "lettre_mission" },
     },
     {
       title: "Document collecte complet · validé",
       meta: "Complété et signé le 28/04/2026",
+      // Le document de collecte se consulte/récupère dans l'outil collecte réel.
+      action: { kind: "link", href: "/espace-ingenieur/collectes" },
     },
     {
       title: "Document entrée en relation",
       meta: "Signé le 28/04/2026 · Yousign",
+      // Génère le vrai DER (PDF pdf-lib) via /api/conformite/der-pdf.
+      action: { kind: "pdf", pdf: "der" },
     },
     {
       title: "Étude patrimoniale livrée · v1.0",
       meta: "Livrée le 06/05/2026 · 84 pages",
       primary: true,
+      // « Ouvrir » → la fiche dossier où l'étude livrée est rattachée.
+      action: { kind: "link", href: "/espace-ingenieur/dossiers/ETU-2026-014" },
     },
   ],
   rdvs: [

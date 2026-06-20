@@ -299,6 +299,16 @@ function DciSimplifieModal({
     el?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, []);
 
+  // « Modifier » d'une rubrique du récapitulatif : bascule en édition et
+  // remonte à la section correspondante pour l'ajuster (sections 01-06).
+  const editSection = useCallback(
+    (step: number) => {
+      setMode("edit");
+      scrollToSection(step);
+    },
+    [scrollToSection],
+  );
+
   return (
     <ModalShell
       open={open}
@@ -767,6 +777,7 @@ function DciSimplifieModal({
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
                   <RecapCard
                     title="⌂ Foyer"
+                    onModifier={() => editSection(1)}
                     rows={[
                       ["Composition", "Personne seule"],
                       ["Conjoints", "—"],
@@ -775,6 +786,7 @@ function DciSimplifieModal({
                   />
                   <RecapCard
                     title="✉ Coordonnées"
+                    onModifier={() => editSection(2)}
                     rows={[
                       ["Adresse", "23 rue Saint-James"],
                       ["Ville", "33000 Bordeaux"],
@@ -783,6 +795,7 @@ function DciSimplifieModal({
                   />
                   <RecapCard
                     title="⚭ Situation"
+                    onModifier={() => editSection(3)}
                     rows={[
                       ["Régime", "Célibataire"],
                       ["Statut", "Célibataire"],
@@ -792,6 +805,7 @@ function DciSimplifieModal({
                   />
                   <RecapCard
                     title="⛁ Patrimoine"
+                    onModifier={() => editSection(4)}
                     rows={[
                       ["Immobilier", "≈ 320 000 €"],
                       ["Financier", "≈ 165 000 €"],
@@ -801,6 +815,7 @@ function DciSimplifieModal({
                   />
                   <RecapCard
                     title="€ Budget"
+                    onModifier={() => editSection(5)}
                     rows={[
                       ["Revenus annuels", "118 000 €"],
                       ["Charges annuelles", "82 000 €"],
@@ -820,7 +835,7 @@ function DciSimplifieModal({
                       >
                         ⊙ Objectifs
                       </div>
-                      <button type="button" style={recapBtnStyle}>
+                      <button type="button" style={recapBtnStyle} onClick={() => editSection(6)}>
                         Modifier
                       </button>
                     </div>
@@ -866,7 +881,15 @@ function pastilleStyle(bg: string): React.CSSProperties {
   };
 }
 
-function RecapCard({ title, rows }: { title: string; rows: [string, string, string?][] }) {
+function RecapCard({
+  title,
+  rows,
+  onModifier,
+}: {
+  title: string;
+  rows: [string, string, string?][];
+  onModifier: () => void;
+}) {
   return (
     <div style={recapCardStyle}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
@@ -881,7 +904,7 @@ function RecapCard({ title, rows }: { title: string; rows: [string, string, stri
         >
           {title}
         </div>
-        <button type="button" style={recapBtnStyle}>
+        <button type="button" style={recapBtnStyle} onClick={onModifier}>
           Modifier
         </button>
       </div>

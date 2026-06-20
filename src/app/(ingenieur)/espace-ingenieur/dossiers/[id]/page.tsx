@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { getFicheDossier, type ParcoursEtape } from "../../../_data/fiche-dossier";
 import "../../../_styles/fiche-dossier.css";
+import { OuvrirEtudeButton } from "./OuvrirEtudeButton";
 
 export const metadata = {
   title: "ASTRAEOS · Fiche dossier",
@@ -97,28 +98,15 @@ export default async function FicheDossierPage({
             ← Retour pipeline
           </Link>
           {/*
-            Maquette : « Ouvrir l'étude » est un btn-gold inerte. Si une
-            visionneuse d'étude était branchée (href), on rendrait un lien actif ;
-            faute de back-end, bouton honnêtement désactivé avec titre explicite.
+            « Ouvrir l'étude » (btn-gold du hero) : génère et télécharge le vrai
+            PDF de l'étude patrimoniale du dossier (Server Action pdf-lib). Plus
+            de bouton mort : l'action produit un livrable réel.
           */}
-          {dossier.ouvrirEtude.href ? (
-            <Link
-              href={dossier.ouvrirEtude.href}
-              className="btn btn-gold btn-sm"
-              style={{ textDecoration: "none" }}
-            >
-              Ouvrir l&apos;étude
-            </Link>
-          ) : (
-            <button
-              type="button"
-              className="btn btn-gold btn-sm"
-              disabled
-              title={dossier.ouvrirEtude.disabledTitle}
-            >
-              Ouvrir l&apos;étude
-            </button>
-          )}
+          <OuvrirEtudeButton
+            dossierId={dossier.id}
+            label="Ouvrir l'étude"
+            className="btn btn-gold btn-sm"
+          />
         </div>
       </div>
 
@@ -185,21 +173,33 @@ export default async function FicheDossierPage({
         <div className="card-body" style={{ padding: "18px 22px" }}>
           <div className="fd-actions-grid">
             {/*
-              Chaque action est branchée sur une vraie feature quand elle existe :
+              Chaque action est branchée sur une vraie feature :
               « Préparer la restitution » et « Voir le transcript » ouvrent la
               salle de visioconférence (Jitsi + transcription), « Reporter le RDV »
-              renvoie vers l'agenda. « Ouvrir l'étude » reste désactivé honnête
-              faute de visionneuse PDF (la maquette le rend de toute façon inerte).
+              renvoie vers l'agenda, « Ouvrir l'étude » génère et télécharge le
+              PDF réel de l'étude patrimoniale (Server Action pdf-lib).
             */}
             {dossier.actions.map((a) => {
               const className = `btn ${a.primary ? "btn-gold" : "btn-ghost"} btn-sm`;
+              // Action « Ouvrir l'étude » : génération + téléchargement du PDF réel.
+              if (a.etude) {
+                return (
+                  <OuvrirEtudeButton
+                    key={a.label}
+                    dossierId={dossier.id}
+                    label={a.label}
+                    className={className}
+                    style={{ padding: "14px" }}
+                  />
+                );
+              }
               if (a.href) {
                 return (
                   <Link
                     key={a.label}
                     href={a.href}
                     className={className}
-                    style={{ textDecoration: "none" }}
+                    style={{ textDecoration: "none", padding: "14px" }}
                   >
                     {a.label}
                   </Link>

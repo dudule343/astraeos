@@ -60,6 +60,11 @@ export type FicheDossierAction = {
   href?: string;
   /** titre explicatif quand l'action n'a pas (encore) de back-end. */
   disabledTitle?: string;
+  /**
+   * Action « Ouvrir l'étude » : déclenche la génération + le téléchargement du
+   * PDF réel de l'étude patrimoniale (Server Action pdf-lib), pas un lien.
+   */
+  etude?: boolean;
 };
 
 export type FicheDossier = {
@@ -68,11 +73,6 @@ export type FicheDossier = {
   heroNameLead: string;
   heroNameStrong: string;
   heroSub: string;
-  /**
-   * Action du hero « Ouvrir l'étude » : aucune visionneuse d'étude (84 p.)
-   * n'est branchée → bouton honnête désactivé (la maquette le rend inerte).
-   */
-  ouvrirEtude: { href?: string; disabledTitle?: string };
   kpis: FicheDossierKpi[];
   parcours: ParcoursEtape[];
   actions: FicheDossierAction[];
@@ -95,10 +95,6 @@ const FICHE_DOSSIER_MODELE: FicheDossier = {
   heroNameStrong: "DUPONT-TOPIN",
   heroSub:
     "Étude patrimoniale · régime de l'union · honoraires 12 800 € HT · restitution prévue demain 12/05/2026 à 14h00 (Zoom · 90 min) · dossier piloté de bout en bout par Julien VASSEUR.",
-  ouvrirEtude: {
-    // Pas de visionneuse d'étude (84 p.) branchée → bouton honnête désactivé.
-    disabledTitle: "Ouverture de l'étude — disponible une fois la visionneuse PDF branchée",
-  },
   kpis: [
     {
       label: "Étape actuelle",
@@ -219,10 +215,9 @@ const FICHE_DOSSIER_MODELE: FicheDossier = {
       ),
     },
     {
-      // L'étude 84 pages n'a pas de visionneuse branchée → désactivé honnête.
+      // Génère et télécharge le vrai PDF de l'étude patrimoniale (pdf-lib).
       label: "📄 Ouvrir l'étude (84 p.)",
-      disabledTitle:
-        "Ouverture de l'étude — disponible une fois la visionneuse PDF branchée",
+      etude: true,
     },
     {
       // RDV découverte du 15/04 enregistré + transcrit (étape 2) : on rouvre la

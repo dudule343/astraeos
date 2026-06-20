@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import {
   KPIS,
@@ -10,9 +10,17 @@ import {
   TOTAL_DOSSIERS,
   type ConformiteRow,
   type DocStatus,
+  type PayTone,
 } from "../../_data/conformite";
 
 type KpiFilter = "a-signer" | "signe-attente" | "paye";
+
+const PAY_FILTER_OPTIONS: { value: PayTone; label: string }[] = [
+  { value: "attente", label: "En attente" },
+  { value: "partiel", label: "Partiel" },
+  { value: "recu", label: "Reçu" },
+  { value: "offert", label: "Offert" },
+];
 
 /** Icônes inline (la maquette les tire d'un sprite #i-*, on les porte ici). */
 function IconSearch() {
@@ -28,6 +36,14 @@ function IconEye() {
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
       <path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7z" />
       <circle cx="12" cy="12" r="2.8" />
+    </svg>
+  );
+}
+
+function IconFilter() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
     </svg>
   );
 }
@@ -139,20 +155,51 @@ function ConformiteTableRow({ row }: { row: ConformiteRow }) {
 export function ConformiteInteractive() {
   const [filter, setFilter] = useState<KpiFilter | null>(null);
   const [query, setQuery] = useState("");
+  const [payFilters, setPayFilters] = useState<PayTone[]>([]);
+  const [filterOpen, setFilterOpen] = useState(false);
+  const filterRef = useRef<HTMLDivElement>(null);
+
+  // Ferme le panneau de filtres au clic extérieur / touche Échap.
+  useEffect(() => {
+    if (!filterOpen) return;
+    const onPointer = (e: MouseEvent) => {
+      if (filterRef.current && !filterRef.current.contains(e.target as Node)) {
+        setFilterOpen(false);
+      }
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setFilterOpen(false);
+    };
+    document.addEventListener("mousedown", onPointer);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onPointer);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [filterOpen]);
 
   const visibleRows = useMemo(() => {
     const q = query.trim().toLowerCase();
     return ROWS.filter((row) => {
       if (filter && row.dataStatus !== filter) return false;
+      if (payFilters.length > 0 && !payFilters.includes(row.payment.tone)) return false;
       if (q && !row.names.join(" ").toLowerCase().includes(q)) return false;
       return true;
     });
-  }, [filter, query]);
+  }, [filter, payFilters, query]);
 
   const toggleFilter = (next: KpiFilter) =>
     setFilter((current) => (current === next ? null : next));
 
-  const hasActiveView = filter !== null || query.trim() !== "";
+  const togglePayFilter = (tone: PayTone) =>
+    setPayFilters((current) =>
+      current.includes(tone)
+        ? current.filter((t) => t !== tone)
+        : [...current, tone],
+    );
+
+  const hasActiveView =
+    filter !== null || query.trim() !== "" || payFilters.length > 0;
 
   // « Voir l'intégralité » : la maquette annonce 18 dossiers mais n'en expose
   // réellement que ROWS.length (les autres ne sont pas encore synchronisés).
@@ -161,6 +208,7 @@ export function ConformiteInteractive() {
   const showAll = () => {
     setFilter(null);
     setQuery("");
+    setPayFilters([]);
   };
 
   const exportCsv = () => {
@@ -269,14 +317,44 @@ export function ConformiteInteractive() {
             </div>
           </div>
           <div className="table-toolbar-right">
-            <button
-              className="btn btn-ghost btn-sm"
-              type="button"
-              disabled
-              title="En cours"
-            >
-              Filtres
-            </button>
+            <div className="conf-filter-wrap" ref={filterRef}>
+              <button
+                className={`btn btn-ghost btn-sm${payFilters.length > 0 ? " conf-filter-active" : ""}`}
+                type="button"
+                onClick={() => setFilterOpen((o) => !o)}
+                aria-expanded={filterOpen}
+                aria-haspopup="true"
+              >
+                Filtres
+                {payFilters.length > 0 ? (
+                  <span className="conf-filter-count">{payFilters.length}</span>
+                ) : null}
+              </button>
+              {filterOpen ? (
+                <div className="conf-filter-pop" role="menu">
+                  <div className="conf-filter-pop-title">Filtrer par paiement</div>
+                  {PAY_FILTER_OPTIONS.map((opt) => (
+                    <label className="conf-filter-opt" key={opt.value}>
+                      <input
+                        type="checkbox"
+                        checked={payFilters.includes(opt.value)}
+                        onChange={() => togglePayFilter(opt.value)}
+                      />
+                      <span className={`s1c-pay-pill ${opt.value}`}>{opt.label}</span>
+                    </label>
+                  ))}
+                  {payFilters.length > 0 ? (
+                    <button
+                      type="button"
+                      className="conf-filter-clear"
+                      onClick={() => setPayFilters([])}
+                    >
+                      Réinitialiser
+                    </button>
+                  ) : null}
+                </div>
+              ) : null}
+            </div>
             <button
               className="btn btn-ghost btn-sm"
               type="button"
@@ -302,6 +380,11 @@ export function ConformiteInteractive() {
             {visibleRows.map((row) => (
               <ConformiteTableRow row={row} key={row.id} />
             ))}
+            {visibleRows.length === 0 ? (
+              <tr className="conf-empty-row">
+                <td colSpan={7}>Aucun dossier ne correspond à ces filtres.</td>
+              </tr>
+            ) : null}
             <tr className="pipe-more-row">
               <td colSpan={7}>
                 … {TOTAL_DOSSIERS - ROWS.length} autres dossiers ·{" "}

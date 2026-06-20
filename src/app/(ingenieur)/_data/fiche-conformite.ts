@@ -307,6 +307,95 @@ export const DER = {
   },
 };
 
+/* ── Modale KYC · Synthèse patrimoniale (onglet ouvert par défaut) ──────── */
+/* Réplique exacte de #modal-kyc > #kyc-tab-synthese (maquette l. 21358→21568) :
+ * c'est le document de tête de l'enveloppe KYC (DCI Complet + Questionnaire de
+ * qualification). Ouvert par les boutons « Consulter » / « Modifier » de la
+ * carte KYC et par le deep-link `?doc=kyc` venu de la fiche prospect. */
+
+export const KYC = {
+  eyebrow:
+    "KYC · Know Your Customer · réglementation ANACOFI / AMF / MIF II",
+  client: "Camille JOUBERT & Yannick BERTHOUX",
+  sub: "Enveloppe réglementaire composée de 2 sous-documents · DCI Complet (situation patrimoniale détaillée) + Questionnaire de qualification client (profil investisseur) · à signer par les 2 cocontractants.",
+  modeMeta: "KYC · DCI Complet + Questionnaire de qualification",
+  tabMeta: "Synthèse patrimoniale · DCI Complet (21 sections) · Questionnaire de qualification (18 sections)",
+};
+
+export type KycKpi = { label: string; value: string; unit: string; meta: string };
+export const KYC_KPIS: KycKpi[] = [
+  { label: "Patrimoine brut", value: "2 955", unit: " k€", meta: "Immobilier · financier · atypique" },
+  { label: "Patrimoine net", value: "1 750", unit: " k€", meta: "Après imputation des crédits" },
+  { label: "Total crédits", value: "1 205", unit: " k€", meta: "RP · Reims · Lyon · SCI Lille" },
+  { label: "Endettement", value: "40,8", unit: " %", meta: "Sur patrimoine brut" },
+];
+
+/** Segments du donut (dasharray/dashoffset déjà calculés dans la maquette). */
+export type KycDonutSegment = {
+  color: string;
+  dasharray: string;
+  dashoffset: string;
+  label: string;
+  legendValue: string;
+};
+export const KYC_DONUT: KycDonutSegment[] = [
+  { color: "#102D50", dasharray: "153.31 475.01", dashoffset: "0.00", label: "Immobilier d'usage · RP", legendValue: "720 k€ · 24.4 %" },
+  { color: "#C68E0E", dasharray: "290.28 338.04", dashoffset: "-153.31", label: "Immobilier locatif", legendValue: "1365 000 € · 46.2 %" },
+  { color: "#708196", dasharray: "180.96 447.36", dashoffset: "-443.59", label: "Financier · épargne", legendValue: "852 k€ · 28.8 %" },
+  { color: "#695D30", dasharray: "3.77 624.55", dashoffset: "-624.55", label: "Atypique · or", legendValue: "18 k€ · 0.6 %" },
+];
+
+export type KycBar = { label: string; width: string; color: string; value: string; title: string };
+export const KYC_NET_BARS: KycBar[] = [
+  { label: "Camille JOUBERT", width: "92.8%", color: "#C68E0E", value: "697 950 €", title: "Camille JOUBERT · 697 950 € · 39.9 % du patrimoine net" },
+  { label: "Yannick BERTHOUX", width: "100.0%", color: "#102D50", value: "751 950 €", title: "Yannick BERTHOUX · 751 950 € · 43.0 % du patrimoine net" },
+  { label: "Patrimoine Commun", width: "34.6%", color: "#695D30", value: "260 000 €", title: "Patrimoine Commun · 260 000 € · 14.9 % du patrimoine net" },
+  { label: "Commun · trésorerie", width: "2.9%", color: "#DDBB6E", value: "22 000 €", title: "Commun · trésorerie · 22 000 € · 1.2 % du patrimoine net" },
+  { label: "Enfants · Léa Tom Inès", width: "2.5%", color: "#877D59", value: "18 500 €", title: "Enfants · Léa Tom Inès · 18 500 € · 1.0 % du patrimoine net" },
+];
+
+export const KYC_FISCAL_BARS: KycBar[] = [
+  { label: "Taux d'endettement", width: "40.8%", color: "#102D50", value: "40,8 %", title: "Taux d'endettement · 40,8 %" },
+  { label: "Taux d'effort", width: "27.3%", color: "#C68E0E", value: "27,3 %", title: "Taux d'effort · 27,3 %" },
+  { label: "Reste à vivre", width: "61.0%", color: "#27AE60", value: "6 110 € / mois", title: "Reste à vivre · 6 110 € / mois" },
+  { label: "Capacité d'épargne", width: "31.0%", color: "#1F8049", value: "54 000 € / an", title: "Capacité d'épargne · 54 000 € / an" },
+];
+
+export type KycMatrixRow = {
+  cat?: { label: string; bg: string };
+  asset: string;
+  camille: string;
+  yannick: string;
+  commun: string;
+  dette: string;
+  detteNeg?: boolean;
+  net: string;
+  kind?: "subtotal" | "total";
+};
+export const KYC_MATRIX: KycMatrixRow[] = [
+  { cat: { label: "IMMO RP", bg: "#102D50" }, asset: "Résidence principale · Paris 12e · T4 95 m² · indivision 60/40", camille: "432 000 €", yannick: "288 000 €", commun: "—", dette: "-280 000 €", detteNeg: true, net: "440 000 €" },
+  { cat: { label: "LOCATIF", bg: "#C68E0E" }, asset: "Reims · T3 nu · 100 % Camille", camille: "165 000 €", yannick: "—", commun: "—", dette: "-95 000 €", detteNeg: true, net: "70 000 €" },
+  { cat: { label: "LOCATIF", bg: "#C68E0E" }, asset: "Lyon · T2 LMNP réel · 100 % Camille", camille: "220 000 €", yannick: "—", commun: "—", dette: "-110 000 €", detteNeg: true, net: "110 000 €" },
+  { cat: { label: "LOCATIF", bg: "#C68E0E" }, asset: "Lille · Immeuble 4 lots · SCI BERTHOUX-JOUBERT IMMO 50/50", camille: "—", yannick: "—", commun: "980 000 €", dette: "-720 000 €", detteNeg: true, net: "260 000 €" },
+  { asset: "Sous-total immobilier", camille: "817 000 €", yannick: "288 000 €", commun: "980 000 €", dette: "-1 205 000 €", detteNeg: true, net: "880 000 €", kind: "subtotal" },
+  { cat: { label: "FINANCIER", bg: "#708196" }, asset: "PEA Bourse Direct · ETF MSCI World + émergents", camille: "78 000 €", yannick: "—", commun: "—", dette: "—", net: "78 000 €" },
+  { cat: { label: "FINANCIER", bg: "#708196" }, asset: "AV Linxea Spirit 2 · 60 % UC / 40 % €", camille: "95 000 €", yannick: "—", commun: "—", dette: "—", net: "95 000 €" },
+  { cat: { label: "FINANCIER", bg: "#708196" }, asset: "PER Linxea · versement 5 000 €/an", camille: "22 000 €", yannick: "—", commun: "—", dette: "—", net: "22 000 €" },
+  { cat: { label: "FINANCIER", bg: "#708196" }, asset: "CTO Boursorama · actions tech US", camille: "24 000 €", yannick: "—", commun: "—", dette: "—", net: "24 000 €" },
+  { cat: { label: "FINANCIER", bg: "#708196" }, asset: "Livret A + LDDS · Camille", camille: "34 950 €", yannick: "—", commun: "—", dette: "—", net: "34 950 €" },
+  { cat: { label: "FINANCIER", bg: "#708196" }, asset: "PEA Saxo Bank · actions individuelles européennes", camille: "—", yannick: "145 000 €", commun: "—", dette: "—", net: "145 000 €" },
+  { cat: { label: "FINANCIER", bg: "#708196" }, asset: "🇱🇺 AV Vitis Life Luxembourg · droit lux. · 80 % UC", camille: "—", yannick: "240 000 €", commun: "—", dette: "—", net: "240 000 €" },
+  { cat: { label: "FINANCIER", bg: "#708196" }, asset: "CTO Saxo · OAT + obligations corporate", camille: "—", yannick: "65 000 €", commun: "—", dette: "—", net: "65 000 €" },
+  { cat: { label: "FINANCIER", bg: "#708196" }, asset: "Trésorerie SASU BERTHOUX CONSEIL", camille: "—", yannick: "85 000 €", commun: "—", dette: "—", net: "85 000 €" },
+  { cat: { label: "FINANCIER", bg: "#708196" }, asset: "Livret A · Yannick", camille: "—", yannick: "22 950 €", commun: "—", dette: "—", net: "22 950 €" },
+  { cat: { label: "FINANCIER", bg: "#708196" }, asset: "3 Livrets A enfants (Léa 8,5 · Tom 6,2 · Inès 3,8 k)", camille: "—", yannick: "—", commun: "18 500 €", dette: "—", net: "18 500 €" },
+  { cat: { label: "FINANCIER", bg: "#708196" }, asset: "Compte commun + comptes individuels", camille: "—", yannick: "—", commun: "22 000 €", dette: "—", net: "22 000 €" },
+  { asset: "Sous-total financier", camille: "253 950 €", yannick: "557 950 €", commun: "40 500 €", dette: "—", detteNeg: true, net: "852 400 €", kind: "subtotal" },
+  { cat: { label: "ATYPIQUE", bg: "#695D30" }, asset: "🥇 Or physique · 4 lingots 250 g · AuCOFFRE", camille: "—", yannick: "18 000 €", commun: "—", dette: "—", net: "18 000 €" },
+  { asset: "Sous-total atypique", camille: "—", yannick: "18 000 €", commun: "—", dette: "—", detteNeg: true, net: "18 000 €", kind: "subtotal" },
+  { asset: "PATRIMOINE TOTAL", camille: "1 070 950 €", yannick: "863 950 €", commun: "1 020 500 €", dette: "-1 205 000 €", detteNeg: true, net: "1 750 400 €", kind: "total" },
+];
+
 /** Données réelles passées au générateur PDF (lib/conformite-pdf.ts). */
 export const DER_PDF_INPUT: ConformitePdfInput = {
   dossierId: "CF-2026-JOU",

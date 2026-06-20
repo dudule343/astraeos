@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { honorairesKpis, etudesMissions, repartitionMissions } from "../../_data/assets-honoraires";
 import "../../_styles/assets-honoraires.css";
+import { ExportHonorairesButton } from "./ExportHonorairesButton";
 import { HonorairesTable } from "./HonorairesTable";
 
 export const metadata = {
@@ -50,14 +51,7 @@ export default function AssetsHonorairesPage() {
           <Link href="/espace-ingenieur/assets" className="btn btn-ghost btn-sm">
             ← Retour vue d&apos;ensemble
           </Link>
-          <button
-            type="button"
-            className="btn btn-gold btn-sm"
-            data-stub="Exporter les honoraires de conseil"
-            data-stub-body="L'export du détail de vos honoraires de conseil sera disponible dans une prochaine itération."
-          >
-            Exporter
-          </button>
+          <ExportHonorairesButton />
         </div>
       </div>
 

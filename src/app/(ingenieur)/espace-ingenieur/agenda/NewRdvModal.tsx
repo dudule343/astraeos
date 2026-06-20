@@ -21,10 +21,15 @@ import { createRdv, type RdvFormat } from "./actions";
 
 export const OPEN_NEW_RDV_EVENT = "open-new-rdv";
 
-/** Détail de l'événement d'ouverture : créneau et jour cliqués. */
+/** Détail de l'événement d'ouverture : créneau et jour cliqués, et — pour
+ *  « Modifier le RDV » depuis une fiche — le client déjà associé. */
 export type OpenNewRdvDetail = {
   heureDebut?: string;
   jour?: string;
+  /** pré-sélectionne un client existant du portefeuille (modification de RDV) */
+  clientExistant?: string;
+  /** bascule l'en-tête de la modale en mode « modification » */
+  modeModification?: boolean;
 };
 
 type RdvType = "initial" | "intermediaire" | "restitution" | "suivi";
@@ -104,11 +109,13 @@ export function NewRdvModal() {
   const [submitStatus, setSubmitStatus] = useState<SubmitStatus>("idle");
   const [toast, setToast] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [modeModification, setModeModification] = useState(false);
 
   const close = useCallback(() => {
     setOpen(false);
     setSubmitStatus("idle");
     setError(null);
+    setModeModification(false);
     document.body.style.overflow = "";
   }, []);
 
@@ -117,6 +124,11 @@ export function NewRdvModal() {
       const detail = (e as CustomEvent<OpenNewRdvDetail>).detail ?? {};
       if (detail.heureDebut) setHeureDebut(detail.heureDebut);
       if (detail.jour) setDate(detail.jour);
+      if (detail.clientExistant) {
+        setClientMode("existant");
+        setClientExistant(detail.clientExistant);
+      }
+      setModeModification(Boolean(detail.modeModification));
       setOpen(true);
       document.body.style.overflow = "hidden";
     }
@@ -239,9 +251,19 @@ export function NewRdvModal() {
               <path d="M18 6 L 6 18 M 6 6 L 18 18" />
             </svg>
           </button>
-          <div className="s1a-modal-eyebrow">Agenda · Création RDV directe</div>
+          <div className="s1a-modal-eyebrow">
+            {modeModification ? "Agenda · Modification du RDV" : "Agenda · Création RDV directe"}
+          </div>
           <h2 className="s1a-modal-title" id="modal-rdv-title">
-            Nouveau <strong>rendez-vous</strong>
+            {modeModification ? (
+              <>
+                Modifier le <strong>rendez-vous</strong>
+              </>
+            ) : (
+              <>
+                Nouveau <strong>rendez-vous</strong>
+              </>
+            )}
           </h2>
           <p className="s1a-modal-sub">
             Le type de RDV sélectionné déclenche automatiquement l&apos;envoi des documents associés au client.
@@ -617,7 +639,11 @@ export function NewRdvModal() {
               onClick={submit}
               disabled={submitStatus === "submitting"}
             >
-              {submitStatus === "submitting" ? "Création…" : "Créer le RDV + envoyer"}
+              {submitStatus === "submitting"
+                ? "Enregistrement…"
+                : modeModification
+                  ? "Enregistrer les modifications"
+                  : "Créer le RDV + envoyer"}
             </button>
           </div>
         </div>
@@ -639,29 +665,3 @@ export function OpenRdvButton() {
   );
 }
 
-/** Cellule vide de la grille : clic = ouvre la modale avec créneau + jour pré-remplis. */
-export function EmptyCell({
-  className,
-  slotKey,
-  dayLabel,
-  style,
-}: {
-  className: string;
-  slotKey: string;
-  dayLabel: string;
-  style?: React.CSSProperties;
-}) {
-  return (
-    <div
-      className={className}
-      style={style}
-      onClick={() =>
-        window.dispatchEvent(
-          new CustomEvent<OpenNewRdvDetail>(OPEN_NEW_RDV_EVENT, {
-            detail: { heureDebut: slotKey, jour: dayLabel },
-          }),
-        )
-      }
-    />
-  );
-}

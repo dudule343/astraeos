@@ -19,12 +19,27 @@ export type RefListItem = {
   highlight?: boolean;
 };
 
+/** Toutes les ressources téléchargeables du référentiel (PDF / SVG réels). */
+export type RefAsset =
+  | "der"
+  | "lettre_mission"
+  | "manuel"
+  | "contrat_cadre"
+  | "kyc"
+  | "questionnaire"
+  | "etude_patrimoniale"
+  | "dossier_client"
+  | "charte_graphique"
+  | "fond_ecran"
+  | "logo_principal"
+  | "logo_or_blanc";
+
 /** Modèle de la bibliothèque documentaire. */
 export type ModeleDoc = {
   title: string;
   desc: string;
-  /** Modèle généré pour de vrai (DER, Lettre de mission) → boutons branchés. */
-  pdf?: "der" | "lettre_mission";
+  /** Ressource générée pour de vrai → boutons Aperçu / Télécharger branchés. */
+  asset: RefAsset;
 };
 
 /** Carte des éléments de communication (logo / fond / charte). */
@@ -39,6 +54,8 @@ export type CommItem = {
   logoGold?: boolean;
   /** Sous-titre (« Logo principal », « PDF · 24 pages »…). */
   subtitle: string;
+  /** Ressource téléchargée par le bouton « Télécharger » de la carte. */
+  asset: RefAsset;
 };
 
 export type ReferentielScreen = {
@@ -123,44 +140,65 @@ const SCREEN: ReferentielScreen = {
       {
         title: "Document d'entrée en relation",
         desc: "Modèle conforme ORIAS · CIF · IAS, à signer par le client lors du 1er rendez-vous.",
-        pdf: "der",
+        asset: "der",
       },
       {
         title: "KYC · Know Your Customer",
         desc: "Formulaire LCB-FT, identification complète + justificatifs.",
+        asset: "kyc",
       },
       {
         title: "Questionnaire de qualification",
         desc: "Profil patrimonial · objectifs · horizon · tolérance risque.",
+        asset: "questionnaire",
       },
       {
         title: "Lettre de mission",
         desc: "Cadre contractuel de l'étude · objet · honoraires · délais.",
-        pdf: "lettre_mission",
+        asset: "lettre_mission",
       },
       {
         title: "Étude patrimoniale anonymisée",
         desc: "Modèle d'étude type · structure · diagnostic · préconisations.",
+        asset: "etude_patrimoniale",
       },
       {
         title: "Dossier client anonymisé",
         desc: "Dossier complet anonymisé pour formation et exemple type.",
+        asset: "dossier_client",
       },
     ],
   },
   communication: {
     title: "Éléments de communication",
     items: [
-      { variant: "navy", title: "PRIVEOS", logo: true, subtitle: "Logo principal" },
+      {
+        variant: "navy",
+        title: "PRIVEOS",
+        logo: true,
+        subtitle: "Logo principal",
+        asset: "logo_principal",
+      },
       {
         variant: "white",
         title: "PRIVEOS",
         logo: true,
         logoGold: true,
         subtitle: "Logo doré sur blanc",
+        asset: "logo_or_blanc",
       },
-      { variant: "navy-gradient", title: "FOND D'ÉCRAN", subtitle: "Présentation" },
-      { variant: "ivory", title: "CHARTE GRAPHIQUE", subtitle: "PDF · 24 pages" },
+      {
+        variant: "navy-gradient",
+        title: "FOND D'ÉCRAN",
+        subtitle: "Présentation",
+        asset: "fond_ecran",
+      },
+      {
+        variant: "ivory",
+        title: "CHARTE GRAPHIQUE",
+        subtitle: "PDF · 24 pages",
+        asset: "charte_graphique",
+      },
     ],
   },
 };
