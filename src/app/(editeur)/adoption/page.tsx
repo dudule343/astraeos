@@ -1,150 +1,197 @@
-import { Topbar } from "../_components/Topbar";
-import { KpiCard, type KpiBlock } from "@/app/_components/shared/KpiCard";
-import { PageHero, SectionHeader, GhostButton } from "@/app/_components/shared/PageHeader";
-import { fetchAdoption, fmtCount } from "./data";
+import { EditeurTopbar } from "../_components/EditeurTopbar";
 
-export const dynamic = "force-dynamic";
-
-export const metadata = {
-  title: "ASTRAEOS · Adoption produit",
+type TopUser = {
+  rank: number;
+  engineer: string;
+  cabinet: string;
+  sessions: string;
+  time: string;
+  studies: string;
+  stars: string;
 };
 
-export default async function AdoptionPage() {
-  const a = await fetchAdoption();
+const TOP_USERS: TopUser[] = [
+  {
+    rank: 1,
+    engineer: "Julien VASSEUR",
+    cabinet: "PRIVEOS Capital · Paris Étoile",
+    sessions: "42",
+    time: "18h 24min",
+    studies: "14",
+    stars: "★★★★★",
+  },
+  {
+    rank: 2,
+    engineer: "Marie SOREL",
+    cabinet: "PRIVEOS Capital · Lyon",
+    sessions: "38",
+    time: "16h 12min",
+    studies: "12",
+    stars: "★★★★★",
+  },
+  {
+    rank: 3,
+    engineer: "Thomas BERNARD",
+    cabinet: "Cabinet Dupont & Associés",
+    sessions: "34",
+    time: "14h 48min",
+    studies: "9",
+    stars: "★★★★☆",
+  },
+  {
+    rank: 4,
+    engineer: "Sophie MARCHAND",
+    cabinet: "Mont-Blanc Patrimoine",
+    sessions: "31",
+    time: "13h 02min",
+    studies: "8",
+    stars: "★★★★☆",
+  },
+  {
+    rank: 5,
+    engineer: "Pierre LAMBERT",
+    cabinet: "Cabinet Lyonnais",
+    sessions: "28",
+    time: "12h 18min",
+    studies: "7",
+    stars: "★★★★☆",
+  },
+];
 
-  // Volumétrie d'utilisation. Les "actifs" sont dérivés de l'activité datée
-  // (timeline_events) ou, à défaut, de last_login_at — jamais inventés. Si
-  // l'usage n'est pas instrumenté, on le dit dans la meta plutôt que d'afficher
-  // un chiffre faux.
-  const activityMeta = a.activityInstrumented
-    ? "activité tracée"
-    : "estimé via dernière connexion";
-
-  const userKpis: KpiBlock[] = [
-    {
-      label: "Utilisateurs actifs semaine",
-      value: fmtCount(a.actifs7j),
-      meta: `7 derniers jours · ${activityMeta}`,
-    },
-    {
-      label: "Utilisateurs actifs mois",
-      value: fmtCount(a.actifs30j),
-      meta:
-        a.usersCrees > 0
-          ? `sur ${a.usersCrees} utilisateur${a.usersCrees > 1 ? "s" : ""} créé${a.usersCrees > 1 ? "s" : ""}`
-          : "30 derniers jours",
-    },
-    {
-      label: "Utilisateurs créés",
-      value: a.usersCrees > 0 ? String(a.usersCrees) : "—",
-      meta: "ingénieurs & dirigeants du périmètre",
-    },
-    {
-      label: "Ratio semaine / mois",
-      value: a.stickiness != null ? String(a.stickiness) : "—",
-      unit: a.stickiness != null ? "%" : undefined,
-      meta: "stickiness · seuil sain > 20 %",
-    },
-  ];
-
-  // Profondeur d'usage. Les "sessions par utilisateur" et la "durée moyenne de
-  // session" n'ont aucune source dans le schéma : on les remplace par des proxys
-  // d'usage réels et datés (dossiers créés, études livrées), et on garde les
-  // dormants (vraie donnée via last_login_at).
-  const engagementKpis: KpiBlock[] = [
-    {
-      label: "Dossiers créés",
-      value: fmtCount(a.dossiersCrees30j),
-      meta: "30 derniers jours",
-    },
-    {
-      label: "Études livrées",
-      value: fmtCount(a.etudesLivrees30j),
-      meta: "30 derniers jours",
-    },
-    {
-      label: "Utilisateurs dormants",
-      value: fmtCount(a.dormants),
-      meta: "aucune connexion 30 jours",
-    },
-  ];
-
+export default function Page() {
   return (
     <>
-      <Topbar current="03 · Adoption produit" />
-
-      <div className="px-10 py-8">
-        <PageHero
-          eyebrow="Bloc 03 · Adoption produit"
-          title="Adoption produit"
-          description="Mesurer combien d'utilisateurs utilisent réellement la plateforme et à quelle fréquence — qui se connecte, qui revient, qui est dormant."
-          actions={<GhostButton dataStub="Export Adoption">Export</GhostButton>}
-        />
-
-        <section className="mb-8">
-          <SectionHeader eyebrow="Utilisateurs actifs" title="Volumétrie d'utilisation" />
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {userKpis.map((kpi) => (
-              <KpiCard key={kpi.label} kpi={kpi} />
-            ))}
+      <EditeurTopbar current="Adoption produit" />
+      <div className="content">
+        <div className="hero">
+          <div>
+            <div className="hero-eyebrow">Bloc 03 · Adoption produit</div>
+            <h1 className="hero-title">Adoption produit</h1>
+            <p className="hero-sub">
+              Mesurer combien d&apos;utilisateurs utilisent réellement la plateforme et à quelle
+              fréquence — qui se connecte, qui revient, qui est dormant.
+            </p>
           </div>
-        </section>
-
-        <section className="mb-8">
-          <SectionHeader eyebrow="Engagement" title="Profondeur d'usage" />
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {engagementKpis.map((kpi) => (
-              <KpiCard key={kpi.label} kpi={kpi} />
-            ))}
+          <div className="hero-actions">
+            <button className="btn btn-ghost btn-sm" data-stub="Export">
+              <svg>
+                <use href="#i-download" />
+              </svg>
+              Export
+            </button>
           </div>
-        </section>
+        </div>
 
-        <section className="mb-8">
-          <SectionHeader eyebrow="Top engagés" title="Top 10 utilisateurs ce mois" />
-          {a.topUsers.length > 0 ? (
-            <div className="overflow-hidden rounded-md border border-[var(--navy-100)] bg-white">
-              <table className="w-full text-left">
-                <thead>
-                  <tr className="border-b border-[var(--navy-100)] bg-[var(--ivory)] text-[10.5px] font-bold uppercase tracking-[0.08em] text-[var(--navy-300)]">
-                    <th className="px-4 py-3">#</th>
-                    <th className="px-4 py-3">Ingénieur</th>
-                    <th className="px-4 py-3">Cabinet</th>
-                    <th className="px-4 py-3 text-right">Entretiens réalisés</th>
-                    <th className="px-4 py-3 text-right">Études livrées</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[var(--navy-100)]">
-                  {a.topUsers.map((user) => (
-                    <tr
-                      key={user.id}
-                      className="text-[12.5px] text-[var(--navy)] hover:bg-[var(--light-blue)]"
-                    >
-                      <td className="px-4 py-3 font-bold text-[var(--navy-300)]">{user.rank}</td>
-                      <td className="px-4 py-3 font-semibold">{user.name}</td>
-                      <td className="px-4 py-3 text-[var(--navy-300)]">{user.cabinet ?? "—"}</td>
-                      <td className="px-4 py-3 text-right tabular-nums">
-                        {user.entretiens > 0 ? user.entretiens : "—"}
-                      </td>
-                      <td className="px-4 py-3 text-right tabular-nums">
-                        {user.etudesLivrees > 0 ? user.etudesLivrees : "—"}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+        <div className="section-block">
+          <div className="section-header">
+            <div>
+              <div className="section-eyebrow">Utilisateurs actifs</div>
+              <div className="section-title">Volumétrie d&apos;utilisation</div>
             </div>
-          ) : (
-            <div className="rounded-md border border-dashed border-[var(--navy-100)] bg-white p-12 text-center">
-              <div className="mb-2 text-[15px] font-semibold text-[var(--navy)]">
-                Aucune activité utilisateur sur la période
+          </div>
+          <div className="kpis">
+            <div className="kpi">
+              <span className="phase-tag p1">PHASE 1</span>
+              <div className="kpi-label">Utilisateurs actifs jour</div>
+              <div className="kpi-value">62</div>
+              <div className="kpi-meta">
+                aujourd&apos;hui · <strong className="up">▲ +14 %</strong>
               </div>
-              <p className="mx-auto max-w-md text-[12.5px] leading-relaxed text-[var(--navy-300)]">
-                Le classement se construit à mesure que les ingénieurs livrent des études et
-                réalisent des entretiens.
-              </p>
             </div>
-          )}
-        </section>
+            <div className="kpi">
+              <span className="phase-tag p1">PHASE 1</span>
+              <div className="kpi-label">Utilisateurs actifs semaine</div>
+              <div className="kpi-value">158</div>
+              <div className="kpi-meta">7 derniers jours</div>
+            </div>
+            <div className="kpi">
+              <span className="phase-tag p1">PHASE 1</span>
+              <div className="kpi-label">Utilisateurs actifs mois</div>
+              <div className="kpi-value">214</div>
+              <div className="kpi-meta">sur ~280 ingénieurs créés</div>
+            </div>
+            <div className="kpi">
+              <span className="phase-tag p1">PHASE 1</span>
+              <div className="kpi-label">Ratio quotidien / mensuel</div>
+              <div className="kpi-value">
+                29 <span className="unit">%</span>
+              </div>
+              <div className="kpi-meta">stickiness · seuil sain &gt; 20 %</div>
+            </div>
+          </div>
+        </div>
+
+        <div className="section-block">
+          <div className="section-header">
+            <div>
+              <div className="section-eyebrow">Engagement</div>
+              <div className="section-title">Profondeur d&apos;usage</div>
+            </div>
+          </div>
+          <div className="kpis kpis-3">
+            <div className="kpi">
+              <span className="phase-tag p1">PHASE 1</span>
+              <div className="kpi-label">Sessions par utilisateur actif</div>
+              <div className="kpi-value">14,2</div>
+              <div className="kpi-meta">
+                par mois · <strong className="up">▲ +8 %</strong>
+              </div>
+            </div>
+            <div className="kpi">
+              <span className="phase-tag p1">PHASE 1</span>
+              <div className="kpi-label">Durée moyenne par session</div>
+              <div className="kpi-value">
+                22 <span className="unit">min</span>
+              </div>
+              <div className="kpi-meta">temps engagé</div>
+            </div>
+            <div className="kpi">
+              <span className="phase-tag p1">PHASE 1</span>
+              <div className="kpi-label">Utilisateurs dormants</div>
+              <div className="kpi-value">68</div>
+              <div className="kpi-meta">aucune connexion 30 jours</div>
+            </div>
+          </div>
+        </div>
+
+        <div className="section-block">
+          <div className="section-header">
+            <div>
+              <div className="section-eyebrow">Top engagés</div>
+              <div className="section-title">Top 10 utilisateurs ce mois</div>
+            </div>
+          </div>
+          <div className="table-wrap">
+            <table className="dt">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Ingénieur</th>
+                  <th>Cabinet</th>
+                  <th className="num">Sessions</th>
+                  <th className="num">Temps cumulé</th>
+                  <th className="num">Études créées</th>
+                  <th className="center">Engagement</th>
+                </tr>
+              </thead>
+              <tbody>
+                {TOP_USERS.map((u) => (
+                  <tr key={u.rank}>
+                    <td>{u.rank}</td>
+                    <td className="cell-primary">{u.engineer}</td>
+                    <td>{u.cabinet}</td>
+                    <td className="num">{u.sessions}</td>
+                    <td className="num">{u.time}</td>
+                    <td className="num">{u.studies}</td>
+                    <td className="center">
+                      <span className="badge badge-success">{u.stars}</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </>
   );

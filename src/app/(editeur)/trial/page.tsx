@@ -1,205 +1,380 @@
-import { Topbar } from "../_components/Topbar";
-import { KpiCard, type KpiBlock } from "@/app/_components/shared/KpiCard";
-import { PageHero } from "@/app/_components/shared/PageHeader";
-import { fetchTrials, type TrialData } from "./data";
-import { TrialTable } from "./TrialTable";
+import { EditeurTopbar } from "../_components/EditeurTopbar";
+import { TrialToolbar } from "./TrialToolbar";
 
-export const dynamic = "force-dynamic";
+// Port 1:1 de la maquette (#page-trial, lignes 2624-2805 de
+// reference/wireframes-editeur.html). Classes de la maquette reprises verbatim,
+// valeurs hardcodées à l'identique. Seule interaction : les filtres rapides
+// (.qf) du tableau, portés dans TrialToolbar (composant client).
 
-// Templates email et démarrage d'essai n'ont aucun backend (pas de table de
-// templates, pas de mutation de statut d'essai). On les rend honnêtement
-// désactivés "à venir" plutôt qu'en faux boutons cliquables.
-function DisabledHeaderAction({
-  children,
-  gold = false,
-}: {
-  children: React.ReactNode;
-  gold?: boolean;
-}) {
-  return (
-    <button
-      type="button"
-      disabled
-      title="Fonctionnalité à venir"
-      className={
-        gold
-          ? "cursor-not-allowed rounded-md bg-[var(--gold)] px-3 py-2 text-[11.5px] font-bold text-white opacity-50"
-          : "cursor-not-allowed rounded-md border border-[var(--navy-100)] bg-white px-3 py-2 text-[11.5px] font-semibold text-[var(--navy-300)] opacity-60"
-      }
-    >
-      {children}
-    </button>
-  );
-}
+type TrialRow = {
+  name: string;
+  role: string;
+  cabinet: string;
+  email: string;
+  phone: string;
+  type: { label: string; cls: string };
+  startedAt: string;
+  reste: { label: string; cls: string };
+  etape: { label: string; cls: string };
+  offre: { label: string; cls: string };
+  callGold: boolean;
+};
 
-const DASH = "—";
-
-function buildKpis(data: TrialData): KpiBlock[] {
-  return [
-    {
-      label: "Essais en cours",
-      value: String(data.enCours),
-      meta: "comptes en période d'essai",
-    },
-    {
-      label: "Démarrés ces 30 jours",
-      value: String(data.demarres30j),
-      meta: "nouveaux essais < 30 jours",
-    },
-    {
-      // Aucune date de fin d'essai en base → pas de source.
-      label: "Échéance dans < 7 jours",
-      value: DASH,
-      meta: "échéance d'essai non suivie en base",
-    },
-    {
-      // Aucun historique de conversion essai→payant tracé.
-      label: "Taux de conversion historique",
-      value: DASH,
-      meta: "non suivi",
-    },
-  ];
-}
-
-// Durée moyenne, ouverture d'emails de relance, conversions avec offre :
-// aucune table de relance, d'offres ou d'événements de conversion → "—".
-const moreKpis: KpiBlock[] = [
-  { label: "Durée moyenne d'essai", value: DASH, meta: "non suivi en base" },
-  { label: "Emails de relance ouverts", value: DASH, meta: "relances non suivies en base" },
-  { label: "Conversions avec offre", value: DASH, meta: "non suivi en base" },
+const ROWS: TrialRow[] = [
+  {
+    name: "Pierre VAUBAN",
+    role: "Dirigeant fondateur",
+    cabinet: "Vauban Patrimoine",
+    email: "p.vauban@vauban-patrimoine.fr",
+    phone: "04 90 12 34 56",
+    type: { label: "Cabinet", cls: "tt tt-cabinet" },
+    startedAt: "14 avr 2026",
+    reste: { label: "6 jours", cls: "badge badge-warning" },
+    etape: { label: "3· Email relance ouvert", cls: "badge badge-info" },
+    offre: { label: "-30 % 1er mois", cls: "badge badge-info" },
+    callGold: true,
+  },
+  {
+    name: "Antoine BERNARD",
+    role: "Associé gérant",
+    cabinet: "Bernard & Cie",
+    email: "a.bernard@bernard-cie.fr",
+    phone: "03 21 45 67 89",
+    type: { label: "Cabinet", cls: "tt tt-cabinet" },
+    startedAt: "17 avr 2026",
+    reste: { label: "9 jours", cls: "badge badge-warning" },
+    etape: { label: "3· Email relance ouvert (2x)", cls: "badge badge-info" },
+    offre: { label: "-50 % 1er mois", cls: "badge badge-gold" },
+    callGold: true,
+  },
+  {
+    name: "Mathilde AUVERGNE",
+    role: "CGP indépendante",
+    cabinet: "Auvergne Wealth",
+    email: "m.auvergne@auvergne-wealth.fr",
+    phone: "04 73 24 35 46",
+    type: { label: "Cabinet", cls: "tt tt-cabinet" },
+    startedAt: "22 avr 2026",
+    reste: { label: "14 jours", cls: "badge badge-info" },
+    etape: { label: "2· Onboarding", cls: "badge badge-warning" },
+    offre: { label: "Pas encore", cls: "badge badge-neutral" },
+    callGold: false,
+  },
+  {
+    name: "Maître Édouard ROUX",
+    role: "Notaire associé",
+    cabinet: "Étude Roux & Vidal",
+    email: "e.roux@roux-vidal-notaires.fr",
+    phone: "02 99 55 66 77",
+    type: { label: "Autre pro", cls: "tt tt-pro" },
+    startedAt: "28 avr 2026",
+    reste: { label: "21 jours", cls: "badge badge-info" },
+    etape: { label: "1· Démarrage", cls: "badge badge-success" },
+    offre: { label: "Pas encore", cls: "badge badge-neutral" },
+    callGold: false,
+  },
 ];
 
-// Contenu produit assumé (config d'offres), pas une donnée live.
-const offers = [
+const OFFERS = [
   {
-    label: { v: "Souple", cls: "bg-[var(--light-blue)] text-[var(--navy)]" },
+    badge: { label: "Souple", cls: "badge badge-info" },
     title: "Réduction 10 %",
     value: "-10 % sur le 1er mois",
     desc: "Pour les essais qui ne se convertissent pas naturellement",
   },
   {
-    label: { v: "Standard", cls: "bg-[var(--orange-bg)] text-[var(--orange-text)]" },
+    badge: { label: "Standard", cls: "badge badge-warning" },
     title: "Réduction 30 %",
     value: "-30 % sur le 1er mois",
     desc: "Si engagement à 3 mois minimum",
   },
   {
-    label: { v: "Forte", cls: "bg-[var(--gold-200)] text-[var(--medium-400)]" },
+    badge: { label: "Forte", cls: "badge badge-gold" },
     title: "Réduction 50 %",
     value: "-50 % sur le 1er mois",
     desc: "Cabinets stratégiques · validation manuelle",
   },
 ];
 
-export default async function TrialPage() {
-  const data = await fetchTrials();
-  const kpis = buildKpis(data);
-
+export default function Page() {
   return (
     <>
-      <Topbar current="Période d'essai" />
-
-      <div className="px-10 py-8">
-        <PageHero
-          eyebrow="Opérations clients"
-          title="Période d'essai"
-          description="Suivi des prospects en période d'essai gratuite — coordonnées complètes, étape du parcours, offre proposée, conversion vers un abonnement payant."
-          actions={
-            <>
-              <DisabledHeaderAction>📧 Templates email · à venir</DisabledHeaderAction>
-              <DisabledHeaderAction gold>Démarrer un essai · à venir</DisabledHeaderAction>
-            </>
-          }
-        />
-
-        <section className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {kpis.map((k) => (
-            <KpiCard key={k.label} kpi={k} />
-          ))}
-        </section>
-
-        <section className="mb-8 grid grid-cols-1 gap-3 sm:grid-cols-3">
-          {moreKpis.map((k) => (
-            <KpiCard key={k.label} kpi={k} />
-          ))}
-        </section>
-
-        <section className="mb-8 rounded-md border border-[var(--navy-100)] bg-white">
-          <div className="flex items-center justify-between border-b border-[var(--navy-100)] px-4 py-3">
-            <div className="text-[13px] font-semibold text-[var(--navy)]">
-              📋 Parcours d&apos;un essai · 3 étapes principales
-            </div>
-            <span className="text-[11px] text-[var(--navy-300)]">
-              Démarrage et essais actifs lus en base
-            </span>
+      <EditeurTopbar current="Période d'essai" />
+      <div className="content">
+        <div className="hero">
+          <div>
+            <div className="hero-eyebrow">Opérations clients</div>
+            <h1 className="hero-title">Période d&apos;essai</h1>
+            <p className="hero-sub">
+              Suivi des prospects en période d&apos;essai gratuite — coordonnées complètes, étape du
+              parcours, offre proposée, conversion vers un abonnement payant.
+            </p>
           </div>
-          <div className="grid grid-cols-3 gap-2 p-4">
-            <div className="rounded-md border border-[var(--green-text)]/40 bg-gradient-to-br from-[var(--ivory)] to-[var(--green-bg)] p-3">
-              <div className="mb-1 text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--green-text)]">
-                Démarrage
-              </div>
-              <div className="text-[24px] font-bold leading-none text-[var(--navy)]">
-                {data.demarres30j}
-              </div>
-              <div className="mt-1 text-[10.5px] text-[var(--navy-300)]">essais démarrés ces 30j</div>
-            </div>
-            <div className="rounded-md border border-[var(--gold)] bg-[var(--gold-200)]/30 p-3">
-              <div className="mb-1 text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--gold)]">
-                En période d&apos;essai
-              </div>
-              <div className="text-[24px] font-bold leading-none text-[var(--gold)]">
-                {data.enCours}
-              </div>
-              <div className="mt-1 text-[10.5px] text-[var(--navy-300)]">essais actifs en cours</div>
-            </div>
-            <div className="rounded-md border border-[var(--navy-100)] bg-[var(--ivory)] p-3">
-              <div className="mb-1 text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--navy-300)]">
-                Conversion
-              </div>
-              <div className="text-[24px] font-bold leading-none text-[var(--navy)]">{DASH}</div>
-              <div className="mt-1 text-[10.5px] text-[var(--navy-300)]">conversion non suivie en base</div>
-            </div>
+          <div className="hero-actions">
+            <button className="btn btn-ghost btn-sm" data-stub="Templates email">
+              <svg>
+                <use href="#i-comms" />
+              </svg>
+              Templates email
+            </button>
+            <button className="btn btn-gold btn-sm" data-stub="Démarrer un essai">
+              Démarrer un essai
+            </button>
           </div>
-        </section>
+        </div>
 
-        <TrialTable rows={data.rows} enCours={data.enCours} />
-
-        <section>
-          <div className="rounded-md border border-[var(--navy-100)] bg-white">
-            <div className="border-b border-[var(--navy-100)] px-4 py-3 text-[13px] font-semibold text-[var(--navy)]">
-              ⚡ Catalogue d&apos;offres incitatives de référence
+        <div className="kpis mb-20">
+          <div className="kpi">
+            <div className="kpi-label">Essais en cours</div>
+            <div className="kpi-value">4</div>
+            <div className="kpi-meta">démarrés &lt; 30 jours</div>
+          </div>
+          <div className="kpi">
+            <div className="kpi-label">Démarrés ces 30 jours</div>
+            <div className="kpi-value">7</div>
+            <div className="kpi-meta">▲ +14 % vs M-1</div>
+          </div>
+          <div className="kpi">
+            <div className="kpi-label">Échéance dans &lt; 7 jours</div>
+            <div className="kpi-value" style={{ color: "var(--orange-text)" }}>
+              3
             </div>
-            <div className="p-4">
-              <div className="mb-3 flex items-start gap-2 rounded-md border border-[var(--green-text)]/30 bg-[var(--green-bg)] px-4 py-3 text-[11.5px] text-[var(--navy)]">
-                <span>✓</span>
-                <div>
-                  Catalogue de référence des 3 offres incitatives prévues, à appliquer manuellement
-                  au cas par cas. L&apos;activation en un clic depuis cet écran sera ajoutée
-                  ultérieurement.
+            <div className="kpi-meta">à relancer en priorité</div>
+          </div>
+          <div className="kpi">
+            <div className="kpi-label">Taux de conversion historique</div>
+            <div className="kpi-value">
+              68 <span className="unit">%</span>
+            </div>
+            <div className="kpi-meta">essai → client payant</div>
+          </div>
+        </div>
+
+        <div className="kpis kpis-3 mb-20">
+          <div className="kpi">
+            <div className="kpi-label">Durée moyenne d&apos;essai</div>
+            <div className="kpi-value">
+              22 <span className="unit">jours</span>
+            </div>
+            <div className="kpi-meta">avant signature</div>
+          </div>
+          <div className="kpi">
+            <div className="kpi-label">Emails de relance ouverts</div>
+            <div className="kpi-value">
+              82 <span className="unit">%</span>
+            </div>
+            <div className="kpi-meta">taux d&apos;ouverture moyen</div>
+          </div>
+          <div className="kpi">
+            <div className="kpi-label">Conversions avec offre</div>
+            <div className="kpi-value">
+              +24 <span className="unit">%</span>
+            </div>
+            <div className="kpi-meta">offre incitative -10 % à -50 %</div>
+          </div>
+        </div>
+
+        {/* Stepper simplifié 3 étapes */}
+        <div className="card mb-24">
+          <div className="card-header">
+            <div className="card-title">
+              <svg>
+                <use href="#i-trial" />
+              </svg>
+              Parcours d&apos;un essai · 3 étapes principales
+            </div>
+            <span className="card-subtitle">Les emails de relance et l&apos;offre sont automatisés</span>
+          </div>
+          <div className="card-body" style={{ padding: "14px 0" }}>
+            <div
+              className="pipeline-stepper"
+              style={{ gridTemplateColumns: "repeat(3,1fr)", margin: 0, border: "none" }}
+            >
+              <div
+                className="stepper-item completed"
+                style={{ background: "linear-gradient(135deg, var(--ivory), var(--green-bg))" }}
+              >
+                <div
+                  className="stepper-badge"
+                  style={{
+                    background: "var(--green-text)",
+                    color: "white",
+                    borderColor: "var(--green-text)",
+                  }}
+                >
+                  <svg>
+                    <use href="#i-success" />
+                  </svg>
                 </div>
+                <div className="stepper-label">DÉMARRAGE</div>
+                <div className="stepper-count">7</div>
+                <div className="stepper-meta">essais démarrés ces 30j</div>
               </div>
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                {offers.map((o) => (
-                  <div
-                    key={o.title}
-                    className="rounded-md border border-[var(--navy-100)] bg-[var(--ivory)] p-4"
-                  >
-                    <span
-                      className={`mb-2 inline-block rounded-full px-2.5 py-0.5 text-[10px] font-bold ${o.label.cls}`}
-                    >
-                      {o.label.v}
-                    </span>
-                    <div className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--navy-300)]">
-                      {o.title}
-                    </div>
-                    <div className="text-[18px] font-bold text-[var(--gold)]">{o.value}</div>
-                    <div className="mt-1 text-[11.5px] text-[var(--navy-300)]">{o.desc}</div>
-                  </div>
-                ))}
+              <div className="stepper-item active">
+                <div className="stepper-badge">
+                  <svg>
+                    <use href="#i-trial" />
+                  </svg>
+                </div>
+                <div className="stepper-label">EN PÉRIODE D&apos;ESSAI</div>
+                <div className="stepper-count">4</div>
+                <div className="stepper-meta">essais actifs en cours</div>
+              </div>
+              <div className="stepper-item">
+                <div className="stepper-badge">
+                  <svg>
+                    <use href="#i-business" />
+                  </svg>
+                </div>
+                <div className="stepper-label">CONVERSION</div>
+                <div className="stepper-count">3</div>
+                <div className="stepper-meta">signés ces 30j · 68 % taux</div>
               </div>
             </div>
           </div>
-        </section>
+        </div>
+
+        {/* TABLEAU REFONDU avec coordonnées complètes */}
+        <div className="table-wrap mb-24">
+          <TrialToolbar />
+
+          <table className="dt">
+            <thead>
+              <tr>
+                <th>Contact (Prénom Nom)</th>
+                <th>Fonction</th>
+                <th>Cabinet</th>
+                <th>Coordonnées</th>
+                <th>Type</th>
+                <th>Démarré le</th>
+                <th>Reste</th>
+                <th>Étape parcours</th>
+                <th>Offre proposée</th>
+                <th className="center">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {ROWS.map((row) => (
+                <tr className="dt-clickable" key={row.email}>
+                  <td className="cell-primary">{row.name}</td>
+                  <td>{row.role}</td>
+                  <td>{row.cabinet}</td>
+                  <td
+                    style={{
+                      fontSize: "11px",
+                      lineHeight: "1.4",
+                      color: "var(--navy)",
+                    }}
+                  >
+                    <div>
+                      <svg
+                        style={{
+                          width: "10px",
+                          height: "10px",
+                          color: "var(--gold)",
+                          verticalAlign: "middle",
+                        }}
+                      >
+                        <use href="#i-mail" />
+                      </svg>{" "}
+                      {row.email}
+                    </div>
+                    <div>
+                      <svg
+                        style={{
+                          width: "10px",
+                          height: "10px",
+                          color: "var(--gold)",
+                          verticalAlign: "middle",
+                        }}
+                      >
+                        <use href="#i-phone" />
+                      </svg>{" "}
+                      {row.phone}
+                    </div>
+                  </td>
+                  <td>
+                    <span className={row.type.cls}>{row.type.label}</span>
+                  </td>
+                  <td>{row.startedAt}</td>
+                  <td>
+                    <span className={row.reste.cls}>{row.reste.label}</span>
+                  </td>
+                  <td>
+                    <span className={row.etape.cls}>{row.etape.label}</span>
+                  </td>
+                  <td>
+                    <span className={row.offre.cls}>{row.offre.label}</span>
+                  </td>
+                  <td className="center" style={{ whiteSpace: "nowrap" }}>
+                    <button
+                      className={row.callGold ? "btn btn-gold btn-sm" : "btn btn-ghost btn-sm"}
+                      style={{ marginRight: "4px" }}
+                      data-stub="Appeler"
+                    >
+                      <svg>
+                        <use href="#i-phone" />
+                      </svg>
+                      Appeler
+                    </button>
+                    <button className="btn btn-ghost btn-sm" data-stub="Email">
+                      <svg>
+                        <use href="#i-mail" />
+                      </svg>
+                      Email
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Offre incitative configurable */}
+        <div className="card">
+          <div className="card-header">
+            <div className="card-title">
+              <svg>
+                <use href="#i-ai" />
+              </svg>
+              Offres incitatives configurables
+            </div>
+          </div>
+          <div className="card-body">
+            <div className="info-bar success">
+              <svg>
+                <use href="#i-success" />
+              </svg>
+              <div>
+                3 offres incitatives configurables, à activer au cas par cas. Statistiquement, ces
+                offres font passer le taux de conversion de <strong>52 %</strong> à{" "}
+                <strong>76 %</strong>.
+              </div>
+            </div>
+            <div className="grid-3" style={{ marginTop: "14px" }}>
+              {OFFERS.map((offer) => (
+                <div className="card" key={offer.title}>
+                  <div className="card-body">
+                    <span className={offer.badge.cls} style={{ marginBottom: "8px" }}>
+                      {offer.badge.label}
+                    </span>
+                    <div className="kpi-label" style={{ marginBottom: "6px" }}>
+                      {offer.title}
+                    </div>
+                    <div style={{ fontSize: "18px", fontWeight: 700, color: "var(--gold)" }}>
+                      {offer.value}
+                    </div>
+                    <div
+                      style={{ fontSize: "11.5px", color: "var(--navy-300)", marginTop: "4px" }}
+                    >
+                      {offer.desc}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
     </>
   );

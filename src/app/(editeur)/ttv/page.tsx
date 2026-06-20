@@ -1,86 +1,106 @@
-import { Topbar } from "../_components/Topbar";
-import { KpiCard, type KpiBlock } from "@/app/_components/shared/KpiCard";
-import { PageHero, SectionHeader, GhostButton } from "@/app/_components/shared/PageHeader";
-import { fetchTtv } from "./data";
-
-export const dynamic = "force-dynamic";
+import { EditeurTopbar } from "../_components/EditeurTopbar";
 
 export const metadata = {
   title: "ASTRAEOS · Vitesse première valeur",
 };
 
-export default async function TtvPage() {
-  const ttv = await fetchTtv();
+const MILESTONES = [
+  { label: "Connexion initiale", value: "4", unit: "min", meta: "après création compte" },
+  { label: "Premier client ajouté", value: "2,4", unit: "jours", meta: "médiane" },
+  { label: "Première étude patrimoniale", value: "5,8", unit: "jours", meta: "médiane" },
+  { label: "Première simulation", value: "7,2", unit: "jours", meta: "médiane" },
+  { label: "Premier rapport généré", value: "9,4", unit: "jours", meta: "médiane · révèle la valeur" },
+] as const;
 
-  const milestoneKpis: KpiBlock[] = ttv.milestones.map((m) => ({
-    phase: "1",
-    label: m.label,
-    value: m.value,
-    unit: m.unit,
-    meta: m.meta,
-  }));
+const FUNNEL = [
+  { label: "Connexion initiale", pct: 100, strong: "100 %", count: "18/18" },
+  { label: "Premier client ajouté", pct: 94, strong: "94 %", count: "17/18" },
+  { label: "Première étude patrimoniale", pct: 78, strong: "78 %", count: "14/18" },
+  { label: "Première simulation", pct: 61, strong: "61 %", count: "11/18" },
+  { label: "Premier rapport généré", pct: 44, strong: "44 %", count: "8/18" },
+] as const;
 
+export default function Page() {
   return (
     <>
-      <Topbar current="04 · Vitesse première valeur" />
+      <EditeurTopbar current="Vitesse première valeur" />
 
-      <div className="px-10 py-8">
-        <PageHero
-          eyebrow="Bloc 04 · Vitesse première valeur"
-          title="Vitesse première valeur"
-          description="Mesurer combien de temps un nouvel utilisateur met avant d'obtenir une première valeur tangible — court = plus de chances de conversion et rétention."
-          actions={<GhostButton dataStub="Export Time-to-value">Export</GhostButton>}
-        />
+      <div className="content">
+        <div className="hero">
+          <div>
+            <div className="hero-eyebrow">Bloc 04 · Vitesse première valeur</div>
+            <h1 className="hero-title">Vitesse première valeur</h1>
+            <p className="hero-sub">
+              Mesurer combien de temps un nouvel utilisateur met avant d&apos;obtenir une première
+              valeur tangible — court = plus de chances de conversion et rétention.
+            </p>
+          </div>
+          <div className="hero-actions">
+            <button className="btn btn-ghost btn-sm" data-stub="Export">
+              <svg>
+                <use href="#i-download" />
+              </svg>
+              Export
+            </button>
+          </div>
+        </div>
 
-        <section className="mb-8">
-          <SectionHeader eyebrow="Délais médians" title="Temps moyen jusqu'aux jalons clés" />
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-            {milestoneKpis.map((kpi) => (
-              <KpiCard key={kpi.label} kpi={kpi} />
+        <div className="section-block">
+          <div className="section-header">
+            <div>
+              <div className="section-eyebrow">Délais médians</div>
+              <div className="section-title">Temps moyen jusqu&apos;aux jalons clés</div>
+            </div>
+          </div>
+          <div className="kpis kpis-5">
+            {MILESTONES.map((m) => (
+              <div className="kpi" key={m.label}>
+                <span className="phase-tag p1">PHASE 1</span>
+                <div className="kpi-label">{m.label}</div>
+                <div className="kpi-value">
+                  {m.value} <span className="unit">{m.unit}</span>
+                </div>
+                <div className="kpi-meta">{m.meta}</div>
+              </div>
             ))}
           </div>
-        </section>
+        </div>
 
-        <section className="mb-8">
-          <SectionHeader
-            eyebrow="Onboarding"
-            title={`Progression des ingénieurs (${ttv.cohort} ${ttv.cohort > 1 ? "ingénieurs" : "ingénieur"})`}
-          />
-          <div className="rounded-md border border-[var(--navy-100)] bg-white p-6">
-            {ttv.hasData ? (
-              <div className="flex flex-col gap-5">
-                {ttv.funnel.map((step) => (
-                  <div key={step.label}>
-                    <div className="mb-1.5 flex justify-between text-[11.5px] text-[var(--navy-300)]">
-                      <span>{step.label}</span>
-                      {step.tracked && step.pct != null ? (
-                        <span>
-                          <strong className="text-[var(--navy)]">{step.pct} %</strong> ·{" "}
-                          {step.reached}/{step.cohort}
-                        </span>
-                      ) : (
-                        <span className="italic">non suivi</span>
-                      )}
-                    </div>
-                    <div className="h-3 overflow-hidden rounded-sm bg-[var(--navy-100)]">
-                      {step.tracked && step.pct != null && (
-                        <div
-                          className="h-full bg-[var(--navy)]"
-                          style={{ width: `${step.pct}%` }}
-                        />
-                      )}
-                    </div>
-                  </div>
-                ))}
+        <div className="section-block">
+          <div className="section-header">
+            <div>
+              <div className="section-eyebrow">Onboarding</div>
+              <div className="section-title">
+                Progression des nouveaux ingénieurs (30 derniers jours)
               </div>
-            ) : (
-              <div className="py-6 text-center text-[12.5px] text-[var(--navy-300)]">
-                Aucun ingénieur rattaché à ce cabinet pour l&apos;instant. La progression
-                d&apos;onboarding s&apos;affichera dès qu&apos;une équipe sera constituée.
-              </div>
-            )}
+            </div>
           </div>
-        </section>
+          <div className="card">
+            <div className="card-body">
+              {FUNNEL.map((step, i) => (
+                <div key={step.label} style={i < FUNNEL.length - 1 ? { marginBottom: "18px" } : undefined}>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      marginBottom: "6px",
+                      fontSize: "11.5px",
+                      color: "var(--navy-300)",
+                    }}
+                  >
+                    <span>{step.label}</span>
+                    <span>
+                      <strong style={{ color: "var(--navy)" }}>{step.strong}</strong> · {step.count}
+                    </span>
+                  </div>
+                  <div className="funnel-bar">
+                    <div className="funnel-bar-fill" style={{ width: `${step.pct}%` }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
     </>
   );

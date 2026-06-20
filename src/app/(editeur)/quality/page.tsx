@@ -1,138 +1,220 @@
-import { Topbar } from "../_components/Topbar";
-import { KpiCard, type KpiBlock } from "@/app/_components/shared/KpiCard";
-import { PageHero, SectionHeader, GhostButton } from "@/app/_components/shared/PageHeader";
-import { fetchQuality, fmtCount, fmtScore } from "./data";
-
-export const dynamic = "force-dynamic";
+import { EditeurTopbar } from "../_components/EditeurTopbar";
 
 export const metadata = {
   title: "ASTRAEOS · Support & qualité",
 };
 
-// Encart "état vide honnête" : utilisé pour les blocs dont la source n'existe
-// pas encore en base (support, incidents). On n'affiche aucun chiffre inventé.
-function EmptyNotice({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="flex items-start gap-2 rounded-md border border-dashed border-[var(--navy-100)] bg-white px-4 py-4 text-[12px] text-[var(--navy-300)]">
-      <span aria-hidden>ℹ️</span>
-      <div>{children}</div>
-    </div>
-  );
-}
+const SUPPORT_KPIS = [
+  {
+    label: "Tickets ouverts",
+    value: "12",
+    meta: "4 critiques · 8 standards",
+  },
+  {
+    label: "Temps moyen de première réponse",
+    value: "2,4",
+    unit: "h",
+    meta: "objectif < 4h",
+  },
+  {
+    label: "Temps moyen de résolution",
+    value: "8,2",
+    unit: "h",
+    meta: "objectif < 24h",
+  },
+  {
+    label: "Satisfaction support",
+    value: "4,7",
+    unit: "/5",
+    meta: "CSAT moyen",
+  },
+];
 
-export default async function QualityPage() {
-  const q = await fetchQuality();
+const STABILITE_KPIS = [
+  {
+    label: "Bugs critiques ouverts",
+    value: "2",
+    valueColor: "var(--red-text)",
+    meta: "à corriger sous 48h",
+  },
+  {
+    label: "Incidents de plateforme",
+    value: "0",
+    meta: "30 derniers jours · 100 % stable",
+  },
+  {
+    label: "Niveau de service garanti",
+    value: "99,8",
+    unit: "%",
+    meta: "disponibilité contractuelle (SLA)",
+  },
+];
 
-  // Bloc "Dossiers en attente / en retard" — dérivé de dossiers.stage_entered_at,
-  // last_activity_at, days_in_stage_cached, priority (seules vraies données de
-  // cette page). Pas de comparatifs temporels : aucun historique de snapshots
-  // en base, donc on ne fabrique pas de flèches d'évolution.
-  const dossierKpis: KpiBlock[] = [
-    {
-      label: "Dossiers suivis",
-      value: fmtCount(q.dossiersActifs),
-      meta: "dossiers actifs du cabinet",
-    },
-    {
-      label: "En retard",
-      value: fmtCount(q.enRetard),
-      meta: "plus de 14 jours dans l'étape",
-      trend: q.enRetard > 0 ? "down" : undefined,
-    },
-    {
-      label: "Sans activité récente",
-      value: fmtCount(q.sansActivite),
-      meta: "aucune activité depuis 14 jours",
-    },
-    {
-      label: "Prioritaires bloqués",
-      value: fmtCount(q.prioritairesBloques),
-      meta: "priorité haute/urgente en retard",
-      trend: q.prioritairesBloques > 0 ? "down" : undefined,
-    },
-  ];
+const N1_RESOLUTION = [
+  {
+    label: "Cette semaine",
+    value: "82",
+    meta: "28 résolus / 34 tickets",
+    compare: [
+      { period: "S-1", value: "▲ 78 %" },
+      { period: "S-2", value: "▲ 76 %" },
+    ],
+  },
+  {
+    label: "Ce mois",
+    value: "79",
+    meta: "112 / 142 tickets",
+    compare: [
+      { period: "M-1", value: "▲ 74 %" },
+      { period: "M-2", value: "▲ 71 %" },
+    ],
+  },
+  {
+    label: "Ce trimestre",
+    value: "76",
+    meta: "324 / 426 tickets",
+    compare: [
+      { period: "T-1", value: "▲ 68 %" },
+      { period: "N-1", value: "▲ 58 %" },
+    ],
+  },
+  {
+    label: "Cette année",
+    value: "73",
+    meta: "986 / 1 350 tickets",
+    compare: [
+      { period: "N-1", value: "▲ 61 %" },
+      { period: "N-2", value: "▲ 52 %" },
+    ],
+  },
+];
 
+export default function Page() {
   return (
     <>
-      <Topbar current="07 · Support & qualité" />
+      <EditeurTopbar current="Support & qualité" />
+      <div className="content">
+        <div className="hero">
+          <div>
+            <div className="hero-eyebrow">Bloc 07 · Support &amp; qualité</div>
+            <h1 className="hero-title">Support &amp; qualité</h1>
+            <p className="hero-sub">
+              Mesurer la qualité du support et la stabilité produit — gestion des tickets,
+              résolution de bugs, suivi des incidents de plateforme et satisfaction client.
+            </p>
+          </div>
+          <div className="hero-actions">
+            <button className="btn btn-ghost btn-sm" data-stub="Export" data-stub-mode="toast">
+              <svg>
+                <use href="#i-download" />
+              </svg>
+              Export
+            </button>
+          </div>
+        </div>
 
-      <div className="px-10 py-8">
-        <PageHero
-          eyebrow="Bloc 07 · Support & qualité"
-          title="Support & qualité"
-          description="Mesurer la qualité du support et la stabilité produit — gestion des tickets, résolution de bugs, suivi des incidents de plateforme et satisfaction client."
-          actions={<GhostButton dataStub="Export Support & qualité">Export</GhostButton>}
-        />
-
-        <section className="mb-8">
-          <SectionHeader eyebrow="Charge support" title="Tickets & délais" />
-          <EmptyNotice>
-            Module de support non encore instrumenté — aucune donnée de ticket, de délai de
-            réponse ou de résolution n&apos;est disponible. Ces indicateurs s&apos;afficheront
-            lorsque le suivi des demandes de support sera branché.
-          </EmptyNotice>
-        </section>
-
-        <section className="mb-8">
-          <SectionHeader eyebrow="Stabilité produit" title="Bugs & incidents" />
-          <EmptyNotice>
-            Suivi des incidents plateforme et des bugs non disponible — aucune source de
-            supervision (incidents, disponibilité, SLA) n&apos;est connectée. Aucune mesure de
-            fiabilité n&apos;est affichée tant qu&apos;elle n&apos;est pas réellement collectée.
-          </EmptyNotice>
-        </section>
-
-        <section className="mb-8">
-          <SectionHeader
-            eyebrow="Suivi de production"
-            title="Dossiers en attente / en retard"
-          />
-          <div className="mb-3 flex items-start gap-2 rounded-md border border-[var(--navy-100)] bg-[var(--light-blue)] px-4 py-3 text-[11.5px] text-[var(--navy)]">
-            <span>ℹ️</span>
+        <div className="section-block">
+          <div className="section-header">
             <div>
-              Dossiers du cabinet qui stagnent dans leur étape ou sans activité récente, dérivés
-              du temps passé dans chaque étape du pipeline. Indicateur de la charge à traiter en
-              priorité.
+              <div className="section-eyebrow">Charge support</div>
+              <div className="section-title">Tickets &amp; délais</div>
             </div>
           </div>
-          {q.hasDossiers ? (
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              {dossierKpis.map((kpi) => (
-                <KpiCard key={kpi.label} kpi={kpi} />
-              ))}
-            </div>
-          ) : (
-            <EmptyNotice>Aucun dossier suivi pour l&apos;instant.</EmptyNotice>
-          )}
-        </section>
+          <div className="kpis">
+            {SUPPORT_KPIS.map((kpi) => (
+              <div className="kpi" key={kpi.label}>
+                <span className="phase-tag p1">PHASE 1</span>
+                <div className="kpi-label">{kpi.label}</div>
+                <div className="kpi-value">
+                  {kpi.value}
+                  {kpi.unit ? (
+                    <>
+                      {" "}
+                      <span className="unit">{kpi.unit}</span>
+                    </>
+                  ) : null}
+                </div>
+                <div className="kpi-meta">{kpi.meta}</div>
+              </div>
+            ))}
+          </div>
+        </div>
 
-        <section className="mb-8">
-          <SectionHeader
-            eyebrow="Retour client"
-            title="Satisfaction des études livrées"
-          />
-          <div className="mb-3 flex items-start gap-2 rounded-md border border-[var(--navy-100)] bg-[var(--light-blue)] px-4 py-3 text-[11.5px] text-[var(--navy)]">
-            <span>ℹ️</span>
+        <div className="section-block">
+          <div className="section-header">
             <div>
-              Note moyenne attribuée par les clients aux études patrimoniales livrées (échelle de
-              1 à 10). Distincte d&apos;une satisfaction support : elle mesure la qualité perçue du
-              livrable, pas du service d&apos;assistance.
+              <div className="section-eyebrow">Stabilité produit</div>
+              <div className="section-title">Bugs &amp; incidents</div>
             </div>
           </div>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <KpiCard
-              kpi={{
-                label: "Satisfaction étude (moyenne)",
-                value: fmtScore(q.satisfactionMoyenne),
-                unit: q.satisfactionMoyenne != null ? "/10" : undefined,
-                meta:
-                  q.satisfactionCount > 0
-                    ? `sur ${q.satisfactionCount} étude${q.satisfactionCount > 1 ? "s" : ""} notée${q.satisfactionCount > 1 ? "s" : ""}`
-                    : "aucune étude notée pour l'instant",
-              }}
-            />
+          <div className="kpis kpis-3">
+            {STABILITE_KPIS.map((kpi) => (
+              <div className="kpi" key={kpi.label}>
+                <span className="phase-tag p1">PHASE 1</span>
+                <div className="kpi-label">{kpi.label}</div>
+                <div
+                  className="kpi-value"
+                  style={kpi.valueColor ? { color: kpi.valueColor } : undefined}
+                >
+                  {kpi.value}
+                  {kpi.unit ? (
+                    <>
+                      {" "}
+                      <span className="unit">{kpi.unit}</span>
+                    </>
+                  ) : null}
+                </div>
+                <div className="kpi-meta">{kpi.meta}</div>
+              </div>
+            ))}
           </div>
-        </section>
+        </div>
+
+        <div className="section-block">
+          <div className="section-header">
+            <div>
+              <div className="section-eyebrow">Premier niveau de support</div>
+              <div className="section-title">
+                Taux de résolution niveau 1 · évolution temporelle
+              </div>
+            </div>
+          </div>
+          <div className="info-bar">
+            <svg>
+              <use href="#i-info" />
+            </svg>
+            <div>
+              Pourcentage de tickets résolus directement par l&apos;équipe support de premier
+              niveau, sans escalade vers le développement.
+            </div>
+          </div>
+          <div className="card">
+            <div className="card-body">
+              <div
+                className="kpis-3"
+                style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: "14px" }}
+              >
+                {N1_RESOLUTION.map((kpi) => (
+                  <div className="kpi" key={kpi.label} style={{ background: "var(--ivory)" }}>
+                    <div className="kpi-label">{kpi.label}</div>
+                    <div className="kpi-value">
+                      {kpi.value} <span className="unit">%</span>
+                    </div>
+                    <div className="kpi-meta">{kpi.meta}</div>
+                    <div className="kpi-compare">
+                      {kpi.compare.map((c) => (
+                        <div className="kpi-compare-cell" key={c.period}>
+                          <div className="kpi-compare-period">{c.period}</div>
+                          <div className="kpi-compare-value up">{c.value}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </>
   );

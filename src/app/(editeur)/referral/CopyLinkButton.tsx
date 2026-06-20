@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 
-// Copie presse-papier du lien de parrainage d'exemple. Bloc explicitement
-// étiqueté "à concevoir" : on câble une vraie copie plutôt qu'un faux clic.
+// Bouton « Copier » du lien de parrainage (maquette ligne 2409). On câble une
+// vraie copie presse-papier plutôt qu'un clic mort, tout en conservant le
+// markup verbatim de la maquette (btn btn-ghost btn-sm + icône #i-copy).
 export function CopyLinkButton({ value }: { value: string }) {
   const [copied, setCopied] = useState(false);
 
@@ -19,11 +20,14 @@ export function CopyLinkButton({ value }: { value: string }) {
 
   return (
     <button
-      type="button"
+      className="btn btn-ghost btn-sm"
+      style={{ marginLeft: "auto" }}
       onClick={handleCopy}
-      className="rounded-md border border-[var(--navy-100)] bg-white px-3 py-2 text-[11.5px] font-semibold text-[var(--navy)] hover:border-[var(--gold)]"
     >
-      {copied ? "✓ Copié" : "📋 Copier"}
+      <svg>
+        <use href="#i-copy" />
+      </svg>
+      {copied ? "Copié" : "Copier"}
     </button>
   );
 }

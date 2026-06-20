@@ -1,73 +1,99 @@
-import { Topbar } from "../_components/Topbar";
-import { KpiCard, type KpiBlock } from "@/app/_components/shared/KpiCard";
-import { PageHero } from "@/app/_components/shared/PageHeader";
-import { fetchTeam } from "./data";
-import { TeamRoster } from "./TeamRoster";
-import { TeamExportButton } from "./TeamExportButton";
-import { AddCollaboratorButton } from "./AddCollaboratorButton";
+import { EditeurTopbar } from "../_components/EditeurTopbar";
+import { TeamRosterDrawer } from "./TeamRosterDrawer";
 
-export const dynamic = "force-dynamic";
-
-export const metadata = {
-  title: "ASTRAEOS · Équipe interne",
-};
-
-export default async function TeamPage() {
-  const team = await fetchTeam();
-
-  // Effectif : total + un KPI par rôle réellement présent (max 4 rôles affichés
-  // après le total pour rester sur une grille de 5 colonnes).
-  const kpisCount: KpiBlock[] = [
-    {
-      label: "Effectif total",
-      value: team.total > 0 ? String(team.total) : "—",
-      meta: "collaborateurs actifs",
-    },
-    ...team.byRole.slice(0, 4).map(
-      (r): KpiBlock => ({
-        label: r.label,
-        value: String(r.count),
-        meta: r.count > 1 ? "personnes" : "personne",
-      }),
-    ),
-  ];
-
+export default function Page() {
   return (
     <>
-      <Topbar current="Équipe interne" />
-
-      <div className="px-10 py-8">
-        <PageHero
-          eyebrow="Pilotage interne"
-          title="Équipe interne"
-          description="Collaborateurs rattachés au cabinet, organisés par rôle. Activité par membre (clients, rendez-vous, études, CA) dérivée des dossiers en cours."
-          actions={
-            <>
-              <TeamExportButton categories={team.categories} />
-              <AddCollaboratorButton />
-            </>
-          }
-        />
-
-        <section className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-          {kpisCount.map((k) => (
-            <KpiCard key={k.label} kpi={k} />
-          ))}
-        </section>
-
-        <div className="mb-3 flex items-start gap-2 rounded-md border border-[var(--navy-100)] bg-[var(--light-blue)] px-4 py-3 text-[11.5px] text-[var(--navy)]">
-          <span>ℹ️</span>
+      <EditeurTopbar current="Équipe interne" />
+      <div className="content">
+        <div className="hero">
           <div>
-            Cliquez sur un ingénieur patrimonial pour ouvrir sa fiche — activité de la semaine
-            (rendez-vous, clients, études livrées et CA généré), dérivée de ses dossiers.
+            <div className="hero-eyebrow">Pilotage interne</div>
+            <h1 className="hero-title">Équipe interne</h1>
+            <p className="hero-sub">
+              Effectif d&apos;ASTRAEOS organisé en 4 catégories : Direction, Technique, Support,
+              Commerciaux. Coût et charge sur le CA suivis en temps réel.
+            </p>
+          </div>
+          <div className="hero-actions">
+            <button className="btn btn-ghost btn-sm" data-stub="Export RH">
+              <svg>
+                <use href="#i-download" />
+              </svg>
+              Export RH
+            </button>
+            <button className="btn btn-gold btn-sm" data-stub="Nouveau collaborateur">
+              <svg>
+                <use href="#i-new" />
+              </svg>
+              Nouveau collaborateur
+            </button>
           </div>
         </div>
 
-        <TeamRoster
-          categories={team.categories}
-          total={team.total}
-          weekLabel={team.weekLabel}
-        />
+        <div className="kpis kpis-5 mb-20">
+          <div className="kpi">
+            <div className="kpi-label">Effectif total</div>
+            <div className="kpi-value">11</div>
+            <div className="kpi-meta">salariés + prestataires</div>
+          </div>
+          <div className="kpi">
+            <div className="kpi-label">Direction</div>
+            <div className="kpi-value">2</div>
+            <div className="kpi-meta">Présidente fondatrice + Dir. des opérations</div>
+          </div>
+          <div className="kpi">
+            <div className="kpi-label">Technique</div>
+            <div className="kpi-value">4</div>
+            <div className="kpi-meta">resp. tech + 3 développeurs</div>
+          </div>
+          <div className="kpi">
+            <div className="kpi-label">Support &amp; relation</div>
+            <div className="kpi-value">3</div>
+            <div className="kpi-meta">2 resp. relation client + 1 N1</div>
+          </div>
+          <div className="kpi">
+            <div className="kpi-label">Commerciaux</div>
+            <div className="kpi-value">2</div>
+            <div className="kpi-meta">1 commercial senior + 1 jr</div>
+          </div>
+        </div>
+
+        <div className="kpis kpis-3 mb-20">
+          <div className="kpi">
+            <div className="kpi-label">Coût total mensuel</div>
+            <div className="kpi-value">
+              82 400 <span className="unit">€</span>
+            </div>
+            <div className="kpi-meta">salaires + charges + prestataires</div>
+          </div>
+          <div className="kpi">
+            <div className="kpi-label">Charge sur le CA</div>
+            <div className="kpi-value">
+              33 <span className="unit">%</span>
+            </div>
+            <div className="kpi-meta">cible &lt; 35 % · OK</div>
+          </div>
+          <div className="kpi">
+            <div className="kpi-label">Coût moyen par collaborateur</div>
+            <div className="kpi-value">
+              7 490 <span className="unit">€</span>
+            </div>
+            <div className="kpi-meta">coût mensuel chargé moyen</div>
+          </div>
+        </div>
+
+        <div className="info-bar">
+          <svg>
+            <use href="#i-info" />
+          </svg>
+          <div>
+            Cliquez sur un collaborateur (hors direction) pour ouvrir sa fiche détaillée — activité
+            de la semaine, indicateurs adaptés à son rôle (technique, support ou commercial).
+          </div>
+        </div>
+
+        <TeamRosterDrawer />
       </div>
     </>
   );

@@ -1,12 +1,7 @@
 import Link from "next/link";
-import { Topbar } from "./_components/Topbar";
-import { AlertsPanel, type AlertItem } from "./_components/AlertsPanel";
-import { createAdminClient } from "@/lib/supabase/admin";
-import { getSessionContext } from "@/lib/auth/context";
-import { fetchLeads } from "./leads/data";
-import { fetchTrials } from "./trial/data";
+import { EditeurTopbar } from "./_components/EditeurTopbar";
 
-export const dynamic = "force-dynamic";
+type Compare = { period: string; value: string; cls: "up" | "down" };
 
 type Kpi = {
   label: string;
@@ -14,367 +9,393 @@ type Kpi = {
   unit?: string;
   meta: string;
   href: string;
+  compares: [Compare, Compare];
 };
 
-type CockpitBlock = {
-  num: string;
-  label: string;
-  href: string;
-};
-
-type Prospect = {
-  id: string;
-  name: string;
-  meta: string;
-};
-
-// Blocs cockpit 01-08 : ce sont des entrées de navigation vers les sections
-// détaillées. Il n'existe aucune source de score agrégé par bloc en base, donc
-// on n'affiche PAS de score (zéro chiffre inventé) — seulement la navigation.
-const cockpitBlocks: CockpitBlock[] = [
-  { num: "01", label: "Pilotage business", href: "/business" },
-  { num: "02", label: "Acquisition & conversion", href: "/acquisition" },
-  { num: "03", label: "Adoption produit", href: "/adoption" },
-  { num: "04", label: "Première valeur", href: "/ttv" },
-  { num: "05", label: "Santé clients", href: "/health" },
-  { num: "06", label: "Analyse produit", href: "/product" },
-  { num: "07", label: "Support & qualité", href: "/quality" },
-  { num: "08", label: "Infrastructure", href: "/infra" },
+const kpis: Kpi[] = [
+  {
+    label: "Chiffre d'affaires généré",
+    value: "142 800",
+    unit: "€",
+    meta: "facturé en mai 2026",
+    href: "/finance",
+    compares: [
+      { period: "M-1", value: "▲ 128 400 €", cls: "up" },
+      { period: "N-1", value: "▲ 41 200 €", cls: "up" },
+    ],
+  },
+  {
+    label: "Chiffre d'affaires encaissé",
+    value: "128 400",
+    unit: "€",
+    meta: "trésorerie réellement perçue",
+    href: "/finance",
+    compares: [
+      { period: "M-1", value: "▲ 118 200 €", cls: "up" },
+      { period: "N-1", value: "▲ 38 600 €", cls: "up" },
+    ],
+  },
+  {
+    label: "Charges du mois",
+    value: "42 600",
+    unit: "€",
+    meta: "cloud + IA + équipe + licences",
+    href: "/finance",
+    compares: [
+      { period: "M-1", value: "▲ 38 200 €", cls: "down" },
+      { period: "N-1", value: "▲ 22 400 €", cls: "down" },
+    ],
+  },
+  {
+    label: "Base prospects",
+    value: "312",
+    meta: "leads qualifiés actifs",
+    href: "/leads",
+    compares: [
+      { period: "M-1", value: "▲ +42", cls: "up" },
+      { period: "N-1", value: "▲ +180", cls: "up" },
+    ],
+  },
+  {
+    label: "Clients actifs",
+    value: "23",
+    meta: "3 marques · 17 cabinets · 3 autres pros",
+    href: "/clients",
+    compares: [
+      { period: "M-1", value: "▲ +2", cls: "up" },
+      { period: "N-1", value: "▲ +14", cls: "up" },
+    ],
+  },
+  {
+    label: "Taux de désabonnement",
+    value: "2,4",
+    unit: "%",
+    meta: "trimestre en cours",
+    href: "/business",
+    compares: [
+      { period: "T-1", value: "▼ 5,0 %", cls: "up" },
+      { period: "N-1", value: "▼ 8,3 %", cls: "up" },
+    ],
+  },
 ];
 
-const SCORE_RADIUS = 68;
-
-type HomeData = {
-  clientsActifs: number | null;
-  leadsTotal: number | null;
-  trialsEnCours: number | null;
-  trialsDemarres30j: number | null;
-  prospects: Prospect[];
-  alerts: AlertItem[];
+type ScoreBlock = {
+  href: string;
+  icon: string;
+  name: string;
+  num: string;
+  color: "green" | "orange";
+  width: string;
 };
 
-const EMPTY_HOME: HomeData = {
-  clientsActifs: null,
-  leadsTotal: null,
-  trialsEnCours: null,
-  trialsDemarres30j: null,
-  prospects: [],
-  alerts: [],
+const scoreBlocks: ScoreBlock[] = [
+  { href: "/business", icon: "#i-business", name: "01 · Pilotage business", num: "92", color: "green", width: "92%" },
+  { href: "/acquisition", icon: "#i-acquisition", name: "02 · Acquisition & conversion", num: "85", color: "green", width: "85%" },
+  { href: "/adoption", icon: "#i-adoption", name: "03 · Adoption produit", num: "72", color: "orange", width: "72%" },
+  { href: "/ttv", icon: "#i-ttv", name: "04 · Première valeur", num: "68", color: "orange", width: "68%" },
+  { href: "/health", icon: "#i-health", name: "05 · Santé clients", num: "88", color: "green", width: "88%" },
+  { href: "/product", icon: "#i-product", name: "06 · Analyse produit", num: "74", color: "orange", width: "74%" },
+  { href: "/quality", icon: "#i-quality", name: "07 · Support & qualité", num: "94", color: "green", width: "94%" },
+  { href: "/infra", icon: "#i-infra", name: "08 · Infrastructure", num: "99", color: "green", width: "99%" },
+];
+
+type Alert = {
+  href: string;
+  badgeCls: string;
+  badgeLabel: string;
+  time: string;
+  title: string;
+  sub: string;
 };
 
-// Toutes les lectures passent par createAdminClient() (bypass RLS) : le scope
-// tenant_id + cabinet_id de la session est la seule barrière anti-fuite. Les
-// data layers réutilisés (fetchLeads/fetchTrials) appliquent déjà ce scope ;
-// le comptage clients ci-dessous le reproduit. Pas de session → état vide.
-async function fetchHome(): Promise<HomeData> {
-  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) return EMPTY_HOME;
+const alerts: Alert[] = [
+  {
+    href: "/health",
+    badgeCls: "badge badge-danger badge-dot",
+    badgeLabel: "Critique",
+    time: "il y a 12 min",
+    title: "PRIVEOS Capital · usage IA dépasse quota",
+    sub: "112 % du plan · escalader pack ou ajuster facturation",
+  },
+  {
+    href: "/trial",
+    badgeCls: "badge badge-warning badge-dot",
+    badgeLabel: "Important",
+    time: "il y a 2h",
+    title: "3 essais arrivent à échéance dans < 7 jours",
+    sub: "Pierre VAUBAN · Antoine BERNARD · clore l'essai",
+  },
+  {
+    href: "/quality",
+    badgeCls: "badge badge-warning badge-dot",
+    badgeLabel: "Important",
+    time: "hier 19h",
+    title: "12 tickets dépassent 24h sans réponse",
+    sub: "SLA en risque · 4 tickets critiques",
+  },
+  {
+    href: "/health",
+    badgeCls: "badge badge-info badge-dot",
+    badgeLabel: "Info",
+    time: "il y a 4h",
+    title: "Cabinet Lyonnais · score santé en baisse",
+    sub: "-12 pts en 30 jours · responsable relation client à alerter",
+  },
+];
 
-  const ctx = await getSessionContext();
-  if (!ctx) return EMPTY_HOME;
+type Prospect = { name: string; meta: string; amount: string };
 
-  try {
-    const supabase = createAdminClient();
+const prospects: Prospect[] = [
+  { name: "Pierre VAUBAN — Vauban Patrimoine", meta: "Échéance 6j · 18 sessions", amount: "~580 €/mois" },
+  { name: "Antoine BERNARD — Bernard & Cie", meta: "Échéance 9j · 14 sessions", amount: "~820 €/mois" },
+  { name: "Mathilde AUVERGNE — Auvergne Wealth", meta: "Échéance 16j · 6 sessions", amount: "~680 €/mois" },
+];
 
-    const { count: clientsCount } = await supabase
-      .from("clients")
-      .select("id", { count: "exact", head: true })
-      .eq("tenant_id", ctx.tenantId)
-      .eq("cabinet_id", ctx.cabinetId);
-
-    const [leads, trials] = await Promise.all([fetchLeads(), fetchTrials()]);
-
-    // Pipeline : les 3 prochains leads amont réels (mêmes données que /leads),
-    // sans montant inventé — on n'affiche que le nom + l'étape réelle.
-    const prospects: Prospect[] = leads.leads
-      .filter((l) => l.name)
-      .slice(0, 3)
-      .map((l) => ({
-        id: l.id,
-        name: l.name as string,
-        meta: l.lastContact === "—" ? l.stageLabel : `${l.stageLabel} · ${l.lastContact}`,
-      }));
-
-    return {
-      clientsActifs: clientsCount ?? 0,
-      leadsTotal: leads.kpis.leadsTotal,
-      trialsEnCours: trials.enCours,
-      trialsDemarres30j: trials.demarres30j,
-      prospects,
-      // Aucune source d'alertes système réelle (pas de table d'incidents/SLA
-      // exposée ici) → liste vide ; AlertsPanel rend un état vide honnête.
-      alerts: [],
-    };
-  } catch {
-    return EMPTY_HOME;
-  }
-}
-
-function buildKpis(data: HomeData): Kpi[] {
-  const dash = (n: number | null): string => (n === null ? "—" : String(n));
-  return [
-    {
-      label: "Chiffre d'affaires généré",
-      value: "—",
-      meta: "donnée non disponible",
-      href: "/finance",
-    },
-    {
-      label: "Chiffre d'affaires encaissé",
-      value: "—",
-      meta: "donnée non disponible",
-      href: "/finance",
-    },
-    {
-      label: "Charges du mois",
-      value: "—",
-      meta: "donnée non disponible",
-      href: "/finance",
-    },
-    {
-      label: "Base prospects",
-      value: dash(data.leadsTotal),
-      meta: "leads amont du cabinet",
-      href: "/leads",
-    },
-    {
-      label: "Clients actifs",
-      value: dash(data.clientsActifs),
-      meta: "portefeuille du cabinet",
-      href: "/clients",
-    },
-    {
-      label: "Taux de désabonnement",
-      value: "—",
-      meta: "donnée non disponible",
-      href: "/business",
-    },
-  ];
-}
-
-export default async function HomePage() {
-  const data = await fetchHome();
-  const kpis = buildKpis(data);
-  const trialMeta =
-    data.trialsDemarres30j === null
-      ? "essais en cours"
-      : `dont ${data.trialsDemarres30j} démarré${data.trialsDemarres30j > 1 ? "s" : ""} sous 30 j`;
-
+export default function Page() {
   return (
     <>
-      <Topbar current="Accueil" />
-
-      <div className="px-10 py-8">
-        <section className="mb-8 flex items-start justify-between gap-6">
+      <EditeurTopbar current="Accueil" />
+      <div className="content">
+        <div className="hero">
           <div>
-            <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-[var(--gold)]">
-              Tableau de bord exécutif
-            </div>
-            <h1 className="mb-2 text-[28px] font-semibold leading-tight tracking-tight text-[var(--navy)]">
-              Accueil
-            </h1>
-            <p className="max-w-2xl text-[13px] leading-relaxed text-[var(--navy-300)]">
-              Vue exécutive synthétique du SaaS ASTRAEOS — pour le détail de chaque
-              métrique, utilisez les sections numérotées 01 à 08 dans la sidebar.
+            <div className="hero-eyebrow">Tableau de bord exécutif</div>
+            <h1 className="hero-title">Accueil</h1>
+            <p className="hero-sub">
+              Vue exécutive synthétique du SaaS ASTRAEOS — pour le détail de chaque métrique,
+              utilisez les sections numérotées 01 à 08 dans la sidebar.
             </p>
           </div>
-          <div className="flex flex-shrink-0 gap-2">
-            <button
-              type="button"
-              data-stub="Rapport hebdo"
-              data-stub-mode="toast"
-              className="rounded-md border border-[var(--navy-100)] bg-white px-3 py-2 text-[11.5px] font-semibold text-[var(--navy)] hover:border-[var(--gold)]"
-            >
+          <div className="hero-actions">
+            <button className="btn btn-ghost btn-sm" data-stub="Rapport hebdo">
+              <svg>
+                <use href="#i-download" />
+              </svg>
               Rapport hebdo
             </button>
-            <button
-              type="button"
-              data-stub="Personnaliser le tableau de bord"
-              className="rounded-md bg-[var(--gold)] px-3 py-2 text-[11.5px] font-bold text-white hover:brightness-110"
-            >
+            <button className="btn btn-gold btn-sm" data-stub="Personnaliser">
               Personnaliser
             </button>
           </div>
-        </section>
+        </div>
 
-        <section className="mb-6">
-          <div className="mb-3 flex items-end justify-between">
+        {/* 6 KPIs exécutifs avec comparaison M-1 / N-1 */}
+        <div className="section-block">
+          <div className="section-header">
             <div>
-              <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-[var(--gold)]">
-                KPIs exécutifs
-              </div>
-              <div className="text-[15px] font-semibold text-[var(--navy)]">
-                Indicateurs financiers et commerciaux
-              </div>
+              <div className="section-eyebrow">KPIs exécutifs</div>
+              <div className="section-title">Indicateurs financiers et commerciaux</div>
+            </div>
+            <div style={{ fontSize: "11.5px", color: "var(--navy-300)" }}>
+              État système · 06 mai 2026 · 14h32
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+          <div className="kpis kpis-6">
             {kpis.map((kpi) => (
-              <Link
-                key={kpi.label}
-                href={kpi.href}
-                className="block cursor-pointer rounded-md border border-[var(--navy-100)] bg-white p-4 transition-shadow hover:border-[var(--gold)] hover:shadow-sm"
-              >
-                <div className="mb-2 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-[var(--navy-300)]">
-                  {kpi.label}
-                </div>
-                <div className="mb-1 text-[24px] font-bold leading-none text-[var(--navy)]">
+              <Link key={kpi.label} href={kpi.href} className="kpi clickable">
+                <div className="kpi-label">{kpi.label}</div>
+                <div className="kpi-value">
                   {kpi.value}
-                  {kpi.unit && (
-                    <span className="ml-1 text-[14px] font-semibold text-[var(--navy-300)]">
-                      {kpi.unit}
-                    </span>
-                  )}
+                  {kpi.unit && <span className="unit">{kpi.unit}</span>}
                 </div>
-                <div className="text-[11px] text-[var(--navy-300)]">{kpi.meta}</div>
+                <div className="kpi-meta">{kpi.meta}</div>
+                <div className="kpi-compare">
+                  {kpi.compares.map((c) => (
+                    <div key={c.period} className="kpi-compare-cell">
+                      <div className="kpi-compare-period">{c.period}</div>
+                      <div className={`kpi-compare-value ${c.cls}`}>{c.value}</div>
+                    </div>
+                  ))}
+                </div>
               </Link>
             ))}
           </div>
-        </section>
+        </div>
 
-        <section className="mb-6 grid grid-cols-1 gap-4 lg:grid-cols-3">
-          <div className="rounded-md border border-[var(--navy-100)] bg-white">
-            <div className="flex items-center justify-between border-b border-[var(--navy-100)] px-4 py-3">
-              <div className="text-[13px] font-semibold text-[var(--navy)]">
+        {/* Score santé global */}
+        <div className="grid-1-2 mb-24">
+          <div className="card">
+            <div className="card-header">
+              <div className="card-title">
+                <svg>
+                  <use href="#i-quality" />
+                </svg>
                 Score santé global
               </div>
-              <span className="rounded-full bg-[var(--navy-100)] px-2.5 py-0.5 text-[10px] font-bold text-[var(--navy-300)]">
-                Non disponible
-              </span>
+              <span className="badge badge-success">Excellent</span>
             </div>
-            <div className="p-6 text-center">
-              <div className="relative mx-auto h-40 w-40">
-                <svg viewBox="0 0 160 160" className="h-full w-full -rotate-90">
+            <div className="card-body" style={{ textAlign: "center", padding: "24px 20px" }}>
+              <div className="score-premium">
+                <svg viewBox="0 0 160 160">
+                  <circle className="score-premium-track" cx="80" cy="80" r="68" />
                   <circle
+                    className="score-premium-fill"
                     cx="80"
                     cy="80"
-                    r={SCORE_RADIUS}
-                    fill="none"
-                    stroke="var(--navy-100)"
-                    strokeWidth="12"
+                    r="68"
+                    strokeDasharray="427"
+                    strokeDashoffset="55"
                   />
                 </svg>
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <div className="text-[34px] font-bold leading-none text-[var(--navy-300)]">
-                    —
+                <div className="score-premium-center">
+                  <div className="score-premium-num">
+                    87<span className="unit-small">/100</span>
                   </div>
-                  <div className="mt-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--navy-300)]">
-                    Santé SaaS
-                  </div>
+                  <div className="score-premium-label">Santé SaaS</div>
                 </div>
               </div>
-              <div className="mt-4 text-[11.5px] leading-relaxed text-[var(--navy-300)]">
-                Aucun score de santé agrégé n&apos;est encore calculé pour ce cabinet.
+              <div
+                style={{
+                  marginTop: "18px",
+                  fontSize: "11.5px",
+                  color: "var(--navy-300)",
+                  lineHeight: "1.5",
+                }}
+              >
+                Voyants verts sur tous les blocs sauf usage IA
+                <br />
+                <span style={{ color: "var(--orange-text)", fontWeight: 600 }}>
+                  PRIVEOS Capital en dépassement quota
+                </span>
               </div>
             </div>
           </div>
 
-          <div className="rounded-md border border-[var(--navy-100)] bg-white lg:col-span-2">
-            <div className="flex items-center justify-between border-b border-[var(--navy-100)] px-4 py-3">
-              <div className="text-[13px] font-semibold text-[var(--navy)]">
-                Blocs cockpit
+          <div className="card">
+            <div className="card-header">
+              <div className="card-title">
+                <svg>
+                  <use href="#i-chart" />
+                </svg>
+                Score par bloc cockpit
               </div>
-              <span className="text-[11px] text-[var(--navy-300)]">
-                Cliquez pour creuser
-              </span>
+              <span className="card-subtitle">Cliquez pour creuser</span>
             </div>
-            <div className="divide-y divide-[var(--navy-100)]">
-              {cockpitBlocks.map((block) => (
-                <Link
-                  key={block.num}
-                  href={block.href}
-                  className="flex cursor-pointer items-center gap-3 px-4 py-3 hover:bg-[var(--light-blue)]"
-                >
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[12.5px] text-[var(--navy)]">
-                        {block.num} · {block.label}
-                      </span>
-                      <span className="text-[12px] font-semibold text-[var(--navy-300)]">
-                        Ouvrir →
-                      </span>
+            <div className="score-block-list">
+              {scoreBlocks.map((block) => (
+                <Link key={block.num} href={block.href} className="score-block-item">
+                  <div className="score-block-icon">
+                    <svg>
+                      <use href={block.icon} />
+                    </svg>
+                  </div>
+                  <div className="score-block-content">
+                    <div className="score-block-row">
+                      <span className="score-block-name">{block.name}</span>
+                      <span className={`score-block-num ${block.color}`}>{block.num}</span>
+                    </div>
+                    <div className="score-block-bar">
+                      <div
+                        className={`score-block-bar-fill ${block.color}`}
+                        style={{ width: block.width }}
+                      />
                     </div>
                   </div>
                 </Link>
               ))}
             </div>
           </div>
-        </section>
+        </div>
 
-        <section className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-          <AlertsPanel alerts={data.alerts} />
+        {/* Alertes (moitié) + Pipeline (moitié) */}
+        <div className="grid-2 mb-24">
+          {/* Alertes urgentes */}
+          <div className="card">
+            <div className="card-header">
+              <div className="card-title">
+                <svg>
+                  <use href="#i-alert" />
+                </svg>
+                Alertes & actions urgentes
+              </div>
+              <button className="btn btn-ghost btn-sm" data-stub="Toutes les alertes">
+                Toutes
+              </button>
+            </div>
+            <div style={{ padding: 0 }}>
+              {alerts.map((alert, i) => (
+                <Link key={i} href={alert.href} className="alert-item">
+                  <div className="alert-meta">
+                    <span className={alert.badgeCls}>{alert.badgeLabel}</span>
+                    <span>{alert.time}</span>
+                  </div>
+                  <div className="alert-title">{alert.title}</div>
+                  <div className="alert-sub">{alert.sub}</div>
+                </Link>
+              ))}
+            </div>
+          </div>
 
-          <div className="rounded-md border border-[var(--navy-100)] bg-white">
-            <div className="flex items-center justify-between border-b border-[var(--navy-100)] px-4 py-3">
-              <div className="text-[13px] font-semibold text-[var(--navy)]">
+          {/* Pipeline commercial intégré */}
+          <div className="card">
+            <div className="card-header">
+              <div className="card-title">
+                <svg>
+                  <use href="#i-business" />
+                </svg>
                 Pipeline commercial
               </div>
-              <Link
-                href="/clients"
-                className="rounded-md border border-[var(--navy-100)] bg-white px-2.5 py-1 text-[11px] font-semibold text-[var(--navy)] hover:border-[var(--gold)]"
-              >
+              <Link href="/clients" className="btn btn-ghost btn-sm">
                 Détails
               </Link>
             </div>
-            <div className="px-4 py-3">
-              <div className="mb-3 grid grid-cols-2 gap-2">
-                <div className="rounded-md border border-[var(--gold-300)] bg-[var(--gold-200)]/40 p-3">
-                  <div className="mb-1 text-[10px] font-bold uppercase tracking-wider text-[var(--medium-400)]">
-                    En période d&apos;essai
+            <div className="card-body" style={{ padding: "14px 16px" }}>
+              {/* Stepper compact 2 étapes */}
+              <div className="pipeline-stepper" style={{ marginBottom: "12px" }}>
+                <div className="stepper-item active">
+                  <div className="stepper-badge">
+                    <svg>
+                      <use href="#i-trial" />
+                    </svg>
                   </div>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-[22px] font-bold text-[var(--navy)]">
-                      {data.trialsEnCours ?? "—"}
-                    </span>
-                    <span className="text-[10.5px] text-[var(--navy-300)]">{trialMeta}</span>
-                  </div>
+                  <div className="stepper-label">EN PÉRIODE D&apos;ESSAI</div>
+                  <div className="stepper-count">4</div>
+                  <div className="stepper-meta">2 850 € MRR potentiel</div>
                 </div>
-                <div className="rounded-md border border-[var(--navy-100)] bg-[var(--light-blue)] p-3">
-                  <div className="mb-1 text-[10px] font-bold uppercase tracking-wider text-[var(--navy-300)]">
-                    Base prospects
+                <div className="stepper-item">
+                  <div className="stepper-badge">
+                    <svg>
+                      <use href="#i-success" />
+                    </svg>
                   </div>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-[22px] font-bold text-[var(--navy)]">
-                      {data.leadsTotal ?? "—"}
-                    </span>
-                    <span className="text-[10.5px] text-[var(--navy-300)]">
-                      leads amont du cabinet
-                    </span>
-                  </div>
+                  <div className="stepper-label">SIGNÉS CE MOIS</div>
+                  <div className="stepper-count">3</div>
+                  <div className="stepper-meta">+14 200 € MRR</div>
                 </div>
               </div>
 
-              {data.prospects.length > 0 ? (
-                <div className="flex flex-col gap-1.5">
-                  {data.prospects.map((p) => (
-                    <Link
-                      key={p.id}
-                      href="/leads"
-                      className="block cursor-pointer rounded-md border border-[var(--navy-100)] bg-[var(--ivory)] px-3 py-2 hover:border-[var(--gold-300)]"
-                    >
-                      <div className="text-[12px] font-semibold text-[var(--navy)]">
-                        {p.name}
-                      </div>
-                      <div className="flex items-center text-[11px] text-[var(--navy-300)]">
-                        <span>{p.meta}</span>
-                      </div>
-                    </Link>
-                  ))}
+              {/* Cards mini de prospects */}
+              <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                {prospects.map((p) => (
+                  <Link key={p.name} href="/trial" className="kb-card" style={{ margin: 0 }}>
+                    <div className="kb-card-title">{p.name}</div>
+                    <div className="kb-card-meta">
+                      {p.meta}{" "}
+                      <span
+                        style={{ color: "var(--gold)", fontWeight: 700, marginLeft: "auto" }}
+                      >
+                        {p.amount}
+                      </span>
+                    </div>
+                  </Link>
+                ))}
+                <div style={{ textAlign: "center", padding: "8px", fontSize: "11px" }}>
                   <Link
-                    href="/leads"
-                    className="mt-1 text-center text-[11px] font-semibold text-[var(--gold)] hover:underline"
+                    href="/trial"
+                    style={{
+                      color: "var(--gold)",
+                      fontWeight: 600,
+                      cursor: "pointer",
+                      textDecoration: "none",
+                    }}
                   >
-                    Voir tous les leads →
+                    Voir le 4ème prospect & clients signés →
                   </Link>
                 </div>
-              ) : (
-                <div className="rounded-md border border-dashed border-[var(--navy-100)] bg-[var(--ivory)] px-3 py-6 text-center text-[11.5px] text-[var(--navy-300)]">
-                  Aucun lead amont à afficher pour l&apos;instant.
-                </div>
-              )}
+              </div>
             </div>
           </div>
-        </section>
+        </div>
       </div>
     </>
   );

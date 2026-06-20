@@ -1,133 +1,198 @@
-import Link from "next/link";
+import { EditeurTopbar } from "../_components/EditeurTopbar";
+import { LeadsPipeline } from "./LeadsPipeline";
+import { LeadsToolbar } from "./LeadsToolbar";
 
-import { Topbar } from "../_components/Topbar";
-import { KpiCard, type KpiBlock } from "@/app/_components/shared/KpiCard";
-import { PageHero } from "@/app/_components/shared/PageHeader";
-import { fetchLeads } from "./data";
-import { LeadsTable } from "./LeadsTable";
-import { ExportLeadsButton } from "./ExportLeadsButton";
+const KPIS: { label: string; value: string; unit?: string; meta: string }[] = [
+  { label: "Leads totaux", value: "312", meta: "qualifiés actifs" },
+  { label: "Nouveaux ce mois", value: "68", meta: "▲ +14 % vs M-1" },
+  { label: "RDV planifiés", value: "22", meta: "cette semaine" },
+  { label: "Essais proposés", value: "9", meta: "en attente acceptation" },
+  { label: "Taux qualification", value: "42 ", unit: "%", meta: "contact → qualifié" },
+  { label: "Délai moyen", value: "14 ", unit: "j", meta: "contact → essai" },
+];
 
-export const dynamic = "force-dynamic";
+type Badge = { label: string; variant: "success" | "warning" | "info" | "purple" };
 
-export const metadata = {
-  title: "ASTRAEOS · Pipeline acquisition",
-};
+type ActionBtn = { label: string; gold: boolean; icon?: string };
 
-export default async function LeadsPage() {
-  const data = await fetchLeads();
-  const k = data.kpis;
+const LEAD_ROWS: {
+  name: string;
+  contact: string;
+  cabinet: string;
+  source: Badge;
+  etape: Badge;
+  dernierContact: string;
+  prochaineAction: string;
+  affecte: string;
+  action: ActionBtn;
+}[] = [
+  {
+    name: "Bertrand FOURNIER",
+    contact: "b.fournier@fournier-conseil.fr · 06 12 34 56 78",
+    cabinet: "Fournier Conseil Patrimonial",
+    source: { label: "Recommandation", variant: "success" },
+    etape: { label: "Qualifié", variant: "warning" },
+    dernierContact: "Hier",
+    prochaineAction: "Appel J+2",
+    affecte: "Marc DUPRE",
+    action: { label: "Appeler", gold: true, icon: "#i-phone" },
+  },
+  {
+    name: "Caroline DAVAL",
+    contact: "c.daval@daval-patrimoine.fr · 06 23 45 67 89",
+    cabinet: "Daval Patrimoine",
+    source: { label: "Recherche organique", variant: "info" },
+    etape: { label: "RDV planifié", variant: "success" },
+    dernierContact: "Avant-hier",
+    prochaineAction: "RDV demain 14h00",
+    affecte: "Marc DUPRE",
+    action: { label: "Préparer RDV", gold: false },
+  },
+  {
+    name: "Étienne ALLARD",
+    contact: "e.allard@allard-cgp.fr · 06 34 56 78 90",
+    cabinet: "Allard CGP",
+    source: { label: "LinkedIn Ads", variant: "warning" },
+    etape: { label: "Contacté", variant: "info" },
+    dernierContact: "il y a 4 jours",
+    prochaineAction: "Email de relance",
+    affecte: "Hugues CARTIER",
+    action: { label: "Email", gold: false, icon: "#i-mail" },
+  },
+  {
+    name: "Maître Catherine NORMANT",
+    contact: "c.normant@normant-notaires.fr · 04 56 78 90 12",
+    cabinet: "Étude Normant Notaires",
+    source: { label: "Salon", variant: "purple" },
+    etape: { label: "RDV fait", variant: "success" },
+    dernierContact: "il y a 2 jours",
+    prochaineAction: "Proposer un essai",
+    affecte: "Marc DUPRE",
+    action: { label: "Proposer essai", gold: true },
+  },
+];
 
-  const nouveauxMeta =
-    k.nouveauxMoisDelta != null
-      ? `${k.nouveauxMoisDelta >= 0 ? "▲ +" : "▼ "}${k.nouveauxMoisDelta} % vs M-1`
-      : "ce mois-ci";
-
-  const kpis: KpiBlock[] = [
-    {
-      label: "Leads totaux",
-      value: k.leadsTotal > 0 ? String(k.leadsTotal) : "—",
-      meta: "en amont de l'étude",
-    },
-    {
-      label: "Nouveaux ce mois",
-      value: k.nouveauxMois > 0 ? String(k.nouveauxMois) : "—",
-      meta: nouveauxMeta,
-    },
-    {
-      label: "RDV planifiés",
-      value: k.rdvPlanifies > 0 ? String(k.rdvPlanifies) : "—",
-      meta: "entretiens à venir",
-    },
-    {
-      label: "Essais proposés",
-      value: "—",
-      meta: "non suivi",
-    },
-    {
-      label: "Taux qualification",
-      value: k.tauxQualif != null ? String(k.tauxQualif) : "—",
-      unit: k.tauxQualif != null ? "%" : undefined,
-      meta: "prospect → conformité",
-    },
-    {
-      label: "Délai moyen",
-      value: k.delaiMoyenJours != null ? String(k.delaiMoyenJours) : "—",
-      unit: k.delaiMoyenJours != null ? "j" : undefined,
-      meta: "dans l'étape courante",
-    },
-  ];
-
+export default function Page() {
   return (
     <>
-      <Topbar current="Pipeline acquisition" />
-
-      <div className="px-10 py-8">
-        <PageHero
-          eyebrow="Acquisition · Pipeline opérationnel"
-          title="Pipeline acquisition"
-          description="Gestion opérationnelle des leads commerciaux en amont de la période d'essai — qualification, prise de contact, RDV planifiés, propositions d'essai. Vue commerciale du portefeuille."
-          actions={
-            <>
-              <ExportLeadsButton leads={data.leads} />
-              <Link
-                href="/clients"
-                className="rounded-md bg-[var(--gold)] px-3 py-2 text-[11.5px] font-bold text-white hover:brightness-110"
-              >
-                ＋ Nouveau lead
-              </Link>
-            </>
-          }
-        />
-
-        <section className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-          {kpis.map((kpi) => (
-            <KpiCard key={kpi.label} kpi={kpi} />
-          ))}
-        </section>
-
-        <section className="mb-8 rounded-md border border-[var(--navy-100)] bg-white">
-          <div className="flex items-center justify-between border-b border-[var(--navy-100)] px-4 py-3">
-            <div className="text-[13px] font-semibold text-[var(--navy)]">
-              Pipeline commercial · 6 étapes
-            </div>
-            <button
-              type="button"
-              disabled
-              title="Vue kanban à venir"
-              className="cursor-not-allowed rounded-md border border-[var(--navy-100)] bg-white px-3 py-2 text-[11.5px] font-semibold text-[var(--navy-300)] opacity-60"
-            >
-              Vue kanban · à venir
+      <EditeurTopbar current="Pipeline acquisition" />
+      <div className="content">
+        <div className="hero">
+          <div>
+            <div className="hero-eyebrow">Acquisition · Pipeline opérationnel</div>
+            <h1 className="hero-title">Pipeline acquisition</h1>
+            <p className="hero-sub">
+              Gestion opérationnelle des leads commerciaux en amont de la période d&apos;essai —
+              qualification, prise de contact, RDV planifiés, propositions d&apos;essai. Vue
+              commerciale du portefeuille.
+            </p>
+          </div>
+          <div className="hero-actions">
+            <button className="btn btn-ghost btn-sm" data-stub="Export">
+              <svg>
+                <use href="#i-download" />
+              </svg>
+              Export
+            </button>
+            <button className="btn btn-gold btn-sm" data-stub="Nouveau lead">
+              <svg>
+                <use href="#i-new" />
+              </svg>
+              Nouveau lead
             </button>
           </div>
-          <div className="grid grid-cols-2 gap-2 p-4 sm:grid-cols-3 lg:grid-cols-6">
-            {data.pipeline.map((step) => (
-              <div
-                key={step.stage}
-                className={`rounded-md border p-3 ${
-                  step.active
-                    ? "border-[var(--gold)] bg-[var(--gold-200)]/30"
-                    : "border-[var(--navy-100)] bg-[var(--ivory)]"
-                }`}
-              >
-                <div
-                  className={`mb-1 text-[9px] font-bold uppercase tracking-[0.12em] ${step.active ? "text-[var(--gold)]" : "text-[var(--navy-300)]"}`}
-                >
-                  {step.label}
-                </div>
-                <div
-                  className={`text-[24px] font-bold leading-none ${step.active ? "text-[var(--gold)]" : "text-[var(--navy)]"}`}
-                >
-                  {step.count}
-                </div>
-                <div className="mt-1 text-[10.5px] text-[var(--navy-300)]">
-                  {step.count > 0 ? "dossiers à cette étape" : "—"}
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
+        </div>
 
-        <LeadsTable leads={data.leads} totalCount={data.totalCount} />
+        {/* KPIs commerciaux */}
+        <div className="kpis kpis-6 mb-20">
+          {KPIS.map((kpi) => (
+            <div className="kpi" key={kpi.label}>
+              <div className="kpi-label">{kpi.label}</div>
+              <div className="kpi-value">
+                {kpi.value}
+                {kpi.unit ? <span className="unit">{kpi.unit}</span> : null}
+              </div>
+              <div className="kpi-meta">{kpi.meta}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Pipeline 6 colonnes */}
+        <div className="card mb-24">
+          <div className="card-header">
+            <div className="card-title">
+              <svg>
+                <use href="#i-business" />
+              </svg>
+              Pipeline commercial · 6 étapes
+            </div>
+            <button className="btn btn-ghost btn-sm" data-stub="Vue kanban">
+              Vue kanban ↗
+            </button>
+          </div>
+          <LeadsPipeline />
+        </div>
+
+        {/* Top leads à traiter */}
+        <div className="table-wrap mb-24">
+          <LeadsToolbar />
+          <table className="dt">
+            <thead>
+              <tr>
+                <th>Contact</th>
+                <th>Cabinet</th>
+                <th>Source</th>
+                <th>Étape</th>
+                <th>Dernier contact</th>
+                <th>Prochain action</th>
+                <th>Affecté à</th>
+                <th className="center">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {LEAD_ROWS.map((row) => (
+                <tr className="dt-clickable" key={row.name}>
+                  <td className="cell-primary">
+                    {row.name}
+                    <br />
+                    <span
+                      style={{
+                        fontSize: "10.5px",
+                        color: "var(--navy-300)",
+                        fontWeight: 400,
+                      }}
+                    >
+                      {row.contact}
+                    </span>
+                  </td>
+                  <td>{row.cabinet}</td>
+                  <td>
+                    <span className={`badge badge-${row.source.variant}`}>{row.source.label}</span>
+                  </td>
+                  <td>
+                    <span className={`badge badge-${row.etape.variant}`}>{row.etape.label}</span>
+                  </td>
+                  <td>{row.dernierContact}</td>
+                  <td>{row.prochaineAction}</td>
+                  <td>{row.affecte}</td>
+                  <td className="center">
+                    <button
+                      className={`btn ${row.action.gold ? "btn-gold" : "btn-ghost"} btn-sm`}
+                      data-stub={row.action.label}
+                    >
+                      {row.action.icon ? (
+                        <svg>
+                          <use href={row.action.icon} />
+                        </svg>
+                      ) : null}
+                      {row.action.label}
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </>
   );

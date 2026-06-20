@@ -1,200 +1,258 @@
-import { Topbar } from "../_components/Topbar";
-import { KpiCard, type KpiBlock } from "@/app/_components/shared/KpiCard";
-import { PageHero, SectionHeader, GhostButton, GoldButton } from "@/app/_components/shared/PageHeader";
-import { fetchCommsData, fmtDateTime } from "./data";
+import { EditeurTopbar } from "../_components/EditeurTopbar";
+import { CommsCalendarFilter } from "./CommsCalendarFilter";
 
-export const dynamic = "force-dynamic";
+// Port 1:1 de la maquette <div id="page-comms"> (wireframes-editeur.html,
+// lignes 4061-4177). Valeurs hardcodées identiques à la maquette.
 
-export const metadata = {
-  title: "ASTRAEOS · Communications & annonces",
-};
+type Badge = { label: string; cls: string };
 
-// Templates : contenu produit statique (modèles offerts par ASTRAEOS), pas des
-// données utilisateur. Aucune table comm_templates n'existe — ce ne sont pas
-// des "tells de démo" mais du contenu applicatif, donc conservés en dur.
-const templates = [
+const calendrier: {
+  date: string;
+  type: Badge;
+  sujet: string;
+  destinataires: string;
+  statut: Badge;
+}[] = [
   {
-    icon: "📧",
-    title: "Newsletter mensuelle",
+    date: "12 mai",
+    type: { label: "Newsletter", cls: "badge badge-info" },
+    sujet: "Nouveautés produit · mai 2026",
+    destinataires: "~280 ingénieurs",
+    statut: { label: "Brouillon", cls: "badge badge-warning" },
+  },
+  {
+    date: "15 mai",
+    type: { label: "Webinar", cls: "badge badge-gold" },
+    sujet: "Optimisation patrimoniale post-réforme retraite",
+    destinataires: "~150 inscrits",
+    statut: { label: "Programmé", cls: "badge badge-info" },
+  },
+  {
+    date: "22 mai",
+    type: { label: "Annonce", cls: "badge badge-purple" },
+    sujet: "Lancement Programme de parrainage",
+    destinataires: "~280 ingénieurs · 23 clients",
+    statut: { label: "Brouillon", cls: "badge badge-warning" },
+  },
+  {
+    date: "28 mai",
+    type: { label: "Newsletter", cls: "badge badge-info" },
+    sujet: "Bibliothèque · 14 documents mis à jour",
+    destinataires: "~280 ingénieurs",
+    statut: { label: "À planifier", cls: "badge badge-neutral" },
+  },
+  {
+    date: "3 juin",
+    type: { label: "Webinar", cls: "badge badge-gold" },
+    sujet: "Conduite d'entretien : 6 erreurs à éviter",
+    destinataires: "à confirmer",
+    statut: { label: "À planifier", cls: "badge badge-neutral" },
+  },
+];
+
+const performances: { badge: Badge; date: string; titre: string; sous: string }[] = [
+  {
+    badge: { label: "Excellent", cls: "badge badge-success badge-dot" },
+    date: "5 mai",
+    titre: "Newsletter avril · 78 % d'ouverture",
+    sous: "280 envois · 218 ouvertures · 64 clics",
+  },
+  {
+    badge: { label: "Très bon", cls: "badge badge-success badge-dot" },
+    date: "22 avril",
+    titre: "Webinar réforme · 134 participants",
+    sous: "150 inscrits · 89 % de présence",
+  },
+  {
+    badge: { label: "Moyen", cls: "badge badge-warning badge-dot" },
+    date: "14 avril",
+    titre: "Annonce roadmap Q2 · 56 % d'ouverture",
+    sous: "280 envois · 156 ouvertures · 28 clics",
+  },
+  {
+    badge: { label: "Excellent", cls: "badge badge-success badge-dot" },
+    date: "3 avril",
+    titre: "Webinar intro · 188 participants",
+    sous: "200 inscrits · 94 % de présence",
+  },
+];
+
+const templates: { icon: string; titre: string; desc: string }[] = [
+  {
+    icon: "#i-comms",
+    titre: "Newsletter mensuelle",
     desc: "Modèle structuré · 5 sections · highlights produit + tips",
   },
   {
-    icon: "🎯",
-    title: "Annonce produit",
+    icon: "#i-licence",
+    titre: "Annonce produit",
     desc: "Modèle court · pour mises à jour majeures & lancements",
   },
   {
-    icon: "🎤",
-    title: "Invitation webinar",
+    icon: "#i-team",
+    titre: "Invitation webinar",
     desc: "Modèle invitation + 2 emails de rappel automatiques",
   },
 ];
 
-const PRIORITY_CLS: Record<string, string> = {
-  critical: "bg-[var(--red-bg)] text-[var(--red-text)]",
-  high: "bg-[var(--orange-bg)] text-[var(--orange-text)]",
-  normal: "bg-[var(--light-blue)] text-[var(--navy)]",
-  low: "bg-[var(--navy-100)] text-[var(--navy-300)]",
-};
-
-export default async function CommsPage() {
-  const data = await fetchCommsData();
-
-  // Aucune table de domaine "communications sortantes" (newsletters, webinars,
-  // taux d'ouverture/clic) n'existe : ces KPIs n'ont pas de source réelle →
-  // état vide honnête ("—"), jamais de chiffre inventé. Les deux derniers KPIs
-  // sont alimentés par la boîte de réception réelle de l'utilisateur.
-  const kpis: KpiBlock[] = [
-    { label: "Newsletters envoyées", value: "—", meta: "Aucune communication enregistrée" },
-    { label: "Webinars organisés", value: "—", meta: "Aucun webinar enregistré" },
-    {
-      label: "Notifications reçues",
-      value: data.notifTotal > 0 ? String(data.notifTotal) : "—",
-      meta: data.notifTotal > 0 ? "dans votre boîte de réception" : "Aucune notification",
-    },
-    {
-      label: "Non lues",
-      value: data.notifUnread > 0 ? String(data.notifUnread) : "—",
-      meta: data.notifUnread > 0 ? "à traiter" : "Tout est lu",
-    },
-  ];
-
+export default function Page() {
   return (
     <>
-      <Topbar current="Communications & annonces" />
+      <EditeurTopbar current="Communications & annonces" />
+      <div className="content">
+        <div className="hero">
+          <div>
+            <div className="hero-eyebrow">Pilotage interne</div>
+            <h1 className="hero-title">Communications &amp; annonces</h1>
+            <p className="hero-sub">
+              Gestion des communications sortantes vers les ingénieurs patrimoniaux des
+              clients ASTRAEOS — newsletter, webinars, mises à jour produit, annonces
+              stratégiques.
+            </p>
+          </div>
+          <div className="hero-actions">
+            <button className="btn btn-ghost btn-sm" data-stub="Templates">
+              Templates
+            </button>
+            <button className="btn btn-gold btn-sm" data-stub="Nouvelle communication">
+              <svg>
+                <use href="#i-comms" />
+              </svg>
+              Nouvelle communication
+            </button>
+          </div>
+        </div>
 
-      <div className="px-10 py-8">
-        <PageHero
-          eyebrow="Pilotage interne"
-          title="Communications & annonces"
-          description="Gestion des communications sortantes vers les ingénieurs patrimoniaux des clients ASTRAEOS — newsletter, webinars, mises à jour produit, annonces stratégiques."
-          actions={
-            <>
-              <GhostButton dataStub="Bibliothèque de templates">Templates</GhostButton>
-              <GoldButton dataStub="Nouvelle communication">
-                ＋ Nouvelle communication
-              </GoldButton>
-            </>
-          }
-        />
-
-        <section className="mb-8 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {kpis.map((k) => (
-            <KpiCard key={k.label} kpi={k} />
-          ))}
-        </section>
-
-        <section className="mb-8 grid grid-cols-1 gap-4 lg:grid-cols-3">
-          <div className="rounded-md border border-[var(--navy-100)] bg-white lg:col-span-2">
-            <div className="flex items-center justify-between border-b border-[var(--navy-100)] px-4 py-3">
-              <div className="text-[13px] font-semibold text-[var(--navy)]">
-                📅 Calendrier de communication
-              </div>
-              <div className="flex gap-1">
-                <button
-                  type="button"
-                  data-stub="Vue mensuelle du calendrier"
-                  className="rounded-md bg-[var(--navy)] px-3 py-1 text-[11px] font-semibold text-white"
-                >
-                  Mois
-                </button>
-                <button
-                  type="button"
-                  data-stub="Vue trimestrielle du calendrier"
-                  className="rounded-md border border-[var(--navy-100)] bg-white px-3 py-1 text-[11px] font-semibold text-[var(--navy)] hover:border-[var(--gold)]"
-                >
-                  Trimestre
-                </button>
-              </div>
+        <div className="kpis mb-20">
+          <div className="kpi">
+            <div className="kpi-label">Newsletters envoyées</div>
+            <div className="kpi-value">14</div>
+            <div className="kpi-meta">depuis janvier</div>
+          </div>
+          <div className="kpi">
+            <div className="kpi-label">Webinars organisés</div>
+            <div className="kpi-value">8</div>
+            <div className="kpi-meta">~120 participants moyens</div>
+          </div>
+          <div className="kpi">
+            <div className="kpi-label">Taux d&apos;ouverture moyen</div>
+            <div className="kpi-value">
+              72 <span className="unit">%</span>
             </div>
-            <table className="w-full text-left">
+            <div className="kpi-meta">▲ +6 pts vs N-1</div>
+          </div>
+          <div className="kpi">
+            <div className="kpi-label">Taux de clic moyen</div>
+            <div className="kpi-value">
+              28 <span className="unit">%</span>
+            </div>
+            <div className="kpi-meta">excellent · benchmark 18 %</div>
+          </div>
+        </div>
+
+        <div className="grid-2-1 mb-24">
+          <div className="card">
+            <div className="card-header">
+              <div className="card-title">
+                <svg>
+                  <use href="#i-comms" />
+                </svg>
+                Calendrier de communication
+              </div>
+              <CommsCalendarFilter />
+            </div>
+            <table className="dt">
               <thead>
-                <tr className="border-b border-[var(--navy-100)] bg-[var(--ivory)] text-[10.5px] font-bold uppercase tracking-[0.08em] text-[var(--navy-300)]">
-                  <th className="px-4 py-3">Date</th>
-                  <th className="px-4 py-3">Type</th>
-                  <th className="px-4 py-3">Sujet</th>
-                  <th className="px-4 py-3">Destinataires</th>
-                  <th className="px-4 py-3">Statut</th>
+                <tr>
+                  <th>Date</th>
+                  <th>Type</th>
+                  <th>Sujet</th>
+                  <th>Destinataires</th>
+                  <th>Statut</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[var(--navy-100)]">
-                <tr>
-                  <td
-                    colSpan={5}
-                    className="px-4 py-10 text-center text-[12px] text-[var(--navy-300)]"
-                  >
-                    Aucune communication planifiée. Le calendrier des envois
-                    (newsletters, webinars, annonces) s&apos;affichera ici dès
-                    qu&apos;une communication sera programmée.
-                  </td>
-                </tr>
+              <tbody>
+                {calendrier.map((row) => (
+                  <tr key={row.date} className="dt-clickable">
+                    <td>{row.date}</td>
+                    <td>
+                      <span className={row.type.cls}>{row.type.label}</span>
+                    </td>
+                    <td className="cell-primary">{row.sujet}</td>
+                    <td className="num">{row.destinataires}</td>
+                    <td>
+                      <span className={row.statut.cls}>{row.statut.label}</span>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
 
-          <div className="rounded-md border border-[var(--navy-100)] bg-white">
-            <div className="flex items-center justify-between border-b border-[var(--navy-100)] px-4 py-3 text-[13px] font-semibold text-[var(--navy)]">
-              📥 Notifications récentes
-              {data.notifUnread > 0 && (
-                <span className="rounded-full bg-[var(--gold-200)] px-2 py-0.5 text-[10px] font-bold text-[var(--medium-400)]">
-                  {data.notifUnread} non lue{data.notifUnread > 1 ? "s" : ""}
-                </span>
-              )}
+          <div className="card">
+            <div className="card-header">
+              <div className="card-title">
+                <svg>
+                  <use href="#i-chart" />
+                </svg>
+                Performance dernières comms
+              </div>
             </div>
-            {data.hasNotifications ? (
-              <div className="divide-y divide-[var(--navy-100)]">
-                {data.notifications.slice(0, 6).map((n) => (
-                  <div
-                    key={n.id}
-                    className={`px-4 py-3 ${n.read ? "" : "bg-[var(--ivory)]"}`}
-                  >
-                    <div className="mb-1 flex items-center gap-2 text-[10.5px]">
-                      <span
-                        className={`rounded-full px-2 py-0.5 font-bold uppercase tracking-wider ${PRIORITY_CLS[n.priority] ?? PRIORITY_CLS.normal}`}
-                      >
-                        {n.typeLabel}
-                      </span>
-                      <span className="text-[var(--navy-300)]">
-                        {fmtDateTime(n.createdAt)}
-                      </span>
-                    </div>
-                    <div className="text-[12px] font-semibold text-[var(--navy)]">
-                      {n.title}
-                    </div>
-                    {n.body && (
-                      <div className="mt-0.5 line-clamp-2 text-[11px] text-[var(--navy-300)]">
-                        {n.body}
-                      </div>
-                    )}
+            <div style={{ padding: "0" }}>
+              {performances.map((p) => (
+                <div className="alert-item" key={p.titre}>
+                  <div className="alert-meta">
+                    <span className={p.badge.cls}>{p.badge.label}</span>
+                    <span>{p.date}</span>
                   </div>
-                ))}
-              </div>
-            ) : (
-              <div className="px-4 py-10 text-center text-[12px] text-[var(--navy-300)]">
-                Aucune notification reçue pour l&apos;instant.
-              </div>
-            )}
-          </div>
-        </section>
-
-        <section>
-          <SectionHeader
-            eyebrow="Bibliothèque"
-            title="Templates de communication"
-            right={<GhostButton dataStub="Nouveau template">＋ Nouveau template</GhostButton>}
-          />
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-            {templates.map((t) => (
-              <div key={t.title} className="rounded-md border border-[var(--navy-100)] bg-white p-5">
-                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-md bg-[var(--gold-200)] text-xl">
-                  {t.icon}
+                  <div className="alert-title">{p.titre}</div>
+                  <div className="alert-sub">{p.sous}</div>
                 </div>
-                <div className="text-[13.5px] font-bold text-[var(--navy)]">{t.title}</div>
-                <div className="mt-1 text-[11.5px] text-[var(--navy-300)]">{t.desc}</div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Templates */}
+        <div className="section-block">
+          <div className="section-header">
+            <div>
+              <div className="section-eyebrow">Bibliothèque</div>
+              <div className="section-title">Templates de communication</div>
+            </div>
+            <button className="btn btn-ghost btn-sm" data-stub="Nouveau template">
+              Nouveau template
+            </button>
+          </div>
+
+          <div className="grid-3">
+            {templates.map((t) => (
+              <div className="card" key={t.titre}>
+                <div className="card-body">
+                  <div className="icon-badge lg" style={{ marginBottom: "10px" }}>
+                    <svg>
+                      <use href={t.icon} />
+                    </svg>
+                  </div>
+                  <div
+                    style={{ fontSize: "13.5px", fontWeight: 700, color: "var(--navy)" }}
+                  >
+                    {t.titre}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "11.5px",
+                      color: "var(--navy-300)",
+                      marginTop: "4px",
+                    }}
+                  >
+                    {t.desc}
+                  </div>
+                </div>
               </div>
             ))}
           </div>
-        </section>
+        </div>
       </div>
     </>
   );

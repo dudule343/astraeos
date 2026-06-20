@@ -1,155 +1,158 @@
-import { Topbar } from "../_components/Topbar";
-import { KpiCard, type KpiBlock } from "@/app/_components/shared/KpiCard";
-import { PageHero, SectionHeader, GhostButton } from "@/app/_components/shared/PageHeader";
-import { fetchInfra, fmtEur, fmtBytes } from "./data";
+import { EditeurTopbar } from "../_components/EditeurTopbar";
 
-export const dynamic = "force-dynamic";
+type Kpi = { label: string; value: string; unit?: string; meta: string };
 
-export const metadata = {
-  title: "ASTRAEOS · Infrastructure",
+const STABILITY_KPIS: Kpi[] = [
+  { label: "Disponibilité 30 jours", value: "99,98", unit: "%", meta: "2 min d'indisponibilité" },
+  { label: "Temps de réponse moyen", value: "142", unit: "ms", meta: "P95 : 380 ms" },
+  { label: "Erreurs serveur 5xx", value: "0,03", unit: "%", meta: "stable · seuil < 0,1 %" },
+  { label: "Incidents 30j", value: "0", meta: "aucun depuis 47 jours" },
+];
+
+const AI_KPIS: Kpi[] = [
+  { label: "Tokens consommés ce mois", value: "42,6", unit: "M", meta: "42,6 millions · ▲ +18 %" },
+  { label: "Coût IA mensuel", value: "3 480", unit: "€", meta: "refacturé aux clients via packs" },
+  { label: "Marge IA brute", value: "68", unit: "%", meta: "revenus IA / coûts IA" },
+];
+
+const CLOUD_KPIS: Kpi[] = [
+  { label: "Coût cloud mensuel", value: "1 240", unit: "€", meta: "AWS + Cloudflare + Supabase" },
+  { label: "Stockage utilisé", value: "428", unit: "Go", meta: "documents clients + backups" },
+  { label: "Bande passante", value: "2,4", unit: "To", meta: "trafic sortant 30 jours" },
+];
+
+type Job = {
+  job: string;
+  frequence: string;
+  derniere: string;
+  duree: string;
 };
 
-// Métriques supervisées hors application (Supabase Platform / Cloudflare / APM) :
-// aucune table métier ne les stocke → état vide honnête, jamais de chiffre inventé.
-const SUPERVISED = "supervisé hors application";
+const JOBS: Job[] = [
+  { job: "Synchronisation ORIAS", frequence: "Quotidien · 03h00", derniere: "06 mai · 03h00", duree: "42 s" },
+  { job: "Recalcul scores santé", frequence: "Quotidien · 04h00", derniere: "06 mai · 04h00", duree: "18 s" },
+  { job: "Backup base de données", frequence: "Quotidien · 02h00", derniere: "06 mai · 02h00", duree: "8 min" },
+  { job: "Génération rapports hebdo", frequence: "Hebdomadaire · lun 06h00", derniere: "05 mai · 06h00", duree: "2 min" },
+  { job: "Relances facturation", frequence: "Hebdomadaire · jeu 09h00", derniere: "02 mai · 09h00", duree: "14 s" },
+  { job: "Nettoyage logs > 90 jours", frequence: "Mensuel · 1er du mois", derniere: "01 mai · 03h30", duree: "3 min" },
+];
 
-export default async function InfraPage() {
-  const infra = await fetchInfra();
-  const stockage = fmtBytes(infra.stockageBytes);
+function KpiBlock({ kpi }: { kpi: Kpi }) {
+  return (
+    <div className="kpi">
+      <span className="phase-tag p1">PHASE 1</span>
+      <div className="kpi-label">{kpi.label}</div>
+      <div className="kpi-value">
+        {kpi.value}
+        {kpi.unit ? <span className="unit">{kpi.unit}</span> : null}
+      </div>
+      <div className="kpi-meta">{kpi.meta}</div>
+    </div>
+  );
+}
 
-  // Bloc 1 — Stabilité / disponibilité. Aucune source en base : tout en "—".
-  const stabilityKpis: KpiBlock[] = [
-    { phase: "1", label: "Disponibilité 30 jours", value: "—", meta: SUPERVISED },
-    { phase: "1", label: "Temps de réponse moyen", value: "—", meta: SUPERVISED },
-    { phase: "1", label: "Erreurs serveur 5xx", value: "—", meta: SUPERVISED },
-    { phase: "1", label: "Incidents 30j", value: "—", meta: SUPERVISED },
-  ];
-
-  // Bloc 2 — Consommation IA. Seul le coût mensuel est dérivable (etudes.total_ai_cost_eur).
-  const aiKpis: KpiBlock[] = [
-    {
-      phase: "1",
-      label: "Tokens consommés ce mois",
-      value: "—",
-      meta: "non mesuré en base",
-    },
-    {
-      phase: "1",
-      label: "Coût IA mensuel",
-      value: fmtEur(infra.coutIaMois),
-      meta:
-        infra.coutIaMois != null
-          ? `${infra.etudesMoisCount} étude${infra.etudesMoisCount > 1 ? "s" : ""} ce mois`
-          : "aucune étude facturée ce mois",
-      valueTone: infra.coutIaMois != null ? "gold" : undefined,
-    },
-    { phase: "1", label: "Marge IA brute", value: "—", meta: "revenus IA non modélisés" },
-  ];
-
-  // Bloc 3 — Infrastructure cloud. Seul le stockage documents est dérivable.
-  const cloudKpis: KpiBlock[] = [
-    { phase: "1", label: "Coût cloud mensuel", value: "—", meta: SUPERVISED },
-    {
-      phase: "1",
-      label: "Stockage documents",
-      value: stockage.value,
-      unit: stockage.unit || undefined,
-      meta:
-        infra.stockageBytes != null
-          ? `${infra.documentsCount} document${infra.documentsCount > 1 ? "s" : ""} client${infra.documentsCount > 1 ? "s" : ""}`
-          : "aucun document stocké",
-    },
-    { phase: "1", label: "Bande passante", value: "—", meta: SUPERVISED },
-  ];
-
+export default function Page() {
   return (
     <>
-      <Topbar current="08 · Infrastructure" />
+      <EditeurTopbar current="08 · Infrastructure" />
+      <div className="content">
+        <div className="hero">
+          <div>
+            <div className="hero-eyebrow">Bloc 08 · Infrastructure</div>
+            <h1 className="hero-title">Infrastructure</h1>
+            <p className="hero-sub">
+              Superviser la stabilité technique de la plateforme — disponibilité, temps de réponse
+              serveur, consommation IA et cloud, jobs automatiques.
+            </p>
+          </div>
+          <div className="hero-actions">
+            <button className="btn btn-ghost btn-sm" data-stub="Export">
+              <svg>
+                <use href="#i-download" />
+              </svg>
+              Export
+            </button>
+          </div>
+        </div>
 
-      <div className="px-10 py-8">
-        <PageHero
-          eyebrow="Bloc 08 · Infrastructure"
-          title="Infrastructure"
-          description="Superviser la stabilité technique de la plateforme — disponibilité, temps de réponse serveur, consommation IA et cloud, jobs automatiques."
-          actions={<GhostButton dataStub="Export Infrastructure">Export</GhostButton>}
-        />
-
-        <section className="mb-8">
-          <SectionHeader eyebrow="Stabilité" title="Disponibilité de la plateforme" />
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {stabilityKpis.map((kpi) => (
-              <KpiCard key={kpi.label} kpi={kpi} />
+        <div className="section-block">
+          <div className="section-header">
+            <div>
+              <div className="section-eyebrow">Stabilité</div>
+              <div className="section-title">Disponibilité de la plateforme</div>
+            </div>
+          </div>
+          <div className="kpis">
+            {STABILITY_KPIS.map((kpi) => (
+              <KpiBlock key={kpi.label} kpi={kpi} />
             ))}
           </div>
-          <p className="mt-2 text-[11px] text-[var(--navy-300)]">
-            Disponibilité, latence, erreurs serveur et incidents sont supervisés au niveau
-            de l&apos;hébergement (Supabase, Cloudflare) et ne sont pas exposés dans
-            l&apos;application.
-          </p>
-        </section>
+        </div>
 
-        <section className="mb-8">
-          <SectionHeader
-            eyebrow="Consommation IA"
-            title="Usage des modèles d'intelligence artificielle"
-          />
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-            {aiKpis.map((kpi) => (
-              <KpiCard key={kpi.label} kpi={kpi} />
+        <div className="section-block">
+          <div className="section-header">
+            <div>
+              <div className="section-eyebrow">Consommation IA</div>
+              <div className="section-title">Usage des modèles d&apos;intelligence artificielle</div>
+            </div>
+          </div>
+          <div className="kpis kpis-3">
+            {AI_KPIS.map((kpi) => (
+              <KpiBlock key={kpi.label} kpi={kpi} />
             ))}
           </div>
-          <p className="mt-2 text-[11px] text-[var(--navy-300)]">
-            Coût IA dérivé du coût cumulé des études produites ce mois. Le détail tokens et
-            la marge ne sont pas suivis en base.
-          </p>
-        </section>
+        </div>
 
-        <section className="mb-8">
-          <SectionHeader
-            eyebrow="Infrastructure cloud"
-            title="Consommation des ressources serveur"
-          />
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-            {cloudKpis.map((kpi) => (
-              <KpiCard key={kpi.label} kpi={kpi} />
+        <div className="section-block">
+          <div className="section-header">
+            <div>
+              <div className="section-eyebrow">Infrastructure cloud</div>
+              <div className="section-title">Consommation des ressources serveur</div>
+            </div>
+          </div>
+          <div className="kpis kpis-3">
+            {CLOUD_KPIS.map((kpi) => (
+              <KpiBlock key={kpi.label} kpi={kpi} />
             ))}
           </div>
-          <p className="mt-2 text-[11px] text-[var(--navy-300)]">
-            Le stockage reflète le volume réel des documents clients du cabinet. Coût cloud
-            et bande passante sont facturés par l&apos;hébergeur, hors application.
-          </p>
-        </section>
+        </div>
 
-        <section className="mb-8">
-          <SectionHeader
-            eyebrow="Automatisations"
-            title="Tâches planifiées de la plateforme · jobs automatiques"
-          />
-          <div className="overflow-hidden rounded-md border border-[var(--navy-100)] bg-white">
-            <table className="w-full text-left">
+        <div className="section-block">
+          <div className="section-header">
+            <div>
+              <div className="section-eyebrow">Automatisations</div>
+              <div className="section-title">
+                Tâches planifiées de la plateforme · jobs automatiques
+              </div>
+            </div>
+          </div>
+          <div className="table-wrap">
+            <table className="dt">
               <thead>
-                <tr className="border-b border-[var(--navy-100)] bg-[var(--ivory)] text-[10.5px] font-bold uppercase tracking-[0.08em] text-[var(--navy-300)]">
-                  <th className="px-4 py-3">Job automatique</th>
-                  <th className="px-4 py-3">Fréquence</th>
-                  <th className="px-4 py-3">Dernière exécution</th>
-                  <th className="px-4 py-3 text-right">Durée</th>
-                  <th className="px-4 py-3 text-center">Statut</th>
+                <tr>
+                  <th>Job automatique</th>
+                  <th>Fréquence</th>
+                  <th>Dernière exécution</th>
+                  <th className="num">Durée</th>
+                  <th className="center">Statut</th>
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td
-                    colSpan={5}
-                    className="px-4 py-10 text-center text-[12.5px] text-[var(--navy-300)]"
-                  >
-                    Aucune tâche planifiée enregistrée. Le suivi des jobs automatiques
-                    (cron, exécutions, durées) n&apos;est pas instrumenté en base.
-                  </td>
-                </tr>
+                {JOBS.map((j) => (
+                  <tr key={j.job}>
+                    <td className="cell-primary">{j.job}</td>
+                    <td>{j.frequence}</td>
+                    <td>{j.derniere}</td>
+                    <td className="num">{j.duree}</td>
+                    <td className="center">
+                      <span className="badge badge-success">OK</span>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
-        </section>
+        </div>
       </div>
     </>
   );

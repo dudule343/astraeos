@@ -1,309 +1,495 @@
-import { Topbar } from "../_components/Topbar";
-import { KpiCard, type KpiBlock } from "@/app/_components/shared/KpiCard";
-import { PageHero, SectionHeader } from "@/app/_components/shared/PageHeader";
-import { fetchReferralData, fmtCount, fmtEur, REFERRAL_COMMISSION_RATE } from "./data";
+import { EditeurTopbar } from "../_components/EditeurTopbar";
 import { ReferralTabs } from "./ReferralTabs";
 import { CopyLinkButton } from "./CopyLinkButton";
 
-// Le programme de parrainage SaaS n'a aucun support en base (cf. data.ts) :
-// pas de configuration de taux modifiable, pas d'invitation, pas de listes.
-// Les actions correspondantes sont rendues honnêtement désactivées ("à venir")
-// plutôt qu'en faux boutons cliquables. Seules les actions réellement
-// implémentables (onglets, copie du lien) sont câblées.
-function DisabledAction({ children, ghost = true }: { children: React.ReactNode; ghost?: boolean }) {
-  return (
-    <button
-      type="button"
-      disabled
-      title="Programme de parrainage à venir"
-      className={
-        ghost
-          ? "cursor-not-allowed rounded-md border border-[var(--navy-100)] bg-white px-3 py-2 text-[11.5px] font-semibold text-[var(--navy-300)] opacity-60"
-          : "cursor-not-allowed rounded-md bg-[var(--gold)] px-3 py-2 text-[11.5px] font-bold text-white opacity-50"
-      }
-    >
-      {children}
-    </button>
-  );
-}
+type Sponsor = {
+  logo: string;
+  logoClass: string;
+  name: string;
+  typeLabel: string;
+  typeClass: string;
+  filleuls: string;
+  payants: string;
+  payantsGold: boolean;
+  caRecurrent: string;
+  commission: string;
+  commissionGold: boolean;
+};
 
-export const dynamic = "force-dynamic";
+const SPONSORS: Sponsor[] = [
+  {
+    logo: "P",
+    logoClass: "tlogo-priveos",
+    name: "PRIVEOS Capital",
+    typeLabel: "Marque",
+    typeClass: "tt-marque",
+    filleuls: "12",
+    payants: "4",
+    payantsGold: true,
+    caRecurrent: "348 €/mois",
+    commission: "69,60 €/mois",
+    commissionGold: true,
+  },
+  {
+    logo: "D",
+    logoClass: "tlogo-dupont",
+    name: "Cabinet Dupont",
+    typeLabel: "Cabinet",
+    typeClass: "tt-cabinet",
+    filleuls: "8",
+    payants: "2",
+    payantsGold: true,
+    caRecurrent: "174 €/mois",
+    commission: "34,80 €/mois",
+    commissionGold: true,
+  },
+  {
+    logo: "JV",
+    logoClass: "tlogo-1",
+    name: "Julien VASSEUR",
+    typeLabel: "Mandataire PRIVEOS",
+    typeClass: "tt-cabinet",
+    filleuls: "6",
+    payants: "2",
+    payantsGold: true,
+    caRecurrent: "174 €/mois",
+    commission: "34,80 €/mois",
+    commissionGold: true,
+  },
+  {
+    logo: "M",
+    logoClass: "tlogo-pro",
+    name: "Notaire Mercier",
+    typeLabel: "Autre pro",
+    typeClass: "tt-pro",
+    filleuls: "5",
+    payants: "1",
+    payantsGold: true,
+    caRecurrent: "87 €/mois",
+    commission: "17,40 €/mois",
+    commissionGold: true,
+  },
+  {
+    logo: "MB",
+    logoClass: "tlogo-montblanc",
+    name: "Mont-Blanc Patrimoine",
+    typeLabel: "Cabinet",
+    typeClass: "tt-cabinet",
+    filleuls: "3",
+    payants: "0",
+    payantsGold: true,
+    caRecurrent: "— €",
+    commission: "— €",
+    commissionGold: false,
+  },
+];
+
+type Activity = {
+  badgeClass: string;
+  badgeLabel: string;
+  time: string;
+  title: string;
+  sub: React.ReactNode;
+};
+
+const ACTIVITY: Activity[] = [
+  {
+    badgeClass: "badge-success",
+    badgeLabel: "Conversion",
+    time: "il y a 2h",
+    title: "Filleul de PRIVEOS Capital → signature client",
+    sub: "Cabinet Voltaire (Marseille) · abonnement 87 €/mois → 17,40 €/mois pour PRIVEOS",
+  },
+  {
+    badgeClass: "badge-info",
+    badgeLabel: "Nouveau filleul",
+    time: "hier 14h",
+    title: "Cabinet Dupont a parrainé Maxime SOULIER",
+    sub: "Soulier Patrimoine (Bordeaux) · démarrage essai prévu",
+  },
+  {
+    badgeClass: "badge-info",
+    badgeLabel: "Nouveau filleul",
+    time: "il y a 2 jours",
+    title: "Julien VASSEUR a parrainé Notaire LERAY",
+    sub: "Étude Leray & Cie (Nantes) · qualification en cours",
+  },
+  {
+    badgeClass: "badge-gold",
+    badgeLabel: "Commission mensuelle",
+    time: "1er mai",
+    title: "Versement mensuel des commissions parrainage",
+    sub: "9 commissions versées · total 156,60 €",
+  },
+];
 
 export const metadata = {
   title: "ASTRAEOS · Programme de parrainage",
 };
 
-export default async function ReferralPage() {
-  const data = await fetchReferralData();
-  const { program } = data;
-  const ratePct = Math.round(REFERRAL_COMMISSION_RATE * 100);
-
-  // Programme SaaS de parrainage : aucune source en base. Chaque KPI dégrade
-  // honnêtement à "—" avec une méta neutre — jamais de chiffre inventé.
-  const kpis: KpiBlock[] = [
-    { label: "Parrains actifs", value: fmtCount(program.parrainsActifs), meta: "Programme à venir" },
-    { label: "Filleuls reçus", value: fmtCount(program.filleulsRecus), meta: "Programme à venir" },
-    { label: "Filleuls payants", value: fmtCount(program.filleulsPayants), meta: "Programme à venir" },
-    { label: "CA récurrent généré", value: fmtEur(program.caRecurrent), meta: "Programme à venir" },
-    { label: "Commissions versées", value: fmtEur(program.commissionsVersees), meta: "Programme à venir" },
-  ];
-
-  // Exemple illustratif paramétrique : sert à expliquer la règle des 20 %.
-  // Aucun client réel impliqué — montant de base assumé comme illustration.
-  const exempleAbonnement = 87;
-  const exempleCommissionMois = exempleAbonnement * REFERRAL_COMMISSION_RATE;
-  const example = [
-    { label: "Abonnement filleul (illustratif)", value: `${exempleAbonnement} €/mois` },
-    { label: "Taux de commission", value: `${ratePct} %` },
-    {
-      label: "Commission mensuelle parrain",
-      value: `${exempleCommissionMois.toLocaleString("fr-FR", { minimumFractionDigits: 2 })} €/mois`,
-      highlight: true,
-    },
-    {
-      label: "Sur 12 mois (filleul fidèle)",
-      value: `${(exempleCommissionMois * 12).toLocaleString("fr-FR", { minimumFractionDigits: 2 })} €/an`,
-      gold: true,
-    },
-    {
-      label: "Sur 36 mois (LTV moyenne)",
-      value: `${(exempleCommissionMois * 36).toLocaleString("fr-FR", { minimumFractionDigits: 2 })} €`,
-      gold: true,
-    },
-  ];
-
+export default function Page() {
   return (
     <>
-      <Topbar current="Programme de parrainage" />
-
-      <div className="px-10 py-8">
-        <PageHero
-          eyebrow="Acquisition · Programme à venir"
-          title="Programme de parrainage"
-          description="Permettre aux clients (marques, cabinets directs, mandataires, autres pros) de recommander ASTRAEOS à leur réseau — modèle de rémunération récurrente : 20 % du montant de l'abonnement du filleul, versé chaque mois tant que le filleul reste actif."
-          actions={
-            <>
-              <DisabledAction>Modifier le % · à venir</DisabledAction>
-              <DisabledAction ghost={false}>🔗 Inviter un parrain</DisabledAction>
-            </>
-          }
-        />
-
-        <div className="mb-6 flex items-start gap-2 rounded-md border border-[var(--green-text)]/30 bg-[var(--green-bg)] px-4 py-3 text-[11.5px] text-[var(--navy)]">
-          <span>✓</span>
+      <EditeurTopbar current="Programme de parrainage" />
+      <div className="content">
+        <div className="hero">
           <div>
-            <strong>Modèle économique simple :</strong> le filleul devient client payant → le
-            parrain perçoit <strong>{ratePct} % du montant de l&apos;abonnement</strong> chaque mois, tant que
-            le filleul reste actif. La commission ne s&apos;applique qu&apos;à{" "}
-            <strong>l&apos;abonnement à la solution ASTRAEOS</strong> (pas sur les packs ponctuels ni les
-            commissions partenaires).
+            <div className="hero-eyebrow">Acquisition · Programme NEW</div>
+            <h1 className="hero-title">Programme de parrainage</h1>
+            <p className="hero-sub">
+              Permettre aux clients (marques, cabinets directs, mandataires, autres pros) de
+              recommander ASTRAEOS à leur réseau — modèle de rémunération récurrente :{" "}
+              <strong>20 % du montant de l&apos;abonnement</strong> du filleul, versé chaque mois tant
+              que le filleul reste actif.
+            </p>
+          </div>
+          <div className="hero-actions">
+            <button className="btn btn-ghost btn-sm" data-stub="Modifier le %">
+              Modifier le %
+            </button>
+            <button className="btn btn-gold btn-sm" data-stub="Inviter un parrain">
+              <svg>
+                <use href="#i-link" />
+              </svg>
+              Inviter un parrain
+            </button>
           </div>
         </div>
 
-        <section className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-          {kpis.map((k) => (
-            <KpiCard key={k.label} kpi={k} />
-          ))}
-        </section>
+        {/* Encadré pédagogique du modèle économique */}
+        <div className="info-bar success">
+          <svg>
+            <use href="#i-success" />
+          </svg>
+          <div>
+            <strong>Modèle économique simple :</strong> le filleul devient client payant → le parrain
+            perçoit <strong>20 % du montant de l&apos;abonnement</strong> chaque mois, tant que le
+            filleul reste actif. La commission ne s&apos;applique qu&apos;à{" "}
+            <strong>l&apos;abonnement à la solution ASTRAEOS</strong> (pas sur les packs ponctuels ni
+            les commissions partenaires).
+          </div>
+        </div>
 
+        {/* KPIs parrainage : 5 KPIs (sans coût d'acquisition) */}
+        <div className="kpis kpis-5 mb-20">
+          <div className="kpi">
+            <div className="kpi-label">Parrains actifs</div>
+            <div className="kpi-value">14</div>
+            <div className="kpi-meta">sur 23 clients · 61 %</div>
+          </div>
+          <div className="kpi">
+            <div className="kpi-label">Filleuls reçus</div>
+            <div className="kpi-value">42</div>
+            <div className="kpi-meta">
+              leads parrainés <span className="ytd-pill">cumul depuis janv.</span>
+            </div>
+          </div>
+          <div className="kpi">
+            <div className="kpi-label">Filleuls payants</div>
+            <div className="kpi-value">9</div>
+            <div className="kpi-meta">21 % de conversion · vs 7 % autres canaux</div>
+          </div>
+          <div className="kpi">
+            <div className="kpi-label">CA récurrent généré</div>
+            <div className="kpi-value">
+              9 460 <span className="unit">€</span>
+            </div>
+            <div className="kpi-meta">9 abonnements actifs · ~1 050 €/mois</div>
+          </div>
+          <div className="kpi">
+            <div className="kpi-label">Commissions versées</div>
+            <div className="kpi-value">
+              1 892 <span className="unit">€</span>
+            </div>
+            <div className="kpi-meta">20 % du CA récurrent · cumulé</div>
+          </div>
+        </div>
+
+        {/* Tabs */}
         <ReferralTabs />
 
-        <section
-          id="referral-overview"
-          className="mb-8 grid grid-cols-1 gap-4 lg:grid-cols-2"
-        >
-          <div id="referral-sponsors" className="rounded-md border border-[var(--navy-100)] bg-white">
-            <div className="flex items-center justify-between border-b border-[var(--navy-100)] px-4 py-3">
-              <div className="text-[13px] font-semibold text-[var(--navy)]">
-                👥 Top 5 parrains performants
+        {/* Top parrains */}
+        <div className="grid-2 mb-24">
+          <div className="card">
+            <div className="card-header">
+              <div className="card-title">
+                <svg>
+                  <use href="#i-team" />
+                </svg>
+                Top 5 parrains performants
               </div>
-              <DisabledAction>Tous les parrains</DisabledAction>
+              <button className="btn btn-ghost btn-sm" data-stub="Tous les parrains">
+                Tous les parrains
+              </button>
             </div>
-            <table className="w-full text-left">
+            <table className="dt">
               <thead>
-                <tr className="border-b border-[var(--navy-100)] bg-[var(--ivory)] text-[10.5px] font-bold uppercase tracking-[0.08em] text-[var(--navy-300)]">
-                  <th className="px-4 py-3">Parrain</th>
-                  <th className="px-4 py-3">Type</th>
-                  <th className="px-4 py-3 text-right">Filleuls</th>
-                  <th className="px-4 py-3 text-right">Payants</th>
-                  <th className="px-4 py-3 text-right">CA récurrent</th>
-                  <th className="px-4 py-3 text-right">Commission /mois</th>
+                <tr>
+                  <th>Parrain</th>
+                  <th>Type</th>
+                  <th className="num">Filleuls</th>
+                  <th className="num">Payants</th>
+                  <th className="num">CA récurrent</th>
+                  <th className="num">Commission /mois</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[var(--navy-100)]">
-                {program.sponsors.length > 0 ? null : (
-                  <tr>
-                    <td
-                      colSpan={6}
-                      className="px-4 py-10 text-center text-[12px] text-[var(--navy-300)]"
-                    >
-                      Aucun parrain — programme à venir.
+              <tbody>
+                {SPONSORS.map((s) => (
+                  <tr className="dt-clickable" key={s.name}>
+                    <td>
+                      <div style={{ display: "flex", alignItems: "center", gap: "9px" }}>
+                        <div className={`tlogo tlogo-sm ${s.logoClass}`}>{s.logo}</div>
+                        <div className="cell-primary">{s.name}</div>
+                      </div>
+                    </td>
+                    <td>
+                      <span className={`tt ${s.typeClass}`}>{s.typeLabel}</span>
+                    </td>
+                    <td className="num">{s.filleuls}</td>
+                    <td className={`num cell-money${s.payantsGold ? " gold" : ""}`}>{s.payants}</td>
+                    <td className="num cell-money">{s.caRecurrent}</td>
+                    <td className={`num cell-money${s.commissionGold ? " gold" : ""}`}>
+                      {s.commission}
                     </td>
                   </tr>
-                )}
+                ))}
               </tbody>
             </table>
           </div>
 
-          <div id="referral-activity" className="rounded-md border border-[var(--navy-100)] bg-white">
-            <div className="flex items-center justify-between border-b border-[var(--navy-100)] px-4 py-3 text-[13px] font-semibold text-[var(--navy)]">
-              <span>✓ Activité récente</span>
-              <DisabledAction>Tout voir</DisabledAction>
+          <div className="card">
+            <div className="card-header">
+              <div className="card-title">
+                <svg>
+                  <use href="#i-success" />
+                </svg>
+                Activité récente
+              </div>
+              <button className="btn btn-ghost btn-sm" data-stub="Tout voir">
+                Tout voir
+              </button>
             </div>
-            <div className="divide-y divide-[var(--navy-100)]">
-              {program.activity.length > 0 ? null : (
-                <div className="px-4 py-10 text-center text-[12px] text-[var(--navy-300)]">
-                  Aucune activité — programme à venir.
+            <div style={{ padding: 0 }}>
+              {ACTIVITY.map((a) => (
+                <div className="alert-item" key={a.title}>
+                  <div className="alert-meta">
+                    <span className={`badge ${a.badgeClass} badge-dot`}>{a.badgeLabel}</span>
+                    <span>{a.time}</span>
+                  </div>
+                  <div className="alert-title">{a.title}</div>
+                  <div className="alert-sub">{a.sub}</div>
                 </div>
-              )}
+              ))}
             </div>
           </div>
-        </section>
+        </div>
 
-        {data.hasClientReferralData && (
-          <section className="mb-8">
-            <SectionHeader
-              eyebrow="Donnée réelle disponible"
-              title="Recommandation entre clients finaux"
-              right={
-                <span className="rounded-full bg-[var(--light-blue)] px-2 py-0.5 text-[10px] font-bold text-[var(--navy)]">
-                  Distinct du programme parrainage
-                </span>
-              }
-            />
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-              <KpiCard
-                kpi={{
-                  label: "Clients acquis par recommandation",
-                  value: fmtCount(data.clientReferral.recommandationCount),
-                  meta: "origine d'acquisition = recommandation",
-                }}
-              />
-              <KpiCard
-                kpi={{
-                  label: "Clients rattachés à un parrain",
-                  value: fmtCount(data.clientReferral.parrainesCount),
-                  meta: "client recommandé par un autre client",
-                }}
-              />
-              <KpiCard
-                kpi={{
-                  label: "Clients prescripteurs",
-                  value: fmtCount(data.clientReferral.parrainsDistincts),
-                  meta: "ont recommandé au moins un client",
-                }}
-              />
+        {/* Configuration commission (modèle 20 % unique) */}
+        <div className="section-block">
+          <div className="section-header">
+            <div>
+              <div className="section-eyebrow">Configuration du programme</div>
+              <div className="section-title">Modèle de commission en vigueur</div>
             </div>
-            <p className="mt-3 text-[11.5px] leading-relaxed text-[var(--navy-300)]">
-              Ces chiffres mesurent la <strong className="text-[var(--navy)]">recommandation
-              entre vos clients finaux</strong> (donnée réelle de votre portefeuille), et non le
-              programme de parrainage de la solution ASTRAEOS décrit ci-dessus.
-            </p>
-          </section>
-        )}
+            <button className="btn btn-ghost btn-sm" data-stub="Modifier le pourcentage">
+              Modifier le pourcentage
+            </button>
+          </div>
 
-        <section id="referral-config" className="mb-8">
-          <SectionHeader
-            eyebrow="Configuration du programme"
-            title="Modèle de commission en vigueur"
-            right={<DisabledAction>Modifier le pourcentage · à venir</DisabledAction>}
-          />
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-            <div className="rounded-md border border-[var(--gold-300)] bg-gradient-to-br from-[var(--ivory)] to-[var(--gold-200)] p-5">
-              <div className="mb-3 flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-md bg-[var(--gold)] text-2xl text-white">
-                  ✓
+          <div className="grid-2">
+            {/* Carte explication modèle */}
+            <div
+              className="referral-card"
+              style={{
+                background: "linear-gradient(135deg, var(--ivory) 0%, var(--gold-200) 100%)",
+                borderColor: "var(--gold-300)",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "14px",
+                  marginBottom: "14px",
+                }}
+              >
+                <div
+                  className="icon-badge lg"
+                  style={{ background: "var(--gold)", color: "white", borderColor: "var(--gold)" }}
+                >
+                  <svg>
+                    <use href="#i-success" />
+                  </svg>
                 </div>
                 <div>
-                  <div className="text-[14px] font-bold text-[var(--navy)]">Commission récurrente</div>
-                  <div className="text-[11.5px] text-[var(--navy-300)]">
+                  <div style={{ fontSize: "14px", fontWeight: 700, color: "var(--navy)" }}>
+                    Commission récurrente
+                  </div>
+                  <div style={{ fontSize: "11.5px", color: "var(--navy-300)" }}>
                     Versée chaque mois tant que le filleul reste actif
                   </div>
                 </div>
               </div>
-              <div className="mb-2 text-[32px] font-bold leading-none text-[var(--gold)]">{ratePct} %</div>
-              <div className="text-[12.5px] leading-relaxed text-[var(--navy)]">
+              <div
+                style={{
+                  fontSize: "32px",
+                  fontWeight: 700,
+                  color: "var(--gold)",
+                  lineHeight: 1,
+                  marginBottom: "8px",
+                }}
+              >
+                20 %
+              </div>
+              <div style={{ fontSize: "12.5px", color: "var(--navy)", lineHeight: 1.6 }}>
                 de l&apos;abonnement mensuel à la solution ASTRAEOS payé par le filleul.
               </div>
-              <div className="mt-3.5 border-t border-[var(--gold-300)] pt-3.5 text-[11.5px] leading-relaxed text-[var(--navy-300)]">
-                <strong className="text-[var(--navy)]">Périmètre :</strong> uniquement l&apos;abonnement
-                à la solution. Aucune commission n&apos;est versée sur les packs ponctuels ni sur les
-                commissions partenaires.
+              <div
+                style={{
+                  marginTop: "14px",
+                  paddingTop: "14px",
+                  borderTop: "1px solid var(--gold-300)",
+                  fontSize: "11.5px",
+                  color: "var(--navy-300)",
+                  lineHeight: 1.6,
+                }}
+              >
+                <strong style={{ color: "var(--navy)" }}>Périmètre :</strong> uniquement
+                l&apos;abonnement à la solution (Pack Investissements financiers · Abonnement
+                portefeuille). Aucune commission n&apos;est versée sur les packs ponctuels
+                (constitution portefeuille, formation, supervision, immatriculation) ni sur les
+                commissions partenaires (immobilier, assurance).
               </div>
             </div>
 
-            <div className="rounded-md border border-[var(--navy-100)] bg-white">
-              <div className="border-b border-[var(--navy-100)] px-4 py-3 text-[13px] font-semibold text-[var(--navy)]">
-                ℹ️ Exemple illustratif de calcul
-              </div>
-              <div className="p-4">
-                <div className="mb-3 text-[13px] font-semibold text-[var(--navy)]">
-                  Exemple : un filleul souscrit l&apos;abonnement à {exempleAbonnement} €/mois.
+            {/* Exemple concret */}
+            <div className="card">
+              <div className="card-header">
+                <div className="card-title">
+                  <svg>
+                    <use href="#i-info" />
+                  </svg>
+                  Exemple concret de calcul
                 </div>
-                {example.map((e) => (
-                  <div
-                    key={e.label}
-                    className={`flex justify-between border-b border-[var(--navy-100)] py-2 text-[12.5px] last:border-0 ${e.highlight ? "bg-[var(--ivory)] -mx-4 px-4" : ""}`}
+              </div>
+              <div className="card-body">
+                <div
+                  style={{
+                    fontSize: "13px",
+                    color: "var(--navy)",
+                    fontWeight: 600,
+                    marginBottom: "14px",
+                  }}
+                >
+                  Cabinet Voltaire (filleul de PRIVEOS Capital) souscrit l&apos;abonnement à 87
+                  €/mois.
+                </div>
+                <div className="finance-detail-row">
+                  <span className="finance-detail-label">Abonnement filleul</span>
+                  <span className="finance-detail-value">87 €/mois</span>
+                </div>
+                <div className="finance-detail-row">
+                  <span className="finance-detail-label">Taux de commission</span>
+                  <span className="finance-detail-value">20 %</span>
+                </div>
+                <div className="finance-detail-row" style={{ background: "var(--ivory)" }}>
+                  <span
+                    className="finance-detail-label"
+                    style={{ fontWeight: 700, color: "var(--gold)" }}
                   >
-                    <span
-                      className={
-                        e.highlight ? "font-bold text-[var(--gold)]" : "text-[var(--navy-300)]"
-                      }
-                    >
-                      {e.label}
-                    </span>
-                    <span
-                      className={`font-semibold ${e.highlight || e.gold ? "text-[var(--gold)]" : "text-[var(--navy)]"}`}
-                    >
-                      {e.value}
-                    </span>
-                  </div>
-                ))}
-                <div className="mt-3 rounded-md bg-[var(--green-bg)] px-3 py-2.5 text-[11.5px] leading-relaxed text-[var(--green-text)]">
-                  <strong>Note :</strong> commission interrompue automatiquement si le filleul
-                  résilie son abonnement. Chiffres illustratifs, à titre d&apos;exemple.
+                    Commission mensuelle parrain
+                  </span>
+                  <span className="finance-detail-value" style={{ color: "var(--gold)" }}>
+                    17,40 €/mois
+                  </span>
+                </div>
+                <div className="finance-detail-row">
+                  <span className="finance-detail-label">Sur 12 mois (filleul fidèle)</span>
+                  <span className="finance-detail-value gold">208,80 €/an</span>
+                </div>
+                <div className="finance-detail-row">
+                  <span className="finance-detail-label">Sur 36 mois (LTV moyenne)</span>
+                  <span className="finance-detail-value gold">626,40 €</span>
+                </div>
+                <div
+                  style={{
+                    marginTop: "12px",
+                    padding: "10px 12px",
+                    background: "var(--green-bg)",
+                    borderRadius: "6px",
+                    fontSize: "11.5px",
+                    color: "var(--green-text)",
+                    lineHeight: 1.5,
+                  }}
+                >
+                  <strong>Note :</strong> commission interrompue automatiquement si le filleul résilie
+                  son abonnement.
                 </div>
               </div>
             </div>
           </div>
-        </section>
+        </div>
 
-        <section>
-          <div className="rounded-md border border-[var(--navy-100)] bg-white">
-            <div className="flex items-center justify-between border-b border-[var(--navy-100)] px-4 py-3">
-              <div className="text-[13px] font-semibold text-[var(--navy)]">
-                🔗 Espace parrain · vue côté client (à concevoir)
-              </div>
-              <span className="rounded-full bg-[#E5DCEB] px-2 py-0.5 text-[10px] font-bold text-[#5B3A6E]">
-                Aperçu de ce que verra le parrain
-              </span>
+        {/* Lien personnalisé exemple */}
+        <div className="card">
+          <div className="card-header">
+            <div className="card-title">
+              <svg>
+                <use href="#i-link" />
+              </svg>
+              Espace parrain · vue côté client (à concevoir)
             </div>
-            <div className="p-4">
-              <div className="mb-3 text-[13px] font-semibold text-[var(--navy)]">
-                Chaque client aura un lien de parrainage personnalisé dans son espace :
-              </div>
-              <div className="flex items-center gap-2 rounded-md border border-[var(--gold-300)] bg-[var(--ivory)] px-3 py-2">
-                <span className="text-[var(--gold)]">🔗</span>
-                <span className="flex-1 font-mono text-[12px] text-[var(--navy-300)]">
-                  https://astraeos.fr/parrainage/&lt;code-parrain&gt;
-                </span>
-                <CopyLinkButton value="https://astraeos.fr/parrainage/<code-parrain>" />
-              </div>
-              <div className="mt-3.5 text-[11.5px] leading-relaxed text-[var(--navy-300)]">
-                Le parrain pourra suivre dans son espace :{" "}
-                <strong className="text-[var(--navy)]">filleuls invités</strong> ·{" "}
-                <strong className="text-[var(--navy)]">filleuls qui ont démarré l&apos;essai</strong> ·{" "}
-                <strong className="text-[var(--navy)]">filleuls devenus payants</strong> ·{" "}
-                <strong className="text-[var(--navy)]">commissions mensuelles cumulées</strong> ·{" "}
-                <strong className="text-[var(--navy)]">historique des virements perçus</strong>.
-              </div>
-              <div className="mt-3.5 rounded-md bg-[#E5DCEB] px-3.5 py-2.5 text-[11.5px] leading-relaxed text-[#5B3A6E]">
-                <strong>À concevoir dans un wireframe ultérieur :</strong> espace parrain côté client.
-                Le lien et le code ci-dessus sont des exemples de présentation.
-              </div>
+            <span className="badge badge-purple">Aperçu de ce que verra le parrain</span>
+          </div>
+          <div className="card-body">
+            <div
+              style={{
+                fontSize: "13px",
+                color: "var(--navy)",
+                marginBottom: "10px",
+                fontWeight: 600,
+              }}
+            >
+              Chaque client a un lien de parrainage personnalisé dans son espace :
+            </div>
+            <div className="referral-card-link">
+              <svg style={{ color: "var(--gold)" }}>
+                <use href="#i-link" />
+              </svg>
+              <span>https://astraeos.fr/parrainage/PRIVEOS-A2K9X8</span>
+              <CopyLinkButton value="https://astraeos.fr/parrainage/PRIVEOS-A2K9X8" />
+            </div>
+            <div
+              style={{
+                fontSize: "11.5px",
+                color: "var(--navy-300)",
+                marginTop: "14px",
+                lineHeight: 1.6,
+              }}
+            >
+              Le parrain pourra suivre dans son espace :{" "}
+              <strong style={{ color: "var(--navy)" }}>filleuls invités</strong> ·{" "}
+              <strong style={{ color: "var(--navy)" }}>filleuls qui ont démarré l&apos;essai</strong>{" "}
+              · <strong style={{ color: "var(--navy)" }}>filleuls devenus payants</strong> ·{" "}
+              <strong style={{ color: "var(--navy)" }}>commissions mensuelles cumulées</strong> ·{" "}
+              <strong style={{ color: "var(--navy)" }}>historique des virements perçus</strong>.
+            </div>
+            <div
+              style={{
+                marginTop: "14px",
+                padding: "10px 14px",
+                background: "var(--purple-bg)",
+                borderRadius: "6px",
+                fontSize: "11.5px",
+                color: "var(--purple-text)",
+                lineHeight: 1.5,
+              }}
+            >
+              <strong>À concevoir dans un wireframe ultérieur :</strong> espace parrain côté client
+              (sera traité dans un Doc Phase 2 dédié à l&apos;espace utilisateur).
             </div>
           </div>
-        </section>
+        </div>
       </div>
     </>
   );
