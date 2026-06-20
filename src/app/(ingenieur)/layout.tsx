@@ -1,4 +1,6 @@
 import { SpaceSwitcher } from "../_components/SpaceSwitcher";
+import { StubShell } from "../_components/StubShell";
+import { Sidebar } from "./_components/Sidebar";
 import { blockClients } from "@/lib/auth/guards";
 
 export const metadata = {
@@ -13,9 +15,13 @@ export default async function IngenieurLayout({
   // sont renvoyés vers leur portail.
   await blockClients();
   return (
-    <div className="flex min-h-screen flex-col bg-[var(--ivory)]">
+    <div className="min-h-screen bg-[var(--ivory)]">
       <SpaceSwitcher active="ingenieur" />
-      {children}
+      <div className="flex">
+        <Sidebar />
+        <main className="min-w-0 flex-1">{children}</main>
+      </div>
+      <StubShell />
     </div>
   );
 }

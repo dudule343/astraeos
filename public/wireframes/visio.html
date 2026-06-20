@@ -1343,7 +1343,7 @@ select.v4-modal-input { cursor:pointer; appearance:none; -webkit-appearance:none
       </div>
       <div>
         <div class="v3-modal-title" id="rec-action-title">Mettre l'enregistrement en pause ?</div>
-        <div class="v3-modal-sub" id="rec-action-sub">Cette action sera horodatée et tracée dans le journal d'audit du dossier.</div>
+        <div class="v3-modal-sub" id="rec-action-sub">L'action est appliquée en temps réel à l'enregistrement de la salle.</div>
       </div>
     </div>
     <div class="v3-modal-body" id="rec-action-body">
@@ -1891,6 +1891,21 @@ function closeModal(id) {
 let REC_STATE = 'active'; // 'active' · 'paused' · 'stopped'
 let REC_PENDING_ACTION = null;
 
+// Pilote l'enregistrement Jibri RÉEL via l'API Jitsi (exposée par startJitsi
+// dans window.__astrJitsiApi). Jibri ne sait pas "mettre en pause" : pause =
+// arrêt de la séquence en cours, reprise = nouvelle séquence. Renvoie true si
+// la commande a pu être envoyée au serveur.
+function astrRecCmd(cmd, arg) {
+  try {
+    var api = window.__astrJitsiApi;
+    if (api && typeof api.executeCommand === 'function') {
+      if (arg === undefined) api.executeCommand(cmd); else api.executeCommand(cmd, arg);
+      return true;
+    }
+  } catch (e) {}
+  return false;
+}
+
 function openRecAction(action) {
   REC_PENDING_ACTION = action;
   const titles = {
@@ -1964,6 +1979,8 @@ function confirmRecAction() {
   closeModal('modal-rec-action');
 
   if (action === 'pause') {
+    // Arrête réellement l'enregistrement Jibri (Jibri n'a pas de "pause").
+    const ok = astrRecCmd('stopRecording', 'file');
     REC_STATE = 'paused';
     document.getElementById('rec-controls-status').className = 'rec-controls-status paused';
     document.getElementById('rec-status-label').textContent = 'Enregistrement en pause';
@@ -1973,8 +1990,9 @@ function confirmRecAction() {
     // Témoin REC dans la session-bar
     const ind = document.getElementById('rec-indicator');
     if (ind) ind.textContent = 'En pause';
-    showToast('Enregistrement mis en pause · journal d\'audit mis à jour');
+    showToast(ok ? 'Enregistrement suspendu (séquence en cours arrêtée).' : 'Enregistrement suspendu.');
   } else if (action === 'stop') {
+    const ok = astrRecCmd('stopRecording', 'file');
     REC_STATE = 'stopped';
     document.getElementById('rec-controls-status').className = 'rec-controls-status stopped';
     document.getElementById('rec-status-label').textContent = 'Enregistrement coupé définitivement';
@@ -1983,8 +2001,10 @@ function confirmRecAction() {
     document.getElementById('btn-rec-stop').style.display = 'none';
     const ind = document.getElementById('rec-indicator');
     if (ind) ind.textContent = 'Coupé';
-    showToast('Enregistrement coupé · journal d\'audit mis à jour');
+    showToast(ok ? 'Enregistrement coupé.' : 'Enregistrement coupé.');
   } else if (action === 'resume') {
+    // Relance une nouvelle séquence Jibri.
+    astrRecCmd('startRecording', { mode: 'file' });
     REC_STATE = 'active';
     document.getElementById('rec-controls-status').className = 'rec-controls-status';
     document.getElementById('rec-status-label').textContent = 'Enregistrement actif';
@@ -1993,7 +2013,7 @@ function confirmRecAction() {
     document.getElementById('btn-rec-stop').style.display = 'inline-flex';
     const ind = document.getElementById('rec-indicator');
     if (ind) ind.textContent = 'Enregistrement';
-    showToast('Enregistrement repris');
+    showToast('Enregistrement repris (nouvelle séquence).');
   }
   REC_PENDING_ACTION = null;
 }
@@ -3378,6 +3398,9 @@ setInterval(() => {
           MOBILE_APP_PROMO: false
         }
       });
+
+      // Exposé pour le contrôle d'enregistrement (pause/couper/reprendre réels).
+      window.__astrJitsiApi = api;
 
       // Enregistrement RÉEL (Jibri → fichier). L'indicateur REC ne s'allume que
       // sur l'état réel renvoyé par Jitsi (recordingStatusChanged), jamais en dur :
