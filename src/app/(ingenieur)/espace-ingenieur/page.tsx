@@ -169,13 +169,6 @@ export default function IngenieurCockpit() {
         </div>
         <div className="hero-actions">
           <Link
-            href="/visio"
-            className="btn btn-ghost btn-sm"
-            style={{ textDecoration: "none" }}
-          >
-            Démarrer un entretien
-          </Link>
-          <Link
             href="/espace-ingenieur/client-new"
             className="btn btn-gold btn-sm"
             style={{ textDecoration: "none" }}

@@ -6,7 +6,10 @@ import {
   COLLECTE_KPIS,
   COLLECTE_ROWS,
   COLLECTE_STEPPER,
+  type CollecteFilterKey,
   type CollecteRow,
+  filterCollecteRows,
+  isCollecteFilter,
 } from "../../_data/collectes";
 import "../../_styles/collectes.css";
 import ProgressCell from "./ProgressCell";
@@ -16,6 +19,16 @@ export const metadata = {
 };
 
 export const dynamic = "force-dynamic";
+
+const BASE = "/espace-ingenieur";
+
+/** Cible de l'action « œil/relance » : la fiche client (comme les autres écrans pipe). */
+const CLIENT_FICHE_HREF = `${BASE}/clients/exemple`;
+
+/** href d'un filtre rapide : « tous » = URL nue, sinon ?filtre=clé. */
+function filterHref(key: CollecteFilterKey): string {
+  return key === "tous" ? `${BASE}/collectes` : `${BASE}/collectes?filtre=${key}`;
+}
 
 /** Routes réelles de l'espace ingénieur pour chaque étape du parcours. */
 const STEPPER_ROUTES: Record<string, string> = {
@@ -151,9 +164,17 @@ function ClientCell({ row }: { row: CollecteRow }) {
   );
 }
 
-export default function CollectesPage() {
+export default async function CollectesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ filtre?: string }>;
+}) {
+  const { filtre } = await searchParams;
+  const activeFilter: CollecteFilterKey = isCollecteFilter(filtre) ? filtre : "tous";
+  const rows = filterCollecteRows(COLLECTE_ROWS, activeFilter);
+
   return (
-    <>
+    <div className="maquette-ing px-10 py-8">
       <div className="pipeline-stepper-v1">
         {COLLECTE_STEPPER.map((s) => (
           <Link
@@ -200,15 +221,20 @@ export default function CollectesPage() {
       </div>
 
       <div className="qf-bar-v1">
-        {COLLECTE_FILTERS.map((f) => (
-          <button
-            key={f.label}
-            className={`qf-v1${f.active ? " active" : ""}${f.alert ? " alert" : ""}`}
-            type="button"
-          >
-            {f.label} <span className="qf-count">{f.count}</span>
-          </button>
-        ))}
+        {COLLECTE_FILTERS.map((f) => {
+          const active = f.key === activeFilter;
+          return (
+            <Link
+              key={f.key}
+              href={filterHref(f.key)}
+              scroll={false}
+              aria-pressed={active}
+              className={`qf-v1${active ? " active" : ""}${f.alert ? " alert" : ""}`}
+            >
+              {f.label} <span className="qf-count">{f.count}</span>
+            </Link>
+          );
+        })}
       </div>
 
       <div className="table-wrap">
@@ -225,7 +251,7 @@ export default function CollectesPage() {
             </tr>
           </thead>
           <tbody>
-            {COLLECTE_ROWS.map((row) => (
+            {rows.map((row) => (
               <tr
                 key={row.id}
                 className={rowClass(row)}
@@ -261,9 +287,17 @@ export default function CollectesPage() {
                 </td>
                 <td className="center">
                   <div className="actions-cell">
-                    <button className="action-btn" type="button">
+                    <Link
+                      href={CLIENT_FICHE_HREF}
+                      className="action-btn"
+                      title={
+                        row.action === "relance"
+                          ? "Relancer le client"
+                          : "Voir la fiche client"
+                      }
+                    >
                       {row.action === "relance" ? <RelanceIcon /> : <EyeIcon />}
-                    </button>
+                    </Link>
                   </div>
                 </td>
               </tr>
@@ -274,6 +308,6 @@ export default function CollectesPage() {
           </tbody>
         </table>
       </div>
-    </>
+    </div>
   );
 }

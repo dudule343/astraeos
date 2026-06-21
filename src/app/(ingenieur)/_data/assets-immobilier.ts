@@ -114,3 +114,44 @@ export const programBreakdown: ProgramBreakdown[] = [
   { count: 0, label: "Ancien rénové", muted: true },
   { count: 0, label: "Location nue", muted: true },
 ];
+
+/**
+ * Construit le CSV du détail des projets immobiliers (source unique =
+ * immoProjects). Utilisé par le bouton « Exporter » du hero pour un
+ * téléchargement côté navigateur, sans backend.
+ */
+export function buildImmoCsv(): string {
+  const sep = ";";
+  const escape = (v: string) => `"${v.replace(/"/g, '""')}"`;
+  const header = [
+    "Client",
+    "Types",
+    "Dates d'initiation",
+    "Dates de livraison",
+    "Projets total",
+    "Délai",
+  ];
+  const rows = immoProjects.map((p) =>
+    [
+      p.clientName,
+      p.types.join(" / "),
+      p.initiationDates.join(" / "),
+      p.deliveryDates.join(" / "),
+      String(p.projectsTotal),
+      p.delay,
+    ]
+      .map(escape)
+      .join(sep),
+  );
+  const total = [
+    "Total portefeuille",
+    immoProjectsTotal.clientsLabel,
+    "",
+    "",
+    String(immoProjectsTotal.projectsTotal),
+    immoProjectsTotal.delayAverage,
+  ]
+    .map(escape)
+    .join(sep);
+  return [header.map(escape).join(sep), ...rows, total].join("\r\n");
+}

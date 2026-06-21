@@ -165,7 +165,9 @@
 }
 .maquette-ing .hon-conseil-cell .badge-gold {
   font-size: 10px;
-  display: inline-block;
+  /* table = la pastille hugge son texte tout en démarrant sur sa propre ligne,
+     comme les <br> de la maquette qui empilent les badges verticalement. */
+  display: table;
   margin-bottom: 3px;
 }
 .maquette-ing .hon-conseil-cell .badge-gold:last-child {

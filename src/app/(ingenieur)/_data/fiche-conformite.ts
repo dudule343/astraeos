@@ -135,8 +135,18 @@ export const DOC_CARDS: DocCard[] = [
 
 export type PackPieceTone = "navy" | "gold" | "green" | "grey";
 
+/** Glyphe SVG de la pastille, indépendant de la teinte (cf. maquette l. 6809→6850). */
+export type PackPieceGlyph =
+  | "circlePlus"
+  | "users"
+  | "doc"
+  | "docPlain"
+  | "list"
+  | "chart";
+
 export type PackPiece = {
   icon: PackPieceTone;
+  glyph: PackPieceGlyph;
   title: string;
   meta: string;
   tagLabel: string;
@@ -147,6 +157,7 @@ export type PackPiece = {
 export const PACK_PIECES: PackPiece[] = [
   {
     icon: "navy",
+    glyph: "circlePlus",
     title: "Document d'Entrée en Relation (DER)",
     meta: "PDF · 4 pages · à signer par le client",
     tagLabel: "Contractuel",
@@ -155,6 +166,7 @@ export const PACK_PIECES: PackPiece[] = [
   },
   {
     icon: "gold",
+    glyph: "users",
     title: "DCI Complet + Questionnaire de qualification (KYC)",
     meta: "PDF · enveloppe réglementaire · à signer par le client",
     tagLabel: "Contractuel",
@@ -163,6 +175,7 @@ export const PACK_PIECES: PackPiece[] = [
   },
   {
     icon: "gold",
+    glyph: "doc",
     title: "Lettre de mission",
     meta: "PDF · honoraires 3 900 € TTC · signée par les 2 parties",
     tagLabel: "Contractuel",
@@ -171,6 +184,7 @@ export const PACK_PIECES: PackPiece[] = [
   },
   {
     icon: "green",
+    glyph: "list",
     title: "Facture des honoraires",
     meta: "PDF · FACT-2026-JOU-001 · 3 900 € TTC",
     tagLabel: "Facturation",
@@ -179,6 +193,7 @@ export const PACK_PIECES: PackPiece[] = [
   },
   {
     icon: "grey",
+    glyph: "docPlain",
     title: "Étude patrimoniale témoin",
     meta: "PDF · 84 pages · anonymisée · aperçu du livrable final",
     tagLabel: "Pédagogique",
@@ -187,6 +202,7 @@ export const PACK_PIECES: PackPiece[] = [
   },
   {
     icon: "grey",
+    glyph: "chart",
     title: "Synthèse exécutive témoin",
     meta: "PDF · 12 pages · anonymisée · plan d'action + gains chiffrés",
     tagLabel: "Pédagogique",

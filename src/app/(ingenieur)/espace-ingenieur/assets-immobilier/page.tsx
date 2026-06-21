@@ -7,6 +7,7 @@ import {
   type AssetsImmoKpi,
 } from "../../_data/assets-immobilier";
 import "../../_styles/assets-immobilier.css";
+import { ExportImmoButton } from "./ExportImmoButton";
 import { ProjectsTable } from "./ProjectsTable";
 
 export const metadata = {
@@ -77,9 +78,7 @@ export default function AssetsImmobilierPage() {
           <Link href="/espace-ingenieur/assets" className="btn btn-ghost btn-sm">
             ← Retour vue d&apos;ensemble
           </Link>
-          <button type="button" className="btn btn-gold btn-sm">
-            Exporter
-          </button>
+          <ExportImmoButton />
         </div>
       </div>
 

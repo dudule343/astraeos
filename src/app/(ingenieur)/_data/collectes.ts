@@ -92,19 +92,42 @@ export const COLLECTE_KPIS: CollecteKpi[] = [
   },
 ];
 
+export type CollecteFilterKey = "tous" | "prets-04" | "en-collecte" | "inactifs";
+
 export type CollecteFilter = {
+  key: CollecteFilterKey;
   label: string;
   count: string;
-  active?: boolean;
   alert?: boolean;
 };
 
 export const COLLECTE_FILTERS: CollecteFilter[] = [
-  { label: "Tous", count: "24", active: true },
-  { label: "Prêts pour étape 04", count: "6" },
-  { label: "En collecte active", count: "13" },
-  { label: "Inactifs > 14 j", count: "5", alert: true },
+  { key: "tous", label: "Tous", count: "24" },
+  { key: "prets-04", label: "Prêts pour étape 04", count: "6" },
+  { key: "en-collecte", label: "En collecte active", count: "13" },
+  { key: "inactifs", label: "Inactifs > 14 j", count: "5", alert: true },
 ];
+
+export function isCollecteFilter(value: string | undefined): value is CollecteFilterKey {
+  return value === "prets-04" || value === "en-collecte" || value === "inactifs";
+}
+
+/** Filtre les lignes affichées selon la facette sélectionnée (source unique). */
+export function filterCollecteRows(
+  rows: CollecteRow[],
+  filter: CollecteFilterKey,
+): CollecteRow[] {
+  switch (filter) {
+    case "prets-04":
+      return rows.filter((r) => r.status === "signed");
+    case "en-collecte":
+      return rows.filter((r) => r.status === "sent");
+    case "inactifs":
+      return rows.filter((r) => r.openingAlert === true);
+    default:
+      return rows;
+  }
+}
 
 export const COLLECTE_FOOTNOTE =
   "… 1 autre client en collecte · 4 dossiers prêts pour étape 04 · documents par dossier : 60 à 300 selon complexité patrimoniale";
