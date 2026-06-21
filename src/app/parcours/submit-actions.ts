@@ -7,6 +7,7 @@
 
 import { getSessionContext } from "@/lib/auth/context";
 import { saveSubmission, type DciKind } from "@/lib/dci-store";
+import { sendParcoursConfirmation, type ParcoursStep } from "@/lib/parcours-email";
 
 export type SubmitDciInput = {
   kind: DciKind;
@@ -33,6 +34,21 @@ export async function submitDci(
       tenant_id: ctx?.tenantId ?? null,
       cabinet_id: ctx?.cabinetId ?? null,
     });
+
+    // Confirmation au prospect + notification ingénieur (best-effort, ne bloque
+    // jamais le retour ok). Le booking (kind='rdv') a déjà son propre e-mail.
+    if (input.kind !== "rdv") {
+      try {
+        await sendParcoursConfirmation({
+          prospectSlug: prospect_slug,
+          displayName: input.displayName || prospect_slug,
+          stepDone: input.kind as ParcoursStep,
+        });
+      } catch {
+        // best-effort : un échec d'e-mail ne compromet pas la soumission.
+      }
+    }
+
     return { ok: true };
   } catch {
     // best-effort : un échec de persistance ne bloque pas l'écran de remerciement.

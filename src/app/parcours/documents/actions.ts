@@ -6,6 +6,7 @@
 // Les fichiers sont relus côté ingénieur par loadProspectDocuments().
 
 import { createAdminClient } from "@/lib/supabase/admin";
+import { sendParcoursConfirmation } from "@/lib/parcours-email";
 
 const STORAGE_BUCKET = "depots";
 const MAX_FILE_SIZE = 15 * 1024 * 1024; // 15 Mo (aligné sur le flux collecte client)
@@ -101,6 +102,21 @@ export async function uploadProspectDocument(
 
     if (uploaded === 0) {
       return { ok: false, error: "Aucun fichier n'a pu être déposé." };
+    }
+
+    // Au moins un fichier déposé : on confirme au prospect (et on notifie
+    // l'ingénieur) que l'étape « dépôt de pièces » est complétée. L'e-mail part
+    // vers l'adresse retrouvée sur sa soumission RDV. Best-effort : ne jamais
+    // bloquer le retour {ok} si l'envoi échoue. Le nom d'affichage est porté par
+    // le lien e-mail (?name=) ; à défaut on retombe sur le slug, l'adresse de
+    // destination restant correcte via la soumission RDV.
+    const nameField = formData.get("name");
+    const displayName =
+      typeof nameField === "string" && nameField.trim() ? nameField.trim() : slug;
+    try {
+      await sendParcoursConfirmation({ prospectSlug: slug, displayName, stepDone: "documents" });
+    } catch {
+      // best-effort : un échec de notification ne remet pas en cause le dépôt.
     }
 
     return { ok: true };
