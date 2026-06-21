@@ -4217,7 +4217,7 @@ setInterval(() => {
       .then(function (mic) {
         if (dgMicStream) { try { dgMicStream.getTracks().forEach(function (t) { t.stop(); }); } catch (e) {} }
         dgMicStream = mic;
-        try { var at = mic.getAudioTracks()[0]; console.log('[ASTR-STT] mic track:', at && at.label, 'enabled=' + (at && at.enabled), 'muted=' + (at && at.muted)); } catch (e) {}
+        try { var at = mic.getAudioTracks()[0]; window.__dgMicLabel = (at && at.label) || '?'; window.__dgMicMuted = at && at.muted; console.log('[ASTR-STT] mic track:', at && at.label, 'enabled=' + (at && at.enabled), 'muted=' + (at && at.muted)); } catch (e) {}
         openDeepgramSocket(token, mic, true);
       })
       .catch(function () {
@@ -4312,6 +4312,7 @@ setInterval(() => {
         if (window.__dgDiag) clearInterval(window.__dgDiag);
         window.__dgDiag = setInterval(function () {
           var s = 'DBG lvl=' + (window.__dgLevel || 0).toFixed(3)
+            + ' mic="' + String(window.__dgMicLabel || '?').slice(0, 24) + '" muted=' + (window.__dgMicMuted ? '1' : '0')
             + ' frames=' + (window.__dgFrames || 0)
             + ' dgmsgs=' + (window.__dgMsgs || 0)
             + ' type=' + (window.__dgLastType || '-')
