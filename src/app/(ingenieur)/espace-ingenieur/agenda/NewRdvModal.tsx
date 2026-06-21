@@ -3,7 +3,24 @@
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
-import { createRdv, type RdvFormat } from "./actions";
+import { createRdv, type RdvFormat, type CreateRdvResult } from "./actions";
+
+type RdvSuccess = Extract<CreateRdvResult, { ok: true }>;
+
+// E-mails du portefeuille de démonstration (les fiches clients de _data sont en
+// @email-test.fr). Dans un vrai outil, l'adresse viendrait de la fiche client en
+// base ; ici on résout les clients de démo connus, sinon adresse vide (l'écran
+// de confirmation l'indique honnêtement). Pour un envoi réel, utiliser « Nouveau
+// prospect » avec une vraie adresse.
+const PORTEFEUILLE_EMAILS: { match: RegExp; email: string }[] = [
+  { match: /dupont-topin/i, email: "bertrand.dupont@email-test.fr" },
+  { match: /aubert/i, email: "jean.aubert@email-test.fr" },
+];
+
+function emailForClientExistant(label: string): string {
+  const found = PORTEFEUILLE_EMAILS.find((e) => e.match.test(label));
+  return found ? found.email : "";
+}
 
 /**
  * Modale « Nouveau rendez-vous » (Création RDV directe) — port fidèle de
@@ -107,14 +124,15 @@ export function NewRdvModal() {
   const [docQualif, setDocQualif] = useState(true);
   const [message, setMessage] = useState(DEFAULT_MESSAGE);
   const [submitStatus, setSubmitStatus] = useState<SubmitStatus>("idle");
-  const [toast, setToast] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [result, setResult] = useState<RdvSuccess | null>(null);
   const [modeModification, setModeModification] = useState(false);
 
   const close = useCallback(() => {
     setOpen(false);
     setSubmitStatus("idle");
     setError(null);
+    setResult(null);
     setModeModification(false);
     document.body.style.overflow = "";
   }, []);
@@ -192,6 +210,16 @@ export function NewRdvModal() {
     const format =
       LIEU_OPTIONS.find((o) => o.label === lieu)?.format ?? "presentiel";
 
+    const clientEmail =
+      clientMode === "nouveau" ? nouveauEmail.trim() : emailForClientExistant(clientExistant);
+
+    const documents = [
+      docDci ? "DCI Simplifié" : null,
+      docQualif ? "Questionnaire de qualification client" : null,
+    ].filter((d): d is string => d !== null);
+
+    const typeLabel = TYPE_CARDS.find((c) => c.type === type)?.title ?? "Rendez-vous";
+
     setSubmitStatus("submitting");
     const res = await createRdv({
       type,
@@ -200,6 +228,11 @@ export function NewRdvModal() {
       heureDebut,
       duree,
       clientNom,
+      clientEmail,
+      typeLabel,
+      lieuLabel: lieu,
+      documents,
+      message,
       attendees: participants.map((p) => ({ nom: p.nom, email: p.email })),
     });
 
@@ -209,31 +242,151 @@ export function NewRdvModal() {
       return;
     }
 
+    // On NE ferme PAS : on affiche l'écran de confirmation (les étapes d'après).
+    // L'agenda est rafraîchi en fond pour refléter le nouveau RDV.
+    setResult(res);
     setSubmitStatus("done");
-    setToast(res.message);
-    close();
-    // Visio : on enchaîne directement sur la salle. Sinon retour agenda à jour.
-    if (res.room) {
-      router.push(`/visio/${res.room}?role=engineer`);
-    } else {
-      router.refresh();
-    }
-    setTimeout(() => setToast(null), 4500);
+    router.refresh();
   }
 
-  if (!open) {
-    // La modale est fermée mais on garde le toast de confirmation visible.
-    if (toast) {
-      return (
-        <div className="rdv-toast" role="status">
-          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2.4">
-            <polyline points="20 6 9 17 4 12" />
-          </svg>
-          {toast}
+  if (!open) return null;
+
+  // Écran de confirmation (les « étapes d'après ») affiché après une création
+  // réussie, à la place du formulaire : statut d'envoi de l'e-mail, documents,
+  // salle visio. Remplace l'ancien simple toast (« il ne se passait rien »).
+  if (result) {
+    const documentsEnvoyes = [
+      docDci ? "DCI Simplifié" : null,
+      docQualif ? "Questionnaire de qualification client" : null,
+    ].filter((d): d is string => d !== null);
+
+    return (
+      <div
+        className="s1a-modal-overlay open"
+        id="modal-rdv-confirme"
+        onClick={(e) => {
+          if (e.target === e.currentTarget) close();
+        }}
+      >
+        <div className="s1a-modal" role="dialog" aria-modal="true">
+          <div className="s1a-modal-header">
+            <button className="s1a-modal-close" onClick={close} aria-label="Fermer" type="button">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
+                <path d="M18 6 L 6 18 M 6 6 L 18 18" />
+              </svg>
+            </button>
+            <div className="s1a-modal-eyebrow">Agenda · Rendez-vous confirmé</div>
+            <h2 className="s1a-modal-title">
+              Rendez-vous <strong>créé</strong>
+            </h2>
+            <p className="s1a-modal-sub">{result.message}</p>
+          </div>
+
+          <div className="s1a-modal-body">
+            <div className="s1a-section">
+              <div className="s1a-section-label">Confirmation au client</div>
+              {result.emailSent ? (
+                <div
+                  style={{
+                    display: "flex",
+                    gap: 10,
+                    alignItems: "flex-start",
+                    padding: "12px 14px",
+                    borderRadius: 8,
+                    background: "#E7F3EA",
+                    color: "#1E6B3A",
+                    fontSize: 14,
+                    lineHeight: 1.5,
+                  }}
+                >
+                  <span aria-hidden="true">✓</span>
+                  <span>
+                    E-mail de confirmation envoyé à <strong>{result.emailTo}</strong>.
+                  </span>
+                </div>
+              ) : (
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 6,
+                    padding: "12px 14px",
+                    borderRadius: 8,
+                    background: "#FBF1E0",
+                    color: "#8A5A12",
+                    fontSize: 14,
+                    lineHeight: 1.5,
+                  }}
+                >
+                  <span>
+                    ⚠ E-mail non envoyé{result.emailTo ? ` à ${result.emailTo}` : ""} : {result.emailError}
+                  </span>
+                  {!result.emailTo && (
+                    <span style={{ fontSize: 12.5, opacity: 0.85 }}>
+                      Le portefeuille de démonstration est en @email-test.fr. Pour un envoi réel,
+                      utilisez « Nouveau prospect » avec une adresse valide.
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div className="s1a-section">
+              <div className="s1a-section-label">
+                Documents {result.emailSent ? "joints à l'e-mail" : "à transmettre"}
+              </div>
+              {documentsEnvoyes.length ? (
+                documentsEnvoyes.map((d) => (
+                  <div key={d} style={{ fontSize: 14, color: "#33425A", lineHeight: 1.8 }}>
+                    • {d}
+                  </div>
+                ))
+              ) : (
+                <div style={{ fontSize: 14, color: "#8B96A8" }}>Aucun document sélectionné.</div>
+              )}
+            </div>
+
+            {result.room && (
+              <div className="s1a-section">
+                <div className="s1a-section-label">Salle de visioconférence</div>
+                <div style={{ fontSize: 14, color: "#33425A", lineHeight: 1.5 }}>
+                  La salle <code>{result.room}</code> est prête. Le lien d&apos;accès a été inclus
+                  dans l&apos;e-mail du client.
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="s1a-modal-footer">
+            <div className="s1a-modal-footer-info">
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.8">
+                <circle cx="12" cy="12" r="9" />
+                <polyline points="12 6 12 12 16 14" />
+              </svg>
+              <span>Action tracée &amp; horodatée</span>
+            </div>
+            <div className="s1a-modal-footer-actions">
+              <button className="s1a-btn s1a-btn-ghost" onClick={close} type="button">
+                Fermer
+              </button>
+              {result.room && (
+                <button
+                  className="s1a-btn s1a-btn-primary"
+                  type="button"
+                  onClick={() => {
+                    const room = result.room;
+                    close();
+                    if (room) router.push(`/visio/${room}?role=engineer`);
+                  }}
+                >
+                  Rejoindre la salle
+                </button>
+              )}
+            </div>
+          </div>
         </div>
-      );
-    }
-    return null;
+      </div>
+    );
   }
 
   return (
