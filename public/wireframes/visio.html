@@ -2942,10 +2942,22 @@ window.addEventListener('DOMContentLoaded', () => {
 
 <script>
 function setView(role) {
-  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  document.getElementById('view-' + role).classList.add('active');
   document.querySelectorAll('.role-switch button').forEach(b => b.classList.remove('active'));
-  document.querySelector('.role-switch button[onclick*="' + role + '"]').classList.add('active');
+  var __b = document.querySelector('.role-switch button[onclick*="' + role + '"]');
+  if (__b) __b.classList.add('active');
+  // La « Vue client » doit montrer la VRAIE visio en mode client épuré (pas le
+  // mock statique #view-client). On réutilise applyClientView (skin client réel
+  // sur la vraie connexion Jitsi) + une classe 'client-preview' qui garde le
+  // toggle visible pour revenir en Vue ingénieur.
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-ingenieur').classList.add('active');
+  if (role === 'client') {
+    try { applyClientView(); } catch (e) {}
+    document.body.classList.add('client-preview');
+  } else {
+    document.body.classList.remove('client-view');
+    document.body.classList.remove('client-preview');
+  }
 }
 function setAssistTab(name) {
   document.querySelectorAll('.assist-tab').forEach(t => t.classList.remove('active'));
@@ -3628,6 +3640,8 @@ setInterval(() => {
   function applyClientView() {
     try {
       document.body.classList.add('client-view');
+      if (window.__clientViewApplied) return; // déjà injecté (toggle aperçu) → ne pas dupliquer
+      window.__clientViewApplied = true;
 
       // CSS injecté : masque tout le confidentiel ingénieur, vidéo plein cadre.
       var css = ''
@@ -3654,7 +3668,12 @@ setInterval(() => {
         + '.astr-client-topbar .astr-ct-logo{width:30px; height:30px; border-radius:7px; background:var(--gold); color:white; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:13px;}'
         + '.astr-client-topbar .astr-ct-brand strong{color:var(--gold-300);}'
         + '.astr-client-topbar .astr-ct-quit{display:inline-flex; align-items:center; gap:6px; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.22); color:white; padding:7px 14px; border-radius:6px; font-family:inherit; font-size:11.5px; font-weight:700; cursor:pointer;}'
-        + '.astr-client-topbar .astr-ct-quit:hover{background:rgba(255,255,255,0.18);}';
+        + '.astr-client-topbar .astr-ct-quit:hover{background:rgba(255,255,255,0.18);}'
+        // Mode APERÇU (toggle ingénieur « Vue client ») : garder la barre du haut
+        // + le switch pour revenir, et masquer le bandeau client hors vue client.
+        + 'body.client-preview > .top-bar{display:flex !important;}'
+        + 'body.client-preview .role-switch{display:flex !important;}'
+        + 'body:not(.client-view) #astr-client-topbar{display:none !important;}';
       var styleEl = document.createElement('style');
       styleEl.textContent = css;
       document.head.appendChild(styleEl);
@@ -4313,11 +4332,6 @@ setInterval(() => {
             + ' type=' + (window.__dgLastType || '-')
             + ' txt="' + String(window.__dgLastTxt || '').slice(0, 40) + '"';
           try { console.log('[ASTR-STT] ctx=' + (dgAudioCtx && dgAudioCtx.state) + ' ' + s); } catch (e) {}
-          try {
-            var el = window.__dgDbgEl;
-            if (!el) { el = document.createElement('div'); el.style.cssText = 'position:fixed;left:6px;bottom:6px;z-index:999999;background:#c0392b;color:#fff;font:12px/1.4 monospace;padding:4px 8px;border-radius:4px;max-width:90vw;'; document.body.appendChild(el); window.__dgDbgEl = el; }
-            el.textContent = s;
-          } catch (e) {}
         }, 1000);
         dgSource = dgAudioCtx.createMediaStreamSource(stream);
         var bufSize = 4096;
