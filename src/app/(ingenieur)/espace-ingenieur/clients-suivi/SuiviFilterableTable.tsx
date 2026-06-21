@@ -184,7 +184,7 @@ export default function SuiviFilterableTable({
                 <td colSpan={9}>Aucun client ne correspond à ce filtre.</td>
               </tr>
             )}
-            {activeKey === "all" && (
+            {activeKey === "all" && remaining.count > 0 && (
               <tr className="dt-more-row">
                 <td colSpan={9}>
                   … {remaining.count} autres clients en suivi ·{" "}

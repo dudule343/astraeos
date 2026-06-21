@@ -6,8 +6,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import {
   KPIS,
-  ROWS,
-  TOTAL_DOSSIERS,
   type ConformiteRow,
   type DocStatus,
   type PayTone,
@@ -15,14 +13,25 @@ import {
 
 type KpiFilter = "a-signer" | "signe-attente" | "paye";
 
-// La fiche conformité détaillée n'existe que pour le dossier de référence
-// (modèle Joubert). Les autres lignes `ficheReady` ouvriraient cette même fiche
-// avec un nom de client incohérent : on n'ouvre donc la fiche que pour ce
-// dossier, et on garde l'action honnêtement désactivée pour les autres.
+type ConformiteInteractiveProps = {
+  rows: ConformiteRow[];
+  kpis: typeof KPIS;
+  total: number;
+  /**
+   * En mode maquette (repli), la fiche détaillée n'existe que pour le dossier
+   * de référence Joubert. En données réelles, chaque ligne porte un id de
+   * dossier réel et ouvre sa propre fiche.
+   */
+  realData: boolean;
+};
+
+// Modèle de référence de la maquette : seule fiche détaillée disponible hors
+// données réelles (les autres exemples ouvriraient un nom incohérent).
 const FICHE_REFERENCE_ID = "joubert";
 
-function hasFiche(row: ConformiteRow): boolean {
-  return row.ficheReady && row.id === FICHE_REFERENCE_ID;
+function hasFiche(row: ConformiteRow, realData: boolean): boolean {
+  if (!row.ficheReady) return false;
+  return realData || row.id === FICHE_REFERENCE_ID;
 }
 
 const PAY_FILTER_OPTIONS: { value: PayTone; label: string }[] = [
@@ -50,14 +59,6 @@ function IconEye() {
   );
 }
 
-function IconFilter() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-      <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
-    </svg>
-  );
-}
-
 function DocLine({ doc }: { doc: DocStatus }) {
   return (
     <span className="doc-status-line">
@@ -70,23 +71,23 @@ function DocLine({ doc }: { doc: DocStatus }) {
   );
 }
 
-function rowClassName(row: ConformiteRow): string {
+function rowClassName(row: ConformiteRow, realData: boolean): string {
   const classes: string[] = [];
   if (row.kind === "couple") classes.push("pipe-row-couple");
   if (row.kind === "personne-morale") classes.push("pipe-row-pm");
   if (row.highlighted) classes.push("pipe-row-highlight");
-  if (hasFiche(row)) classes.push("pipe-row-clickable");
+  if (hasFiche(row, realData)) classes.push("pipe-row-clickable");
   return classes.join(" ");
 }
 
-function ConformiteTableRow({ row }: { row: ConformiteRow }) {
+function ConformiteTableRow({ row, realData }: { row: ConformiteRow; realData: boolean }) {
   const router = useRouter();
   const ficheHref = `/espace-ingenieur/conformite/${row.id}`;
 
   return (
     <tr
-      className={rowClassName(row)}
-      onClick={hasFiche(row) ? () => router.push(ficheHref) : undefined}
+      className={rowClassName(row, realData)}
+      onClick={hasFiche(row, realData) ? () => router.push(ficheHref) : undefined}
     >
       <td>
         <div className="client-cell">
@@ -142,7 +143,7 @@ function ConformiteTableRow({ row }: { row: ConformiteRow }) {
       </td>
       <td className="center" onClick={(e) => e.stopPropagation()}>
         <div className="actions-cell">
-          {hasFiche(row) ? (
+          {hasFiche(row, realData) ? (
             <Link href={ficheHref} className="action-btn" title="Ouvrir la fiche conformité">
               <IconEye />
             </Link>
@@ -166,7 +167,12 @@ function ConformiteTableRow({ row }: { row: ConformiteRow }) {
   );
 }
 
-export function ConformiteInteractive() {
+export function ConformiteInteractive({
+  rows,
+  kpis,
+  total,
+  realData,
+}: ConformiteInteractiveProps) {
   const [filter, setFilter] = useState<KpiFilter | null>(null);
   const [query, setQuery] = useState("");
   const [payFilters, setPayFilters] = useState<PayTone[]>([]);
@@ -194,13 +200,13 @@ export function ConformiteInteractive() {
 
   const visibleRows = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return ROWS.filter((row) => {
+    return rows.filter((row) => {
       if (filter && row.dataStatus !== filter) return false;
       if (payFilters.length > 0 && !payFilters.includes(row.payment.tone)) return false;
       if (q && !row.names.join(" ").toLowerCase().includes(q)) return false;
       return true;
     });
-  }, [filter, payFilters, query]);
+  }, [filter, payFilters, query, rows]);
 
   const toggleFilter = (next: KpiFilter) =>
     setFilter((current) => (current === next ? null : next));
@@ -215,10 +221,9 @@ export function ConformiteInteractive() {
   const hasActiveView =
     filter !== null || query.trim() !== "" || payFilters.length > 0;
 
-  // « Voir l'intégralité » : la maquette annonce 18 dossiers mais n'en expose
-  // réellement que ROWS.length (les autres ne sont pas encore synchronisés).
-  // Le lien retire tout filtre/recherche pour afficher l'ensemble des dossiers
-  // chargés, plutôt que de promettre des lignes inexistantes.
+  // « Voir l'intégralité » : retire tout filtre/recherche pour afficher
+  // l'ensemble des dossiers chargés, plutôt que de promettre des lignes
+  // inexistantes. En données réelles, total === rows.length (rien de caché).
   const showAll = () => {
     setFilter(null);
     setQuery("");
@@ -279,9 +284,9 @@ export function ConformiteInteractive() {
         >
           <div className="kpi-label">En attente signature</div>
           <div className="kpi-value">
-            {KPIS.aSigner.count} <span className="unit">{KPIS.aSigner.unit}</span>
+            {kpis.aSigner.count} <span className="unit">{kpis.aSigner.unit}</span>
           </div>
-          <div className="kpi-meta">{KPIS.aSigner.meta}</div>
+          <div className="kpi-meta">{kpis.aSigner.meta}</div>
         </div>
         <div
           className={`kpi clickable${filter === "signe-attente" ? " kpi-active" : ""}`}
@@ -289,9 +294,9 @@ export function ConformiteInteractive() {
         >
           <div className="kpi-label">En conformité</div>
           <div className="kpi-value">
-            {KPIS.enConformite.count} <span className="unit">{KPIS.enConformite.unit}</span>
+            {kpis.enConformite.count} <span className="unit">{kpis.enConformite.unit}</span>
           </div>
-          <div className="kpi-meta">{KPIS.enConformite.meta}</div>
+          <div className="kpi-meta">{kpis.enConformite.meta}</div>
         </div>
         <div
           className={`kpi clickable${filter === "paye" ? " kpi-active" : ""}`}
@@ -299,20 +304,20 @@ export function ConformiteInteractive() {
         >
           <div className="kpi-label">Paiement reçu</div>
           <div className="kpi-value">
-            {KPIS.paiement.recu}
-            <span style={{ fontSize: "16px", color: "var(--navy-300)" }}> / {KPIS.paiement.total}</span>
+            {kpis.paiement.recu}
+            <span style={{ fontSize: "16px", color: "var(--navy-300)" }}> / {kpis.paiement.total}</span>
           </div>
           <div className="kpi-meta">
-            <strong>{KPIS.paiement.pct}</strong> ·{" "}
-            <strong style={{ color: "var(--orange-text)" }}>{KPIS.paiement.attente}</strong>
+            <strong>{kpis.paiement.pct}</strong> ·{" "}
+            <strong style={{ color: "var(--orange-text)" }}>{kpis.paiement.attente}</strong>
           </div>
         </div>
         <div className="kpi">
           <div className="kpi-label">Délai moyen</div>
           <div className="kpi-value">
-            {KPIS.delai.value} <span className="unit">{KPIS.delai.unit}</span>
+            {kpis.delai.value} <span className="unit">{kpis.delai.unit}</span>
           </div>
-          <div className="kpi-meta">{KPIS.delai.meta}</div>
+          <div className="kpi-meta">{kpis.delai.meta}</div>
         </div>
       </div>
 
@@ -392,31 +397,33 @@ export function ConformiteInteractive() {
           </thead>
           <tbody>
             {visibleRows.map((row) => (
-              <ConformiteTableRow row={row} key={row.id} />
+              <ConformiteTableRow row={row} key={row.id} realData={realData} />
             ))}
             {visibleRows.length === 0 ? (
               <tr className="conf-empty-row">
                 <td colSpan={7}>Aucun dossier ne correspond à ces filtres.</td>
               </tr>
             ) : null}
-            <tr className="pipe-more-row">
-              <td colSpan={7}>
-                … {TOTAL_DOSSIERS - ROWS.length} autres dossiers ·{" "}
-                <button
-                  type="button"
-                  className="pipe-more-link"
-                  onClick={showAll}
-                  disabled={!hasActiveView}
-                  title={
-                    hasActiveView
-                      ? "Afficher tous les dossiers chargés"
-                      : `${ROWS.length} dossiers synchronisés sur ${TOTAL_DOSSIERS} · les autres arrivent depuis la banque`
-                  }
-                >
-                  Voir l&apos;intégralité ({TOTAL_DOSSIERS})
-                </button>
-              </td>
-            </tr>
+            {total > rows.length ? (
+              <tr className="pipe-more-row">
+                <td colSpan={7}>
+                  … {total - rows.length} autres dossiers ·{" "}
+                  <button
+                    type="button"
+                    className="pipe-more-link"
+                    onClick={showAll}
+                    disabled={!hasActiveView}
+                    title={
+                      hasActiveView
+                        ? "Afficher tous les dossiers chargés"
+                        : `${rows.length} dossiers synchronisés sur ${total} · les autres arrivent depuis la banque`
+                    }
+                  >
+                    Voir l&apos;intégralité ({total})
+                  </button>
+                </td>
+              </tr>
+            ) : null}
           </tbody>
         </table>
 

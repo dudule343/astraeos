@@ -2,13 +2,12 @@ import Link from "next/link";
 
 import {
   pipelineSteps,
-  etudesKpis,
-  fetchEtudes,
   isValidFilter,
   type PipelineStep,
   type EtudeRow,
   type FilterKey,
 } from "../../_data/etudes";
+import { fetchEtudesLive } from "../../_data/etudes-server";
 import "../../_styles/etudes.css";
 
 export const metadata = {
@@ -223,7 +222,7 @@ function EtudeTableRow({ row }: { row: EtudeRow }) {
       <td className="center">
         <div className="actions-cell">
           <Link
-            href="/espace-ingenieur/dossiers"
+            href={`/espace-ingenieur/dossiers/${row.id}`}
             className="action-btn"
             title="Consulter le dossier"
           >
@@ -242,7 +241,7 @@ export default async function EtudesPage({
 }) {
   const { filtre } = await searchParams;
   const filter: FilterKey = isValidFilter(filtre) ? filtre : "toutes";
-  const { filters, rows, remaining } = fetchEtudes(filter);
+  const { filters, rows, remaining, kpis } = await fetchEtudesLive(filter);
 
   return (
     <div className="etudes-page-wrap">
@@ -268,7 +267,7 @@ export default async function EtudesPage({
       </section>
 
       <div className="kpis kpis-4 mb-20">
-        {etudesKpis.map((kpi) => (
+        {kpis.map((kpi) => (
           <div className="kpi" key={kpi.label}>
             <div className="kpi-label">{kpi.label}</div>
             <div

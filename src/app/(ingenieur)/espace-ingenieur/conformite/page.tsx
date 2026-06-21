@@ -1,12 +1,15 @@
 import Link from "next/link";
 
 import { BANK_BANNER, STEPPER, type StepperItem } from "../../_data/conformite";
+import { getConformiteScreen } from "../../_data/conformite-server";
 import "../../_styles/conformite.css";
 import { ConformiteInteractive } from "./ConformiteInteractive";
 
 export const metadata = {
   title: "ASTRAEOS · Conformité en cours",
 };
+
+export const dynamic = "force-dynamic";
 
 /** SVG du badge de chaque étape du stepper, identiques à la maquette. */
 function StepperBadgeIcon({ step }: { step: string }) {
@@ -96,12 +99,17 @@ function StepperCard({ item }: { item: StepperItem }) {
   );
 }
 
-export default function ConformitePage() {
+export default async function ConformitePage() {
+  const screen = await getConformiteScreen();
+  const stepper: StepperItem[] = STEPPER.map((item) =>
+    item.step === "02" ? { ...item, count: String(screen.total) } : item,
+  );
+
   return (
     <div className="pipe-page-wrap">
       {/* STEPPER PARCOURS */}
       <div className="pipeline-stepper-v1">
-        {STEPPER.map((item) => (
+        {stepper.map((item) => (
           <StepperCard item={item} key={item.step} />
         ))}
       </div>
@@ -139,7 +147,12 @@ export default function ConformitePage() {
       </div>
 
       {/* KPIs + TABLE (interactif : filtrage KPI, recherche, lignes cliquables) */}
-      <ConformiteInteractive />
+      <ConformiteInteractive
+        rows={screen.rows}
+        kpis={screen.kpis}
+        total={screen.total}
+        realData={screen.realData}
+      />
     </div>
   );
 }

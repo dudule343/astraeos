@@ -307,9 +307,15 @@ export default function ProfilInteractive({ screen }: { screen: ProfilScreen }) 
               <IconShield />
               Agréments réglementaires
             </div>
-            <span className="badge badge-success" style={{ fontSize: "10px" }}>
-              Tous valides
-            </span>
+            {agrements.every((ag) => ag.statut === "Valide") ? (
+              <span className="badge badge-success" style={{ fontSize: "10px" }}>
+                Tous valides
+              </span>
+            ) : (
+              <span className="badge" style={{ fontSize: "10px" }}>
+                À compléter
+              </span>
+            )}
           </div>
           <div className="card-body" style={{ padding: 0 }}>
             {agrements.map((ag, i) => (
@@ -327,7 +333,10 @@ export default function ProfilInteractive({ screen }: { screen: ProfilScreen }) 
                   <div style={{ fontSize: "13px", fontWeight: 700, color: "var(--navy)" }}>{ag.titre}</div>
                   <div style={{ fontSize: "10.5px", color: "var(--navy-300)", marginTop: "2px" }}>{ag.detail}</div>
                 </div>
-                <span className="badge badge-success" style={{ fontSize: "10px" }}>
+                <span
+                  className={`badge${ag.statut === "Valide" ? " badge-success" : ""}`}
+                  style={{ fontSize: "10px" }}
+                >
                   {ag.statut}
                 </span>
               </div>

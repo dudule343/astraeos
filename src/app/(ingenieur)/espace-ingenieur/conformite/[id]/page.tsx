@@ -13,6 +13,7 @@ import {
 import "../../../_styles/conformite.css";
 import "../../../_styles/fiche-conformite.css";
 import "../../agenda/_styles/agenda.css";
+import { getFicheConformiteHero } from "../../../_data/fiche-conformite-server";
 import {
   DerModalControls,
   EnvoiPack,
@@ -23,27 +24,58 @@ export const metadata = {
   title: "ASTRAEOS · Fiche conformité",
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function FicheConformitePage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
-  // Modèle de référence Joubert : l'id est mappé à la fiche démonstrative,
-  // exactement comme la fiche client de la maquette.
-  await params;
+  const { id } = await params;
+  // Si l'id correspond à un dossier réel du cabinet, on personnalise le hero
+  // (foyer réel) ; sinon on garde le foyer modèle Joubert de la maquette.
+  const realHero = await getFicheConformiteHero(id);
 
   return (
     <div className="fco-wrap">
+      {realHero && !realHero.hasConformiteItems ? (
+        <div className="fc-info-banner">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--navy-300)" strokeWidth="2">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="16" x2="12" y2="12" />
+            <line x1="12" y1="8" x2="12.01" y2="8" />
+          </svg>
+          <span>
+            <strong>Dossier réel · atelier de référence</strong> · aucune pièce
+            de conformité n&apos;a encore été générée pour ce foyer. L&apos;atelier
+            de génération ci-dessous (DER · KYC · LM) est présenté à titre de
+            modèle tant que les documents ne sont pas produits.
+          </span>
+        </div>
+      ) : null}
+
       {/* HERO */}
       <div className="hero">
         <div>
           <div className="hero-eyebrow">{HERO.eyebrow}</div>
           <h1 className="hero-title">
-            {HERO.client1Lead}
-            <strong>{HERO.client1Strong}</strong>
-            {HERO.client2Lead}
-            <strong>{HERO.client2Strong}</strong>
-            {HERO.titleTail}
+            {realHero ? (
+              <>
+                {realHero.client1Lead}
+                <strong>{realHero.client1Strong}</strong>
+                {realHero.client2Lead}
+                {realHero.client2Strong ? <strong>{realHero.client2Strong}</strong> : null}
+                {HERO.titleTail}
+              </>
+            ) : (
+              <>
+                {HERO.client1Lead}
+                <strong>{HERO.client1Strong}</strong>
+                {HERO.client2Lead}
+                <strong>{HERO.client2Strong}</strong>
+                {HERO.titleTail}
+              </>
+            )}
           </h1>
           <p className="hero-sub">
             {HERO.sub.lead}

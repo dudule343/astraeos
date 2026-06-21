@@ -348,32 +348,216 @@ async function loadRealRdvsByDate(): Promise<Map<string, AgendaRdv>> {
   return out;
 }
 
-/** Données de l'agenda (exemples maquette + vrais RDV pris en ligne, par date). */
+/** Variante de couleur de l'event selon le type de RDV (table rdv). */
+const RDV_TYPE_VARIANT: Record<string, AgendaRdv["variant"]> = {
+  decouverte: "ev-gold",
+  restitution: "ev-gold",
+  collecte: "ev-gold",
+  suivi_annuel: "ev-success",
+  signature: "ev-navy",
+  autre: "ev-internal",
+};
+
+const RDV_TYPE_META: Record<string, string> = {
+  decouverte: "Entretien initial",
+  restitution: "Restitution étude",
+  collecte: "Point collecte",
+  suivi_annuel: "Suivi annuel",
+  signature: "Signature",
+  autre: "Rendez-vous",
+};
+
+const RDV_FORMAT_META: Record<string, string> = {
+  visio: "visio",
+  telephone: "tél.",
+  presentiel: "présentiel",
+};
+
+type RdvTableRow = {
+  id: string;
+  scheduled_at: string | null;
+  type: string | null;
+  format: string | null;
+  duration_minutes: number | null;
+  dossiers?:
+    | { clients?: { personnes?: Array<{ last_name?: string | null }> | { last_name?: string | null } | null } | null }
+    | Array<{ clients?: { personnes?: Array<{ last_name?: string | null }> | { last_name?: string | null } | null } | null }>
+    | null;
+};
+
+function lastNameOf(row: RdvTableRow): string {
+  const dossier = Array.isArray(row.dossiers) ? row.dossiers[0] : row.dossiers;
+  const persons = dossier?.clients?.personnes;
+  const p = Array.isArray(persons) ? persons[0] : persons;
+  const ln = p?.last_name ?? "";
+  return ln ? ln.toUpperCase() : "RDV";
+}
+
+/**
+ * Charge les vrais RDV de l'ingénieur depuis la table `rdv`, indexés par DATE
+ * ABSOLUE "année-mois-jour:créneau" — placés dans la grille à leur vraie date.
+ * Renvoie aussi les stats brutes pour les KPI (semaine / mois / durée moyenne).
+ * Best-effort.
+ */
+async function loadEngineerRdvs(): Promise<{
+  byDate: Map<string, AgendaRdv>;
+  weekCount: number;
+  weekVisio: number;
+  weekPresentiel: number;
+  monthCount: number;
+  monthLabel: string;
+  avgMinutes: number | null;
+}> {
+  const byDate = new Map<string, AgendaRdv>();
+  const fallback = {
+    byDate,
+    weekCount: 0,
+    weekVisio: 0,
+    weekPresentiel: 0,
+    monthCount: 0,
+    monthLabel: "ce mois",
+    avgMinutes: null as number | null,
+  };
+  try {
+    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) return fallback;
+    const ctx = await getSessionContext();
+    if (!ctx) return fallback;
+    const supabase = createAdminClient();
+    const { data } = await supabase
+      .from("rdv")
+      .select(
+        "id, scheduled_at, type, format, duration_minutes, dossiers(clients(personnes(last_name)))",
+      )
+      .eq("engineer_id", ctx.userId)
+      .order("scheduled_at", { ascending: true })
+      .limit(300);
+
+    const rows = (data ?? []) as RdvTableRow[];
+    const now = new Date();
+    // Semaine ISO courante (lundi → dimanche).
+    const monday = new Date(now);
+    const dow = (monday.getDay() + 6) % 7; // 0 = lundi
+    monday.setHours(0, 0, 0, 0);
+    monday.setDate(monday.getDate() - dow);
+    const sunday = new Date(monday);
+    sunday.setDate(sunday.getDate() + 7);
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+
+    let weekCount = 0;
+    let weekVisio = 0;
+    let weekPresentiel = 0;
+    let monthCount = 0;
+    let durSum = 0;
+    let durN = 0;
+
+    for (const r of rows) {
+      if (!r.scheduled_at) continue;
+      const dt = new Date(r.scheduled_at);
+      if (!Number.isFinite(dt.getTime())) continue;
+      const hh = dt.getHours();
+      const mm = dt.getMinutes();
+      const slotKey = `${hh}h${String(mm).padStart(2, "0")}`;
+      const hourLabel = `${String(hh).padStart(2, "0")}h${mm === 0 ? "" : String(mm).padStart(2, "0")}`;
+      const type = r.type ?? "autre";
+      const format = r.format ?? "";
+      const metaParts = [RDV_TYPE_META[type] ?? type.replace(/_/g, " ")];
+      if (format) metaParts.push(RDV_FORMAT_META[format] ?? format);
+      byDate.set(`${dt.getFullYear()}-${dt.getMonth()}-${dt.getDate()}:${slotKey}`, {
+        id: `rdv-${r.id}`,
+        dayIndex: 0,
+        slotKey,
+        hourLabel,
+        surname: lastNameOf(r),
+        metaLabel: metaParts.join(" · "),
+        isVisio: format === "visio",
+        variant: RDV_TYPE_VARIANT[type] ?? "ev-navy",
+        href: "/espace-ingenieur/agenda",
+      });
+
+      if (dt >= monday && dt < sunday) {
+        weekCount += 1;
+        if (format === "visio") weekVisio += 1;
+        if (format === "presentiel") weekPresentiel += 1;
+      }
+      if (dt >= monthStart && dt < monthEnd) monthCount += 1;
+      if (r.duration_minutes != null) {
+        durSum += Number(r.duration_minutes);
+        durN += 1;
+      }
+    }
+
+    return {
+      byDate,
+      weekCount,
+      weekVisio,
+      weekPresentiel,
+      monthCount,
+      monthLabel: `cumul ${now.toLocaleDateString("fr-FR", { month: "long", year: "numeric" })}`,
+      avgMinutes: durN > 0 ? Math.round(durSum / durN) : null,
+    };
+  } catch {
+    return fallback;
+  }
+}
+
+function formatAvgDuration(minutes: number | null): { value: string; unit: string } {
+  if (minutes == null) return { value: "—", unit: "" };
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  if (h === 0) return { value: String(m), unit: "min" };
+  return { value: String(h), unit: m === 0 ? "h" : `h ${m} min` };
+}
+
+/** Données de l'agenda : grille = vrais RDV de l'ingénieur (table rdv) +
+ *  RDV pris en ligne (dci_submissions), placés par date réelle ; KPI calculés
+ *  sur les vrais RDV. La semaine de base maquette sert de repère visuel. */
 export async function getAgenda(): Promise<AgendaData> {
-  const realRdvs = await loadRealRdvsByDate();
+  const [onlineRdvs, eng] = await Promise.all([
+    loadRealRdvsByDate(),
+    loadEngineerRdvs(),
+  ]);
+
+  // Fusion : les vrais RDV de la table rdv + les prises de RDV en ligne, tous
+  // indexés par date absolue. La prise en ligne (visio prospect) prime.
+  const realRdvs = new Map<string, AgendaRdv>(eng.byDate);
+  for (const [k, v] of onlineRdvs) realRdvs.set(k, v);
+
+  const avg = formatAvgDuration(eng.avgMinutes);
+  const now = new Date();
+
   return {
     rdvsBySlot: buildSlotMap(),
     realRdvs,
     weekLabel: "Semaine du lundi 11 au dimanche 17 mai 2026",
-    weekEyebrow: "Mon agenda · synchronisé Google Agenda · semaine 20",
-    syncLabel: "Google Agenda · sync 11:42",
+    weekEyebrow: `Mon agenda · synchronisé Google Agenda · semaine ${isoWeek(now)}`,
+    syncLabel: "Google Agenda · sync activée",
     days: DAYS,
-    kpiWeekCount: 8,
-    kpiWeekMeta: "5 en présentiel · 3 en visio",
-    kpiWeekCompare: [
-      { period: "S-1", value: "+2", direction: "up" },
-      { period: "N-1 même semaine", value: "+3", direction: "up" },
-    ],
-    kpiMonthCount: 22,
-    kpiMonthLabel: "cumul mai 2026",
-    kpiMonthCompare: [
-      { period: "M-1", value: "+4", direction: "up" },
-      { period: "N-1 même mois", value: "+6", direction: "up" },
-    ],
-    avgDurationValue: "1",
-    avgDurationUnit: "h 12 min",
-    avgDurationMeta: "cumul N-1 · ▼ -8 min",
+    kpiWeekCount: eng.weekCount,
+    kpiWeekMeta:
+      eng.weekCount > 0
+        ? `${eng.weekPresentiel} en présentiel · ${eng.weekVisio} en visio`
+        : "aucun RDV cette semaine",
+    kpiWeekCompare: [],
+    kpiMonthCount: eng.monthCount,
+    kpiMonthLabel: eng.monthLabel,
+    kpiMonthCompare: [],
+    avgDurationValue: avg.value,
+    avgDurationUnit: avg.unit,
+    avgDurationMeta:
+      eng.avgMinutes != null ? "sur mes RDV planifiés" : "aucune durée renseignée",
     publicSlug: "luc-thilliez",
     publicLink: "priveos.com/rdv/luc-thilliez",
   };
+}
+
+/** Numéro de semaine ISO 8601. */
+function isoWeek(date: Date): number {
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  const dayNum = (d.getUTCDay() + 6) % 7;
+  d.setUTCDate(d.getUTCDate() - dayNum + 3);
+  const firstThursday = new Date(Date.UTC(d.getUTCFullYear(), 0, 4));
+  const firstDayNum = (firstThursday.getUTCDay() + 6) % 7;
+  firstThursday.setUTCDate(firstThursday.getUTCDate() - firstDayNum + 3);
+  return 1 + Math.round((d.getTime() - firstThursday.getTime()) / (7 * 86_400_000));
 }

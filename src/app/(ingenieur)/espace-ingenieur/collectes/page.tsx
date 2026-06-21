@@ -1,16 +1,12 @@
 import Link from "next/link";
 
 import {
-  COLLECTE_FILTERS,
-  COLLECTE_FOOTNOTE,
-  COLLECTE_KPIS,
-  COLLECTE_ROWS,
-  COLLECTE_STEPPER,
   type CollecteFilterKey,
   type CollecteRow,
   filterCollecteRows,
   isCollecteFilter,
 } from "../../_data/collectes";
+import { getCollectesScreen } from "../../_data/collectes-server";
 import "../../_styles/collectes.css";
 import ProgressCell from "./ProgressCell";
 
@@ -177,12 +173,13 @@ export default async function CollectesPage({
 }) {
   const { filtre } = await searchParams;
   const activeFilter: CollecteFilterKey = isCollecteFilter(filtre) ? filtre : "tous";
-  const rows = filterCollecteRows(COLLECTE_ROWS, activeFilter);
+  const screen = await getCollectesScreen();
+  const rows = filterCollecteRows(screen.rows, activeFilter);
 
   return (
     <div className="maquette-ing px-10 py-8">
       <div className="pipeline-stepper-v1">
-        {COLLECTE_STEPPER.map((s) => (
+        {screen.stepper.map((s) => (
           <Link
             key={s.step}
             href={STEPPER_ROUTES[s.page]}
@@ -214,7 +211,7 @@ export default async function CollectesPage({
       </section>
 
       <div className="kpis kpis-4 mb-20">
-        {COLLECTE_KPIS.map((k) => (
+        {screen.kpis.map((k) => (
           <div className="kpi" key={k.label}>
             <div className="kpi-label">{k.label}</div>
             <div className="kpi-value" style={k.valueColor ? { color: k.valueColor } : undefined}>
@@ -227,7 +224,7 @@ export default async function CollectesPage({
       </div>
 
       <div className="qf-bar-v1">
-        {COLLECTE_FILTERS.map((f) => {
+        {screen.filters.map((f) => {
           const active = f.key === activeFilter;
           return (
             <Link
@@ -308,9 +305,11 @@ export default async function CollectesPage({
                 </td>
               </tr>
             ))}
-            <tr className="dt-footnote">
-              <td colSpan={7}>{COLLECTE_FOOTNOTE}</td>
-            </tr>
+            {screen.footnote ? (
+              <tr className="dt-footnote">
+                <td colSpan={7}>{screen.footnote}</td>
+              </tr>
+            ) : null}
           </tbody>
         </table>
       </div>

@@ -4706,7 +4706,7 @@ setInterval(() => {
     return { cls: 'insight-tag', label: 'Repère' };
   }
 
-  function injectConseil(c) {
+  function injectConseil(c, silent) {
     if (!insightsPane) return;
     var t = tagFor(c.type);
     var card = document.createElement('div');
@@ -4756,7 +4756,10 @@ setInterval(() => {
       }
     } catch (e) { /* silencieux */ }
     setTimeout(function () { card.classList.remove('new'); }, 6000);
-    // Greffe ASTRAEOS · persistance du conseil injecté.
+    // Greffe ASTRAEOS · persistance du conseil injecté. En mode `silent` (réhydra-
+    // tation à la reprise depuis dci_snapshot/conseils déjà persistés), on n'émet
+    // pas l'event pour éviter un re-PATCH en boucle de ce qui est déjà en base.
+    if (silent) return;
     try {
       document.dispatchEvent(new CustomEvent('astr-conseil', {
         detail: { titre: c.titre || '', type: c.type || '', detail: c.detail || '', repere_legal: c.repere_legal || null }
@@ -4764,7 +4767,7 @@ setInterval(() => {
     } catch (e) { /* silencieux */ }
   }
 
-  function injectArticle(a) {
+  function injectArticle(a, silent) {
     if (!legalList) return;
     if (legalEmpty) legalEmpty.style.display = 'none';
     var card = document.createElement('div');
@@ -4776,13 +4779,37 @@ setInterval(() => {
     var titleHtml = a.intitule ? '<strong>' + esc(a.intitule) + '</strong> — ' : '';
     card.innerHTML = refHtml + titleHtml + esc(a.extrait);
     legalList.insertBefore(card, legalList.firstChild);
-    // Greffe ASTRAEOS · persistance de l'article injecté.
+    // Greffe ASTRAEOS · persistance de l'article injecté. `silent` = réhydratation
+    // à la reprise : pas de re-PATCH de ce qui est déjà persisté.
+    if (silent) return;
     try {
       document.dispatchEvent(new CustomEvent('astr-article', {
         detail: { reference: a.reference || '', intitule: a.intitule || '', extrait: a.extrait || '' }
       }));
     } catch (e) { /* silencieux */ }
   }
+
+  // Exposé pour la réhydratation à la reprise (IIFE de persistance) : réaffiche
+  // les conseils/articles déjà générés et persistés pendant la session.
+  // `emitted` est aussi peuplé pour que la pompe live ne ré-émette pas de doublon.
+  window.__astrRehydrateInsight = function (c) {
+    try {
+      if (!c || !c.detail) return;
+      var key = (c.titre || c.detail).toLowerCase().trim();
+      if (key && emitted.indexOf(key) !== -1) return;
+      if (key) emitted.push(key);
+      injectConseil(c, true);
+    } catch (e) { /* silencieux */ }
+  };
+  window.__astrRehydrateArticle = function (a) {
+    try {
+      if (!a || !a.extrait) return;
+      var key = (a.reference || a.intitule || a.extrait).toLowerCase().trim();
+      if (key && emitted.indexOf(key) !== -1) return;
+      if (key) emitted.push(key);
+      injectArticle(a, true);
+    } catch (e) { /* silencieux */ }
+  };
 
   function maybeSendConseils(fromInterval) {
     if (userPaused && !fromInterval) return;
@@ -5539,6 +5566,18 @@ setInterval(() => {
         if (!data || !data.id) { scheduleOpenRetry(); return; }
         entretienId = data.id;
         if (data.dci_snapshot) applySnapshotAndRerender(data.dci_snapshot);
+        // Réhydratation des insights déjà générés pendant la session : conseils
+        // et articles persistés réapparaissent dans le panneau à la reprise.
+        // Ordre chronologique (plus ancien d'abord) → injectConseil insère en
+        // tête, donc le plus récent finit en haut, comme en live.
+        try {
+          if (Array.isArray(data.conseils) && typeof window.__astrRehydrateInsight === 'function') {
+            data.conseils.forEach(function (c) { window.__astrRehydrateInsight(c); });
+          }
+          if (Array.isArray(data.articles) && typeof window.__astrRehydrateArticle === 'function') {
+            data.articles.forEach(function (a) { window.__astrRehydrateArticle(a); });
+          }
+        } catch (e) { /* silencieux : réhydratation best-effort, ne casse pas la reprise */ }
         mountNotesUI();
         renderNotes(data.notes || []);
         // Rattrapage : draine ce qui a été capté AVANT l'obtention de l'id.

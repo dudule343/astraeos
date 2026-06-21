@@ -38,9 +38,12 @@ const IconRelance = () => (
   </svg>
 );
 
-/* Slug déterministe à partir du premier nom : la route /prospects/[id] sert la
- * fiche de référence quel que soit le slug, donc chaque ligne peut ouvrir une
- * fiche réelle même quand la maquette ne fournit pas de href dédié. */
+/* Slug déterministe à partir du premier nom, aligné sur le `slugify` des Server
+ * Actions (display_name → prospect_slug). Les vrais prospects « parcours en
+ * ligne » arrivent sans href dédié (href null) : on dérive alors le même slug
+ * que celui stocké dans dci_submissions, pour que la fiche [id] retrouve la
+ * soumission réelle et affiche profil de risque + documents déposés. Quand la
+ * maquette fournit un href, on le respecte. */
 function slugFor(row: ProspectRow): string {
   if (row.href) return row.href;
   const base = row.names[0]

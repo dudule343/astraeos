@@ -1,10 +1,9 @@
 import Link from "next/link";
 
 import {
-  getActiviteScreen,
-  type BadgeStyle,
-  type EtapeBadge,
-} from "../../_data/activite";
+  fetchActivite,
+  type ProchainRdvData,
+} from "../../_data/mon-activite-server";
 import "../../_styles/activite.css";
 
 export const metadata = {
@@ -14,11 +13,11 @@ export const metadata = {
 export const dynamic = "force-dynamic";
 
 /** Couplet background/color du badge « Type » de RDV, repris de la maquette. */
-function typeBadgeStyle(style: BadgeStyle): {
+function typeBadgeStyle(kind: ProchainRdvData["typeStyle"]): {
   className: string;
   inline?: React.CSSProperties;
 } {
-  switch (style.kind) {
+  switch (kind) {
     case "gold":
       return { className: "badge badge-gold", inline: { fontSize: "10px" } };
     case "success":
@@ -41,11 +40,11 @@ function typeBadgeStyle(style: BadgeStyle): {
 }
 
 /** Badge « Étape » dans le tableau des prochains RDV. */
-function etapeBadgeStyle(etape: EtapeBadge): {
+function etapeBadgeStyle(style: ProchainRdvData["etapeStyle"]): {
   className: string;
   inline?: React.CSSProperties;
 } {
-  switch (etape.style) {
+  switch (style) {
     case "success":
       return { className: "badge badge-success", inline: { fontSize: "9.5px" } };
     case "gold":
@@ -66,12 +65,6 @@ function etapeBadgeStyle(etape: EtapeBadge): {
 }
 
 // Icônes inlinées (la maquette utilise un sprite <use href="#i-…"/> absent ici).
-const IconBusiness = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="12" cy="12" r="9" />
-    <path d="M12 7v5l3 2" />
-  </svg>
-);
 const IconAlert = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
     <path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" />
@@ -96,19 +89,22 @@ const IconCalendar = () => (
   </svg>
 );
 
-export default function MonActiviteCommerciale() {
-  const s = getActiviteScreen();
+export default async function MonActiviteCommerciale() {
+  const s = await fetchActivite();
 
   return (
     <div className="px-10 py-8">
       {/* HERO */}
       <div className="hero">
         <div>
-          <div className="hero-eyebrow">{s.heroEyebrow}</div>
+          <div className="hero-eyebrow">Mon activité commerciale · pilotage opérationnel</div>
           <h1 className="hero-title">
             Mon activité <strong>commerciale</strong>
           </h1>
-          <p className="hero-sub">{s.heroSub}</p>
+          <p className="hero-sub">
+            Pilotage de votre activité personnelle · rendez-vous tenus et à venir,
+            actions en retard et sources d&apos;acquisition de vos clients.
+          </p>
         </div>
         <div className="hero-actions">
           <Link className="btn btn-ghost btn-sm" href="/espace-ingenieur/agenda">
@@ -134,34 +130,6 @@ export default function MonActiviteCommerciale() {
         ))}
       </div>
 
-      {/* Performance par étape du parcours · header navy + body blanc */}
-      <div className="card mb-18">
-        <div className="card-header act-delais-header">
-          <div className="card-title">
-            <IconBusiness />
-            {s.delaisTitre}
-          </div>
-          <span className="act-delais-meta">{s.delaisMeta}</span>
-        </div>
-        <div className="act-delais-body">
-          <div className="act-delais-grid">
-            {s.delais.map((d) => (
-              <div
-                className={`act-delais-col${d.cumul ? " cumul" : ""}`}
-                key={d.step}
-              >
-                <div className="act-delais-step">{d.step}</div>
-                <div className="act-delais-value">
-                  {d.jours} <span className="unit">jours</span>
-                </div>
-                <div className="act-delais-transition">{d.transition}</div>
-                <div className={`act-delais-ecart ${d.ecartTone}`}>{d.ecart}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
       {/* Actions en retard + Sources d'acquisition */}
       <div className="act-two-col">
         {/* Actions en retard */}
@@ -174,18 +142,24 @@ export default function MonActiviteCommerciale() {
             <span className="badge act-badge-orange">{s.actionsBadge}</span>
           </div>
           <div className="card-body" style={{ padding: 0 }}>
-            {s.actions.map((a) => (
-              <div className="act-action-row" key={a.titre}>
-                <div className={`act-action-dot ${a.severity}`} />
-                <div className="act-action-body">
-                  <div className="act-action-titre">{a.titre}</div>
-                  <div className="act-action-detail">{a.detail}</div>
+            {s.actions.length > 0 ? (
+              s.actions.map((a) => (
+                <div className="act-action-row" key={a.titre}>
+                  <div className={`act-action-dot ${a.severity}`} />
+                  <div className="act-action-body">
+                    <div className="act-action-titre">{a.titre}</div>
+                    <div className="act-action-detail">{a.detail}</div>
+                  </div>
+                  <Link className="btn btn-ghost btn-sm act-action-cta" href={a.href}>
+                    {a.cta}
+                  </Link>
                 </div>
-                <Link className="btn btn-ghost btn-sm act-action-cta" href={a.href}>
-                  {a.cta}
-                </Link>
+              ))
+            ) : (
+              <div style={{ padding: "22px 20px", textAlign: "center", fontSize: "11.5px", color: "var(--navy-300)" }}>
+                Aucune action en retard. Vos dossiers avancent normalement.
               </div>
-            ))}
+            )}
           </div>
         </div>
 
@@ -199,24 +173,30 @@ export default function MonActiviteCommerciale() {
             <span className="act-card-meta">{s.sourcesMeta}</span>
           </div>
           <div className="act-sources-body">
-            {s.sources.map((src) => (
-              <div className="act-source" key={src.label}>
-                <div className="act-source-head">
-                  <strong>{src.label}</strong>
-                  <span
-                    className={`act-source-count ${src.countGold ? "gold" : "navy"}`}
-                  >
-                    {src.count}
-                  </span>
+            {s.sources.length > 0 ? (
+              <>
+                {s.sources.map((src) => (
+                  <div className="act-source" key={src.label}>
+                    <div className="act-source-head">
+                      <strong>{src.label}</strong>
+                      <span className={`act-source-count ${src.countGold ? "gold" : "navy"}`}>
+                        {src.count}
+                      </span>
+                    </div>
+                    <div className="act-source-bar">
+                      <span className={src.barStyle} style={{ width: src.pct }} />
+                    </div>
+                  </div>
+                ))}
+                <div className="act-sources-lecture">
+                  <strong>Lecture :</strong> {s.sourcesLecture}
                 </div>
-                <div className="act-source-bar">
-                  <span className={src.barStyle} style={{ width: src.pct }} />
-                </div>
+              </>
+            ) : (
+              <div style={{ padding: "10px 0", fontSize: "11.5px", color: "var(--navy-300)" }}>
+                Aucune donnée d&apos;acquisition pour le moment.
               </div>
-            ))}
-            <div className="act-sources-lecture">
-              <strong>Lecture :</strong> {s.sourcesLecture}
-            </div>
+            )}
           </div>
         </div>
       </div>
@@ -230,52 +210,57 @@ export default function MonActiviteCommerciale() {
           </div>
           <span className="act-card-meta">{s.rdvMeta}</span>
         </div>
-        <table className="dt" style={{ fontSize: "12.5px" }}>
-          <thead>
-            <tr>
-              <th>Date &amp; heure</th>
-              <th>Client</th>
-              <th>Type</th>
-              <th>Lieu</th>
-              <th className="center">Étape</th>
-              <th className="center">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {s.rdv.map((r) => {
-              const type = typeBadgeStyle(r.typeStyle);
-              const etape = etapeBadgeStyle(r.etape);
-              return (
-                <tr key={`${r.date}-${r.client}`}>
-                  <td className="nowrap">
-                    <strong>{r.date}</strong>
-                    {r.dateMeta && <div className="act-rdv-date-meta">{r.dateMeta}</div>}
-                  </td>
-                  <td>
-                    <strong>{r.client}</strong>
-                  </td>
-                  <td>
-                    <span className={type.className} style={type.inline}>
-                      {r.typeLabel}
-                    </span>
-                  </td>
-                  <td>{r.lieu}</td>
-                  <td className="center">
-                    <span className={etape.className} style={etape.inline}>
-                      {r.etape.label}
-                    </span>
-                  </td>
-                  <td className="center">
-                    {/* « Préparer » ouvre la vraie fiche client ingénieur. */}
-                    <Link className="btn btn-ghost btn-sm" href={r.href}>
-                      Préparer
-                    </Link>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+        {s.rdv.length > 0 ? (
+          <table className="dt" style={{ fontSize: "12.5px" }}>
+            <thead>
+              <tr>
+                <th>Date &amp; heure</th>
+                <th>Client</th>
+                <th>Type</th>
+                <th>Lieu</th>
+                <th className="center">Étape</th>
+                <th className="center">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {s.rdv.map((r, i) => {
+                const type = typeBadgeStyle(r.typeStyle);
+                const etape = etapeBadgeStyle(r.etapeStyle);
+                return (
+                  <tr key={`${r.date}-${r.client}-${i}`}>
+                    <td className="nowrap">
+                      <strong>{r.date}</strong>
+                      {r.dateMeta && <div className="act-rdv-date-meta">{r.dateMeta}</div>}
+                    </td>
+                    <td>
+                      <strong>{r.client}</strong>
+                    </td>
+                    <td>
+                      <span className={type.className} style={type.inline}>
+                        {r.typeLabel}
+                      </span>
+                    </td>
+                    <td>{r.lieu}</td>
+                    <td className="center">
+                      <span className={etape.className} style={etape.inline}>
+                        {r.etapeLabel}
+                      </span>
+                    </td>
+                    <td className="center">
+                      <Link className="btn btn-ghost btn-sm" href={r.href}>
+                        Préparer
+                      </Link>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        ) : (
+          <div style={{ padding: "22px 20px", textAlign: "center", fontSize: "11.5px", color: "var(--navy-300)" }}>
+            Aucun rendez-vous à venir.
+          </div>
+        )}
       </div>
     </div>
   );

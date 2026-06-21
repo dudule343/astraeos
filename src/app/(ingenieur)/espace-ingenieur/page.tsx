@@ -1,12 +1,12 @@
 import Link from "next/link";
 
 import {
-  getCockpit,
-  type Alerte,
-  type Kpi,
-  type RdvJour,
-  type SanteBar,
-} from "../_data/tableau-de-bord";
+  fetchDashboard,
+  type DashAlerte,
+  type DashKpi,
+  type DashRdv,
+  type DashSante,
+} from "../_data/mon-activite-server";
 import "../_styles/tableau-de-bord.css";
 import { EtudesPrioritairesTable } from "./EtudesPrioritairesTable";
 
@@ -14,13 +14,15 @@ export const metadata = {
   title: "ASTRAEOS · Espace Ingénieur",
 };
 
-const ALERT_DOT: Record<Alerte["dot"], string> = {
+export const dynamic = "force-dynamic";
+
+const ALERT_DOT: Record<DashAlerte["dot"], string> = {
   orange: "var(--orange-text)",
   gold: "var(--gold)",
   navy: "var(--navy-300)",
 };
 
-function KpiCell({ kpi }: { kpi: Kpi }) {
+function KpiCell({ kpi }: { kpi: DashKpi }) {
   return (
     <div className="kpi">
       <div className="kpi-label">{kpi.label}</div>
@@ -28,22 +30,11 @@ function KpiCell({ kpi }: { kpi: Kpi }) {
         {kpi.value} {kpi.unit ? <span className="unit">{kpi.unit}</span> : null}
       </div>
       <div className="kpi-meta">{kpi.meta}</div>
-      <div className="kpi-compare-3">
-        {kpi.compares.map((c) => (
-          <div key={c.period}>
-            <div className="kpi-compare-3-period">{c.period}</div>
-            <div className={`kpi-compare-3-value ${c.dir}`}>
-              <span className="kpi-compare-3-arrow">{c.dir === "up" ? "▲" : "▼"}</span>
-              {c.value}
-            </div>
-          </div>
-        ))}
-      </div>
     </div>
   );
 }
 
-function AlerteRow({ alerte, last }: { alerte: Alerte; last: boolean }) {
+function AlerteRow({ alerte, last }: { alerte: DashAlerte; last: boolean }) {
   return (
     <div
       style={{
@@ -76,7 +67,7 @@ function AlerteRow({ alerte, last }: { alerte: Alerte; last: boolean }) {
   );
 }
 
-function RdvRow({ rdv }: { rdv: RdvJour }) {
+function RdvRow({ rdv }: { rdv: DashRdv }) {
   return (
     <div
       style={{
@@ -112,7 +103,7 @@ function RdvRow({ rdv }: { rdv: RdvJour }) {
   );
 }
 
-function SanteRow({ bar, last }: { bar: SanteBar; last: boolean }) {
+function SanteRow({ bar, last }: { bar: DashSante; last: boolean }) {
   const color = bar.tone === "green" ? "#2EA85A" : "var(--gold)";
   const valueColor = bar.tone === "green" ? "#2EA85A" : "var(--gold-deep)";
   return (
@@ -153,8 +144,23 @@ function SanteRow({ bar, last }: { bar: SanteBar; last: boolean }) {
   );
 }
 
-export default function IngenieurCockpit() {
-  const d = getCockpit();
+function EmptyHint({ children }: { children: React.ReactNode }) {
+  return (
+    <div
+      style={{
+        padding: "22px 20px",
+        textAlign: "center",
+        fontSize: "11.5px",
+        color: "var(--navy-300)",
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
+export default async function IngenieurCockpit() {
+  const d = await fetchDashboard();
 
   return (
     <div style={{ padding: "28px 36px 40px" }}>
@@ -178,7 +184,7 @@ export default function IngenieurCockpit() {
         </div>
       </div>
 
-      {/* 5 KPI principaux avec comparaisons M-1 · T-1 · N-1 */}
+      {/* 5 KPI principaux */}
       <div className="kpis kpis-5 mb-20">
         {d.kpis.map((kpi) => (
           <KpiCell key={kpi.label} kpi={kpi} />
@@ -206,7 +212,11 @@ export default function IngenieurCockpit() {
             </div>
             <span style={{ fontSize: "11px", color: "var(--navy-300)" }}>{d.etudesCount}</span>
           </div>
-          <EtudesPrioritairesTable etudes={d.etudes} />
+          {d.etudes.length > 0 ? (
+            <EtudesPrioritairesTable etudes={d.etudes} />
+          ) : (
+            <EmptyHint>Aucune étude en cours d&apos;instruction pour le moment.</EmptyHint>
+          )}
         </div>
 
         {/* Mes alertes */}
@@ -227,9 +237,13 @@ export default function IngenieurCockpit() {
             </span>
           </div>
           <div className="card-body" style={{ padding: 0 }}>
-            {d.alertes.map((alerte, i) => (
-              <AlerteRow key={alerte.id} alerte={alerte} last={i === d.alertes.length - 1} />
-            ))}
+            {d.alertes.length > 0 ? (
+              d.alertes.map((alerte, i) => (
+                <AlerteRow key={alerte.id} alerte={alerte} last={i === d.alertes.length - 1} />
+              ))
+            ) : (
+              <EmptyHint>Aucune alerte. Vos dossiers sont à jour.</EmptyHint>
+            )}
           </div>
         </div>
       </div>
@@ -243,7 +257,7 @@ export default function IngenieurCockpit() {
           marginBottom: "18px",
         }}
       >
-        {/* Mes rendez-vous du jour */}
+        {/* Mes rendez-vous à venir */}
         <div className="card">
           <div className="card-header">
             <div className="card-title">
@@ -251,14 +265,16 @@ export default function IngenieurCockpit() {
                 <rect x="3" y="5" width="18" height="16" rx="2" />
                 <path d="M3 9h18M8 3v4M16 3v4" />
               </svg>
-              Mes rendez-vous du jour
+              Mes prochains rendez-vous
             </div>
             <span style={{ fontSize: "11px", color: "var(--navy-300)" }}>{d.rdvDuJourMeta}</span>
           </div>
           <div className="card-body" style={{ padding: 0 }}>
-            {d.rdvDuJour.map((rdv) => (
-              <RdvRow key={rdv.id} rdv={rdv} />
-            ))}
+            {d.rdvDuJour.length > 0 ? (
+              d.rdvDuJour.map((rdv) => <RdvRow key={rdv.id} rdv={rdv} />)
+            ) : (
+              <EmptyHint>Aucun rendez-vous à venir.</EmptyHint>
+            )}
             <div style={{ padding: "12px 20px", textAlign: "center" }}>
               <Link
                 href="/espace-ingenieur/agenda"
@@ -286,9 +302,13 @@ export default function IngenieurCockpit() {
             </span>
           </div>
           <div className="card-body" style={{ padding: 0 }}>
-            {d.sante.map((bar, i) => (
-              <SanteRow key={bar.label} bar={bar} last={i === d.sante.length - 1} />
-            ))}
+            {d.sante.length > 0 ? (
+              d.sante.map((bar, i) => (
+                <SanteRow key={bar.label} bar={bar} last={i === d.sante.length - 1} />
+              ))
+            ) : (
+              <EmptyHint>Indicateurs disponibles dès vos premiers dossiers.</EmptyHint>
+            )}
           </div>
         </div>
       </div>

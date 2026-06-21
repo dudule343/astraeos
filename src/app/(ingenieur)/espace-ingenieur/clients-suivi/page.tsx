@@ -1,19 +1,15 @@
 import Link from "next/link";
 
-import {
-  pipelineSteps,
-  suiviKpis,
-  suiviFilters,
-  suiviRows,
-  suiviRemaining,
-  type PipelineStep,
-} from "../../_data/clients-suivi";
+import { type PipelineStep } from "../../_data/clients-suivi";
+import { getClientsSuiviScreen } from "../../_data/clients-suivi-server";
 import "../../_styles/clients-suivi.css";
 import SuiviFilterableTable from "./SuiviFilterableTable";
 
 export const metadata = {
   title: "ASTRAEOS · Clients en suivi",
 };
+
+export const dynamic = "force-dynamic";
 
 /** Icônes des badges du stepper, identiques à la maquette (une par étape). */
 function StepIcon({ step }: { step: string }) {
@@ -107,11 +103,13 @@ function StepperItem({ step }: { step: PipelineStep }) {
   );
 }
 
-export default function ClientsSuiviPage() {
+export default async function ClientsSuiviPage() {
+  const screen = await getClientsSuiviScreen();
+
   return (
     <div className="suivi-page-wrap">
       <div className="pipeline-stepper-v1">
-        {pipelineSteps.map((step) => (
+        {screen.steps.map((step) => (
           <StepperItem key={step.step} step={step} />
         ))}
       </div>
@@ -125,7 +123,8 @@ export default function ClientsSuiviPage() {
             Mes clients <strong>en suivi</strong>
           </h1>
           <p className="hero-sub">
-            Votre portefeuille de 7 clients en suivi récurrent. Pilotage des
+            Votre portefeuille de {screen.rows.length} client
+            {screen.rows.length > 1 ? "s" : ""} en suivi récurrent. Pilotage des
             entrevues, contacts, missions actives et alerte sur les clients
             dormants.
           </p>
@@ -133,7 +132,7 @@ export default function ClientsSuiviPage() {
       </section>
 
       <div className="kpis kpis-4 mb-20">
-        {suiviKpis.map((kpi) => (
+        {screen.kpis.map((kpi) => (
           <div className="kpi" key={kpi.label}>
             <div className="kpi-label">{kpi.label}</div>
             <div
@@ -152,9 +151,9 @@ export default function ClientsSuiviPage() {
       </div>
 
       <SuiviFilterableTable
-        filters={suiviFilters}
-        rows={suiviRows}
-        remaining={suiviRemaining}
+        filters={screen.filters}
+        rows={screen.rows}
+        remaining={screen.remaining}
       />
     </div>
   );

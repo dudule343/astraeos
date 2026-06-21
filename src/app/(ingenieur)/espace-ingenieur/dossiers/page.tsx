@@ -1,6 +1,7 @@
 import Link from "next/link";
 
-import { getPipelineScreen, type CardBadge, type PipelineCard } from "../../_data/pipeline";
+import { type CardBadge, type PipelineCard } from "../../_data/pipeline";
+import { getPipelineScreenLive } from "../../_data/pipeline-server";
 import "../../_styles/pipeline.css";
 
 import { ExportPipelineButton } from "./ExportPipelineButton";
@@ -65,8 +66,8 @@ function Card({ card }: { card: PipelineCard }) {
   );
 }
 
-export default function PipelinePage() {
-  const screen = getPipelineScreen();
+export default async function PipelinePage() {
+  const screen = await getPipelineScreenLive();
 
   return (
     <div className="pipeline-page">

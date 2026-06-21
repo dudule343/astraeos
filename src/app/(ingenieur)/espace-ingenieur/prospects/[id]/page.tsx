@@ -1,5 +1,11 @@
 import Link from "next/link";
 
+import { createAdminClient, DEFAULT_TENANT_ID } from "@/lib/supabase/admin";
+import {
+  loadProspectDocuments,
+  type ProspectUploadedDoc,
+} from "@/app/(ingenieur)/_data/prospect-documents";
+import { decodeRiskProfile, type RiskProfile } from "../../../_data/risk-profile";
 import {
   getFicheProspect,
   type Condition,
@@ -19,6 +25,7 @@ import {
   RelancerButton,
   SupprimerButton,
 } from "./FicheProspectInteractive";
+import RiskProfileCard from "./RiskProfileCard";
 
 export const metadata = {
   title: "ASTRAEOS · Fiche prospect",
@@ -146,6 +153,83 @@ function renderInline(parts: Inline[]) {
   );
 }
 
+/**
+ * Données réelles d'un prospect issu du parcours en ligne, si l'`id` (slug)
+ * correspond à de vraies lignes `dci_submissions` (tenant legacy). Best-effort :
+ * sans base/contexte ou en cas d'erreur, renvoie null et la fiche reste en
+ * mode démo. On lit le profil de risque depuis la soumission kind='qualification'
+ * et les documents déposés depuis le bucket Storage.
+ */
+async function loadRealProspect(slug: string): Promise<{
+  riskProfile: RiskProfile | null;
+  documents: ProspectUploadedDoc[];
+} | null> {
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) return null;
+  try {
+    const supabase = createAdminClient();
+    const { data, error } = await supabase
+      .from("dci_submissions")
+      .select("kind, payload")
+      .eq("tenant_id", DEFAULT_TENANT_ID)
+      .eq("prospect_slug", slug);
+    if (error || !data || data.length === 0) return null;
+
+    const qualification = (data as Array<{ kind: string; payload: Record<string, unknown> | null }>).find(
+      (r) => r.kind === "qualification",
+    );
+    const riskProfile = qualification ? decodeRiskProfile(qualification.payload) : null;
+    const documents = await loadProspectDocuments(slug);
+    return { riskProfile, documents };
+  } catch {
+    return null;
+  }
+}
+
+function ProspectDocumentsCard({ documents }: { documents: ProspectUploadedDoc[] }) {
+  return (
+    <div className="card">
+      <div className="card-header">
+        <div className="card-title">
+          <IconDoc />
+          Documents déposés
+        </div>
+        <span className="badge fp-doc-badge-pill">{documents.length} fichier(s)</span>
+      </div>
+      <div className="card-body fp-card-body">
+        {documents.length === 0 ? (
+          <div style={{ fontSize: "11.5px", color: "var(--navy-300)" }}>
+            Aucun document déposé.
+          </div>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+            {documents.map((doc) => (
+              <a
+                key={doc.url}
+                href={doc.url}
+                target="_blank"
+                rel="noreferrer"
+                className="s1b-doc-row"
+                style={{ textDecoration: "none", cursor: "pointer" }}
+              >
+                <div className="s1b-doc-icon">
+                  <DocRowIcon icon="file" />
+                </div>
+                <div>
+                  <div className="s1b-doc-title">{doc.name}</div>
+                  <div className="s1b-doc-meta">
+                    {[doc.sizeLabel, doc.uploadedAt].filter(Boolean).join(" · ") || "Document déposé"}
+                  </div>
+                </div>
+                <span className="s1b-doc-status ok">Consulter</span>
+              </a>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default async function FicheProspectPage({
   params,
 }: {
@@ -153,10 +237,33 @@ export default async function FicheProspectPage({
 }) {
   const { id } = await params;
   const fiche = getFicheProspect(id);
+  const real = await loadRealProspect(id);
 
   return (
     <FicheProspectProvider slug={fiche.slug}>
     <div className="fiche-prospect-wrap">
+      {real ? (
+        <div className="fp-grid-2" style={{ marginBottom: "18px" }}>
+          {real.riskProfile ? (
+            <RiskProfileCard profile={real.riskProfile} />
+          ) : (
+            <div className="card">
+              <div className="card-header">
+                <div className="card-title">
+                  <IconDoc />
+                  Profil de risque
+                </div>
+              </div>
+              <div className="card-body fp-card-body">
+                <div style={{ fontSize: "11.5px", color: "var(--navy-300)" }}>
+                  Questionnaire de qualification non encore complété.
+                </div>
+              </div>
+            </div>
+          )}
+          <ProspectDocumentsCard documents={real.documents} />
+        </div>
+      ) : null}
       {/* HERO */}
       <div className="hero">
         <div>

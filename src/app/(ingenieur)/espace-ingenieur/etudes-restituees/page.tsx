@@ -3,11 +3,11 @@ import Link from "next/link";
 import "../../_styles/maquette.css";
 import "../../_styles/etudes-restituees.css";
 import {
-  fetchEtudesRestituees,
   isValidFilter,
   type EtudeRestituee,
   type FilterKey,
 } from "../../_data/etudes-restituees";
+import { fetchEtudesRestitueesLive } from "../../_data/etudes-restituees-server";
 
 export const dynamic = "force-dynamic";
 
@@ -132,7 +132,7 @@ export default async function EtudesRestitueesPage({
 }) {
   const { filtre } = await searchParams;
   const filter: FilterKey = isValidFilter(filtre) ? filtre : "toutes";
-  const data = await fetchEtudesRestituees(filter);
+  const data = await fetchEtudesRestitueesLive(filter);
 
   return (
     <div className="maquette-ing px-10 py-8">

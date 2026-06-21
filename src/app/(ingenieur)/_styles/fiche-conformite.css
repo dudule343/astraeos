@@ -11,6 +11,27 @@
   padding: 26px 30px 40px;
 }
 
+/* Bandeau d'information honnête « dossier réel · pièces non générées ».
+ * Porté ici car la page conformité [id] n'importe pas fiche-client.css. */
+.maquette-ing .fco-wrap .fc-info-banner {
+  margin-bottom: 14px;
+  padding: 8px 14px;
+  background: var(--light-blue);
+  border: 1px solid var(--navy-100);
+  border-radius: 6px;
+  font-size: 10.5px;
+  color: var(--navy-300);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.maquette-ing .fco-wrap .fc-info-banner svg {
+  flex-shrink: 0;
+}
+.maquette-ing .fco-wrap .fc-info-banner strong {
+  color: var(--navy);
+}
+
 /* ── Stepper parcours patrimonial (6 étapes) ──────────────────────────── */
 
 .maquette-ing .s1b-parcours-stepper {

@@ -4,7 +4,7 @@
  * valeur en dur dans le composant.
  */
 
-export type AgrementStatut = "Valide";
+export type AgrementStatut = "Valide" | "À renseigner";
 
 export interface Agrement {
   titre: string;
