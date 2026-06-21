@@ -12,6 +12,18 @@ function canonicalOrigin(): string {
   return (env || "https://app.astraeos.fr").replace(/\/+$/, "");
 }
 
+/** Mappe un libellé de document (coché dans la modale) vers l'écran /parcours
+ *  que le client ouvre depuis l'e-mail. null si pas d'écran dédié. */
+const DOC_ROUTES: Record<string, string> = {
+  "DCI Simplifié": "/parcours/dci-simplifie",
+  "Questionnaire de qualification client": "/parcours/qualification",
+  "DCI Complet": "/parcours/dci-complet",
+};
+function parcoursUrlFor(label: string): string | null {
+  const route = DOC_ROUTES[label];
+  return route ? `${canonicalOrigin()}${route}` : null;
+}
+
 /**
  * Création d'un rendez-vous depuis la modale « Nouveau RDV » de l'agenda
  * ingénieur. Le bouton « Créer le RDV + envoyer » appelle réellement cette
@@ -146,7 +158,7 @@ async function sendConfirmationEmail(
     duree: input.duree,
     lieu: input.lieuLabel,
     joinUrl,
-    documents: input.documents,
+    documents: input.documents.map((label) => ({ label, url: parcoursUrlFor(label) })),
     message: input.message,
   });
 

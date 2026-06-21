@@ -5,6 +5,8 @@
 // récapitulatif du RDV, le lien visio si applicable, et la liste des documents
 // à compléter avant l'entretien.
 
+export type RdvDocument = { label: string; url?: string | null };
+
 type BuildRdvConfirmationArgs = {
   prenomNom: string;
   typeLabel: string;
@@ -13,7 +15,10 @@ type BuildRdvConfirmationArgs = {
   duree: string;
   lieu: string;
   joinUrl?: string | null;
-  documents: string[];
+  /** documents à compléter : libellé + lien vers l'écran /parcours si dispo */
+  documents: RdvDocument[];
+  /** lien « prendre/voir le rendez-vous » (écran de prise de RDV) */
+  bookingUrl?: string | null;
   message?: string;
 };
 
@@ -39,6 +44,7 @@ export function buildRdvConfirmationEmail({
   lieu,
   joinUrl,
   documents,
+  bookingUrl,
   message,
 }: BuildRdvConfirmationArgs): { subject: string; html: string } {
   const subject = `PRIVEOS · Confirmation de votre rendez-vous · ${dateLabel}`;
@@ -54,33 +60,40 @@ export function buildRdvConfirmationEmail({
       <td style="padding:4px 0;color:${NAVY};font-size:14px;font-weight:600;font-family:'Epilogue',Helvetica,Arial,sans-serif;">${escapeHtml(value)}</td>
     </tr>`;
 
+  const docRow = (d: RdvDocument) =>
+    d.url
+      ? `<div style="margin:0 0 8px 0;">
+           <a href="${escapeHtml(d.url)}" target="_blank" style="display:inline-block;color:${NAVY};font-size:14px;font-weight:600;text-decoration:none;border:1px solid ${GOLD};border-radius:6px;padding:9px 16px;font-family:'Epilogue',Helvetica,Arial,sans-serif;">${escapeHtml(
+             d.label,
+           )} &rarr;</a>
+         </div>`
+      : `<div style="margin:0 0 6px 0;color:#33425A;font-size:14px;line-height:22px;font-family:'Epilogue',Helvetica,Arial,sans-serif;">&bull; ${escapeHtml(
+          d.label,
+        )}</div>`;
+
   const docsList = documents.length
     ? `
         <tr><td style="padding:8px 36px 0 36px;">
           <div style="color:${NAVY};font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1px;font-family:'Epilogue',Helvetica,Arial,sans-serif;">Documents à compléter</div>
         </td></tr>
         <tr><td style="padding:8px 36px 4px 36px;">
-          ${documents
-            .map(
-              (d) =>
-                `<div style="margin:0 0 6px 0;color:#33425A;font-size:14px;line-height:22px;font-family:'Epilogue',Helvetica,Arial,sans-serif;">• ${escapeHtml(
-                  d,
-                )}</div>`,
-            )
-            .join("")}
+          ${documents.map(docRow).join("")}
         </td></tr>`
     : "";
 
-  const joinButton = joinUrl
-    ? `
-        <tr><td align="center" style="padding:20px 36px 4px 36px;">
+  const button = (url: string, label: string) => `
+        <tr><td align="center" style="padding:18px 36px 4px 36px;">
           <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
             <td style="background-color:${GOLD};border-radius:6px;">
-              <a href="${escapeHtml(joinUrl)}" target="_blank" style="display:inline-block;padding:14px 32px;color:${NAVY};font-size:16px;font-weight:600;text-decoration:none;font-family:'Epilogue',Helvetica,Arial,sans-serif;">Rejoindre la visioconférence</a>
+              <a href="${escapeHtml(url)}" target="_blank" style="display:inline-block;padding:14px 32px;color:${NAVY};font-size:16px;font-weight:600;text-decoration:none;font-family:'Epilogue',Helvetica,Arial,sans-serif;">${escapeHtml(
+                label,
+              )}</a>
             </td>
           </tr></table>
-        </td></tr>`
-    : "";
+        </td></tr>`;
+
+  const joinButton = joinUrl ? button(joinUrl, "Rejoindre la visioconférence") : "";
+  const bookingButton = bookingUrl ? button(bookingUrl, "Choisir / voir mon rendez-vous") : "";
 
   const html = `<!DOCTYPE html>
 <html lang="fr">
@@ -118,6 +131,7 @@ export function buildRdvConfirmationEmail({
       </td></tr>
       ${joinButton}
       ${docsList}
+      ${bookingButton}
       <tr><td style="border-top:1px solid #ECE7DC;padding:24px 36px;margin-top:16px;">
         <p style="margin:0;color:#33425A;font-size:14px;line-height:22px;font-family:'Epilogue',Helvetica,Arial,sans-serif;">Bien à vous,<br><strong style="color:${NAVY};">Votre conseiller PRIVEOS</strong></p>
       </td></tr>
