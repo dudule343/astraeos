@@ -251,6 +251,11 @@ export default async function FicheClientPage({
                   <div className="fc-rdv-when">{r.when}</div>
                   <div className="fc-rdv-title">{r.title}</div>
                   <div className="fc-rdv-meta">{r.meta}</div>
+                  {r.recordingHref ? (
+                    <a className="fc-rdv-download" href={r.recordingHref}>
+                      ⬇ Télécharger l&apos;enregistrement
+                    </a>
+                  ) : null}
                 </div>
               );
             })}

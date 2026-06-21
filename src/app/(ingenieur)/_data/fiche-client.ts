@@ -66,6 +66,8 @@ export type RdvHisto = {
   meta: string;
   /** premier RDV = à venir, surligné doré à gauche */
   upcoming?: boolean;
+  /** lien de téléchargement de l'enregistrement vidéo (si l'entretien a été enregistré) */
+  recordingHref?: string;
 };
 
 export type FicheClient = {
@@ -195,11 +197,13 @@ export const FICHE_CLIENT_MODELE: FicheClient = {
       when: "25/04/2026 · 10h00",
       title: "Validation collecte documents",
       meta: "📹 Zoom · 45 min · transcript disponible",
+      recordingHref: "/api/recordings/download?room=rdv-dupont-topin-collecte",
     },
     {
       when: "15/04/2026 · 14h30",
       title: "Entretien découverte complet",
       meta: "📹 Zoom · 120 min · transcript IA · complétion auto-doc",
+      recordingHref: "/api/recordings/download?room=rdv-dupont-topin-decouverte",
     },
     {
       when: "22/05/2025 · 16h00",
