@@ -4250,22 +4250,32 @@ setInterval(() => {
         // n'atteint Deepgram (transcription connectée mais vide). On le réveille
         // tout de suite, et on réessaie au premier geste utilisateur si besoin.
         try { dgAudioCtx.resume(); } catch (e) {}
-        if (dgAudioCtx.state === 'suspended') {
-          var resumeOnGesture = function () {
-            if (dgAudioCtx) { try { dgAudioCtx.resume(); } catch (e) {} }
-            document.removeEventListener('pointerdown', resumeOnGesture, true);
-            document.removeEventListener('keydown', resumeOnGesture, true);
-            document.removeEventListener('touchstart', resumeOnGesture, true);
-          };
-          document.addEventListener('pointerdown', resumeOnGesture, true);
-          document.addEventListener('keydown', resumeOnGesture, true);
-          document.addEventListener('touchstart', resumeOnGesture, true);
-        }
+        // Réveil ROBUSTE : en auto-démarrage, les clics utilisateur vont dans
+        // l'iframe Jitsi (cross-origin), donc un « resume au clic » sur CE
+        // document ne se déclenche jamais → contexte suspendu → onaudioprocess
+        // ne tourne pas → aucun audio n'atteint Deepgram (connecté mais vide).
+        // On poll resume() jusqu'à 'running' (40 × 350 ms ≈ 14 s).
+        var __resumeTries = 0;
+        var __resumePoll = setInterval(function () {
+          __resumeTries++;
+          if (!dgAudioCtx || dgAudioCtx.state === 'running' || __resumeTries > 40) { clearInterval(__resumePoll); return; }
+          try { dgAudioCtx.resume(); } catch (e) {}
+        }, 350);
+        var resumeOnGesture = function () { if (dgAudioCtx) { try { dgAudioCtx.resume(); } catch (e) {} } };
+        document.addEventListener('pointerdown', resumeOnGesture, true);
+        document.addEventListener('keydown', resumeOnGesture, true);
+        try { window.top.addEventListener('pointerdown', resumeOnGesture, true); } catch (e) {}
+        // Diagnostic console (1/s) : audio capté (frames>0) ? Deepgram répond (dgmsgs>0) ?
+        if (window.__dgDiag) clearInterval(window.__dgDiag);
+        window.__dgDiag = setInterval(function () {
+          try { console.log('[ASTR-STT] ctx=' + (dgAudioCtx && dgAudioCtx.state) + ' frames=' + (window.__dgFrames || 0) + ' dgmsgs=' + (window.__dgMsgs || 0) + ' ws=' + (dgWs && dgWs.readyState)); } catch (e) {}
+        }, 1000);
         dgSource = dgAudioCtx.createMediaStreamSource(stream);
         var bufSize = 4096;
         dgProcessor = dgAudioCtx.createScriptProcessor(bufSize, 1, 1);
         dgProcessor.onaudioprocess = function (e) {
           if (!dgWs || dgWs.readyState !== 1) return;
+          window.__dgFrames = (window.__dgFrames || 0) + 1;
           var input = e.inputBuffer.getChannelData(0);
           var down = downsampleTo16k(input, dgAudioCtx.sampleRate);
           var pcm = floatTo16BitPCM(down);
@@ -4320,6 +4330,7 @@ setInterval(() => {
     };
 
     ws.onmessage = function (ev) {
+      window.__dgMsgs = (window.__dgMsgs || 0) + 1;
       var msg;
       try { msg = JSON.parse(ev.data); } catch (e) { return; }
       if (!msg || msg.type !== 'Results' || !msg.channel) return;
