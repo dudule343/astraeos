@@ -391,23 +391,44 @@ function applyMerge(current: Entretien, input: MergeInput): void {
 
 async function mergeSupabase(id: string, input: MergeInput): Promise<boolean> {
   const supabase = createAdminClient();
-  // Append ATOMIQUE via RPC (un seul UPDATE `jsonb ||` borné en queue) : deux
-  // PATCH concurrents (flush transcript + flush insights + dci-extract) ne
-  // s'écrasent plus. Remplace l'ancien read-modify-write sujet au lost update.
-  const { data, error } = await supabase.rpc("append_entretien", {
-    p_id: id,
-    p_transcript: input.transcript_append ?? [],
-    p_conseils: input.conseils_append ?? [],
-    p_articles: input.articles_append ?? [],
-    p_notes: input.notes_append ?? [],
-    p_dci: input.dci_snapshot ?? null,
-    p_transcript_cap: TRANSCRIPT_CAP,
-    p_conseils_cap: CONSEILS_CAP,
-    p_articles_cap: ARTICLES_CAP,
-    p_notes_cap: NOTES_CAP,
-  });
-  if (error) throw error;
-  return data === true;
+  // Lecture-fusion-écriture via REST (clé service_role). On n'utilise PAS de RPC
+  // SQL : aucune fonction `append_entretien` n'est garantie en base, et on ne peut
+  // pas créer de DDL ici. Acceptable fonctionnellement : un seul ingénieur édite
+  // son entretien à la fois, les flush sont débouncés, et les caps bornent la
+  // taille. En cas de deux flush quasi simultanés, le dernier write gagne (perte
+  // tolérable de quelques lignes en append) — bien mieux que l'ancien repli
+  // fichier éphémère qui PERDAIT tout sur Vercel.
+  const { data: row, error: readErr } = await supabase
+    .from("entretiens")
+    .select("transcript, conseils, articles, notes, dci_snapshot")
+    .eq("id", id)
+    .maybeSingle();
+  if (readErr) throw readErr;
+  if (!row) return false;
+
+  const current = {
+    transcript: Array.isArray(row.transcript) ? row.transcript : [],
+    conseils: Array.isArray(row.conseils) ? row.conseils : [],
+    articles: Array.isArray(row.articles) ? row.articles : [],
+    notes: Array.isArray(row.notes) ? row.notes : [],
+    dci_snapshot: row.dci_snapshot ?? null,
+    updated_at: "",
+  } as unknown as Entretien;
+  applyMerge(current, input);
+
+  const { error: upErr } = await supabase
+    .from("entretiens")
+    .update({
+      transcript: current.transcript,
+      conseils: current.conseils,
+      articles: current.articles,
+      notes: current.notes,
+      dci_snapshot: current.dci_snapshot,
+      updated_at: current.updated_at,
+    })
+    .eq("id", id);
+  if (upErr) throw upErr;
+  return true;
 }
 
 async function mergeFile(id: string, input: MergeInput): Promise<boolean> {
