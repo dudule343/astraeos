@@ -2,31 +2,27 @@
 
 import { useState } from "react";
 
-type Status = "completed" | "active" | "neutral";
+// État initial repris de la maquette : seules deux classes indépendantes existent
+// sur chaque carte, .active (étape ouverte) et .completed (étape validée ✓ Validé).
+// Étape 1 complétée + ouverte, étape 2 ouverte (active), étapes 3 à 6 fermées.
+// toggleWizardStep ne touche QUE .active (ouvre/ferme), comme la maquette : il ne
+// valide jamais une étape. goToWizardStep valide les étapes précédentes et ouvre la cible.
+const INITIAL_ACTIVE_STEP = 2;
+const INITIAL_COMPLETED: number[] = [1];
 
-// État initial repris de la maquette : étape 1 complétée, étape 2 active,
-// étapes 3 à 6 neutres. toggleWizardStep ouvre/ferme une étape ; goToWizardStep
-// valide toutes les étapes précédentes (✓ + badge « Validé ») et active la cible.
-const INITIAL_STATUS: Record<number, Status> = {
-  1: "completed",
-  2: "active",
-  3: "neutral",
-  4: "neutral",
-  5: "neutral",
-  6: "neutral",
+// Badge de base de chaque étape dans la maquette (statique, hors validation).
+const BASE_BADGE: Record<number, { cls: string; label: string }> = {
+  1: { cls: "badge badge-gold", label: "En cours" },
+  2: { cls: "badge badge-gold", label: "En cours" },
+  3: { cls: "badge badge-neutral", label: "À configurer" },
+  4: { cls: "badge badge-neutral", label: "À configurer" },
+  5: { cls: "badge badge-neutral", label: "À configurer" },
+  6: { cls: "badge badge-neutral", label: "Final" },
 };
 
-const NEUTRAL_BADGE: Record<number, string> = {
-  3: "À configurer",
-  4: "À configurer",
-  5: "À configurer",
-  6: "Final",
-};
-
-function statusBadge(step: number, status: Status) {
-  if (status === "completed") return { cls: "badge badge-success", label: "Validé" };
-  if (status === "active") return { cls: "badge badge-gold", label: "En cours" };
-  return { cls: "badge badge-neutral", label: NEUTRAL_BADGE[step] ?? "À configurer" };
+function statusBadge(step: number, completed: boolean) {
+  if (completed) return { cls: "badge badge-success", label: "Validé" };
+  return BASE_BADGE[step] ?? { cls: "badge badge-neutral", label: "À configurer" };
 }
 
 const packs: { checked: boolean; pack: string; badge: string; type: string; priceClass: string; price: string }[] = [
@@ -63,45 +59,34 @@ const documents = [
 ];
 
 export function ClientNewWizard() {
-  const [statuses, setStatuses] = useState<Record<number, Status>>(INITIAL_STATUS);
+  const [activeStep, setActiveStep] = useState<number>(INITIAL_ACTIVE_STEP);
+  const [completed, setCompleted] = useState<number[]>(INITIAL_COMPLETED);
 
   function toggleWizardStep(stepNum: number) {
-    setStatuses((prev) => {
-      const wasActive = prev[stepNum] === "active";
-      const next = { ...prev };
-      // Une seule étape active à la fois (comme querySelectorAll('.active').remove()).
-      for (let i = 1; i <= 6; i++) {
-        if (next[i] === "active") next[i] = i < stepNum ? "completed" : "neutral";
-      }
-      if (!wasActive) next[stepNum] = "active";
-      return next;
-    });
+    // Comme la maquette : on retire .active partout puis on rouvre la cible si
+    // elle n'était pas déjà ouverte. On ne touche JAMAIS .completed ni le badge.
+    setActiveStep((prev) => (prev === stepNum ? 0 : stepNum));
   }
 
   function goToWizardStep(stepNum: number) {
-    setStatuses((prev) => {
-      const next = { ...prev };
-      for (let i = 1; i <= 6; i++) {
-        if (next[i] === "active") next[i] = "neutral";
-      }
-      for (let i = 1; i < stepNum; i++) {
-        next[i] = "completed";
-      }
-      next[stepNum] = "active";
-      return next;
+    // Valide toutes les étapes précédentes (✓ + badge « Validé ») et ouvre la cible.
+    setCompleted((prev) => {
+      const set = new Set(prev);
+      for (let i = 1; i < stepNum; i++) set.add(i);
+      return [...set];
     });
+    setActiveStep(stepNum);
   }
 
   function cardClass(step: number) {
-    const s = statuses[step];
     let cls = "wizard-step-card";
-    if (s === "active") cls += " active";
-    if (s === "completed") cls += " completed";
+    if (step === activeStep) cls += " active";
+    if (completed.includes(step)) cls += " completed";
     return cls;
   }
 
   function stepNum(step: number) {
-    return statuses[step] === "completed" ? "✓" : String(step);
+    return completed.includes(step) ? "✓" : String(step);
   }
 
   return (
@@ -138,7 +123,7 @@ export function ClientNewWizard() {
             <div className="wizard-step-desc">Cabinet direct sélectionné</div>
           </div>
           <div className="wizard-step-status">
-            <span className={statusBadge(1, statuses[1]).cls}>{statusBadge(1, statuses[1]).label}</span>
+            <span className={statusBadge(1, completed.includes(1)).cls}>{statusBadge(1, completed.includes(1)).label}</span>
             <div className="wizard-step-toggle"><svg><use href="#i-arrow-down" /></svg></div>
           </div>
         </div>
@@ -175,7 +160,7 @@ export function ClientNewWizard() {
             <div className="wizard-step-desc">Patrimoine Conseil Avignon SAS · SIREN 892 547 318</div>
           </div>
           <div className="wizard-step-status">
-            <span className={statusBadge(2, statuses[2]).cls}>{statusBadge(2, statuses[2]).label}</span>
+            <span className={statusBadge(2, completed.includes(2)).cls}>{statusBadge(2, completed.includes(2)).label}</span>
             <div className="wizard-step-toggle"><svg><use href="#i-arrow-down" /></svg></div>
           </div>
         </div>
@@ -213,7 +198,7 @@ export function ClientNewWizard() {
             <div className="wizard-step-desc">Sous-domaine · branding · paramètres techniques · facturation</div>
           </div>
           <div className="wizard-step-status">
-            <span className={statusBadge(3, statuses[3]).cls}>{statusBadge(3, statuses[3]).label}</span>
+            <span className={statusBadge(3, completed.includes(3)).cls}>{statusBadge(3, completed.includes(3)).label}</span>
             <div className="wizard-step-toggle"><svg><use href="#i-arrow-down" /></svg></div>
           </div>
         </div>
@@ -250,7 +235,7 @@ export function ClientNewWizard() {
             <div className="wizard-step-desc">Choix des packs récurrents et ponctuels du catalogue</div>
           </div>
           <div className="wizard-step-status">
-            <span className={statusBadge(4, statuses[4]).cls}>{statusBadge(4, statuses[4]).label}</span>
+            <span className={statusBadge(4, completed.includes(4)).cls}>{statusBadge(4, completed.includes(4)).label}</span>
             <div className="wizard-step-toggle"><svg><use href="#i-arrow-down" /></svg></div>
           </div>
         </div>
@@ -285,7 +270,7 @@ export function ClientNewWizard() {
             <div className="wizard-step-desc">Liste initiale des utilisateurs · rôles · droits d&apos;accès</div>
           </div>
           <div className="wizard-step-status">
-            <span className={statusBadge(5, statuses[5]).cls}>{statusBadge(5, statuses[5]).label}</span>
+            <span className={statusBadge(5, completed.includes(5)).cls}>{statusBadge(5, completed.includes(5)).label}</span>
             <div className="wizard-step-toggle"><svg><use href="#i-arrow-down" /></svg></div>
           </div>
         </div>
@@ -321,7 +306,7 @@ export function ClientNewWizard() {
             <div className="wizard-step-desc">Vérification finale · contrat · activation période d&apos;essai 30 jours</div>
           </div>
           <div className="wizard-step-status">
-            <span className={statusBadge(6, statuses[6]).cls}>{statusBadge(6, statuses[6]).label}</span>
+            <span className={statusBadge(6, completed.includes(6)).cls}>{statusBadge(6, completed.includes(6)).label}</span>
             <div className="wizard-step-toggle"><svg><use href="#i-arrow-down" /></svg></div>
           </div>
         </div>

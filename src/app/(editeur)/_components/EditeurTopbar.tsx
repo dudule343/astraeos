@@ -72,8 +72,18 @@ export function EditeurTopbar({ current }: { current: string }) {
             <div className="date-popover-section">
               <div className="date-popover-label">Plage personnalisée</div>
               <div className="date-range-inputs">
-                <input type="date" className="date-range-input" defaultValue="2026-04-06" />
-                <input type="date" className="date-range-input" defaultValue="2026-05-06" />
+                <input
+                  type="date"
+                  className="date-range-input"
+                  defaultValue="2026-04-06"
+                  suppressHydrationWarning
+                />
+                <input
+                  type="date"
+                  className="date-range-input"
+                  defaultValue="2026-05-06"
+                  suppressHydrationWarning
+                />
               </div>
             </div>
             <div className="date-popover-section">
