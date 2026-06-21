@@ -1,3 +1,7 @@
+// Espace éditeur — page « Communications & annonces » (route /comms).
+// Port fidèle 1:1 de la maquette : reference/wireframes-editeur.html,
+// <div id="page-comms">, lignes 4061-4182. Données EN DUR = valeurs d'exemple
+// de la maquette (pas branché Supabase). Pattern + détails : (editeur)/README.md.
 import { EditeurTopbar } from "../_components/EditeurTopbar";
 import { CommsCalendarFilter } from "./CommsCalendarFilter";
 

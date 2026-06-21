@@ -1,3 +1,7 @@
+// Espace éditeur — page « Adoption produit » (route /adoption).
+// Port fidèle 1:1 de la maquette : reference/wireframes-editeur.html,
+// <div id="page-adoption">, lignes 1605-1656. Données EN DUR = valeurs d'exemple
+// de la maquette (pas branché Supabase). Pattern + détails : (editeur)/README.md.
 import { EditeurTopbar } from "../_components/EditeurTopbar";
 
 type TopUser = {

@@ -1,3 +1,7 @@
+// Espace éditeur — page « Pilotage business » (route /business).
+// Port fidèle 1:1 de la maquette : reference/wireframes-editeur.html,
+// <div id="page-business">, lignes 1230-1490. Données EN DUR = valeurs d'exemple
+// de la maquette (pas branché Supabase). Pattern + détails : (editeur)/README.md.
 import { EditeurTopbar } from "../_components/EditeurTopbar";
 import { ExpansionTable } from "./ExpansionTable";
 import {

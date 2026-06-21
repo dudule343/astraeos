@@ -1,3 +1,7 @@
+// Espace éditeur — page « Clients totaux actifs » (route /clients).
+// Port fidèle 1:1 de la maquette : reference/wireframes-editeur.html,
+// <div id="page-clients">, lignes 2424-2623. Données EN DUR = valeurs d'exemple
+// de la maquette (pas branché Supabase). Pattern + détails : (editeur)/README.md.
 import Link from "next/link";
 
 import { EditeurTopbar } from "../_components/EditeurTopbar";

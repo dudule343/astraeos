@@ -1,3 +1,7 @@
+// Espace éditeur — page « Pipeline acquisition » (route /leads).
+// Port fidèle 1:1 de la maquette : reference/wireframes-editeur.html,
+// <div id="page-leads">, lignes 2056-2195. Données EN DUR = valeurs d'exemple
+// de la maquette (pas branché Supabase). Pattern + détails : (editeur)/README.md.
 import { EditeurTopbar } from "../_components/EditeurTopbar";
 import { LeadsPipeline } from "./LeadsPipeline";
 import { LeadsToolbar } from "./LeadsToolbar";

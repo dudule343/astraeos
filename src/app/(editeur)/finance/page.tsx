@@ -1,3 +1,7 @@
+// Espace éditeur — page « Finance consolidée » (route /finance).
+// Port fidèle 1:1 de la maquette : reference/wireframes-editeur.html,
+// <div id="page-finance">, lignes 3352-4060. Données EN DUR = valeurs d'exemple
+// de la maquette (pas branché Supabase). Pattern + détails : (editeur)/README.md.
 import { EditeurTopbar } from "../_components/EditeurTopbar";
 import { FinanceConsolidee } from "./FinanceConsolidee";
 

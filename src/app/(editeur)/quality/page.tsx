@@ -1,3 +1,7 @@
+// Espace éditeur — page « Support & qualité » (route /quality).
+// Port fidèle 1:1 de la maquette : reference/wireframes-editeur.html,
+// <div id="page-quality">, lignes 1909-1995. Données EN DUR = valeurs d'exemple
+// de la maquette (pas branché Supabase). Pattern + détails : (editeur)/README.md.
 import { EditeurTopbar } from "../_components/EditeurTopbar";
 
 export const metadata = {

@@ -1,3 +1,7 @@
+// Espace éditeur — page « Infrastructure » (route /infra).
+// Port fidèle 1:1 de la maquette : reference/wireframes-editeur.html,
+// <div id="page-infra">, lignes 1996-2055. Données EN DUR = valeurs d'exemple
+// de la maquette (pas branché Supabase). Pattern + détails : (editeur)/README.md.
 import { EditeurTopbar } from "../_components/EditeurTopbar";
 
 type Kpi = { label: string; value: string; unit?: string; meta: string };

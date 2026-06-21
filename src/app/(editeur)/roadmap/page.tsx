@@ -1,3 +1,7 @@
+// Espace éditeur — page « Roadmap & releases » (route /roadmap).
+// Port fidèle 1:1 de la maquette : reference/wireframes-editeur.html,
+// <div id="page-roadmap">, lignes 4183-4239. Données EN DUR = valeurs d'exemple
+// de la maquette (pas branché Supabase). Pattern + détails : (editeur)/README.md.
 import { EditeurTopbar } from "../_components/EditeurTopbar";
 
 type RoadmapCard = {

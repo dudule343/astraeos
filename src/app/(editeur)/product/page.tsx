@@ -1,3 +1,7 @@
+// Espace éditeur — page « Analyse produit » (route /product).
+// Port fidèle 1:1 de la maquette : reference/wireframes-editeur.html,
+// <div id="page-product">, lignes 1843-1908. Données EN DUR = valeurs d'exemple
+// de la maquette (pas branché Supabase). Pattern + détails : (editeur)/README.md.
 import { EditeurTopbar } from "../_components/EditeurTopbar";
 
 const TOP_FEATURES = [
