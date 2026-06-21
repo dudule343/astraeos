@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { getClientsScreen } from "../../_data/clients";
+import { getClientsScreen } from "../../_data/clients-server";
 import "../../_styles/clients.css";
 
 import ClientsTable from "./ClientsTable";
@@ -11,8 +11,8 @@ export const metadata = {
 
 export const dynamic = "force-dynamic";
 
-export default function ClientsPage() {
-  const screen = getClientsScreen();
+export default async function ClientsPage() {
+  const screen = await getClientsScreen();
   const kpiActifs = screen.kpiClientsActifs;
   const kpiRepartition = screen.kpiRepartition;
   const kpiTicket = screen.kpiTicketMoyen;

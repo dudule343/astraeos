@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { honorairesKpis, etudesMissions, repartitionMissions } from "../../_data/assets-honoraires";
+import { getAssetsHonoraires } from "../../_data/assets-honoraires";
 import "../../_styles/assets-honoraires.css";
 import { ExportHonorairesButton } from "./ExportHonorairesButton";
 import { HonorairesTable } from "./HonorairesTable";
@@ -9,6 +9,8 @@ import { TemplateDownloads } from "./TemplateDownloads";
 export const metadata = {
   title: "ASTRAEOS · Honoraires de conseil",
 };
+
+export const dynamic = "force-dynamic";
 
 /** Picto document (sprite #i-doc de la maquette), inliné. */
 function IconDoc() {
@@ -34,7 +36,9 @@ function IconChart() {
   );
 }
 
-export default function AssetsHonorairesPage() {
+export default async function AssetsHonorairesPage() {
+  const screen = await getAssetsHonoraires();
+
   return (
     <div className="assets-honoraires-page-wrap">
       <div className="hero">
@@ -52,13 +56,13 @@ export default function AssetsHonorairesPage() {
           <Link href="/espace-ingenieur/assets" className="btn btn-ghost btn-sm">
             ← Retour vue d&apos;ensemble
           </Link>
-          <ExportHonorairesButton />
+          <ExportHonorairesButton screen={screen} />
         </div>
       </div>
 
       {/* 3 KPIs : Études réalisées + Honoraires + Honoraire moyen */}
       <div className="kpis kpis-3 mb-20">
-        {honorairesKpis.map((kpi) => (
+        {screen.kpis.map((kpi) => (
           <div className="kpi" key={kpi.label}>
             <div className="kpi-label">{kpi.label}</div>
             <div className={`kpi-value${kpi.valueGold ? " gold" : ""}`}>
@@ -89,10 +93,10 @@ export default function AssetsHonorairesPage() {
             Détail de mes études patrimoniales
           </div>
           <span className="card-header-note">
-            {etudesMissions.length} études réalisées · cliquez pour le détail client
+            {screen.missions.length} études réalisées · cliquez pour le détail client
           </span>
         </div>
-        <HonorairesTable />
+        <HonorairesTable missions={screen.missions} total={screen.total} />
       </div>
 
       {/* Modèles contractuels (DER, Lettre de mission) générés par pdf-lib */}
@@ -110,7 +114,7 @@ export default function AssetsHonorairesPage() {
         </div>
         <div className="card-body hon-repartition-body">
           <div className="hon-repartition-grid">
-            {repartitionMissions.map((r) => (
+            {screen.repartition.map((r) => (
               <div className="hon-repartition-tile" key={r.label}>
                 <div className="hon-repartition-count">{r.count}</div>
                 <div className="hon-repartition-label">{r.label}</div>

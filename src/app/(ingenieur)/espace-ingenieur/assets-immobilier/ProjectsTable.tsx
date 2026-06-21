@@ -2,19 +2,25 @@
 
 import { useRouter } from "next/navigation";
 
-import {
-  immoProjects,
-  immoProjectsTotal,
-  type ImmoProjectRow,
-} from "../../_data/assets-immobilier";
+import type {
+  ImmoProjectRow,
+  ImmoProjectsTotal,
+} from "../../_data/assets-immobilier-pure";
 
 /**
  * Tableau « Détail de mes projets immobiliers ».
  * Porte le comportement de la maquette : chaque <tr> est cliquable
  * (onclick="goToPage('ing-fiche-client')") et ouvre la fiche du client de la
  * ligne. Le bouton « Voir → » fait la même navigation que la ligne.
+ * Données réelles reçues par PROPS depuis la page serveur.
  */
-export function ProjectsTable() {
+export function ProjectsTable({
+  projects,
+  total,
+}: {
+  projects: ImmoProjectRow[];
+  total: ImmoProjectsTotal;
+}) {
   const router = useRouter();
 
   const goToClient = (clientId: string) =>
@@ -34,7 +40,7 @@ export function ProjectsTable() {
         </tr>
       </thead>
       <tbody>
-        {immoProjects.map((row) => (
+        {projects.map((row) => (
           <ProjectRow key={row.clientId} row={row} onOpen={goToClient} />
         ))}
         <tr style={{ background: "var(--gold-200)", fontWeight: 700 }}>
@@ -42,12 +48,12 @@ export function ProjectsTable() {
             <strong>Total portefeuille</strong>
           </td>
           <td colSpan={3} style={{ textAlign: "center", fontSize: "11.5px" }}>
-            {immoProjectsTotal.clientsLabel}
+            {total.clientsLabel}
           </td>
           <td className="num">
-            <strong>{immoProjectsTotal.projectsTotal}</strong>
+            <strong>{total.projectsTotal}</strong>
           </td>
-          <td className="num">{immoProjectsTotal.delayAverage}</td>
+          <td className="num">{total.delayAverage}</td>
           <td />
         </tr>
       </tbody>

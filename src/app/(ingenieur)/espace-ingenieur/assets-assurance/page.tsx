@@ -29,8 +29,8 @@ const QualityIcon = () => (
   </svg>
 );
 
-export default function AssetsAssurancePage() {
-  const data = getAssetsAssurance();
+export default async function AssetsAssurancePage() {
+  const data = await getAssetsAssurance();
 
   return (
     <div className="maquette-ing px-10 py-8">

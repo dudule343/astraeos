@@ -1,8 +1,10 @@
 import Link from "next/link";
 
-import { getFicheClient, type HistoItem } from "../../../_data/fiche-client";
+import { type HistoItem } from "../../../_data/fiche-client";
+import { getFicheClient } from "../../../_data/fiche-client-server";
 import "../../../_styles/fiche-client.css";
 import { DocumentRowActions } from "./DocumentRowActions";
+import { FicheClientInteractive } from "./FicheClientInteractive";
 
 export const metadata = {
   title: "ASTRAEOS · Fiche client",
@@ -44,23 +46,26 @@ export default async function FicheClientPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const fiche = getFicheClient(id);
+  const fiche = await getFicheClient(id);
 
   return (
     <div className="fiche-client-wrap">
-      {/* Bandeau « Fiche client modèle » */}
-      <div className="fc-info-banner">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--navy-300)" strokeWidth="2">
-          <circle cx="12" cy="12" r="10" />
-          <line x1="12" y1="16" x2="12" y2="12" />
-          <line x1="12" y1="8" x2="12.01" y2="8" />
-        </svg>
-        <span>
-          <strong>Fiche client modèle</strong> · dans cette maquette, tous les
-          clients de l&apos;agenda ouvrent cette fiche exemple. En production,
-          chaque client dispose de sa propre fiche.
-        </span>
-      </div>
+      {/* Bandeau « Fiche client modèle » : uniquement sur le repli (pas de
+          foyer réel branché). Sur une vraie fiche éditable, on le retire. */}
+      {fiche.editable ? null : (
+        <div className="fc-info-banner">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--navy-300)" strokeWidth="2">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="16" x2="12" y2="12" />
+            <line x1="12" y1="8" x2="12.01" y2="8" />
+          </svg>
+          <span>
+            <strong>Fiche client modèle</strong> · dans cette maquette, tous les
+            clients de l&apos;agenda ouvrent cette fiche exemple. En production,
+            chaque client dispose de sa propre fiche.
+          </span>
+        </div>
+      )}
 
       {/* HERO */}
       <div className="hero">
@@ -95,60 +100,12 @@ export default async function FicheClientPage({
         </div>
       </div>
 
-      {/* Identités du couple */}
-      <div className="fc-grid-2">
-        {fiche.personnes.map((p) => (
-          <div className="card" key={p.name}>
-            <div className="card-header">
-              <div className="card-title">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="9" cy="8" r="3" />
-                  <circle cx="17" cy="9" r="2.5" />
-                  <path d="M4 20c0-2.8 2.2-5 5-5s5 2.2 5 5" />
-                  <path d="M14 16.5c0-1.9 1.6-3.5 3.5-3.5s3.5 1.6 3.5 3.5" />
-                </svg>
-                {p.name}
-              </div>
-              <span className="badge badge-success" style={{ fontSize: "9.5px" }}>
-                {p.kycBadge}
-              </span>
-            </div>
-            <div className="card-body fc-identite-body">
-              <div className="fc-identite-grid">
-                {p.rows.map((r) => (
-                  <FragmentRow key={r.label}>
-                    <span>{r.label}</span>
-                    <strong>{r.value}</strong>
-                  </FragmentRow>
-                ))}
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Régime de l'union · cadre juridique */}
-      <div className="card mb-18 fc-regime-card">
-        <div className="card-header">
-          <div className="card-title">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1" />
-              <path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1" />
-            </svg>
-            Régime de l&apos;union · cadre juridique
-          </div>
-        </div>
-        <div className="card-body fc-regime-body">
-          <div className="fc-regime-grid">
-            {fiche.regimeFields.map((f) => (
-              <div key={f.label}>
-                <div className="fc-regime-label">{f.label}</div>
-                <div className={`fc-regime-value${f.gold ? " gold" : ""}`}>{f.value}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+      {/* Identités du couple + régime de l'union — éditables (composant client). */}
+      <FicheClientInteractive
+        personnes={fiche.personnes}
+        regimeFields={fiche.regimeFields}
+        editable={fiche.editable}
+      />
 
       {/* Historique de l'accompagnement */}
       <div className="card mb-18">
@@ -264,9 +221,4 @@ export default async function FicheClientPage({
       </div>
     </div>
   );
-}
-
-/** Wrapper neutre : ses enfants restent des cellules directes de la grille. */
-function FragmentRow({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
 }

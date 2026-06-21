@@ -2,18 +2,19 @@
 
 import { useState } from "react";
 
-import { buildImmoCsv } from "../../_data/assets-immobilier";
+import { buildImmoCsv } from "../../_data/assets-immobilier-pure";
+import type { AssetsImmoScreen } from "../../_data/assets-immobilier-pure";
 
 /**
  * Bouton « Exporter » du hero. Action réelle : génère le CSV du détail des
- * projets immobiliers (source unique = immoProjects) et déclenche le
+ * projets immobiliers (source = écran reçu par props) et déclenche le
  * téléchargement côté navigateur. Pas de bouton mort, pas de backend requis.
  */
-export function ExportImmoButton() {
+export function ExportImmoButton({ screen }: { screen: AssetsImmoScreen }) {
   const [done, setDone] = useState(false);
 
   function exporter() {
-    const csv = buildImmoCsv();
+    const csv = buildImmoCsv(screen);
     // BOM UTF-8 pour qu'Excel ouvre les accents correctement.
     const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);

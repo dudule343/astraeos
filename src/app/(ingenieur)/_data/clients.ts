@@ -1,7 +1,14 @@
 /**
- * Source de vérité unique pour l'écran « Tous mes clients » (page-ing-clients).
- * Exemples EXACTS de la maquette v28 — comme si l'ingénieur Julien VASSEUR
- * avait saisi son portefeuille à la main. Aucune valeur en dur dans la page.
+ * Module PUR de l'écran « Tous mes clients » (page-ing-clients).
+ *
+ * AUCUN import serveur ici (pas de next/headers, getSessionContext,
+ * createAdminClient, supabase/server) : ce fichier est importé par le
+ * composant client `ClientsTable.tsx`. Il contient les types, les libellés,
+ * les helpers purs et les données de repli (la maquette v28 « Julien VASSEUR »).
+ *
+ * Les vraies données sont lues par `clients-server.ts` (module serveur) et
+ * passées à la page via getClientsScreen(), qui dégrade sur le repli ci-dessous
+ * quand la base n'est pas configurée.
  */
 
 export type ClientType = "Personne physique" | "Personne morale";
@@ -158,6 +165,7 @@ const CLIENTS: Client[] = [
   },
 ];
 
+/** Écran de repli (maquette v28). Sert quand la base n'est pas configurée. */
 const SCREEN: ClientsScreen = {
   heroEyebrow: "Mon portefeuille · cumul depuis janvier 2026",
   heroSub:
@@ -198,6 +206,42 @@ const SCREEN: ClientsScreen = {
   cardTitle: "Tous mes clients · 7 fiches",
 };
 
-export function getClientsScreen(): ClientsScreen {
+/** Écran de repli synchrone (pur). Aucune lecture base. */
+export function getClientsScreenFallbackSync(): ClientsScreen {
   return SCREEN;
+}
+
+// ---------------------------------------------------------------------------
+// Helpers purs (réutilisés par le module serveur ET le composant client)
+// ---------------------------------------------------------------------------
+
+/** Libellés FR du type de foyer (enum DB household_type). */
+export const HOUSEHOLD_TYPE_LABELS: Record<string, string> = {
+  couple_marie: "marié",
+  couple_pacs: "pacsé",
+  celibataire: "célibataire",
+  divorce: "divorcé",
+  veuf: "veuf",
+};
+
+/** Initiales à partir d'un nom de personne (« Bertrand DUPONT » → « BD »). */
+export function clientInitials(name: string): string {
+  const parts = name.split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "—";
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return `${parts[0].charAt(0)}${parts[parts.length - 1].charAt(0)}`.toUpperCase();
+}
+
+/** Date ISO → « jj/mm/aaaa », « — » si absente / invalide. */
+export function formatClientDate(date: string | null | undefined): string {
+  if (!date) return "—";
+  const t = new Date(date);
+  if (Number.isNaN(t.getTime())) return "—";
+  return t.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" });
+}
+
+/** Montant € → « 62 800 € », « — » si nul. */
+export function formatEurClient(n: number): string {
+  if (!Number.isFinite(n) || n === 0) return "—";
+  return `${Math.round(n).toLocaleString("fr-FR")} €`;
 }

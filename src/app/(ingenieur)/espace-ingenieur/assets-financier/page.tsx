@@ -25,8 +25,8 @@ const FINANCE_ICON = (
   </svg>
 );
 
-export default function AssetsFinancierPage() {
-  const screen = getAssetsFinancierScreen();
+export default async function AssetsFinancierPage() {
+  const screen = await getAssetsFinancierScreen();
 
   return (
     <div className="px-10 py-8">

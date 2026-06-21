@@ -1,11 +1,6 @@
 import Link from "next/link";
 
-import {
-  assetsImmoKpis,
-  immoProjects,
-  programBreakdown,
-  type AssetsImmoKpi,
-} from "../../_data/assets-immobilier";
+import { getAssetsImmobilier, type AssetsImmoKpi } from "../../_data/assets-immobilier";
 import "../../_styles/assets-immobilier.css";
 import { ExportImmoButton } from "./ExportImmoButton";
 import { ProjectsTable } from "./ProjectsTable";
@@ -13,6 +8,8 @@ import { ProjectsTable } from "./ProjectsTable";
 export const metadata = {
   title: "ASTRAEOS · Investissement immobilier",
 };
+
+export const dynamic = "force-dynamic";
 
 /** Picto « courbe + flèche » du titre de carte (symbol #i-business). */
 function BusinessIcon() {
@@ -60,7 +57,9 @@ function KpiBlock({ kpi }: { kpi: AssetsImmoKpi }) {
   );
 }
 
-export default function AssetsImmobilierPage() {
+export default async function AssetsImmobilierPage() {
+  const screen = await getAssetsImmobilier();
+
   return (
     <div className="maquette-ing assets-immo-page">
       <div className="hero">
@@ -78,13 +77,13 @@ export default function AssetsImmobilierPage() {
           <Link href="/espace-ingenieur/assets" className="btn btn-ghost btn-sm">
             ← Retour vue d&apos;ensemble
           </Link>
-          <ExportImmoButton />
+          <ExportImmoButton screen={screen} />
         </div>
       </div>
 
       {/* 3 KPIs : Volume + Projets + Ticket moyen */}
       <div className="kpis kpis-3 mb-20">
-        {assetsImmoKpis.map((kpi) => (
+        {screen.kpis.map((kpi) => (
           <KpiBlock key={kpi.label} kpi={kpi} />
         ))}
       </div>
@@ -97,10 +96,10 @@ export default function AssetsImmobilierPage() {
             Détail de mes projets immobiliers
           </div>
           <span style={{ fontSize: "11px", color: "var(--navy-300)" }}>
-            {immoProjects.length} projets · cliquez pour le détail client
+            {screen.projects.length} projets · cliquez pour le détail client
           </span>
         </div>
-        <ProjectsTable />
+        <ProjectsTable projects={screen.projects} total={screen.projectsTotal} />
       </div>
 
       {/* Répartition par type de programme */}
@@ -113,7 +112,7 @@ export default function AssetsImmobilierPage() {
         </div>
         <div style={{ padding: "22px" }}>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "18px" }}>
-            {programBreakdown.map((p) => (
+            {screen.breakdown.map((p) => (
               <div
                 key={p.label}
                 style={{

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-import type { FinancierClient, FinancierTotal } from "../../_data/assets-financier";
+import type { FinancierClient, FinancierTotal } from "../../_data/assets-financier-pure";
 
 /**
  * Tableau « Détail de mes placements » de l'écran investissement financier.

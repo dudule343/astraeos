@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 
-import type { AssetsAssurance } from "../../_data/assets-assurance";
+import type { AssetsAssurance } from "../../_data/assets-assurance-pure";
 
 /**
  * Table « Détail de mes contrats d'assurance ».

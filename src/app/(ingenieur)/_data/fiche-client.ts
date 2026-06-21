@@ -1,14 +1,16 @@
 /**
- * Données d'exemple de la fiche client ingénieur — RÉPLIQUE EXACTE de la
- * maquette 030 v28 (`#page-ing-fiche-client`, lignes 4618→4774).
+ * Module PUR de la fiche client ingénieur (#page-ing-fiche-client).
  *
- * Fiche client modèle : Bertrand & Monique DUPONT-TOPIN. Dans la maquette,
- * tous les clients de l'agenda ouvrent cette fiche exemple ; en production
- * chaque client a sa propre fiche. Source unique de la page fiche client :
- * la page lit ici, jamais de valeur en dur dans le composant.
+ * AUCUN import serveur (next/headers, getSessionContext, createAdminClient,
+ * supabase/server) : importé par le composant client `FicheClientInteractive`.
+ * Contient les types d'affichage, les types/libellés des champs éditables
+ * (enums DB), les helpers purs et la fiche de repli (modèle DUPONT-TOPIN).
+ *
+ * Les vraies données sont lues par `fiche-client-server.ts` et passées par
+ * props à la page serveur, qui dégrade sur le repli ci-dessous.
  */
 
-import { getClientsScreen, type Client } from "./clients";
+import { type Client } from "./clients";
 
 export type Personne = {
   name: string;
@@ -28,27 +30,9 @@ export type HistoItem = {
   variant: "etude" | "immo" | "financier" | "audit";
   title: string;
   meta: string;
-  /**
-   * Dossier vers lequel pointe « Voir → ». Dans la maquette, seule la première
-   * ligne (étude patrimoniale) fait goToPage('ing-fiche-dossier') et ouvre la
-   * fiche dossier ingénieur (#page-ing-fiche-dossier) ; les autres lignes ont
-   * un bouton « Voir → » inerte (aucun onclick). On porte ce comportement à
-   * l'identique : href renseigné → vrai <Link> vers la route dossier portée
-   * (src/app/(ingenieur)/espace-ingenieur/dossiers/[id]) ; href null → bouton
-   * honnête désactivé, fidèle à l'inertie de la maquette.
-   */
   href: string | null;
 };
 
-/**
- * Action réelle déclenchée par les boutons d'une ligne document.
- *  - "pdf:der" / "pdf:lettre_mission" → génération + téléchargement du PDF réel
- *    via /api/conformite/der-pdf (lib/conformite-pdf.ts), comme la fiche
- *    conformité. Les deux boutons « Consulter / Télécharger » produisent le
- *    document (Consulter l'ouvre dans un onglet, Télécharger le sauvegarde).
- *  - "link" → navigation vers l'outil réel du repo (collecte, dossier) où le
- *    document peut être consulté/récupéré.
- */
 export type DocumentAction =
   | { kind: "pdf"; pdf: "der" | "lettre_mission" }
   | { kind: "link"; href: string };
@@ -84,9 +68,159 @@ export type FicheClient = {
   historique: HistoItem[];
   documents: DocumentSigne[];
   rdvs: RdvHisto[];
+  /**
+   * Données éditables (identité du foyer + personnes), au format DB exact,
+   * alimentées depuis Supabase. `null` quand la fiche provient du repli modèle
+   * (non éditable). Le composant interactif n'affiche le mode édition que si
+   * `editable` est présent.
+   */
+  editable: FicheClientEditable | null;
 };
 
-/** Fiche client modèle de la maquette. */
+// ---------------------------------------------------------------------------
+// Données éditables — valeurs DB exactes (foyer + personnes)
+// ---------------------------------------------------------------------------
+
+export type FoyerEditable = {
+  household_type: string;
+  marital_regime: string | null;
+  marriage_date: string | null; // ISO yyyy-mm-dd
+  household_address: string | null;
+  nb_children: number;
+  nb_dependents: number;
+  tax_residency: string | null;
+  acquisition_origin: string | null;
+};
+
+export type PersonneEditable = {
+  role_in_household: "person_a" | "person_b";
+  first_name: string;
+  last_name: string;
+  birth_name: string | null;
+  birth_date: string | null; // ISO yyyy-mm-dd
+  nationality: string | null;
+  profession: string | null;
+  employer: string | null;
+  employment_status: string | null;
+  tmi_estimated: number | null;
+  phone: string | null;
+  email: string | null;
+};
+
+export type FicheClientEditable = {
+  clientId: string;
+  foyer: FoyerEditable;
+  personnes: PersonneEditable[];
+};
+
+// ---------------------------------------------------------------------------
+// Libellés FR des enums DB (valeurs DB exactes en clé)
+// ---------------------------------------------------------------------------
+
+export const HOUSEHOLD_TYPE_LABELS: Record<string, string> = {
+  couple_marie: "Couple marié",
+  couple_pacs: "Couple pacsé",
+  celibataire: "Célibataire",
+  divorce: "Divorcé(e)",
+  veuf: "Veuf(ve)",
+};
+
+export const MARITAL_REGIME_LABELS: Record<string, string> = {
+  communaute_reduite_acquets: "Communauté réduite aux acquêts",
+  communaute_universelle: "Communauté universelle",
+  separation_biens: "Séparation de biens",
+  participation_aux_acquets: "Participation aux acquêts",
+};
+
+export const ACQUISITION_ORIGIN_LABELS: Record<string, string> = {
+  recommandation: "Recommandation",
+  captation_directe: "Captation directe",
+  reattribution: "Réattribution",
+  marketing: "Marketing",
+  autre: "Autre",
+};
+
+export const EMPLOYMENT_STATUS_LABELS: Record<string, string> = {
+  cdi: "CDI",
+  cdd: "CDD",
+  cadre_dirigeant: "Cadre dirigeant",
+  tns_liberal: "TNS · profession libérale",
+  tns_artisan: "TNS · artisan / commerçant",
+  fonctionnaire: "Fonctionnaire",
+  retraite: "Retraité",
+  chomeur: "Sans emploi",
+  etudiant: "Étudiant",
+  autre: "Autre",
+};
+
+/** Options ordonnées prêtes pour un <select> (valeur DB + libellé FR). */
+export type EnumOption = { value: string; label: string };
+
+export const HOUSEHOLD_TYPE_OPTIONS: EnumOption[] = [
+  "couple_marie",
+  "couple_pacs",
+  "celibataire",
+  "divorce",
+  "veuf",
+].map((value) => ({ value, label: HOUSEHOLD_TYPE_LABELS[value] }));
+
+export const MARITAL_REGIME_OPTIONS: EnumOption[] = [
+  "communaute_reduite_acquets",
+  "communaute_universelle",
+  "separation_biens",
+  "participation_aux_acquets",
+].map((value) => ({ value, label: MARITAL_REGIME_LABELS[value] }));
+
+export const ACQUISITION_ORIGIN_OPTIONS: EnumOption[] = [
+  "recommandation",
+  "captation_directe",
+  "reattribution",
+  "marketing",
+  "autre",
+].map((value) => ({ value, label: ACQUISITION_ORIGIN_LABELS[value] }));
+
+export const EMPLOYMENT_STATUS_OPTIONS: EnumOption[] = [
+  "cdi",
+  "cdd",
+  "cadre_dirigeant",
+  "tns_liberal",
+  "tns_artisan",
+  "fonctionnaire",
+  "retraite",
+  "chomeur",
+  "etudiant",
+  "autre",
+].map((value) => ({ value, label: EMPLOYMENT_STATUS_LABELS[value] }));
+
+// ---------------------------------------------------------------------------
+// Helpers purs
+// ---------------------------------------------------------------------------
+
+/** Âge en années à partir d'une date de naissance ISO. */
+export function ageFromBirthDate(iso: string | null): number | null {
+  if (!iso) return null;
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return null;
+  const now = new Date();
+  let age = now.getFullYear() - d.getFullYear();
+  const m = now.getMonth() - d.getMonth();
+  if (m < 0 || (m === 0 && now.getDate() < d.getDate())) age -= 1;
+  return age;
+}
+
+/** Date ISO → « jj/mm/aaaa », « — » si absente / invalide. */
+export function formatFicheDate(iso: string | null | undefined): string {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "—";
+  return d.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" });
+}
+
+// ---------------------------------------------------------------------------
+// Fiche client modèle (repli, maquette 030 v28)
+// ---------------------------------------------------------------------------
+
+/** Fiche client modèle de la maquette. Non éditable (editable === null). */
 export const FICHE_CLIENT_MODELE: FicheClient = {
   id: "dupont-topin",
   eyebrow: "Fiche client · régime de l'union · client depuis le 15/03/2025",
@@ -135,17 +269,12 @@ export const FICHE_CLIENT_MODELE: FicheClient = {
       variant: "etude",
       title: "Étude patrimoniale réalisée",
       meta: "Stratégie de transmission · livrée le 06/05/2026 · 84 pages · honoraires 12 800 € HT",
-      // Maquette : onclick="goToPage('ing-fiche-dossier')" → ouvre la fiche
-      // dossier ETU-2026-014 (le dossier de l'étude, cf. lettre de mission).
       href: "/espace-ingenieur/dossiers/ETU-2026-014",
     },
     {
       variant: "immo",
       title: "Investissement immobilier réalisé",
       meta: "SCPI Corum Origin · 80 000 € · souscription accompagnée le 02/05/2026",
-      // Chaque acte de l'accompagnement vit dans le dossier patrimonial du
-      // client : « Voir → » ouvre la vraie fiche dossier où l'investissement
-      // a été tracé (route portée dossiers/[id]).
       href: "/espace-ingenieur/dossiers/ETU-2026-014",
     },
     {
@@ -165,26 +294,22 @@ export const FICHE_CLIENT_MODELE: FicheClient = {
     {
       title: "Lettre de mission · ETU-2026-014",
       meta: "Signée le 28/04/2026 · Yousign",
-      // Génère la vraie lettre de mission (PDF pdf-lib) via /api/conformite/der-pdf.
       action: { kind: "pdf", pdf: "lettre_mission" },
     },
     {
       title: "Document collecte complet · validé",
       meta: "Complété et signé le 28/04/2026",
-      // Le document de collecte se consulte/récupère dans l'outil collecte réel.
       action: { kind: "link", href: "/espace-ingenieur/collectes" },
     },
     {
       title: "Document entrée en relation",
       meta: "Signé le 28/04/2026 · Yousign",
-      // Génère le vrai DER (PDF pdf-lib) via /api/conformite/der-pdf.
       action: { kind: "pdf", pdf: "der" },
     },
     {
       title: "Étude patrimoniale livrée · v1.0",
       meta: "Livrée le 06/05/2026 · 84 pages",
       primary: true,
-      // « Ouvrir » → la fiche dossier où l'étude livrée est rattachée.
       action: { kind: "link", href: "/espace-ingenieur/dossiers/ETU-2026-014" },
     },
   ],
@@ -213,17 +338,15 @@ export const FICHE_CLIENT_MODELE: FicheClient = {
       meta: "🏢 Présentiel · cabinet · 90 min",
     },
   ],
+  editable: null,
 };
 
 /**
- * Renvoie la fiche du client correspondant au slug. On reconstruit l'IDENTITÉ
- * (hero : nom, type, date, détails) à partir de la liste réelle des clients, pour
- * que cliquer « Voir » sur un client ouvre BIEN sa fiche (et non toujours le
- * modèle DUPONT-TOPIN). Les sections détaillées (régime, historique, documents,
- * RDV) restent les données d'exemple tant que les vraies fiches Supabase ne sont
- * pas branchées — c'est ce que signale le bandeau « fiche client modèle ».
+ * Reconstruit l'IDENTITÉ (hero) d'un client de repli à partir de la liste
+ * maquette, pour que cliquer « Voir » ouvre la bonne en-tête. Les sections
+ * détaillées restent les données d'exemple (fiche non éditable).
  */
-function ficheFromClient(client: Client): FicheClient {
+export function ficheModeleFromClient(client: Client): FicheClient {
   return {
     ...FICHE_CLIENT_MODELE,
     id: client.slug,
@@ -231,12 +354,6 @@ function ficheFromClient(client: Client): FicheClient {
     heroNameLead: "",
     heroNameStrong: client.nom,
     heroSub: `${client.details} · dernière interaction : ${client.derniereInteraction}. Sections détaillées ci-dessous : données d'exemple (fiche modèle).`,
+    editable: null,
   };
-}
-
-export function getFicheClient(id: string): FicheClient {
-  const client = getClientsScreen().clients.find((c) => c.slug === id);
-  if (!client) return FICHE_CLIENT_MODELE;
-  if (client.slug === "dupont-topin") return FICHE_CLIENT_MODELE;
-  return ficheFromClient(client);
 }

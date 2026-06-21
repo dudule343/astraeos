@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { buildAssuranceCsv, type AssetsAssurance } from "../../_data/assets-assurance";
+import { buildAssuranceCsv, type AssetsAssurance } from "../../_data/assets-assurance-pure";
 
 /**
  * Bouton « Exporter » du hero. Action réelle : génère le CSV du détail des

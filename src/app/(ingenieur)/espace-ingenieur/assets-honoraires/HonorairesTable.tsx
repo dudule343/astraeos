@@ -2,19 +2,25 @@
 
 import { useRouter } from "next/navigation";
 
-import {
-  etudesMissions,
-  honorairesTotal,
-  type EtudeMission,
-} from "../../_data/assets-honoraires";
+import type {
+  EtudeMission,
+  HonorairesTotal,
+} from "../../_data/assets-honoraires-pure";
 
 /**
  * Tableau « Détail de mes études patrimoniales ».
  * Porte le comportement de la maquette : chaque <tr> est cliquable
  * (onclick="goToPage('ing-fiche-dossier')") et ouvre la fiche du dossier de la
  * ligne (timeline du parcours). Le bouton « Voir → » fait la même navigation.
+ * Données réelles reçues par PROPS depuis la page serveur.
  */
-export function HonorairesTable() {
+export function HonorairesTable({
+  missions,
+  total,
+}: {
+  missions: EtudeMission[];
+  total: HonorairesTotal;
+}) {
   const router = useRouter();
 
   const goToDossier = (dossierId: string) =>
@@ -33,7 +39,7 @@ export function HonorairesTable() {
         </tr>
       </thead>
       <tbody>
-        {etudesMissions.map((m) => (
+        {missions.map((m) => (
           <EtudeRow key={m.dossierId} mission={m} onOpen={goToDossier} />
         ))}
         <tr className="hon-total-row">
@@ -41,9 +47,9 @@ export function HonorairesTable() {
             <strong>Total portefeuille</strong>
           </td>
           <td className="hon-total-resume" colSpan={3}>
-            {honorairesTotal.resume}
+            {total.resume}
           </td>
-          <td className="num cell-money gold">{honorairesTotal.montant}</td>
+          <td className="num cell-money gold">{total.montant}</td>
           <td />
         </tr>
       </tbody>
