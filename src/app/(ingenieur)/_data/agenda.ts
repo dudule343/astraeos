@@ -60,6 +60,8 @@ export type AgendaData = {
   syncLabel: string;
   days: AgendaDayHeader[];
   rdvsBySlot: Map<string, AgendaRdv>;
+  /** vrais RDV pris en ligne, indexés par date absolue "année-mois-jour:créneau" */
+  realRdvs: Map<string, AgendaRdv>;
   kpiWeekCount: number;
   kpiWeekMeta: string;
   kpiWeekCompare: KpiCompareCell[];
@@ -273,59 +275,64 @@ const MOIS: Record<string, number> = {
   décembre: 11, decembre: 11,
 };
 
-/** Parse "Vendredi 15 mai 2026" + "09:00 – 10:00" → position dans la semaine de
- *  base (lundi 11 → dimanche 17 mai 2026). null si hors de cette semaine. */
-function positionInBaseWeek(
+/** Parse "Vendredi 15 mai 2026" + "09:00 – 10:00" → date ABSOLUE + créneau.
+ *  Pas de contrainte de semaine : le RDV est placé à sa vraie date. */
+function parseRdvDate(
   dateLabel: string,
   timeLabel: string,
-): { dayIndex: number; slotKey: string; hourLabel: string } | null {
+): { year: number; month: number; date: number; slotKey: string; hourLabel: string } | null {
   const md = dateLabel.match(/(\d{1,2})\s+([A-Za-zÀ-ÿ]+)\s+(\d{4})/);
   if (!md) return null;
-  const day = Number(md[1]);
-  const mois = MOIS[md[2].toLowerCase()];
+  const date = Number(md[1]);
+  const month = MOIS[md[2].toLowerCase()];
   const year = Number(md[3]);
-  if (mois !== 4 || year !== 2026 || day < 11 || day > 17) return null;
+  if (month === undefined) return null;
   const mt = timeLabel.match(/(\d{1,2}):(\d{2})/);
   if (!mt) return null;
   const hh = Number(mt[1]);
   const mm = mt[2];
   return {
-    dayIndex: day - 11, // 11 mai = lundi = 0
+    year,
+    month,
+    date,
     slotKey: `${hh}h${mm}`,
     hourLabel: `${String(hh).padStart(2, "0")}h${mm === "00" ? "" : mm}`,
   };
 }
 
-/** Injecte dans la grille les vrais RDV pris en ligne (dci_submissions kind='rdv')
- *  qui tombent dans la semaine affichée, scopés au cabinet. Best-effort. */
-async function mergeRealRdvs(map: Map<string, AgendaRdv>): Promise<void> {
+/** Charge les vrais RDV pris en ligne (dci_submissions kind='rdv'), scopés au
+ *  cabinet, indexés par DATE ABSOLUE "année-mois-jour:créneau". La grille les
+ *  affiche dans la semaine réelle où ils tombent (n'importe quelle date).
+ *  Best-effort : map vide sans base/contexte. */
+async function loadRealRdvsByDate(): Promise<Map<string, AgendaRdv>> {
+  const out = new Map<string, AgendaRdv>();
   try {
-    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) return;
+    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) return out;
     const ctx = await getSessionContext();
-    if (!ctx) return;
+    if (!ctx) return out;
     const supabase = createAdminClient();
     const { data } = await supabase
       .from("dci_submissions")
       .select("prospect_slug, display_name, payload")
       .eq("tenant_id", ctx.tenantId)
       .eq("kind", "rdv")
-      .limit(100);
+      .limit(200);
     for (const r of (data ?? []) as Array<{
       prospect_slug: string;
       display_name: string | null;
       payload: Record<string, unknown> | null;
     }>) {
       const p = r.payload ?? {};
-      const pos = positionInBaseWeek(
+      const pos = parseRdvDate(
         typeof p.dateLabel === "string" ? p.dateLabel : "",
         typeof p.timeLabel === "string" ? p.timeLabel : "",
       );
       if (!pos) continue;
       const surname = (r.display_name ?? r.prospect_slug).split(" ").slice(-1)[0].toUpperCase();
       const room = typeof p.visioRoom === "string" ? p.visioRoom : `rdv-${r.prospect_slug}-initial`;
-      map.set(`${pos.dayIndex}:${pos.slotKey}`, {
+      out.set(`${pos.year}-${pos.month}-${pos.date}:${pos.slotKey}`, {
         id: `real-${r.prospect_slug}`,
-        dayIndex: pos.dayIndex,
+        dayIndex: 0,
         slotKey: pos.slotKey,
         hourLabel: pos.hourLabel,
         surname,
@@ -336,16 +343,17 @@ async function mergeRealRdvs(map: Map<string, AgendaRdv>): Promise<void> {
       });
     }
   } catch {
-    // best-effort : la grille démo reste affichée si la base est indisponible.
+    // best-effort
   }
+  return out;
 }
 
-/** Données de l'agenda (exemples maquette + vrais RDV pris en ligne). */
+/** Données de l'agenda (exemples maquette + vrais RDV pris en ligne, par date). */
 export async function getAgenda(): Promise<AgendaData> {
-  const rdvsBySlot = buildSlotMap();
-  await mergeRealRdvs(rdvsBySlot);
+  const realRdvs = await loadRealRdvsByDate();
   return {
-    rdvsBySlot,
+    rdvsBySlot: buildSlotMap(),
+    realRdvs,
     weekLabel: "Semaine du lundi 11 au dimanche 17 mai 2026",
     weekEyebrow: "Mon agenda · synchronisé Google Agenda · semaine 20",
     syncLabel: "Google Agenda · sync 11:42",

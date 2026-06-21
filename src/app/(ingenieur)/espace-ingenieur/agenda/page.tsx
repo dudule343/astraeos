@@ -116,6 +116,7 @@ export default async function AgendaPage() {
           baseWeekLabel={data.weekLabel}
           days={days}
           rdvsBySlot={rdvsBySlot}
+          realRdvs={data.realRdvs}
         />
 
         {/* Panneau de droite */}

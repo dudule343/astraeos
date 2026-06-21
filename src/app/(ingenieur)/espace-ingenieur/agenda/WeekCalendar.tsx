@@ -84,11 +84,15 @@ export function WeekCalendar({
   baseWeekLabel,
   days,
   rdvsBySlot,
+  realRdvs,
 }: {
   baseWeekLabel: string;
   days: AgendaDayHeader[];
   /** map "dayIndex:slotKey" -> RDV, valable uniquement sur la semaine de base */
   rdvsBySlot: Map<string, AgendaRdv>;
+  /** vrais RDV pris en ligne, indexés par date absolue "année-mois-jour:créneau",
+   *  placés dans la semaine réelle où ils tombent (n'importe quelle date) */
+  realRdvs: Map<string, AgendaRdv>;
 }) {
   const [weekOffset, setWeekOffset] = useState(0);
   const isBaseWeek = weekOffset === 0;
@@ -195,10 +199,14 @@ export function WeekCalendar({
                   {slot.label}
                 </div>
                 {displayDays.map((day) => {
-                  // Les événements ne valent que pour la semaine de base.
-                  const rdv = isBaseWeek
-                    ? rdvsBySlot.get(`${day.index}:${slot.key}`)
-                    : undefined;
+                  // Vrais RDV pris en ligne : placés par DATE réelle, donc visibles
+                  // dans n'importe quelle semaine consultée. La démo reste sur la
+                  // semaine de base.
+                  const cellDate = addDays(monday, day.index);
+                  const realKey = `${cellDate.getFullYear()}-${cellDate.getMonth()}-${cellDate.getDate()}:${slot.key}`;
+                  const rdv =
+                    realRdvs.get(realKey) ??
+                    (isBaseWeek ? rdvsBySlot.get(`${day.index}:${slot.key}`) : undefined);
                   const isLunch =
                     LUNCH_SLOTS.has(slot.key) && day.index <= 4 && !rdv;
                   const isEmpty = !rdv && !isLunch;
