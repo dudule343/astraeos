@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import SvgDefs from "./SvgDefs";
+import { persistParcours } from "../submit-client";
 import {
   PRODUITS,
   CONNAISSANCE_OPTIONS,
@@ -162,6 +163,7 @@ export default function Questionnaire() {
   };
 
   const submitForm = () => {
+    persistParcours("qualification");
     setSubmitted(true);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };

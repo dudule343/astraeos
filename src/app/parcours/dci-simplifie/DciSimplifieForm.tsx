@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { SVG_DEFS } from "./svg-defs";
+import { persistParcours } from "../submit-client";
 
 const TOTAL_STEPS = 8;
 
@@ -91,6 +92,7 @@ export default function DciSimplifieForm() {
     showStep(n);
   }
   function submitForm() {
+    persistParcours("simple");
     setSubmitted(true);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }

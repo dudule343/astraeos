@@ -3,6 +3,8 @@
 // (.maq-dci-complet) afin de reproduire à l'identique navigation, accordéons,
 // toggles, tables dynamiques, liaisons prêt↔bien, synthèse et signature.
 
+import { persistParcours } from "../submit-client";
+
 const TOTAL_STEPS = 22;
 
 type Ctx = { root: HTMLElement; currentStep: number };
@@ -218,6 +220,7 @@ export function initDci(root: HTMLElement): () => void {
   }
 
   function submitForm() {
+    persistParcours('complet');
     qsa('.section').forEach((s) => s.classList.remove('active'));
     const fv = $('finalView');
     if (fv) fv.classList.add('active');

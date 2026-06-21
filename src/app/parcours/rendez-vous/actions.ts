@@ -80,9 +80,14 @@ export async function bookRdv(input: BookRdvInput): Promise<BookRdvResult> {
   if (!nom) return { ok: false, reason: "Renseignez votre nom." };
   if (!EMAIL_RE.test(email)) return { ok: false, reason: "Adresse e-mail invalide." };
 
-  const room = `rdv-${slug(nom) || "prospect"}-initial`;
+  const prospectSlug = slug(nom) || "prospect";
+  const room = `rdv-${prospectSlug}-initial`;
   const visioUrl = `${canonicalOrigin()}/visio/${room}?role=client`;
-  const dciUrl = `${canonicalOrigin()}/parcours/dci-complet`;
+  // Le lien DCI porte l'identité prospect (?prospect=&name=) pour que la
+  // soumission soit rattachée au bon prospect dans dci_submissions.
+  const dciUrl = `${canonicalOrigin()}/parcours/dci-complet?prospect=${encodeURIComponent(
+    prospectSlug,
+  )}&name=${encodeURIComponent(nom)}`;
 
   // 1. Persistance : le prospect + son RDV dans dci_submissions (kind='rdv'),
   //    scopé au cabinet (legacy/contexte par défaut) → apparaît dans /prospects.
