@@ -2,6 +2,8 @@
 
 import { useMemo, useState } from "react";
 
+import { bookRdv } from "./actions";
+
 const MONTH_NAMES = [
   "Janvier",
   "Février",
@@ -68,10 +70,16 @@ export default function BookingClient() {
   const [consentRecord, setConsentRecord] = useState(false);
 
   const [confirmed, setConfirmed] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [confirmation, setConfirmation] = useState<{
     date: string;
     time: string;
     email: string;
+    visioUrl: string;
+    dciUrl: string;
+    emailSent: boolean;
+    emailError: string | null;
   } | null>(null);
 
   const calendarCells = useMemo(() => {
@@ -141,18 +149,42 @@ export default function BookingClient() {
       selectedSlot,
   );
 
-  function confirmBooking() {
-    if (!selectedDate || !selectedSlot) return;
-    const dayStr = selectedDate.toLocaleDateString("fr-FR", {
-      weekday: "long",
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    });
-    setConfirmation({
-      date: capitalize(dayStr),
-      time: `${selectedSlot} – ${addOneHour(selectedSlot)} · 1 heure`,
+  async function confirmBooking() {
+    if (!selectedDate || !selectedSlot || submitting) return;
+    setErrorMsg(null);
+    const dayStr = capitalize(
+      selectedDate.toLocaleDateString("fr-FR", {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      }),
+    );
+    const timeStr = `${selectedSlot} – ${addOneHour(selectedSlot)} · 1 heure`;
+
+    setSubmitting(true);
+    const res = await bookRdv({
+      firstName,
+      lastName,
       email: email.trim(),
+      referral,
+      dateLabel: dayStr,
+      timeLabel: `${selectedSlot} – ${addOneHour(selectedSlot)}`,
+    });
+    setSubmitting(false);
+
+    if (!res.ok) {
+      setErrorMsg(res.reason);
+      return;
+    }
+    setConfirmation({
+      date: dayStr,
+      time: timeStr,
+      email: email.trim(),
+      visioUrl: res.visioUrl,
+      dciUrl: res.dciUrl,
+      emailSent: res.emailSent,
+      emailError: res.emailError,
     });
     setConfirmed(true);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -201,7 +233,7 @@ export default function BookingClient() {
                 </svg>
                 Entretien initial
                 <span className="meeting-pill-sep"></span>1 heure
-                <span className="meeting-pill-sep"></span>Google Meet
+                <span className="meeting-pill-sep"></span>Visioconférence
                 <span className="meeting-pill-sep"></span>Sans engagement
               </div>
             </div>
@@ -383,7 +415,7 @@ export default function BookingClient() {
                   onChange={(e) => setEmail(e.target.value)}
                 />
                 <div className="field-help">
-                  Nous y enverrons la confirmation et le lien Google Meet
+                  Nous y enverrons la confirmation et le lien de visioconférence
                 </div>
               </div>
 
@@ -443,10 +475,15 @@ export default function BookingClient() {
                 className="btn-confirm"
                 id="confirmBtn"
                 onClick={confirmBooking}
-                disabled={!formValid}
+                disabled={!formValid || submitting}
               >
-                Confirmer le rendez-vous
+                {submitting ? "Confirmation en cours…" : "Confirmer le rendez-vous"}
               </button>
+              {errorMsg && (
+                <div style={{ marginTop: 10, color: "#8B3A2A", fontSize: 13 }}>
+                  {errorMsg}
+                </div>
+              )}
             </div>
           </div>
 
@@ -469,11 +506,22 @@ export default function BookingClient() {
         <div className="conf-check">✓</div>
         <div className="conf-title">Votre rendez-vous est confirmé</div>
         <div className="conf-text">
-          Vous allez recevoir dans les prochaines minutes un e-mail de
-          confirmation à l&apos;adresse{" "}
-          <strong id="confEmail">{confirmation?.email}</strong>, contenant le
-          lien Google Meet pour l&apos;entretien ainsi qu&apos;un document de
-          collecte d&apos;informations à compléter avant notre échange.
+          {confirmation?.emailSent ? (
+            <>
+              Un e-mail de confirmation vient d&apos;être envoyé à{" "}
+              <strong id="confEmail">{confirmation?.email}</strong>, contenant le
+              lien de visioconférence pour l&apos;entretien ainsi qu&apos;un
+              document de collecte d&apos;informations à compléter. Vous pouvez
+              aussi y accéder directement ci-dessous.
+            </>
+          ) : (
+            <>
+              Votre rendez-vous est enregistré. L&apos;e-mail à{" "}
+              <strong id="confEmail">{confirmation?.email}</strong> n&apos;a pas
+              pu être envoyé{confirmation?.emailError ? ` (${confirmation.emailError})` : ""}.
+              Utilisez les liens ci-dessous pour le jour de l&apos;entretien.
+            </>
+          )}
         </div>
         <div className="conf-details">
           <div className="conf-details-row">
@@ -490,12 +538,56 @@ export default function BookingClient() {
           </div>
           <div className="conf-details-row">
             <strong>Modalité</strong>
-            <span>Google Meet · lien envoyé par e-mail</span>
+            <span>Visioconférence · lien ci-dessous et par e-mail</span>
           </div>
           <div className="conf-details-row">
             <strong>Conseiller</strong>
             <span>Luc THILLIEZ · Cabinet Paris Étoile</span>
           </div>
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            gap: 12,
+            justifyContent: "center",
+            flexWrap: "wrap",
+            margin: "24px 0 8px",
+          }}
+        >
+          <a
+            href={confirmation?.visioUrl ?? "#"}
+            target="_blank"
+            rel="noreferrer"
+            style={{
+              display: "inline-block",
+              padding: "13px 26px",
+              background: "#C8A55C",
+              color: "#0B1C35",
+              fontWeight: 600,
+              borderRadius: 6,
+              textDecoration: "none",
+            }}
+          >
+            Rejoindre la visioconférence
+          </a>
+          <a
+            href={confirmation?.dciUrl ?? "#"}
+            target="_blank"
+            rel="noreferrer"
+            style={{
+              display: "inline-block",
+              padding: "13px 26px",
+              background: "#fff",
+              color: "#0B1C35",
+              fontWeight: 600,
+              border: "1px solid #C8A55C",
+              borderRadius: 6,
+              textDecoration: "none",
+            }}
+          >
+            Compléter mon document de collecte
+          </a>
         </div>
         <div className="conf-next">
           Pensez à compléter le document de collecte que vous allez recevoir par
