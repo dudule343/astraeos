@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { getAgenda, type KpiCompareCell } from "../../_data/agenda";
 import { CopyLinkButton } from "./CopyLinkButton";
+import { GoogleSyncButton } from "./GoogleSyncButton";
 import { NewRdvModal, OpenRdvButton } from "./NewRdvModal";
 import { WeekCalendar } from "./WeekCalendar";
 import "./_styles/agenda.css";
@@ -45,23 +46,7 @@ export default async function AgendaPage() {
           </p>
         </div>
         <div className="hero-actions">
-          <a
-            className="btn btn-ghost btn-sm"
-            href="/api/auth/google/start"
-            title="Synchroniser votre Google Calendar avec Astraeos"
-          >
-            <svg
-              style={{ width: "13px", height: "13px" }}
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <circle cx="12" cy="12" r="9" />
-              <path d="M8 12 L 11 15 L 16 9" />
-            </svg>
-            <span>{data.syncLabel}</span>
-          </a>
+          <GoogleSyncButton />
           <OpenRdvButton />
         </div>
       </div>
