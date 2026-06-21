@@ -25,8 +25,8 @@ function KpiCompare({ cells }: { cells: KpiCompareCell[] }) {
   );
 }
 
-export default function AgendaPage() {
-  const data = getAgenda();
+export default async function AgendaPage() {
+  const data = await getAgenda();
   const { days, rdvsBySlot } = data;
 
   return (

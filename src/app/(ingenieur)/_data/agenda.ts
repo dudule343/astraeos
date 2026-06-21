@@ -10,6 +10,9 @@
  */
 
 /** Un RDV positionné dans la grille semaine. */
+import { createAdminClient } from "@/lib/supabase/admin";
+import { getSessionContext } from "@/lib/auth/context";
+
 export type AgendaRdv = {
   id: string;
   /** 0 = lundi … 6 = dimanche */
@@ -264,14 +267,89 @@ function buildSlotMap(): Map<string, AgendaRdv> {
   return map;
 }
 
-/** Données de l'agenda (exemples maquette). Source unique pour la page. */
-export function getAgenda(): AgendaData {
+const MOIS: Record<string, number> = {
+  janvier: 0, février: 1, fevrier: 1, mars: 2, avril: 3, mai: 4, juin: 5,
+  juillet: 6, août: 7, aout: 7, septembre: 8, octobre: 9, novembre: 10,
+  décembre: 11, decembre: 11,
+};
+
+/** Parse "Vendredi 15 mai 2026" + "09:00 – 10:00" → position dans la semaine de
+ *  base (lundi 11 → dimanche 17 mai 2026). null si hors de cette semaine. */
+function positionInBaseWeek(
+  dateLabel: string,
+  timeLabel: string,
+): { dayIndex: number; slotKey: string; hourLabel: string } | null {
+  const md = dateLabel.match(/(\d{1,2})\s+([A-Za-zÀ-ÿ]+)\s+(\d{4})/);
+  if (!md) return null;
+  const day = Number(md[1]);
+  const mois = MOIS[md[2].toLowerCase()];
+  const year = Number(md[3]);
+  if (mois !== 4 || year !== 2026 || day < 11 || day > 17) return null;
+  const mt = timeLabel.match(/(\d{1,2}):(\d{2})/);
+  if (!mt) return null;
+  const hh = Number(mt[1]);
+  const mm = mt[2];
   return {
+    dayIndex: day - 11, // 11 mai = lundi = 0
+    slotKey: `${hh}h${mm}`,
+    hourLabel: `${String(hh).padStart(2, "0")}h${mm === "00" ? "" : mm}`,
+  };
+}
+
+/** Injecte dans la grille les vrais RDV pris en ligne (dci_submissions kind='rdv')
+ *  qui tombent dans la semaine affichée, scopés au cabinet. Best-effort. */
+async function mergeRealRdvs(map: Map<string, AgendaRdv>): Promise<void> {
+  try {
+    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) return;
+    const ctx = await getSessionContext();
+    if (!ctx) return;
+    const supabase = createAdminClient();
+    const { data } = await supabase
+      .from("dci_submissions")
+      .select("prospect_slug, display_name, payload")
+      .eq("tenant_id", ctx.tenantId)
+      .eq("kind", "rdv")
+      .limit(100);
+    for (const r of (data ?? []) as Array<{
+      prospect_slug: string;
+      display_name: string | null;
+      payload: Record<string, unknown> | null;
+    }>) {
+      const p = r.payload ?? {};
+      const pos = positionInBaseWeek(
+        typeof p.dateLabel === "string" ? p.dateLabel : "",
+        typeof p.timeLabel === "string" ? p.timeLabel : "",
+      );
+      if (!pos) continue;
+      const surname = (r.display_name ?? r.prospect_slug).split(" ").slice(-1)[0].toUpperCase();
+      const room = typeof p.visioRoom === "string" ? p.visioRoom : `rdv-${r.prospect_slug}-initial`;
+      map.set(`${pos.dayIndex}:${pos.slotKey}`, {
+        id: `real-${r.prospect_slug}`,
+        dayIndex: pos.dayIndex,
+        slotKey: pos.slotKey,
+        hourLabel: pos.hourLabel,
+        surname,
+        metaLabel: "Entretien initial · visio · prospect en ligne",
+        isVisio: true,
+        variant: "ev-gold",
+        href: `/visio/${room}?role=engineer`,
+      });
+    }
+  } catch {
+    // best-effort : la grille démo reste affichée si la base est indisponible.
+  }
+}
+
+/** Données de l'agenda (exemples maquette + vrais RDV pris en ligne). */
+export async function getAgenda(): Promise<AgendaData> {
+  const rdvsBySlot = buildSlotMap();
+  await mergeRealRdvs(rdvsBySlot);
+  return {
+    rdvsBySlot,
     weekLabel: "Semaine du lundi 11 au dimanche 17 mai 2026",
     weekEyebrow: "Mon agenda · synchronisé Google Agenda · semaine 20",
     syncLabel: "Google Agenda · sync 11:42",
     days: DAYS,
-    rdvsBySlot: buildSlotMap(),
     kpiWeekCount: 8,
     kpiWeekMeta: "5 en présentiel · 3 en visio",
     kpiWeekCompare: [
