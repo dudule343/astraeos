@@ -3,6 +3,9 @@
 // (page-ing-pipe-01). Source unique : la page lit d'ici, rien n'est en dur
 // dans le composant. Mêmes noms, mêmes dates, mêmes statuts que la maquette.
 
+import { createAdminClient } from "@/lib/supabase/admin";
+import { getSessionContext } from "@/lib/auth/context";
+
 export type ProspectStatus =
   | { kind: "pill"; tone: "sent" | "waiting" | "relance" | "met"; label: string }
   | { kind: "custom"; label: string; bg: string; color: string };
@@ -193,6 +196,93 @@ const VIEW: ProspectsView = {
   reste: { count: 177, total: 187 },
 };
 
+// Libellés courts par type de soumission, pour la colonne "Documents".
+const KIND_LABEL: Record<string, string> = {
+  rdv: "RDV",
+  simple: "DCI simplifié",
+  qualification: "Qualif",
+  complet: "DCI complet",
+};
+
+/**
+ * Lit les vrais prospects entrés via le parcours en ligne (table
+ * `dci_submissions`, regroupés par prospect), scopés au cabinet courant, et les
+ * transforme en lignes du tableau. Best-effort : en l'absence de base/contexte,
+ * renvoie [] et l'écran retombe sur les exemples de la maquette.
+ */
+async function loadRealProspects(): Promise<ProspectRow[]> {
+  try {
+    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) return [];
+    const ctx = await getSessionContext();
+    if (!ctx) return [];
+    const supabase = createAdminClient();
+    const { data } = await supabase
+      .from("dci_submissions")
+      .select("prospect_slug, kind, display_name, payload, updated_at")
+      .eq("tenant_id", ctx.tenantId)
+      .order("updated_at", { ascending: false })
+      .limit(200);
+    if (!data || data.length === 0) return [];
+
+    type Acc = { name: string; kinds: Set<string>; rdvDate: string | null };
+    const byProspect = new Map<string, Acc>();
+    for (const r of data as Array<{
+      prospect_slug: string;
+      kind: string;
+      display_name: string | null;
+      payload: Record<string, unknown> | null;
+      updated_at: string;
+    }>) {
+      const cur =
+        byProspect.get(r.prospect_slug) ??
+        { name: r.display_name ?? r.prospect_slug, kinds: new Set<string>(), rdvDate: null };
+      cur.kinds.add(r.kind);
+      if (r.display_name) cur.name = r.display_name;
+      if (r.kind === "rdv" && r.payload && typeof r.payload.dateLabel === "string") {
+        cur.rdvDate = r.payload.dateLabel as string;
+      }
+      byProspect.set(r.prospect_slug, cur);
+    }
+
+    return [...byProspect.values()].map((p, i): ProspectRow => {
+      const done = [...p.kinds].map((k) => KIND_LABEL[k] ?? k).join(" · ");
+      const status: ProspectStatus =
+        p.kinds.size >= 3
+          ? { kind: "custom", label: `Parcours ${p.kinds.size}/4`, bg: "#E8F5EE", color: "#1F8049" }
+          : { kind: "pill", tone: "sent", label: `${done} reçu` };
+      return {
+        href: null,
+        highlight: i === 0,
+        type: "seul",
+        names: [p.name],
+        typeLabel: "Prospect · parcours en ligne",
+        cabinet: { name: "Luc THILLIEZ", meta: "Dirigeant-praticien" },
+        ingenieur: null,
+        rencontre: {
+          date: p.rdvDate ?? "—",
+          meta: p.kinds.has("rdv") ? "RDV pris en ligne" : "Pas encore de RDV",
+        },
+        documents: { date: "—", meta: done ? `${done} reçu(s)` : "Aucun document" },
+        status,
+      };
+    });
+  } catch {
+    return [];
+  }
+}
+
 export async function fetchProspectsView(): Promise<ProspectsView> {
-  return VIEW;
+  const realRows = await loadRealProspects();
+  if (realRows.length === 0) return VIEW;
+  return {
+    ...VIEW,
+    kpis: {
+      ...VIEW.kpis,
+      actifs: {
+        value: String(VIEW.rows.length + realRows.length),
+        meta: `dont ${realRows.length} via parcours en ligne`,
+      },
+    },
+    rows: [...realRows, ...VIEW.rows],
+  };
 }
