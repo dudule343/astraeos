@@ -4268,7 +4268,7 @@ setInterval(() => {
         // Diagnostic console (1/s) : audio capté (frames>0) ? Deepgram répond (dgmsgs>0) ?
         if (window.__dgDiag) clearInterval(window.__dgDiag);
         window.__dgDiag = setInterval(function () {
-          try { console.log('[ASTR-STT] ctx=' + (dgAudioCtx && dgAudioCtx.state) + ' frames=' + (window.__dgFrames || 0) + ' dgmsgs=' + (window.__dgMsgs || 0) + ' ws=' + (dgWs && dgWs.readyState)); } catch (e) {}
+          try { console.log('[ASTR-STT] ctx=' + (dgAudioCtx && dgAudioCtx.state) + ' lvl=' + (window.__dgLevel || 0).toFixed(3) + ' frames=' + (window.__dgFrames || 0) + ' dgmsgs=' + (window.__dgMsgs || 0) + ' ws=' + (dgWs && dgWs.readyState)); } catch (e) {}
         }, 1000);
         dgSource = dgAudioCtx.createMediaStreamSource(stream);
         var bufSize = 4096;
@@ -4277,6 +4277,8 @@ setInterval(() => {
           if (!dgWs || dgWs.readyState !== 1) return;
           window.__dgFrames = (window.__dgFrames || 0) + 1;
           var input = e.inputBuffer.getChannelData(0);
+          var __pk = 0; for (var __i = 0; __i < input.length; __i += 64) { var __a = Math.abs(input[__i]); if (__a > __pk) __pk = __a; }
+          window.__dgLevel = __pk;
           var down = downsampleTo16k(input, dgAudioCtx.sampleRate);
           var pcm = floatTo16BitPCM(down);
           try { dgWs.send(pcm.buffer); } catch (err) {}
@@ -4333,6 +4335,7 @@ setInterval(() => {
       window.__dgMsgs = (window.__dgMsgs || 0) + 1;
       var msg;
       try { msg = JSON.parse(ev.data); } catch (e) { return; }
+      try { console.log('[ASTR-STT-MSG]', msg && msg.type, JSON.stringify(msg && msg.channel && msg.channel.alternatives && msg.channel.alternatives[0] && msg.channel.alternatives[0].transcript)); } catch (e) {}
       if (!msg || msg.type !== 'Results' || !msg.channel) return;
       var alt = msg.channel.alternatives && msg.channel.alternatives[0];
       var txt = alt && alt.transcript ? alt.transcript : '';
