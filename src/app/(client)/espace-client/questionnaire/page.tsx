@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import "@/app/parcours/_styles/qualification.css";
 import { CLIENT_BASE } from "@/app/(client)/_components/nav";
 import { getClientContext, fetchClientDci } from "@/app/(client)/_data/client";
 import QuestionnaireClient from "./QuestionnaireClient";
@@ -51,6 +52,7 @@ export default async function QuestionnairePage() {
       <Header />
       <QuestionnaireClient
         dossierId={ctx.dossierId}
+        displayName={`${ctx.firstName} ${ctx.lastName}`.trim()}
         status={dci.status}
         byCategory={byCategory}
         simplifiedCompletedAt={dci.simplifiedCompletedAt}

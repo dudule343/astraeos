@@ -2,8 +2,11 @@
 
 import { useMemo, useState, useTransition } from "react";
 
-import { saveDciCategory } from "@/app/(client)/actions";
+import { saveDciCategory, saveRiskProfile } from "@/app/(client)/actions";
 import type { DciCategoryKey, DciStatus } from "@/app/(client)/_data/client";
+import Questionnaire, {
+  type RiskAnswers,
+} from "@/app/parcours/qualification/Questionnaire";
 import {
   PHASES,
   type CategorySchema,
@@ -31,6 +34,8 @@ type CategoryData = {
 export type QuestionnaireClientProps = {
   dossierId: string;
   status: DciStatus;
+  /** Nom du client, pour rattacher le profil de risque (saveRiskProfile). */
+  displayName: string;
   /** Pré-remplissage par catégorie (responses brutes + complétion calculée). */
   byCategory: Record<string, CategoryData>;
   simplifiedCompletedAt: string | null;
@@ -94,6 +99,40 @@ export default function QuestionnaireClient(props: QuestionnaireClientProps) {
             initialResponses={props.byCategory[cat.key]?.responses ?? {}}
           />
         ))}
+      </div>
+
+      {/* À la suite du DCI : le questionnaire de risque (profil investisseur),
+          rattaché au dossier via saveRiskProfile. */}
+      <div style={{ marginTop: 36, borderTop: "1px solid #E7E1D5", paddingTop: 28 }}>
+        <div className="mb-3 text-center">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-[var(--gold-deep,#C68E0E)]">
+            Étape suivante
+          </p>
+          <h2
+            style={{
+              fontFamily: "var(--font-cinzel, serif)",
+              fontSize: 22,
+              color: "var(--navy, #102D50)",
+              margin: "4px 0",
+            }}
+          >
+            Questionnaire de risque
+          </h2>
+          <p className="text-[13px] italic text-[var(--navy-300)]">
+            Pour finaliser votre profil d&apos;investisseur.
+          </p>
+        </div>
+        <div className="maq-qualification">
+          <Questionnaire
+            onSubmitAnswers={async (answers: RiskAnswers) => {
+              await saveRiskProfile(
+                props.dossierId,
+                props.displayName,
+                answers as unknown as Record<string, unknown>,
+              );
+            }}
+          />
+        </div>
       </div>
     </div>
   );
