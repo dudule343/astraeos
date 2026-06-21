@@ -125,19 +125,38 @@ function ProductSection({ product }: { product: Product }) {
   );
 }
 
-export default function Questionnaire() {
+export type RiskAnswers = {
+  reponses: Record<string, number>;
+  esgPrivilegier: boolean[];
+  esgEviter: boolean[];
+  certifie: boolean;
+};
+
+export default function Questionnaire({
+  onSubmitAnswers,
+  initialAnswers,
+}: {
+  /** Si fourni, remplace l'enregistrement par défaut (parcours prospect →
+   *  dci_submissions). Utilisé par l'espace client pour rattacher le profil au dossier. */
+  onSubmitAnswers?: (answers: RiskAnswers) => void | Promise<void>;
+  initialAnswers?: Partial<RiskAnswers>;
+} = {}) {
   const [currentStep, setCurrentStep] = useState(1);
   const [submitted, setSubmitted] = useState(false);
   const [saveFlash, setSaveFlash] = useState(false);
-  const [certChecked, setCertChecked] = useState(false);
+  const [certChecked, setCertChecked] = useState(initialAnswers?.certifie ?? false);
 
   // Sélections radio par groupe (auto-eval, horizon, profile, tolerance, reaction, curve, esg, esg-eq)
-  const [radios, setRadios] = useState<Record<string, number>>({ esg: 1 });
+  const [radios, setRadios] = useState<Record<string, number>>(
+    initialAnswers?.reponses ?? { esg: 1 },
+  );
   // Cases ESG cochées (privilégier / éviter)
   const [privilegier, setPrivilegier] = useState<boolean[]>(
-    ESG_PRIVILEGIER.map(() => false),
+    initialAnswers?.esgPrivilegier ?? ESG_PRIVILEGIER.map(() => false),
   );
-  const [eviter, setEviter] = useState<boolean[]>(ESG_EVITER.map(() => false));
+  const [eviter, setEviter] = useState<boolean[]>(
+    initialAnswers?.esgEviter ?? ESG_EVITER.map(() => false),
+  );
 
   const selectRadio = (group: string, index: number) => {
     setRadios((prev) => ({ ...prev, [group]: index }));
@@ -163,13 +182,19 @@ export default function Questionnaire() {
   };
 
   const submitForm = () => {
-    // On enregistre les VRAIES réponses (profil de risque), pas juste un marqueur.
-    persistParcours("qualification", {
+    const answers: RiskAnswers = {
       reponses: radios,
       esgPrivilegier: privilegier,
       esgEviter: eviter,
       certifie: certChecked,
-    });
+    };
+    // Espace client : enregistrement rattaché au dossier (onSubmitAnswers).
+    // Parcours prospect : enregistrement dci_submissions par défaut.
+    if (onSubmitAnswers) {
+      void onSubmitAnswers(answers);
+    } else {
+      persistParcours("qualification", answers);
+    }
     setSubmitted(true);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };

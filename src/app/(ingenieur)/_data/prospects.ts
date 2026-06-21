@@ -220,6 +220,9 @@ async function loadRealProspects(): Promise<ProspectRow[]> {
       .from("dci_submissions")
       .select("prospect_slug, kind, display_name, payload, updated_at")
       .eq("tenant_id", ctx.tenantId)
+      // Exclut les profils de risque remplis par des CLIENTS (slug `dossier-…`,
+      // espace client) : ce ne sont pas des prospects.
+      .not("prospect_slug", "like", "dossier-%")
       .order("updated_at", { ascending: false })
       .limit(200);
     if (!data || data.length === 0) return [];

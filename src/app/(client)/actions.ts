@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getSessionContext } from "@/lib/auth/context";
+import { saveSubmission } from "@/lib/dci-store";
 import { CLIENT_BASE } from "./_components/nav";
 import {
   DCI_CATEGORY_COLUMNS,
@@ -105,6 +106,43 @@ async function resolveOwnedDossier(
     tenantId: dossier.tenant_id as string,
     cabinetId: dossier.cabinet_id as string,
   };
+}
+
+// ---------------------------------------------------------------------------
+// saveRiskProfile — enregistre le questionnaire de risque rempli par le CLIENT
+// ---------------------------------------------------------------------------
+/**
+ * Le client remplit le questionnaire de risque depuis son espace. On rattache le
+ * profil au dossier (slug `dossier-<id>`) dans dci_submissions, scope revérifié.
+ * Ces entrées sont filtrées de l'écran /prospects (ce sont des clients, pas des
+ * prospects) ; le décodeur de profil de risque les lit normalement.
+ */
+export async function saveRiskProfile(
+  dossierId: string,
+  displayName: string,
+  payload: Record<string, unknown>,
+): Promise<ActionResult> {
+  try {
+    if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
+      return { ok: false, error: "Réponses invalides." };
+    }
+    const owned = await resolveOwnedDossier(dossierId);
+    if (!owned.ok) return owned;
+
+    await saveSubmission({
+      prospect_slug: `dossier-${owned.dossierId}`,
+      kind: "qualification",
+      payload: { ...payload, source: "espace-client" },
+      display_name: displayName?.trim() || `Dossier ${owned.dossierId.slice(0, 8)}`,
+      submitted_at: new Date().toISOString(),
+      tenant_id: owned.tenantId,
+      cabinet_id: owned.cabinetId,
+    });
+    revalidatePath(`${CLIENT_BASE}/questionnaire-risque`);
+    return { ok: true };
+  } catch {
+    return { ok: false, error: "Enregistrement du profil de risque impossible." };
+  }
 }
 
 // ---------------------------------------------------------------------------
