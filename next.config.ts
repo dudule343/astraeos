@@ -44,6 +44,13 @@ const nextConfig: NextConfig = {
   },
   async headers() {
     return [
+      // La wireframe visio (cockpit Jitsi/transcription) évolue souvent : on
+      // force le no-store pour que le navigateur recharge toujours la dernière
+      // version (sinon un visio.html en cache masque les correctifs déployés).
+      {
+        source: "/wireframes/:path*",
+        headers: [{ key: "Cache-Control", value: "no-store, must-revalidate" }],
+      },
       {
         source: "/:path*",
         headers: securityHeaders,

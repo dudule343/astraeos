@@ -4177,10 +4177,11 @@ setInterval(() => {
     // (couvre un double-démarrage dans la fenêtre async + évite la fuite du
     // précédent flux micro).
     cleanupDeepgram();
-    navigator.mediaDevices.getUserMedia({ audio: true })
+    navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: true } })
       .then(function (mic) {
         if (dgMicStream) { try { dgMicStream.getTracks().forEach(function (t) { t.stop(); }); } catch (e) {} }
         dgMicStream = mic;
+        try { var at = mic.getAudioTracks()[0]; console.log('[ASTR-STT] mic track:', at && at.label, 'enabled=' + (at && at.enabled), 'muted=' + (at && at.muted)); } catch (e) {}
         openDeepgramSocket(token, mic, true);
       })
       .catch(function () {
@@ -4274,7 +4275,11 @@ setInterval(() => {
             + ' type=' + (window.__dgLastType || '-')
             + ' txt="' + String(window.__dgLastTxt || '').slice(0, 40) + '"';
           try { console.log('[ASTR-STT] ctx=' + (dgAudioCtx && dgAudioCtx.state) + ' ' + s); } catch (e) {}
-          try { setNote(s); } catch (e) {}
+          try {
+            var el = window.__dgDbgEl;
+            if (!el) { el = document.createElement('div'); el.style.cssText = 'position:fixed;left:6px;bottom:6px;z-index:999999;background:#c0392b;color:#fff;font:12px/1.4 monospace;padding:4px 8px;border-radius:4px;max-width:90vw;'; document.body.appendChild(el); window.__dgDbgEl = el; }
+            el.textContent = s;
+          } catch (e) {}
         }, 1000);
         dgSource = dgAudioCtx.createMediaStreamSource(stream);
         var bufSize = 4096;
