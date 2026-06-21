@@ -4245,7 +4245,13 @@ setInterval(() => {
     ws.onopen = function () {
       try {
         var Ctx = window.AudioContext || window.webkitAudioContext;
-        dgAudioCtx = new Ctx();
+        // Forcer 16 kHz : le navigateur resample lui-même le micro à 16k (propre),
+        // et downsampleTo16k devient un no-op → on envoie EXACTEMENT du linear16
+        // 16k à Deepgram. Un resample manuel imparfait (depuis 44.1/48k) produit
+        // un signal que Deepgram n'arrive pas à transcrire (Results vides) alors
+        // que l'audio est bien présent. Fallback au contexte par défaut si refusé.
+        try { dgAudioCtx = new Ctx({ sampleRate: 16000 }); } catch (e) { dgAudioCtx = new Ctx(); }
+        try { console.log('[ASTR-STT] AudioContext sampleRate=' + dgAudioCtx.sampleRate); } catch (e) {}
         // L'auto-démarrage (sans clic direct) crée souvent un AudioContext
         // SUSPENDU → onaudioprocess ne se déclenche jamais, aucun audio
         // n'atteint Deepgram (transcription connectée mais vide). On le réveille
