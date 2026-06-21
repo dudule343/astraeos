@@ -8,6 +8,8 @@
  * la page lit ici, jamais de valeur en dur dans le composant.
  */
 
+import { getClientsScreen, type Client } from "./clients";
+
 export type Personne = {
   name: string;
   kycBadge: string;
@@ -214,10 +216,27 @@ export const FICHE_CLIENT_MODELE: FicheClient = {
 };
 
 /**
- * Renvoie la fiche client pour un id donné. Dans la maquette toutes les
- * fiches ouvrent le modèle DUPONT-TOPIN ; on conserve ce comportement tant
- * que les vraies fiches Supabase ne sont pas rebranchées.
+ * Renvoie la fiche du client correspondant au slug. On reconstruit l'IDENTITÉ
+ * (hero : nom, type, date, détails) à partir de la liste réelle des clients, pour
+ * que cliquer « Voir » sur un client ouvre BIEN sa fiche (et non toujours le
+ * modèle DUPONT-TOPIN). Les sections détaillées (régime, historique, documents,
+ * RDV) restent les données d'exemple tant que les vraies fiches Supabase ne sont
+ * pas branchées — c'est ce que signale le bandeau « fiche client modèle ».
  */
-export function getFicheClient(_id: string): FicheClient {
-  return FICHE_CLIENT_MODELE;
+function ficheFromClient(client: Client): FicheClient {
+  return {
+    ...FICHE_CLIENT_MODELE,
+    id: client.slug,
+    eyebrow: `Fiche client · ${client.type} · client depuis le ${client.date1ereEtude}`,
+    heroNameLead: "",
+    heroNameStrong: client.nom,
+    heroSub: `${client.details} · dernière interaction : ${client.derniereInteraction}. Sections détaillées ci-dessous : données d'exemple (fiche modèle).`,
+  };
+}
+
+export function getFicheClient(id: string): FicheClient {
+  const client = getClientsScreen().clients.find((c) => c.slug === id);
+  if (!client) return FICHE_CLIENT_MODELE;
+  if (client.slug === "dupont-topin") return FICHE_CLIENT_MODELE;
+  return ficheFromClient(client);
 }
