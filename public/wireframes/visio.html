@@ -4177,7 +4177,20 @@ setInterval(() => {
     // (couvre un double-démarrage dans la fenêtre async + évite la fuite du
     // précédent flux micro).
     cleanupDeepgram();
-    navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: true } })
+    // La transcription choisit un VRAI micro matériel (évite les périphériques
+    // virtuels silencieux type Loom/BlackHole qui peuvent être le défaut système
+    // → flux muet → Deepgram renvoie du vide alors que l'appel Jitsi, lui, a le
+    // bon micro). Fallback au défaut système si l'énumération échoue.
+    var __base = { echoCancellation: false, noiseSuppression: false, autoGainControl: true };
+    navigator.mediaDevices.enumerateDevices()
+      .then(function (devs) {
+        var bad = /virtual|loom|blackhole|aggregate|soundflower/i;
+        var real = (devs || []).filter(function (d) { return d.kind === 'audioinput'; })
+          .find(function (d) { return d.deviceId && d.label && !bad.test(d.label); });
+        try { console.log('[ASTR-STT] micro transcription:', real ? real.label : 'defaut systeme'); } catch (e) {}
+        return navigator.mediaDevices.getUserMedia({ audio: real ? { deviceId: { ideal: real.deviceId }, echoCancellation: false, noiseSuppression: false, autoGainControl: true } : __base });
+      })
+      .catch(function () { return navigator.mediaDevices.getUserMedia({ audio: __base }); })
       .then(function (mic) {
         if (dgMicStream) { try { dgMicStream.getTracks().forEach(function (t) { t.stop(); }); } catch (e) {} }
         dgMicStream = mic;
