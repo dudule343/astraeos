@@ -823,6 +823,22 @@ select.v4-modal-input { cursor:pointer; appearance:none; -webkit-appearance:none
   </div>
 </div>
 
+<!-- Aperçu « Vue client » (toggle ingénieur) : un SEUL écran = la vidéo. On masque
+     tout le cockpit confidentiel (insights IA, transcription, DCI, contrôles), on
+     garde juste la barre du haut pour pouvoir revenir en Vue ingénieur. -->
+<style id="astr-client-preview-css">
+  body.client-preview #view-client{display:none !important;}
+  body.client-preview #view-ingenieur{display:flex !important;}
+  body.client-preview .alt-panel{display:none !important;}
+  body.client-preview #view-ingenieur .dci-live,
+  body.client-preview #view-ingenieur .assist,
+  body.client-preview #view-ingenieur .rec-controls,
+  body.client-preview #view-ingenieur .video-zoom-btn{display:none !important;}
+  body.client-preview #view-ingenieur > .session-bar{display:none !important;}
+  body.client-preview #view-ingenieur .cockpit,
+  body.client-preview #view-ingenieur .cockpit.video-zoomed{grid-template-columns:1fr !important;}
+</style>
+
 <!-- ═══ VUE INGÉNIEUR ═══════════════════════════════════════════════ -->
 <div class="view active" id="view-ingenieur">
 
@@ -2951,13 +2967,10 @@ function setView(role) {
   // toggle visible pour revenir en Vue ingénieur.
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.getElementById('view-ingenieur').classList.add('active');
-  if (role === 'client') {
-    try { applyClientView(); } catch (e) {}
-    document.body.classList.add('client-preview');
-  } else {
-    document.body.classList.remove('client-view');
-    document.body.classList.remove('client-preview');
-  }
+  // Le CSS statique #astr-client-preview-css masque tout le cockpit quand
+  // body.client-preview est présent → la vue client = un seul écran (la vidéo).
+  if (role === 'client') document.body.classList.add('client-preview');
+  else document.body.classList.remove('client-preview');
 }
 function setAssistTab(name) {
   document.querySelectorAll('.assist-tab').forEach(t => t.classList.remove('active'));
