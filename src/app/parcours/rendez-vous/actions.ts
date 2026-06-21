@@ -154,6 +154,11 @@ export async function bookRdv(input: BookRdvInput): Promise<BookRdvResult> {
   const qualUrl = `${canonicalOrigin()}/parcours/qualification?prospect=${encodeURIComponent(
     prospectSlug,
   )}&name=${encodeURIComponent(nom)}`;
+  // Lien de dépôt des pièces justificatives (CNI, justif. domicile, RIB, avis
+  // d'imposition), rattaché au même prospect → fichiers visibles dans sa fiche.
+  const documentsUrl = `${canonicalOrigin()}/parcours/documents?prospect=${encodeURIComponent(
+    prospectSlug,
+  )}&name=${encodeURIComponent(nom)}`;
 
   const ctx = await getSessionContext();
 
@@ -211,6 +216,7 @@ export async function bookRdv(input: BookRdvInput): Promise<BookRdvResult> {
     documents: [
       { label: "Compléter mon document de collecte (DCI)", url: dciUrl },
       { label: "Compléter mon questionnaire de risque (profil investisseur)", url: qualUrl },
+      { label: "Déposer mes pièces justificatives", url: documentsUrl },
     ],
     message: `Bonjour ${input.firstName.trim()},\n\nVotre rendez-vous est confirmé. Le jour de l'entretien, cliquez sur le bouton ci-dessous pour rejoindre la visioconférence (aucune installation nécessaire). Merci de compléter au préalable le document de collecte et le questionnaire de risque pour préparer notre échange.`,
   });
@@ -231,6 +237,7 @@ export async function bookRdv(input: BookRdvInput): Promise<BookRdvResult> {
       documents: [
         { label: "Voir le DCI du prospect", url: dciUrl },
         { label: "Voir le questionnaire de risque du prospect", url: qualUrl },
+        { label: "Voir les pièces justificatives du prospect", url: documentsUrl },
       ],
       message: `Nouvelle prise de rendez-vous par un prospect.\n\nProspect : ${nom}\nE-mail : ${email}${input.referral?.trim() ? `\nRecommandé par : ${input.referral.trim()}` : ""}\n\nLe prospect a reçu sa confirmation et le lien de visioconférence. Le RDV est enregistré dans votre espace prospects.`,
     });
