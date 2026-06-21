@@ -3,17 +3,26 @@ import Link from "next/link";
 import {
   pipelineSteps,
   etudesKpis,
-  etudesFilters,
-  etudesRows,
-  etudesRemaining,
+  fetchEtudes,
+  isValidFilter,
   type PipelineStep,
   type EtudeRow,
+  type FilterKey,
 } from "../../_data/etudes";
 import "../../_styles/etudes.css";
 
 export const metadata = {
   title: "ASTRAEOS · Études en cours",
 };
+
+export const dynamic = "force-dynamic";
+
+const BASE = "/espace-ingenieur/etudes";
+
+/** href d'un filtre rapide : « toutes » = URL nue, sinon ?filtre=clé. */
+function filterHref(key: FilterKey): string {
+  return key === "toutes" ? BASE : `${BASE}?filtre=${key}`;
+}
 
 /** Icônes des badges du stepper, identiques à la maquette (une par étape). */
 function StepIcon({ step }: { step: string }) {
@@ -226,7 +235,15 @@ function EtudeTableRow({ row }: { row: EtudeRow }) {
   );
 }
 
-export default function EtudesPage() {
+export default async function EtudesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ filtre?: string }>;
+}) {
+  const { filtre } = await searchParams;
+  const filter: FilterKey = isValidFilter(filtre) ? filtre : "toutes";
+  const { filters, rows, remaining } = fetchEtudes(filter);
+
   return (
     <div className="etudes-page-wrap">
       <div className="pipeline-stepper-v1">
@@ -271,14 +288,16 @@ export default function EtudesPage() {
       </div>
 
       <div className="qf-bar-v1">
-        {etudesFilters.map((f) => (
-          <button
-            key={f.label}
+        {filters.map((f) => (
+          <Link
+            key={f.key}
+            href={filterHref(f.key)}
+            scroll={false}
+            aria-pressed={f.active}
             className={`qf-v1${f.active ? " active" : ""}${f.alert ? " alert" : ""}`}
-            type="button"
           >
             {f.label} <span className="qf-count">{f.count}</span>
-          </button>
+          </Link>
         ))}
       </div>
 
@@ -297,14 +316,20 @@ export default function EtudesPage() {
             </tr>
           </thead>
           <tbody>
-            {etudesRows.map((row) => (
-              <EtudeTableRow key={row.id} row={row} />
-            ))}
+            {rows.length > 0 ? (
+              rows.map((row) => <EtudeTableRow key={row.id} row={row} />)
+            ) : (
+              <tr className="dt-empty-row">
+                <td colSpan={8}>Aucune étude pour ce filtre.</td>
+              </tr>
+            )}
             <tr className="dt-more-row">
               <td colSpan={8}>
-                … {etudesRemaining.count} autres études en cours ·{" "}
+                {remaining.count > 0 ? (
+                  <>… {remaining.count} autres études en cours · </>
+                ) : null}
                 <Link href="/espace-ingenieur/dossiers">
-                  Voir l&apos;intégralité ({etudesRemaining.total})
+                  Voir l&apos;intégralité ({remaining.total})
                 </Link>
               </td>
             </tr>

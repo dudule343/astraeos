@@ -1,34 +1,36 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+
 import type { CollecteRow } from "../../_data/collectes";
 
 /**
- * Cellule « Complétion » de l'écran collecte. Porte EXACTEMENT le comportement
- * de la maquette (page-ing-pipe-03) :
- *   - les lignes qui ont un `detail` ouvrent un alert() avec le détail
- *     document-par-document au clic ;
- *   - les lignes sans `detail` ont seulement cursor:pointer (aucune action),
- *     comme dans la maquette où ces cellules n'ont pas d'onclick.
+ * Cellule « Complétion » de l'écran collecte. Cliquer ouvre la fiche client
+ * (où vivent les documents collectés), comme le pictogramme « œil » de la ligne
+ * et comme le pattern des autres écrans pipe (cf. conformité : row.onClick ->
+ * router.push de la fiche). Le détail document-par-document de la maquette est
+ * conservé en infobulle (title) au survol.
  */
+const BASE = "/espace-ingenieur";
+
 export default function ProgressCell({ row }: { row: CollecteRow }) {
-  const handleClick = row.detail ? () => window.alert(row.detail) : undefined;
+  const router = useRouter();
+  const ficheHref = `${BASE}/clients/${row.id}`;
+  const open = () => router.push(ficheHref);
 
   return (
     <td
       style={{ cursor: "pointer" }}
-      onClick={handleClick}
-      role={row.detail ? "button" : undefined}
-      tabIndex={row.detail ? 0 : undefined}
-      onKeyDown={
-        row.detail
-          ? (event) => {
-              if (event.key === "Enter" || event.key === " ") {
-                event.preventDefault();
-                window.alert(row.detail);
-              }
-            }
-          : undefined
-      }
+      onClick={open}
+      role="button"
+      tabIndex={0}
+      title={row.detail ?? "Ouvrir la fiche client pour voir les documents"}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          open();
+        }
+      }}
     >
       <div className="progress-cell">
         <div className="progress-bar">

@@ -2,24 +2,83 @@
 
 import { useEffect, useState } from "react";
 
-/* Boutons de la barre d'outils (droite) + modale « Nouveau prospect ».
- * Porté de page-ing-pipe-01 + #modal-nouveau-prospect de la maquette ingénieur
- * v28 (openModalNouveauProspect / switchProspectType / toggleProspectDoc).
+import { createProspect } from "./actions";
+
+/* Bouton « Nouveau prospect » + modale #modal-nouveau-prospect.
+ * Porté de page-ing-pipe-01 de la maquette ingénieur v28
+ * (openModalNouveauProspect / switchProspectType / toggleProspectDoc).
  * Interactions réelles : ouverture/fermeture modale, toggle type de prospect
  * (affiche/masque identité principal / conjoint / personne morale), cases à
- * cocher des documents de pré-qualification qui révèlent les blocs e-mail. */
+ * cocher des documents qui révèlent les blocs e-mail, et « Créer le prospect »
+ * branché sur une Server Action (createProspect). */
 
 type ProspectType = "solo" | "couple" | "morale";
 type DocId = "dci-simple" | "dci-complet" | "questionnaire";
 
-export default function NouveauProspectModal() {
+const DOC_LABEL: Record<DocId, string> = {
+  "dci-simple": "DCI Simplifié",
+  "dci-complet": "DCI Complet",
+  questionnaire: "Questionnaire de qualification",
+};
+
+export default function NouveauProspectModal({
+  onCreated,
+}: {
+  onCreated?: (message: string) => void;
+}) {
   const [open, setOpen] = useState(false);
   const [type, setType] = useState<ProspectType>("solo");
+  const [submitting, setSubmitting] = useState(false);
+  const [civilite, setCivilite] = useState("Monsieur");
+  const [prenom, setPrenom] = useState("");
+  const [nom, setNom] = useState("");
+  const [email, setEmail] = useState("");
+  const [telephone, setTelephone] = useState("");
+  const [raisonSociale, setRaisonSociale] = useState("");
   const [docs, setDocs] = useState<Record<DocId, boolean>>({
     "dci-simple": false,
     "dci-complet": false,
     questionnaire: false,
   });
+
+  const resetForm = () => {
+    setType("solo");
+    setCivilite("Monsieur");
+    setPrenom("");
+    setNom("");
+    setEmail("");
+    setTelephone("");
+    setRaisonSociale("");
+    setDocs({ "dci-simple": false, "dci-complet": false, questionnaire: false });
+  };
+
+  const canSubmit =
+    type === "morale" ? raisonSociale.trim().length > 0 : nom.trim().length > 0;
+
+  const handleCreate = async () => {
+    if (!canSubmit || submitting) return;
+    setSubmitting(true);
+    try {
+      const selectedDocs = (Object.keys(docs) as DocId[])
+        .filter((id) => docs[id])
+        .map((id) => DOC_LABEL[id]);
+      const res = await createProspect({
+        type,
+        civilite,
+        prenom,
+        nom,
+        email,
+        telephone,
+        raisonSociale,
+        docs: selectedDocs,
+      });
+      onCreated?.(res.message);
+      resetForm();
+      setOpen(false);
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
@@ -45,12 +104,8 @@ export default function NouveauProspectModal() {
 
   return (
     <>
-      <button className="btn btn-ghost btn-sm">Filtres avancés</button>
-      <button className="btn btn-ghost btn-sm">
-        Trier par : Date 1<sup>re</sup> rencontre
-      </button>
-      <button className="btn btn-ghost btn-sm">Exporter</button>
       <button
+        type="button"
         className="btn btn-sm btn-nouveau-prospect"
         onClick={() => setOpen(true)}
       >
@@ -136,7 +191,11 @@ export default function NouveauProspectModal() {
                   <label className="s1a-field-label">
                     Civilité<span className="required">*</span>
                   </label>
-                  <select className="s1a-select">
+                  <select
+                    className="s1a-select"
+                    value={civilite}
+                    onChange={(e) => setCivilite(e.target.value)}
+                  >
                     <option>Monsieur</option>
                     <option>Madame</option>
                   </select>
@@ -145,7 +204,13 @@ export default function NouveauProspectModal() {
                   <label className="s1a-field-label">
                     Prénom<span className="required">*</span>
                   </label>
-                  <input type="text" className="s1a-input" placeholder="ex. Bertrand" />
+                  <input
+                    type="text"
+                    className="s1a-input"
+                    placeholder="ex. Bertrand"
+                    value={prenom}
+                    onChange={(e) => setPrenom(e.target.value)}
+                  />
                 </div>
                 <div className="s1a-field">
                   <label className="s1a-field-label">
@@ -156,6 +221,8 @@ export default function NouveauProspectModal() {
                     className="s1a-input"
                     placeholder="ex. DUPONT-TOPIN"
                     style={{ textTransform: "uppercase" }}
+                    value={nom}
+                    onChange={(e) => setNom(e.target.value)}
                   />
                 </div>
               </div>
@@ -169,13 +236,21 @@ export default function NouveauProspectModal() {
                     type="email"
                     className="s1a-input"
                     placeholder="bertrand.dupont-topin@email.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                   />
                 </div>
                 <div className="s1a-field">
                   <label className="s1a-field-label">
                     Téléphone<span className="required">*</span>
                   </label>
-                  <input type="tel" className="s1a-input" placeholder="+33 6 12 34 56 78" />
+                  <input
+                    type="tel"
+                    className="s1a-input"
+                    placeholder="+33 6 12 34 56 78"
+                    value={telephone}
+                    onChange={(e) => setTelephone(e.target.value)}
+                  />
                 </div>
               </div>
             </div>
@@ -250,6 +325,8 @@ export default function NouveauProspectModal() {
                   className="s1a-input"
                   placeholder="ex. SAS GROUPE LEFEBVRE"
                   style={{ textTransform: "uppercase" }}
+                  value={raisonSociale}
+                  onChange={(e) => setRaisonSociale(e.target.value)}
                 />
               </div>
 
@@ -501,10 +578,21 @@ export default function NouveauProspectModal() {
               </span>
             </div>
             <div className="s1a-modal-footer-actions">
-              <button className="s1a-btn s1a-btn-ghost" onClick={() => setOpen(false)}>
+              <button
+                type="button"
+                className="s1a-btn s1a-btn-ghost"
+                onClick={() => setOpen(false)}
+              >
                 Annuler
               </button>
-              <button className="s1a-btn s1a-btn-primary">Créer le prospect</button>
+              <button
+                type="button"
+                className="s1a-btn s1a-btn-primary"
+                onClick={handleCreate}
+                disabled={!canSubmit || submitting}
+              >
+                {submitting ? "Création…" : "Créer le prospect"}
+              </button>
             </div>
           </div>
         </div>

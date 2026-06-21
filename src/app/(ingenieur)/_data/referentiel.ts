@@ -15,6 +15,8 @@ export type RefListItem = {
   rest?: string;
   /** Lien à droite (« Voir → », « v3.1 → »). */
   link: string;
+  /** Ressource ouverte au clic sur le lien (aperçu PDF réel). */
+  asset: RefAsset;
   /** true => ligne mise en valeur (fond doré + liseré gauche). */
   highlight?: boolean;
 };
@@ -110,10 +112,10 @@ const SCREEN: ReferentielScreen = {
     description:
       "Document maître décrivant l'ensemble des process opérationnels du Cabinet Paris Étoile · 168 pages · mis à jour le 24 avril 2026.",
     sections: [
-      { label: "Section 1 · Onboarding client (étapes 01 → 03)", link: "Voir →" },
-      { label: "Section 2 · Étude patrimoniale (étape 04)", link: "Voir →" },
-      { label: "Section 3 · Restitution & signature (étape 05)", link: "Voir →" },
-      { label: "Section 4 · Suivi récurrent (étape 06)", link: "Voir →" },
+      { label: "Section 1 · Onboarding client (étapes 01 → 03)", link: "Voir →", asset: "manuel" },
+      { label: "Section 2 · Étude patrimoniale (étape 04)", link: "Voir →", asset: "manuel" },
+      { label: "Section 3 · Restitution & signature (étape 05)", link: "Voir →", asset: "manuel" },
+      { label: "Section 4 · Suivi récurrent (étape 06)", link: "Voir →", asset: "manuel" },
     ],
   },
   contrat: {
@@ -127,10 +129,11 @@ const SCREEN: ReferentielScreen = {
         strong: "Licence de marque",
         rest: " · contrat unique · 5 ingénieurs",
         link: "v3.1 →",
+        asset: "contrat_cadre",
         highlight: true,
       },
-      { label: "Document d'Information Précontractuelle (DIP)", link: "Voir →" },
-      { label: "État général du marché", link: "Voir →" },
+      { label: "Document d'Information Précontractuelle (DIP)", link: "Voir →", asset: "contrat_cadre" },
+      { label: "État général du marché", link: "Voir →", asset: "contrat_cadre" },
     ],
     note: "Note : à l'avenir, des modèles franchise / mandataire pourront s'ajouter selon l'évolution juridique du réseau.",
   },

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import type { FinancierClient, FinancierTotal } from "../../_data/assets-financier";
@@ -9,9 +10,11 @@ import type { FinancierClient, FinancierTotal } from "../../_data/assets-financi
  *
  * Portage fidèle de la maquette v28 : dans le wireframe chaque ligne porte
  * `<tr onclick="goToPage('ing-fiche-client')">`, c'est la LIGNE entière qui
- * navigue vers la fiche client. Le bouton « Voir → » n'est PAS un lien : il
- * hérite du clic de la ligne. On reproduit exactement ça avec un vrai handler
- * client (useRouter), comme EtudesPrioritairesTable.
+ * navigue vers la fiche client. On reproduit ça avec un vrai handler client
+ * (useRouter) sur la ligne, plus un onKeyDown pour l'accessibilité clavier.
+ * Le « Voir → » est rendu comme un vrai <Link href> (pas un bouton inerte qui
+ * dépendrait du bubbling), aligné sur le pattern éprouvé de ClientsTable :
+ * navigable au clavier, ouvrable dans un nouvel onglet, clic-droit fonctionnel.
  */
 export function PlacementsTable({
   clients,
@@ -89,9 +92,13 @@ export function PlacementsTable({
                 {client.encoursTotal}
               </td>
               <td className="center" style={{ verticalAlign: "middle" }}>
-                <button type="button" className="btn btn-ghost btn-sm">
+                <Link
+                  className="btn btn-ghost btn-sm"
+                  href={href}
+                  onClick={(e) => e.stopPropagation()}
+                >
                   Voir →
-                </button>
+                </Link>
               </td>
             </tr>
           );

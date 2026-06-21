@@ -200,4 +200,118 @@
 .maquette-ing .sim-modal-actions {
   display: flex;
   justify-content: flex-end;
+  margin-top: 22px;
+}
+
+/* ── Calculateur fonctionnel dans la modale ─────────────────────────────── */
+
+.maquette-ing .sim-calc {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.maquette-ing .sim-field {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.maquette-ing .sim-field-label {
+  font-size: 12.5px;
+  color: var(--navy-300);
+  flex: 1;
+}
+
+.maquette-ing .sim-field-input {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: white;
+  border: 1px solid var(--ivory-deep, #e6ddc9);
+  border-radius: 6px;
+  padding: 8px 12px;
+  width: 150px;
+  transition: border-color 0.15s;
+}
+
+.maquette-ing .sim-field-input:focus-within {
+  border-color: var(--gold);
+}
+
+.maquette-ing .sim-field-input input {
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--navy);
+  text-align: right;
+  -moz-appearance: textfield;
+}
+
+.maquette-ing .sim-field-input input::-webkit-outer-spin-button,
+.maquette-ing .sim-field-input input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.maquette-ing .sim-field-suffix {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--navy-300);
+  flex-shrink: 0;
+}
+
+.maquette-ing .sim-result {
+  margin-top: 18px;
+  border-top: 1px solid var(--ivory-deep, #e6ddc9);
+  padding-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.maquette-ing .sim-result-hl {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: linear-gradient(135deg, var(--navy) 0%, #1a3866 100%);
+  color: white;
+  border-radius: 6px;
+  padding: 12px 16px;
+  border-left: 3px solid var(--gold);
+}
+
+.maquette-ing .sim-result-hl span {
+  font-size: 12px;
+  color: var(--gold-300);
+  font-weight: 600;
+}
+
+.maquette-ing .sim-result-hl strong {
+  font-family: var(--serif);
+  font-size: 20px;
+  font-weight: 700;
+  color: white;
+}
+
+.maquette-ing .sim-result-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: 12.5px;
+}
+
+.maquette-ing .sim-result-row span {
+  color: var(--navy-300);
+}
+
+.maquette-ing .sim-result-row strong {
+  color: var(--navy);
+  font-weight: 700;
 }

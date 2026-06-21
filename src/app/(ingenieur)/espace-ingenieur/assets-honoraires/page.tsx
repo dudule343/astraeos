@@ -4,6 +4,7 @@ import { honorairesKpis, etudesMissions, repartitionMissions } from "../../_data
 import "../../_styles/assets-honoraires.css";
 import { ExportHonorairesButton } from "./ExportHonorairesButton";
 import { HonorairesTable } from "./HonorairesTable";
+import { TemplateDownloads } from "./TemplateDownloads";
 
 export const metadata = {
   title: "ASTRAEOS · Honoraires de conseil",
@@ -92,6 +93,11 @@ export default function AssetsHonorairesPage() {
           </span>
         </div>
         <HonorairesTable />
+      </div>
+
+      {/* Modèles contractuels (DER, Lettre de mission) générés par pdf-lib */}
+      <div className="mb-18">
+        <TemplateDownloads />
       </div>
 
       {/* Répartition par type de mission du portefeuille */}

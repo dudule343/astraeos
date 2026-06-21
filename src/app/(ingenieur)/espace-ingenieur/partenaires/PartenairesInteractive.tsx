@@ -9,6 +9,7 @@ import type {
   PartenairesScreen,
   ProfilVariant,
 } from "../../_data/partenaires";
+import { createPartenaire, type PartenaireType } from "./actions";
 
 /* Écran « Partenaires & apporteurs d'affaires » — partie interactive.
  * Porté de page-ing-partenaires (maquette ingénieur v28). Le rendu statique
@@ -480,10 +481,54 @@ function ApporteursTable({
   );
 }
 
+const EMPTY_FORM = {
+  type: "reco" as PartenaireType,
+  nomStructure: "",
+  profil: "notaire",
+  localisation: "",
+  specialite: "",
+};
+
 export default function PartenairesInteractive({ screen }: { screen: PartenairesScreen }) {
   const [creating, setCreating] = useState(false);
   const [recoDetail, setRecoDetail] = useState<PartenaireReco | null>(null);
   const [apporteurDetail, setApporteurDetail] = useState<Apporteur | null>(null);
+
+  const [form, setForm] = useState(EMPTY_FORM);
+  const [submitting, setSubmitting] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
+
+  const canSave = form.nomStructure.trim().length > 0;
+
+  const closeCreate = () => {
+    setCreating(false);
+    setForm(EMPTY_FORM);
+  };
+
+  const handleSave = async () => {
+    if (!canSave || submitting) return;
+    setSubmitting(true);
+    try {
+      const res = await createPartenaire({
+        type: form.type,
+        nomStructure: form.nomStructure,
+        profil: form.profil,
+        localisation: form.localisation,
+        specialite: form.specialite,
+      });
+      setToast(res.message);
+      setCreating(false);
+      setForm(EMPTY_FORM);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(null), 4500);
+    return () => clearTimeout(t);
+  }, [toast]);
 
   const exportReco = (rows: PartenaireReco[]) =>
     downloadCsv("partenaires-recommandables.csv", [
@@ -587,18 +632,23 @@ export default function PartenairesInteractive({ screen }: { screen: Partenaires
 
       <Modal
         open={creating}
-        onClose={() => setCreating(false)}
+        onClose={closeCreate}
         eyebrow="Carnet de partenaires · Création"
         title="Nouveau"
         titleStrong="partenaire"
         sub="Référencer un partenaire recommandable ou un apporteur d'affaires dans le carnet du cabinet."
         footer={
           <>
-            <button type="button" className="pp-btn pp-btn-ghost" onClick={() => setCreating(false)}>
+            <button type="button" className="pp-btn pp-btn-ghost" onClick={closeCreate}>
               Annuler
             </button>
-            <button type="button" className="pp-btn pp-btn-primary" onClick={() => setCreating(false)}>
-              Enregistrer le partenaire
+            <button
+              type="button"
+              className="pp-btn pp-btn-primary"
+              onClick={handleSave}
+              disabled={!canSave || submitting}
+            >
+              {submitting ? "Enregistrement…" : "Enregistrer le partenaire"}
             </button>
           </>
         }
@@ -606,18 +656,33 @@ export default function PartenairesInteractive({ screen }: { screen: Partenaires
         <div className="pp-form-grid">
           <label className="pp-field">
             <span className="pp-field-label">Nom / structure</span>
-            <input className="pp-input" placeholder="ex. Maître Sophie BERNHEIM" />
+            <input
+              className="pp-input"
+              placeholder="ex. Maître Sophie BERNHEIM"
+              value={form.nomStructure}
+              onChange={(e) => setForm((f) => ({ ...f, nomStructure: e.target.value }))}
+            />
           </label>
           <label className="pp-field">
             <span className="pp-field-label">Type</span>
-            <select className="pp-input" defaultValue="reco">
+            <select
+              className="pp-input"
+              value={form.type}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, type: e.target.value as PartenaireType }))
+              }
+            >
               <option value="reco">Partenaire recommandable</option>
               <option value="apporteur">Apporteur d&apos;affaires</option>
             </select>
           </label>
           <label className="pp-field">
             <span className="pp-field-label">Profession / profil</span>
-            <select className="pp-input" defaultValue="notaire">
+            <select
+              className="pp-input"
+              value={form.profil}
+              onChange={(e) => setForm((f) => ({ ...f, profil: e.target.value }))}
+            >
               <option value="notaire">Notaire</option>
               <option value="avocat">Avocat</option>
               <option value="expert-comptable">Expert-comptable</option>
@@ -628,11 +693,21 @@ export default function PartenairesInteractive({ screen }: { screen: Partenaires
           </label>
           <label className="pp-field">
             <span className="pp-field-label">Localisation</span>
-            <input className="pp-input" placeholder="ex. Paris 8e" />
+            <input
+              className="pp-input"
+              placeholder="ex. Paris 8e"
+              value={form.localisation}
+              onChange={(e) => setForm((f) => ({ ...f, localisation: e.target.value }))}
+            />
           </label>
           <label className="pp-field pp-field-full">
             <span className="pp-field-label">Spécialité / note</span>
-            <input className="pp-input" placeholder="ex. Transmission · démembrement" />
+            <input
+              className="pp-input"
+              placeholder="ex. Transmission · démembrement"
+              value={form.specialite}
+              onChange={(e) => setForm((f) => ({ ...f, specialite: e.target.value }))}
+            />
           </label>
         </div>
       </Modal>
@@ -696,6 +771,15 @@ export default function PartenairesInteractive({ screen }: { screen: Partenaires
           </>
         ) : null}
       </Modal>
+
+      {toast ? (
+        <div className="pp-toast" role="status">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2.4">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+          {toast}
+        </div>
+      ) : null}
     </>
   );
 }

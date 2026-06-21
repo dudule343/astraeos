@@ -22,8 +22,14 @@ export const dynamic = "force-dynamic";
 
 const BASE = "/espace-ingenieur";
 
-/** Cible de l'action « œil/relance » : la fiche client (comme les autres écrans pipe). */
-const CLIENT_FICHE_HREF = `${BASE}/clients/exemple`;
+/**
+ * Cible de l'action « œil/relance » : la fiche du client de la ligne. Les slugs
+ * connus (cf. _data/clients) ouvrent la vraie fiche ; les autres retombent sur la
+ * fiche modèle via getFicheClient (aucun 404), comme le reste de l'espace pipe.
+ */
+function clientFicheHref(row: CollecteRow): string {
+  return `${BASE}/clients/${row.id}`;
+}
 
 /** href d'un filtre rapide : « tous » = URL nue, sinon ?filtre=clé. */
 function filterHref(key: CollecteFilterKey): string {
@@ -288,7 +294,7 @@ export default async function CollectesPage({
                 <td className="center">
                   <div className="actions-cell">
                     <Link
-                      href={CLIENT_FICHE_HREF}
+                      href={clientFicheHref(row)}
                       className="action-btn"
                       title={
                         row.action === "relance"

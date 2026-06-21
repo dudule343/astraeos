@@ -150,20 +150,13 @@ export default async function MesProspectsActifs() {
         </div>
       </div>
 
-      {/* Quick filters */}
-      <div className="qf-bar-v1">
-        {view.quickFilters.map((qf) => (
-          <button
-            key={qf.label}
-            className={`qf-v1 ${qf.active ? "active" : ""} ${qf.alert ? "alert" : ""}`}
-          >
-            {qf.label} <span className="qf-count">{qf.count}</span>
-          </button>
-        ))}
-      </div>
-
-      {/* Tableau prospects (Client Component : lignes cliquables + modale) */}
-      <ProspectsTable rows={view.rows} reste={view.reste} />
+      {/* Tableau prospects (Client Component : recherche, filtres rapides,
+          lignes cliquables, actions de ligne et modale « Nouveau prospect »). */}
+      <ProspectsTable
+        rows={view.rows}
+        reste={view.reste}
+        quickFilters={view.quickFilters}
+      />
     </div>
   );
 }

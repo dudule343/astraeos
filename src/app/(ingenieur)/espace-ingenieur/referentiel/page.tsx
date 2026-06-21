@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { getReferentielScreen } from "../../_data/referentiel";
-import { ApercuButton, ModeleActions, TelechargerButton } from "./ModeleActions";
+import { ApercuButton, ModeleActions, RefListLink, TelechargerButton } from "./ModeleActions";
 import { IaZone, MettreAJourButton, RefSwitch } from "./ReferentielInteractive";
 import "../../_styles/referentiel.css";
 
@@ -130,7 +130,7 @@ export default function ReferentielPage() {
               {manuel.sections.map((s) => (
                 <div key={s.label} className="ref-list-row">
                   <span>{s.label}</span>
-                  <span className="ref-list-link">{s.link}</span>
+                  <RefListLink type={s.asset} label={s.link} />
                 </div>
               ))}
             </div>
@@ -160,7 +160,7 @@ export default function ReferentielPage() {
                     {item.strong ? <strong>{item.strong}</strong> : null}
                     {item.rest ?? item.label}
                   </span>
-                  <span className="ref-list-link">{item.link}</span>
+                  <RefListLink type={item.asset} label={item.link} />
                 </div>
               ))}
             </div>

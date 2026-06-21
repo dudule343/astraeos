@@ -151,8 +151,13 @@ export default function SimulateursPage() {
               </div>
               <div className="sim-desc">{sim.description}</div>
               {/* Bouton or pleinement actif (identique maquette) + vraie
-                  interaction client : ouvre une modale au clic. */}
-              <SimulateurLauncher title={sim.title} description={sim.description} />
+                  interaction client : ouvre une modale avec un calculateur
+                  fonctionnel au clic. */}
+              <SimulateurLauncher
+                id={sim.id}
+                title={sim.title}
+                description={sim.description}
+              />
             </div>
           </div>
         ))}

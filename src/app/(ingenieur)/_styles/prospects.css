@@ -540,6 +540,43 @@
   font-weight: 700;
   cursor: pointer;
 }
+.maquette-ing .dt-foot-link {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: var(--gold);
+  font-weight: 700;
+  cursor: pointer;
+}
+.maquette-ing .dt-foot-link:hover {
+  text-decoration: underline;
+}
+
+/* Toast de confirmation (relance / création / export). Repris d'agenda.css
+ * pour que la liste des prospects ne dépende pas d'une autre feuille. */
+.maquette-ing .rdv-toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 1000;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 380px;
+  padding: 12px 16px;
+  background: var(--navy, #0a1f38);
+  color: #fff;
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.4;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(10, 31, 56, 0.35);
+}
+.maquette-ing .rdv-toast svg {
+  flex-shrink: 0;
+  color: #4ade80;
+}
 
 /* KPI : valeur "19 / 24" -------------------------------------------------- */
 .maquette-ing .kpi-value .frac {

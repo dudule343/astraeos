@@ -15,6 +15,8 @@ export interface EtudeRestituee {
   clientRepr?: string;
   clientType: ClientType;
   clientTypeLabel: string;
+  /** Slug de fiche client existante (route clients/[id]) si le client a déjà une fiche, sinon absent. */
+  clientSlug?: string;
   cabinetName: string;
   cabinetCity: string;
   ingenieurInitials: string;
@@ -124,6 +126,7 @@ const DATA: EtudesRestitueesData = {
       clientLines: ["Albert HUYGHE", "Cécile HUYGHE"],
       clientType: "couple",
       clientTypeLabel: "Couple",
+      clientSlug: "huyghe",
       cabinetName: "Luc THILLIEZ",
       cabinetCity: "Dirigeant-praticien",
       ingenieurInitials: "EL",

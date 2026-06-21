@@ -281,9 +281,17 @@ export default async function EtudesRestitueesPage({
                   <td className="center">
                     <div className="actions-cell">
                       <Link
-                        href={`${BASE}/clients`}
+                        href={
+                          row.clientSlug
+                            ? `${BASE}/clients/${row.clientSlug}`
+                            : `${BASE}/clients`
+                        }
                         className="action-btn"
-                        title="Voir la fiche client"
+                        title={
+                          row.clientSlug
+                            ? "Voir la fiche client"
+                            : "Voir dans la liste des clients"
+                        }
                       >
                         <EyeIcon />
                       </Link>

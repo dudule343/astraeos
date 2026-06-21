@@ -81,6 +81,27 @@ export function ModeleActions({ type }: { type: RefAssetType }) {
 }
 
 /**
+ * Lien doré « Voir → » / « v3.1 → » d'une ligne de liste (sections du Manuel,
+ * items du Contrat-cadre). Rendu comme du texte mais cliquable : ouvre l'aperçu
+ * du PDF réel associé. Remplace l'ancien <span> mort de la maquette.
+ */
+export function RefListLink({ type, label }: { type: RefAssetType; label: string }) {
+  const { busy, error, run } = useRefAsset();
+  return (
+    <button
+      type="button"
+      className="ref-list-link ref-list-link--btn"
+      disabled={busy !== null}
+      onClick={() => run(type, "preview")}
+      title={error ?? undefined}
+      aria-label={`Aperçu : ${label}`}
+    >
+      {busy === "preview" ? "..." : label}
+    </button>
+  );
+}
+
+/**
  * Bouton « Aperçu » seul (carte Manuel / Contrat), ouvre le PDF dans un onglet.
  */
 export function ApercuButton({ type, className }: { type: RefAssetType; className?: string }) {

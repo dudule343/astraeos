@@ -298,6 +298,26 @@
   font-weight: 700;
 }
 
+.maquette-ing .ref-list-link--btn {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.maquette-ing .ref-list-link--btn:hover {
+  color: var(--gold-deep);
+  text-decoration: underline;
+}
+
+.maquette-ing .ref-list-link--btn:disabled {
+  cursor: progress;
+  opacity: 0.6;
+}
+
 .maquette-ing .ref-card-actions {
   display: flex;
   gap: 8px;

@@ -39,7 +39,16 @@ export const suiviKpis: SuiviKpi[] = [
   { label: "Sans contact > 6 mois", value: "1", meta: "risque de churn", valueColor: "red" },
 ];
 
+/** Clés de filtrage : chacune correspond à un prédicat sur les lignes. */
+export type SuiviFilterKey =
+  | "all"
+  | "entrevue-30j"
+  | "missions-actives"
+  | "sans-contact-3m"
+  | "sans-contact-6m";
+
 export type SuiviFilter = {
+  key: SuiviFilterKey;
   label: string;
   count: string;
   active?: boolean;
@@ -47,12 +56,34 @@ export type SuiviFilter = {
 };
 
 export const suiviFilters: SuiviFilter[] = [
-  { label: "Tous", count: "142", active: true },
-  { label: "Entrevue prévue < 30 j", count: "38" },
-  { label: "Missions actives", count: "52" },
-  { label: "Sans contact > 3 mois", count: "12", alert: true },
-  { label: "Sans contact > 6 mois", count: "3", alert: true },
+  { key: "all", label: "Tous", count: "142", active: true },
+  { key: "entrevue-30j", label: "Entrevue prévue < 30 j", count: "38" },
+  { key: "missions-actives", label: "Missions actives", count: "52" },
+  { key: "sans-contact-3m", label: "Sans contact > 3 mois", count: "12", alert: true },
+  { key: "sans-contact-6m", label: "Sans contact > 6 mois", count: "3", alert: true },
 ];
+
+/**
+ * Prédicat de filtrage d'une ligne pour une clé donnée. Source unique de la
+ * logique (utilisée par le Client Component de la barre de filtres).
+ * Les seuils sont dérivés des champs structurés de chaque ligne.
+ */
+export function suiviRowMatchesFilter(row: SuiviRow, key: SuiviFilterKey): boolean {
+  switch (key) {
+    case "all":
+      return true;
+    case "entrevue-30j":
+      return row.daysUntilNext !== null && row.daysUntilNext < 30;
+    case "missions-actives":
+      return row.hasActiveMission;
+    case "sans-contact-3m":
+      return row.daysSinceLastContact > 90;
+    case "sans-contact-6m":
+      return row.daysSinceLastContact > 180;
+    default:
+      return true;
+  }
+}
 
 export type StatusTone = "success" | "gold" | "orange";
 
@@ -94,6 +125,13 @@ export type SuiviRow = {
   statusTone: StatusTone;
   /** Action : œil (consulter) ou alerte. */
   actionIcon: "eye" | "alert";
+  /** Champs structurés pour le filtrage (dérivés des libellés d'affichage). */
+  /** Nombre de jours depuis le dernier contact (cf. lastMeta « Il y a N j »). */
+  daysSinceLastContact: number;
+  /** Jours avant la prochaine entrevue ; null si aucune entrevue planifiée. */
+  daysUntilNext: number | null;
+  /** Au moins une préconisation / mission en cours (≠ « Aucune en cours »). */
+  hasActiveMission: boolean;
 };
 
 export const suiviRows: SuiviRow[] = [
@@ -118,6 +156,9 @@ export const suiviRows: SuiviRow[] = [
     statusLabel: "Actif",
     statusTone: "success",
     actionIcon: "eye",
+    daysSinceLastContact: 56,
+    daysUntilNext: 37,
+    hasActiveMission: true,
   },
   {
     id: "dubois",
@@ -136,6 +177,9 @@ export const suiviRows: SuiviRow[] = [
     statusLabel: "Actif",
     statusTone: "success",
     actionIcon: "eye",
+    daysSinceLastContact: 86,
+    daysUntilNext: 19,
+    hasActiveMission: true,
   },
   {
     id: "huyghe",
@@ -156,6 +200,9 @@ export const suiviRows: SuiviRow[] = [
     statusLabel: "Actif",
     statusTone: "success",
     actionIcon: "eye",
+    daysSinceLastContact: 69,
+    daysUntilNext: 24,
+    hasActiveMission: true,
   },
   {
     id: "dupont-henri",
@@ -180,6 +227,9 @@ export const suiviRows: SuiviRow[] = [
     statusLabel: "Non renouvelé conseil",
     statusTone: "orange",
     actionIcon: "alert",
+    daysSinceLastContact: 149,
+    daysUntilNext: null,
+    hasActiveMission: false,
   },
   {
     id: "groupe-lebon",
@@ -201,6 +251,9 @@ export const suiviRows: SuiviRow[] = [
     statusLabel: "VIP corporate",
     statusTone: "gold",
     actionIcon: "eye",
+    daysSinceLastContact: 49,
+    daysUntilNext: 44,
+    hasActiveMission: true,
   },
 ];
 

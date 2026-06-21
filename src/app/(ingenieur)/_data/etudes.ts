@@ -48,7 +48,18 @@ export const etudesKpis: EtudesKpi[] = [
   { label: "Délai moyen de réalisation", value: "32", unit: "jours", meta: "depuis l'étape 03" },
 ];
 
+/** Clé de filtre rapide. "toutes" = aucun filtre. */
+export type FilterKey =
+  | "toutes"
+  | "sous-30j"
+  | "patrimoniales"
+  | "immo-direct"
+  | "fin-direct"
+  | "assurance"
+  | "en-retard";
+
 export type EtudesFilter = {
+  key: FilterKey;
   label: string;
   count: string;
   active?: boolean;
@@ -56,14 +67,26 @@ export type EtudesFilter = {
 };
 
 export const etudesFilters: EtudesFilter[] = [
-  { label: "Toutes", count: "41", active: true },
-  { label: "Restitution sous 30 j", count: "22" },
-  { label: "Études patrimoniales", count: "28" },
-  { label: "Investissement immobilier direct", count: "8" },
-  { label: "Investissement financier direct", count: "3" },
-  { label: "Mise en place assurance direct", count: "2" },
-  { label: "En retard", count: "3", alert: true },
+  { key: "toutes", label: "Toutes", count: "41", active: true },
+  { key: "sous-30j", label: "Restitution sous 30 j", count: "22" },
+  { key: "patrimoniales", label: "Études patrimoniales", count: "28" },
+  { key: "immo-direct", label: "Investissement immobilier direct", count: "8" },
+  { key: "fin-direct", label: "Investissement financier direct", count: "3" },
+  { key: "assurance", label: "Mise en place assurance direct", count: "2" },
+  { key: "en-retard", label: "En retard", count: "3", alert: true },
 ];
+
+export function isValidFilter(value: string | undefined): value is FilterKey {
+  return (
+    value === "toutes" ||
+    value === "sous-30j" ||
+    value === "patrimoniales" ||
+    value === "immo-direct" ||
+    value === "fin-direct" ||
+    value === "assurance" ||
+    value === "en-retard"
+  );
+}
 
 export type EtudeRow = {
   id: string;
@@ -174,3 +197,65 @@ export const etudesRows: EtudeRow[] = [
 
 /** Reste de la liste, ligne « voir l'intégralité » de la maquette. */
 export const etudesRemaining = { count: 37, total: 41 };
+
+/** Une étude est « en retard » dès que le délai contractuel est dépassé. */
+function isEnRetard(row: EtudeRow): boolean {
+  return Boolean(row.restitMetaAlert || row.progressAlert || row.restitAlert);
+}
+
+/** Restitution « sous 30 j » : on lit le « Dans N jours » du méta de restitution. */
+function isSous30Jours(row: EtudeRow): boolean {
+  if (isEnRetard(row)) return false;
+  const match = row.restitMeta.match(/Dans\s+(\d+)\s+jour/i);
+  if (!match) return false;
+  return Number(match[1]) <= 30;
+}
+
+function rowMatchesFilter(row: EtudeRow, filter: FilterKey): boolean {
+  switch (filter) {
+    case "toutes":
+      return true;
+    case "sous-30j":
+      return isSous30Jours(row);
+    case "patrimoniales":
+      return row.studyType === "patrimoine";
+    case "immo-direct":
+      return row.studyType === "immo-direct";
+    case "fin-direct":
+      return row.studyType === "fin-direct";
+    case "assurance":
+      return row.studyType === "assurance";
+    case "en-retard":
+      return isEnRetard(row);
+    default:
+      return true;
+  }
+}
+
+export type EtudesData = {
+  filters: EtudesFilter[];
+  rows: EtudeRow[];
+  remaining: { count: number; total: number };
+};
+
+/**
+ * Renvoie les études filtrées selon la clé demandée. Filtrage réel : lignes,
+ * filtre actif, compteur « … N autres » et total affiché sont recalculés.
+ * « toutes » (défaut) ne filtre rien. Le total d'une catégorie = le compteur
+ * annoncé par le filtre rapide (le tableau n'affiche qu'un extrait).
+ */
+export function fetchEtudes(filter: FilterKey = "toutes"): EtudesData {
+  const filters = etudesFilters.map((f) => ({ ...f, active: f.key === filter }));
+
+  if (filter === "toutes") {
+    return { filters, rows: etudesRows, remaining: etudesRemaining };
+  }
+
+  const rows = etudesRows.filter((r) => rowMatchesFilter(r, filter));
+  const total = Number(
+    etudesFilters.find((f) => f.key === filter)?.count ?? rows.length,
+  );
+  const count = Math.max(0, total - rows.length);
+
+  return { filters, rows, remaining: { count, total } };
+}

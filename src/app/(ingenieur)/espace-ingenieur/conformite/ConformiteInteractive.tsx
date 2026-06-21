@@ -15,6 +15,16 @@ import {
 
 type KpiFilter = "a-signer" | "signe-attente" | "paye";
 
+// La fiche conformité détaillée n'existe que pour le dossier de référence
+// (modèle Joubert). Les autres lignes `ficheReady` ouvriraient cette même fiche
+// avec un nom de client incohérent : on n'ouvre donc la fiche que pour ce
+// dossier, et on garde l'action honnêtement désactivée pour les autres.
+const FICHE_REFERENCE_ID = "joubert";
+
+function hasFiche(row: ConformiteRow): boolean {
+  return row.ficheReady && row.id === FICHE_REFERENCE_ID;
+}
+
 const PAY_FILTER_OPTIONS: { value: PayTone; label: string }[] = [
   { value: "attente", label: "En attente" },
   { value: "partiel", label: "Partiel" },
@@ -65,7 +75,7 @@ function rowClassName(row: ConformiteRow): string {
   if (row.kind === "couple") classes.push("pipe-row-couple");
   if (row.kind === "personne-morale") classes.push("pipe-row-pm");
   if (row.highlighted) classes.push("pipe-row-highlight");
-  if (row.ficheReady) classes.push("pipe-row-clickable");
+  if (hasFiche(row)) classes.push("pipe-row-clickable");
   return classes.join(" ");
 }
 
@@ -76,7 +86,7 @@ function ConformiteTableRow({ row }: { row: ConformiteRow }) {
   return (
     <tr
       className={rowClassName(row)}
-      onClick={row.ficheReady ? () => router.push(ficheHref) : undefined}
+      onClick={hasFiche(row) ? () => router.push(ficheHref) : undefined}
     >
       <td>
         <div className="client-cell">
@@ -132,7 +142,7 @@ function ConformiteTableRow({ row }: { row: ConformiteRow }) {
       </td>
       <td className="center" onClick={(e) => e.stopPropagation()}>
         <div className="actions-cell">
-          {row.ficheReady ? (
+          {hasFiche(row) ? (
             <Link href={ficheHref} className="action-btn" title="Ouvrir la fiche conformité">
               <IconEye />
             </Link>
@@ -141,7 +151,11 @@ function ConformiteTableRow({ row }: { row: ConformiteRow }) {
               type="button"
               className="action-btn"
               disabled
-              title="Fiche conformité indisponible · documents non encore signés"
+              title={
+                row.ficheReady
+                  ? "Fiche conformité détaillée indisponible pour ce dossier"
+                  : "Fiche conformité indisponible · documents non encore signés"
+              }
             >
               <IconEye />
             </button>
