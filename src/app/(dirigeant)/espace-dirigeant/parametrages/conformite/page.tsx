@@ -1,3 +1,8 @@
+// Espace dirigeant — Paramétrages · Conformité juridique.
+// Port fidèle hardcodé de la maquette 020 (reference/wireframes-dirigeant.html,
+// lignes 8975-9184). Route : /espace-dirigeant/parametrages/conformite
+// Méthode + carte des écrans : PORT-FRONT-DIRIGEANT.md
+// Doc : vault Obsidian ASTRAEOS/doc-technique/espace-dirigeant.md
 import { DirigeantTopbar } from "../../../_components/DirigeantTopbar";
 
 export const metadata = { title: "ASTRAEOS · Espace Dirigeant · Conformité juridique" };

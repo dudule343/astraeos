@@ -1,3 +1,8 @@
+// Espace dirigeant — Assets · Investissement financier.
+// Port fidèle hardcodé de la maquette 020 (reference/wireframes-dirigeant.html,
+// lignes 7770-7847). Route : /espace-dirigeant/assets/financier
+// Méthode + carte des écrans : PORT-FRONT-DIRIGEANT.md
+// Doc : vault Obsidian ASTRAEOS/doc-technique/espace-dirigeant.md
 import Link from "next/link";
 import { DirigeantTopbar } from "../../../_components/DirigeantTopbar";
 

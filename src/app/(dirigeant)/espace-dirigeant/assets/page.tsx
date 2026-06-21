@@ -1,3 +1,8 @@
+// Espace dirigeant — Assets · Vue d'ensemble.
+// Port fidèle hardcodé de la maquette 020 (reference/wireframes-dirigeant.html,
+// lignes 7609-7769). Route : /espace-dirigeant/assets
+// Méthode + carte des écrans : PORT-FRONT-DIRIGEANT.md
+// Doc : vault Obsidian ASTRAEOS/doc-technique/espace-dirigeant.md
 import Link from "next/link";
 import { DirigeantTopbar } from "../../_components/DirigeantTopbar";
 

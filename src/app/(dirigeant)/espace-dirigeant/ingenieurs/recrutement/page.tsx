@@ -1,3 +1,8 @@
+// Espace dirigeant — Recrutement des ingénieurs.
+// Port fidèle hardcodé de la maquette 020 (reference/wireframes-dirigeant.html,
+// lignes 6621-6745). Route : /espace-dirigeant/ingenieurs/recrutement
+// Méthode + carte des écrans : PORT-FRONT-DIRIGEANT.md
+// Doc : vault Obsidian ASTRAEOS/doc-technique/espace-dirigeant.md
 import { DirigeantTopbar } from "../../../_components/DirigeantTopbar";
 import { RecrutementClient } from "./RecrutementClient";
 

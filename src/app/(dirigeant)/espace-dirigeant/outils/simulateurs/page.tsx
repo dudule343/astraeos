@@ -1,3 +1,8 @@
+// Espace dirigeant — Outils · Simulateurs & calculateurs.
+// Port fidèle hardcodé de la maquette 020 (reference/wireframes-dirigeant.html,
+// lignes 9585-9674). Route : /espace-dirigeant/outils/simulateurs
+// Méthode + carte des écrans : PORT-FRONT-DIRIGEANT.md
+// Doc : vault Obsidian ASTRAEOS/doc-technique/espace-dirigeant.md
 import { DirigeantTopbar } from "../../../_components/DirigeantTopbar";
 import { SimulateursClient } from "./SimulateursClient";
 

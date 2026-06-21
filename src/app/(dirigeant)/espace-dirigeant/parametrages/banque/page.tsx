@@ -1,3 +1,8 @@
+// Espace dirigeant — Paramétrages · Connexions bancaires.
+// Port fidèle hardcodé de la maquette 020 (reference/wireframes-dirigeant.html,
+// lignes 8611-8771). Route : /espace-dirigeant/parametrages/banque
+// Méthode + carte des écrans : PORT-FRONT-DIRIGEANT.md
+// Doc : vault Obsidian ASTRAEOS/doc-technique/espace-dirigeant.md
 import { DirigeantTopbar } from "../../../_components/DirigeantTopbar";
 import { FactModeClient } from "./FactModeClient";
 

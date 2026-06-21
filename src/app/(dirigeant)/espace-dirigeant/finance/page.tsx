@@ -1,3 +1,8 @@
+// Espace dirigeant — Vue d'ensemble financière.
+// Port fidèle hardcodé de la maquette 020 (reference/wireframes-dirigeant.html,
+// lignes 2661-4202). Route : /espace-dirigeant/finance
+// Méthode + carte des écrans : PORT-FRONT-DIRIGEANT.md
+// Doc : vault Obsidian ASTRAEOS/doc-technique/espace-dirigeant.md
 import { DirigeantTopbar } from "../../_components/DirigeantTopbar";
 import { FinanceOverviewClient } from "./FinanceOverviewClient";
 

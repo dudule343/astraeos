@@ -1,3 +1,8 @@
+// Espace dirigeant — Accueil cabinet.
+// Port fidèle hardcodé de la maquette 020 (reference/wireframes-dirigeant.html,
+// lignes 2291-2660). Route : /espace-dirigeant/
+// Méthode + carte des écrans : PORT-FRONT-DIRIGEANT.md
+// Doc : vault Obsidian ASTRAEOS/doc-technique/espace-dirigeant.md
 import Link from "next/link";
 import { DirigeantTopbar } from "../_components/DirigeantTopbar";
 

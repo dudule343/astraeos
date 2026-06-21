@@ -1,4 +1,7 @@
 "use client";
+// Espace dirigeant — composant client (interactions de l'écran : onglets,
+// filtres, drawers, popovers…). Port fidèle de la maquette 020.
+// Voir PORT-FRONT-DIRIGEANT.md et la doc Obsidian espace-dirigeant.
 
 import { useMemo, useState } from "react";
 

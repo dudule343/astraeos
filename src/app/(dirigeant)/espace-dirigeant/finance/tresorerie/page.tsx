@@ -1,3 +1,8 @@
+// Espace dirigeant — Trésorerie.
+// Port fidèle hardcodé de la maquette 020 (reference/wireframes-dirigeant.html,
+// lignes 4299-5102). Route : /espace-dirigeant/finance/tresorerie
+// Méthode + carte des écrans : PORT-FRONT-DIRIGEANT.md
+// Doc : vault Obsidian ASTRAEOS/doc-technique/espace-dirigeant.md
 import { DirigeantTopbar } from "../../../_components/DirigeantTopbar";
 import { TresorerieClient } from "./TresorerieClient";
 

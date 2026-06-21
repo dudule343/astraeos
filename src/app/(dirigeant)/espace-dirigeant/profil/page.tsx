@@ -1,3 +1,8 @@
+// Espace dirigeant — Profil & agréments.
+// Port fidèle hardcodé de la maquette 020 (reference/wireframes-dirigeant.html,
+// lignes 9760-10129). Route : /espace-dirigeant/profil
+// Méthode + carte des écrans : PORT-FRONT-DIRIGEANT.md
+// Doc : vault Obsidian ASTRAEOS/doc-technique/espace-dirigeant.md
 import { DirigeantTopbar } from "../../_components/DirigeantTopbar";
 import { ProfilNotificationPrefs } from "./ProfilClient";
 

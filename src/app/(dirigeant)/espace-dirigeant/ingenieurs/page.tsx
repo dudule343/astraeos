@@ -1,3 +1,8 @@
+// Espace dirigeant — Mes ingénieurs.
+// Port fidèle hardcodé de la maquette 020 (reference/wireframes-dirigeant.html,
+// lignes 6539-6620). Route : /espace-dirigeant/ingenieurs
+// Méthode + carte des écrans : PORT-FRONT-DIRIGEANT.md
+// Doc : vault Obsidian ASTRAEOS/doc-technique/espace-dirigeant.md
 import { DirigeantTopbar } from "../../_components/DirigeantTopbar";
 import { IngenieursClient } from "./IngenieursClient";
 
