@@ -4268,7 +4268,13 @@ setInterval(() => {
         // Diagnostic console (1/s) : audio capté (frames>0) ? Deepgram répond (dgmsgs>0) ?
         if (window.__dgDiag) clearInterval(window.__dgDiag);
         window.__dgDiag = setInterval(function () {
-          try { console.log('[ASTR-STT] ctx=' + (dgAudioCtx && dgAudioCtx.state) + ' lvl=' + (window.__dgLevel || 0).toFixed(3) + ' frames=' + (window.__dgFrames || 0) + ' dgmsgs=' + (window.__dgMsgs || 0) + ' ws=' + (dgWs && dgWs.readyState)); } catch (e) {}
+          var s = 'DBG lvl=' + (window.__dgLevel || 0).toFixed(3)
+            + ' frames=' + (window.__dgFrames || 0)
+            + ' dgmsgs=' + (window.__dgMsgs || 0)
+            + ' type=' + (window.__dgLastType || '-')
+            + ' txt="' + String(window.__dgLastTxt || '').slice(0, 40) + '"';
+          try { console.log('[ASTR-STT] ctx=' + (dgAudioCtx && dgAudioCtx.state) + ' ' + s); } catch (e) {}
+          try { setNote(s); } catch (e) {}
         }, 1000);
         dgSource = dgAudioCtx.createMediaStreamSource(stream);
         var bufSize = 4096;
@@ -4335,10 +4341,11 @@ setInterval(() => {
       window.__dgMsgs = (window.__dgMsgs || 0) + 1;
       var msg;
       try { msg = JSON.parse(ev.data); } catch (e) { return; }
-      try { console.log('[ASTR-STT-MSG]', msg && msg.type, JSON.stringify(msg && msg.channel && msg.channel.alternatives && msg.channel.alternatives[0] && msg.channel.alternatives[0].transcript)); } catch (e) {}
+      window.__dgLastType = (msg && msg.type) || '?';
       if (!msg || msg.type !== 'Results' || !msg.channel) return;
       var alt = msg.channel.alternatives && msg.channel.alternatives[0];
       var txt = alt && alt.transcript ? alt.transcript : '';
+      window.__dgLastTxt = txt;
       if (!txt) return;
       if (msg.is_final) { showInterim(''); pushFinalText(txt); }
       else { showInterim(txt); }
