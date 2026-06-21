@@ -6,7 +6,7 @@ import { SVG_DEFS } from "./svg-defs";
 const TOTAL_STEPS = 8;
 
 type Enfant = { prenom: string; date: string };
-type Objectif = { num: number };
+type Objectif = { num: number; kind: "obj1" | "obj2" | "added" };
 
 /** Toggle Oui/Non/3-options : index de l'option sélectionnée + visibilité conditionnelle. */
 function useYesNo(initialSelected: number, initialVisible: boolean) {
@@ -63,7 +63,7 @@ export default function DciSimplifieForm() {
   const autresDettes = useYesNo(1, false); // Non
 
   // Section 7 · objectifs
-  const [objectifs, setObjectifs] = useState<Objectif[]>([{ num: 1 }, { num: 2 }]);
+  const [objectifs, setObjectifs] = useState<Objectif[]>([{ num: 1, kind: "obj1" }, { num: 2, kind: "obj2" }]);
   const [objCount, setObjCount] = useState(2);
 
   function flashSave() {
@@ -105,7 +105,7 @@ export default function DciSimplifieForm() {
   function addObjectif() {
     const next = objCount + 1;
     setObjCount(next);
-    setObjectifs((o) => [...o, { num: next }]);
+    setObjectifs((o) => [...o, { num: next, kind: "added" }]);
   }
   function removeObjectif(i: number) {
     setObjectifs((o) => o.filter((_, idx) => idx !== i));
@@ -1072,7 +1072,7 @@ export default function DciSimplifieForm() {
 
             <div>
               {objectifs.map((obj, i) => (
-                <ObjectifCard key={i} num={obj.num} first={i === 0} onRemove={() => removeObjectif(i)} />
+                <ObjectifCard key={i} num={obj.num} kind={obj.kind} onRemove={() => removeObjectif(i)} />
               ))}
             </div>
 
@@ -1270,9 +1270,10 @@ export default function DciSimplifieForm() {
   );
 }
 
-function ObjectifCard({ num, first, onRemove }: { num: number; first: boolean; onRemove: () => void }) {
-  // L'objectif 1 a une liste complète, l'objectif 2 une liste réduite (cf. maquette).
-  // Les objectifs ajoutés réutilisent la liste complète (cf. addObjectif).
+function ObjectifCard({ num, kind, onRemove }: { num: number; kind: "obj1" | "obj2" | "added"; onRemove: () => void }) {
+  // Trois archétypes de carte fidèles à la maquette (objectif 1 statique, objectif 2 statique,
+  // carte ajoutée via addObjectif). Le rendu dépend de l'origine de la carte, pas de son numéro
+  // d'affichage, pour rester correct après suppression d'une carte intermédiaire.
   const objetOptionsFull = [
     "Préparer ma transmission patrimoniale",
     "Préparer ma retraite",
@@ -1294,23 +1295,23 @@ function ObjectifCard({ num, first, onRemove }: { num: number; first: boolean; o
     "Acquérir un bien immobilier",
     "Autre · préciser",
   ];
-  // Objectif 1 : Importance « Élevée », initier « Court terme », atteindre « Long terme »
-  // Objectif 2 & suivants : Importance « Moyenne », initier « Urgent »/« Court terme », atteindre « Court terme »/« Moyen terme »
-  const isObj1 = first && num === 1;
-  const objetOptions = isObj1 ? objetOptionsFull : (num === 2 ? objetOptionsReduced : objetOptionsFull);
+  // Objectif 1 : liste complète, Importance « Élevée », initier « Court terme », atteindre « Long terme »
+  // Objectif 2 : liste réduite, Importance « Moyenne », initier « Urgent », atteindre « Court terme »
+  // Carte ajoutée : liste complète, Importance « Moyenne », initier « Court terme », atteindre « Moyen terme »
+  const objetOptions = kind === "obj2" ? objetOptionsReduced : objetOptionsFull;
 
-  const importanceOptions = isObj1
+  const importanceOptions = kind === "obj1"
     ? ["Élevée", "Moyenne", "Faible"]
     : ["Moyenne", "Élevée", "Faible"];
 
-  const initierOptions = isObj1
-    ? ["Court terme (1 à 2 ans)", "Urgent (moins d'un an)", "Moyen terme (3 à 5 ans)", "Long terme (5 à 10 ans)", "Très long terme (plus de 10 ans)"]
-    : ["Urgent (moins d'un an)", "Court terme (1 à 2 ans)", "Moyen terme (3 à 5 ans)", "Long terme (5 à 10 ans)", "Très long terme (plus de 10 ans)"];
+  const initierOptions = kind === "obj2"
+    ? ["Urgent (moins d'un an)", "Court terme (1 à 2 ans)", "Moyen terme (3 à 5 ans)", "Long terme (5 à 10 ans)", "Très long terme (plus de 10 ans)"]
+    : ["Court terme (1 à 2 ans)", "Urgent (moins d'un an)", "Moyen terme (3 à 5 ans)", "Long terme (5 à 10 ans)", "Très long terme (plus de 10 ans)"];
 
   let atteindreOptions: string[];
-  if (isObj1) {
+  if (kind === "obj1") {
     atteindreOptions = ["Long terme (5 à 10 ans)", "Urgent (moins d'un an)", "Court terme (1 à 2 ans)", "Moyen terme (3 à 5 ans)", "Très long terme (plus de 10 ans)"];
-  } else if (num === 2) {
+  } else if (kind === "obj2") {
     atteindreOptions = ["Court terme (1 à 2 ans)", "Urgent (moins d'un an)", "Moyen terme (3 à 5 ans)", "Long terme (5 à 10 ans)", "Très long terme (plus de 10 ans)"];
   } else {
     atteindreOptions = ["Moyen terme (3 à 5 ans)", "Urgent (moins d'un an)", "Court terme (1 à 2 ans)", "Long terme (5 à 10 ans)", "Très long terme (plus de 10 ans)"];

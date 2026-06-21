@@ -167,7 +167,7 @@ export function initDci(root: HTMLElement): () => void {
     const sec = root.querySelector<HTMLElement>(`.section[data-step="${n}"]`);
     if (sec) sec.classList.add('active');
     ctx.currentStep = n;
-    document.body.classList.toggle('s1-fixed', n === 1);
+    root.classList.toggle('s1-fixed', n === 1);
     updateProgress();
     updateNav();
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -467,7 +467,7 @@ export function initDci(root: HTMLElement): () => void {
           </div>
         </div>
         ${actionsRow()}`;
-      buildAssetCard('assetsListPret', pretId, assetCounters.pret, bienType + ' · ' + addr, 'Prêt lié', '—', detail);
+      buildAssetCard('assetsListEmp', pretId, assetCounters.pret, bienType + ' · ' + addr, 'Prêt lié', '—', detail);
     } else if (!isLinked && linkedLoans[bienId]) {
       const pretId = linkedLoans[bienId];
       const pretCard = root.querySelector<HTMLElement>(`.asset-row[data-detail="${pretId}"]`);
@@ -1558,7 +1558,7 @@ export function initDci(root: HTMLElement): () => void {
   root.addEventListener('input', onInput);
 
   // État initial : section 1 figée, progression à 0.
-  document.body.classList.add('s1-fixed');
+  root.classList.add('s1-fixed');
   updateProgress();
   updateNav();
 
@@ -1566,6 +1566,6 @@ export function initDci(root: HTMLElement): () => void {
     root.removeEventListener('click', onClick);
     root.removeEventListener('change', onChange);
     root.removeEventListener('input', onInput);
-    document.body.classList.remove('s1-fixed');
+    root.classList.remove('s1-fixed');
   };
 }
