@@ -36,6 +36,9 @@ function isUnauthenticatedAllowed(pathname: string, method: string): boolean {
     // Dépôt client par token (liens envoyés par e-mail).
     pathname.startsWith("/depot") ||
     pathname.startsWith("/api/collecte/") ||
+    // Parcours prospect/client (DCI simplifié/complet, qualification, prise de
+    // RDV) ouverts depuis les liens e-mail : accessibles sans session.
+    pathname.startsWith("/parcours") ||
     // Soumission DCI par un prospect : uniquement en POST sur /api/dci/[kind].
     (method === "POST" && pathname.startsWith("/api/dci/")) ||
     // Webhooks d'enregistrement (finalize Jibri sur le VPS) : authentifiés par

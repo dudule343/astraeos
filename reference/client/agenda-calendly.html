@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prendre rendez-vous · PRIVEOS</title>
+<style>
+:root {
+  --navy: #102D50;
+  --navy-700: #1A3A60;
+  --navy-300: #5A6E8A;
+  --navy-100: #C8D3E0;
+  --gold: #C68E0E;
+  --gold-light: #E8C272;
+  --gold-soft: #F4E4B8;
+  --ivory: #FAF8F3;
+  --ivory-deep: #F2EEE3;
+  --light-blue: #EBF1FA;
+  --white: #FFFFFF;
+  --text-body: #2C2C2C;
+  --success: #2EA85A;
+  --error: #D9534F;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Epilogue', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--ivory);
+  color: var(--text-body);
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+.page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px 20px 40px;
+}
+
+/* ─── Header PRIVEOS ─────────────────────────────────── */
+.brand-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 0 32px;
+  border-bottom: 1px solid var(--navy-100);
+  margin-bottom: 32px;
+}
+.brand-logo {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.brand-logo-mark {
+  width: 38px;
+  height: 38px;
+  background: var(--navy);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gold);
+  font-family: 'Cinzel', 'Georgia', serif;
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: 0.05em;
+}
+.brand-logo-text {
+  font-family: 'Cinzel', 'Georgia', serif;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  color: var(--navy);
+}
+.brand-tagline {
+  font-size: 10px;
+  color: var(--navy-300);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+
+/* ─── Bloc supérieur · présentation conseiller ──────── */
+.advisor-card {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: 24px;
+  background: var(--white);
+  border: 1px solid var(--navy-100);
+  border-radius: 12px;
+  padding: 24px 28px;
+  margin-bottom: 28px;
+}
+.advisor-photo {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-700) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gold);
+  font-family: 'Georgia', serif;
+  font-size: 36px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  border: 3px solid var(--gold-soft);
+}
+.advisor-info-name {
+  font-family: 'Georgia', serif;
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--navy);
+  margin-bottom: 2px;
+}
+.advisor-info-role {
+  font-size: 12px;
+  color: var(--navy-300);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.advisor-info-cabinet {
+  font-size: 13px;
+  color: var(--text-body);
+  margin-bottom: 14px;
+}
+.meeting-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--gold-soft);
+  border: 1px solid var(--gold);
+  color: var(--navy);
+  padding: 8px 14px;
+  border-radius: 24px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.meeting-pill-icon {
+  width: 14px;
+  height: 14px;
+  fill: var(--gold);
+}
+.meeting-pill-sep {
+  width: 1px;
+  height: 14px;
+  background: var(--gold);
+  opacity: 0.4;
+}
+
+/* ─── Layout 2 colonnes (calendrier · formulaire) ───── */
+.booking-grid {
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: 24px;
+  background: var(--white);
+  border: 1px solid var(--navy-100);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.booking-col {
+  padding: 28px;
+}
+.booking-col-left {
+  border-right: 1px solid var(--ivory-deep);
+}
+
+.col-title {
+  font-family: 'Georgia', serif;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--navy);
+  margin-bottom: 4px;
+}
+.col-subtitle {
+  font-size: 12px;
+  color: var(--navy-300);
+  letter-spacing: 0.06em;
+  margin-bottom: 22px;
+}
+
+/* ─── Calendrier mensuel ────────────────────────────── */
+.cal-month-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 4px 14px;
+}
+.cal-month-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--navy);
+}
+.cal-nav-btn {
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--navy-100);
+  background: var(--white);
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--navy);
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+.cal-nav-btn:hover { background: var(--ivory); border-color: var(--gold); }
+.cal-nav-btns { display: flex; gap: 6px; }
+
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+.cal-weekday {
+  text-align: center;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--navy-300);
+  letter-spacing: 0.1em;
+  padding: 6px 0;
+  text-transform: uppercase;
+}
+.cal-day {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+  position: relative;
+}
+.cal-day.empty { visibility: hidden; }
+.cal-day.past { color: var(--navy-100); cursor: not-allowed; }
+.cal-day.weekend { color: var(--navy-100); cursor: not-allowed; background: transparent; }
+.cal-day.available {
+  background: var(--light-blue);
+  color: var(--navy);
+  font-weight: 600;
+}
+.cal-day.available:hover {
+  background: var(--gold-soft);
+  border: 1px solid var(--gold);
+}
+.cal-day.selected {
+  background: var(--navy);
+  color: var(--gold);
+  font-weight: 700;
+}
+.cal-day.today {
+  outline: 2px solid var(--gold);
+  outline-offset: -2px;
+}
+
+/* ─── Créneaux horaires ─────────────────────────────── */
+.slots-zone {
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid var(--ivory-deep);
+}
+.slots-label {
+  font-size: 11px;
+  color: var(--navy-300);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  font-weight: 700;
+}
+.slots-selected-day {
+  font-size: 14px;
+  color: var(--navy);
+  font-weight: 600;
+  margin-bottom: 14px;
+}
+.slots-empty {
+  font-size: 13px;
+  color: var(--navy-300);
+  font-style: italic;
+  text-align: center;
+  padding: 20px;
+}
+.slots-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.slot {
+  padding: 10px 6px;
+  background: var(--white);
+  border: 1px solid var(--navy-100);
+  border-radius: 6px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--navy);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.slot:hover {
+  background: var(--ivory);
+  border-color: var(--gold);
+}
+.slot.selected {
+  background: var(--navy);
+  color: var(--gold);
+  border-color: var(--navy);
+}
+.slot.unavailable {
+  background: var(--ivory-deep);
+  color: var(--navy-100);
+  cursor: not-allowed;
+}
+.slot.unavailable:hover { background: var(--ivory-deep); border-color: var(--navy-100); }
+
+/* ─── Formulaire prospect ───────────────────────────── */
+.form-field {
+  margin-bottom: 18px;
+}
+.field-label {
+  font-size: 11px;
+  color: var(--navy);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 700;
+  margin-bottom: 6px;
+  display: block;
+}
+.field-label .required {
+  color: var(--gold);
+  margin-left: 4px;
+}
+.field-help {
+  font-size: 11px;
+  color: var(--navy-300);
+  margin-top: 4px;
+  font-style: italic;
+}
+.field-input {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1px solid var(--navy-100);
+  border-radius: 7px;
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--text-body);
+  background: var(--white);
+  transition: all 0.15s;
+}
+.field-input:focus {
+  outline: none;
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px var(--gold-soft);
+}
+.field-input::placeholder { color: var(--navy-100); }
+
+.fields-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* ─── Sélection récapitulative ──────────────────────── */
+.summary-card {
+  background: var(--light-blue);
+  border: 1px solid var(--navy-100);
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-bottom: 20px;
+  font-size: 13px;
+  color: var(--navy);
+  line-height: 1.6;
+}
+.summary-card.empty {
+  background: var(--ivory-deep);
+  color: var(--navy-300);
+  text-align: center;
+  font-style: italic;
+}
+.summary-line { display: flex; align-items: center; gap: 8px; }
+.summary-line strong { font-weight: 700; }
+.summary-icon { font-size: 14px; }
+
+/* ─── Bloc consentement enregistrement ──────────────── */
+.consent-block {
+  background: var(--ivory);
+  border: 1px solid var(--gold);
+  border-left: 3px solid var(--gold);
+  border-radius: 8px;
+  padding: 18px 20px;
+  margin-bottom: 22px;
+}
+.consent-title {
+  font-family: 'Georgia', serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--navy);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.consent-title-icon {
+  width: 16px;
+  height: 16px;
+  fill: var(--gold);
+}
+.consent-text {
+  font-size: 12px;
+  color: var(--text-body);
+  line-height: 1.65;
+  margin-bottom: 12px;
+}
+.consent-checkbox-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--white);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.consent-checkbox-row:hover { background: var(--gold-soft); }
+.consent-checkbox-row input { margin-top: 2px; flex-shrink: 0; }
+.consent-checkbox-label {
+  font-size: 12px;
+  color: var(--navy);
+  line-height: 1.5;
+  font-weight: 500;
+}
+
+/* ─── Bouton final ──────────────────────────────────── */
+.btn-confirm {
+  width: 100%;
+  padding: 14px 24px;
+  background: var(--gold);
+  border: none;
+  border-radius: 7px;
+  color: var(--navy);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+.btn-confirm:hover {
+  background: var(--navy);
+  color: var(--gold);
+}
+.btn-confirm:disabled {
+  background: var(--ivory-deep);
+  color: var(--navy-100);
+  cursor: not-allowed;
+}
+
+/* ─── Confirmation finale (vue après envoi) ─────────── */
+.confirmation-view {
+  display: none;
+  text-align: center;
+  padding: 50px 30px;
+  background: var(--white);
+  border: 1px solid var(--navy-100);
+  border-radius: 12px;
+}
+.confirmation-view.active { display: block; }
+.conf-check {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 24px;
+  background: var(--gold-soft);
+  border: 2px solid var(--gold);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--navy);
+  font-size: 32px;
+  font-weight: 700;
+}
+.conf-title {
+  font-family: 'Georgia', serif;
+  font-size: 24px;
+  color: var(--navy);
+  margin-bottom: 12px;
+}
+.conf-text {
+  font-size: 14px;
+  color: var(--text-body);
+  line-height: 1.6;
+  margin-bottom: 24px;
+  max-width: 540px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.conf-details {
+  display: inline-block;
+  background: var(--ivory);
+  border: 1px solid var(--navy-100);
+  border-radius: 8px;
+  padding: 18px 28px;
+  text-align: left;
+}
+.conf-details-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--navy);
+  padding: 6px 0;
+}
+.conf-details-row strong { font-weight: 700; min-width: 110px; color: var(--navy-300); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; }
+.conf-next {
+  margin-top: 28px;
+  font-size: 12px;
+  color: var(--navy-300);
+  font-style: italic;
+}
+
+/* ─── Mention bas de page ───────────────────────────── */
+.legal-footer {
+  text-align: center;
+  font-size: 11px;
+  color: var(--navy-300);
+  margin-top: 28px;
+  line-height: 1.5;
+}
+.legal-footer a { color: var(--gold); text-decoration: none; }
+
+/* ─── Responsive mobile ──────────────────────────────── */
+@media (max-width: 760px) {
+  .page { padding: 16px 12px; }
+  .advisor-card { grid-template-columns: 1fr; text-align: center; padding: 20px; }
+  .advisor-photo { margin: 0 auto; }
+  .booking-grid { grid-template-columns: 1fr; }
+  .booking-col-left { border-right: none; border-bottom: 1px solid var(--ivory-deep); }
+  .booking-col { padding: 20px; }
+  .meeting-pill { font-size: 12px; padding: 6px 12px; }
+  .slots-grid { grid-template-columns: repeat(2, 1fr); }
+  .fields-row { grid-template-columns: 1fr; }
+}
+
+/* ─── Annotation wireframe (en haut) ─────────────────── */
+.wf-annotation {
+  background: var(--navy);
+  color: var(--ivory);
+  font-size: 11px;
+  padding: 10px 16px;
+  margin: -24px -20px 24px;
+  text-align: center;
+  letter-spacing: 0.08em;
+}
+.wf-annotation strong { color: var(--gold); }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <div class="wf-annotation">
+    <strong>WIREFRAME · 04 · CALENDLY PRIVEOS</strong> · Page publique de prise de rendez-vous · accessible via le lien partagé par l'ingénieur (ex. priveos.com/rdv/luc-thilliez) · première étape du parcours client (Avant-01)
+  </div>
+
+  <!-- Header marque -->
+  <div class="brand-header">
+    <div>
+      <div class="brand-logo">
+        <div class="brand-logo-mark">P</div>
+        <div>
+          <div class="brand-logo-text">PRIVEOS</div>
+          <div class="brand-tagline">CONSEIL EN GESTION DE PATRIMOINE</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vue principale -->
+  <div id="bookingView">
+
+    <!-- Carte conseiller -->
+    <div class="advisor-card">
+      <div class="advisor-photo">LT</div>
+      <div>
+        <div class="advisor-info-name">Luc THILLIEZ</div>
+        <div class="advisor-info-role">Ingénieur Patrimonial · Cabinet Paris Étoile</div>
+        <div class="advisor-info-cabinet">62 avenue des Champs-Élysées · 75008 Paris</div>
+        <div class="meeting-pill">
+          <svg class="meeting-pill-icon" viewBox="0 0 24 24"><path d="M12 1a11 11 0 100 22 11 11 0 000-22zm5 12h-5V6h2v5h3v2z"/></svg>
+          Entretien initial
+          <span class="meeting-pill-sep"></span>
+          1 heure
+          <span class="meeting-pill-sep"></span>
+          Google Meet
+          <span class="meeting-pill-sep"></span>
+          Sans engagement
+        </div>
+      </div>
+    </div>
+
+    <!-- Layout calendrier + formulaire -->
+    <div class="booking-grid">
+
+      <!-- Colonne gauche · calendrier -->
+      <div class="booking-col booking-col-left">
+        <div class="col-title">Choisissez une date et un horaire</div>
+        <div class="col-subtitle">Disponibilités · fuseau Europe/Paris</div>
+
+        <div class="cal-month-nav">
+          <div class="cal-month-name" id="monthName">Mai 2026</div>
+          <div class="cal-nav-btns">
+            <button class="cal-nav-btn" onclick="prevMonth()">‹</button>
+            <button class="cal-nav-btn" onclick="nextMonth()">›</button>
+          </div>
+        </div>
+
+        <div class="cal-grid" id="calGrid">
+          <div class="cal-weekday">Lun</div>
+          <div class="cal-weekday">Mar</div>
+          <div class="cal-weekday">Mer</div>
+          <div class="cal-weekday">Jeu</div>
+          <div class="cal-weekday">Ven</div>
+          <div class="cal-weekday">Sam</div>
+          <div class="cal-weekday">Dim</div>
+        </div>
+
+        <div class="slots-zone">
+          <div class="slots-label">Créneaux disponibles</div>
+          <div class="slots-selected-day" id="slotsTitle">Sélectionnez une date</div>
+          <div id="slotsContainer">
+            <div class="slots-empty">Cliquez sur une date dans le calendrier pour voir les créneaux disponibles.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Colonne droite · formulaire prospect -->
+      <div class="booking-col">
+        <div class="col-title">Vos coordonnées</div>
+        <div class="col-subtitle">Pour confirmer le rendez-vous et vous l'envoyer par e-mail</div>
+
+        <!-- Récap sélection -->
+        <div class="summary-card empty" id="summaryCard">
+          <em>Votre date et votre créneau s'afficheront ici une fois sélectionnés.</em>
+        </div>
+
+        <div class="fields-row">
+          <div class="form-field">
+            <label class="field-label">Prénom<span class="required">*</span></label>
+            <input type="text" class="field-input" id="firstName" placeholder="Bertrand">
+          </div>
+          <div class="form-field">
+            <label class="field-label">Nom<span class="required">*</span></label>
+            <input type="text" class="field-input" id="lastName" placeholder="DUPONT-TOPIN">
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label class="field-label">Adresse e-mail<span class="required">*</span></label>
+          <input type="email" class="field-input" id="email" placeholder="bertrand.dupont@email.fr">
+          <div class="field-help">Nous y enverrons la confirmation et le lien Google Meet</div>
+        </div>
+
+        <div class="form-field">
+          <label class="field-label">Recommandé par qui ?</label>
+          <input type="text" class="field-input" id="referral" placeholder="Nom de la personne, du cabinet, du site…">
+          <div class="field-help">Ce champ nous aide à mieux préparer notre échange · facultatif</div>
+        </div>
+
+        <!-- Bloc consentement -->
+        <div class="consent-block">
+          <div class="consent-title">
+            <svg class="consent-title-icon" viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 18a8 8 0 110-16 8 8 0 010 16zm-1-5h2v2h-2zm0-8h2v6h-2z"/></svg>
+            Enregistrement de l'entretien
+          </div>
+          <div class="consent-text">
+            PRIVEOS exerce une activité réglementée de Conseil en Investissement Financier (CIF) et de Courtage en Assurance. Cet entretien sera enregistré dans le seul but de garantir la qualité et la traçabilité de l'accompagnement qui vous est proposé. L'enregistrement est strictement réservé à un usage interne et n'est communiqué à aucun tiers. Si la collaboration ne se concrétise pas, l'enregistrement et l'ensemble des données partagées seront supprimés conformément à la loi n° 78-17 du 6 janvier 1978 modifiée et au Règlement (UE) 2016/679 (RGPD).
+          </div>
+          <label class="consent-checkbox-row">
+            <input type="checkbox" id="consentRecord">
+            <span class="consent-checkbox-label">Je consens expressément à l'enregistrement de l'entretien et au traitement de mes données dans les conditions exposées ci-dessus.</span>
+          </label>
+        </div>
+
+        <button class="btn-confirm" id="confirmBtn" onclick="confirmBooking()" disabled>Confirmer le rendez-vous</button>
+      </div>
+    </div>
+
+    <div class="legal-footer">
+      PRIVEOS · SAS au capital de 10 000 € · SIREN 948 742 903 · ORIAS 23004036<br>
+      <a href="#">Mentions légales</a> · <a href="#">Politique de confidentialité</a> · <a href="#">Liste Bloctel</a>
+    </div>
+  </div>
+
+  <!-- Vue confirmation -->
+  <div class="confirmation-view" id="confirmationView">
+    <div class="conf-check">✓</div>
+    <div class="conf-title">Votre rendez-vous est confirmé</div>
+    <div class="conf-text">
+      Vous allez recevoir dans les prochaines minutes un e-mail de confirmation à l'adresse <strong id="confEmail"></strong>, contenant le lien Google Meet pour l'entretien ainsi qu'un document de collecte d'informations à compléter avant notre échange.
+    </div>
+    <div class="conf-details">
+      <div class="conf-details-row"><strong>Date</strong><span id="confDate"></span></div>
+      <div class="conf-details-row"><strong>Heure</strong><span id="confTime"></span></div>
+      <div class="conf-details-row"><strong>Durée</strong><span>1 heure</span></div>
+      <div class="conf-details-row"><strong>Modalité</strong><span>Google Meet · lien envoyé par e-mail</span></div>
+      <div class="conf-details-row"><strong>Conseiller</strong><span>Luc THILLIEZ · Cabinet Paris Étoile</span></div>
+    </div>
+    <div class="conf-next">
+      Pensez à compléter le document de collecte que vous allez recevoir par e-mail avant notre échange.<br>
+      Sans ce document complété, l'entretien ne pourra pas se maintenir.
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ─── Calendrier dynamique ─────────────────────────────
+const MONTH_NAMES = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+let currentMonth = 4; // mai 2026
+let currentYear = 2026;
+let selectedDate = null;
+let selectedSlot = null;
+const today = new Date(2026, 4, 14); // 14 mai 2026
+
+// Créneaux fictifs pour la démo
+const SLOTS_MORNING = ['09:00','09:30','10:00','10:30','11:00','11:30'];
+const SLOTS_AFTERNOON = ['14:00','14:30','15:00','15:30','16:00','16:30','17:00','17:30'];
+function getSlotsForDay(date) {
+  const day = date.getDay();
+  if (day === 0 || day === 6) return []; // weekend
+  const slots = [...SLOTS_MORNING, ...SLOTS_AFTERNOON];
+  // simuler des indisponibilités
+  const seed = date.getDate();
+  return slots.map(s => ({ time: s, available: (seed + s.charCodeAt(0)) % 5 !== 0 }));
+}
+
+function renderCalendar() {
+  const grid = document.getElementById('calGrid');
+  // Reset (garder les en-têtes des 7 premiers)
+  const weekdays = Array.from(grid.querySelectorAll('.cal-weekday'));
+  grid.innerHTML = '';
+  weekdays.forEach(w => grid.appendChild(w));
+
+  document.getElementById('monthName').textContent = MONTH_NAMES[currentMonth] + ' ' + currentYear;
+
+  const firstDay = new Date(currentYear, currentMonth, 1);
+  const lastDay = new Date(currentYear, currentMonth + 1, 0);
+  let startWeekday = firstDay.getDay(); // 0=dim
+  startWeekday = (startWeekday === 0) ? 6 : startWeekday - 1; // lun=0
+
+  for (let i = 0; i < startWeekday; i++) {
+    const empty = document.createElement('div');
+    empty.className = 'cal-day empty';
+    grid.appendChild(empty);
+  }
+
+  for (let d = 1; d <= lastDay.getDate(); d++) {
+    const cell = document.createElement('div');
+    cell.className = 'cal-day';
+    cell.textContent = d;
+    const dateObj = new Date(currentYear, currentMonth, d);
+    const isToday = dateObj.toDateString() === today.toDateString();
+    const isPast = dateObj < today && !isToday;
+    const isWeekend = dateObj.getDay() === 0 || dateObj.getDay() === 6;
+    if (isPast) cell.classList.add('past');
+    else if (isWeekend) cell.classList.add('weekend');
+    else cell.classList.add('available');
+    if (isToday) cell.classList.add('today');
+    if (selectedDate && dateObj.toDateString() === selectedDate.toDateString()) cell.classList.add('selected');
+    if (!isPast && !isWeekend) {
+      cell.addEventListener('click', () => selectDate(dateObj));
+    }
+    grid.appendChild(cell);
+  }
+}
+
+function selectDate(date) {
+  selectedDate = date;
+  selectedSlot = null;
+  renderCalendar();
+  renderSlots();
+  updateSummary();
+  checkFormValid();
+}
+
+function renderSlots() {
+  const titleEl = document.getElementById('slotsTitle');
+  const container = document.getElementById('slotsContainer');
+  if (!selectedDate) {
+    titleEl.textContent = 'Sélectionnez une date';
+    container.innerHTML = '<div class="slots-empty">Cliquez sur une date dans le calendrier pour voir les créneaux disponibles.</div>';
+    return;
+  }
+  const dayStr = selectedDate.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+  titleEl.textContent = dayStr.charAt(0).toUpperCase() + dayStr.slice(1);
+  const slots = getSlotsForDay(selectedDate);
+  if (slots.length === 0) {
+    container.innerHTML = '<div class="slots-empty">Aucun créneau disponible ce jour-là.</div>';
+    return;
+  }
+  const grid = document.createElement('div');
+  grid.className = 'slots-grid';
+  slots.forEach(s => {
+    const btn = document.createElement('div');
+    btn.className = 'slot' + (s.available ? '' : ' unavailable') + (selectedSlot === s.time ? ' selected' : '');
+    btn.textContent = s.time;
+    if (s.available) {
+      btn.addEventListener('click', () => {
+        selectedSlot = s.time;
+        renderSlots();
+        updateSummary();
+        checkFormValid();
+      });
+    }
+    grid.appendChild(btn);
+  });
+  container.innerHTML = '';
+  container.appendChild(grid);
+}
+
+function updateSummary() {
+  const card = document.getElementById('summaryCard');
+  if (!selectedDate || !selectedSlot) {
+    card.className = 'summary-card empty';
+    card.innerHTML = '<em>Votre date et votre créneau s\'afficheront ici une fois sélectionnés.</em>';
+    return;
+  }
+  const dayStr = selectedDate.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  card.className = 'summary-card';
+  card.innerHTML = `
+    <div class="summary-line"><span class="summary-icon">📅</span><strong>${dayStr.charAt(0).toUpperCase() + dayStr.slice(1)}</strong></div>
+    <div class="summary-line"><span class="summary-icon">🕐</span>de <strong>${selectedSlot}</strong> à <strong>${addOneHour(selectedSlot)}</strong> · fuseau Europe/Paris</div>
+  `;
+}
+function addOneHour(t) {
+  const [h, m] = t.split(':').map(Number);
+  return String((h + 1) % 24).padStart(2, '0') + ':' + String(m).padStart(2, '0');
+}
+
+function prevMonth() {
+  currentMonth--;
+  if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+  renderCalendar();
+}
+function nextMonth() {
+  currentMonth++;
+  if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+  renderCalendar();
+}
+
+// ─── Validation formulaire ────────────────────────────
+function checkFormValid() {
+  const fn = document.getElementById('firstName').value.trim();
+  const ln = document.getElementById('lastName').value.trim();
+  const em = document.getElementById('email').value.trim();
+  const cs = document.getElementById('consentRecord').checked;
+  const valid = fn && ln && em && cs && selectedDate && selectedSlot;
+  document.getElementById('confirmBtn').disabled = !valid;
+}
+['firstName','lastName','email','referral','consentRecord'].forEach(id => {
+  document.getElementById(id).addEventListener('input', checkFormValid);
+  document.getElementById(id).addEventListener('change', checkFormValid);
+});
+
+// ─── Confirmation ─────────────────────────────────────
+function confirmBooking() {
+  const dayStr = selectedDate.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  document.getElementById('confDate').textContent = dayStr.charAt(0).toUpperCase() + dayStr.slice(1);
+  document.getElementById('confTime').textContent = `${selectedSlot} – ${addOneHour(selectedSlot)} · 1 heure`;
+  document.getElementById('confEmail').textContent = document.getElementById('email').value.trim();
+  document.getElementById('bookingView').style.display = 'none';
+  document.getElementById('confirmationView').classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+renderCalendar();
+</script>
+
+</body>
+</html>

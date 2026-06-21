@@ -1,0 +1,470 @@
+/* PORTÉ MÉCANIQUEMENT depuis agenda-calendly.html (<style> de tête).
+   Régénéré par scripts/scope-html-css.mjs. Sélecteurs scopés sous .maq-rdv. */
+
+:root {
+  --navy: #102D50;
+  --navy-700: #1A3A60;
+  --navy-300: #5A6E8A;
+  --navy-100: #C8D3E0;
+  --gold: #C68E0E;
+  --gold-light: #E8C272;
+  --gold-soft: #F4E4B8;
+  --ivory: #FAF8F3;
+  --ivory-deep: #F2EEE3;
+  --light-blue: #EBF1FA;
+  --white: #FFFFFF;
+  --text-body: #2C2C2C;
+  --success: #2EA85A;
+  --error: #D9534F;
+}.maq-rdv * { box-sizing: border-box; margin: 0; padding: 0; }.maq-rdv {
+  font-family: 'Epilogue', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--ivory);
+  color: var(--text-body);
+  line-height: 1.5;
+  min-height: 100vh;
+}.maq-rdv .page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px 20px 40px;
+}
+
+/* ─── Header PRIVEOS ─────────────────────────────────── */
+.maq-rdv .brand-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 0 32px;
+  border-bottom: 1px solid var(--navy-100);
+  margin-bottom: 32px;
+}.maq-rdv .brand-logo {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}.maq-rdv .brand-logo-mark {
+  width: 38px;
+  height: 38px;
+  background: var(--navy);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gold);
+  font-family: 'Cinzel', 'Georgia', serif;
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: 0.05em;
+}.maq-rdv .brand-logo-text {
+  font-family: 'Cinzel', 'Georgia', serif;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  color: var(--navy);
+}.maq-rdv .brand-tagline {
+  font-size: 10px;
+  color: var(--navy-300);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+
+/* ─── Bloc supérieur · présentation conseiller ──────── */
+.maq-rdv .advisor-card {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: 24px;
+  background: var(--white);
+  border: 1px solid var(--navy-100);
+  border-radius: 12px;
+  padding: 24px 28px;
+  margin-bottom: 28px;
+}.maq-rdv .advisor-photo {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-700) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gold);
+  font-family: 'Georgia', serif;
+  font-size: 36px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  border: 3px solid var(--gold-soft);
+}.maq-rdv .advisor-info-name {
+  font-family: 'Georgia', serif;
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--navy);
+  margin-bottom: 2px;
+}.maq-rdv .advisor-info-role {
+  font-size: 12px;
+  color: var(--navy-300);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}.maq-rdv .advisor-info-cabinet {
+  font-size: 13px;
+  color: var(--text-body);
+  margin-bottom: 14px;
+}.maq-rdv .meeting-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--gold-soft);
+  border: 1px solid var(--gold);
+  color: var(--navy);
+  padding: 8px 14px;
+  border-radius: 24px;
+  font-size: 13px;
+  font-weight: 600;
+}.maq-rdv .meeting-pill-icon {
+  width: 14px;
+  height: 14px;
+  fill: var(--gold);
+}.maq-rdv .meeting-pill-sep {
+  width: 1px;
+  height: 14px;
+  background: var(--gold);
+  opacity: 0.4;
+}
+
+/* ─── Layout 2 colonnes (calendrier · formulaire) ───── */
+.maq-rdv .booking-grid {
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: 24px;
+  background: var(--white);
+  border: 1px solid var(--navy-100);
+  border-radius: 12px;
+  overflow: hidden;
+}.maq-rdv .booking-col {
+  padding: 28px;
+}.maq-rdv .booking-col-left {
+  border-right: 1px solid var(--ivory-deep);
+}.maq-rdv .col-title {
+  font-family: 'Georgia', serif;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--navy);
+  margin-bottom: 4px;
+}.maq-rdv .col-subtitle {
+  font-size: 12px;
+  color: var(--navy-300);
+  letter-spacing: 0.06em;
+  margin-bottom: 22px;
+}
+
+/* ─── Calendrier mensuel ────────────────────────────── */
+.maq-rdv .cal-month-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 4px 14px;
+}.maq-rdv .cal-month-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--navy);
+}.maq-rdv .cal-nav-btn {
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--navy-100);
+  background: var(--white);
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--navy);
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}.maq-rdv .cal-nav-btn:hover { background: var(--ivory); border-color: var(--gold); }.maq-rdv .cal-nav-btns { display: flex; gap: 6px; }.maq-rdv .cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}.maq-rdv .cal-weekday {
+  text-align: center;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--navy-300);
+  letter-spacing: 0.1em;
+  padding: 6px 0;
+  text-transform: uppercase;
+}.maq-rdv .cal-day {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+  position: relative;
+}.maq-rdv .cal-day.empty { visibility: hidden; }.maq-rdv .cal-day.past { color: var(--navy-100); cursor: not-allowed; }.maq-rdv .cal-day.weekend { color: var(--navy-100); cursor: not-allowed; background: transparent; }.maq-rdv .cal-day.available {
+  background: var(--light-blue);
+  color: var(--navy);
+  font-weight: 600;
+}.maq-rdv .cal-day.available:hover {
+  background: var(--gold-soft);
+  border: 1px solid var(--gold);
+}.maq-rdv .cal-day.selected {
+  background: var(--navy);
+  color: var(--gold);
+  font-weight: 700;
+}.maq-rdv .cal-day.today {
+  outline: 2px solid var(--gold);
+  outline-offset: -2px;
+}
+
+/* ─── Créneaux horaires ─────────────────────────────── */
+.maq-rdv .slots-zone {
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid var(--ivory-deep);
+}.maq-rdv .slots-label {
+  font-size: 11px;
+  color: var(--navy-300);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  font-weight: 700;
+}.maq-rdv .slots-selected-day {
+  font-size: 14px;
+  color: var(--navy);
+  font-weight: 600;
+  margin-bottom: 14px;
+}.maq-rdv .slots-empty {
+  font-size: 13px;
+  color: var(--navy-300);
+  font-style: italic;
+  text-align: center;
+  padding: 20px;
+}.maq-rdv .slots-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}.maq-rdv .slot {
+  padding: 10px 6px;
+  background: var(--white);
+  border: 1px solid var(--navy-100);
+  border-radius: 6px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--navy);
+  cursor: pointer;
+  transition: all 0.15s;
+}.maq-rdv .slot:hover {
+  background: var(--ivory);
+  border-color: var(--gold);
+}.maq-rdv .slot.selected {
+  background: var(--navy);
+  color: var(--gold);
+  border-color: var(--navy);
+}.maq-rdv .slot.unavailable {
+  background: var(--ivory-deep);
+  color: var(--navy-100);
+  cursor: not-allowed;
+}.maq-rdv .slot.unavailable:hover { background: var(--ivory-deep); border-color: var(--navy-100); }
+
+/* ─── Formulaire prospect ───────────────────────────── */
+.maq-rdv .form-field {
+  margin-bottom: 18px;
+}.maq-rdv .field-label {
+  font-size: 11px;
+  color: var(--navy);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 700;
+  margin-bottom: 6px;
+  display: block;
+}.maq-rdv .field-label .required {
+  color: var(--gold);
+  margin-left: 4px;
+}.maq-rdv .field-help {
+  font-size: 11px;
+  color: var(--navy-300);
+  margin-top: 4px;
+  font-style: italic;
+}.maq-rdv .field-input {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1px solid var(--navy-100);
+  border-radius: 7px;
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--text-body);
+  background: var(--white);
+  transition: all 0.15s;
+}.maq-rdv .field-input:focus {
+  outline: none;
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px var(--gold-soft);
+}.maq-rdv .field-input::placeholder { color: var(--navy-100); }.maq-rdv .fields-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* ─── Sélection récapitulative ──────────────────────── */
+.maq-rdv .summary-card {
+  background: var(--light-blue);
+  border: 1px solid var(--navy-100);
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-bottom: 20px;
+  font-size: 13px;
+  color: var(--navy);
+  line-height: 1.6;
+}.maq-rdv .summary-card.empty {
+  background: var(--ivory-deep);
+  color: var(--navy-300);
+  text-align: center;
+  font-style: italic;
+}.maq-rdv .summary-line { display: flex; align-items: center; gap: 8px; }.maq-rdv .summary-line strong { font-weight: 700; }.maq-rdv .summary-icon { font-size: 14px; }
+
+/* ─── Bloc consentement enregistrement ──────────────── */
+.maq-rdv .consent-block {
+  background: var(--ivory);
+  border: 1px solid var(--gold);
+  border-left: 3px solid var(--gold);
+  border-radius: 8px;
+  padding: 18px 20px;
+  margin-bottom: 22px;
+}.maq-rdv .consent-title {
+  font-family: 'Georgia', serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--navy);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}.maq-rdv .consent-title-icon {
+  width: 16px;
+  height: 16px;
+  fill: var(--gold);
+}.maq-rdv .consent-text {
+  font-size: 12px;
+  color: var(--text-body);
+  line-height: 1.65;
+  margin-bottom: 12px;
+}.maq-rdv .consent-checkbox-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--white);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+}.maq-rdv .consent-checkbox-row:hover { background: var(--gold-soft); }.maq-rdv .consent-checkbox-row input { margin-top: 2px; flex-shrink: 0; }.maq-rdv .consent-checkbox-label {
+  font-size: 12px;
+  color: var(--navy);
+  line-height: 1.5;
+  font-weight: 500;
+}
+
+/* ─── Bouton final ──────────────────────────────────── */
+.maq-rdv .btn-confirm {
+  width: 100%;
+  padding: 14px 24px;
+  background: var(--gold);
+  border: none;
+  border-radius: 7px;
+  color: var(--navy);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}.maq-rdv .btn-confirm:hover {
+  background: var(--navy);
+  color: var(--gold);
+}.maq-rdv .btn-confirm:disabled {
+  background: var(--ivory-deep);
+  color: var(--navy-100);
+  cursor: not-allowed;
+}
+
+/* ─── Confirmation finale (vue après envoi) ─────────── */
+.maq-rdv .confirmation-view {
+  display: none;
+  text-align: center;
+  padding: 50px 30px;
+  background: var(--white);
+  border: 1px solid var(--navy-100);
+  border-radius: 12px;
+}.maq-rdv .confirmation-view.active { display: block; }.maq-rdv .conf-check {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 24px;
+  background: var(--gold-soft);
+  border: 2px solid var(--gold);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--navy);
+  font-size: 32px;
+  font-weight: 700;
+}.maq-rdv .conf-title {
+  font-family: 'Georgia', serif;
+  font-size: 24px;
+  color: var(--navy);
+  margin-bottom: 12px;
+}.maq-rdv .conf-text {
+  font-size: 14px;
+  color: var(--text-body);
+  line-height: 1.6;
+  margin-bottom: 24px;
+  max-width: 540px;
+  margin-left: auto;
+  margin-right: auto;
+}.maq-rdv .conf-details {
+  display: inline-block;
+  background: var(--ivory);
+  border: 1px solid var(--navy-100);
+  border-radius: 8px;
+  padding: 18px 28px;
+  text-align: left;
+}.maq-rdv .conf-details-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--navy);
+  padding: 6px 0;
+}.maq-rdv .conf-details-row strong { font-weight: 700; min-width: 110px; color: var(--navy-300); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; }.maq-rdv .conf-next {
+  margin-top: 28px;
+  font-size: 12px;
+  color: var(--navy-300);
+  font-style: italic;
+}
+
+/* ─── Mention bas de page ───────────────────────────── */
+.maq-rdv .legal-footer {
+  text-align: center;
+  font-size: 11px;
+  color: var(--navy-300);
+  margin-top: 28px;
+  line-height: 1.5;
+}.maq-rdv .legal-footer a { color: var(--gold); text-decoration: none; }
+
+/* ─── Responsive mobile ──────────────────────────────── */
+@media (max-width: 760px) {
+.maq-rdv .page { padding: 16px 12px; }.maq-rdv .advisor-card { grid-template-columns: 1fr; text-align: center; padding: 20px; }.maq-rdv .advisor-photo { margin: 0 auto; }.maq-rdv .booking-grid { grid-template-columns: 1fr; }.maq-rdv .booking-col-left { border-right: none; border-bottom: 1px solid var(--ivory-deep); }.maq-rdv .booking-col { padding: 20px; }.maq-rdv .meeting-pill { font-size: 12px; padding: 6px 12px; }.maq-rdv .slots-grid { grid-template-columns: repeat(2, 1fr); }.maq-rdv .fields-row { grid-template-columns: 1fr; }}
+
+/* ─── Annotation wireframe (en haut) ─────────────────── */
+.maq-rdv .wf-annotation {
+  background: var(--navy);
+  color: var(--ivory);
+  font-size: 11px;
+  padding: 10px 16px;
+  margin: -24px -20px 24px;
+  text-align: center;
+  letter-spacing: 0.08em;
+}.maq-rdv .wf-annotation strong { color: var(--gold); }

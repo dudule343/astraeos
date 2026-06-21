@@ -1,0 +1,1879 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Questionnaire de qualification client · PRIVEOS</title>
+<style>
+:root {
+  --navy: #102D50;
+  --navy-700: #1A3A60;
+  --navy-500: #3A4F6E;
+  --navy-300: #708196;
+  --navy-200: #A4AEBB;
+  --navy-100: #DBE0E4;
+  --navy-50: #EFF2F5;
+  --gold: #C68E0E;
+  --gold-light: #DDBB6E;
+  --gold-soft: #EEDDB6;
+  --gold-faint: #F8EFDA;
+  --ivory: #FAF8F3;
+  --ivory-deep: #F4F0E5;
+  --ivory-card: #FFFFFE;
+  --light-blue: #EBF1FA;
+  --white: #FFFFFF;
+  --text: #1F2937;
+  --text-soft: #4A5568;
+  --text-muted: #6B7689;
+  --success: #2EA85A;
+  --error: #D9534F;
+  --line: #E8E3D6;
+  --line-soft: #F0EBE0;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Epilogue', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--ivory);
+  color: var(--text);
+  line-height: 1.6;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── Bandeau de progression haut ───────────────────── */
+.top-bar {
+  position: sticky;
+  top: 0;
+  background: var(--white);
+  border-bottom: 1px solid var(--line);
+  z-index: 50;
+  padding: 18px 0;
+}
+.top-bar-inner {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 0 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+.brand-mini { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+.brand-mini-mark { width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; }
+.brand-mini-mark svg { width: 100%; height: 100%; }
+.brand-mini-text {
+  font-family: 'Cinzel', 'Georgia', serif;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  color: var(--navy);
+}
+.progress-zone { flex: 1; max-width: 480px; }
+.progress-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--navy-300);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+.progress-info .percent { color: var(--gold); font-weight: 700; }
+.progress-bar-wrap { height: 2px; background: var(--line); border-radius: 2px; overflow: hidden; }
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--gold) 0%, var(--gold-light) 100%);
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 2px;
+}
+.save-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11px;
+  color: var(--navy-300);
+  letter-spacing: 0.06em;
+  font-style: italic;
+}
+.save-indicator.saved { color: var(--success); }
+.save-icon { width: 13px; height: 13px; stroke-width: 2; }
+
+/* ─── Conteneur de section ─────────────────────────── */
+.section-container {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 60px 32px 100px;
+  min-height: calc(100vh - 75px);
+}
+
+.section {
+  display: none;
+  animation: sectionIn 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.section.active { display: block; }
+@keyframes sectionIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.section-header { text-align: center; margin-bottom: 48px; }
+.section-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 10px;
+  color: var(--gold);
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  font-weight: 700;
+  margin-bottom: 22px;
+}
+.section-eyebrow::before, .section-eyebrow::after {
+  content: '';
+  width: 28px;
+  height: 1px;
+  background: var(--gold);
+  opacity: 0.5;
+}
+.section-title {
+  font-family: 'Cormorant Garamond', 'Georgia', serif;
+  font-size: 44px;
+  font-weight: 500;
+  color: var(--navy);
+  letter-spacing: -0.015em;
+  margin-bottom: 16px;
+  line-height: 1.1;
+}
+.section-subtitle {
+  font-size: 14.5px;
+  color: var(--text-soft);
+  max-width: 560px;
+  margin: 0 auto;
+  line-height: 1.65;
+}
+
+/* ─── Bloc produit financier ─────────────────────────── */
+.product-card {
+  background: var(--ivory-card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 0;
+  margin-bottom: 24px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(16, 45, 80, 0.03);
+}
+.product-intro {
+  background: linear-gradient(135deg, var(--ivory) 0%, var(--gold-faint) 100%);
+  border-bottom: 1px solid var(--line);
+  padding: 28px 38px;
+}
+.product-def-label {
+  font-size: 10px;
+  color: var(--gold);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.product-def-text {
+  font-family: 'Cormorant Garamond', 'Georgia', serif;
+  font-size: 18px;
+  color: var(--navy);
+  font-weight: 500;
+  line-height: 1.45;
+  margin-bottom: 18px;
+  font-style: italic;
+}
+.product-example {
+  display: flex;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--text-soft);
+  line-height: 1.6;
+  padding-top: 16px;
+  border-top: 1px solid rgba(198, 142, 14, 0.18);
+}
+.product-example-icon {
+  width: 16px;
+  height: 16px;
+  color: var(--gold);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.product-example-icon svg { width: 100%; height: 100%; stroke-width: 1.6; }
+.product-example-label {
+  color: var(--gold);
+  font-weight: 700;
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  margin-right: 6px;
+}
+.product-questions {
+  padding: 32px 38px;
+}
+
+/* ─── Champs ─────────────────────────────────────────── */
+.field {
+  margin-bottom: 22px;
+}
+.field:last-child { margin-bottom: 0; }
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+  margin-bottom: 22px;
+}
+.field-row-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 32px;
+  margin-bottom: 22px;
+}
+.field-row:last-child, .field-row-3:last-child { margin-bottom: 0; }
+.field-row .field, .field-row-3 .field { margin-bottom: 0; }
+
+.field-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--navy);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+.field-label .required { color: var(--gold); font-weight: 700; }
+
+.text-input, .select-input {
+  width: 100%;
+  padding: 13px 16px;
+  background: var(--white);
+  border: 1px solid var(--navy-100);
+  border-radius: 9px;
+  color: var(--text);
+  font-size: 14px;
+  font-family: inherit;
+  transition: all 0.18s;
+}
+.text-input::placeholder { color: var(--navy-200); }
+.text-input:focus, .select-input:focus {
+  outline: none;
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px var(--gold-faint);
+}
+.text-input:read-only {
+  background: var(--ivory);
+  color: var(--text-soft);
+}
+.select-input {
+  appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none' stroke='%23C68E0E' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><polyline points='1 1.5 6 6.5 11 1.5'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  padding-right: 44px;
+  cursor: pointer;
+}
+
+/* ─── Pages à choix (radio cards) ─────────────────── */
+.choice-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.choice-radio {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 20px 24px;
+  background: var(--ivory-card);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+.choice-radio:hover {
+  border-color: var(--gold-soft);
+  background: var(--ivory);
+}
+.choice-radio.selected {
+  background: var(--gold-faint);
+  border-color: var(--gold);
+  box-shadow: 0 0 0 1px var(--gold);
+}
+.choice-radio-circle {
+  width: 22px;
+  height: 22px;
+  border: 1.5px solid var(--navy-100);
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 2px;
+  transition: all 0.18s;
+  position: relative;
+}
+.choice-radio.selected .choice-radio-circle {
+  border-color: var(--gold);
+  border-width: 2px;
+}
+.choice-radio.selected .choice-radio-circle::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 10px;
+  height: 10px;
+  background: var(--gold);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+.choice-radio-content { flex: 1; }
+.choice-radio-label {
+  font-family: 'Georgia', serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--navy);
+  margin-bottom: 4px;
+}
+.choice-radio-desc {
+  font-size: 13px;
+  color: var(--text-soft);
+  line-height: 1.55;
+}
+
+/* ─── Bloc explicatif (cadre réglementaire, etc.) ── */
+.info-block {
+  background: var(--ivory-card);
+  border: 1px solid var(--line);
+  border-left: 2px solid var(--gold);
+  border-radius: 10px;
+  padding: 26px 32px;
+  margin-bottom: 28px;
+}
+.info-block-title {
+  font-family: 'Cormorant Garamond', 'Georgia', serif;
+  font-size: 18px;
+  color: var(--navy);
+  font-weight: 600;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.info-block-title svg { width: 18px; height: 18px; color: var(--gold); stroke-width: 1.6; }
+.info-block-text {
+  font-size: 13.5px;
+  color: var(--text-soft);
+  line-height: 1.75;
+  margin-bottom: 8px;
+}
+.info-block-text:last-child { margin-bottom: 0; }
+.info-block-text strong { color: var(--navy); font-weight: 600; }
+.info-block-text a { color: var(--gold); font-weight: 600; text-decoration: none; border-bottom: 1px dotted var(--gold); }
+.info-block-text a:hover { border-bottom-style: solid; }
+
+/* ─── Guide pédagogique (4 dimensions) ─────────────── */
+.guide-block {
+  background: var(--ivory);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 28px 32px;
+  margin-bottom: 28px;
+}
+.guide-title {
+  font-family: 'Cormorant Garamond', 'Georgia', serif;
+  font-size: 18px;
+  color: var(--navy);
+  font-weight: 600;
+  margin-bottom: 18px;
+  text-align: center;
+}
+.guide-dims {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.guide-dim {
+  display: flex;
+  gap: 12px;
+  padding: 14px;
+  background: var(--white);
+  border: 1px solid var(--line-soft);
+  border-radius: 8px;
+}
+.guide-dim-num {
+  width: 26px;
+  height: 26px;
+  background: var(--gold-faint);
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.guide-dim-content { flex: 1; }
+.guide-dim-name {
+  font-size: 12px;
+  color: var(--navy);
+  font-weight: 700;
+  margin-bottom: 3px;
+  letter-spacing: 0.04em;
+}
+.guide-dim-desc {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+
+/* ─── Page 16 · courbe rendement/risque SVG ──────── */
+.chart-block {
+  background: var(--ivory-card);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 28px;
+  margin-bottom: 28px;
+}
+.chart-svg { width: 100%; height: auto; display: block; }
+
+/* ─── Choix de courbe · indicateur coloré ─────────── */
+.choice-radio.choice-curve {
+  align-items: center;
+}
+.curve-color-indicator {
+  width: 36px;
+  height: 4px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+/* ─── ESG · checkboxes ───────────────────────────────── */
+.check-list { display: flex; flex-direction: column; gap: 10px; }
+.check-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 18px;
+  background: var(--ivory-card);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+.check-row:hover { border-color: var(--gold-soft); background: var(--ivory); }
+.check-row.checked {
+  background: var(--gold-faint);
+  border-color: var(--gold);
+}
+.check-box {
+  width: 20px;
+  height: 20px;
+  border: 1.5px solid var(--navy-100);
+  border-radius: 4px;
+  flex-shrink: 0;
+  margin-top: 2px;
+  background: var(--white);
+  transition: all 0.18s;
+  position: relative;
+}
+.check-row.checked .check-box {
+  background: var(--gold);
+  border-color: var(--gold);
+}
+.check-row.checked .check-box::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 6px;
+  height: 11px;
+  border: solid var(--white);
+  border-width: 0 2px 2px 0;
+  transform: translate(-50%, -60%) rotate(45deg);
+}
+.check-label {
+  font-size: 13.5px;
+  color: var(--text);
+  line-height: 1.5;
+  font-weight: 500;
+  flex: 1;
+}
+.check-row.checked .check-label { color: var(--navy); }
+
+.conditional {
+  display: none;
+  margin-top: 22px;
+  padding: 4px 0 4px 18px;
+  border-left: 2px solid var(--gold);
+}
+.conditional.visible { display: block; animation: condIn 0.3s ease; }
+@keyframes condIn { from { opacity: 0; } to { opacity: 1; } }
+.conditional-title {
+  font-family: 'Cormorant Garamond', 'Georgia', serif;
+  font-size: 16px;
+  color: var(--navy);
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+/* ─── Navigation entre sections ─────────────────────── */
+.nav-bar {
+  position: sticky;
+  bottom: 0;
+  background: var(--white);
+  border-top: 1px solid var(--line);
+  padding: 18px 0;
+  box-shadow: 0 -4px 16px rgba(16, 45, 80, 0.04);
+}
+.nav-bar-inner {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 0 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+}
+.nav-btn {
+  padding: 13px 30px;
+  border-radius: 9px;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  border: none;
+}
+.nav-btn.prev {
+  background: transparent;
+  color: var(--navy);
+  border: 1px solid var(--navy-100);
+}
+.nav-btn.prev:hover { background: var(--ivory); border-color: var(--navy); }
+.nav-btn.next { background: var(--navy); color: var(--ivory); }
+.nav-btn.next:hover { background: var(--navy-700); }
+.nav-btn.next.final { background: var(--gold); color: var(--navy); }
+.nav-btn.next.final:hover { background: var(--gold-light); }
+.nav-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.nav-btn svg { width: 14px; height: 14px; stroke-width: 2; }
+.nav-step-indicator {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 14px;
+  color: var(--navy-300);
+}
+.nav-step-indicator strong {
+  color: var(--gold);
+  font-weight: 700;
+  font-style: normal;
+  font-family: 'Epilogue', sans-serif;
+  letter-spacing: 0.1em;
+}
+
+/* ─── Section 01 spécial · accueil ──────────────────── */
+.welcome-hero { text-align: center; padding: 16px 0 36px; }
+.welcome-mark {
+  font-family: 'Cinzel', 'Georgia', serif;
+  font-size: 36px;
+  color: var(--navy);
+  letter-spacing: 0.24em;
+  font-weight: 600;
+  margin-bottom: 22px;
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+}
+.welcome-mark svg { width: 38px; height: 38px; }
+.welcome-line { width: 64px; height: 1px; background: var(--gold); margin: 0 auto 36px; }
+.welcome-name {
+  font-family: 'Cormorant Garamond', 'Georgia', serif;
+  font-size: 38px;
+  color: var(--navy);
+  margin-bottom: 18px;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+.welcome-message {
+  font-size: 15.5px;
+  color: var(--text-soft);
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.75;
+}
+.welcome-message strong { color: var(--navy); font-weight: 600; }
+
+/* ─── Section signature finale ──────────────────────── */
+.profile-result {
+  background: linear-gradient(135deg, var(--ivory-card) 0%, var(--gold-faint) 100%);
+  border: 1px solid var(--gold-soft);
+  border-radius: 12px;
+  padding: 32px 36px;
+  margin-bottom: 28px;
+  text-align: center;
+}
+.profile-result-label {
+  font-size: 10px;
+  color: var(--gold);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+.profile-result-name {
+  font-family: 'Cormorant Garamond', 'Georgia', serif;
+  font-size: 36px;
+  color: var(--navy);
+  font-weight: 500;
+  margin-bottom: 14px;
+  font-style: italic;
+}
+.profile-result-desc {
+  font-size: 13.5px;
+  color: var(--text-soft);
+  line-height: 1.65;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.signature-block {
+  background: var(--ivory-card);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 28px 32px;
+  margin-bottom: 28px;
+}
+.signature-block-title {
+  font-family: 'Cormorant Garamond', 'Georgia', serif;
+  font-size: 18px;
+  color: var(--navy);
+  font-weight: 600;
+  margin-bottom: 18px;
+}
+.signature-id-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 22px;
+  margin-bottom: 22px;
+}
+.signature-id-field {
+  background: var(--ivory);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 14px 16px;
+}
+.signature-id-label {
+  font-size: 10px;
+  color: var(--gold);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+.signature-id-value {
+  font-size: 14px;
+  color: var(--navy);
+  font-weight: 600;
+}
+
+.cert-block {
+  background: var(--ivory-card);
+  border: 1px solid var(--gold);
+  border-radius: 12px;
+  padding: 24px 28px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 8px rgba(198, 142, 14, 0.08);
+}
+.cert-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  cursor: pointer;
+}
+.cert-checkbox {
+  width: 20px;
+  height: 20px;
+  border: 1.5px solid var(--gold);
+  border-radius: 4px;
+  flex-shrink: 0;
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--white);
+  transition: all 0.18s;
+  position: relative;
+}
+.cert-label input { position: absolute; opacity: 0; width: 20px; height: 20px; cursor: pointer; }
+.cert-label input:checked ~ .cert-checkbox { background: var(--gold); }
+.cert-label input:checked ~ .cert-checkbox::after {
+  content: '';
+  width: 6px; height: 11px;
+  border: solid var(--white);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg) translate(-1px, -2px);
+}
+.cert-text {
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.7;
+  flex: 1;
+}
+.cert-text strong { font-weight: 700; color: var(--navy); }
+
+/* ─── Splash de fin (après envoi) ───────────────────── */
+.final-view {
+  display: none;
+  text-align: center;
+  padding: 60px 0;
+  max-width: 680px;
+  margin: 0 auto;
+}
+.final-view.active { display: block; }
+.final-frame {
+  background: var(--ivory-card);
+  border: 1px solid var(--gold-soft);
+  border-radius: 16px;
+  padding: 64px 56px;
+  position: relative;
+  box-shadow: 0 8px 32px rgba(16, 45, 80, 0.06);
+}
+.final-frame::before, .final-frame::after {
+  content: '';
+  position: absolute;
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--gold);
+}
+.final-frame::before {
+  top: -1px; left: -1px;
+  border-right: none; border-bottom: none;
+  border-radius: 16px 0 0 0;
+}
+.final-frame::after {
+  bottom: -1px; right: -1px;
+  border-left: none; border-top: none;
+  border-radius: 0 0 16px 0;
+}
+.final-seal { width: 100px; height: 100px; margin: 0 auto 36px; }
+.final-seal svg { width: 100%; height: 100%; }
+.final-line { width: 80px; height: 1px; background: var(--gold); margin: 0 auto 30px; }
+.final-title {
+  font-family: 'Cormorant Garamond', 'Georgia', serif;
+  font-size: 46px;
+  color: var(--navy);
+  margin-bottom: 24px;
+  font-style: italic;
+  font-weight: 400;
+}
+.final-text {
+  font-size: 16px;
+  color: var(--text-soft);
+  max-width: 560px;
+  margin: 0 auto 36px;
+  line-height: 1.75;
+}
+.final-text strong { color: var(--navy); font-weight: 600; }
+.final-signature {
+  font-size: 16px;
+  color: var(--text-soft);
+  margin-top: 38px;
+  line-height: 1.75;
+}
+.final-signature-name {
+  font-family: 'Cinzel', serif;
+  font-size: 13px;
+  letter-spacing: 0.24em;
+  color: var(--gold);
+  margin-top: 6px;
+  font-weight: 600;
+}
+
+/* ─── Bandeau wireframe ─────────────────────────────── */
+.wf-annotation {
+  background: var(--navy);
+  color: var(--gold);
+  font-size: 11px;
+  padding: 10px 16px;
+  text-align: center;
+  letter-spacing: 0.1em;
+  font-weight: 500;
+}
+.wf-annotation strong { color: var(--ivory); letter-spacing: 0.18em; }
+
+/* ─── Responsive ─────────────────────────────────────── */
+@media (max-width: 760px) {
+  .top-bar-inner { flex-wrap: wrap; gap: 14px; padding: 0 18px; }
+  .progress-zone { order: 3; max-width: 100%; width: 100%; }
+  .section-container { padding: 36px 20px 50px; }
+  .section-title { font-size: 32px; }
+  .product-intro, .product-questions { padding: 22px 22px; }
+  .product-def-text { font-size: 16px; }
+  .field-row, .field-row-3 { grid-template-columns: 1fr; gap: 16px; }
+  .guide-dims { grid-template-columns: 1fr; }
+  .signature-id-row { grid-template-columns: 1fr; gap: 14px; }
+  .nav-bar-inner { padding: 0 20px; }
+  .nav-btn { padding: 11px 18px; font-size: 11px; }
+  .welcome-name { font-size: 28px; }
+  .final-frame { padding: 44px 24px; }
+  .final-title { font-size: 34px; }
+  .info-block, .guide-block { padding: 22px; }
+  .profile-result { padding: 24px; }
+  .profile-result-name { font-size: 28px; }
+}
+
+.svg-defs { width: 0; height: 0; position: absolute; visibility: hidden; }
+</style>
+</head>
+<body>
+
+<svg class="svg-defs" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <symbol id="ic-tree" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M16 28V18" stroke-width="1.6"/>
+    <path d="M16 18c-3 0-5.5-2.2-5.5-5s2.5-5 5.5-5 5.5 2.2 5.5 5-2.5 5-5.5 5z" stroke-width="1.4"/>
+    <path d="M16 8V4" stroke-width="1.4"/>
+    <circle cx="11.5" cy="11" r="1.2" fill="currentColor" stroke="none"/>
+    <circle cx="20.5" cy="11" r="1.2" fill="currentColor" stroke="none"/>
+    <circle cx="16" cy="14.5" r="1.2" fill="currentColor" stroke="none"/>
+  </symbol>
+  <symbol id="ic-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6l8-3z"/>
+    <polyline points="9 12 11 14 15 10"/>
+  </symbol>
+  <symbol id="ic-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="9"/>
+    <line x1="12" y1="11" x2="12" y2="16"/>
+    <circle cx="12" cy="8" r="1" fill="currentColor" stroke="none"/>
+  </symbol>
+  <symbol id="ic-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="4 12 10 18 20 6"/>
+  </symbol>
+  <symbol id="ic-arrow-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="4" y1="12" x2="20" y2="12"/>
+    <polyline points="14 6 20 12 14 18"/>
+  </symbol>
+  <symbol id="ic-arrow-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="20" y1="12" x2="4" y2="12"/>
+    <polyline points="10 6 4 12 10 18"/>
+  </symbol>
+  <symbol id="ic-bulb" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M9 18h6"/>
+    <path d="M10 21h4"/>
+    <path d="M12 3a6 6 0 00-3 11l1 3h4l1-3a6 6 0 00-3-11z"/>
+  </symbol>
+  <symbol id="ic-seal" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="50" cy="50" r="46" stroke-width="1.5"/>
+    <circle cx="50" cy="50" r="36" stroke-width="1"/>
+    <polyline points="34 50 46 62 66 38" stroke-width="2.5"/>
+  </symbol>
+</defs>
+</svg>
+
+<div class="wf-annotation">
+  <strong>WIREFRAME · 06 · ESPACE CLIENT · QUESTIONNAIRE DE QUALIFICATION CLIENT</strong> · Document individuel et nominatif · à signer par chaque personne physique
+</div>
+
+<div class="top-bar">
+  <div class="top-bar-inner">
+    <div class="brand-mini">
+      <div class="brand-mini-mark" style="color: var(--gold);">
+        <svg><use href="#ic-tree"/></svg>
+      </div>
+      <div class="brand-mini-text">PRIVEOS</div>
+    </div>
+    <div class="progress-zone">
+      <div class="progress-info">
+        <span><span class="percent" id="progPercent">0%</span> complété</span>
+        <span id="progStep">Étape 1 sur 19</span>
+      </div>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" id="progFill" style="width: 0%"></div>
+      </div>
+    </div>
+    <div class="save-indicator saved" id="saveIndicator">
+      <svg class="save-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><use href="#ic-check"/></svg>
+      Enregistré
+    </div>
+  </div>
+</div>
+
+<div class="section-container">
+
+  <!-- ─── SECTION 01 · INTRODUCTION ─── -->
+  <div class="section active" data-step="1">
+    <div class="welcome-hero">
+      <div class="welcome-mark" style="color: var(--gold);">
+        <svg><use href="#ic-tree"/></svg>
+        <span style="color: var(--navy);">PRIVEOS</span>
+      </div>
+      <div class="welcome-line"></div>
+      <div class="welcome-name">Bonjour Bertrand,</div>
+      <div class="welcome-message">
+        Ce questionnaire de qualification client vise à déterminer <strong>votre profil d'investisseur</strong>.
+        <br><br>
+        Il vous prendra environ <strong>10 minutes</strong> (vos réponses sont sauvegardées automatiquement, vous pouvez le compléter en plusieurs fois).
+      </div>
+    </div>
+
+    <div class="info-block">
+      <div class="info-block-title">
+        <svg><use href="#ic-info"/></svg>
+        Pourquoi ce questionnaire ?
+      </div>
+      <div class="info-block-text">
+        La réglementation nous impose de qualifier votre profil d'investisseur.
+      </div>
+      <div class="info-block-text">
+        Les informations que vous nous communiquerez nous permettront de vérifier l'adéquation entre votre situation patrimoniale actuelle, vos connaissances, votre expérience en matière d'investissement, votre tolérance au risque ainsi que vos objectifs.
+      </div>
+      <div class="info-block-text">
+        Ces éléments sont nécessaires afin de vous fournir un accompagnement et des recommandations personnalisées, adaptés à votre profil.
+      </div>
+    </div>
+
+    <div class="info-block">
+      <div class="info-block-title">
+        <svg><use href="#ic-shield"/></svg>
+        Protection de vos données personnelles · RGPD
+      </div>
+      <div class="info-block-text">
+        Les informations recueillies dans ce questionnaire sont enregistrées dans un fichier informatisé par PRIVEOS pour les besoins de votre qualification réglementaire et pour vous délivrer un conseil personnalisé.
+      </div>
+      <div class="info-block-text">
+        Conservation : pendant la durée nécessaire à l'exécution des prestations. Vous disposez d'un droit d'accès, de rectification et de suppression de vos données. Pour toute demande : <a href="mailto:contact@priveos.io">contact@priveos.io</a>
+      </div>
+    </div>
+
+    <div class="guide-block">
+      <div class="guide-title">Pour chaque produit financier, nous vous interrogerons sur 4 dimensions</div>
+      <div class="guide-dims">
+        <div class="guide-dim">
+          <div class="guide-dim-num">1</div>
+          <div class="guide-dim-content">
+            <div class="guide-dim-name">CONNAISSANCE</div>
+            <div class="guide-dim-desc">Votre niveau de compréhension du produit · de "aucune" à "avancée"</div>
+          </div>
+        </div>
+        <div class="guide-dim">
+          <div class="guide-dim-num">2</div>
+          <div class="guide-dim-content">
+            <div class="guide-dim-name">EXPÉRIENCE</div>
+            <div class="guide-dim-desc">Votre pratique passée de ce produit · de "aucune" à "régulière"</div>
+          </div>
+        </div>
+        <div class="guide-dim">
+          <div class="guide-dim-num">3</div>
+          <div class="guide-dim-content">
+            <div class="guide-dim-name">RISQUE</div>
+            <div class="guide-dim-desc">Selon vous, ce produit comporte-t-il un risque de perte en capital ?</div>
+          </div>
+        </div>
+        <div class="guide-dim">
+          <div class="guide-dim-num">4</div>
+          <div class="guide-dim-content">
+            <div class="guide-dim-name">DÉTENTION</div>
+            <div class="guide-dim-desc">Possédez-vous actuellement ce produit dans votre patrimoine ?</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── PRODUITS FINANCIERS (9 sections) ─── -->
+
+  <!-- 02 · ACTIONS -->
+  <div class="section" data-step="2">
+    <div class="section-header">
+      <div class="section-eyebrow">Produit 1 sur 9</div>
+      <h1 class="section-title">Actions</h1>
+    </div>
+
+    <div class="product-card">
+      <div class="product-intro">
+        <div class="product-def-label">Définition</div>
+        <div class="product-def-text">Une action représente une part de propriété dans une entreprise cotée en Bourse.</div>
+        <div class="product-example">
+          <div class="product-example-icon"><svg><use href="#ic-bulb"/></svg></div>
+          <div><span class="product-example-label">Exemple ·</span>Détenir une action LVMH ou TotalEnergies, c'est posséder une infime fraction de l'entreprise et bénéficier de ses dividendes éventuels.</div>
+        </div>
+      </div>
+      <div class="product-questions">
+        <div class="field-row-3">
+          <div class="field">
+            <label class="field-label">Connaissance</label>
+            <select class="select-input">
+              <option>Choisir…</option>
+              <option>Aucune connaissance</option>
+              <option>Initié(e)</option>
+              <option>Avancé(e)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="field-label">Expérience</label>
+            <select class="select-input">
+              <option>Choisir…</option>
+              <option>Aucune expérience</option>
+              <option>Initié(e)</option>
+              <option>Avancé(e)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="field-label">Détention</label>
+            <select class="select-input">
+              <option>Choisir…</option>
+              <option>Oui</option>
+              <option>Non</option>
+              <option>Ne sait pas</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label class="field-label">Selon vous, ce produit comporte-t-il un risque de perte en capital ?</label>
+          <select class="select-input">
+            <option>Choisir…</option>
+            <option>Oui</option>
+            <option>Non</option>
+            <option>Ne sait pas</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 03 · OBLIGATIONS -->
+  <div class="section" data-step="3">
+    <div class="section-header">
+      <div class="section-eyebrow">Produit 2 sur 9</div>
+      <h1 class="section-title">Obligations</h1>
+    </div>
+    <div class="product-card">
+      <div class="product-intro">
+        <div class="product-def-label">Définition</div>
+        <div class="product-def-text">Une obligation est un prêt accordé à un État ou à une entreprise, qui s'engage à le rembourser avec des intérêts.</div>
+        <div class="product-example">
+          <div class="product-example-icon"><svg><use href="#ic-bulb"/></svg></div>
+          <div><span class="product-example-label">Exemple ·</span>Prêter de l'argent à l'État français via une Obligation Assimilable du Trésor (OAT) sur 10 ans, qui verse un coupon annuel fixé à la souscription.</div>
+        </div>
+      </div>
+      <div class="product-questions">
+        <div class="field-row-3">
+          <div class="field"><label class="field-label">Connaissance</label><select class="select-input"><option>Choisir…</option><option>Aucune connaissance</option><option>Initié(e)</option><option>Avancé(e)</option></select></div>
+          <div class="field"><label class="field-label">Expérience</label><select class="select-input"><option>Choisir…</option><option>Aucune expérience</option><option>Initié(e)</option><option>Avancé(e)</option></select></div>
+          <div class="field"><label class="field-label">Détention</label><select class="select-input"><option>Choisir…</option><option>Oui</option><option>Non</option><option>Ne sait pas</option></select></div>
+        </div>
+        <div class="field"><label class="field-label">Selon vous, ce produit comporte-t-il un risque de perte en capital ?</label><select class="select-input"><option>Choisir…</option><option>Oui</option><option>Non</option><option>Ne sait pas</option></select></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 04 · FONDS EN EUROS -->
+  <div class="section" data-step="4">
+    <div class="section-header">
+      <div class="section-eyebrow">Produit 3 sur 9</div>
+      <h1 class="section-title">Fonds en Euros</h1>
+    </div>
+    <div class="product-card">
+      <div class="product-intro">
+        <div class="product-def-label">Définition</div>
+        <div class="product-def-text">Support d'épargne au sein d'un contrat d'assurance-vie dont le capital est garanti par l'assureur et qui produit un rendement annuel.</div>
+        <div class="product-example">
+          <div class="product-example-icon"><svg><use href="#ic-bulb"/></svg></div>
+          <div><span class="product-example-label">Exemple ·</span>Le fonds en euros d'un contrat d'assurance-vie classique, qui a rapporté en moyenne 2,5 % en 2024.</div>
+        </div>
+      </div>
+      <div class="product-questions">
+        <div class="field-row-3">
+          <div class="field"><label class="field-label">Connaissance</label><select class="select-input"><option>Choisir…</option><option>Aucune connaissance</option><option>Initié(e)</option><option>Avancé(e)</option></select></div>
+          <div class="field"><label class="field-label">Expérience</label><select class="select-input"><option>Choisir…</option><option>Aucune expérience</option><option>Initié(e)</option><option>Avancé(e)</option></select></div>
+          <div class="field"><label class="field-label">Détention</label><select class="select-input"><option>Choisir…</option><option>Oui</option><option>Non</option><option>Ne sait pas</option></select></div>
+        </div>
+        <div class="field"><label class="field-label">Selon vous, ce produit comporte-t-il un risque de perte en capital ?</label><select class="select-input"><option>Choisir…</option><option>Oui</option><option>Non</option><option>Ne sait pas</option></select></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 05 · IMMOBILIER FINANCIER -->
+  <div class="section" data-step="5">
+    <div class="section-header">
+      <div class="section-eyebrow">Produit 4 sur 9</div>
+      <h1 class="section-title">Immobilier financier (SCPI, OPCI)</h1>
+    </div>
+    <div class="product-card">
+      <div class="product-intro">
+        <div class="product-def-label">Définition</div>
+        <div class="product-def-text">Investissement dans la pierre via un fonds mutualisé qui détient et gère un parc immobilier locatif.</div>
+        <div class="product-example">
+          <div class="product-example-icon"><svg><use href="#ic-bulb"/></svg></div>
+          <div><span class="product-example-label">Exemple ·</span>Acheter des parts d'une SCPI de bureaux qui distribue des revenus locatifs trimestriels (environ 4,5 % par an).</div>
+        </div>
+      </div>
+      <div class="product-questions">
+        <div class="field-row-3">
+          <div class="field"><label class="field-label">Connaissance</label><select class="select-input"><option>Choisir…</option><option>Aucune connaissance</option><option>Initié(e)</option><option>Avancé(e)</option></select></div>
+          <div class="field"><label class="field-label">Expérience</label><select class="select-input"><option>Choisir…</option><option>Aucune expérience</option><option>Initié(e)</option><option>Avancé(e)</option></select></div>
+          <div class="field"><label class="field-label">Détention</label><select class="select-input"><option>Choisir…</option><option>Oui</option><option>Non</option><option>Ne sait pas</option></select></div>
+        </div>
+        <div class="field"><label class="field-label">Selon vous, ce produit comporte-t-il un risque de perte en capital ?</label><select class="select-input"><option>Choisir…</option><option>Oui</option><option>Non</option><option>Ne sait pas</option></select></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 06 · PRODUITS STRUCTURÉS -->
+  <div class="section" data-step="6">
+    <div class="section-header">
+      <div class="section-eyebrow">Produit 5 sur 9</div>
+      <h1 class="section-title">Produits structurés</h1>
+    </div>
+    <div class="product-card">
+      <div class="product-intro">
+        <div class="product-def-label">Définition</div>
+        <div class="product-def-text">Produit financier complexe combinant plusieurs instruments, dont le rendement est conditionné à un scénario prédéfini.</div>
+        <div class="product-example">
+          <div class="product-example-icon"><svg><use href="#ic-bulb"/></svg></div>
+          <div><span class="product-example-label">Exemple ·</span>Un produit qui rembourse votre capital majoré d'un gain de 5 % par an si le CAC 40 n'a pas baissé de plus de 30 % à l'échéance.</div>
+        </div>
+      </div>
+      <div class="product-questions">
+        <div class="field-row-3">
+          <div class="field"><label class="field-label">Connaissance</label><select class="select-input"><option>Choisir…</option><option>Aucune connaissance</option><option>Initié(e)</option><option>Avancé(e)</option></select></div>
+          <div class="field"><label class="field-label">Expérience</label><select class="select-input"><option>Choisir…</option><option>Aucune expérience</option><option>Initié(e)</option><option>Avancé(e)</option></select></div>
+          <div class="field"><label class="field-label">Détention</label><select class="select-input"><option>Choisir…</option><option>Oui</option><option>Non</option><option>Ne sait pas</option></select></div>
+        </div>
+        <div class="field"><label class="field-label">Selon vous, ce produit comporte-t-il un risque de perte en capital ?</label><select class="select-input"><option>Choisir…</option><option>Oui</option><option>Non</option><option>Ne sait pas</option></select></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 07 · CAPITAL RISQUE -->
+  <div class="section" data-step="7">
+    <div class="section-header">
+      <div class="section-eyebrow">Produit 6 sur 9</div>
+      <h1 class="section-title">Capital risque (FCPI, FCPR)</h1>
+    </div>
+    <div class="product-card">
+      <div class="product-intro">
+        <div class="product-def-label">Définition</div>
+        <div class="product-def-text">Investissement dans des sociétés non cotées, principalement des PME innovantes ou en développement.</div>
+        <div class="product-example">
+          <div class="product-example-icon"><svg><use href="#ic-bulb"/></svg></div>
+          <div><span class="product-example-label">Exemple ·</span>Un FCPI qui investit dans des start-ups technologiques françaises, en échange d'une réduction d'impôt et d'une espérance de gain à 7-10 ans.</div>
+        </div>
+      </div>
+      <div class="product-questions">
+        <div class="field-row-3">
+          <div class="field"><label class="field-label">Connaissance</label><select class="select-input"><option>Choisir…</option><option>Aucune connaissance</option><option>Initié(e)</option><option>Avancé(e)</option></select></div>
+          <div class="field"><label class="field-label">Expérience</label><select class="select-input"><option>Choisir…</option><option>Aucune expérience</option><option>Initié(e)</option><option>Avancé(e)</option></select></div>
+          <div class="field"><label class="field-label">Détention</label><select class="select-input"><option>Choisir…</option><option>Oui</option><option>Non</option><option>Ne sait pas</option></select></div>
+        </div>
+        <div class="field"><label class="field-label">Selon vous, ce produit comporte-t-il un risque de perte en capital ?</label><select class="select-input"><option>Choisir…</option><option>Oui</option><option>Non</option><option>Ne sait pas</option></select></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 08 · OPCVM -->
+  <div class="section" data-step="8">
+    <div class="section-header">
+      <div class="section-eyebrow">Produit 7 sur 9</div>
+      <h1 class="section-title">OPCVM (SICAV, FCP)</h1>
+    </div>
+    <div class="product-card">
+      <div class="product-intro">
+        <div class="product-def-label">Définition</div>
+        <div class="product-def-text">Fonds d'investissement qui mutualise l'épargne de nombreux investisseurs pour acheter des actions, obligations et autres titres.</div>
+        <div class="product-example">
+          <div class="product-example-icon"><svg><use href="#ic-bulb"/></svg></div>
+          <div><span class="product-example-label">Exemple ·</span>Un OPCVM « actions zone euro » qui regroupe l'argent de milliers d'épargnants pour acheter un portefeuille diversifié de grandes entreprises européennes.</div>
+        </div>
+      </div>
+      <div class="product-questions">
+        <div class="field-row-3">
+          <div class="field"><label class="field-label">Connaissance</label><select class="select-input"><option>Choisir…</option><option>Aucune connaissance</option><option>Initié(e)</option><option>Avancé(e)</option></select></div>
+          <div class="field"><label class="field-label">Expérience</label><select class="select-input"><option>Choisir…</option><option>Aucune expérience</option><option>Initié(e)</option><option>Avancé(e)</option></select></div>
+          <div class="field"><label class="field-label">Détention</label><select class="select-input"><option>Choisir…</option><option>Oui</option><option>Non</option><option>Ne sait pas</option></select></div>
+        </div>
+        <div class="field"><label class="field-label">Selon vous, ce produit comporte-t-il un risque de perte en capital ?</label><select class="select-input"><option>Choisir…</option><option>Oui</option><option>Non</option><option>Ne sait pas</option></select></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 09 · PRODUITS À EFFET DE LEVIER -->
+  <div class="section" data-step="9">
+    <div class="section-header">
+      <div class="section-eyebrow">Produit 8 sur 9</div>
+      <h1 class="section-title">Produits à effet de levier</h1>
+    </div>
+    <div class="product-card">
+      <div class="product-intro">
+        <div class="product-def-label">Définition</div>
+        <div class="product-def-text">Produit financier qui amplifie la variation d'un sous-jacent (action, indice) par un facteur multiplicateur, dans les deux sens.</div>
+        <div class="product-example">
+          <div class="product-example-icon"><svg><use href="#ic-bulb"/></svg></div>
+          <div><span class="product-example-label">Exemple ·</span>Un Turbo à effet de levier × 5 sur l'action LVMH : si LVMH gagne 1 %, vous gagnez 5 % · si elle perd 1 %, vous perdez 5 %. Risque de perte totale du capital.</div>
+        </div>
+      </div>
+      <div class="product-questions">
+        <div class="field-row-3">
+          <div class="field"><label class="field-label">Connaissance</label><select class="select-input"><option>Choisir…</option><option>Aucune connaissance</option><option>Initié(e)</option><option>Avancé(e)</option></select></div>
+          <div class="field"><label class="field-label">Expérience</label><select class="select-input"><option>Choisir…</option><option>Aucune expérience</option><option>Initié(e)</option><option>Avancé(e)</option></select></div>
+          <div class="field"><label class="field-label">Détention</label><select class="select-input"><option>Choisir…</option><option>Oui</option><option>Non</option><option>Ne sait pas</option></select></div>
+        </div>
+        <div class="field"><label class="field-label">Selon vous, ce produit comporte-t-il un risque de perte en capital ?</label><select class="select-input"><option>Choisir…</option><option>Oui</option><option>Non</option><option>Ne sait pas</option></select></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 10 · ETF / TRACKERS -->
+  <div class="section" data-step="10">
+    <div class="section-header">
+      <div class="section-eyebrow">Produit 9 sur 9</div>
+      <h1 class="section-title">ETF / Trackers</h1>
+    </div>
+    <div class="product-card">
+      <div class="product-intro">
+        <div class="product-def-label">Définition</div>
+        <div class="product-def-text">Fonds coté en Bourse qui réplique automatiquement l'évolution d'un indice (CAC 40, S&amp;P 500, etc.).</div>
+        <div class="product-example">
+          <div class="product-example-icon"><svg><use href="#ic-bulb"/></svg></div>
+          <div><span class="product-example-label">Exemple ·</span>Un ETF qui suit le CAC 40 : si l'indice prend 2 %, votre ETF prend également 2 %. Les frais sont sensiblement inférieurs à ceux des fonds gérés activement.</div>
+        </div>
+      </div>
+      <div class="product-questions">
+        <div class="field-row-3">
+          <div class="field"><label class="field-label">Connaissance</label><select class="select-input"><option>Choisir…</option><option>Aucune connaissance</option><option>Initié(e)</option><option>Avancé(e)</option></select></div>
+          <div class="field"><label class="field-label">Expérience</label><select class="select-input"><option>Choisir…</option><option>Aucune expérience</option><option>Initié(e)</option><option>Avancé(e)</option></select></div>
+          <div class="field"><label class="field-label">Détention</label><select class="select-input"><option>Choisir…</option><option>Oui</option><option>Non</option><option>Ne sait pas</option></select></div>
+        </div>
+        <div class="field"><label class="field-label">Selon vous, ce produit comporte-t-il un risque de perte en capital ?</label><select class="select-input"><option>Choisir…</option><option>Oui</option><option>Non</option><option>Ne sait pas</option></select></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 11 · CRYPTO -->
+  <div class="section" data-step="11">
+    <div class="section-header">
+      <div class="section-eyebrow">Produit hors classique</div>
+      <h1 class="section-title">Crypto-monnaies</h1>
+    </div>
+    <div class="product-card">
+      <div class="product-intro">
+        <div class="product-def-label">Définition</div>
+        <div class="product-def-text">Monnaie numérique décentralisée fonctionnant sur la blockchain, sans autorité centrale ni garantie.</div>
+        <div class="product-example">
+          <div class="product-example-icon"><svg><use href="#ic-bulb"/></svg></div>
+          <div><span class="product-example-label">Exemple ·</span>Le Bitcoin ou l'Ethereum, dont les cours peuvent varier de plus de 50 % en quelques mois — à la hausse comme à la baisse.</div>
+        </div>
+      </div>
+      <div class="product-questions">
+        <div class="field-row-3">
+          <div class="field"><label class="field-label">Connaissance</label><select class="select-input"><option>Choisir…</option><option>Aucune connaissance</option><option>Initié(e)</option><option>Avancé(e)</option></select></div>
+          <div class="field"><label class="field-label">Expérience</label><select class="select-input"><option>Choisir…</option><option>Aucune expérience</option><option>Initié(e)</option><option>Avancé(e)</option></select></div>
+          <div class="field"><label class="field-label">Détention</label><select class="select-input"><option>Choisir…</option><option>Oui</option><option>Non</option><option>Ne sait pas</option></select></div>
+        </div>
+        <div class="field"><label class="field-label">Selon vous, ce produit comporte-t-il un risque de perte en capital ?</label><select class="select-input"><option>Choisir…</option><option>Oui</option><option>Non</option><option>Ne sait pas</option></select></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 12 · AUTO-ÉVALUATION -->
+  <div class="section" data-step="12">
+    <div class="section-header">
+      <div class="section-eyebrow">Votre profil</div>
+      <h1 class="section-title">Auto-évaluation</h1>
+      <div class="section-subtitle">En tant qu'investisseur, comment vous estimez-vous ?</div>
+    </div>
+    <div class="choice-list">
+      <div class="choice-radio" onclick="selectRadio(this, 'auto-eval')">
+        <div class="choice-radio-circle"></div>
+        <div class="choice-radio-content">
+          <div class="choice-radio-label">Novice</div>
+          <div class="choice-radio-desc">Je débute et je connais peu les placements financiers.</div>
+        </div>
+      </div>
+      <div class="choice-radio" onclick="selectRadio(this, 'auto-eval')">
+        <div class="choice-radio-circle"></div>
+        <div class="choice-radio-content">
+          <div class="choice-radio-label">Informé(e)</div>
+          <div class="choice-radio-desc">J'ai déjà réalisé plusieurs placements et je commence à en comprendre le fonctionnement.</div>
+        </div>
+      </div>
+      <div class="choice-radio" onclick="selectRadio(this, 'auto-eval')">
+        <div class="choice-radio-circle"></div>
+        <div class="choice-radio-content">
+          <div class="choice-radio-label">Expérimenté(e)</div>
+          <div class="choice-radio-desc">J'ai une expérience solide des différents produits financiers et je comprends leurs risques.</div>
+        </div>
+      </div>
+      <div class="choice-radio" onclick="selectRadio(this, 'auto-eval')">
+        <div class="choice-radio-circle"></div>
+        <div class="choice-radio-content">
+          <div class="choice-radio-label">Très expérimenté(e)</div>
+          <div class="choice-radio-desc">Je maîtrise la majorité des instruments financiers et je gère mes investissements de façon autonome.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 13 · HORIZON -->
+  <div class="section" data-step="13">
+    <div class="section-header">
+      <div class="section-eyebrow">Votre profil</div>
+      <h1 class="section-title">Horizon de placement</h1>
+      <div class="section-subtitle">Dans le cadre de votre projet d'investissement, quelle est votre stratégie en termes d'horizon ?</div>
+    </div>
+    <div class="choice-list">
+      <div class="choice-radio" onclick="selectRadio(this, 'horizon')">
+        <div class="choice-radio-circle"></div>
+        <div class="choice-radio-content">
+          <div class="choice-radio-label">Court terme (moins de 2 ans)</div>
+          <div class="choice-radio-desc">Je prévois de récupérer le capital ou de réaliser des gains rapidement, en acceptant une performance potentiellement plus faible.</div>
+        </div>
+      </div>
+      <div class="choice-radio" onclick="selectRadio(this, 'horizon')">
+        <div class="choice-radio-circle"></div>
+        <div class="choice-radio-content">
+          <div class="choice-radio-label">Moyen terme (3 à 5 ans)</div>
+          <div class="choice-radio-desc">L'investissement peut rester actif quelques années avant d'être liquidé.</div>
+        </div>
+      </div>
+      <div class="choice-radio" onclick="selectRadio(this, 'horizon')">
+        <div class="choice-radio-circle"></div>
+        <div class="choice-radio-content">
+          <div class="choice-radio-label">Long terme (plus de 5 ans)</div>
+          <div class="choice-radio-desc">Je vise un horizon d'investissement supérieur à 5 ans, sans retrait immédiat.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 14 · PROFIL INVESTISSEUR -->
+  <div class="section" data-step="14">
+    <div class="section-header">
+      <div class="section-eyebrow">Votre profil</div>
+      <h1 class="section-title">Profil d'investisseur</h1>
+      <div class="section-subtitle">Quelle affirmation décrit le mieux votre profil d'investisseur ?</div>
+    </div>
+    <div class="choice-list">
+      <div class="choice-radio" onclick="selectRadio(this, 'profile')">
+        <div class="choice-radio-circle"></div>
+        <div class="choice-radio-content">
+          <div class="choice-radio-label">Approche prudente</div>
+          <div class="choice-radio-desc">Je privilégie la préservation du capital, quitte à limiter le potentiel de rendement. Je n'accepte qu'une faible proportion de placements à caractère dynamique.</div>
+        </div>
+      </div>
+      <div class="choice-radio" onclick="selectRadio(this, 'profile')">
+        <div class="choice-radio-circle"></div>
+        <div class="choice-radio-content">
+          <div class="choice-radio-label">Approche équilibrée</div>
+          <div class="choice-radio-desc">Je recherche un juste équilibre entre sécurité et performance, en combinant de manière équilibrée des placements stables et plus dynamiques.</div>
+        </div>
+      </div>
+      <div class="choice-radio" onclick="selectRadio(this, 'profile')">
+        <div class="choice-radio-circle"></div>
+        <div class="choice-radio-content">
+          <div class="choice-radio-label">Approche dynamique</div>
+          <div class="choice-radio-desc">Je suis disposé(e) à investir une part importante de mon capital dans des placements volatils afin de viser un rendement élevé à long terme, en assumant le risque d'éventuelles pertes significatives.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 15 · TOLÉRANCE -->
+  <div class="section" data-step="15">
+    <div class="section-header">
+      <div class="section-eyebrow">Votre profil</div>
+      <h1 class="section-title">Tolérance aux variations</h1>
+      <div class="section-subtitle">Parmi ces attitudes, laquelle vous décrit le mieux ?</div>
+    </div>
+    <div class="choice-list">
+      <div class="choice-radio" onclick="selectRadio(this, 'tolerance')">
+        <div class="choice-radio-circle"></div>
+        <div class="choice-radio-content">
+          <div class="choice-radio-label">Tolérance faible</div>
+          <div class="choice-radio-desc">J'accepte uniquement de légères variations de mon capital.</div>
+        </div>
+      </div>
+      <div class="choice-radio" onclick="selectRadio(this, 'tolerance')">
+        <div class="choice-radio-circle"></div>
+        <div class="choice-radio-content">
+          <div class="choice-radio-label">Tolérance modérée</div>
+          <div class="choice-radio-desc">J'accepte des variations modérées dans l'espoir d'obtenir un rendement plus rémunérateur.</div>
+        </div>
+      </div>
+      <div class="choice-radio" onclick="selectRadio(this, 'tolerance')">
+        <div class="choice-radio-circle"></div>
+        <div class="choice-radio-content">
+          <div class="choice-radio-label">Tolérance élevée</div>
+          <div class="choice-radio-desc">J'accepte des variations importantes de mon capital, considérant qu'elles peuvent améliorer mon rendement à long terme.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 16 · RÉACTION BAISSE -->
+  <div class="section" data-step="16">
+    <div class="section-header">
+      <div class="section-eyebrow">Votre profil</div>
+      <h1 class="section-title">Réaction face à une baisse</h1>
+      <div class="section-subtitle">Imaginez qu'après une hausse initiale de 10 %, la valeur de l'un de vos placements baisse de 20 %. Quelle serait votre réaction ?</div>
+    </div>
+    <div class="choice-list">
+      <div class="choice-radio" onclick="selectRadio(this, 'reaction')">
+        <div class="choice-radio-circle"></div>
+        <div class="choice-radio-content">
+          <div class="choice-radio-label">Liquidation immédiate</div>
+          <div class="choice-radio-desc">Je vends immédiatement pour réorienter les fonds vers un placement moins risqué.</div>
+        </div>
+      </div>
+      <div class="choice-radio" onclick="selectRadio(this, 'reaction')">
+        <div class="choice-radio-circle"></div>
+        <div class="choice-radio-content">
+          <div class="choice-radio-label">Vente différée</div>
+          <div class="choice-radio-desc">J'attends et ne vends qu'en cas de perte jugée significative.</div>
+        </div>
+      </div>
+      <div class="choice-radio" onclick="selectRadio(this, 'reaction')">
+        <div class="choice-radio-circle"></div>
+        <div class="choice-radio-content">
+          <div class="choice-radio-label">Conservation</div>
+          <div class="choice-radio-desc">Je garde ce placement en acceptant ses variations.</div>
+        </div>
+      </div>
+      <div class="choice-radio" onclick="selectRadio(this, 'reaction')">
+        <div class="choice-radio-circle"></div>
+        <div class="choice-radio-content">
+          <div class="choice-radio-label">Renforcement</div>
+          <div class="choice-radio-desc">Je réinvestis, convaincu(e) que la valeur finira par rebondir.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 17 · COURBE RENDEMENT/RISQUE -->
+  <div class="section" data-step="17">
+    <div class="section-header">
+      <div class="section-eyebrow">Votre profil</div>
+      <h1 class="section-title">Profil rendement / risque</h1>
+      <div class="section-subtitle">Vous trouverez ci-dessous 7 séries de rendements simulés sur 5 ans, classées du moins risqué au plus risqué, avec un potentiel de gain croissant.<br><br>Laquelle choisissez-vous ?</div>
+    </div>
+
+    <div class="chart-block">
+      <svg class="chart-svg" viewBox="0 0 720 440" xmlns="http://www.w3.org/2000/svg">
+        <!-- Échelle : y260 = cours 100, 1 unité de cours = 3 px -->
+        <!-- y50=170 · y80=160 · y140=140 · y200=120 · y260=100 · y320=80 · y380=60 -->
+
+        <!-- Grid horizontale -->
+        <line x1="70" y1="380" x2="700" y2="380" stroke="#E8E3D6" stroke-width="1"/>
+        <line x1="70" y1="320" x2="700" y2="320" stroke="#F0EBE0" stroke-width="1"/>
+        <line x1="70" y1="260" x2="700" y2="260" stroke="#DBE0E4" stroke-width="1" stroke-dasharray="4,3"/>
+        <line x1="70" y1="200" x2="700" y2="200" stroke="#F0EBE0" stroke-width="1"/>
+        <line x1="70" y1="140" x2="700" y2="140" stroke="#F0EBE0" stroke-width="1"/>
+        <line x1="70" y1="80" x2="700" y2="80" stroke="#F0EBE0" stroke-width="1"/>
+
+        <!-- Grid verticale -->
+        <line x1="196" y1="40" x2="196" y2="380" stroke="#F0EBE0" stroke-width="1"/>
+        <line x1="322" y1="40" x2="322" y2="380" stroke="#F0EBE0" stroke-width="1"/>
+        <line x1="448" y1="40" x2="448" y2="380" stroke="#F0EBE0" stroke-width="1"/>
+        <line x1="574" y1="40" x2="574" y2="380" stroke="#F0EBE0" stroke-width="1"/>
+
+        <!-- Axe Y · vertical -->
+        <line x1="70" y1="40" x2="70" y2="380" stroke="#A4AEBB" stroke-width="1.5"/>
+
+        <!-- Labels Y -->
+        <text x="60" y="385" font-size="11" fill="#708196" text-anchor="end" font-family="Epilogue" font-weight="500">60</text>
+        <text x="60" y="325" font-size="11" fill="#708196" text-anchor="end" font-family="Epilogue" font-weight="500">80</text>
+        <text x="60" y="265" font-size="11" fill="#102D50" text-anchor="end" font-family="Epilogue" font-weight="700">100</text>
+        <text x="60" y="205" font-size="11" fill="#708196" text-anchor="end" font-family="Epilogue" font-weight="500">120</text>
+        <text x="60" y="145" font-size="11" fill="#708196" text-anchor="end" font-family="Epilogue" font-weight="500">140</text>
+        <text x="60" y="85" font-size="11" fill="#708196" text-anchor="end" font-family="Epilogue" font-weight="500">160</text>
+
+        <!-- Labels X -->
+        <text x="70" y="402" font-size="11" fill="#708196" text-anchor="middle" font-family="Epilogue" font-weight="500">0</text>
+        <text x="196" y="402" font-size="11" fill="#708196" text-anchor="middle" font-family="Epilogue" font-weight="500">1</text>
+        <text x="322" y="402" font-size="11" fill="#708196" text-anchor="middle" font-family="Epilogue" font-weight="500">2</text>
+        <text x="448" y="402" font-size="11" fill="#708196" text-anchor="middle" font-family="Epilogue" font-weight="500">3</text>
+        <text x="574" y="402" font-size="11" fill="#708196" text-anchor="middle" font-family="Epilogue" font-weight="500">4</text>
+        <text x="700" y="402" font-size="11" fill="#708196" text-anchor="middle" font-family="Epilogue" font-weight="500">5</text>
+
+        <!-- Légendes axes -->
+        <text x="385" y="425" font-size="12" fill="#102D50" text-anchor="middle" font-family="Cormorant Garamond" font-style="italic">Années</text>
+        <text x="22" y="210" font-size="12" fill="#102D50" text-anchor="middle" font-family="Cormorant Garamond" font-style="italic" transform="rotate(-90 22 210)">Cours</text>
+
+        <!-- COURBES · 11 points par courbe (granularité semestrielle) · volatilité progressive -->
+        <!-- x positions : 70, 133, 196, 259, 322, 385, 448, 511, 574, 637, 700 -->
+
+        <!-- Courbe 1 · ROUGE FONCÉ · 1%/an · perte max 0% · plate -->
+        <path d="M 70 260 L 133 259 L 196 258 L 259 257 L 322 256 L 385 254 L 448 253 L 511 251 L 574 249 L 637 247 L 700 245"
+              fill="none" stroke="#C0392B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+
+        <!-- Courbe 2 · ORANGE · 2%/an · perte max 2% · oscillations ténues -->
+        <path d="M 70 260 L 133 262 L 196 264 L 259 261 L 322 257 L 385 253 L 448 249 L 511 252 L 574 244 L 637 235 L 700 230"
+              fill="none" stroke="#E67E22" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+
+        <!-- Courbe 3 · JAUNE · 4%/an · perte max 7% · oscillations visibles -->
+        <path d="M 70 260 L 133 252 L 196 263 L 259 275 L 322 268 L 385 252 L 448 240 L 511 248 L 574 226 L 637 208 L 700 194"
+              fill="none" stroke="#D4AC0D" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+
+        <!-- Courbe 4 · VERT · 6%/an · perte max 13% · oscillations marquées -->
+        <path d="M 70 260 L 133 240 L 196 266 L 259 290 L 322 298 L 385 272 L 448 232 L 511 218 L 574 196 L 637 178 L 700 158"
+              fill="none" stroke="#27AE60" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+
+        <!-- Courbe 5 · CYAN · 8%/an · perte max 23% · forte volatilité -->
+        <path d="M 70 260 L 133 230 L 196 296 L 259 320 L 322 268 L 385 220 L 448 308 L 511 220 L 574 178 L 637 162 L 700 131"
+              fill="none" stroke="#16A2C2" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+
+        <!-- Courbe 6 · BLEU · 12%/an · perte max 28% · très forte volatilité -->
+        <path d="M 70 260 L 133 218 L 196 296 L 259 332 L 322 270 L 385 184 L 448 326 L 511 232 L 574 152 L 637 92 L 700 50"
+              fill="none" stroke="#2E5BBA" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+
+        <!-- Courbe 7 · MAGENTA · 19%/an · perte max 49% · montagnes russes -->
+        <path d="M 70 260 L 133 192 L 196 308 L 259 374 L 322 280 L 385 168 L 448 350 L 511 218 L 574 372 L 637 168 L 700 60"
+              fill="none" stroke="#C71585" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+
+    <div class="choice-list">
+      <div class="choice-radio choice-curve" onclick="selectRadio(this, 'curve')">
+        <span class="curve-color-indicator" style="background: #C0392B;"></span>
+        <div class="choice-radio-circle"></div>
+        <div class="choice-radio-content">
+          <div class="choice-radio-label">Courbe 1</div>
+          <div class="choice-radio-desc">Rendement annuel moyen 1 % · Perte maximale 0 %</div>
+        </div>
+      </div>
+      <div class="choice-radio choice-curve" onclick="selectRadio(this, 'curve')">
+        <span class="curve-color-indicator" style="background: #E67E22;"></span>
+        <div class="choice-radio-circle"></div>
+        <div class="choice-radio-content">
+          <div class="choice-radio-label">Courbe 2</div>
+          <div class="choice-radio-desc">Rendement annuel moyen 2 % · Perte maximale 2 %</div>
+        </div>
+      </div>
+      <div class="choice-radio choice-curve" onclick="selectRadio(this, 'curve')">
+        <span class="curve-color-indicator" style="background: #D4AC0D;"></span>
+        <div class="choice-radio-circle"></div>
+        <div class="choice-radio-content">
+          <div class="choice-radio-label">Courbe 3</div>
+          <div class="choice-radio-desc">Rendement annuel moyen 4 % · Perte maximale 7 %</div>
+        </div>
+      </div>
+      <div class="choice-radio choice-curve" onclick="selectRadio(this, 'curve')">
+        <span class="curve-color-indicator" style="background: #27AE60;"></span>
+        <div class="choice-radio-circle"></div>
+        <div class="choice-radio-content">
+          <div class="choice-radio-label">Courbe 4</div>
+          <div class="choice-radio-desc">Rendement annuel moyen 6 % · Perte maximale 13 %</div>
+        </div>
+      </div>
+      <div class="choice-radio choice-curve" onclick="selectRadio(this, 'curve')">
+        <span class="curve-color-indicator" style="background: #16A2C2;"></span>
+        <div class="choice-radio-circle"></div>
+        <div class="choice-radio-content">
+          <div class="choice-radio-label">Courbe 5</div>
+          <div class="choice-radio-desc">Rendement annuel moyen 8 % · Perte maximale 23 %</div>
+        </div>
+      </div>
+      <div class="choice-radio choice-curve" onclick="selectRadio(this, 'curve')">
+        <span class="curve-color-indicator" style="background: #2E5BBA;"></span>
+        <div class="choice-radio-circle"></div>
+        <div class="choice-radio-content">
+          <div class="choice-radio-label">Courbe 6</div>
+          <div class="choice-radio-desc">Rendement annuel moyen 12 % · Perte maximale 28 %</div>
+        </div>
+      </div>
+      <div class="choice-radio choice-curve" onclick="selectRadio(this, 'curve')">
+        <span class="curve-color-indicator" style="background: #C71585;"></span>
+        <div class="choice-radio-circle"></div>
+        <div class="choice-radio-content">
+          <div class="choice-radio-label">Courbe 7</div>
+          <div class="choice-radio-desc">Rendement annuel moyen 19 % · Perte maximale 49 %</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 18 · ESG -->
+  <div class="section" data-step="18">
+    <div class="section-header">
+      <div class="section-eyebrow">Votre profil</div>
+      <h1 class="section-title">Critères ESG</h1>
+      <div class="section-subtitle">Souhaitez-vous intégrer une dimension responsable dans vos investissements ?</div>
+    </div>
+
+    <div class="info-block">
+      <div class="info-block-title">
+        <svg><use href="#ic-info"/></svg>
+        Élément de définition
+      </div>
+      <div class="info-block-text">
+        Les critères ESG (Environnement, Social, Gouvernance) permettent d'orienter les investissements vers des entreprises ou des secteurs qui respectent certains engagements éthiques, sociaux ou écologiques.
+      </div>
+      <div class="info-block-text">
+        Intégrer ces critères peut impliquer d'une part l'exclusion de certains secteurs ou pratiques jugés controversés, ou d'autre part la sélection d'acteurs vertueux. Ces facteurs sont susceptibles de réduire le rendement potentiel des placements.
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="field-label">Seriez-vous disposé(e) à intégrer des critères ESG dans votre portefeuille, même si cela peut réduire significativement la performance de vos investissements ?</label>
+      <div class="choice-list" style="margin-top: 12px;">
+        <div class="choice-radio" onclick="selectRadio(this, 'esg'); document.getElementById('esgDetail').classList.add('visible')">
+          <div class="choice-radio-circle"></div>
+          <div class="choice-radio-content">
+            <div class="choice-radio-label">Oui</div>
+          </div>
+        </div>
+        <div class="choice-radio selected" onclick="selectRadio(this, 'esg'); document.getElementById('esgDetail').classList.remove('visible')">
+          <div class="choice-radio-circle"></div>
+          <div class="choice-radio-content">
+            <div class="choice-radio-label">Non</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="conditional" id="esgDetail">
+      <div class="conditional-title">Quel équilibre recherchez-vous entre performance financière et impact sociétal ?</div>
+      <div class="choice-list" style="margin-bottom: 26px;">
+        <div class="choice-radio" onclick="selectRadio(this, 'esg-eq')">
+          <div class="choice-radio-circle"></div>
+          <div class="choice-radio-content">
+            <div class="choice-radio-label">Performance avant tout</div>
+            <div class="choice-radio-desc">Je privilégie exclusivement la performance financière.</div>
+          </div>
+        </div>
+        <div class="choice-radio" onclick="selectRadio(this, 'esg-eq')">
+          <div class="choice-radio-circle"></div>
+          <div class="choice-radio-content">
+            <div class="choice-radio-label">Équilibre</div>
+            <div class="choice-radio-desc">Je souhaite un équilibre entre performance et impact positif, en acceptant que la performance puisse être inférieure.</div>
+          </div>
+        </div>
+        <div class="choice-radio" onclick="selectRadio(this, 'esg-eq')">
+          <div class="choice-radio-circle"></div>
+          <div class="choice-radio-content">
+            <div class="choice-radio-label">Impact prioritaire</div>
+            <div class="choice-radio-desc">Je suis prêt(e) à prioriser l'impact sociétal, même si cela implique une diminution significative des perspectives de rendement.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="conditional-title">Souhaitez-vous privilégier certains secteurs ou thèmes d'investissement ?</div>
+      <div class="check-list" style="margin-bottom: 26px;">
+        <div class="check-row" onclick="toggleCheck(this)">
+          <div class="check-box"></div>
+          <div class="check-label">Technologies propres / Énergies renouvelables</div>
+        </div>
+        <div class="check-row" onclick="toggleCheck(this)">
+          <div class="check-box"></div>
+          <div class="check-label">Santé et biotechnologie</div>
+        </div>
+        <div class="check-row" onclick="toggleCheck(this)">
+          <div class="check-box"></div>
+          <div class="check-label">Éducation et innovation sociale</div>
+        </div>
+        <div class="check-row" onclick="toggleCheck(this)">
+          <div class="check-box"></div>
+          <div class="check-label">Immobilier durable</div>
+        </div>
+      </div>
+
+      <div class="conditional-title">Souhaitez-vous éviter certains secteurs ?</div>
+      <div class="check-list">
+        <div class="check-row" onclick="toggleCheck(this)">
+          <div class="check-box"></div>
+          <div class="check-label">Énergies fossiles (pétrole, charbon, gaz)</div>
+        </div>
+        <div class="check-row" onclick="toggleCheck(this)">
+          <div class="check-box"></div>
+          <div class="check-label">Armement et défense</div>
+        </div>
+        <div class="check-row" onclick="toggleCheck(this)">
+          <div class="check-box"></div>
+          <div class="check-label">Tabac et alcool</div>
+        </div>
+        <div class="check-row" onclick="toggleCheck(this)">
+          <div class="check-box"></div>
+          <div class="check-label">Industrie controversée (exploitation minière non responsable…)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 19 · SIGNATURE FINALE -->
+  <div class="section" data-step="19">
+    <div class="section-header">
+      <div class="section-eyebrow">Signature</div>
+      <h1 class="section-title">Récapitulatif et signature</h1>
+      <div class="section-subtitle">Nous vous invitons à valider votre questionnaire avant transmission à votre ingénieur patrimonial.</div>
+    </div>
+
+    <div class="profile-result">
+      <div class="profile-result-label">Profil détecté</div>
+      <div class="profile-result-name">Équilibré</div>
+      <div class="profile-result-desc">
+        Vous recherchez un juste équilibre entre sécurité et performance.<br>
+        Votre horizon est de long terme avec une tolérance modérée aux variations.
+      </div>
+    </div>
+
+    <div class="signature-block">
+      <div class="signature-block-title">Identité du signataire</div>
+      <div class="signature-id-row">
+        <div class="signature-id-field">
+          <div class="signature-id-label">Prénom</div>
+          <div class="signature-id-value">Bertrand</div>
+        </div>
+        <div class="signature-id-field">
+          <div class="signature-id-label">Nom</div>
+          <div class="signature-id-value">DUPONT-TOPIN</div>
+        </div>
+        <div class="signature-id-field">
+          <div class="signature-id-label">Date de signature</div>
+          <div class="signature-id-value">15 mai 2026</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cert-block">
+      <label class="cert-label">
+        <input type="checkbox" id="certCheck" onchange="checkFinalValid()">
+        <span class="cert-checkbox"></span>
+        <span class="cert-text">
+          <strong>Je certifie l'exactitude des informations</strong> communiquées dans ce questionnaire. Je comprends qu'elles serviront à déterminer mon profil d'investisseur et à fonder les recommandations qui me seront formulées par mon ingénieur patrimonial PRIVEOS dans le cadre de la réglementation CIF/MIF.
+        </span>
+      </label>
+    </div>
+  </div>
+
+  <!-- FINAL -->
+  <div class="final-view" id="finalView">
+    <div class="final-frame">
+      <div class="final-seal" style="color: var(--gold);">
+        <svg><use href="#ic-seal"/></svg>
+      </div>
+      <div class="final-line"></div>
+      <div class="final-title">Merci Bertrand,</div>
+      <div class="final-text">
+        Votre questionnaire de qualification client a été transmis à votre ingénieur patrimonial :
+        <br><br>
+        <strong>Luc THILLIEZ</strong>.
+        <br><br>
+        Ce document constitue une étape réglementaire indispensable pour vous formuler toute recommandation d'investissement personnalisée.
+        <br><br>
+        Vous allez recevoir un e-mail de confirmation avec votre questionnaire signé.
+      </div>
+      <div class="final-signature">
+        À très bientôt,
+        <div class="final-signature-name">L'ÉQUIPE PRIVEOS</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="nav-bar" id="navBar">
+  <div class="nav-bar-inner">
+    <button class="nav-btn prev" id="prevBtn" onclick="prevStep()" style="visibility: hidden;">
+      <svg><use href="#ic-arrow-left"/></svg>
+      Précédent
+    </button>
+    <div class="nav-step-indicator" id="stepIndicator"><strong>1</strong> sur 19</div>
+    <button class="nav-btn next" id="nextBtn" onclick="nextStep()">
+      Continuer
+      <svg><use href="#ic-arrow-right"/></svg>
+    </button>
+  </div>
+</div>
+
+<script>
+const TOTAL_STEPS = 19;
+let currentStep = 1;
+
+function showStep(n) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  const sec = document.querySelector(`.section[data-step="${n}"]`);
+  if (sec) sec.classList.add('active');
+  currentStep = n;
+  updateProgress();
+  updateNav();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  flashSave();
+}
+
+function updateProgress() {
+  const pct = Math.round(((currentStep - 1) / (TOTAL_STEPS - 1)) * 100);
+  document.getElementById('progFill').style.width = pct + '%';
+  document.getElementById('progPercent').textContent = pct + '%';
+  document.getElementById('progStep').textContent = `Étape ${currentStep} sur ${TOTAL_STEPS}`;
+  document.getElementById('stepIndicator').innerHTML = `<strong>${currentStep}</strong> sur ${TOTAL_STEPS}`;
+}
+
+function updateNav() {
+  const prev = document.getElementById('prevBtn');
+  const next = document.getElementById('nextBtn');
+  prev.style.visibility = currentStep === 1 ? 'hidden' : 'visible';
+  if (currentStep === TOTAL_STEPS) {
+    next.innerHTML = 'Signer et envoyer <svg><use href="#ic-arrow-right"/></svg>';
+    next.classList.add('final');
+    next.disabled = !document.getElementById('certCheck').checked;
+  } else {
+    next.innerHTML = 'Continuer <svg><use href="#ic-arrow-right"/></svg>';
+    next.classList.remove('final');
+    next.disabled = false;
+  }
+}
+
+function nextStep() {
+  if (currentStep === TOTAL_STEPS) { submitForm(); return; }
+  if (currentStep < TOTAL_STEPS) showStep(currentStep + 1);
+}
+function prevStep() { if (currentStep > 1) showStep(currentStep - 1); }
+
+function checkFinalValid() {
+  if (currentStep === TOTAL_STEPS) {
+    document.getElementById('nextBtn').disabled = !document.getElementById('certCheck').checked;
+  }
+}
+
+function submitForm() {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById('finalView').classList.add('active');
+  document.getElementById('navBar').style.display = 'none';
+  document.querySelector('.top-bar').style.display = 'none';
+  document.getElementById('progFill').style.width = '100%';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function flashSave() {
+  const ind = document.getElementById('saveIndicator');
+  ind.classList.remove('saved');
+  setTimeout(() => ind.classList.add('saved'), 200);
+}
+
+function selectRadio(el, group) {
+  el.parentElement.querySelectorAll('.choice-radio').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function toggleCheck(el) {
+  el.classList.toggle('checked');
+}
+
+updateProgress();
+updateNav();
+</script>
+
+</body>
+</html>
