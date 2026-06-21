@@ -4182,13 +4182,36 @@ setInterval(() => {
     // → flux muet → Deepgram renvoie du vide alors que l'appel Jitsi, lui, a le
     // bon micro). Fallback au défaut système si l'énumération échoue.
     var __base = { echoCancellation: false, noiseSuppression: false, autoGainControl: true };
-    navigator.mediaDevices.enumerateDevices()
-      .then(function (devs) {
-        var bad = /virtual|loom|blackhole|aggregate|soundflower/i;
-        var real = (devs || []).filter(function (d) { return d.kind === 'audioinput'; })
-          .find(function (d) { return d.deviceId && d.label && !bad.test(d.label); });
-        try { console.log('[ASTR-STT] micro transcription:', real ? real.label : 'defaut systeme'); } catch (e) {}
-        return navigator.mediaDevices.getUserMedia({ audio: real ? { deviceId: { ideal: real.deviceId }, echoCancellation: false, noiseSuppression: false, autoGainControl: true } : __base });
+    // Capter EXACTEMENT le micro que Jitsi utilise (l'appel l'a sélectionné et il
+    // a du son). Sinon mon filtre prenait un autre micro matériel silencieux
+    // (lvl=0.000 confirmé). On lit le deviceId via l'API Jitsi getCurrentDevices,
+    // repli sur un micro non-virtuel, puis défaut système.
+    function pickJitsiMicId() {
+      return new Promise(function (resolve) {
+        var api = window.__astrJitsiApi || window.__astraeosJitsi;
+        if (!api || typeof api.getCurrentDevices !== 'function') { resolve(null); return; }
+        try {
+          api.getCurrentDevices().then(function (d) {
+            var ai = d && d.audioInput;
+            if (Array.isArray(ai)) ai = ai[0];
+            resolve(ai && ai.deviceId ? ai.deviceId : null);
+          }).catch(function () { resolve(null); });
+        } catch (e) { resolve(null); }
+      });
+    }
+    pickJitsiMicId()
+      .then(function (jitsiId) {
+        if (jitsiId) {
+          try { console.log('[ASTR-STT] micro = Jitsi deviceId', jitsiId); } catch (e) {}
+          return navigator.mediaDevices.getUserMedia({ audio: { deviceId: { exact: jitsiId }, echoCancellation: false, noiseSuppression: false, autoGainControl: true } });
+        }
+        return navigator.mediaDevices.enumerateDevices().then(function (devs) {
+          var bad = /virtual|loom|blackhole|aggregate|soundflower/i;
+          var real = (devs || []).filter(function (d) { return d.kind === 'audioinput'; })
+            .find(function (d) { return d.deviceId && d.label && !bad.test(d.label); });
+          try { console.log('[ASTR-STT] micro transcription (repli):', real ? real.label : 'defaut'); } catch (e) {}
+          return navigator.mediaDevices.getUserMedia({ audio: real ? { deviceId: { ideal: real.deviceId }, echoCancellation: false, noiseSuppression: false, autoGainControl: true } : __base });
+        });
       })
       .catch(function () { return navigator.mediaDevices.getUserMedia({ audio: __base }); })
       .then(function (mic) {
