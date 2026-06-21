@@ -113,6 +113,9 @@ export function NewRdvModal() {
   const [clientExistant, setClientExistant] = useState(
     "Bertrand & Monique DUPONT-TOPIN · Couple · ETU-2026-014",
   );
+  const [clientEmail, setClientEmail] = useState(
+    emailForClientExistant("Bertrand & Monique DUPONT-TOPIN · Couple · ETU-2026-014"),
+  );
   const [nouveauCivilite, setNouveauCivilite] = useState("Monsieur");
   const [nouveauPrenom, setNouveauPrenom] = useState("");
   const [nouveauNom, setNouveauNom] = useState("");
@@ -145,6 +148,7 @@ export function NewRdvModal() {
       if (detail.clientExistant) {
         setClientMode("existant");
         setClientExistant(detail.clientExistant);
+        setClientEmail(emailForClientExistant(detail.clientExistant));
       }
       setModeModification(Boolean(detail.modeModification));
       setOpen(true);
@@ -166,6 +170,13 @@ export function NewRdvModal() {
   useEffect(() => () => {
     document.body.style.overflow = "";
   }, []);
+
+  // Sélectionne un client existant et pré-remplit l'e-mail destinataire associé,
+  // tout en laissant l'ingénieur le modifier librement (l'adresse de démo est éditable).
+  function selectClientExistant(label: string) {
+    setClientExistant(label);
+    setClientEmail(emailForClientExistant(label));
+  }
 
   function selectType(t: RdvType) {
     setType(t);
@@ -210,8 +221,8 @@ export function NewRdvModal() {
     const format =
       LIEU_OPTIONS.find((o) => o.label === lieu)?.format ?? "presentiel";
 
-    const clientEmail =
-      clientMode === "nouveau" ? nouveauEmail.trim() : emailForClientExistant(clientExistant);
+    const clientEmailToSend =
+      clientMode === "nouveau" ? nouveauEmail.trim() : clientEmail.trim();
 
     const documents = [
       docDci ? "DCI Simplifié" : null,
@@ -228,7 +239,7 @@ export function NewRdvModal() {
       heureDebut,
       duree,
       clientNom,
-      clientEmail,
+      clientEmail: clientEmailToSend,
       typeLabel,
       lieuLabel: lieu,
       documents,
@@ -327,6 +338,19 @@ export function NewRdvModal() {
                       utilisez « Nouveau prospect » avec une adresse valide.
                     </span>
                   )}
+                </div>
+              )}
+            </div>
+
+            <div className="s1a-section">
+              <div className="s1a-section-label">Synchronisation agenda</div>
+              {(result as { googleSynced?: boolean }).googleSynced ? (
+                <div style={{ fontSize: 14, color: "#1E6B3A", lineHeight: 1.5 }}>
+                  ✓ Ajouté à votre Google Agenda
+                </div>
+              ) : (
+                <div style={{ fontSize: 13, color: "#8B96A8", lineHeight: 1.5 }}>
+                  Non ajouté à Google Agenda (agenda non connecté)
                 </div>
               )}
             </div>
@@ -540,11 +564,29 @@ export function NewRdvModal() {
                     className="s1a-input"
                     placeholder="ex. DUPONT-TOPIN · Bertrand & Monique · ETU-2026-014"
                     value={clientExistant}
-                    onChange={(e) => setClientExistant(e.target.value)}
+                    onChange={(e) => selectClientExistant(e.target.value)}
                   />
                   <div className="rdv-field-hint">
                     Saisissez nom, prénom ou n° dossier · 7 clients dans votre portefeuille
                   </div>
+                </div>
+                <div className="s1a-field">
+                  <label className="s1a-field-label">E-mail du client</label>
+                  <input
+                    type="email"
+                    className="s1a-input"
+                    placeholder="email@exemple.com"
+                    value={clientEmail}
+                    onChange={(e) => setClientEmail(e.target.value)}
+                  />
+                  <div className="rdv-field-hint">
+                    L&apos;e-mail de confirmation sera envoyé à cette adresse.
+                  </div>
+                  {clientEmail.includes("@email-test.fr") && (
+                    <div className="rdv-field-hint" style={{ color: "#8A5A12" }}>
+                      Adresse de démonstration, remplacez-la par l&apos;e-mail réel du client.
+                    </div>
+                  )}
                 </div>
               </div>
             ) : (
