@@ -149,6 +149,11 @@ export async function bookRdv(input: BookRdvInput): Promise<BookRdvResult> {
   const dciUrl = `${canonicalOrigin()}/parcours/dci-complet?prospect=${encodeURIComponent(
     prospectSlug,
   )}&name=${encodeURIComponent(nom)}`;
+  // Lien du questionnaire de risque (qualification investisseur), rattaché au
+  // même prospect → la soumission apparaît sous son nom dans /prospects.
+  const qualUrl = `${canonicalOrigin()}/parcours/qualification?prospect=${encodeURIComponent(
+    prospectSlug,
+  )}&name=${encodeURIComponent(nom)}`;
 
   const ctx = await getSessionContext();
 
@@ -203,8 +208,11 @@ export async function bookRdv(input: BookRdvInput): Promise<BookRdvResult> {
     duree: "1 heure",
     lieu: "Visioconférence sécurisée (lien ci-dessous)",
     joinUrl: visioUrl,
-    documents: [{ label: "Compléter mon document de collecte (DCI)", url: dciUrl }],
-    message: `Bonjour ${input.firstName.trim()},\n\nVotre rendez-vous est confirmé. Le jour de l'entretien, cliquez sur le bouton ci-dessous pour rejoindre la visioconférence (aucune installation nécessaire). Merci de compléter au préalable le document de collecte pour préparer notre échange.`,
+    documents: [
+      { label: "Compléter mon document de collecte (DCI)", url: dciUrl },
+      { label: "Compléter mon questionnaire de risque (profil investisseur)", url: qualUrl },
+    ],
+    message: `Bonjour ${input.firstName.trim()},\n\nVotre rendez-vous est confirmé. Le jour de l'entretien, cliquez sur le bouton ci-dessous pour rejoindre la visioconférence (aucune installation nécessaire). Merci de compléter au préalable le document de collecte et le questionnaire de risque pour préparer notre échange.`,
   });
   const c = await sendEmail(email, client.subject, client.html);
 
@@ -220,7 +228,10 @@ export async function bookRdv(input: BookRdvInput): Promise<BookRdvResult> {
       duree: "1 heure",
       lieu: "Visioconférence",
       joinUrl: visioUrl,
-      documents: [{ label: "Voir le DCI du prospect", url: dciUrl }],
+      documents: [
+        { label: "Voir le DCI du prospect", url: dciUrl },
+        { label: "Voir le questionnaire de risque du prospect", url: qualUrl },
+      ],
       message: `Nouvelle prise de rendez-vous par un prospect.\n\nProspect : ${nom}\nE-mail : ${email}${input.referral?.trim() ? `\nRecommandé par : ${input.referral.trim()}` : ""}\n\nLe prospect a reçu sa confirmation et le lien de visioconférence. Le RDV est enregistré dans votre espace prospects.`,
     });
     const i = await sendEmail(notify, `PRIVEOS · Nouveau RDV prospect · ${nom}`, ing.html);

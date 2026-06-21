@@ -163,7 +163,13 @@ export default function Questionnaire() {
   };
 
   const submitForm = () => {
-    persistParcours("qualification");
+    // On enregistre les VRAIES réponses (profil de risque), pas juste un marqueur.
+    persistParcours("qualification", {
+      reponses: radios,
+      esgPrivilegier: privilegier,
+      esgEviter: eviter,
+      certifie: certChecked,
+    });
     setSubmitted(true);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
