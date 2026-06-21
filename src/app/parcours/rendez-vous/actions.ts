@@ -12,8 +12,68 @@
 import { buildRdvConfirmationEmail } from "@/lib/rdv-email";
 import { getSessionContext } from "@/lib/auth/context";
 import { saveSubmission } from "@/lib/dci-store";
+import { engineerSlugFromContext, getValidAccessToken } from "@/lib/google-oauth";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const MOIS_RDV: Record<string, number> = {
+  janvier: 0, février: 1, fevrier: 1, mars: 2, avril: 3, mai: 4, juin: 5,
+  juillet: 6, août: 7, aout: 7, septembre: 8, octobre: 9, novembre: 10,
+  décembre: 11, decembre: 11,
+};
+
+/** "Vendredi 15 mai 2026" + "09:00 – 10:00" → dateTime locaux Europe/Paris pour
+ *  l'event Google (sans Z : Google interprète avec le timeZone fourni). */
+function slotToGoogleTimes(
+  dateLabel: string,
+  timeLabel: string,
+): { start: string; end: string } | null {
+  const md = dateLabel.match(/(\d{1,2})\s+([A-Za-zÀ-ÿ]+)\s+(\d{4})/);
+  const mt = timeLabel.match(/(\d{1,2}):(\d{2})/);
+  if (!md || !mt) return null;
+  const month = MOIS_RDV[md[2].toLowerCase()];
+  if (month === undefined) return null;
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const ymd = `${md[3]}-${pad(month + 1)}-${pad(Number(md[1]))}`;
+  const hh = Number(mt[1]);
+  return {
+    start: `${ymd}T${pad(hh)}:${mt[2]}:00`,
+    end: `${ymd}T${pad(hh + 1)}:${mt[2]}:00`,
+  };
+}
+
+/** Crée l'événement dans le Google Agenda de l'ingénieur connecté (sync façon
+ *  Calendly). Best-effort : false si Google non connecté / erreur. */
+async function syncToGoogleCalendar(
+  ctx: { userId: string; tenantId: string },
+  args: { nom: string; email: string; dateLabel: string; timeLabel: string; visioUrl: string; dciUrl: string },
+): Promise<boolean> {
+  try {
+    const engineer = engineerSlugFromContext(ctx);
+    const accessToken = await getValidAccessToken(engineer, ctx.tenantId);
+    if (!accessToken || accessToken === "demo-token-not-real") return false;
+    const times = slotToGoogleTimes(args.dateLabel, args.timeLabel);
+    if (!times) return false;
+    const res = await fetch(
+      "https://www.googleapis.com/calendar/v3/calendars/primary/events",
+      {
+        method: "POST",
+        headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          summary: `Entretien initial · ${args.nom}`,
+          description: `Rendez-vous pris en ligne.\nProspect : ${args.nom} (${args.email})\nVisioconférence : ${args.visioUrl}\nDocument de collecte (DCI) : ${args.dciUrl}`,
+          location: args.visioUrl,
+          start: { dateTime: times.start, timeZone: "Europe/Paris" },
+          end: { dateTime: times.end, timeZone: "Europe/Paris" },
+          attendees: [{ email: args.email }],
+        }),
+      },
+    );
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
 
 function canonicalOrigin(): string {
   const env = process.env.ASTRAEOS_PUBLIC_ORIGIN?.trim();
@@ -71,6 +131,7 @@ export type BookRdvResult =
       emailSent: boolean;
       emailError: string | null;
       ingenieurNotified: boolean;
+      googleSynced: boolean;
     }
   | { ok: false; reason: string };
 
@@ -89,11 +150,12 @@ export async function bookRdv(input: BookRdvInput): Promise<BookRdvResult> {
     prospectSlug,
   )}&name=${encodeURIComponent(nom)}`;
 
+  const ctx = await getSessionContext();
+
   // 1. Persistance : le prospect + son RDV dans dci_submissions (kind='rdv'),
   //    scopé au cabinet (legacy/contexte par défaut) → apparaît dans /prospects.
   let persisted = false;
   try {
-    const ctx = await getSessionContext();
     await saveSubmission({
       prospect_slug: slug(nom) || "prospect",
       kind: "rdv",
@@ -119,7 +181,20 @@ export async function bookRdv(input: BookRdvInput): Promise<BookRdvResult> {
     // best-effort : un échec de persistance ne bloque pas la confirmation client.
   }
 
-  // 2. E-mail de confirmation au CLIENT.
+  // 2. Synchronisation Google Agenda de l'ingénieur (façon Calendly), si connecté.
+  let googleSynced = false;
+  if (ctx) {
+    googleSynced = await syncToGoogleCalendar(ctx, {
+      nom,
+      email,
+      dateLabel: input.dateLabel,
+      timeLabel: input.timeLabel,
+      visioUrl,
+      dciUrl,
+    });
+  }
+
+  // 3. E-mail de confirmation au CLIENT.
   const client = buildRdvConfirmationEmail({
     prenomNom: nom,
     typeLabel: "Entretien initial",
@@ -161,5 +236,6 @@ export async function bookRdv(input: BookRdvInput): Promise<BookRdvResult> {
     emailSent: c.sent,
     emailError: c.error,
     ingenieurNotified,
+    googleSynced,
   };
 }
