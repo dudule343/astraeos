@@ -4182,36 +4182,31 @@ setInterval(() => {
     // → flux muet → Deepgram renvoie du vide alors que l'appel Jitsi, lui, a le
     // bon micro). Fallback au défaut système si l'énumération échoue.
     var __base = { echoCancellation: false, noiseSuppression: false, autoGainControl: true };
-    // Capter EXACTEMENT le micro que Jitsi utilise (l'appel l'a sélectionné et il
-    // a du son). Sinon mon filtre prenait un autre micro matériel silencieux
-    // (lvl=0.000 confirmé). On lit le deviceId via l'API Jitsi getCurrentDevices,
-    // repli sur un micro non-virtuel, puis défaut système.
-    function pickJitsiMicId() {
+    // Le défaut système peut être un périphérique VIRTUEL SILENCIEUX (Loom/Wispr)
+    // → getUserMedia({audio:true}) capte du vide (lvl=0). Et Jitsi renvoie souvent
+    // deviceId='default' qui retombe sur ce même virtuel. On capte donc un VRAI
+    // micro MATÉRIEL : deviceId réel (pas 'default'/'communications') + label non
+    // virtuel, en visant celui que Jitsi affiche (ex « Micro Studio Display »).
+    var PSEUDO = { 'default': 1, 'communications': 1, '': 1 };
+    var BAD = /virtual|loom|blackhole|aggregate|soundflower|wispr/i;
+    function jitsiAudio() {
       return new Promise(function (resolve) {
         var api = window.__astrJitsiApi || window.__astraeosJitsi;
         if (!api || typeof api.getCurrentDevices !== 'function') { resolve(null); return; }
-        try {
-          api.getCurrentDevices().then(function (d) {
-            var ai = d && d.audioInput;
-            if (Array.isArray(ai)) ai = ai[0];
-            resolve(ai && ai.deviceId ? ai.deviceId : null);
-          }).catch(function () { resolve(null); });
-        } catch (e) { resolve(null); }
+        try { api.getCurrentDevices().then(function (d) { var ai = d && d.audioInput; if (Array.isArray(ai)) ai = ai[0]; resolve(ai || null); }).catch(function () { resolve(null); }); }
+        catch (e) { resolve(null); }
       });
     }
-    pickJitsiMicId()
-      .then(function (jitsiId) {
-        if (jitsiId) {
-          try { console.log('[ASTR-STT] micro = Jitsi deviceId', jitsiId); } catch (e) {}
-          return navigator.mediaDevices.getUserMedia({ audio: { deviceId: { exact: jitsiId }, echoCancellation: false, noiseSuppression: false, autoGainControl: true } });
-        }
-        return navigator.mediaDevices.enumerateDevices().then(function (devs) {
-          var bad = /virtual|loom|blackhole|aggregate|soundflower/i;
-          var real = (devs || []).filter(function (d) { return d.kind === 'audioinput'; })
-            .find(function (d) { return d.deviceId && d.label && !bad.test(d.label); });
-          try { console.log('[ASTR-STT] micro transcription (repli):', real ? real.label : 'defaut'); } catch (e) {}
-          return navigator.mediaDevices.getUserMedia({ audio: real ? { deviceId: { ideal: real.deviceId }, echoCancellation: false, noiseSuppression: false, autoGainControl: true } : __base });
-        });
+    Promise.all([jitsiAudio(), navigator.mediaDevices.enumerateDevices().catch(function () { return []; })])
+      .then(function (r) {
+        var ji = r[0];
+        var reals = (r[1] || []).filter(function (d) { return d.kind === 'audioinput' && d.deviceId && !PSEUDO[d.deviceId] && d.label && !BAD.test(d.label); });
+        var chosen = null;
+        if (ji && ji.label) chosen = reals.find(function (d) { return d.label === ji.label; });
+        if (!chosen && ji && ji.deviceId && !PSEUDO[ji.deviceId]) chosen = reals.find(function (d) { return d.deviceId === ji.deviceId; });
+        if (!chosen) chosen = reals[0];
+        try { console.log('[ASTR-STT] micro choisi:', chosen ? chosen.label : '(aucun reel)', '| jitsi:', ji && ji.label, ji && ji.deviceId, '| reels:', reals.map(function (d) { return d.label; }).join(', ')); } catch (e) {}
+        return navigator.mediaDevices.getUserMedia({ audio: chosen ? { deviceId: { exact: chosen.deviceId }, echoCancellation: false, noiseSuppression: false, autoGainControl: true } : __base });
       })
       .catch(function () { return navigator.mediaDevices.getUserMedia({ audio: __base }); })
       .then(function (mic) {
