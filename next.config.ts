@@ -15,12 +15,14 @@ const securityHeaders = [
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
   {
     key: "Permissions-Policy",
-    // La visio a besoin de la caméra/micro/partage d'écran en same-origin ; on
-    // bloque le reste. display-capture est requis pour getDisplayMedia (mode
-    // compagnon Meet/Zoom de la transcription) ; sans lui, Chrome bloque le
-    // partage d'onglet par policy avant même tout prompt utilisateur.
+    // La visio embarque une iframe Jitsi CROSS-ORIGIN (srv1750581.hstgr.cloud).
+    // Avec `(self)`, la policy de tête interdit de DÉLÉGUER caméra/micro/partage
+    // à cette iframe cross-origin → Chrome bloque, même avec allow="camera *" sur
+    // l'iframe. `=*` rend ces features DÉLÉGABLES ; le grant réel reste contrôlé
+    // par l'attribut allow de chaque iframe (seule l'iframe Jitsi le porte). On
+    // garde geolocation/browsing-topics bloqués.
     value:
-      "camera=(self), microphone=(self), display-capture=(self), geolocation=(), browsing-topics=()",
+      "camera=*, microphone=*, display-capture=*, geolocation=(), browsing-topics=()",
   },
   // HSTS uniquement en prod (HTTPS) — éviter de l'envoyer en dev/HTTP.
   ...(isProd
