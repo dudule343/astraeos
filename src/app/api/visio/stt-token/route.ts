@@ -99,17 +99,17 @@ export async function POST() {
       }
     }
 
-    // Repli : les clés créées via la console Deepgram (rôle « Default ») savent
-    // transcrire mais n'ont pas le scope keys:write pour fabriquer des clés
-    // éphémères (HTTP 403). On NE renvoie JAMAIS la clé maître au navigateur :
-    // même scopée transcription, elle n'a ni TTL ni rotation et fuiterait dans
-    // le client. Sans clé éphémère possible, le STT serveur est indisponible →
-    // 503 ; le front bascule sur Web Speech.
+    // MODE DIRECT : les clés créées via la console Deepgram (rôle « Default »)
+    // savent transcrire (scope usage) mais n'ont pas keys:write pour fabriquer
+    // des clés éphémères (HTTP 403). Plutôt que de tomber sur Web Speech, on
+    // renvoie la clé maître DIRECTEMENT pour streamer Deepgram. Acceptable en
+    // BYOK : cette route est réservée au STAFF (getSessionContext en tête), donc
+    // la clé n'atteint QUE le cockpit de l'ingénieur (le cabinet propriétaire de
+    // la clé), jamais la vue client (role=client) qui n'appelle pas cette route.
+    // Pour revenir au modèle éphémère (sans exposer la clé), créer une clé
+    // Deepgram rôle Owner/Admin (avec keys:write) dans /integrations.
     if (resp.status === 403) {
-      return NextResponse.json(
-        { error: "STT temporairement indisponible" },
-        { status: 503 },
-      );
+      return NextResponse.json({ key: masterKey, expires_in: 0, mode: "direct" });
     }
 
     const msg = await resp.text().catch(() => "");
