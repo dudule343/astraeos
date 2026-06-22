@@ -50,6 +50,17 @@ interface Props {
   statusByItemId?: Record<string, DepotStatus>;
 }
 
+/**
+ * Pièce libre ajoutée à la main par l'ingénieur, hors référentiel (286 pièces).
+ * Réutilise la forme CatalogEntry pour transiter dans toute la machinerie
+ * existante (groupage, filtres, mapping d'envoi) ; `isCustom` la distingue
+ * pour l'affichage (badge) et la suppression définitive.
+ */
+type CustomItem = CatalogEntry & { isCustom: true };
+
+/** Thème par défaut d'une pièce libre sans catégorie saisie. */
+const CUSTOM_THEME = "Informations complémentaires";
+
 /** État d'un fait pour l'affichage : coché, décoché, ou inconnu (« à confirmer »). */
 type TriState = "on" | "off" | "unknown";
 
@@ -99,6 +110,15 @@ export function CollecteBuilder({
   const [forcedOn, setForcedOn] = useState<Set<string>>(() => new Set());
   const [forcedOff, setForcedOff] = useState<Set<string>>(() => new Set());
 
+  // Pièces libres saisies par l'ingénieur (hors référentiel). Compteur dédié
+  // pour des id stables et uniques ("custom-1", "custom-2"…).
+  const [customItems, setCustomItems] = useState<CustomItem[]>([]);
+  const [customSeq, setCustomSeq] = useState(0);
+  // Mini-formulaire d'ajout (replié par défaut).
+  const [addingCustom, setAddingCustom] = useState(false);
+  const [customLabel, setCustomLabel] = useState("");
+  const [customTheme, setCustomTheme] = useState("");
+
   const [participant, setParticipant] = useState<Participant>(defaultParticipant);
   const [sending, setSending] = useState(false);
   const [result, setResult] = useState<{ ok: boolean; message: string } | null>(null);
@@ -125,8 +145,12 @@ export function CollecteBuilder({
         if (forcedOn.has(e.id)) byId.set(e.id, e);
       }
     }
+    // Pièces libres : actives tant qu'elles ne sont pas explicitement décochées.
+    for (const c of customItems) {
+      if (!forcedOff.has(c.id)) byId.set(c.id, c);
+    }
     return [...byId.values()];
-  }, [derived, forcedOn, forcedOff, fullCatalog]);
+  }, [derived, forcedOn, forcedOff, fullCatalog, customItems]);
 
   const activeIds = useMemo(() => new Set(activeItems.map((e) => e.id)), [activeItems]);
 
@@ -181,6 +205,41 @@ export function CollecteBuilder({
         return n;
       });
     }
+  }
+
+  function addCustomItem() {
+    const label = customLabel.trim();
+    if (!label) return;
+    const seq = customSeq + 1;
+    const id = `custom-${seq}`;
+    const theme = customTheme.trim() || CUSTOM_THEME;
+    setCustomItems((prev) => [
+      ...prev,
+      { id, category: theme, label, type: "Document", isCustom: true },
+    ]);
+    setCustomSeq(seq);
+    // Une pièce qu'on vient de créer doit être active : on purge un éventuel
+    // forçage - résiduel sur cet id (ne peut pas arriver avec un seq croissant,
+    // garde-fou de cohérence).
+    setForcedOff((prev) => {
+      if (!prev.has(id)) return prev;
+      const n = new Set(prev);
+      n.delete(id);
+      return n;
+    });
+    setCustomLabel("");
+    setCustomTheme("");
+    setAddingCustom(false);
+  }
+
+  function removeCustomItem(id: string) {
+    setCustomItems((prev) => prev.filter((c) => c.id !== id));
+    setForcedOff((prev) => {
+      if (!prev.has(id)) return prev;
+      const n = new Set(prev);
+      n.delete(id);
+      return n;
+    });
   }
 
   function toggleTheme(cat: string) {
@@ -413,7 +472,7 @@ export function CollecteBuilder({
               {([
                 { key: "all", label: "Toutes", count: TOTAL_PIECES },
                 { key: "selected", label: "Sélectionnées", count: selectedCount },
-                { key: "excluded", label: "Non incluses", count: TOTAL_PIECES - selectedCount },
+                { key: "excluded", label: "Non incluses", count: Math.max(0, TOTAL_PIECES - selectedCount) },
               ] as const).map((f) => (
                 <button
                   key={f.key}
@@ -438,14 +497,122 @@ export function CollecteBuilder({
                 </button>
               ))}
             </div>
-            <button
-              type="button"
-              onClick={toggleAllThemes}
-              className="rounded-md border border-[var(--navy-100)] bg-white px-2.5 py-1.5 text-[11px] font-semibold text-[var(--navy)] hover:border-[var(--gold)]"
-            >
-              Tout replier / déplier
-            </button>
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => setAddingCustom((v) => !v)}
+                className="rounded-md border border-dashed border-[var(--gold)] bg-[var(--gold-100)] px-2.5 py-1.5 text-[11px] font-semibold text-[var(--gold-deep)] hover:brightness-95"
+              >
+                + Ajouter une pièce
+              </button>
+              <button
+                type="button"
+                onClick={toggleAllThemes}
+                className="rounded-md border border-[var(--navy-100)] bg-white px-2.5 py-1.5 text-[11px] font-semibold text-[var(--navy)] hover:border-[var(--gold)]"
+              >
+                Tout replier / déplier
+              </button>
+            </div>
           </div>
+
+          {/* Mini-formulaire d'ajout d'une pièce libre (hors référentiel) */}
+          {addingCustom && (
+            <div className="mb-3 rounded-md border border-[var(--gold)] bg-[var(--gold-100)] p-3">
+              <div className="mb-2 text-[11px] font-bold uppercase tracking-[0.08em] text-[var(--gold-deep)]">
+                Nouvelle pièce hors référentiel
+              </div>
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <input
+                  type="text"
+                  value={customLabel}
+                  onChange={(e) => setCustomLabel(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      addCustomItem();
+                    }
+                  }}
+                  placeholder="Libellé de la pièce (ex. Attestation employeur)"
+                  className="flex-1 rounded-md border border-[var(--navy-100)] px-2.5 py-1.5 text-[12.5px] text-[var(--navy)] outline-none focus:border-[var(--gold)]"
+                />
+                <select
+                  value={customTheme}
+                  onChange={(e) => setCustomTheme(e.target.value)}
+                  className="rounded-md border border-[var(--navy-100)] bg-white px-2.5 py-1.5 text-[12px] text-[var(--navy)] outline-none focus:border-[var(--gold)] sm:w-[220px]"
+                >
+                  <option value="">Thème (optionnel)</option>
+                  {THEME_ORDER.map((t) => (
+                    <option key={t} value={t}>
+                      {t}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  onClick={addCustomItem}
+                  disabled={!customLabel.trim()}
+                  className="rounded-md bg-[var(--gold)] px-4 py-1.5 text-[11.5px] font-bold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Ajouter
+                </button>
+              </div>
+              <div className="mt-1.5 text-[10.5px] text-[var(--navy-300)]">
+                La pièce sera demandée au client comme un document à fournir. Sans thème, elle ira dans « {CUSTOM_THEME} ».
+              </div>
+            </div>
+          )}
+
+          {/* Pièces libres ajoutées (hors référentiel) */}
+          {customItems.length > 0 && (
+            <div className="mb-2.5 overflow-hidden rounded-md border border-[var(--gold)] bg-white">
+              <div className="flex items-center justify-between bg-[var(--gold-100)] px-4 py-2.5">
+                <div>
+                  <div className="text-[13.5px] font-bold text-[var(--navy)]">Pièces ajoutées à la main</div>
+                  <div className="mt-0.5 text-[11px] text-[var(--navy-300)]">
+                    Hors référentiel · saisies par l&apos;ingénieur
+                  </div>
+                </div>
+                <span className="text-[11px] font-semibold text-[var(--gold-deep)]">
+                  {customItems.filter((c) => activeIds.has(c.id)).length}/{customItems.length} sélectionnées
+                </span>
+              </div>
+              <div className="border-t border-[var(--navy-100)]">
+                {customItems.map((item) => {
+                  const active = activeIds.has(item.id);
+                  return (
+                    <div
+                      key={item.id}
+                      className={`flex items-start gap-2.5 border-b border-[var(--navy-100)] px-4 py-1.5 last:border-b-0 hover:bg-[var(--ivory)] ${
+                        active ? "" : "opacity-45"
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={active}
+                        onChange={() => toggleItem(item.id, active)}
+                        className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 accent-[var(--gold)]"
+                      />
+                      <span className="flex-1 text-[12px] leading-tight text-[var(--navy)]">
+                        {item.label}
+                        <span className="ml-1.5 text-[10.5px] text-[var(--navy-300)]">· {item.category}</span>
+                      </span>
+                      <span className="flex-shrink-0 rounded-sm bg-[var(--gold-200)] px-1.5 py-0.5 text-[8.5px] font-bold uppercase tracking-[0.08em] text-[var(--medium-400)]">
+                        Pièce libre
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => removeCustomItem(item.id)}
+                        aria-label="Supprimer cette pièce"
+                        className="flex-shrink-0 rounded-sm px-1 text-[13px] leading-none text-[var(--navy-300)] hover:text-[var(--red-text)]"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           <div className="flex flex-col gap-2.5">
             {themeKeys.map((category) => {

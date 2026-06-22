@@ -27,6 +27,11 @@ function clientFicheHref(row: CollecteRow): string {
   return `${BASE}/clients/${row.id}`;
 }
 
+/** Cible du constructeur de collecte (moteur conditionnel) pour le prospect. */
+function constructeurHref(row: CollecteRow): string {
+  return `${BASE}/collectes/${row.id}`;
+}
+
 /** href d'un filtre rapide : « tous » = URL nue, sinon ?filtre=clé. */
 function filterHref(key: CollecteFilterKey): string {
   return key === "tous" ? `${BASE}/collectes` : `${BASE}/collectes?filtre=${key}`;
@@ -208,6 +213,14 @@ export default async function CollectesPage({
             fiscalité, patrimoine, charges, projets. Espace client ouvert pour upload sécurisé.
           </p>
         </div>
+        {rows[0] ? (
+          <Link
+            href={constructeurHref(rows[0])}
+            className="rounded-md bg-[var(--gold)] px-4 py-2.5 text-[12.5px] font-bold text-white no-underline transition hover:brightness-110"
+          >
+            Envoyer une demande de collecte
+          </Link>
+        ) : null}
       </section>
 
       <div className="kpis kpis-4 mb-20">
@@ -261,7 +274,13 @@ export default async function CollectesPage({
                 style={row.highlightRow ? { background: "rgba(245,221,215,0.3)" } : undefined}
               >
                 <td>
-                  <ClientCell row={row} />
+                  <Link
+                    href={constructeurHref(row)}
+                    className="block no-underline"
+                    title="Ouvrir le constructeur de collecte"
+                  >
+                    <ClientCell row={row} />
+                  </Link>
                 </td>
                 <td>
                   <div className="cabinet-cell">

@@ -101,8 +101,19 @@ const VERDICT_OPTIONS: { key: Verdict; label: string; bg: string; fg: string }[]
   { key: "a_revoir", label: "À revoir", bg: "var(--gold-100)", fg: "var(--gold-deep)" },
 ];
 
+// Aperçu d'une pièce : on déduit le mode (image / PDF / autre) du nom de fichier.
+type PreviewTarget = { url: string; fileName: string };
+
+function previewKind(fileName: string): "image" | "pdf" | "other" {
+  const ext = fileName.toLowerCase().split(".").pop() ?? "";
+  if (["jpg", "jpeg", "png", "heic", "webp", "gif"].includes(ext)) return "image";
+  if (ext === "pdf") return "pdf";
+  return "other";
+}
+
 export function CollectesAdmin() {
   const [list, setList] = useState<ListItem[] | null>(null);
+  const [preview, setPreview] = useState<PreviewTarget | null>(null);
   const [listErr, setListErr] = useState<string | null>(null);
   const [activeToken, setActiveToken] = useState<string | null>(null);
   const [detail, setDetail] = useState<Detail | null>(null);
@@ -485,22 +496,47 @@ export function CollectesAdmin() {
                     {dep ? (
                       <div style={{ marginTop: 8, display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
                         {dep.file_name ? (
-                          <a
-                            href={`/api/collecte-admin/${encodeURIComponent(activeToken!)}/file?item_index=${idx}`}
-                            target="_blank"
-                            rel="noreferrer"
-                            style={{
-                              fontSize: 12,
-                              fontWeight: 600,
-                              color: "var(--gold-deep)",
-                              textDecoration: "none",
-                              border: "1px solid var(--gold-200)",
-                              borderRadius: 7,
-                              padding: "5px 10px",
-                            }}
-                          >
-                            ⬇ {dep.file_name}
-                          </a>
+                          <>
+                            <button
+                              onClick={() =>
+                                setPreview({
+                                  url: `/api/collecte-admin/${encodeURIComponent(activeToken!)}/file?item_index=${idx}`,
+                                  fileName: dep.file_name!,
+                                })
+                              }
+                              title="Prévisualiser la pièce"
+                              style={{
+                                fontSize: 12,
+                                fontWeight: 600,
+                                color: "var(--navy)",
+                                background: "transparent",
+                                textDecoration: "none",
+                                border: "1px solid var(--navy-100)",
+                                borderRadius: 7,
+                                padding: "5px 10px",
+                                cursor: "pointer",
+                                fontFamily: "inherit",
+                              }}
+                            >
+                              👁 Aperçu
+                            </button>
+                            <a
+                              href={`/api/collecte-admin/${encodeURIComponent(activeToken!)}/file?item_index=${idx}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              style={{
+                                fontSize: 12,
+                                fontWeight: 600,
+                                color: "var(--gold-deep)",
+                                textDecoration: "none",
+                                border: "1px solid var(--gold-200)",
+                                borderRadius: 7,
+                                padding: "5px 10px",
+                              }}
+                            >
+                              ⬇ {dep.file_name}
+                            </a>
+                          </>
                         ) : (
                           <span style={{ fontSize: 12.5, color: "var(--navy)" }}>
                             Réponse : {dep.reponse || "—"}
@@ -751,6 +787,163 @@ export function CollectesAdmin() {
             </div>
           </>
         )}
+      </div>
+
+      {preview && <PreviewModal target={preview} onClose={() => setPreview(null)} />}
+    </div>
+  );
+}
+
+// Modale d'aperçu : image dans une balise <img>, PDF dans un <iframe>,
+// repli téléchargement pour les autres formats. La route /file redirige vers
+// une URL signée, exploitable directement comme src.
+function PreviewModal({
+  target,
+  onClose,
+}: {
+  target: PreviewTarget;
+  onClose: () => void;
+}) {
+  const kind = previewKind(target.fileName);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 100,
+        background: "rgba(11,28,53,0.6)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: 24,
+      }}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          background: "#fff",
+          borderRadius: 12,
+          width: "min(900px, 100%)",
+          height: "min(85vh, 100%)",
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden",
+          boxShadow: "0 20px 60px rgba(11,28,53,0.4)",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 12,
+            padding: "12px 16px",
+            borderBottom: "1px solid var(--navy-100)",
+          }}
+        >
+          <span
+            style={{
+              fontSize: 13,
+              fontWeight: 700,
+              color: "var(--navy)",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {target.fileName}
+          </span>
+          <button
+            onClick={onClose}
+            aria-label="Fermer l'aperçu"
+            style={{
+              border: "none",
+              background: "var(--navy-100)",
+              color: "var(--navy)",
+              borderRadius: 8,
+              width: 30,
+              height: 30,
+              cursor: "pointer",
+              fontSize: 14,
+              flexShrink: 0,
+            }}
+          >
+            ✕
+          </button>
+        </div>
+        <div style={{ flex: 1, minHeight: 0, background: "var(--ivory)" }}>
+          {kind === "image" && (
+            <div
+              style={{
+                width: "100%",
+                height: "100%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: 16,
+                overflow: "auto",
+              }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={target.url}
+                alt={target.fileName}
+                style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }}
+              />
+            </div>
+          )}
+          {kind === "pdf" && (
+            <iframe
+              src={target.url}
+              title={target.fileName}
+              style={{ width: "100%", height: "100%", border: "none" }}
+            />
+          )}
+          {kind === "other" && (
+            <div
+              style={{
+                height: "100%",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 12,
+                padding: 24,
+                textAlign: "center",
+              }}
+            >
+              <span style={{ fontSize: 13, color: "var(--navy-300)" }}>
+                Aperçu indisponible pour ce format.
+              </span>
+              <a
+                href={target.url}
+                target="_blank"
+                rel="noreferrer"
+                style={{
+                  fontSize: 12.5,
+                  fontWeight: 600,
+                  color: "var(--gold-deep)",
+                  border: "1px solid var(--gold-200)",
+                  borderRadius: 8,
+                  padding: "8px 14px",
+                  textDecoration: "none",
+                }}
+              >
+                ⬇ Télécharger {target.fileName}
+              </a>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -79,6 +79,14 @@ function formatMilliers(digits: string): string {
   return clean.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
 }
 
+// Aperçu d'un fichier : on déduit le mode (image / PDF / autre) du nom.
+function previewKind(fileName: string): "image" | "pdf" | "other" {
+  const ext = fileName.toLowerCase().split(".").pop() ?? "";
+  if (["jpg", "jpeg", "png", "heic", "webp", "gif"].includes(ext)) return "image";
+  if (ext === "pdf") return "pdf";
+  return "other";
+}
+
 export function DepotClient({ token }: { token: string }) {
   const [state, setState] = useState<LoadState>({ phase: "loading" });
 
@@ -438,6 +446,16 @@ function ItemRow({
   const [error, setError] = useState<string | null>(null);
   const [draft, setDraft] = useState(depot?.reponse ?? "");
   const [dragOver, setDragOver] = useState(false);
+  // Aperçu local du fichier choisi (objectURL) + ouverture de la modale.
+  const [preview, setPreview] = useState<{ url: string; name: string } | null>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
+
+  // Libère l'objectURL au démontage ou quand un nouveau fichier le remplace.
+  useEffect(() => {
+    return () => {
+      if (preview) URL.revokeObjectURL(preview.url);
+    };
+  }, [preview]);
 
   // La structure stocke 'Document' | 'Question' — comparaison insensible à la casse par sécurité.
   const isDocument = (item.type || "").toLowerCase() !== "question";
@@ -483,6 +501,11 @@ function ItemRow({
         setError("Fichier trop volumineux (15 Mo maximum).");
         return;
       }
+      // Aperçu immédiat depuis le fichier local (avant même l'upload).
+      setPreview((prev) => {
+        if (prev) URL.revokeObjectURL(prev.url);
+        return { url: URL.createObjectURL(file), name: file.name };
+      });
       const body = new FormData();
       body.set("item_index", String(item.index));
       body.set("label", item.label);
@@ -575,6 +598,50 @@ function ItemRow({
               Déposé ✓ — {depot?.file_name}
             </div>
           )}
+          {preview && (
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 8 }}>
+              {previewKind(preview.name) === "image" ? (
+                <button
+                  type="button"
+                  onClick={() => setPreviewOpen(true)}
+                  title="Voir l'aperçu"
+                  style={{
+                    padding: 0,
+                    border: "1px solid var(--navy-100)",
+                    borderRadius: 8,
+                    overflow: "hidden",
+                    background: "#fff",
+                    cursor: "pointer",
+                    lineHeight: 0,
+                  }}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={preview.url}
+                    alt={preview.name}
+                    style={{ width: 48, height: 48, objectFit: "cover", display: "block" }}
+                  />
+                </button>
+              ) : null}
+              <button
+                type="button"
+                onClick={() => setPreviewOpen(true)}
+                style={{
+                  border: "none",
+                  background: "none",
+                  padding: 0,
+                  fontSize: 11.5,
+                  color: "var(--gold-deep, #9a7a35)",
+                  cursor: "pointer",
+                  fontFamily: "inherit",
+                  textDecoration: "underline",
+                  textUnderlineOffset: 3,
+                }}
+              >
+                👁 Aperçu
+              </button>
+            </div>
+          )}
           {answerDone && (
             <div style={{ fontSize: 12, color: "var(--green-text)", marginTop: 4 }}>
               Répondu ✓ — {depot?.reponse}
@@ -649,6 +716,152 @@ function ItemRow({
           onSubmit={(value) => void onAnswer(value)}
         />
       )}
+
+      {previewOpen && preview && (
+        <PreviewModal
+          url={preview.url}
+          name={preview.name}
+          onClose={() => setPreviewOpen(false)}
+        />
+      )}
+    </div>
+  );
+}
+
+// Modale d'aperçu côté client : image en <img>, PDF en <iframe>, repli sinon.
+function PreviewModal({
+  url,
+  name,
+  onClose,
+}: {
+  url: string;
+  name: string;
+  onClose: () => void;
+}) {
+  const kind = previewKind(name);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 80,
+        background: "rgba(11,28,53,0.6)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: 16,
+      }}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          background: "#fff",
+          borderRadius: 14,
+          width: "min(720px, 100%)",
+          height: "min(85vh, 100%)",
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden",
+          boxShadow: "0 20px 60px rgba(11,28,53,0.45)",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 12,
+            padding: "12px 16px",
+            borderBottom: "1px solid var(--navy-100)",
+          }}
+        >
+          <span
+            style={{
+              fontSize: 13,
+              fontWeight: 600,
+              color: "var(--navy)",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {name}
+          </span>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Fermer l'aperçu"
+            style={{
+              border: "none",
+              background: "var(--navy-100)",
+              color: "var(--navy)",
+              borderRadius: 8,
+              width: 30,
+              height: 30,
+              cursor: "pointer",
+              fontSize: 14,
+              flexShrink: 0,
+            }}
+          >
+            ✕
+          </button>
+        </div>
+        <div style={{ flex: 1, minHeight: 0, background: "var(--ivory)" }}>
+          {kind === "image" && (
+            <div
+              style={{
+                width: "100%",
+                height: "100%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: 16,
+                overflow: "auto",
+              }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={url}
+                alt={name}
+                style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }}
+              />
+            </div>
+          )}
+          {kind === "pdf" && (
+            <iframe
+              src={url}
+              title={name}
+              style={{ width: "100%", height: "100%", border: "none" }}
+            />
+          )}
+          {kind === "other" && (
+            <div
+              style={{
+                height: "100%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: 24,
+                textAlign: "center",
+                fontSize: 13,
+                color: "var(--navy-300)",
+              }}
+            >
+              Aperçu indisponible pour ce format.
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
