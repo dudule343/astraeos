@@ -241,7 +241,7 @@ export async function bookRdv(input: BookRdvInput): Promise<BookRdvResult> {
       ],
       message: `Nouvelle prise de rendez-vous par un prospect.\n\nProspect : ${nom}\nE-mail : ${email}${input.referral?.trim() ? `\nRecommandé par : ${input.referral.trim()}` : ""}\n\nLe prospect a reçu sa confirmation et le lien de visioconférence. Le RDV est enregistré dans votre espace prospects.`,
     });
-    const i = await sendEmail(notify, `PRIVEOS · Nouveau RDV prospect · ${nom}`, ing.html);
+    const i = await sendEmail(notify, `ASTRAEOS · Nouveau RDV prospect · ${nom}`, ing.html);
     ingenieurNotified = i.sent;
   }
 

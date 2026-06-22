@@ -1,4 +1,4 @@
-// Gabarit d'e-mail de collecte aux couleurs PRIVEOS.
+// Gabarit d'e-mail de collecte aux couleurs ASTRAEOS.
 // HTML robuste : tables, styles inline, max-width 560 — lisible Gmail / Apple Mail.
 
 type CollecteItem = {
@@ -40,8 +40,8 @@ export function buildCollecteEmail({
 }: BuildCollecteEmailArgs): { subject: string; html: string } {
   const isRappel = variant === "rappel";
   const subject = isRappel
-    ? "PRIVEOS · Rappel · Documents en attente pour votre étude patrimoniale"
-    : "PRIVEOS · Documents nécessaires à votre étude patrimoniale";
+    ? "ASTRAEOS · Rappel · Documents en attente pour votre étude patrimoniale"
+    : "ASTRAEOS · Documents nécessaires à votre étude patrimoniale";
 
   const MAX_LISTED = 6;
   const listed = items.slice(0, MAX_LISTED);
@@ -94,7 +94,7 @@ export function buildCollecteEmail({
       <table role="presentation" width="560" cellpadding="0" cellspacing="0" border="0" style="width:560px;max-width:560px;background-color:#FFFFFF;border-radius:8px;overflow:hidden;">
         <tr>
           <td style="background-color:${NAVY};padding:28px 36px;">
-            <div style="color:${GOLD};font-size:13px;letter-spacing:3px;text-transform:uppercase;font-family:'Epilogue',Helvetica,Arial,sans-serif;">PRIVEOS</div>
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr><td style="width:30px;height:30px;background-color:${GOLD};border-radius:7px;text-align:center;vertical-align:middle;font-family:Georgia,'Times New Roman',serif;font-weight:700;font-size:17px;color:${NAVY};">A</td><td style="padding-left:10px;color:${GOLD};font-size:16px;letter-spacing:3px;font-family:'Epilogue',Helvetica,Arial,sans-serif;font-weight:600;vertical-align:middle;">ASTRAEOS</td></tr></table>
             <div style="color:#FFFFFF;font-size:22px;line-height:30px;margin-top:6px;font-family:Georgia,'Times New Roman',serif;font-style:italic;">Votre étude patrimoniale</div>
           </td>
         </tr>
@@ -141,7 +141,7 @@ export function buildCollecteEmail({
         </tr>
         <tr>
           <td style="border-top:1px solid #ECE7DC;padding:24px 36px;">
-            <p style="margin:0;color:#33425A;font-size:14px;line-height:22px;font-family:'Epilogue',Helvetica,Arial,sans-serif;">Bien à vous,<br><strong style="color:${NAVY};">L'équipe PRIVEOS</strong></p>
+            <p style="margin:0;color:#33425A;font-size:14px;line-height:22px;font-family:'Epilogue',Helvetica,Arial,sans-serif;">Bien à vous,<br><strong style="color:${NAVY};">L'équipe ASTRAEOS</strong></p>
           </td>
         </tr>
       </table>

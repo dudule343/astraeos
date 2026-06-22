@@ -1,4 +1,4 @@
-// Gabarit d'e-mail d'invitation à un entretien visio, aux couleurs PRIVEOS.
+// Gabarit d'e-mail d'invitation à un entretien visio, aux couleurs ASTRAEOS.
 // HTML robuste (tables + styles inline), même charte que collecte-email.
 
 type BuildVisioInviteArgs = {
@@ -25,7 +25,7 @@ export function buildVisioInviteEmail({
   joinUrl,
   message,
 }: BuildVisioInviteArgs): { subject: string; html: string } {
-  const subject = "PRIVEOS · Votre rendez-vous en visioconférence";
+  const subject = "ASTRAEOS · Votre rendez-vous en visioconférence";
 
   const intro =
     message && message.trim()
@@ -47,7 +47,7 @@ export function buildVisioInviteEmail({
       <table role="presentation" width="560" cellpadding="0" cellspacing="0" border="0" style="width:560px;max-width:560px;background-color:#FFFFFF;border-radius:8px;overflow:hidden;">
         <tr>
           <td style="background-color:${NAVY};padding:28px 36px;">
-            <div style="color:${GOLD};font-size:13px;letter-spacing:3px;text-transform:uppercase;font-family:'Epilogue',Helvetica,Arial,sans-serif;">PRIVEOS</div>
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr><td style="width:30px;height:30px;background-color:${GOLD};border-radius:7px;text-align:center;vertical-align:middle;font-family:Georgia,'Times New Roman',serif;font-weight:700;font-size:17px;color:${NAVY};">A</td><td style="padding-left:10px;color:${GOLD};font-size:16px;letter-spacing:3px;font-family:'Epilogue',Helvetica,Arial,sans-serif;font-weight:600;vertical-align:middle;">ASTRAEOS</td></tr></table>
             <div style="color:#FFFFFF;font-size:22px;line-height:30px;margin-top:6px;font-family:Georgia,'Times New Roman',serif;font-style:italic;">Votre rendez-vous en visioconférence</div>
           </td>
         </tr>
@@ -79,7 +79,7 @@ export function buildVisioInviteEmail({
         </tr>
         <tr>
           <td style="border-top:1px solid #ECE7DC;padding:24px 36px;">
-            <p style="margin:0;color:#33425A;font-size:14px;line-height:22px;font-family:'Epilogue',Helvetica,Arial,sans-serif;">Bien à vous,<br><strong style="color:${NAVY};">L'équipe PRIVEOS</strong></p>
+            <p style="margin:0;color:#33425A;font-size:14px;line-height:22px;font-family:'Epilogue',Helvetica,Arial,sans-serif;">Bien à vous,<br><strong style="color:${NAVY};">L'équipe ASTRAEOS</strong></p>
           </td>
         </tr>
       </table>

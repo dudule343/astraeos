@@ -75,7 +75,7 @@ function buildHtml(opts: {
   prospectSlug: string;
   stepDone: ParcoursStep;
 }): { subject: string; html: string } {
-  const subject = "PRIVEOS · Bien reçu, votre étape est enregistrée";
+  const subject = "ASTRAEOS · Bien reçu, votre étape est enregistrée";
   const doneLabel = STEP_DONE_LABEL[opts.stepDone];
 
   // Étapes restantes : tout NEXT_STEPS sauf celle qu'on vient de réaliser.
@@ -119,7 +119,7 @@ function buildHtml(opts: {
   <tr><td align="center" style="padding:32px 16px;">
     <table role="presentation" width="560" cellpadding="0" cellspacing="0" border="0" style="width:560px;max-width:560px;background-color:#FFFFFF;border-radius:8px;overflow:hidden;">
       <tr><td style="background-color:${NAVY};padding:28px 36px;">
-        <div style="color:${GOLD};font-size:13px;letter-spacing:3px;text-transform:uppercase;font-family:'Epilogue',Helvetica,Arial,sans-serif;">PRIVEOS</div>
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr><td style="width:30px;height:30px;background-color:${GOLD};border-radius:7px;text-align:center;vertical-align:middle;font-family:Georgia,'Times New Roman',serif;font-weight:700;font-size:17px;color:${NAVY};">A</td><td style="padding-left:10px;color:${GOLD};font-size:16px;letter-spacing:3px;font-family:'Epilogue',Helvetica,Arial,sans-serif;font-weight:600;vertical-align:middle;">ASTRAEOS</td></tr></table>
         <div style="color:#FFFFFF;font-size:22px;line-height:30px;margin-top:6px;font-family:Georgia,'Times New Roman',serif;font-style:italic;">Bien reçu</div>
       </td></tr>
       <tr><td style="padding:32px 36px 8px 36px;">
@@ -132,7 +132,7 @@ function buildHtml(opts: {
       </td></tr>
       ${nextBlock}
       <tr><td style="border-top:1px solid #ECE7DC;padding:24px 36px;margin-top:16px;">
-        <p style="margin:0;color:#33425A;font-size:14px;line-height:22px;font-family:'Epilogue',Helvetica,Arial,sans-serif;">Bien à vous,<br><strong style="color:${NAVY};">L'équipe PRIVEOS · Astraeos</strong></p>
+        <p style="margin:0;color:#33425A;font-size:14px;line-height:22px;font-family:'Epilogue',Helvetica,Arial,sans-serif;">Bien à vous,<br><strong style="color:${NAVY};">L'équipe ASTRAEOS · Astraeos</strong></p>
       </td></tr>
     </table>
     <p style="margin:18px 0 0 0;color:#A7AEBB;font-size:11px;line-height:16px;font-family:'Epilogue',Helvetica,Arial,sans-serif;">Vos données restent strictement confidentielles.</p>
@@ -179,7 +179,7 @@ export async function sendParcoursConfirmation(opts: {
 </body></html>`;
       await sendEmail(
         notify,
-        `PRIVEOS · Étape complétée · ${opts.displayName}`,
+        `ASTRAEOS · Étape complétée · ${opts.displayName}`,
         notifyHtml,
       );
     }
