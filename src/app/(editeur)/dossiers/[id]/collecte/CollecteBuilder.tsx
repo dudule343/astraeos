@@ -31,6 +31,17 @@ const THEME_ORDER = [
 
 type Participant = { nom: string; email: string };
 
+/** Nombre maxi de destinataires aligné sur l'API (MAX_PARTICIPANTS côté /api/collecte/send). */
+const MAX_PARTICIPANTS = 50;
+
+/** Étapes du wizard d'envoi (présentation seulement, la logique reste partagée). */
+type Step = 1 | 2 | 3;
+const STEPS: { n: Step; label: string }[] = [
+  { n: 1, label: "Composition des pièces" },
+  { n: 2, label: "Destinataires" },
+  { n: 3, label: "Envoi & confirmation" },
+];
+
 /**
  * Statut de dépôt d'une pièce (dimension SUIVI). En composition pré-envoi rien
  * n'est encore déposé : le statut par défaut est « à demander ». Après envoi,
@@ -120,9 +131,25 @@ export function CollecteBuilder({
   const [customLabel, setCustomLabel] = useState("");
   const [customTheme, setCustomTheme] = useState("");
 
-  const [participant, setParticipant] = useState<Participant>(defaultParticipant);
+  // Destinataires de la collecte. Le participant pré-rempli (issu du dossier)
+  // amorce la liste s'il porte un nom ; sinon on démarre vide et un brouillon
+  // sert à la saisie. L'API /api/collecte/send accepte participants[] (jusqu'à
+  // MAX_PARTICIPANTS) : on génère une collecte + un lien de dépôt par personne.
+  const [participants, setParticipants] = useState<Participant[]>(() =>
+    defaultParticipant.nom.trim() ? [defaultParticipant] : [],
+  );
+  const [draft, setDraft] = useState<Participant>(() =>
+    defaultParticipant.nom.trim() ? { nom: "", email: "" } : defaultParticipant,
+  );
+
   const [sending, setSending] = useState(false);
-  const [result, setResult] = useState<{ ok: boolean; message: string } | null>(null);
+  const [result, setResult] = useState<
+    { ok: boolean; message: string; lines?: string[] } | null
+  >(null);
+
+  // Wizard : étape courante (présentation), modale de passage à l'étude.
+  const [step, setStep] = useState<Step>(1);
+  const [confirmStage, setConfirmStage] = useState(false);
 
   // UI : colonne des faits repliable, accordéon des thèmes, filtre actif.
   const [factsOpen, setFactsOpen] = useState(true);
@@ -243,6 +270,26 @@ export function CollecteBuilder({
     });
   }
 
+  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  function addParticipant() {
+    const nom = draft.nom.trim();
+    if (!nom || participants.length >= MAX_PARTICIPANTS) return;
+    const email = draft.email.trim();
+    setParticipants((prev) => [...prev, { nom, email }]);
+    setDraft({ nom: "", email: "" });
+  }
+
+  function removeParticipant(index: number) {
+    setParticipants((prev) => prev.filter((_, i) => i !== index));
+  }
+
+  function updateParticipant(index: number, patch: Partial<Participant>) {
+    setParticipants((prev) =>
+      prev.map((p, i) => (i === index ? { ...p, ...patch } : p)),
+    );
+  }
+
   function toggleTheme(cat: string) {
     setCollapsed((prev) => {
       const n = new Set(prev);
@@ -263,7 +310,16 @@ export function CollecteBuilder({
     return true;
   }
 
+  // Destinataires effectifs : la liste validée, plus le brouillon courant s'il
+  // porte un nom (confort : on n'oublie pas une saisie non « ajoutée »). Const
+  // dérivée pure : la mémoïsation est laissée au React Compiler.
+  const recipients: Participant[] = [...participants];
+  if (draft.nom.trim()) {
+    recipients.push({ nom: draft.nom.trim(), email: draft.email.trim() });
+  }
+
   async function send() {
+    if (recipients.length === 0) return;
     setSending(true);
     setResult(null);
     try {
@@ -274,34 +330,52 @@ export function CollecteBuilder({
         label: e.label,
         type: e.type === "Document" ? ("Document" as const) : ("Question" as const),
       }));
+      // Mode global : e-mail dès qu'au moins un destinataire a une adresse, sinon
+      // lien à partager. Un destinataire sans adresse en mode "both" reçoit son
+      // lien sans e-mail (l'API gère ce cas par participant).
+      const anyEmail = recipients.some((p) => p.email.trim().length > 0);
+      const allEmail = recipients.every((p) => p.email.trim().length > 0);
+      const mode = !anyEmail ? "link" : allEmail ? "email" : "both";
       const res = await fetch("/api/collecte/send", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          participants: [{ nom: participant.nom, email: participant.email }],
+          participants: recipients.map((p) => ({ nom: p.nom.trim(), email: p.email.trim() })),
           items,
-          mode: participant.email ? "email" : "link",
+          mode,
           dossier_id: dossierId ?? null,
         }),
       });
       const data = (await res.json().catch(() => ({}))) as {
         error?: string;
-        results?: Array<{ depotUrl: string | null; error: string | null }>;
+        results?: Array<{
+          email: string | null;
+          depotUrl: string | null;
+          error: string | null;
+        }>;
       };
       if (!res.ok) {
         setResult({ ok: false, message: data.error ?? `Erreur HTTP ${res.status}` });
         return;
       }
-      const first = data.results?.[0];
-      if (first?.error) {
-        setResult({ ok: false, message: first.error });
+      const results = data.results ?? [];
+      const failures = results.filter((r) => r.error);
+      const lines = results.map((r, i) => {
+        const who = r.email || recipients[i]?.nom || "destinataire";
+        if (r.error) return `✗ ${who} : ${r.error}`;
+        return r.depotUrl ? `✓ ${who} · ${r.depotUrl}` : `✓ ${who}`;
+      });
+      if (failures.length === results.length) {
+        setResult({ ok: false, message: "Aucun envoi n'a abouti.", lines });
         return;
       }
       setResult({
         ok: true,
-        message: first?.depotUrl
-          ? `Collecte envoyée. Lien de dépôt : ${first.depotUrl}`
-          : "Collecte envoyée.",
+        message:
+          failures.length > 0
+            ? `Collecte envoyée à ${results.length - failures.length}/${results.length} destinataire(s).`
+            : `Collecte envoyée à ${results.length} destinataire(s).`,
+        lines,
       });
     } catch (err) {
       setResult({ ok: false, message: err instanceof Error ? err.message : "Échec de l'envoi" });
@@ -310,7 +384,13 @@ export function CollecteBuilder({
     }
   }
 
-  const canSend = !sending && selectedCount > 0 && participant.nom.trim().length > 0;
+  const recipientsValid =
+    recipients.length > 0 &&
+    recipients.every(
+      (p) => p.nom.trim().length > 0 && (p.email.trim() === "" || EMAIL_RE.test(p.email.trim())),
+    );
+
+  const canSend = !sending && selectedCount > 0 && recipientsValid;
 
   return (
     <div className="flex flex-col gap-5">
@@ -342,22 +422,80 @@ export function CollecteBuilder({
           </div>
         </div>
         <div className="flex flex-shrink-0 items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setFactsOpen((v) => !v)}
-            className="rounded-md border border-[var(--navy-100)] bg-white px-3 py-2 text-[11.5px] font-semibold text-[var(--navy)] hover:border-[var(--gold)]"
-          >
-            {factsOpen ? "Masquer la situation" : "Modifier la situation"}
-          </button>
-          <button
-            type="button"
-            onClick={send}
-            disabled={!canSend}
-            className="rounded-md bg-[var(--gold)] px-4 py-2 text-[11.5px] font-bold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {sending ? "Envoi…" : "Envoyer la collecte"}
-          </button>
+          {step === 1 && (
+            <button
+              type="button"
+              onClick={() => setFactsOpen((v) => !v)}
+              className="rounded-md border border-[var(--navy-100)] bg-white px-3 py-2 text-[11.5px] font-semibold text-[var(--navy)] hover:border-[var(--gold)]"
+            >
+              {factsOpen ? "Masquer la situation" : "Modifier la situation"}
+            </button>
+          )}
+          {step < 3 ? (
+            <button
+              type="button"
+              onClick={() => setStep((s) => (s === 1 ? 2 : 3) as Step)}
+              disabled={step === 1 ? selectedCount === 0 : !recipientsValid}
+              className="rounded-md bg-[var(--navy)] px-4 py-2 text-[11.5px] font-bold text-white transition hover:brightness-125 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {step === 1 ? "Continuer · destinataires →" : "Continuer · envoi →"}
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={send}
+              disabled={!canSend}
+              className="rounded-md bg-[var(--gold)] px-4 py-2 text-[11.5px] font-bold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {sending ? "Envoi…" : "Envoyer la collecte"}
+            </button>
+          )}
         </div>
+      </div>
+
+      {/* STEPPER — 3 étapes (composition → destinataires → envoi) */}
+      <div className="flex flex-wrap items-center gap-2 rounded-md border border-[var(--navy-100)] bg-white px-4 py-3">
+        {STEPS.map((s, i) => {
+          const isCurrent = step === s.n;
+          const isDone = step > s.n;
+          // On peut revenir en arrière librement ; avancer exige les pré-requis.
+          const reachable =
+            s.n <= step ||
+            (s.n === 2 && selectedCount > 0) ||
+            (s.n === 3 && selectedCount > 0 && recipientsValid);
+          return (
+            <div key={s.n} className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => reachable && setStep(s.n)}
+                disabled={!reachable}
+                className={`flex items-center gap-2 rounded-md px-2.5 py-1.5 text-[11.5px] font-semibold transition disabled:cursor-not-allowed ${
+                  isCurrent
+                    ? "bg-[var(--navy)] text-white"
+                    : isDone
+                      ? "text-[var(--gold-deep)] hover:bg-[var(--gold-100)]"
+                      : "text-[var(--navy-300)] hover:bg-[var(--ivory)] disabled:opacity-50"
+                }`}
+              >
+                <span
+                  className={`flex h-[20px] w-[20px] items-center justify-center rounded-full text-[10px] font-bold ${
+                    isCurrent
+                      ? "bg-white text-[var(--navy)]"
+                      : isDone
+                        ? "bg-[var(--gold)] text-white"
+                        : "bg-[var(--navy-100)] text-[var(--navy-300)]"
+                  }`}
+                >
+                  {isDone ? "✓" : s.n}
+                </span>
+                {s.label}
+              </button>
+              {i < STEPS.length - 1 && (
+                <span className="text-[var(--navy-300)]">→</span>
+              )}
+            </div>
+          );
+        })}
       </div>
 
       {result && (
@@ -368,39 +506,227 @@ export function CollecteBuilder({
               : "bg-[var(--red-bg)] text-[var(--red-text)]"
           }`}
         >
-          {result.message}
+          <div className="font-semibold">{result.message}</div>
+          {result.lines && result.lines.length > 0 && (
+            <ul className="mt-1 space-y-0.5">
+              {result.lines.map((l, i) => (
+                <li key={i} className="break-all font-mono text-[10.5px] leading-snug">
+                  {l}
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       )}
 
-      {/* Destinataire (composition) */}
-      <div className="grid grid-cols-1 gap-2 rounded-md border border-[var(--navy-100)] bg-white p-4 sm:grid-cols-2">
-        <div>
-          <label className="mb-1 block text-[10.5px] font-semibold uppercase tracking-wide text-[var(--navy-300)]">
-            Destinataire
-          </label>
-          <input
-            type="text"
-            value={participant.nom}
-            onChange={(e) => setParticipant((p) => ({ ...p, nom: e.target.value }))}
-            placeholder="Nom du client"
-            className="w-full rounded-md border border-[var(--navy-100)] px-2.5 py-1.5 text-[12.5px] text-[var(--navy)] outline-none focus:border-[var(--gold)]"
-          />
-        </div>
-        <div>
-          <label className="mb-1 block text-[10.5px] font-semibold uppercase tracking-wide text-[var(--navy-300)]">
-            E-mail (optionnel · sinon lien de dépôt)
-          </label>
-          <input
-            type="email"
-            value={participant.email}
-            onChange={(e) => setParticipant((p) => ({ ...p, email: e.target.value }))}
-            placeholder="client@exemple.fr"
-            className="w-full rounded-md border border-[var(--navy-100)] px-2.5 py-1.5 text-[12.5px] text-[var(--navy)] outline-none focus:border-[var(--gold)]"
-          />
-        </div>
-      </div>
+      {/* ÉTAPE 2 — DESTINATAIRES (multi-participant) */}
+      {step === 2 && (
+        <section className="rounded-md border border-[var(--navy-100)] bg-white p-4">
+          <div className="mb-3">
+            <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-[var(--gold)]">
+              Étape 02
+            </div>
+            <div className="text-[15px] font-semibold text-[var(--navy)]">
+              À qui envoyer la collecte ?
+            </div>
+            <div className="mt-1 text-[11px] text-[var(--navy-300)]">
+              Ajoutez un ou plusieurs destinataires. Chacun reçoit sa propre collecte et son lien de
+              dépôt. Sans e-mail, seul le lien à partager est généré (jusqu&apos;à {MAX_PARTICIPANTS}{" "}
+              destinataires).
+            </div>
+          </div>
 
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-[320px_1fr]">
+          {/* Liste des destinataires déjà ajoutés (éditables / supprimables) */}
+          {participants.length > 0 && (
+            <div className="mb-3 flex flex-col gap-2">
+              {participants.map((p, i) => {
+                const emailKo = p.email.trim() !== "" && !EMAIL_RE.test(p.email.trim());
+                return (
+                  <div
+                    key={i}
+                    className="grid grid-cols-1 items-start gap-2 rounded-md border border-[var(--navy-100)] bg-[var(--ivory)] p-2.5 sm:grid-cols-[1fr_1fr_auto]"
+                  >
+                    <input
+                      type="text"
+                      value={p.nom}
+                      onChange={(e) => updateParticipant(i, { nom: e.target.value })}
+                      placeholder="Nom du destinataire"
+                      className="w-full rounded-md border border-[var(--navy-100)] bg-white px-2.5 py-1.5 text-[12.5px] text-[var(--navy)] outline-none focus:border-[var(--gold)]"
+                    />
+                    <input
+                      type="email"
+                      value={p.email}
+                      onChange={(e) => updateParticipant(i, { email: e.target.value })}
+                      placeholder="e-mail (optionnel)"
+                      className={`w-full rounded-md border bg-white px-2.5 py-1.5 text-[12.5px] text-[var(--navy)] outline-none focus:border-[var(--gold)] ${
+                        emailKo ? "border-[var(--red-text)]" : "border-[var(--navy-100)]"
+                      }`}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeParticipant(i)}
+                      aria-label="Retirer ce destinataire"
+                      className="justify-self-end rounded-md border border-[var(--navy-100)] bg-white px-2.5 py-1.5 text-[11px] font-semibold text-[var(--navy-300)] hover:border-[var(--red-text)] hover:text-[var(--red-text)]"
+                    >
+                      Retirer
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Brouillon d'ajout */}
+          {participants.length < MAX_PARTICIPANTS && (
+            <div className="grid grid-cols-1 items-end gap-2 sm:grid-cols-[1fr_1fr_auto]">
+              <div>
+                <label className="mb-1 block text-[10.5px] font-semibold uppercase tracking-wide text-[var(--navy-300)]">
+                  Destinataire
+                </label>
+                <input
+                  type="text"
+                  value={draft.nom}
+                  onChange={(e) => setDraft((d) => ({ ...d, nom: e.target.value }))}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      addParticipant();
+                    }
+                  }}
+                  placeholder="Nom du client"
+                  className="w-full rounded-md border border-[var(--navy-100)] px-2.5 py-1.5 text-[12.5px] text-[var(--navy)] outline-none focus:border-[var(--gold)]"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-[10.5px] font-semibold uppercase tracking-wide text-[var(--navy-300)]">
+                  E-mail (optionnel · sinon lien de dépôt)
+                </label>
+                <input
+                  type="email"
+                  value={draft.email}
+                  onChange={(e) => setDraft((d) => ({ ...d, email: e.target.value }))}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      addParticipant();
+                    }
+                  }}
+                  placeholder="client@exemple.fr"
+                  className="w-full rounded-md border border-[var(--navy-100)] px-2.5 py-1.5 text-[12.5px] text-[var(--navy)] outline-none focus:border-[var(--gold)]"
+                />
+              </div>
+              <button
+                type="button"
+                onClick={addParticipant}
+                disabled={!draft.nom.trim()}
+                className="rounded-md border border-dashed border-[var(--gold)] bg-[var(--gold-100)] px-4 py-1.5 text-[11.5px] font-bold text-[var(--gold-deep)] transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                + Ajouter
+              </button>
+            </div>
+          )}
+
+          {participants.length >= MAX_PARTICIPANTS && (
+            <div className="text-[11px] font-semibold text-[var(--orange-text)]">
+              Maximum de {MAX_PARTICIPANTS} destinataires atteint.
+            </div>
+          )}
+
+          <div className="mt-4 flex items-center justify-between border-t border-[var(--navy-100)] pt-3">
+            <button
+              type="button"
+              onClick={() => setStep(1)}
+              className="rounded-md border border-[var(--navy-100)] bg-white px-4 py-2 text-[11.5px] font-semibold text-[var(--navy)] hover:border-[var(--gold)]"
+            >
+              ← Composition
+            </button>
+            <button
+              type="button"
+              onClick={() => setStep(3)}
+              disabled={!recipientsValid}
+              className="rounded-md bg-[var(--navy)] px-4 py-2 text-[11.5px] font-bold text-white transition hover:brightness-125 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Continuer · envoi →
+            </button>
+          </div>
+        </section>
+      )}
+
+      {/* ÉTAPE 3 — ENVOI & CONFIRMATION (récapitulatif) */}
+      {step === 3 && (
+        <section className="rounded-md border border-[var(--navy-100)] bg-white p-4">
+          <div className="mb-3">
+            <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-[var(--gold)]">
+              Étape 03
+            </div>
+            <div className="text-[15px] font-semibold text-[var(--navy)]">
+              Vérifier et envoyer
+            </div>
+            <div className="mt-1 text-[11px] text-[var(--navy-300)]">
+              Relisez la composition et les destinataires avant l&apos;envoi.
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="rounded-md border border-[var(--navy-100)] bg-[var(--ivory)] p-3">
+              <div className="text-[10.5px] font-semibold uppercase tracking-wide text-[var(--navy-300)]">
+                Composition
+              </div>
+              <div className="mt-1 text-[20px] font-bold text-[var(--navy)]">
+                {selectedCount}{" "}
+                <span className="text-[12px] font-semibold text-[var(--navy-300)]">
+                  pièce{selectedCount > 1 ? "s" : ""} sur {TOTAL_PIECES}
+                </span>
+              </div>
+              {customItems.length > 0 && (
+                <div className="mt-1 text-[11px] text-[var(--gold-deep)]">
+                  dont {customItems.filter((c) => activeIds.has(c.id)).length} pièce(s) hors référentiel
+                </div>
+              )}
+            </div>
+            <div className="rounded-md border border-[var(--navy-100)] bg-[var(--ivory)] p-3">
+              <div className="text-[10.5px] font-semibold uppercase tracking-wide text-[var(--navy-300)]">
+                Destinataires
+              </div>
+              <ul className="mt-1 flex flex-col gap-0.5">
+                {recipients.map((p, i) => (
+                  <li key={i} className="text-[12px] text-[var(--navy)]">
+                    <span className="font-semibold">{p.nom}</span>
+                    <span className="ml-1.5 text-[var(--navy-300)]">
+                      {p.email.trim() ? p.email.trim() : "· lien de dépôt"}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          <div className="mt-4 flex items-center justify-between border-t border-[var(--navy-100)] pt-3">
+            <button
+              type="button"
+              onClick={() => setStep(2)}
+              className="rounded-md border border-[var(--navy-100)] bg-white px-4 py-2 text-[11.5px] font-semibold text-[var(--navy)] hover:border-[var(--gold)]"
+            >
+              ← Destinataires
+            </button>
+            <button
+              type="button"
+              onClick={send}
+              disabled={!canSend}
+              className="rounded-md bg-[var(--gold)] px-5 py-2 text-[11.5px] font-bold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {sending
+                ? "Envoi…"
+                : `Envoyer à ${recipients.length} destinataire${recipients.length > 1 ? "s" : ""}`}
+            </button>
+          </div>
+        </section>
+      )}
+
+      {/* ÉTAPE 1 — COMPOSITION (faits + référentiel) */}
+      <div
+        className={`grid grid-cols-1 gap-5 lg:grid-cols-[320px_1fr] ${step === 1 ? "" : "hidden"}`}
+      >
         {/* GAUCHE — checklist des faits (pilote du moteur), repliable */}
         {factsOpen && (
           <section>
@@ -781,17 +1107,62 @@ export function CollecteBuilder({
             >
               ← Retour à la fiche
             </a>
-            <form action={moveDossierStage.bind(null, dossierId, "next")}>
-              <button
-                type="submit"
-                className="rounded-md bg-[var(--navy)] px-4 py-2.5 text-[12px] font-bold text-white transition hover:brightness-125"
-              >
-                Passer à l&apos;étude (étape 04) →
-              </button>
-            </form>
+            <button
+              type="button"
+              onClick={() => setConfirmStage(true)}
+              className="rounded-md bg-[var(--navy)] px-4 py-2.5 text-[12px] font-bold text-white transition hover:brightness-125"
+            >
+              Passer à l&apos;étude (étape 04) →
+            </button>
           </div>
         )}
       </div>
+
+      {/* MODALE de confirmation du passage à l'étude (étape 04). Le clic ne
+          déclenche moveDossierStage qu'après confirmation explicite. */}
+      {dossierId && confirmStage && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--navy)]/40 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="confirm-stage-title"
+          onClick={() => setConfirmStage(false)}
+        >
+          <div
+            className="w-full max-w-md rounded-md border border-[var(--navy-100)] bg-white p-6 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div
+              id="confirm-stage-title"
+              className="text-[16px] font-bold text-[var(--navy)]"
+            >
+              Confirmer le passage à l&apos;étude ?
+            </div>
+            <div className="mt-2 text-[12.5px] leading-relaxed text-[var(--navy-300)]">
+              Le dossier passera à l&apos;étape 04 · Réalisation de l&apos;étude patrimoniale.{" "}
+              <strong className="text-[var(--navy)]">{selectedCount} pièce{selectedCount > 1 ? "s" : ""}</strong>{" "}
+              composent la collecte. Assurez-vous d&apos;avoir envoyé la collecte au client si nécessaire.
+            </div>
+            <div className="mt-5 flex items-center justify-end gap-2.5">
+              <button
+                type="button"
+                onClick={() => setConfirmStage(false)}
+                className="rounded-md border border-[var(--navy-100)] bg-white px-4 py-2 text-[12px] font-semibold text-[var(--navy)] hover:border-[var(--gold)]"
+              >
+                Annuler
+              </button>
+              <form action={moveDossierStage.bind(null, dossierId, "next")}>
+                <button
+                  type="submit"
+                  className="rounded-md bg-[var(--navy)] px-4 py-2 text-[12px] font-bold text-white transition hover:brightness-125"
+                >
+                  Confirmer le passage
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

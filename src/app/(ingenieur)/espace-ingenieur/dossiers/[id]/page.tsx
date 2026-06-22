@@ -75,7 +75,7 @@ export default async function FicheDossierPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const dossier = getFicheDossier(id);
+  const dossier = await getFicheDossier(id);
 
   return (
     <div>

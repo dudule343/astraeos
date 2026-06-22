@@ -47,6 +47,30 @@ export async function POST(
     return NextResponse.json({ error: "Token invalide" }, { status: 404 });
   }
 
+  // Sélection optionnelle : un tableau d'item_index à relancer. Absent → on
+  // relance sur TOUTES les pièces encore demandées (comportement historique).
+  // Le corps peut être vide (relance globale) → on tolère le JSON manquant.
+  let selectedIndexes: number[] | null = null;
+  try {
+    const body = (await req.json().catch(() => null)) as { item_index?: unknown } | null;
+    if (body && Array.isArray(body.item_index)) {
+      const ints = body.item_index
+        .map((v) => Number(v))
+        .filter((n) => Number.isInteger(n) && n >= 0);
+      // Tableau fourni mais vide → sélection invalide, on refuse plutôt que de
+      // relancer tout le monde par surprise.
+      if (ints.length === 0) {
+        return NextResponse.json(
+          { error: "Aucune pièce sélectionnée." },
+          { status: 400 },
+        );
+      }
+      selectedIndexes = ints;
+    }
+  } catch {
+    selectedIndexes = null;
+  }
+
   const supabase = createAdminClient();
 
   const { data: collecte, error } = await supabase
@@ -93,8 +117,20 @@ export async function POST(
   const structure: Item[] = Array.isArray(collecte.structure)
     ? (collecte.structure as Item[])
     : [];
-  // On ne liste que les pièces encore demandées (les retirées ne concernent plus le client).
-  const items = structure.filter((it) => !it.removed);
+  // On ne liste que les pièces encore demandées (les retirées ne concernent plus
+  // le client). Si une sélection d'index est fournie, on borne en plus à ces
+  // pièces — la relance ne rappelle alors QUE les pièces cochées.
+  const selectedSet = selectedIndexes ? new Set(selectedIndexes) : null;
+  const items = structure.filter(
+    (it, idx) => !it.removed && (!selectedSet || selectedSet.has(idx)),
+  );
+
+  if (items.length === 0) {
+    return NextResponse.json(
+      { error: "Aucune pièce à relancer (sélection vide ou pièces déjà retirées)." },
+      { status: 400 },
+    );
+  }
 
   const { subject, html } = buildCollecteEmail({
     prenomNom: collecte.client_nom || email,

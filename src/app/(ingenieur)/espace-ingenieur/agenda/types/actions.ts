@@ -1,21 +1,25 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
+
 import { getSessionContext } from "@/lib/auth/context";
 import { createAdminClient } from "@/lib/supabase/admin";
+
+import { durationLabelToMinutes } from "../../../_data/types-rdv";
 
 /**
  * Server Actions de l'écran « Mes types de rendez-vous » (#page-ing-types-rdv).
  *
- * La configuration des types de RDV (création, édition, activation,
- * disponibilités globales) n'a pas encore de table dédiée dans le schéma
- * (`rdv_types` n'existe pas). Comme la modale « Nouveau RDV » de l'agenda, on
- * valide réellement la saisie côté serveur et on retourne un résultat honnête :
- * `persisted:false` tant qu'aucune table n'est branchée, plutôt qu'un bouton
- * mort. Le scope tenant/cabinet/engineer est résolu comme dans les autres
- * actions de l'espace ingénieur.
+ * La création / édition / activation d'un type de RDV est persistée dans la
+ * table `rdv_types` (migration 20260622_rdv_types.sql), scope tenant/cabinet,
+ * en best-effort : si la table n'existe pas encore (migration non appliquée),
+ * la saisie est validée et on retourne `persisted:false` plutôt qu'un bouton
+ * mort. Le scope est résolu comme dans les autres actions de l'espace ingénieur.
  */
 
 export type RdvVisibility = "public" | "private";
+
+const TYPES_PATH = "/espace-ingenieur/agenda/types";
 
 export type SaveRdvTypeInput = {
   /** id existant en cas d'édition, vide/absent en création. */
@@ -33,24 +37,28 @@ export type SaveResult =
   | { ok: true; persisted: boolean; message: string }
   | { ok: false; reason: string };
 
-async function resolveScope(): Promise<{ persisted: boolean }> {
-  // Pas de table de config des types de RDV : on ne persiste pas, mais on
-  // garde la résolution de session pour rester cohérent avec le reste.
-  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) return { persisted: false };
+type Scope = { tenantId: string; cabinetId: string } | null;
+
+/** Scope tenant/cabinet de la requête, ou null si la base n'est pas branchée. */
+async function resolveScope(): Promise<Scope> {
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) return null;
   try {
     const ctx = await getSessionContext();
-    if (!ctx) return { persisted: false };
-    // Touche la base en lecture seule pour confirmer la connexion réelle.
-    const supabase = createAdminClient();
-    await supabase
-      .from("dossiers")
-      .select("id")
-      .eq("tenant_id", ctx.tenantId)
-      .limit(1);
-    return { persisted: false };
+    if (!ctx) return null;
+    return { tenantId: ctx.tenantId, cabinetId: ctx.cabinetId };
   } catch {
-    return { persisted: false };
+    return null;
   }
+}
+
+/**
+ * Vrai quand l'erreur Supabase indique une table/relation absente (migration
+ * non appliquée). On dégrade alors proprement en `persisted:false`.
+ */
+function isMissingTable(error: { code?: string; message?: string } | null): boolean {
+  if (!error) return false;
+  if (error.code === "42P01") return true;
+  return /relation .*rdv_types.* does not exist/i.test(error.message ?? "");
 }
 
 export async function saveRdvType(input: SaveRdvTypeInput): Promise<SaveResult> {
@@ -68,15 +76,44 @@ export async function saveRdvType(input: SaveRdvTypeInput): Promise<SaveResult> 
     };
   }
 
-  const { persisted } = await resolveScope();
   const verb = input.id ? "mis à jour" : "créé";
-  return {
+  const notPersisted: SaveResult = {
     ok: true,
-    persisted,
-    message: persisted
-      ? `Type « ${name} » ${verb}.`
-      : `Type « ${name} » ${verb}. La persistance sera active une fois la table de configuration branchée.`,
+    persisted: false,
+    message: `Type « ${name} » ${verb}. La persistance sera active une fois la table de configuration branchée.`,
   };
+
+  const scope = await resolveScope();
+  if (!scope) return notPersisted;
+
+  try {
+    const supabase = createAdminClient();
+    const duree_min = durationLabelToMinutes(input.durationLabel);
+
+    if (input.id) {
+      const { error } = await supabase
+        .from("rdv_types")
+        .update({ label: name, duree_min })
+        .eq("id", input.id)
+        .eq("tenant_id", scope.tenantId)
+        .eq("cabinet_id", scope.cabinetId);
+      if (error) return isMissingTable(error) ? notPersisted : { ok: false, reason: error.message };
+    } else {
+      const { error } = await supabase.from("rdv_types").insert({
+        tenant_id: scope.tenantId,
+        cabinet_id: scope.cabinetId,
+        label: name,
+        duree_min,
+        actif: true,
+      });
+      if (error) return isMissingTable(error) ? notPersisted : { ok: false, reason: error.message };
+    }
+
+    revalidatePath(TYPES_PATH);
+    return { ok: true, persisted: true, message: `Type « ${name} » ${verb}.` };
+  } catch {
+    return notPersisted;
+  }
 }
 
 export async function toggleRdvTypeActive(input: {
@@ -88,15 +125,36 @@ export async function toggleRdvTypeActive(input: {
   if (!input.id) {
     return { ok: false, reason: "Type de rendez-vous introuvable." };
   }
-  const { persisted } = await resolveScope();
+
   const action = input.disable ? "désactivé" : "réactivé";
-  return {
+  const notPersisted: SaveResult = {
     ok: true,
-    persisted,
-    message: persisted
-      ? `Type « ${input.name} » ${action}.`
-      : `Type « ${input.name} » ${action}. La persistance sera active une fois la table de configuration branchée.`,
+    persisted: false,
+    message: `Type « ${input.name} » ${action}. La persistance sera active une fois la table de configuration branchée.`,
   };
+
+  const scope = await resolveScope();
+  if (!scope) return notPersisted;
+
+  try {
+    const supabase = createAdminClient();
+    const { error } = await supabase
+      .from("rdv_types")
+      .update({ actif: !input.disable })
+      .eq("id", input.id)
+      .eq("tenant_id", scope.tenantId)
+      .eq("cabinet_id", scope.cabinetId);
+    if (error) return isMissingTable(error) ? notPersisted : { ok: false, reason: error.message };
+
+    revalidatePath(TYPES_PATH);
+    return {
+      ok: true,
+      persisted: true,
+      message: `Type « ${input.name} » ${action}.`,
+    };
+  } catch {
+    return notPersisted;
+  }
 }
 
 export type SavePlagesInput = {
@@ -113,12 +171,12 @@ export async function saveDispoPlages(
   if (!input.heureDebut.trim() || !input.heureFin.trim()) {
     return { ok: false, reason: "Renseignez l'amplitude horaire (début et fin)." };
   }
-  const { persisted } = await resolveScope();
+  // Les plages globales de disponibilité ne sont pas modélisées dans
+  // `rdv_types` (catalogue de types seulement) : on valide sans persister.
   return {
     ok: true,
-    persisted,
-    message: persisted
-      ? "Plages de disponibilité mises à jour."
-      : "Plages de disponibilité validées. La persistance sera active une fois la table de configuration branchée.",
+    persisted: false,
+    message:
+      "Plages de disponibilité validées. La persistance sera active une fois la table de configuration branchée.",
   };
 }

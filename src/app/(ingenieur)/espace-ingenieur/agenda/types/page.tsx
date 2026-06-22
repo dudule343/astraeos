@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { getTypesRdvScreen } from "../../../_data/types-rdv";
+import { getTypesRdvScreenServer } from "../../../_data/types-rdv-server";
 import "../../../_styles/types-rdv.css";
 
 import { NewTypeButton, TypesRdvInteractive } from "./TypesRdvInteractive";
@@ -9,8 +9,8 @@ export const metadata = {
   title: "ASTRAEOS · Mes types de rendez-vous",
 };
 
-export default function TypesRdvPage() {
-  const screen = getTypesRdvScreen();
+export default async function TypesRdvPage() {
+  const screen = await getTypesRdvScreenServer();
 
   return (
     <div className="types-rdv-page-wrap">

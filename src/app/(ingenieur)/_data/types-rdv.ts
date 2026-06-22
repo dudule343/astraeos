@@ -251,3 +251,57 @@ const SCREEN: TypesRdvScreen = {
 export function getTypesRdvScreen(): TypesRdvScreen {
   return SCREEN;
 }
+
+/** "1h" / "1h30" / "90 min" / "2h" → minutes. Repli 60 si illisible. */
+export function durationLabelToMinutes(label: string): number {
+  const txt = label.toLowerCase().trim();
+  const hm = txt.match(/(\d+)\s*h\s*(\d+)?/);
+  if (hm) {
+    const h = Number(hm[1]) || 0;
+    const m = hm[2] ? Number(hm[2]) : 0;
+    return h * 60 + m;
+  }
+  const min = txt.match(/(\d+)\s*min/);
+  if (min) return Number(min[1]) || 60;
+  const n = Number(txt);
+  return Number.isFinite(n) && n > 0 ? n : 60;
+}
+
+/** Minutes → libellé compact ("90" → "1h30", "60" → "1h", "30" → "30 min"). */
+export function minutesToDurationLabel(min: number): string {
+  if (!Number.isFinite(min) || min <= 0) return "1h";
+  const h = Math.floor(min / 60);
+  const m = min % 60;
+  if (h === 0) return `${m} min`;
+  return m === 0 ? `${h}h` : `${h}h${String(m).padStart(2, "0")}`;
+}
+
+/**
+ * Construit un RdvType d'affichage à partir des seuls champs persistés en base
+ * (label, durée, visibilité, activité). Les champs riches non modélisés en base
+ * (documents, message, disponibilités détaillées) prennent des valeurs neutres :
+ * c'est volontaire, la table `rdv_types` ne stocke que le catalogue de base.
+ */
+export function buildRdvTypeFromCore(core: {
+  id: string;
+  name: string;
+  durationLabel: string;
+  visibility: RdvVisibility;
+  desc?: string;
+}): RdvType {
+  return {
+    id: core.id,
+    visibility: core.visibility,
+    durationLabel: core.durationLabel,
+    name: core.name,
+    desc: core.desc ?? "",
+    docs: [],
+    dispoMain: "Lun – Ven · 9h00 → 19h00",
+    dispoSub: "",
+    message: [t("Bonjour "), v("{prenom}"), t(", ")],
+    signatureName: SIGNATURE_NAME,
+    signatureRole: SIGNATURE_ROLE,
+    delaiMini: "24 heures",
+    tampon: "15 minutes",
+  };
+}

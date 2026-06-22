@@ -237,11 +237,244 @@ const FICHE_DOSSIER_MODELE: FicheDossier = {
   ],
 };
 
-/**
- * Fiche dossier modèle. La maquette n'affiche qu'un seul dossier exemple ;
- * on mappe l'id de l'URL sur le modèle (comme la fiche client), sans le perdre :
- * en production chaque dossier aurait ses propres données.
+/* ── Branchement Supabase ─────────────────────────────────────────────────
+ *
+ * La fiche dossier lit le vrai dossier (`dossiers` ⨝ `clients` ⨝ `personnes`)
+ * enrichi de l'étude (`etudes`), des pièces de conformité (`conformite_items`)
+ * et des souscriptions (`souscriptions`). On reconstruit le hero et les 4 KPIs
+ * depuis la base, et on ajuste l'état des étapes du parcours qui dépendent de
+ * données réelles (étude livrée, conformité OK). Le détail éditorial de chaque
+ * étape (parcours en 6 temps, encart de production) reste celui du modèle :
+ * ce sont des libellés métier, pas des données de dossier. Repli intégral sur
+ * le modèle quand la base n'est pas configurée ou l'id est inconnu.
  */
-export function getFicheDossier(_id: string): FicheDossier {
-  return FICHE_DOSSIER_MODELE;
+
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+const STAGE_STEP: Record<string, number> = {
+  "01_prospect": 1,
+  "02_compliance": 2,
+  "03_collecte": 4,
+  "04_etudes": 5,
+  "05_restituee": 6,
+  "06_suivi": 6,
+};
+
+const STAGE_LABEL: Record<string, string> = {
+  "01_prospect": "Prospect",
+  "02_compliance": "Conformité",
+  "03_collecte": "Collecte",
+  "04_etudes": "En production",
+  "05_restituee": "Restituée",
+  "06_suivi": "En suivi",
+};
+
+type RawPersonne = {
+  role_in_household: string | null;
+  first_name: string | null;
+  last_name: string | null;
+};
+
+type RawDossierFull = {
+  id: string;
+  pipeline_stage: string | null;
+  pipeline_entry_date: string | null;
+  study_delivered_at: string | null;
+  restitution_meeting_date: string | null;
+  total_revenue_cached: number | string | null;
+  internal_notes: string | null;
+  client: {
+    household_type: string | null;
+    personnes: RawPersonne[] | null;
+  } | null;
+  etudes: { status: string | null; delivered_at: string | null }[] | null;
+  conformite_items: { status: string | null }[] | null;
+  souscriptions: { amount_initial: number | string | null; status: string | null }[] | null;
+};
+
+function fmtDate(value: string | null | undefined): string {
+  if (!value) return "—";
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return "—";
+  return d.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" });
+}
+
+function fmtAmount(value: number | string | null | undefined): string | null {
+  if (value == null) return null;
+  const n = Number(value);
+  if (!Number.isFinite(n) || n <= 0) return null;
+  return Math.round(n).toLocaleString("fr-FR").replace(/ /g, " ");
+}
+
+function daysBetween(from: string | null, to: string | null): number | null {
+  if (!from) return null;
+  const start = new Date(from).getTime();
+  const end = to ? new Date(to).getTime() : Date.now();
+  if (Number.isNaN(start) || Number.isNaN(end)) return null;
+  const diff = Math.round((end - start) / 86_400_000);
+  return diff >= 0 ? diff : null;
+}
+
+function heroFromDossier(row: RawDossierFull): {
+  eyebrow: string;
+  heroNameLead: string;
+  heroNameStrong: string;
+  heroSub: string;
+} {
+  // Raison sociale éventuelle (personne morale) stockée en JSON dans les notes.
+  let raisonSociale: string | undefined;
+  if (row.internal_notes) {
+    try {
+      raisonSociale = (JSON.parse(row.internal_notes) as { raison_sociale?: string }).raison_sociale;
+    } catch {
+      /* notes non-JSON : on ignore */
+    }
+  }
+
+  const personnes = row.client?.personnes ?? [];
+  const a = personnes.find((p) => p.role_in_household === "person_a") ?? personnes[0];
+  const b = personnes.find((p) => p.role_in_household === "person_b");
+  const lastName = (a?.last_name ?? "").trim();
+  const aFirst = (a?.first_name ?? "").trim();
+  const lead = b ? [aFirst, (b.first_name ?? "").trim()].filter(Boolean).join(" & ") : aFirst;
+
+  const stage = row.pipeline_stage ?? "01_prospect";
+  const stageLabel = STAGE_LABEL[stage] ?? "En cours";
+  const entry = fmtDate(row.pipeline_entry_date);
+
+  const subBits: string[] = ["Étude patrimoniale"];
+  const honoraires = fmtAmount(row.total_revenue_cached);
+  if (honoraires) subBits.push(`honoraires ${honoraires} €`);
+  if (row.study_delivered_at) {
+    subBits.push(`étude livrée le ${fmtDate(row.study_delivered_at)}`);
+  } else if (row.restitution_meeting_date) {
+    subBits.push(`restitution prévue le ${fmtDate(row.restitution_meeting_date)}`);
+  }
+  subBits.push(`stade actuel : ${stageLabel.toLowerCase()}`);
+
+  return {
+    eyebrow: `Dossier ${row.id} · ${stageLabel} · ouvert le ${entry}`,
+    heroNameLead: raisonSociale ? "" : lead ? `${lead} ` : "",
+    heroNameStrong: raisonSociale || lastName || "Dossier",
+    heroSub: subBits.join(" · ") + ".",
+  };
+}
+
+function kpisFromDossier(row: RawDossierFull): FicheDossierKpi[] {
+  const stage = row.pipeline_stage ?? "01_prospect";
+  const step = STAGE_STEP[stage] ?? 1;
+  const stageLabel = STAGE_LABEL[stage] ?? "En cours";
+
+  const honoraires = fmtAmount(row.total_revenue_cached);
+  const conformiteItems = row.conformite_items ?? [];
+  const conformiteOk =
+    conformiteItems.length > 0 &&
+    conformiteItems.every((i) => i.status === "signe" || i.status === "valide");
+
+  const dureeRef = row.study_delivered_at ?? row.restitution_meeting_date ?? null;
+  const duree = daysBetween(row.pipeline_entry_date, dureeRef);
+
+  return [
+    {
+      label: "Étape actuelle",
+      value: `${step} · ${stageLabel}`,
+      meta: row.restitution_meeting_date
+        ? `RDV restitution ${fmtDate(row.restitution_meeting_date)}`
+        : "Parcours patrimonial en cours",
+      valueVariant: "gold",
+    },
+    {
+      label: "Honoraires HT",
+      value: honoraires ?? "—",
+      unit: honoraires ? "€" : undefined,
+      meta: honoraires ? "facturés pour la mission" : "à définir",
+    },
+    {
+      label: "Durée du dossier",
+      value: duree != null ? String(duree) : "—",
+      unit: duree != null ? "j" : undefined,
+      meta: `démarrage ${fmtDate(row.pipeline_entry_date)}`,
+    },
+    {
+      label: "Statut conformité",
+      value: conformiteOk ? "✓ OK" : "En cours",
+      meta: conformiteOk
+        ? "KYC + LCB-FT validés"
+        : `${conformiteItems.length} pièce(s) de conformité`,
+      valueVariant: conformiteOk ? "green" : undefined,
+    },
+  ];
+}
+
+/**
+ * Recale l'état visuel des étapes du parcours sur le stade réel du dossier :
+ * les étapes <= étape courante passent « done », l'étape courante « current ».
+ * On conserve le contenu éditorial des étapes (titres, descriptions) du modèle.
+ */
+function parcoursForStep(currentStep: number): ParcoursEtape[] {
+  return FICHE_DOSSIER_MODELE.parcours.map((etape) => {
+    if (etape.num < currentStep) return { ...etape, state: "done" };
+    if (etape.num === currentStep) return { ...etape, state: "current" };
+    return { ...etape, state: "done" };
+  });
+}
+
+/**
+ * Fiche dossier réelle alimentée par la base. Dégrade sur le modèle de la
+ * maquette quand Supabase n'est pas configuré, la session manque, ou l'id ne
+ * correspond à aucun dossier du cabinet. Garde la forme de retour `FicheDossier`.
+ */
+export async function getFicheDossier(id: string): Promise<FicheDossier> {
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) return FICHE_DOSSIER_MODELE;
+  // Les ids de la maquette ne sont pas des UUID : on évite une requête vide.
+  if (!UUID_RE.test(id)) return FICHE_DOSSIER_MODELE;
+
+  try {
+    const { createAdminClient } = await import("@/lib/supabase/admin");
+    const { getSessionContext } = await import("@/lib/auth/context");
+
+    const ctx = await getSessionContext();
+    if (!ctx) return FICHE_DOSSIER_MODELE;
+
+    const supabase = createAdminClient();
+    const { data, error } = await supabase
+      .from("dossiers")
+      .select(
+        `
+          id, pipeline_stage, pipeline_entry_date, study_delivered_at,
+          restitution_meeting_date, total_revenue_cached, internal_notes,
+          client:clients!inner (
+            household_type,
+            personnes ( role_in_household, first_name, last_name )
+          ),
+          etudes ( status, delivered_at ),
+          conformite_items ( status ),
+          souscriptions ( amount_initial, status )
+        `,
+      )
+      .eq("id", id)
+      .eq("tenant_id", ctx.tenantId)
+      .eq("cabinet_id", ctx.cabinetId)
+      .maybeSingle();
+
+    if (error || !data) return FICHE_DOSSIER_MODELE;
+
+    const row = data as unknown as RawDossierFull;
+    const hero = heroFromDossier(row);
+    const step = STAGE_STEP[row.pipeline_stage ?? "01_prospect"] ?? 1;
+
+    return {
+      ...FICHE_DOSSIER_MODELE,
+      id: row.id,
+      eyebrow: hero.eyebrow,
+      heroNameLead: hero.heroNameLead,
+      heroNameStrong: hero.heroNameStrong,
+      heroSub: hero.heroSub,
+      kpis: kpisFromDossier(row),
+      parcours: parcoursForStep(step),
+    };
+  } catch {
+    return FICHE_DOSSIER_MODELE;
+  }
 }

@@ -53,6 +53,16 @@ type Message = {
   body: string;
   created_at: string;
 };
+type Gravite = "bloquante" | "majeure" | "mineure";
+type Incoherence = {
+  champ: string;
+  sources: string[];
+  constat: string;
+  gravite: Gravite;
+};
+// Statut local de revue d'une incohérence par l'ingénieur (non persisté côté
+// serveur : le croisement est rejoué à la demande). On horodate l'action.
+type IncoherenceReview = { state: "valide" | "annule"; at: string };
 type Detail = {
   client_nom: string;
   client_email: string;
@@ -95,6 +105,17 @@ function analyseBadge(status: string | null): { label: string; bg: string; fg: s
   }
 }
 
+function graviteBadge(g: Gravite): { label: string; bg: string; fg: string } {
+  switch (g) {
+    case "bloquante":
+      return { label: "Bloquante", bg: "rgba(192,57,43,0.12)", fg: "#C0392B" };
+    case "majeure":
+      return { label: "Majeure", bg: "var(--gold-100)", fg: "var(--gold-deep)" };
+    default:
+      return { label: "Mineure", bg: "var(--navy-100)", fg: "var(--navy-300)" };
+  }
+}
+
 const VERDICT_OPTIONS: { key: Verdict; label: string; bg: string; fg: string }[] = [
   { key: "valide", label: "Validé", bg: "var(--green-bg,#e6f4ec)", fg: "var(--green-text,#1F5A36)" },
   { key: "refuse", label: "Refusé", bg: "rgba(192,57,43,0.1)", fg: "#C0392B" },
@@ -124,6 +145,12 @@ export function CollectesAdmin() {
   const [newItemLabel, setNewItemLabel] = useState("");
   const [addItemErr, setAddItemErr] = useState<string | null>(null);
   const [relanceMsg, setRelanceMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  // Sélection de pièces à relancer (par item_index). Vide = aucune cochée.
+  const [selected, setSelected] = useState<Set<number>>(new Set());
+  // Contrôle de cohérence croisée (DCI ↔ entretien ↔ pièces).
+  const [coherence, setCoherence] = useState<Incoherence[] | null>(null);
+  const [coherenceErr, setCoherenceErr] = useState<string | null>(null);
+  const [coherenceReviews, setCoherenceReviews] = useState<Record<number, IncoherenceReview>>({});
 
   const loadList = useCallback(async () => {
     try {
@@ -164,6 +191,10 @@ export function CollectesAdmin() {
     setNewItemLabel("");
     setAddItemErr(null);
     setRelanceMsg(null);
+    setSelected(new Set());
+    setCoherence(null);
+    setCoherenceErr(null);
+    setCoherenceReviews({});
   }, [activeToken, loadDetail]);
 
   const addItem = async () => {
@@ -224,18 +255,32 @@ export function CollectesAdmin() {
     }
   };
 
-  const relancer = async () => {
+  // Relance par sélection : si des pièces sont cochées, on ne rappelle QUE
+  // celles-ci ; sinon (scope === "all") on relance sur toutes les pièces encore
+  // demandées (comportement historique).
+  const relancer = async (scope: "selected" | "all") => {
     if (!activeToken) return;
+    const indexes = scope === "selected" ? [...selected] : null;
+    if (scope === "selected" && indexes!.length === 0) return;
     setBusy("relance");
     setRelanceMsg(null);
     try {
       const res = await fetch(`/api/collecte-admin/${encodeURIComponent(activeToken)}/relance`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        body: indexes ? JSON.stringify({ item_index: indexes }) : undefined,
       });
       const data = (await res.json().catch(() => ({}))) as { error?: string; to?: string };
       if (res.ok) {
-        setRelanceMsg({ ok: true, text: `Rappel envoyé à ${data.to ?? "le client"}.` });
+        const count = indexes ? indexes.length : null;
+        setRelanceMsg({
+          ok: true,
+          text:
+            count != null
+              ? `Rappel de ${count} pièce(s) envoyé à ${data.to ?? "le client"}.`
+              : `Rappel envoyé à ${data.to ?? "le client"}.`,
+        });
+        if (scope === "selected") setSelected(new Set());
         loadDetail(activeToken);
       } else {
         setRelanceMsg({ ok: false, text: data.error ?? `Erreur HTTP ${res.status}` });
@@ -245,6 +290,51 @@ export function CollectesAdmin() {
     } finally {
       setBusy(null);
     }
+  };
+
+  const toggleSelected = (idx: number) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(idx)) next.delete(idx);
+      else next.add(idx);
+      return next;
+    });
+  };
+
+  const analyseCoherence = async () => {
+    if (!activeToken) return;
+    setBusy("coherence");
+    setCoherenceErr(null);
+    try {
+      const res = await fetch(`/api/collecte-admin/${encodeURIComponent(activeToken)}/coherence`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+      const data = (await res.json().catch(() => ({}))) as {
+        error?: string;
+        incoherences?: Incoherence[];
+      };
+      if (res.ok) {
+        setCoherence(data.incoherences ?? []);
+        setCoherenceReviews({});
+      } else {
+        setCoherenceErr(data.error ?? `Erreur HTTP ${res.status}`);
+      }
+    } catch {
+      setCoherenceErr("Erreur réseau.");
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const reviewIncoherence = (idx: number, state: "valide" | "annule") => {
+    setCoherenceReviews((prev) => {
+      const next = { ...prev };
+      // Re-cliquer le même état le retire (toggle).
+      if (next[idx]?.state === state) delete next[idx];
+      else next[idx] = { state, at: new Date().toISOString() };
+      return next;
+    });
   };
 
   const reanalyse = async (itemIndex: number) => {
@@ -381,11 +471,11 @@ export function CollectesAdmin() {
                   {detail.progress.done}/{detail.progress.total} pièces
                 </div>
                 <button
-                  onClick={relancer}
+                  onClick={() => relancer("all")}
                   disabled={busy === "relance" || !detail.client_email}
                   title={
                     detail.client_email
-                      ? "Renvoyer un e-mail de rappel au client"
+                      ? "Renvoyer un e-mail de rappel pour toutes les pièces encore demandées"
                       : "Aucune adresse e-mail sur cette collecte"
                   }
                   style={{
@@ -401,7 +491,7 @@ export function CollectesAdmin() {
                     opacity: detail.client_email && busy !== "relance" ? 1 : 0.6,
                   }}
                 >
-                  {busy === "relance" ? "Envoi…" : "Relancer le client"}
+                  {busy === "relance" ? "Envoi…" : "Relancer (tout)"}
                 </button>
               </div>
             </div>
@@ -434,7 +524,19 @@ export function CollectesAdmin() {
                     }}
                   >
                     <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
-                      <div style={{ minWidth: 0 }}>
+                      <div style={{ minWidth: 0, display: "flex", alignItems: "flex-start", gap: 8 }}>
+                        {/* Case de relance : pour les pièces encore demandées et
+                            non déposées (en attente du client). */}
+                        {!item.removed && !dep && (
+                          <input
+                            type="checkbox"
+                            checked={selected.has(idx)}
+                            onChange={() => toggleSelected(idx)}
+                            title="Inclure cette pièce dans la relance"
+                            style={{ marginTop: 2, cursor: "pointer", accentColor: "var(--gold)" }}
+                          />
+                        )}
+                        <div style={{ minWidth: 0 }}>
                         <div
                           style={{
                             fontSize: 13,
@@ -455,6 +557,7 @@ export function CollectesAdmin() {
                             {[item.theme, item.sub].filter(Boolean).join(" · ")}
                           </div>
                         )}
+                        </div>
                       </div>
                       <div style={{ flexShrink: 0, display: "flex", alignItems: "center", gap: 8 }}>
                         <span
@@ -617,6 +720,262 @@ export function CollectesAdmin() {
                   </div>
                 );
               })}
+            </div>
+
+            {/* Relance par sélection : ne rappelle au client QUE les pièces cochées. */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 12,
+                margin: "0 0 20px",
+                flexWrap: "wrap",
+              }}
+            >
+              <button
+                onClick={() => relancer("selected")}
+                disabled={busy === "relance" || selected.size === 0 || !detail.client_email}
+                title={
+                  !detail.client_email
+                    ? "Aucune adresse e-mail sur cette collecte"
+                    : selected.size === 0
+                      ? "Cochez au moins une pièce en attente"
+                      : "Envoyer un rappel ciblé sur les pièces cochées"
+                }
+                style={{
+                  fontSize: 12.5,
+                  fontWeight: 700,
+                  fontFamily: "inherit",
+                  color: "#fff",
+                  background: "var(--gold)",
+                  border: "none",
+                  borderRadius: 8,
+                  padding: "9px 16px",
+                  cursor:
+                    selected.size > 0 && detail.client_email && busy !== "relance"
+                      ? "pointer"
+                      : "default",
+                  opacity:
+                    selected.size > 0 && detail.client_email && busy !== "relance" ? 1 : 0.5,
+                }}
+              >
+                {busy === "relance"
+                  ? "Envoi…"
+                  : `Relancer les pièces cochées${selected.size ? ` (${selected.size})` : ""}`}
+              </button>
+              {selected.size > 0 && (
+                <button
+                  onClick={() => setSelected(new Set())}
+                  style={{
+                    fontSize: 12,
+                    fontWeight: 600,
+                    fontFamily: "inherit",
+                    color: "var(--navy-300)",
+                    background: "transparent",
+                    border: "1px solid var(--navy-100)",
+                    borderRadius: 8,
+                    padding: "8px 12px",
+                    cursor: "pointer",
+                  }}
+                >
+                  Décocher tout
+                </button>
+              )}
+            </div>
+
+            {/* Contrôle de cohérence croisée : DCI ↔ entretien ↔ pièces déposées. */}
+            <div
+              style={{
+                border: "1px solid var(--navy-100)",
+                borderRadius: 10,
+                padding: 16,
+                marginBottom: 20,
+                background: "var(--ivory,#faf7f0)",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: 12,
+                  flexWrap: "wrap",
+                }}
+              >
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: "var(--navy)" }}>
+                    Contrôle de cohérence
+                  </div>
+                  <div style={{ fontSize: 11.5, color: "var(--navy-300)", marginTop: 2 }}>
+                    Croise le DCI déclaré, l&apos;entretien et les pièces déposées.
+                  </div>
+                </div>
+                <button
+                  onClick={analyseCoherence}
+                  disabled={busy === "coherence"}
+                  style={{
+                    fontSize: 12.5,
+                    fontWeight: 700,
+                    fontFamily: "inherit",
+                    color: "var(--navy)",
+                    background: "var(--gold-100)",
+                    border: "1px solid var(--gold-200)",
+                    borderRadius: 8,
+                    padding: "8px 14px",
+                    cursor: busy === "coherence" ? "default" : "pointer",
+                    opacity: busy === "coherence" ? 0.6 : 1,
+                  }}
+                >
+                  {busy === "coherence" ? "Analyse…" : "Analyser la cohérence"}
+                </button>
+              </div>
+
+              {coherenceErr && (
+                <div style={{ marginTop: 10, fontSize: 12.5, color: "#C0392B" }}>{coherenceErr}</div>
+              )}
+
+              {coherence !== null && coherence.length === 0 && !coherenceErr && (
+                <div
+                  style={{
+                    marginTop: 12,
+                    fontSize: 12.5,
+                    fontWeight: 600,
+                    color: "var(--green-text,#1F5A36)",
+                  }}
+                >
+                  ✓ Aucune incohérence détectée entre les sources.
+                </div>
+              )}
+
+              {coherence !== null && coherence.length > 0 && (
+                <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 10 }}>
+                  {coherence.map((inc, i) => {
+                    const review = coherenceReviews[i];
+                    const gb = graviteBadge(inc.gravite);
+                    return (
+                      <div
+                        key={i}
+                        style={{
+                          border: "1px solid var(--navy-100)",
+                          borderRadius: 9,
+                          padding: "12px 14px",
+                          background: "#fff",
+                          opacity: review?.state === "annule" ? 0.55 : 1,
+                        }}
+                      >
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            gap: 10,
+                          }}
+                        >
+                          <span
+                            style={{
+                              fontSize: 13,
+                              fontWeight: 700,
+                              color: "var(--navy)",
+                              textDecoration: review?.state === "annule" ? "line-through" : "none",
+                            }}
+                          >
+                            {inc.champ}
+                          </span>
+                          <span
+                            style={{
+                              fontSize: 10.5,
+                              fontWeight: 700,
+                              padding: "3px 9px",
+                              borderRadius: 999,
+                              background: gb.bg,
+                              color: gb.fg,
+                              flexShrink: 0,
+                            }}
+                          >
+                            {gb.label}
+                          </span>
+                        </div>
+                        {inc.constat && (
+                          <div
+                            style={{
+                              fontSize: 12.5,
+                              color: "var(--navy)",
+                              lineHeight: 1.5,
+                              marginTop: 6,
+                            }}
+                          >
+                            {inc.constat}
+                          </div>
+                        )}
+                        {inc.sources.length > 0 && (
+                          <div
+                            style={{
+                              fontSize: 11,
+                              color: "var(--navy-300)",
+                              marginTop: 6,
+                            }}
+                          >
+                            Sources : {inc.sources.join(" · ")}
+                          </div>
+                        )}
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 8,
+                            marginTop: 10,
+                            flexWrap: "wrap",
+                          }}
+                        >
+                          {(["valide", "annule"] as const).map((st) => {
+                            const on = review?.state === st;
+                            const isValide = st === "valide";
+                            return (
+                              <button
+                                key={st}
+                                onClick={() => reviewIncoherence(i, st)}
+                                style={{
+                                  fontSize: 11,
+                                  fontWeight: 700,
+                                  padding: "4px 11px",
+                                  borderRadius: 999,
+                                  cursor: "pointer",
+                                  fontFamily: "inherit",
+                                  border: `1px solid ${
+                                    on
+                                      ? isValide
+                                        ? "var(--green-text,#1F5A36)"
+                                        : "#C0392B"
+                                      : "var(--navy-100)"
+                                  }`,
+                                  background: on
+                                    ? isValide
+                                      ? "var(--green-bg,#e6f4ec)"
+                                      : "rgba(192,57,43,0.1)"
+                                    : "transparent",
+                                  color: on
+                                    ? isValide
+                                      ? "var(--green-text,#1F5A36)"
+                                      : "#C0392B"
+                                    : "var(--navy-300)",
+                                }}
+                              >
+                                {isValide ? "Valider" : "Annuler"}
+                              </button>
+                            );
+                          })}
+                          {review && (
+                            <span style={{ fontSize: 10.5, color: "var(--navy-300)" }}>
+                              {review.state === "valide" ? "Validée" : "Annulée"} ·{" "}
+                              {fmtDate(review.at)}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
             {/* Collecte adaptative : demander une pièce complémentaire après l'envoi */}

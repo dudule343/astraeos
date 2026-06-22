@@ -412,6 +412,23 @@ export const KYC_MATRIX: KycMatrixRow[] = [
   { asset: "PATRIMOINE TOTAL", camille: "1 070 950 €", yannick: "863 950 €", commun: "1 020 500 €", dette: "-1 205 000 €", detteNeg: true, net: "1 750 400 €", kind: "total" },
 ];
 
+/* ── Type du corps live (livrables + conditions) ──────────────────────────
+ *
+ * La forme du CORPS branché sur Supabase est définie ici (donnée pure), mais
+ * son calcul vit dans fiche-conformite-server.ts : ce module est aussi importé
+ * par un composant client, donc il ne doit jamais embarquer de code serveur
+ * (createAdminClient / getSessionContext → next/headers casse le bundle client).
+ */
+export type FicheConformiteBody = {
+  docCards: DocCard[];
+  conditions: ConditionRow[];
+  conditionsSub: string;
+  conditionsCount: string;
+  payBanner: typeof PAY_BANNER;
+  /** true quand le corps vient de la base (sinon repli maquette). */
+  realData: boolean;
+};
+
 /** Données réelles passées au générateur PDF (lib/conformite-pdf.ts). */
 export const DER_PDF_INPUT: ConformitePdfInput = {
   dossierId: "CF-2026-JOU",

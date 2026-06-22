@@ -31,7 +31,7 @@ export default async function FicheRdvPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const fiche = getFicheRdv(id);
+  const fiche = await getFicheRdv(id);
 
   return (
     <div className="fiche-rdv-wrap">

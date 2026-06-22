@@ -1,19 +1,22 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
+
 import { getSessionContext } from "@/lib/auth/context";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 /**
  * Création d'un partenaire / apporteur depuis la modale « Nouveau partenaire »
- * de l'écran Partenaires. Porte le bouton « Enregistrer le partenaire » de la
- * maquette (qui ne faisait que fermer la modale en jetant la saisie) en vraie
- * Server Action.
+ * de l'écran Partenaires.
  *
- * Il n'existe pas (encore) de table dédiée `partenaires` : la création est
- * tracée best-effort dans `dossier_events` (table de traçabilité générique déjà
- * utilisée par prospects / conformité) avec un kind « partner_created ». Quand
- * Supabase n'est pas configuré ou que la table n'existe pas, on dégrade vers une
- * confirmation propre — jamais un bouton mort, jamais de cul-de-sac.
+ * Persiste désormais dans la table dédiée `public.partenaires` (scope tenant +
+ * cabinet, service_role) : un partenaire créé réapparaît dans la liste après
+ * revalidation. Avant, l'insertion partait dans `dossier_events` (orphelin) et
+ * n'était jamais relue.
+ *
+ * Best-effort : si Supabase n'est pas configuré, si la session manque, ou si la
+ * table n'existe pas encore (migration 20260622_partenaires.sql non appliquée),
+ * on dégrade vers une confirmation non persistée — jamais un bouton mort.
  */
 
 export type PartenaireType = "reco" | "apporteur";
@@ -37,6 +40,24 @@ const TYPE_LABEL: Record<PartenaireType, string> = {
   apporteur: "apporteur d'affaires",
 };
 
+/**
+ * On encode le couple type métier + profil dans la colonne libre `type`, sous
+ * la forme "reco:notaire" / "apporteur:avocat", que le module serveur décode
+ * pour router la ligne vers la bonne section avec le bon badge.
+ */
+function encodeType(type: PartenaireType, profil: string): string {
+  const safeProfil = (profil || "notaire").trim();
+  return `${type}:${safeProfil}`;
+}
+
+/** Localisation + spécialité fusionnées dans `note` (lecture humaine). */
+function buildNote(localisation?: string, specialite?: string): string | null {
+  const parts = [localisation?.trim(), specialite?.trim()].filter(
+    (p): p is string => Boolean(p),
+  );
+  return parts.length > 0 ? parts.join(" · ") : null;
+}
+
 export async function createPartenaire(
   input: CreatePartenaireInput,
 ): Promise<CreatePartenaireResult> {
@@ -54,26 +75,19 @@ export async function createPartenaire(
 
     const supabase = createAdminClient();
 
-    const { error } = await supabase.from("dossier_events").insert({
+    const { error } = await supabase.from("partenaires").insert({
       tenant_id: ctx.tenantId,
       cabinet_id: ctx.cabinetId,
-      engineer_id: ctx.userId,
-      kind: "partner_created",
-      label: `Nouveau ${typeLabel} : ${name}`,
-      payload: JSON.stringify({
-        type: input.type,
-        nom: name,
-        profil: input.profil,
-        localisation: input.localisation ?? null,
-        specialite: input.specialite ?? null,
-        source: "carnet-partenaires",
-      }),
-      created_at: new Date().toISOString(),
+      nom: name,
+      type: encodeType(input.type, input.profil),
+      note: buildNote(input.localisation, input.specialite),
     });
 
-    // La table de traçabilité peut ne pas exister sur tous les environnements :
-    // on dégrade proprement vers une confirmation non persistée.
+    // La table peut ne pas exister sur tous les environnements (migration non
+    // appliquée) : on dégrade proprement vers une confirmation non persistée.
     if (error) return { ok: true, persisted: false, message };
+
+    revalidatePath("/espace-ingenieur/partenaires");
     return { ok: true, persisted: true, message };
   } catch {
     return { ok: true, persisted: false, message };

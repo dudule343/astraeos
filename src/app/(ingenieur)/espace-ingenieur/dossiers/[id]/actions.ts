@@ -116,7 +116,7 @@ function writeParagraph(
  */
 export async function generateEtudePdf(dossierId: string): Promise<EtudePdfResult> {
   try {
-    const dossier = getFicheDossier(dossierId);
+    const dossier = await getFicheDossier(dossierId);
     const cabinet = await cabinetHeader();
     const clientName = `${dossier.heroNameLead}${dossier.heroNameStrong}`.trim();
 
