@@ -42,8 +42,9 @@ type DepotStatus = "depose" | "attval" | "manquant" | "alerte";
 interface Props {
   /** Faits initiaux dérivés du DCI côté serveur (deriveFacts). */
   initialFacts: Facts;
-  /** Id du dossier (footer · passage à l'étape suivante). */
-  dossierId: string;
+  /** Id du dossier (footer · passage à l'étape suivante). Absent = demande de
+   *  collecte LIBRE (à n'importe qui, sans dossier rattaché). */
+  dossierId?: string;
   /** Participant pré-rempli depuis le dossier (modifiable avant envoi). */
   defaultParticipant: Participant;
   /** Statuts de dépôt par id de pièce (mode suivi). Absent = composition. */
@@ -280,7 +281,7 @@ export function CollecteBuilder({
           participants: [{ nom: participant.nom, email: participant.email }],
           items,
           mode: participant.email ? "email" : "link",
-          dossier_id: dossierId,
+          dossier_id: dossierId ?? null,
         }),
       });
       const data = (await res.json().catch(() => ({}))) as {
@@ -772,22 +773,24 @@ export function CollecteBuilder({
             collecte envoyée au client.
           </div>
         </div>
-        <div className="flex flex-shrink-0 items-center gap-2.5">
-          <a
-            href={`/dossiers/${dossierId}`}
-            className="rounded-md border border-[var(--navy-100)] bg-white px-4 py-2.5 text-[12px] font-semibold text-[var(--navy)] transition hover:border-[var(--gold)]"
-          >
-            ← Retour à la fiche
-          </a>
-          <form action={moveDossierStage.bind(null, dossierId, "next")}>
-            <button
-              type="submit"
-              className="rounded-md bg-[var(--navy)] px-4 py-2.5 text-[12px] font-bold text-white transition hover:brightness-125"
+        {dossierId && (
+          <div className="flex flex-shrink-0 items-center gap-2.5">
+            <a
+              href={`/dossiers/${dossierId}`}
+              className="rounded-md border border-[var(--navy-100)] bg-white px-4 py-2.5 text-[12px] font-semibold text-[var(--navy)] transition hover:border-[var(--gold)]"
             >
-              Passer à l&apos;étude (étape 04) →
-            </button>
-          </form>
-        </div>
+              ← Retour à la fiche
+            </a>
+            <form action={moveDossierStage.bind(null, dossierId, "next")}>
+              <button
+                type="submit"
+                className="rounded-md bg-[var(--navy)] px-4 py-2.5 text-[12px] font-bold text-white transition hover:brightness-125"
+              >
+                Passer à l&apos;étude (étape 04) →
+              </button>
+            </form>
+          </div>
+        )}
       </div>
     </div>
   );

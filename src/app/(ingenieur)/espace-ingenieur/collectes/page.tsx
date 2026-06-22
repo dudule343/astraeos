@@ -213,14 +213,12 @@ export default async function CollectesPage({
             fiscalité, patrimoine, charges, projets. Espace client ouvert pour upload sécurisé.
           </p>
         </div>
-        {rows[0] ? (
-          <Link
-            href={constructeurHref(rows[0])}
-            className="rounded-md bg-[var(--gold)] px-4 py-2.5 text-[12.5px] font-bold text-white no-underline transition hover:brightness-110"
-          >
-            Envoyer une demande de collecte
-          </Link>
-        ) : null}
+        <Link
+          href="/espace-ingenieur/collectes/nouvelle"
+          className="rounded-md bg-[var(--gold)] px-4 py-2.5 text-[12.5px] font-bold text-white no-underline transition hover:brightness-110"
+        >
+          + Nouvelle demande de collecte
+        </Link>
       </section>
 
       <div className="kpis kpis-4 mb-20">
