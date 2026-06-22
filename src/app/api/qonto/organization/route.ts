@@ -33,7 +33,7 @@ type QontoPayload = {
 const MOCK: QontoPayload = {
   connected: false,
   source: "mock",
-  organization: { slug: "priveos", legal_name: "PRIVEOS" },
+  organization: { slug: "priveos", legal_name: "ASTRAEOS" },
   main_account: {
     iban: "FR76 1660 8000 0112 3456 7890 142",
     bic: "QNTOFRP1XXX",

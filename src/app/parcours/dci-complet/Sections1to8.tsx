@@ -10,7 +10,7 @@ export function Sections1to8() {
         <div className="welcome-frame">
           <div className="welcome-mark" style={{ color: 'var(--gold)' }}>
             <svg><use href="#ic-tree" /></svg>
-            <span style={{ color: 'var(--navy)' }}>PRIVEOS</span>
+            <span style={{ color: 'var(--navy)' }}>ASTRAEOS</span>
           </div>
           <div className="welcome-line" />
           <div className="welcome-name">Bonjour,<br /><span className="welcome-name-civilite">Monsieur Bertrand DUPONT-TOPIN</span></div>

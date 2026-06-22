@@ -145,7 +145,7 @@ export default function VisioLobby() {
                   <span className="font-semibold text-[#0A1F38]">{nom}</span>.
                 </>
               ) : (
-                "Entretien visio hébergé par PRIVEOS. Aucun client préchargé : le dossier se remplit pendant l'échange."
+                "Entretien visio hébergé par ASTRAEOS. Aucun client préchargé : le dossier se remplit pendant l'échange."
               )}
             </p>
           </div>

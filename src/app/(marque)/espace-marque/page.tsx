@@ -28,7 +28,7 @@ const DATE_FR = NOW.toLocaleDateString("fr-FR", {
 
 export default async function AccueilReseauPage() {
   // Scope RÉSEAU : tous les cabinets du tenant (pas de filtre cabinet_id).
-  // Le flag d'auth est OFF → contexte legacy du seed (tenant PRIVEOS Capital).
+  // Le flag d'auth est OFF → contexte legacy du seed (tenant ASTRAEOS Capital).
   const cabinets = await fetchNetworkCabinets();
   const perf = computeNetworkPerfKpis(cabinets);
   const ranked = rankNetworkCabinets(cabinets);
@@ -68,7 +68,7 @@ export default async function AccueilReseauPage() {
       <div className="px-10 py-8">
         <PageHero
           eyebrow={`Tableau de bord · ${DATE_FR}`}
-          title="Bienvenue sur le réseau PRIVEOS"
+          title="Bienvenue sur le réseau ASTRAEOS"
           description="Cockpit de la tête de réseau : indicateurs consolidés de l'ensemble des cabinets licenciés, encours sous gestion, parcours patrimonial et classement des licenciés. Tout pour piloter la marque depuis un seul écran."
           actions={
             <NetworkExportButton
@@ -90,7 +90,7 @@ export default async function AccueilReseauPage() {
 
         {/* ---- Cockpit · KPIs consolidés du réseau ---- */}
         <section className="mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-[var(--gold)]">
-          Cockpit · synthèse du réseau PRIVEOS
+          Cockpit · synthèse du réseau ASTRAEOS
         </section>
         <section className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {reseauKpis.map((k) => (

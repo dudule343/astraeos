@@ -445,7 +445,7 @@ export default function BookingClient() {
                   Enregistrement de l&apos;entretien
                 </div>
                 <div className="consent-text">
-                  PRIVEOS exerce une activité réglementée de Conseil en
+                  ASTRAEOS exerce une activité réglementée de Conseil en
                   Investissement Financier (CIF) et de Courtage en Assurance.
                   Cet entretien sera enregistré dans le seul but de garantir la
                   qualité et la traçabilité de l&apos;accompagnement qui vous est
@@ -488,7 +488,7 @@ export default function BookingClient() {
           </div>
 
           <div className="legal-footer">
-            PRIVEOS · SAS au capital de 10 000 € · SIREN 948 742 903 · ORIAS
+            ASTRAEOS · SAS au capital de 10 000 € · SIREN 948 742 903 · ORIAS
             23004036
             <br />
             <a href="#">Mentions légales</a> ·{" "}

@@ -424,7 +424,7 @@ export default function Page() {
             >
               Le Cabinet Paris Étoile représente{" "}
               <strong style={{ color: "var(--gold-300)" }}>21,4 %</strong> du chiffre
-              d&apos;affaires généré par le top 5 du réseau PRIVEOS.
+              d&apos;affaires généré par le top 5 du réseau ASTRAEOS.
             </div>
           </div>
         </div>
@@ -1896,7 +1896,7 @@ export default function Page() {
                 <div className="alert-title">
                   Cabinet Paris Étoile dépasse l&apos;objectif T2 (+18 %)
                 </div>
-                <div className="alert-sub">Top performer du réseau PRIVEOS</div>
+                <div className="alert-sub">Top performer du réseau ASTRAEOS</div>
               </div>
               <div className="alert-item alert-info">
                 <div className="alert-meta">
@@ -1905,7 +1905,7 @@ export default function Page() {
                 </div>
                 <div className="alert-title">Encaissements à venir 38 400 € sur 14 jours</div>
                 <div className="alert-sub">
-                  4 factures · 2 honoraires études · 2 commissions PRIVEOS
+                  4 factures · 2 honoraires études · 2 commissions ASTRAEOS
                 </div>
               </div>
             </div>

@@ -268,7 +268,7 @@ function TemoinsCard() {
   const temoins = [
     {
       title: "Étude patrimoniale témoin",
-      desc: "84 pages · format PRIVEOS éditorial · audit complet + diagnostic + préconisations",
+      desc: "84 pages · format ASTRAEOS éditorial · audit complet + diagnostic + préconisations",
     },
     {
       title: "Synthèse exécutive témoin",
@@ -472,7 +472,7 @@ export default async function ConformitePage({
   ];
 
   const mailSubject =
-    "PRIVEOS · Éléments de contractualisation de notre accompagnement patrimonial";
+    "ASTRAEOS · Éléments de contractualisation de notre accompagnement patrimonial";
   const mailBody = `
     <p>Madame, Monsieur,</p>
     <p>Faisant suite à notre échange, je vous fais parvenir les éléments permettant de contractualiser notre relation. Vous trouverez en pièces jointes :</p>
@@ -484,7 +484,7 @@ export default async function ConformitePage({
       <li>et deux éléments pour mesurer le livrable : l'<strong>étude patrimoniale témoin</strong> et la <strong>synthèse exécutive témoin</strong>.</li>
     </ul>
     <p><strong>La prochaine étape pour vous</strong> consiste à signer électroniquement les trois documents contractuels (DER, KYC et lettre de mission) et à régler les honoraires. Dès réception, nous ouvrirons votre espace sécurisé pour la collecte des pièces et lancerons la réalisation de votre étude patrimoniale (délai 5 semaines).</p>
-    <p>Je reste à votre entière disposition.<br>Bien à vous,<br><strong>Luc THILLIEZ</strong> · Président associé du cabinet PRIVEOS</p>
+    <p>Je reste à votre entière disposition.<br>Bien à vous,<br><strong>Luc THILLIEZ</strong> · Président associé du cabinet ASTRAEOS</p>
   `;
 
   return (

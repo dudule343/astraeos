@@ -205,7 +205,7 @@ export function MarketingClient() {
                 }}
               >
                 Cette page sera enrichie au fil des campagnes lancées par le cabinet. Les contenus
-                marketing partagés par PRIVEOS (templates, plaquettes, articles, vidéos) restent
+                marketing partagés par ASTRAEOS (templates, plaquettes, articles, vidéos) restent
                 accessibles via le module Templates &amp; communication.
               </div>
             </div>

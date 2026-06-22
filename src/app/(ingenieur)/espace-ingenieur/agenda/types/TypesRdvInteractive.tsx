@@ -887,7 +887,7 @@ function PublicPreviewModal({
                 marginBottom: "6px",
               }}
             >
-              PRIVEOS · Conseil patrimonial
+              ASTRAEOS · Conseil patrimonial
             </div>
             <div
               style={{

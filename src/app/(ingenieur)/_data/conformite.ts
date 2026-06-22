@@ -70,7 +70,7 @@ export const STEPPER: StepperItem[] = [
 ];
 
 export const BANK_BANNER = {
-  title: "Synchronisation avec la banque du cabinet PRIVEOS active",
+  title: "Synchronisation avec la banque du cabinet ASTRAEOS active",
   meta: "Dernière synchronisation · 24/05/2026 à 17:42 · les statuts de paiement sont actualisés automatiquement",
   status: "Active",
 };

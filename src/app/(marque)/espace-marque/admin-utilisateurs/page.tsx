@@ -10,7 +10,7 @@ export default function AdminUtilisateursPage() {
       current="Utilisateurs tête de réseau"
       eyebrow="Administration · Paramétrages tête de réseau"
       title="Utilisateurs tête de réseau"
-      description="Gestion des utilisateurs de la tête de réseau : comptes, rôles et droits d&apos;accès au scope réseau, rattachés au tenant PRIVEOS."
+      description="Gestion des utilisateurs de la tête de réseau : comptes, rôles et droits d&apos;accès au scope réseau, rattachés au tenant ASTRAEOS."
     />
   );
 }

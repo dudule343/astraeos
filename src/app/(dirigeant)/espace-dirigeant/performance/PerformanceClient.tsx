@@ -73,7 +73,7 @@ export function PerformanceClient() {
         <div>
           <div className="hero-eyebrow">Tableau de bord · pilotage des cabinets licenciés</div>
           <h1 className="hero-title">Performance des <strong>ingénieurs</strong> au sein du cabinet</h1>
-          <p className="hero-sub">Suivi consolidé des 5 ingénieurs du cabinet PRIVEOS · trajectoire 2026 (année en cours) en mini-graphique · cliquez sur une ligne pour voir la comparaison 2024 / 2025 / 2026 · activez &quot;Comparer&quot; pour confronter 2 cabinets côte à côte.</p>
+          <p className="hero-sub">Suivi consolidé des 5 ingénieurs du cabinet ASTRAEOS · trajectoire 2026 (année en cours) en mini-graphique · cliquez sur une ligne pour voir la comparaison 2024 / 2025 / 2026 · activez &quot;Comparer&quot; pour confronter 2 cabinets côte à côte.</p>
         </div>
         <div className="hero-actions">
           <button className="btn btn-gold btn-sm">Exporter</button>

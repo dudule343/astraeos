@@ -54,7 +54,7 @@ export default function Page() {
             <div className="kpi-value gold">
               1 540 800 <span className="unit">€</span>
             </div>
-            <div className="kpi-meta">part PRIVEOS · cumul janv-mai</div>
+            <div className="kpi-meta">part ASTRAEOS · cumul janv-mai</div>
           </div>
           <div className="kpi">
             <div className="kpi-label">Récurrence perçue</div>

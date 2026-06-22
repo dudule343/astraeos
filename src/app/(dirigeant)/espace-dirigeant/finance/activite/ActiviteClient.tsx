@@ -129,7 +129,7 @@ const DRAWER_ROWS: {
   {
     date: "25/01/2026",
     client: "Famille DELANNOY (neveu)",
-    ing1: "Cabinet PRIVEOS direct",
+    ing1: "Cabinet ASTRAEOS direct",
     ing2: "Luc THILLIEZ",
     badge: "Investissement immobilier",
     badgeStyle: { background: "#E8F5EE", color: "var(--green-text)", fontSize: "10px" },
@@ -549,7 +549,7 @@ export function ActiviteClient() {
               }}
             >
               <strong>Origine des 22 clients :</strong> 6 Paris Étoile · 4 Lyon Défense · 3
-              Strasbourg Orangerie · 2 Paris Vendôme · 2 Bordeaux Centre · 2 PRIVEOS direct · 2
+              Strasbourg Orangerie · 2 Paris Vendôme · 2 Bordeaux Centre · 2 ASTRAEOS direct · 2
               Marseille Avenue · 1 Nantes Tour. Aucune entrée pour les autres cabinets sur janvier.
             </div>
           </div>

@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
 
   const engineer = engineerSlugFromContext(ctx);
   const titre =
-    (typeof body.titre === "string" && body.titre.trim()) || "Entretien PRIVEOS";
+    (typeof body.titre === "string" && body.titre.trim()) || "Entretien ASTRAEOS";
 
   const tokens = await loadTokens(engineer, ctx.tenantId);
   if (!tokens) {

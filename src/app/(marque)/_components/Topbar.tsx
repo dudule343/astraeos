@@ -56,7 +56,7 @@ export function Topbar({ current }: { current: string }) {
     <div className="sticky top-0 z-10 flex items-center gap-3.5 border-b border-[var(--navy-100)] bg-[var(--ivory)] px-10 py-3.5">
       <div className="flex flex-1 items-center gap-2.5 text-[12.5px] text-[var(--navy-300)]">
         <Link href="/espace-marque" className="cursor-pointer hover:text-[var(--gold)]">
-          Réseau PRIVEOS
+          Réseau ASTRAEOS
         </Link>
         <span className="opacity-50">›</span>
         <span className="font-semibold text-[var(--navy)]">{current}</span>

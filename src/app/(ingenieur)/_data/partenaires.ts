@@ -27,7 +27,7 @@ export type FiltrePerf = {
   variants: ProfilVariant[] | null;
 };
 
-/** Partenaire recommandable (section 1) : PRIVEOS transmet des clients vers lui. */
+/** Partenaire recommandable (section 1) : ASTRAEOS transmet des clients vers lui. */
 export type PartenaireReco = {
   nom: string;
   structure: string;
@@ -108,7 +108,7 @@ const SCREEN: PartenairesScreen = {
     { text: "partenaires recommandables", strong: true },
     {
       text:
-        " que PRIVEOS active pour ses clients (notaires, avocats, experts comptables identifiés et qualifiés), et les ",
+        " que ASTRAEOS active pour ses clients (notaires, avocats, experts comptables identifiés et qualifiés), et les ",
     },
     { text: "apporteurs d'affaires", strong: true },
     {
@@ -127,7 +127,7 @@ const SCREEN: PartenairesScreen = {
     { label: "Affaires apportées 2026", value: "38", meta: "clients entrés via apporteurs" },
   ],
   reco: {
-    sectionEyebrow: "1 · Partenaires identifiés et qualifiés par PRIVEOS",
+    sectionEyebrow: "1 · Partenaires identifiés et qualifiés par ASTRAEOS",
     sectionTitle: "Partenaires à qui je transmets des clients",
     sectionRight:
       "Notaires · Avocats · Experts-comptables que les ingénieurs peuvent activer pour un dossier",
@@ -204,7 +204,7 @@ const SCREEN: PartenairesScreen = {
     resteLien: "Voir l'intégralité (18)",
   },
   apporteurs: {
-    sectionEyebrow: "2 · Personnes qui amènent des clients à PRIVEOS et au cabinet",
+    sectionEyebrow: "2 · Personnes qui amènent des clients à ASTRAEOS et au cabinet",
     sectionTitle: "Apporteurs d'affaires",
     sectionRight:
       "Avocats · Notaires · Comptables · Agents immo · Clients satisfaits · Podcasteurs · Influenceurs",

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
 // Topbar portée à l'identique de la maquette dirigeant (reference/wireframes-dirigeant.html,
-// lignes 1117-1175) : fil d'Ariane PRIVEOS, sélecteur de date global avec popover,
+// lignes 1117-1175) : fil d'Ariane ASTRAEOS, sélecteur de date global avec popover,
 // boutons icônes, pastille utilisateur Luc THILLIEZ. Le toggle du popover
 // (toggleDatePopover) devient un état client.
 
@@ -39,7 +39,7 @@ export function DirigeantTopbar({ current }: { current: string }) {
   return (
     <div className="topbar">
       <div className="breadcrumb">
-        <Link href="/espace-dirigeant">PRIVEOS</Link>
+        <Link href="/espace-dirigeant">ASTRAEOS</Link>
         <span className="sep">›</span>
         <span className="current">{current}</span>
       </div>

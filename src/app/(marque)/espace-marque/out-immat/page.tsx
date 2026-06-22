@@ -10,7 +10,7 @@ export default function OutImmatPage() {
       current="Immatriculation de société"
       eyebrow="Outils"
       title="Immatriculation de société"
-      description="Outil d&apos;accompagnement à l&apos;immatriculation de sociétés proposé aux clients du réseau : formalités, modèles et suivi des dossiers. Piloté au niveau de la marque PRIVEOS."
+      description="Outil d&apos;accompagnement à l&apos;immatriculation de sociétés proposé aux clients du réseau : formalités, modèles et suivi des dossiers. Piloté au niveau de la marque ASTRAEOS."
     />
   );
 }

@@ -167,7 +167,7 @@ const FICHE_DOSSIER_MODELE: FicheDossier = {
       badge: { label: "✓ Livrée", variant: "success" },
       state: "done",
       rich: {
-        subtitle: "Production conduite par l'ingénieur · avec l'appui des agents IA PRIVEOS",
+        subtitle: "Production conduite par l'ingénieur · avec l'appui des agents IA ASTRAEOS",
         parties: [
           {
             lead: "Partie 1 · Bilan patrimonial",
@@ -175,7 +175,7 @@ const FICHE_DOSSIER_MODELE: FicheDossier = {
           },
           {
             lead: "Partie 2 · Étude patrimoniale (préconisations)",
-            rest: " : 5 axes structurés (situation client / projection sans action / proposition PRIVEOS / projection avec action / étapes de mise en place / simulation chiffrée / textes de loi)",
+            rest: " : 5 axes structurés (situation client / projection sans action / proposition ASTRAEOS / projection avec action / étapes de mise en place / simulation chiffrée / textes de loi)",
           },
           {
             lead: "Partie 3 · Tableau récapitulatif",

@@ -63,7 +63,7 @@ type MarketingItem = {
 };
 
 const MARKETING_LIBRARY: MarketingItem[] = [
-  { badge: "PDF", badgeBg: "var(--gold-100)", badgeColor: "var(--gold-deep)", title: "Plaquette PRIVEOS · cabinet", meta: "8 pages · v3.2 · 4 MB" },
+  { badge: "PDF", badgeBg: "var(--gold-100)", badgeColor: "var(--gold-deep)", title: "Plaquette ASTRAEOS · cabinet", meta: "8 pages · v3.2 · 4 MB" },
   { badge: "PPT", badgeBg: "var(--light-blue)", badgeColor: "var(--navy)", title: "Présentation services · client final", meta: "24 slides · v2.1 · 18 MB" },
   { badge: "JPG", badgeBg: "#FFE3D5", badgeColor: "var(--orange-text)", title: "Bannières LinkedIn · 5 visuels", meta: "1200×627px · v1.0 · 2 MB" },
   { badge: "PDF", badgeBg: "var(--gold-100)", badgeColor: "var(--gold-deep)", title: "Charte graphique réseau · v3.2", meta: "36 pages · mars 2026 · 12 MB" },

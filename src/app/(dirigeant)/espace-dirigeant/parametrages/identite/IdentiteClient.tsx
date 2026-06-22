@@ -25,7 +25,7 @@ export function IdentiteClient() {
             Charte &amp; <strong>templates</strong>
           </h1>
           <p className="hero-sub">
-            Référentiel d&apos;identité visuelle PRIVEOS · logos, typographies, palettes,
+            Référentiel d&apos;identité visuelle ASTRAEOS · logos, typographies, palettes,
             templates email, présentations, bannières. Tous les assets brandés disponibles pour le
             réseau.
           </p>
@@ -33,7 +33,7 @@ export function IdentiteClient() {
         <div className="hero-actions">
           <button
             className="btn btn-ghost btn-sm"
-            onClick={fire("Préparation du pack complet d'assets PRIVEOS…")}
+            onClick={fire("Préparation du pack complet d'assets ASTRAEOS…")}
           >
             Télécharger pack complet
           </button>
@@ -47,7 +47,7 @@ export function IdentiteClient() {
             <svg>
               <use href="#i-marketplace" />
             </svg>
-            Logos PRIVEOS
+            Logos ASTRAEOS
           </div>
         </div>
         <div className="card-body">
@@ -69,7 +69,7 @@ export function IdentiteClient() {
                   letterSpacing: "0.04em",
                 }}
               >
-                PRIVEOS
+                ASTRAEOS
               </div>
               <div
                 style={{
@@ -84,7 +84,7 @@ export function IdentiteClient() {
               <button
                 className="btn btn-gold btn-sm"
                 style={{ marginTop: "14px", width: "100%" }}
-                onClick={fire("Téléchargement du logo PRIVEOS · sur fond navy (PNG · SVG)")}
+                onClick={fire("Téléchargement du logo ASTRAEOS · sur fond navy (PNG · SVG)")}
               >
                 PNG · SVG
               </button>
@@ -107,7 +107,7 @@ export function IdentiteClient() {
                   letterSpacing: "0.04em",
                 }}
               >
-                PRIVEOS
+                ASTRAEOS
               </div>
               <div
                 style={{
@@ -122,7 +122,7 @@ export function IdentiteClient() {
               <button
                 className="btn btn-gold btn-sm"
                 style={{ marginTop: "14px", width: "100%" }}
-                onClick={fire("Téléchargement du logo PRIVEOS · doré sur blanc (PNG · SVG)")}
+                onClick={fire("Téléchargement du logo ASTRAEOS · doré sur blanc (PNG · SVG)")}
               >
                 PNG · SVG
               </button>
@@ -144,7 +144,7 @@ export function IdentiteClient() {
                   letterSpacing: "0.04em",
                 }}
               >
-                PRIVEOS
+                ASTRAEOS
               </div>
               <div
                 style={{
@@ -159,7 +159,7 @@ export function IdentiteClient() {
               <button
                 className="btn btn-gold btn-sm"
                 style={{ marginTop: "14px", width: "100%" }}
-                onClick={fire("Téléchargement du logo PRIVEOS · navy sur ivory (PNG · SVG)")}
+                onClick={fire("Téléchargement du logo ASTRAEOS · navy sur ivory (PNG · SVG)")}
               >
                 PNG · SVG
               </button>
@@ -193,7 +193,7 @@ export function IdentiteClient() {
                   fontWeight: 600,
                 }}
               >
-                PRIVEOS
+                ASTRAEOS
               </div>
               <div
                 style={{
@@ -208,7 +208,7 @@ export function IdentiteClient() {
               <button
                 className="btn btn-gold btn-sm"
                 style={{ marginTop: "14px", width: "100%" }}
-                onClick={fire("Téléchargement du logo PRIVEOS · variation gradient (PNG · SVG)")}
+                onClick={fire("Téléchargement du logo ASTRAEOS · variation gradient (PNG · SVG)")}
               >
                 PNG · SVG
               </button>
@@ -399,7 +399,7 @@ export function IdentiteClient() {
                   marginBottom: "10px",
                 }}
               >
-                Newsletter PRIVEOS
+                Newsletter ASTRAEOS
               </div>
               <strong style={{ fontSize: "13px" }}>Email mensuel</strong>
               <div style={{ fontSize: "11px", color: "var(--navy-300)", marginTop: "4px" }}>
@@ -439,7 +439,7 @@ export function IdentiteClient() {
               </div>
               <strong style={{ fontSize: "13px" }}>PowerPoint étude</strong>
               <div style={{ fontSize: "11px", color: "var(--navy-300)", marginTop: "4px" }}>
-                Master slide PRIVEOS · 24 slides
+                Master slide ASTRAEOS · 24 slides
               </div>
               <button
                 className="btn btn-gold btn-sm"

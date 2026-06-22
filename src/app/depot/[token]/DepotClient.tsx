@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 /* ----------------------------------------------------------------------------
-   Page client de dépôt de documents (charte PRIVEOS).
+   Page client de dépôt de documents (charte ASTRAEOS).
    Le client arrive depuis l'e-mail de collecte, souvent sur mobile.
    On consomme l'API publique GET /api/collecte/[token] côté client (pas de
    service_role ici), puis on dépose fichiers/réponses via POST .../depot.
@@ -168,7 +168,7 @@ function Header({
             marginBottom: 14,
           }}
         >
-          PRIVEOS
+          ASTRAEOS
         </div>
         <h1
           style={{
@@ -267,6 +267,7 @@ function ReadyView({
       <Header clientNom={data.client_nom} done={data.progress.done} total={data.progress.total} />
 
       <div style={{ maxWidth: 720, margin: "0 auto", padding: "20px 16px 96px" }}>
+        <DepotBanner done={data.progress.done} total={data.progress.total} />
         {groups.map((group) => (
           <ThemeSection
             key={group.theme}
@@ -283,6 +284,77 @@ function ReadyView({
 
       <ChatWidget token={token} open={chatOpen} setOpen={setChatOpen} prefill={chatPrefill} />
     </>
+  );
+}
+
+/**
+ * Bandeau en tête du dépôt : rassure sur la REPRISE (le lien est réutilisable,
+ * les pièces sont enregistrées au fil de l'eau → on peut faire une pause et
+ * revenir un autre jour) et félicite quand tout est déposé.
+ */
+function DepotBanner({ done, total }: { done: number; total: number }) {
+  const [copied, setCopied] = useState(false);
+  const allDone = total > 0 && done >= total;
+
+  const copyLink = useCallback(() => {
+    if (typeof window === "undefined") return;
+    const url = window.location.href;
+    const after = () => {
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2200);
+    };
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(url).then(after).catch(after);
+    } else {
+      after();
+    }
+  }, []);
+
+  return (
+    <div
+      style={{
+        background: allDone ? "#E8F5EE" : "var(--ivory, #FAF7F0)",
+        border: `1px solid ${allDone ? "#BfE3CD" : "var(--navy-100, #E7E1D5)"}`,
+        borderRadius: 12,
+        padding: "14px 16px",
+        marginBottom: 16,
+        display: "flex",
+        flexWrap: "wrap",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: 12,
+      }}
+    >
+      <div style={{ fontSize: 13, lineHeight: 1.55, color: "var(--navy)", flex: "1 1 320px" }}>
+        {allDone ? (
+          <>
+            <strong style={{ color: "#1F8049" }}>✓ Tous vos documents sont déposés, merci !</strong>{" "}
+            Votre ingénieur patrimonial les retrouvera dans son espace et reviendra vers vous. Vous pouvez fermer cette page.
+          </>
+        ) : (
+          <>
+            <strong>💾 Pas besoin de tout faire d&apos;un coup.</strong> Vos documents sont enregistrés au fur et à mesure : vous pouvez quitter et <strong>reprendre plus tard</strong> avec ce même lien (pensez à le garder).
+          </>
+        )}
+      </div>
+      <button
+        type="button"
+        onClick={copyLink}
+        style={{
+          flexShrink: 0,
+          border: "1px solid var(--gold, #C8A55C)",
+          background: copied ? "var(--gold, #C8A55C)" : "transparent",
+          color: copied ? "#fff" : "var(--gold-deep, #9C7A24)",
+          borderRadius: 8,
+          padding: "9px 14px",
+          fontSize: 12.5,
+          fontWeight: 600,
+          cursor: "pointer",
+        }}
+      >
+        {copied ? "Lien copié ✓" : "🔗 Copier mon lien de reprise"}
+      </button>
+    </div>
   );
 }
 

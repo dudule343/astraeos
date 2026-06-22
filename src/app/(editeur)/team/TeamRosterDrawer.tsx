@@ -78,7 +78,7 @@ const CATEGORIES: Category[] = [
     count: "3 personnes · 18 600 €/mois · 7,4 % du CA",
     clickable: true,
     people: [
-      { id: "elodie", name: "Élodie VARIN", role: "Responsable Relation Client senior", email: "e.varin@astraeos.fr", phone: "06 78 90 12 34", clients: "PRIVEOS, Atlas, 5 cabinets", cost: "6 800 €", load: "2,7 %" },
+      { id: "elodie", name: "Élodie VARIN", role: "Responsable Relation Client senior", email: "e.varin@astraeos.fr", phone: "06 78 90 12 34", clients: "ASTRAEOS, Atlas, 5 cabinets", cost: "6 800 €", load: "2,7 %" },
       { id: "thomas", name: "Thomas GAUTHIER", role: "Responsable Relation Client", email: "t.gauthier@astraeos.fr", phone: "06 89 01 23 45", clients: "Fontaine, 8 cabinets, 3 pros", cost: "5 800 €", load: "2,3 %" },
       { id: "julie", name: "Julie MERCANTI", role: "Support technique N1", email: "j.mercanti@astraeos.fr", phone: "06 90 12 34 56", clients: "tous (tickets de support)", cost: "6 000 €", load: "2,4 %" },
     ],

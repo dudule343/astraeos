@@ -17,7 +17,7 @@ type TemplateResult =
  */
 async function cabinetHeader(): Promise<ConformitePdfInput["cabinet"]> {
   const fallback: ConformitePdfInput["cabinet"] = {
-    name: "Cabinet PRIVEOS",
+    name: "Cabinet ASTRAEOS",
     addressStreet: null,
     addressZipcode: null,
     addressCity: null,

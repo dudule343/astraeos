@@ -81,7 +81,7 @@ const DAY_CELLS_LUN_VEN: RdvTypeDayCell[] = [
 ];
 
 const SIGNATURE_NAME = "Luc THILLIEZ";
-const SIGNATURE_ROLE = "Président associé du cabinet PRIVEOS";
+const SIGNATURE_ROLE = "Président associé du cabinet ASTRAEOS";
 
 function t(value: string): MessageSegment {
   return { kind: "text", value };
@@ -93,7 +93,7 @@ function v(value: string): MessageSegment {
 const SCREEN: TypesRdvScreen = {
   heroEyebrow: "Agenda · Configuration personnelle · Sprint S1A",
   heroSub:
-    "Définissez les RDV que vous proposez sur votre lien public PRIVEOS (style Calendly) ou en interne. Chaque type pilote la durée, les documents auto-envoyés, le message, la visibilité et les disponibilités.",
+    "Définissez les RDV que vous proposez sur votre lien public ASTRAEOS (style Calendly) ou en interne. Chaque type pilote la durée, les documents auto-envoyés, le message, la visibilité et les disponibilités.",
   kpis: [
     {
       label: "Types de RDV configurés",

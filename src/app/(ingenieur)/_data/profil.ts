@@ -58,13 +58,13 @@ export interface ProfilScreen {
 const screen: ProfilScreen = {
   heroEyebrow: "Mon profil · Cabinet Paris Étoile · ingénieur patrimonial",
   heroSub:
-    "Votre identité personnelle, vos agréments réglementaires (CIF, IAS, ORIAS, CJA), vos préférences de notifications et la signature email. Les éléments réglementaires sont synchronisés avec votre profil PRIVEOS · modifications via la tête de réseau.",
+    "Votre identité personnelle, vos agréments réglementaires (CIF, IAS, ORIAS, CJA), vos préférences de notifications et la signature email. Les éléments réglementaires sont synchronisés avec votre profil ASTRAEOS · modifications via la tête de réseau.",
 
   identite: {
     initiales: "LT",
     nomComplet: "Luc THILLIEZ",
     role: "Ingénieur patrimonial · dirigeant-praticien du Cabinet Paris Étoile",
-    membreDepuis: "Membre PRIVEOS depuis le 14 mars 2018 · ID #PRIVEOS-ING-0001",
+    membreDepuis: "Membre ASTRAEOS depuis le 14 mars 2018 · ID #ASTRAEOS-ING-0001",
     statutBadge: "Compte actif & conforme",
     derniereConnexion: "Dernière connexion · 12/05/2026 · 09h12",
   },
@@ -142,7 +142,7 @@ const screen: ProfilScreen = {
       active: true,
     },
     {
-      titre: "Newsletter PRIVEOS",
+      titre: "Newsletter ASTRAEOS",
       detail: "Hebdomadaire · veille marché",
       active: false,
     },
@@ -151,11 +151,11 @@ const screen: ProfilScreen = {
   signature: {
     initiales: "LT",
     nom: "Luc THILLIEZ",
-    titre: "Président associé du cabinet PRIVEOS",
+    titre: "Président associé du cabinet ASTRAEOS",
     contact: "📧 luc.thilliez@email-test.fr · 📞 +33 6 12 34 56 78",
     lienRdv: "priveos.com/rdv/luc-thilliez · prendre rendez-vous",
     pied:
-      "Cabinet Paris Étoile · 62 av. des Champs-Élysées · 75008 Paris\nCIF E007654 (AMF) · IAS 18 002 345 (ORIAS) · membre PRIVEOS",
+      "Cabinet Paris Étoile · 62 av. des Champs-Élysées · 75008 Paris\nCIF E007654 (AMF) · IAS 18 002 345 (ORIAS) · membre ASTRAEOS",
   },
 };
 

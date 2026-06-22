@@ -162,7 +162,7 @@ export const expansionRows: ExpansionRow[] = [
     id: 1,
     logoCls: "tlogo-priveos",
     logoText: "P",
-    name: "PRIVEOS Capital",
+    name: "ASTRAEOS Capital",
     typeCls: "tt-marque",
     typeLabel: "Marque",
     abo: "12 800 €",

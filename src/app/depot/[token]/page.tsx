@@ -11,7 +11,7 @@ const cormorant = Cormorant_Garamond({
 });
 
 export const metadata: Metadata = {
-  title: "PRIVEOS · Dépôt de documents",
+  title: "ASTRAEOS · Dépôt de documents",
 };
 
 export default async function DepotPage({

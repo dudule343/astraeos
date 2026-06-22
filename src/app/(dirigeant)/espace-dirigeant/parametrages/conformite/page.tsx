@@ -20,7 +20,7 @@ export default function Page() {
             </h1>
             <p className="hero-sub">
               Politique LCB-FT, gestion du DPO, conformité RGPD, documents légaux du cabinet (RC
-              Pro, CGV, conditions d&apos;agrément ORIAS) et rendez-vous d&apos;audit avec PRIVEOS.
+              Pro, CGV, conditions d&apos;agrément ORIAS) et rendez-vous d&apos;audit avec ASTRAEOS.
               Ces paramètres garantissent la conformité réglementaire du Cabinet Paris Étoile.
             </p>
           </div>
@@ -214,7 +214,7 @@ export default function Page() {
                     Sandrine HERVÉ
                   </div>
                   <div style={{ fontSize: "10.5px", color: "var(--navy-300)" }}>
-                    DPO PRIVEOS Capital · sandrine.herve@email-test.fr
+                    DPO ASTRAEOS Capital · sandrine.herve@email-test.fr
                   </div>
                 </div>
                 <span className="badge badge-success" style={{ fontSize: "10px" }}>
@@ -339,7 +339,7 @@ export default function Page() {
               </tr>
               <tr>
                 <td>
-                  <strong>CGV PRIVEOS Capital</strong>
+                  <strong>CGV ASTRAEOS Capital</strong>
                 </td>
                 <td style={{ fontSize: "11.5px", color: "var(--navy-300)" }}>
                   Conditions générales de vente
@@ -428,7 +428,7 @@ export default function Page() {
               <svg>
                 <use href="#i-calendar" />
               </svg>
-              Rendez-vous d&apos;audit avec PRIVEOS
+              Rendez-vous d&apos;audit avec ASTRAEOS
             </div>
             <span style={{ fontSize: "11px", color: "var(--navy-300)", fontStyle: "italic" }}>
               internes &amp; externes

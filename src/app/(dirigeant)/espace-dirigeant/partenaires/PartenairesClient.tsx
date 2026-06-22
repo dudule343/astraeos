@@ -267,7 +267,7 @@ export function PartenairesClient() {
           </h1>
           <p className="hero-sub">
             Deux populations distinctes : les <strong>partenaires recommandables</strong> que
-            PRIVEOS active pour ses clients (notaires, avocats, experts comptables identifiés et
+            ASTRAEOS active pour ses clients (notaires, avocats, experts comptables identifiés et
             qualifiés), et les <strong>apporteurs d&apos;affaires</strong> qui amènent des clients à
             notre réseau (avocats, notaires, comptables, agents immo, clients satisfaits,
             podcasteurs...).
@@ -307,11 +307,11 @@ export function PartenairesClient() {
         </div>
       </div>
 
-      {/* SECTION 1 : Partenaires recommandables que PRIVEOS active pour ses clients */}
+      {/* SECTION 1 : Partenaires recommandables que ASTRAEOS active pour ses clients */}
       <div className="section-block">
         <div className="section-header">
           <div>
-            <div className="section-eyebrow">1 · Partenaires identifiés et qualifiés par PRIVEOS</div>
+            <div className="section-eyebrow">1 · Partenaires identifiés et qualifiés par ASTRAEOS</div>
             <div className="section-title">
               <strong>Partenaires à qui je transmets des clients</strong>
             </div>
@@ -415,7 +415,7 @@ export function PartenairesClient() {
         <div className="section-header">
           <div>
             <div className="section-eyebrow">
-              2 · Personnes qui amènent des clients à PRIVEOS et au cabinet
+              2 · Personnes qui amènent des clients à ASTRAEOS et au cabinet
             </div>
             <div className="section-title">
               <strong>Apporteurs d&apos;affaires</strong>

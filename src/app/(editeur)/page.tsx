@@ -118,7 +118,7 @@ const alerts: Alert[] = [
     badgeCls: "badge badge-danger badge-dot",
     badgeLabel: "Critique",
     time: "il y a 12 min",
-    title: "PRIVEOS Capital · usage IA dépasse quota",
+    title: "ASTRAEOS Capital · usage IA dépasse quota",
     sub: "112 % du plan · escalader pack ou ajuster facturation",
   },
   {
@@ -259,7 +259,7 @@ export default function Page() {
                 Voyants verts sur tous les blocs sauf usage IA
                 <br />
                 <span style={{ color: "var(--orange-text)", fontWeight: 600 }}>
-                  PRIVEOS Capital en dépassement quota
+                  ASTRAEOS Capital en dépassement quota
                 </span>
               </div>
             </div>

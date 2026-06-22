@@ -212,7 +212,7 @@ async function loadDossierBundle(
     conjointName,
     honoraires,
     cabinet: {
-      name: str(c.name) ?? "Cabinet PRIVEOS",
+      name: str(c.name) ?? "Cabinet ASTRAEOS",
       addressStreet: str(c.address_street),
       addressZipcode: str(c.address_zipcode),
       addressCity: str(c.address_city),

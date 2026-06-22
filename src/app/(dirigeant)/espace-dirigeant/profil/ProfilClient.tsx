@@ -11,7 +11,7 @@ const NOTIFICATION_PREFS = [
   { label: "Études en retard de production", checked: true },
   { label: "Trésorerie sous seuil critique", checked: true },
   { label: "Nouveau prospect / candidature ingénieur", checked: true },
-  { label: "Newsletter PRIVEOS hebdomadaire", checked: false },
+  { label: "Newsletter ASTRAEOS hebdomadaire", checked: false },
   { label: "Mises à jour du catalogue produits", checked: true },
 ];
 
@@ -48,7 +48,7 @@ export function ProfilNotificationPrefs() {
         }}
       >
         &#8505; Les modifications de votre identité, vos agréments et vos coordonnées
-        professionnelles doivent être effectuées auprès de votre référent PRIVEOS pour mise à jour
+        professionnelles doivent être effectuées auprès de votre référent ASTRAEOS pour mise à jour
         réglementaire.
       </div>
     </div>

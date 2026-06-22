@@ -141,7 +141,7 @@ export function LicenciesClient() {
   function connectAsLicencie(id: string) {
     const d = LICENCIE_DATA[id];
     setBanner(
-      `Mode délégation activé · Vous êtes connecté en tant que ${d ? d.name : id}. Une bannière persistante rappelle votre identité PRIVEOS pendant toute la session.`,
+      `Mode délégation activé · Vous êtes connecté en tant que ${d ? d.name : id}. Une bannière persistante rappelle votre identité ASTRAEOS pendant toute la session.`,
     );
     setDrawerId(null);
     if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
@@ -204,7 +204,7 @@ export function LicenciesClient() {
             Les <strong>licenciés</strong> du Cabinet Paris Étoile
           </h1>
           <p className="hero-sub">
-            Cabinets de gestion de patrimoine ayant souscrit auprès de PRIVEOS. Vue détaillée, filtres
+            Cabinets de gestion de patrimoine ayant souscrit auprès de ASTRAEOS. Vue détaillée, filtres
             dynamiques, comparateur multi-licenciés, détail niveau 2 (mode délégation : se connecter en tant
             que cabinet).
           </p>
@@ -707,7 +707,7 @@ export function LicenciesClient() {
           >
             <strong style={{ color: "var(--navy)" }}>Détail niveau 2 :</strong> «&nbsp;Se connecter en tant
             que&nbsp;» ouvre l&apos;espace cabinet en mode délégation. Une bannière persistante rappelle votre
-            identité PRIVEOS.
+            identité ASTRAEOS.
           </div>
         </div>
       </aside>

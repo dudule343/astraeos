@@ -27,7 +27,7 @@ type Fonts = { regular: PDFFont; bold: PDFFont };
  * repli neutre si la session ou la table manquent.
  */
 async function cabinetHeader(): Promise<{ name: string; orias: string | null }> {
-  const fallback = { name: "Cabinet PRIVEOS", orias: null as string | null };
+  const fallback = { name: "Cabinet ASTRAEOS", orias: null as string | null };
   if (!process.env.SUPABASE_SERVICE_ROLE_KEY) return fallback;
   try {
     const ctx = await getSessionContext();

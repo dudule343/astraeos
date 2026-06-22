@@ -97,7 +97,7 @@ const CONNECTORS: Connector[] = [
     name: "Zoom",
     category: "Visio & webinaires",
     description:
-      "Rendez-vous client à distance, restitutions d'études, formations Académie PRIVEOS, webinaires.",
+      "Rendez-vous client à distance, restitutions d'études, formations Académie ASTRAEOS, webinaires.",
     meta: "312 réunions (mai)",
     status: "active",
     iconBg: "linear-gradient(135deg, #2D8CFF, #4DA8FF)",

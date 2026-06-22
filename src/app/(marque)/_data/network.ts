@@ -7,7 +7,7 @@ import { getSessionContext } from "@/lib/auth/context";
 // la marque voit TOUS les cabinets licenciés du tenant.
 //
 // Le flag d'auth est OFF → getSessionContext renvoie le contexte legacy du
-// seed, donc tenantId = PRIVEOS Capital. Le seed est quasi vide : la plupart
+// seed, donc tenantId = ASTRAEOS Capital. Le seed est quasi vide : la plupart
 // des chiffres dégradent proprement à 0 / état vide, c'est voulu.
 //
 // Réconciliation schéma (db/migrations/0001_initial_schema.sql) — mêmes règles

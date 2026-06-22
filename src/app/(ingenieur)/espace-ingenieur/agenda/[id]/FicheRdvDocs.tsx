@@ -395,7 +395,7 @@ function DciSimplifieModal({
                       marginBottom: "8px",
                     }}
                   >
-                    PRIVEOS · DCI Simplifié
+                    ASTRAEOS · DCI Simplifié
                   </div>
                   <div style={{ fontSize: "20px", fontWeight: 700, color: "var(--navy)", marginBottom: "6px" }}>
                     Bonjour Nicolas,

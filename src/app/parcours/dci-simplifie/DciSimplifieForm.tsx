@@ -131,7 +131,7 @@ export default function DciSimplifieForm() {
               <div className="brand-mini-mark" style={{ color: "var(--gold)" }}>
                 <svg><use href="#ic-tree" /></svg>
               </div>
-              <div className="brand-mini-text">PRIVEOS</div>
+              <div className="brand-mini-text">ASTRAEOS</div>
             </div>
             <div className="progress-zone">
               <div className="progress-info">
@@ -157,7 +157,7 @@ export default function DciSimplifieForm() {
           <div className="welcome-frame">
             <div className="welcome-mark" style={{ color: "var(--gold)" }}>
               <svg><use href="#ic-tree" /></svg>
-              <span style={{ color: "var(--navy)" }}>PRIVEOS</span>
+              <span style={{ color: "var(--navy)" }}>ASTRAEOS</span>
             </div>
             <div className="welcome-line" />
             <div className="welcome-name">Bonjour Monsieur Bertrand DUPONT-TOPIN,</div>
@@ -192,7 +192,7 @@ export default function DciSimplifieForm() {
               Protection de vos données personnelles · RGPD
             </div>
             <div className="rgpd-text">
-              Les informations recueillies dans ce document sont enregistrées dans un fichier informatisé par PRIVEOS afin de connaître votre situation familiale, financière et patrimoniale, et de vous conseiller au mieux de vos intérêts.
+              Les informations recueillies dans ce document sont enregistrées dans un fichier informatisé par ASTRAEOS afin de connaître votre situation familiale, financière et patrimoniale, et de vous conseiller au mieux de vos intérêts.
             </div>
             <div className="rgpd-text">
               Conservation : pendant la durée nécessaire à l&apos;exécution des prestations. Vous disposez d&apos;un droit d&apos;accès, de rectification et de suppression de vos données. Pour toute demande : <a href="mailto:contact@priveos.io">contact@priveos.io</a>
@@ -1211,7 +1211,7 @@ export default function DciSimplifieForm() {
               <input type="checkbox" checked={certChecked} onChange={(e) => setCertChecked(e.target.checked)} />
               <span className="cert-checkbox"></span>
               <span className="cert-text">
-                <strong>Je certifie l&apos;exactitude des informations</strong> communiquées dans ce document. Je comprends que la qualité du conseil prodigué par PRIVEOS dépendra de la véracité et de l&apos;exhaustivité de mes réponses. Je consens au traitement de ces données par PRIVEOS pour les besoins de l&apos;accompagnement patrimonial qui me sera proposé.
+                <strong>Je certifie l&apos;exactitude des informations</strong> communiquées dans ce document. Je comprends que la qualité du conseil prodigué par ASTRAEOS dépendra de la véracité et de l&apos;exhaustivité de mes réponses. Je consens au traitement de ces données par ASTRAEOS pour les besoins de l&apos;accompagnement patrimonial qui me sera proposé.
               </span>
             </label>
           </div>
@@ -1242,7 +1242,7 @@ export default function DciSimplifieForm() {
             </div>
             <div className="final-signature">
               À très bientôt,
-              <div className="final-signature-name">L&apos;ÉQUIPE PRIVEOS</div>
+              <div className="final-signature-name">L&apos;ÉQUIPE ASTRAEOS</div>
             </div>
           </div>
         </div>

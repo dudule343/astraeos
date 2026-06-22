@@ -513,7 +513,7 @@ export function RestitueesClient() {
                 <td>
                   <div className="cabinet-cell">
                     <span className="name">Luc THILLIEZ</span>
-                    <span className="city">Paris 8e (PRIVEOS)</span>
+                    <span className="city">Paris 8e (ASTRAEOS)</span>
                   </div>
                 </td>
                 <td>

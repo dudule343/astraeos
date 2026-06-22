@@ -485,13 +485,13 @@ export default function NouveauProspectModal({
                     </span>
                   </span>
                   <strong>Objet</strong>
-                  <span>Bienvenue chez PRIVEOS · Cabinet Paris Étoile</span>
+                  <span>Bienvenue chez ASTRAEOS · Cabinet Paris Étoile</span>
                 </div>
 
                 <p style={{ marginBottom: "10px" }}>Monsieur,</p>
 
                 <p style={{ marginBottom: "10px" }}>
-                  Je vous remercie de l&#39;intérêt que vous portez aux services de PRIVEOS ·
+                  Je vous remercie de l&#39;intérêt que vous portez aux services de ASTRAEOS ·
                   Cabinet Paris Étoile. Pour préparer notre prochain échange dans les
                   meilleures conditions, je vous transmets ci-dessous les documents permettant
                   de mieux comprendre votre situation patrimoniale.
@@ -549,9 +549,9 @@ export default function NouveauProspectModal({
                 <div className="em-sig">
                   <strong>Luc THILLIEZ</strong>
                   <br />
-                  Président associé du cabinet PRIVEOS
+                  Président associé du cabinet ASTRAEOS
                   <br />
-                  <span style={{ color: "var(--gold-deep)", fontWeight: 600 }}>PRIVEOS</span> ·
+                  <span style={{ color: "var(--gold-deep)", fontWeight: 600 }}>ASTRAEOS</span> ·
                   Conseil patrimonial indépendant
                   <br />
                   10 avenue Kléber · 75116 Paris

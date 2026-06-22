@@ -58,7 +58,7 @@ export function ClientsTable() {
 
           <tr
             className="dt-clickable"
-            onClick={() => alert("Déploiement des cabinets affiliés à PRIVEOS Capital")}
+            onClick={() => alert("Déploiement des cabinets affiliés à ASTRAEOS Capital")}
           >
             <td
               className="num cell-id"
@@ -70,7 +70,7 @@ export function ClientsTable() {
               <div style={{ display: "flex", alignItems: "center", gap: "9px" }}>
                 <div className="tlogo tlogo-priveos">P</div>
                 <div>
-                  <div className="cell-primary">PRIVEOS Capital</div>
+                  <div className="cell-primary">ASTRAEOS Capital</div>
                   <div
                     style={{ fontSize: "10.5px", color: "var(--navy-300)", marginTop: "2px" }}
                   >

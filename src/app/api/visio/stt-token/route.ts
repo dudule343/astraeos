@@ -20,7 +20,7 @@ export async function POST() {
     return NextResponse.json({ error: "Authentification requise" }, { status: 401 });
   }
 
-  // 1. Clé maître Deepgram : clé serveur PRIVEOS (env DEEPGRAM_API_KEY) en
+  // 1. Clé maître Deepgram : clé serveur ASTRAEOS (env DEEPGRAM_API_KEY) en
   //    priorité, sinon repli sur la clé du cabinet de la session (stt_settings).
   //    Absente des deux → 409 (le front bascule sur Web Speech).
   let masterKey: string;

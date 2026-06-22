@@ -148,7 +148,7 @@ function buildScreen(
   const membreDepuis = (() => {
     const since = formatDateFr(user.created_at);
     return since
-      ? `Membre PRIVEOS depuis le ${since}`
+      ? `Membre ASTRAEOS depuis le ${since}`
       : fallback.identite.membreDepuis;
   })();
 
@@ -203,12 +203,12 @@ function buildScreen(
   // Quand l'ingénieur réel est retrouvé mais que ses agréments ne sont pas
   // encore renseignés en base, on N'EMPRUNTE PAS ceux de la maquette : on
   // afficherait sinon des n° CIF/IAS inventés sous une vraie identité. On
-  // dégrade vers un repère neutre, à compléter par le référent PRIVEOS.
+  // dégrade vers un repère neutre, à compléter par le référent ASTRAEOS.
   if (agrements.length === 0) {
     agrements.push({
       titre: "Agréments réglementaires",
       detail:
-        "Aucun n° CIF / IAS / ORIAS renseigné · à compléter auprès de votre référent PRIVEOS",
+        "Aucun n° CIF / IAS / ORIAS renseigné · à compléter auprès de votre référent ASTRAEOS",
       statut: "À renseigner",
     });
   }
@@ -228,7 +228,7 @@ function buildScreen(
   const piedLignes = [
     cabinetName || null,
     adresseCabinet ? adresseCabinet.replace("\n", " · ") : null,
-    oriasNum ? `ORIAS ${oriasNum} · membre PRIVEOS` : "membre PRIVEOS",
+    oriasNum ? `ORIAS ${oriasNum} · membre ASTRAEOS` : "membre ASTRAEOS",
   ].filter(Boolean);
 
   const signature: ProfilScreen["signature"] = {

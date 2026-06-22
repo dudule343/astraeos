@@ -24,7 +24,7 @@ const SPONSORS: Sponsor[] = [
   {
     logo: "P",
     logoClass: "tlogo-priveos",
-    name: "PRIVEOS Capital",
+    name: "ASTRAEOS Capital",
     typeLabel: "Marque",
     typeClass: "tt-marque",
     filleuls: "12",
@@ -51,7 +51,7 @@ const SPONSORS: Sponsor[] = [
     logo: "JV",
     logoClass: "tlogo-1",
     name: "Julien VASSEUR",
-    typeLabel: "Mandataire PRIVEOS",
+    typeLabel: "Mandataire ASTRAEOS",
     typeClass: "tt-cabinet",
     filleuls: "6",
     payants: "2",
@@ -101,8 +101,8 @@ const ACTIVITY: Activity[] = [
     badgeClass: "badge-success",
     badgeLabel: "Conversion",
     time: "il y a 2h",
-    title: "Filleul de PRIVEOS Capital → signature client",
-    sub: "Cabinet Voltaire (Marseille) · abonnement 87 €/mois → 17,40 €/mois pour PRIVEOS",
+    title: "Filleul de ASTRAEOS Capital → signature client",
+    sub: "Cabinet Voltaire (Marseille) · abonnement 87 €/mois → 17,40 €/mois pour ASTRAEOS",
   },
   {
     badgeClass: "badge-info",
@@ -385,7 +385,7 @@ export default function Page() {
                     marginBottom: "14px",
                   }}
                 >
-                  Cabinet Voltaire (filleul de PRIVEOS Capital) souscrit l&apos;abonnement à 87
+                  Cabinet Voltaire (filleul de ASTRAEOS Capital) souscrit l&apos;abonnement à 87
                   €/mois.
                 </div>
                 <div className="finance-detail-row">
@@ -460,8 +460,8 @@ export default function Page() {
               <svg style={{ color: "var(--gold)" }}>
                 <use href="#i-link" />
               </svg>
-              <span>https://astraeos.fr/parrainage/PRIVEOS-A2K9X8</span>
-              <CopyLinkButton value="https://astraeos.fr/parrainage/PRIVEOS-A2K9X8" />
+              <span>https://astraeos.fr/parrainage/ASTRAEOS-A2K9X8</span>
+              <CopyLinkButton value="https://astraeos.fr/parrainage/ASTRAEOS-A2K9X8" />
             </div>
             <div
               style={{

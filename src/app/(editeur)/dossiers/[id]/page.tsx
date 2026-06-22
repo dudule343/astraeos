@@ -218,19 +218,19 @@ function JalonBadge({ badge }: { badge: { label: string; tone: JalonTone } }) {
   );
 }
 
-/** Contenu riche FIXE de l'étape 5 (les 4 parties du livrable PRIVEOS). */
+/** Contenu riche FIXE de l'étape 5 (les 4 parties du livrable ASTRAEOS). */
 function Etape5Detail() {
   return (
     <>
       <div className="mt-0.5 text-[10.5px] italic text-[var(--navy-300)]">
-        Production conduite par l&apos;ingénieur · avec l&apos;appui des agents IA PRIVEOS
+        Production conduite par l&apos;ingénieur · avec l&apos;appui des agents IA ASTRAEOS
       </div>
       <div className="mt-1.5 text-[11.5px] leading-[1.7] text-[var(--navy-300)]">
         <strong>Partie 1 · Bilan patrimonial</strong> : insécurités + axes d&apos;optimisation + météo
         patrimoniale finale
         <br />
         <strong>Partie 2 · Étude patrimoniale (préconisations)</strong> : 5 axes structurés (situation
-        client / projection sans action / proposition PRIVEOS / projection avec action / étapes de mise en
+        client / projection sans action / proposition ASTRAEOS / projection avec action / étapes de mise en
         place / simulation chiffrée / textes de loi)
         <br />
         <strong>Partie 3 · Tableau récapitulatif</strong> : 3 colonnes (Situation initiale / Préconisations

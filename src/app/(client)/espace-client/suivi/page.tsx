@@ -201,7 +201,7 @@ export default async function SuiviPage() {
                     </a>
                   )}
                   <AgendaButton
-                    title={`${rdv.typeLabel} · PRIVEOS`}
+                    title={`${rdv.typeLabel} · ASTRAEOS`}
                     startIso={rdv.scheduledAt}
                     durationMinutes={rdv.durationMinutes}
                     location={rdv.formatLabel}

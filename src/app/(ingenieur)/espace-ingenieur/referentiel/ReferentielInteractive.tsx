@@ -150,7 +150,7 @@ export function IaZone({ ia }: { ia: IaData }) {
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder={ia.placeholder}
                 className="ref-ia-input"
-                aria-label="Interroger le référentiel PRIVEOS"
+                aria-label="Interroger le référentiel ASTRAEOS"
               />
               <button type="submit" className="btn btn-gold" disabled={query.trim() === ""}>
                 {ia.cta}
@@ -209,7 +209,7 @@ function IaResponseModal({
           {question}
         </div>
         <p className="mb-4 text-[13px] leading-relaxed text-[var(--navy-300)]">
-          L&apos;assistant IA entraîné sur le référentiel PRIVEOS (process, contrat
+          L&apos;assistant IA entraîné sur le référentiel ASTRAEOS (process, contrat
           licenciés, bibliothèque, FAQ) sera connecté à votre espace prochainement.
           Votre question est bien prise en compte et obtiendra une réponse
           contextualisée avec le lien vers le document source.

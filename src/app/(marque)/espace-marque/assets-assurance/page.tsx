@@ -8,7 +8,7 @@ export default function AssetsAssurancePage() {
   return (
     <PlaceholderPage
       current="Assurance"
-      eyebrow="Assets PRIVEOS"
+      eyebrow="Assets ASTRAEOS"
       title="Assurance · réseau"
       description="Production assurance du réseau (emprunteur, prévoyance, mutuelle, homme clé) : contrats actifs, primes perçues et frais de dossier, agrégés sur tous les cabinets du tenant."
     />

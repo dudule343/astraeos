@@ -22,7 +22,7 @@ export default function Page() {
             <p className="hero-sub">
               Identité personnelle, agréments réglementaires (CIF, IAS, ORIAS, CJA), préférences
               notifications. Les informations réglementaires sont synchronisées avec votre profil
-              PRIVEOS · modifications via la tête de réseau.
+              ASTRAEOS · modifications via la tête de réseau.
             </p>
           </div>
         </div>
@@ -59,7 +59,7 @@ export default function Page() {
                 <strong>luc.thilliez@email-test.fr</strong>
                 <span style={{ color: "var(--navy-300)" }}>Téléphone</span>
                 <strong>+33 1 42 65 80 10</strong>
-                <span style={{ color: "var(--navy-300)" }}>Membre PRIVEOS depuis</span>
+                <span style={{ color: "var(--navy-300)" }}>Membre ASTRAEOS depuis</span>
                 <strong>2018</strong>
               </div>
             </div>

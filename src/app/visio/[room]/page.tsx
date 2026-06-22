@@ -1,7 +1,7 @@
 import { Cockpit } from "./_cockpit/Cockpit";
 
 export const metadata = {
-  title: "PRIVEOS · Visio",
+  title: "ASTRAEOS · Visio",
 };
 
 type Params = { room: string };
@@ -39,7 +39,7 @@ function sanitizeNom(raw: string | undefined): string {
 }
 
 /** Outil de visio compagnon : seuls "meet" et "zoom" sont propagés ; tout le
- *  reste (y compris absent) signifie « salle PRIVEOS intégrée » → "". */
+ *  reste (y compris absent) signifie « salle ASTRAEOS intégrée » → "". */
 function sanitizeTool(raw: string | undefined): "" | "meet" | "zoom" {
   return raw === "meet" || raw === "zoom" ? raw : "";
 }
@@ -125,7 +125,7 @@ export default async function VisioRoomPage({
     <div className="flex min-h-screen flex-col bg-[var(--ivory)]">
       <iframe
         src={src}
-        title="Visio PRIVEOS"
+        title="Visio ASTRAEOS"
         // On délègue micro/caméra/partage à TOUTES les origines (`*`), pas
         // seulement `self` : l'API Jitsi crée à l'intérieur une iframe
         // CROSS-ORIGIN (srv1750581.hstgr.cloud). Avec `camera`/`microphone` sans

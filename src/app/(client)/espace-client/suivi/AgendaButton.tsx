@@ -45,7 +45,7 @@ export function AgendaButton({
     const lines = [
       "BEGIN:VCALENDAR",
       "VERSION:2.0",
-      "PRODID:-//PRIVEOS//Espace Client//FR",
+      "PRODID:-//ASTRAEOS//Espace Client//FR",
       "CALSCALE:GREGORIAN",
       "METHOD:PUBLISH",
       "BEGIN:VEVENT",

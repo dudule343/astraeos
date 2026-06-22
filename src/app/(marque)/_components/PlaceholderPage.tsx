@@ -3,7 +3,7 @@ import { Topbar } from "./Topbar";
 /**
  * Placeholder honnête du chrome marque (tête de réseau).
  * Même structure que le PlaceholderPage de l'éditeur, mais branché sur la
- * Topbar marque (fil d'ariane « Réseau PRIVEOS »). Décrit clairement ce que
+ * Topbar marque (fil d'ariane « Réseau ASTRAEOS »). Décrit clairement ce que
  * la page montrera une fois branchée sur du réel, avec un badge « à venir ».
  */
 export function PlaceholderPage({
@@ -38,7 +38,7 @@ export function PlaceholderPage({
           <div className="mb-3 text-[40px] leading-none">🚧</div>
           <div className="mb-2 text-[16px] font-semibold text-[var(--navy)]">Page à venir</div>
           <p className="mx-auto max-w-md text-[12.5px] leading-relaxed text-[var(--navy-300)]">
-            Cette page du réseau PRIVEOS sera branchée sur les données réelles consolidées des
+            Cette page du réseau ASTRAEOS sera branchée sur les données réelles consolidées des
             cabinets du tenant dans une prochaine itération.
           </p>
         </section>

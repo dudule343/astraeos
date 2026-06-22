@@ -48,7 +48,7 @@ export type ModeleDoc = {
 export type CommItem = {
   /** Variante visuelle de la carte. */
   variant: "navy" | "white" | "navy-gradient" | "ivory";
-  /** Grand libellé central (« PRIVEOS », « FOND D'ÉCRAN », « CHARTE GRAPHIQUE »). */
+  /** Grand libellé central (« ASTRAEOS », « FOND D'ÉCRAN », « CHARTE GRAPHIQUE »). */
   title: string;
   /** Si vrai, le titre est rendu en serif doré façon logo. */
   logo?: boolean;
@@ -100,10 +100,10 @@ const SCREEN: ReferentielScreen = {
     "Référentiel opérationnel du Cabinet Paris Étoile : zone IA pour interrogation contextuelle, manuel opératoire, contrat-cadre licenciés, bibliothèque de modèles documentaires, éléments de communication.",
   ia: {
     eyebrow: "Assistant IA · méthodologie",
-    titre: "Interrogez le référentiel PRIVEOS",
+    titre: "Interrogez le référentiel ASTRAEOS",
     description:
       "L'IA est entraînée sur l'ensemble du référentiel : process, contrat licenciés, bibliothèque, FAQ. Posez vos questions en langage naturel, obtenez la réponse contextualisée et le lien vers le document source.",
-    placeholder: "Comment rédiger un pacte d'associés selon le process PRIVEOS ?",
+    placeholder: "Comment rédiger un pacte d'associés selon le process ASTRAEOS ?",
     cta: "Demander à l'IA",
     suggestions: ["Process onboarding client", "Modèle KYC", "Lettre de mission"],
   },
@@ -177,14 +177,14 @@ const SCREEN: ReferentielScreen = {
     items: [
       {
         variant: "navy",
-        title: "PRIVEOS",
+        title: "ASTRAEOS",
         logo: true,
         subtitle: "Logo principal",
         asset: "logo_principal",
       },
       {
         variant: "white",
-        title: "PRIVEOS",
+        title: "ASTRAEOS",
         logo: true,
         logoGold: true,
         subtitle: "Logo doré sur blanc",

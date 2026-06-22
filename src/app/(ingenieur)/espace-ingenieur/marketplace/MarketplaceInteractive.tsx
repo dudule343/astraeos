@@ -130,7 +130,7 @@ export function MarketplaceInteractive({ categories }: MarketplaceInteractivePro
                 data-stub-body={
                   cat.action === "module"
                     ? "Le module assurance multi-compagnies sera connecté à votre espace prochainement."
-                    : "Votre demande de mise en relation sera transmise à un référent PRIVEOS. Cette action sera branchée prochainement."
+                    : "Votre demande de mise en relation sera transmise à un référent ASTRAEOS. Cette action sera branchée prochainement."
                 }
               >
                 {cat.action === "module" ? ModuleIcon : RelationIcon}
@@ -226,7 +226,7 @@ export function MarketplaceInteractive({ categories }: MarketplaceInteractivePro
                 className="btn btn-gold btn-sm"
                 data-stub={`Demande d'agrément · ${fiche.nom}`}
                 data-stub-mode="modal"
-                data-stub-body="Votre demande d'agrément pour ce produit sera transmise au référent PRIVEOS concerné. Le circuit d'agrément en ligne sera disponible prochainement."
+                data-stub-body="Votre demande d'agrément pour ce produit sera transmise au référent ASTRAEOS concerné. Le circuit d'agrément en ligne sera disponible prochainement."
               >
                 Demander l&apos;agrément
               </button>

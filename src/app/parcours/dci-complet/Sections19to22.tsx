@@ -245,20 +245,20 @@ export function Sections19to22() {
         </div>
 
         <div className="compliance-block" style={{ padding: '22px 28px' }}>
-          <div className="compliance-block-subtitle">Mentions de conformité PRIVEOS</div>
+          <div className="compliance-block-subtitle">Mentions de conformité ASTRAEOS</div>
           <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '6px', marginBottom: '14px', fontStyle: 'italic' }}>Cliquez pour déployer chaque mention.</div>
 
           <details className="compliance-accordion">
             <summary>Votre conseiller et vos intérêts</summary>
             <div className="compliance-accordion-content">
-              La qualité du conseil prodigué par votre ingénieur patrimonial PRIVEOS dépend directement de la <strong>véracité, de l&apos;exactitude et de l&apos;exhaustivité</strong> des informations que vous avez communiquées dans ce document. Vous reconnaissez avoir été informé(e) que toute information inexacte, incomplète ou erronée est susceptible d&apos;affecter la pertinence des recommandations formulées par votre ingénieur patrimonial.
+              La qualité du conseil prodigué par votre ingénieur patrimonial ASTRAEOS dépend directement de la <strong>véracité, de l&apos;exactitude et de l&apos;exhaustivité</strong> des informations que vous avez communiquées dans ce document. Vous reconnaissez avoir été informé(e) que toute information inexacte, incomplète ou erronée est susceptible d&apos;affecter la pertinence des recommandations formulées par votre ingénieur patrimonial.
             </div>
           </details>
 
           <details className="compliance-accordion">
             <summary>Protection des données personnelles · RGPD</summary>
             <div className="compliance-accordion-content">
-              Les informations recueillies sont enregistrées dans un fichier informatisé par PRIVEOS aux fins d&apos;exécution de la prestation de conseil patrimonial et de respect de nos obligations réglementaires (CIF, courtage en assurance, LCB-FT). Ces données sont conservées pendant la durée nécessaire à l&apos;exécution des prestations puis archivées conformément aux durées légales applicables. Vous disposez d&apos;un droit d&apos;accès, de rectification, de suppression, de limitation et de portabilité de vos données. Pour toute demande : <a href="mailto:contact@priveos.io">contact@priveos.io</a>
+              Les informations recueillies sont enregistrées dans un fichier informatisé par ASTRAEOS aux fins d&apos;exécution de la prestation de conseil patrimonial et de respect de nos obligations réglementaires (CIF, courtage en assurance, LCB-FT). Ces données sont conservées pendant la durée nécessaire à l&apos;exécution des prestations puis archivées conformément aux durées légales applicables. Vous disposez d&apos;un droit d&apos;accès, de rectification, de suppression, de limitation et de portabilité de vos données. Pour toute demande : <a href="mailto:contact@priveos.io">contact@priveos.io</a>
             </div>
           </details>
 
@@ -282,7 +282,7 @@ export function Sections19to22() {
             <input type="checkbox" id="certCheck" data-action="cert-check" />
             <span className="cert-checkbox" />
             <span className="cert-text">
-              <strong>Je certifie l&apos;exactitude et l&apos;exhaustivité des informations</strong> communiquées dans ce document. Je reconnais avoir pris connaissance des mentions de conformité ci-dessus et consens au traitement de mes données par PRIVEOS aux fins de l&apos;accompagnement patrimonial qui m&apos;est proposé.
+              <strong>Je certifie l&apos;exactitude et l&apos;exhaustivité des informations</strong> communiquées dans ce document. Je reconnais avoir pris connaissance des mentions de conformité ci-dessus et consens au traitement de mes données par ASTRAEOS aux fins de l&apos;accompagnement patrimonial qui m&apos;est proposé.
             </span>
           </label>
         </div>
@@ -312,7 +312,7 @@ export function Sections19to22() {
           </div>
           <div className="final-signature">
             À très bientôt,
-            <div className="final-signature-name">L&apos;ÉQUIPE PRIVEOS</div>
+            <div className="final-signature-name">L&apos;ÉQUIPE ASTRAEOS</div>
           </div>
         </div>
       </div>

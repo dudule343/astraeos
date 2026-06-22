@@ -6,7 +6,7 @@ export default function Page() {
     <div className="maq-rdv">
       <div className="page">
         <div className="wf-annotation">
-          <strong>WIREFRAME · 04 · CALENDLY PRIVEOS</strong> · Page publique de
+          <strong>WIREFRAME · 04 · CALENDLY ASTRAEOS</strong> · Page publique de
           prise de rendez-vous · accessible via le lien partagé par
           l&apos;ingénieur (ex. priveos.com/rdv/luc-thilliez) · première étape du
           parcours client (Avant-01)
@@ -18,7 +18,7 @@ export default function Page() {
             <div className="brand-logo">
               <div className="brand-logo-mark">P</div>
               <div>
-                <div className="brand-logo-text">PRIVEOS</div>
+                <div className="brand-logo-text">ASTRAEOS</div>
                 <div className="brand-tagline">
                   CONSEIL EN GESTION DE PATRIMOINE
                 </div>

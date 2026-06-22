@@ -216,7 +216,7 @@ export const PACK = {
   mail: {
     to: "camille.joubert@email.fr · yannick.berthoux@email.fr",
     subject:
-      "PRIVEOS · Éléments de contractualisation de notre accompagnement patrimonial",
+      "ASTRAEOS · Éléments de contractualisation de notre accompagnement patrimonial",
   },
 };
 
@@ -233,7 +233,7 @@ export const TEMOIN_DOCS: TemoinDoc[] = [
     variant: "etude",
     title: "Étude patrimoniale témoin",
     desc:
-      "84 pages · format PRIVEOS éditorial · audit complet + diagnostic + préconisations",
+      "84 pages · format ASTRAEOS éditorial · audit complet + diagnostic + préconisations",
   },
   {
     variant: "synthese",
@@ -281,7 +281,7 @@ export const CONDITIONS: ConditionRow[] = [
     check: "wait",
     text: "Règlement des honoraires reçu · 3 900 € TTC",
     meta:
-      "Prix total de la mission · virement bancaire attendu · règle PRIVEOS : règlement intégral avant ouverture de l'espace sécurisé (étape 03)",
+      "Prix total de la mission · virement bancaire attendu · règle ASTRAEOS : règlement intégral avant ouverture de l'espace sécurisé (étape 03)",
     badge: { kind: "pay", label: "En attente" },
   },
 ];
@@ -317,7 +317,7 @@ export const DER = {
   signClients: "Mme Camille JOUBERT & M. Yannick BERTHOUX",
   signConseiller: {
     name: "Luc THILLIEZ",
-    role: "Président associé du cabinet PRIVEOS",
+    role: "Président associé du cabinet ASTRAEOS",
     stamp: "Luc Thilliez",
     signedNote: "Signé électroniquement via Yousign · 11/05/2026",
   },
@@ -437,7 +437,7 @@ export const DER_PDF_INPUT: ConformitePdfInput = {
   honoraires: "3 900 € TTC",
   perimetre: "Bilan patrimonial complet · couple PACS, régime de séparation",
   cabinet: {
-    name: "PRIVEOS",
+    name: "ASTRAEOS",
     addressStreet: "10 avenue Kléber",
     addressZipcode: "75116",
     addressCity: "Paris",

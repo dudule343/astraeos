@@ -178,7 +178,7 @@ const DATA: EtudesRestitueesData = {
       clientType: "morale",
       clientTypeLabel: "Personne morale",
       cabinetName: "Luc THILLIEZ",
-      cabinetCity: "Paris 8e (PRIVEOS)",
+      cabinetCity: "Paris 8e (ASTRAEOS)",
       ingenieurInitials: "LT",
       ingenieurName: "Luc THILLIEZ",
       studyTone: "societe",

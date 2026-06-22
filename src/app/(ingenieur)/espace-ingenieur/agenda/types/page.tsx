@@ -68,7 +68,7 @@ export default async function TypesRdvPage() {
           d&apos;accompagnement ci-dessous utilisent la variable{" "}
           <span className="rdv-type-variable">{"{signature}"}</span> qui est
           remplacée automatiquement selon votre statut :{" "}
-          <em>« Président associé du cabinet PRIVEOS »</em> pour les associés (Luc
+          <em>« Président associé du cabinet ASTRAEOS »</em> pour les associés (Luc
           THILLIEZ, etc.),{" "}
           <em>« Ingénieur patrimonial · Cabinet Paris Étoile »</em> pour les
           ingénieurs collaborateurs (Julien VASSEUR, Sophie MERCIER, Thomas

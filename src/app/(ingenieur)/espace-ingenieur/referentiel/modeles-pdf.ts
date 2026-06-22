@@ -7,7 +7,7 @@ import { PDFDocument, StandardFonts, rgb, type PDFFont, type PDFPage } from "pdf
  * builder réglementaire dédié dans lib/conformite-pdf.ts : manuel opératoire,
  * contrat-cadre / DIP, KYC, questionnaire de qualification, étude patrimoniale
  * anonymisée, dossier client anonymisé, charte graphique. Chaque document est un
- * gabarit vierge PRIVEOS, conforme à la bibliothèque du référentiel : aucune
+ * gabarit vierge ASTRAEOS, conforme à la bibliothèque du référentiel : aucune
  * donnée client réelle, mais un vrai PDF téléchargeable (jamais un bouton mort).
  *
  * Co-localisé dans l'écran référentiel et autonome (pdf-lib uniquement) pour ne
@@ -95,14 +95,14 @@ function drawHeader(cur: Cursor, fonts: Fonts, docTitle: string, subtitle: strin
   const { page } = cur;
 
   page.drawRectangle({ x: 0, y: PAGE_H - 96, width: PAGE_W, height: 96, color: NAVY });
-  page.drawText("Cabinet PRIVEOS", {
+  page.drawText("Cabinet ASTRAEOS", {
     x: MARGIN,
     y: PAGE_H - 46,
     size: 16,
     font: fonts.bold,
     color: rgb(1, 1, 1),
   });
-  page.drawText("Modele de reference - reseau PRIVEOS", {
+  page.drawText("Modele de reference - reseau ASTRAEOS", {
     x: MARGIN,
     y: PAGE_H - 66,
     size: 8.5,
@@ -143,9 +143,9 @@ async function initDoc(title: string, subtitle: string): Promise<{
   fonts: Fonts;
 }> {
   const doc = await PDFDocument.create();
-  doc.setTitle(`${title} - Modele PRIVEOS`);
+  doc.setTitle(`${title} - Modele ASTRAEOS`);
   doc.setProducer("Astraeos");
-  doc.setCreator("Cabinet PRIVEOS");
+  doc.setCreator("Cabinet ASTRAEOS");
   const fonts: Fonts = {
     regular: await doc.embedFont(StandardFonts.Helvetica),
     bold: await doc.embedFont(StandardFonts.HelveticaBold),
@@ -222,7 +222,7 @@ const SPECS: Record<RefModeleType, ModeleSpec> = {
     title: "Manuel operatoire",
     subtitle: "Document maitre des process operationnels - 168 pages (extrait modele)",
     intro:
-      "Le present manuel decrit l'ensemble des process operationnels du reseau PRIVEOS, de l'entree en relation au suivi recurrent. Il sert de reference unique a chaque ingenieur patrimonial.",
+      "Le present manuel decrit l'ensemble des process operationnels du reseau ASTRAEOS, de l'entree en relation au suivi recurrent. Il sert de reference unique a chaque ingenieur patrimonial.",
     sections: [
       {
         heading: "Section 1 - Onboarding client (etapes 01 a 03)",
@@ -256,12 +256,12 @@ const SPECS: Record<RefModeleType, ModeleSpec> = {
     title: "Contrat-cadre licencies - licence de marque",
     subtitle: "Contrat unique de licence de marque + documents precontractuels (modele v3.1)",
     intro:
-      "Le present contrat-cadre regit la licence de marque PRIVEOS consentie au cabinet licencie. Il est accompagne des documents precontractuels obligatoires (DIP, etat general du marche).",
+      "Le present contrat-cadre regit la licence de marque ASTRAEOS consentie au cabinet licencie. Il est accompagne des documents precontractuels obligatoires (DIP, etat general du marche).",
     sections: [
       {
         heading: "Article 1 - Objet de la licence",
         body: [
-          "La tete de reseau concede au licencie le droit d'exploiter la marque PRIVEOS et son referentiel methodologique, dans les conditions definies au present contrat.",
+          "La tete de reseau concede au licencie le droit d'exploiter la marque ASTRAEOS et son referentiel methodologique, dans les conditions definies au present contrat.",
         ],
       },
       {
@@ -352,7 +352,7 @@ const SPECS: Record<RefModeleType, ModeleSpec> = {
     title: "Etude patrimoniale anonymisee",
     subtitle: "Modele d'etude type - structure - diagnostic - preconisations",
     intro:
-      "La presente etude type illustre la structure d'un livrable patrimonial PRIVEOS, a des fins de formation. Toutes les donnees sont anonymisees.",
+      "La presente etude type illustre la structure d'un livrable patrimonial ASTRAEOS, a des fins de formation. Toutes les donnees sont anonymisees.",
     sections: [
       {
         heading: "1 - Synthese de la situation",
@@ -401,15 +401,15 @@ const SPECS: Record<RefModeleType, ModeleSpec> = {
     ],
   },
   charte_graphique: {
-    title: "Charte graphique PRIVEOS",
+    title: "Charte graphique ASTRAEOS",
     subtitle: "Identite visuelle du reseau - 24 pages (extrait modele)",
     intro:
-      "La presente charte definit l'identite visuelle du reseau PRIVEOS : logotype, couleurs, typographies et regles d'usage applicables a tous les cabinets licencies.",
+      "La presente charte definit l'identite visuelle du reseau ASTRAEOS : logotype, couleurs, typographies et regles d'usage applicables a tous les cabinets licencies.",
     sections: [
       {
         heading: "1 - Logotype",
         body: [
-          "Le logotype PRIVEOS se decline en version principale (or sur navy), version doree sur blanc et version monochrome. Une zone de protection minimale est respectee autour du logo.",
+          "Le logotype ASTRAEOS se decline en version principale (or sur navy), version doree sur blanc et version monochrome. Une zone de protection minimale est respectee autour du logo.",
         ],
       },
       {
@@ -451,10 +451,10 @@ export function buildRefModelePdf(type: RefModeleType): Promise<Uint8Array> {
   return buildFromSpec(SPECS[type]);
 }
 
-/** Fond d'écran de présentation PRIVEOS (paysage navy + halo doré), PDF réel. */
+/** Fond d'écran de présentation ASTRAEOS (paysage navy + halo doré), PDF réel. */
 export async function buildFondEcranPdf(): Promise<Uint8Array> {
   const doc = await PDFDocument.create();
-  doc.setTitle("Fond d'ecran de presentation - PRIVEOS");
+  doc.setTitle("Fond d'ecran de presentation - ASTRAEOS");
   doc.setProducer("Astraeos");
   const serif = await doc.embedFont(StandardFonts.TimesRomanBold);
   const sans = await doc.embedFont(StandardFonts.Helvetica);
@@ -472,7 +472,7 @@ export async function buildFondEcranPdf(): Promise<Uint8Array> {
       opacity: 0.04,
     });
   }
-  page.drawText("PRIVEOS", {
+  page.drawText("ASTRAEOS", {
     x: 90,
     y: H / 2 + 10,
     size: 96,

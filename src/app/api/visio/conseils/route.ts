@@ -213,7 +213,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // 2. Clé IA : clé serveur PRIVEOS (env ANTHROPIC_API_KEY) en priorité, sinon
+  // 2. Clé IA : clé serveur ASTRAEOS (env ANTHROPIC_API_KEY) en priorité, sinon
   //    repli sur la clé du cabinet (ia_settings). Absente des deux → 409.
   let apiKey: string;
   let model: string;

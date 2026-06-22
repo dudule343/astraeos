@@ -79,7 +79,7 @@ Pour préparer ce premier entretien dans les meilleures conditions, je vous invi
 Au plaisir de notre échange.
 
 Luc THILLIEZ
-Président associé du cabinet PRIVEOS`;
+Président associé du cabinet ASTRAEOS`;
 
 type Participant = { id: number; nom: string; email: string };
 

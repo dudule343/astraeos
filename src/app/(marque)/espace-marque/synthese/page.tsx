@@ -122,7 +122,7 @@ export default async function SyntheseReseauPage() {
         <PageHero
           eyebrow="Tableau de bord · synthèse financière du réseau"
           title="Synthèse du réseau"
-          description="Vue financière consolidée du réseau PRIVEOS : CA généré et encaissé sur l'ensemble des cabinets du tenant, répartition entre honoraires d'études et apports d'affaires, ventilation des commissions par catégorie de produit."
+          description="Vue financière consolidée du réseau ASTRAEOS : CA généré et encaissé sur l'ensemble des cabinets du tenant, répartition entre honoraires d'études et apports d'affaires, ventilation des commissions par catégorie de produit."
           actions={
             <NetworkExportButton
               label="Export comptable"

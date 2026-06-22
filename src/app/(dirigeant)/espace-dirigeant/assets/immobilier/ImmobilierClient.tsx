@@ -40,7 +40,7 @@ export function ImmobilierClient() {
       <div className="kpis kpis-4 mb-20">
         <div className="kpi"><div className="kpi-label">Volume immobilier traité</div><div className="kpi-value">28 100 000 <span className="unit">€</span></div><div className="kpi-meta">cumul depuis janvier 2026 · réseau</div></div>
         <div className="kpi"><div className="kpi-label">Projets réalisés</div><div className="kpi-value">53</div><div className="kpi-meta">tous types confondus</div></div>
-        <div className="kpi"><div className="kpi-label">Apports d&apos;affaires perçus PRIVEOS</div><div className="kpi-value gold">96 000 <span className="unit">€</span></div><div className="kpi-meta">cumul depuis janvier 2026</div></div>
+        <div className="kpi"><div className="kpi-label">Apports d&apos;affaires perçus ASTRAEOS</div><div className="kpi-value gold">96 000 <span className="unit">€</span></div><div className="kpi-meta">cumul depuis janvier 2026</div></div>
         <div className="kpi"><div className="kpi-label">Ticket moyen par projet</div><div className="kpi-value">530 000 <span className="unit">€</span></div><div className="kpi-meta">moyenne réseau</div></div>
       </div>
 
@@ -52,8 +52,8 @@ export function ImmobilierClient() {
               <th>Cabinet</th>
               <th className="num">Projets réalisés</th>
               <th className="num">Volume traité</th>
-              <th className="num">Apports d&apos;affaires PRIVEOS</th>
-              <th className="num">Récurrence perçue PRIVEOS</th>
+              <th className="num">Apports d&apos;affaires ASTRAEOS</th>
+              <th className="num">Récurrence perçue ASTRAEOS</th>
               <th className="num">Délai moyen<br /><span style={{ fontWeight: 400, color: "var(--navy-300)" }}>de la présentation au paiement</span></th>
               <th>Évolution N-1</th>
             </tr>
@@ -125,7 +125,7 @@ export function ImmobilierClient() {
                 <div style={{ fontFamily: "'Epilogue',sans-serif", fontSize: "18px", fontWeight: 700, color: "var(--navy)", marginTop: "4px" }}>4 200 000 €</div>
               </div>
               <div style={{ background: "white", padding: "12px 14px", borderRadius: "8px", borderLeft: "3px solid var(--gold)" }}>
-                <div style={{ fontSize: "10px", color: "var(--navy-300)", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" }}>Apports PRIVEOS</div>
+                <div style={{ fontSize: "10px", color: "var(--navy-300)", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" }}>Apports ASTRAEOS</div>
                 <div style={{ fontFamily: "'Epilogue',sans-serif", fontSize: "18px", fontWeight: 700, color: "var(--gold)", marginTop: "4px" }}>18 200 €</div>
               </div>
               <div style={{ background: "white", padding: "12px 14px", borderRadius: "8px", borderLeft: "3px solid var(--gold)" }}>
@@ -138,7 +138,7 @@ export function ImmobilierClient() {
             <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--gold)", letterSpacing: "0.14em", textTransform: "uppercase", marginBottom: "8px" }}>Détail des 8 projets · cumul depuis janvier 2026</div>
             <div className="card" style={{ marginBottom: "18px" }}>
               <table className="dt" style={{ fontSize: "12px" }}>
-                <thead><tr><th>Date</th><th>Client</th><th>Programme</th><th className="num">Montant</th><th className="num">Apport PRIVEOS</th><th className="num">Délai</th><th>Ingénieur</th></tr></thead>
+                <thead><tr><th>Date</th><th>Client</th><th>Programme</th><th className="num">Montant</th><th className="num">Apport ASTRAEOS</th><th className="num">Délai</th><th>Ingénieur</th></tr></thead>
                 <tbody>
                   <tr><td className="nowrap">12/02/2026</td><td><strong>Albert &amp; Cécile HUYGHE</strong></td><td><span style={{ color: "var(--gold-deep)", fontWeight: 600 }}>Projet Denormandie</span></td><td className="num cell-money">680 000 €</td><td className="num cell-money gold">2 800 €</td><td className="num">62 j</td><td>Émilie LAMBERT</td></tr>
                   <tr><td className="nowrap">28/02/2026</td><td><strong>Olivier MAILLOT</strong></td><td><span style={{ color: "var(--gold-deep)", fontWeight: 600 }}>Projet Denormandie</span></td><td className="num cell-money">580 000 €</td><td className="num cell-money gold">2 400 €</td><td className="num">68 j</td><td>Julien VASSEUR</td></tr>
@@ -156,7 +156,7 @@ export function ImmobilierClient() {
             <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--gold)", letterSpacing: "0.14em", textTransform: "uppercase", marginBottom: "8px" }}>Décomposition par programme</div>
             <div className="card" style={{ marginBottom: "18px" }}>
               <table className="dt" style={{ fontSize: "12px" }}>
-                <thead><tr><th>Programme</th><th className="num">Projets</th><th className="num">Volume</th><th className="num">Apport PRIVEOS</th></tr></thead>
+                <thead><tr><th>Programme</th><th className="num">Projets</th><th className="num">Volume</th><th className="num">Apport ASTRAEOS</th></tr></thead>
                 <tbody>
                   <tr><td><strong style={{ color: "var(--gold-deep)" }}>Projet Denormandie</strong></td><td className="num">4</td><td className="num cell-money">2 400 000 €</td><td className="num cell-money gold">10 000 €</td></tr>
                   <tr><td><strong>LMNP résidences services</strong></td><td className="num">2</td><td className="num cell-money">900 000 €</td><td className="num cell-money gold">3 600 €</td></tr>
@@ -170,7 +170,7 @@ export function ImmobilierClient() {
             <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--gold)", letterSpacing: "0.14em", textTransform: "uppercase", marginBottom: "8px" }}>Contribution des ingénieurs</div>
             <div className="card">
               <table className="dt" style={{ fontSize: "12px" }}>
-                <thead><tr><th>Ingénieur</th><th className="num">Projets</th><th className="num">Apports PRIVEOS générés</th></tr></thead>
+                <thead><tr><th>Ingénieur</th><th className="num">Projets</th><th className="num">Apports ASTRAEOS générés</th></tr></thead>
                 <tbody>
                   <tr><td><strong>Julien VASSEUR</strong></td><td className="num">5</td><td className="num cell-money gold">11 200 €</td></tr>
                   <tr><td><strong>Émilie LAMBERT</strong></td><td className="num">3</td><td className="num cell-money">7 000 €</td></tr>

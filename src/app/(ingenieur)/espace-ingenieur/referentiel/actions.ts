@@ -33,7 +33,7 @@ type AssetResult =
 
 /**
  * Entrée « modèle » neutre pour les builders réglementaires : aucune donnée
- * client réelle, identité PRIVEOS générique. C'est le gabarit vierge remis à un
+ * client réelle, identité ASTRAEOS générique. C'est le gabarit vierge remis à un
  * licencié, conforme à la bibliothèque du référentiel.
  */
 function modelInput(): ConformitePdfInput {
@@ -44,7 +44,7 @@ function modelInput(): ConformitePdfInput {
     honoraires: null,
     perimetre: null,
     cabinet: {
-      name: "Cabinet PRIVEOS",
+      name: "Cabinet ASTRAEOS",
       addressStreet: null,
       addressZipcode: null,
       addressCity: null,
@@ -56,14 +56,14 @@ function modelInput(): ConformitePdfInput {
   };
 }
 
-/** Logotype PRIVEOS vectoriel (or sur navy / or sur blanc), fichier SVG réel. */
+/** Logotype ASTRAEOS vectoriel (or sur navy / or sur blanc), fichier SVG réel. */
 function logoSvg(variant: "principal" | "or_blanc"): string {
   const bg = variant === "principal" ? "#0B1834" : "#FFFFFF";
   const sub = variant === "principal" ? "#C9A24B" : "#7A6A4A";
   return `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="480" height="180" viewBox="0 0 480 180">
   <rect width="480" height="180" fill="${bg}"/>
-  <text x="240" y="100" text-anchor="middle" font-family="Cormorant Garamond, Georgia, serif" font-size="64" font-weight="600" fill="#B48E51" letter-spacing="4">PRIVEOS</text>
+  <text x="240" y="100" text-anchor="middle" font-family="Cormorant Garamond, Georgia, serif" font-size="64" font-weight="600" fill="#B48E51" letter-spacing="4">ASTRAEOS</text>
   <text x="240" y="132" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="13" letter-spacing="6" fill="${sub}">INGENIERIE PATRIMONIALE</text>
 </svg>
 `;

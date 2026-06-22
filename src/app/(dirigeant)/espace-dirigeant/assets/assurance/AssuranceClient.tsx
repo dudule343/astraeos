@@ -18,10 +18,10 @@ export function AssuranceClient() {
         "  - 7 mutuelle dirigeant\n" +
         "  - 5 homme clé\n" +
         "· Primes perçues : 462 000 €\n" +
-        "· Frais de dossiers PRIVEOS : 78 200 €\n" +
+        "· Frais de dossiers ASTRAEOS : 78 200 €\n" +
         "  - Émilie LAMBERT a placé : 38 contrats / 52 000 €\n" +
         "  - Julien VASSEUR a placé : 20 contrats / 26 200 €\n" +
-        "· Récurrence PRIVEOS : 18 400 €",
+        "· Récurrence ASTRAEOS : 18 400 €",
     );
 
   return (
@@ -35,7 +35,7 @@ export function AssuranceClient() {
           <p className="hero-sub">
             Détail réseau des contrats d&apos;assurance distribués via le module multi-compagnies
             (emprunteur immo, prêt conso, prévoyance pro, mutuelle dirigeant, homme clé). Apports
-            d&apos;affaires PRIVEOS sur les commissions distribuées.
+            d&apos;affaires ASTRAEOS sur les commissions distribuées.
           </p>
         </div>
         <div className="hero-actions">
@@ -70,7 +70,7 @@ export function AssuranceClient() {
           <div className="kpi-meta">cumul depuis janvier 2026</div>
         </div>
         <div className="kpi">
-          <div className="kpi-label">Récurrence perçue par PRIVEOS</div>
+          <div className="kpi-label">Récurrence perçue par ASTRAEOS</div>
           <div className="kpi-value gold">
             128 600 <span className="unit">€</span>
           </div>
@@ -110,14 +110,14 @@ export function AssuranceClient() {
                 </span>
               </th>
               <th className="num">
-                Récurrence perçue par PRIVEOS
+                Récurrence perçue par ASTRAEOS
                 <br />
                 <span style={{ fontWeight: 400, color: "var(--navy-300)" }}>
                   cumul depuis janvier
                 </span>
               </th>
               <th className="num">
-                Total flux PRIVEOS
+                Total flux ASTRAEOS
                 <br />
                 <span style={{ fontWeight: 400, color: "var(--navy-300)" }}>
                   cumul depuis janvier

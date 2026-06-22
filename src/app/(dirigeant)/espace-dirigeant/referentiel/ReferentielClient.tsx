@@ -226,7 +226,7 @@ export function ReferentielClient() {
                   marginBottom: 8,
                 }}
               >
-                Interrogez le référentiel PRIVEOS
+                Interrogez le référentiel ASTRAEOS
               </div>
               <div
                 style={{
@@ -245,7 +245,7 @@ export function ReferentielClient() {
                   type="text"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Comment rédiger un pacte d'associés selon le process PRIVEOS ?"
+                  placeholder="Comment rédiger un pacte d'associés selon le process ASTRAEOS ?"
                   style={{
                     flex: 1,
                     padding: "12px 16px",
@@ -599,7 +599,7 @@ export function ReferentielClient() {
                   fontWeight: 600,
                 }}
               >
-                PRIVEOS
+                ASTRAEOS
               </div>
               <div
                 style={{
@@ -633,7 +633,7 @@ export function ReferentielClient() {
                   color: "var(--gold)",
                 }}
               >
-                PRIVEOS
+                ASTRAEOS
               </div>
               <div
                 style={{

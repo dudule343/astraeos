@@ -224,7 +224,7 @@ export default function Questionnaire({
                   <use href="#ic-tree" />
                 </svg>
               </div>
-              <div className="brand-mini-text">PRIVEOS</div>
+              <div className="brand-mini-text">ASTRAEOS</div>
             </div>
             <div className="progress-zone">
               <div className="progress-info">
@@ -257,7 +257,7 @@ export default function Questionnaire({
               <svg>
                 <use href="#ic-tree" />
               </svg>
-              <span style={{ color: "var(--navy)" }}>PRIVEOS</span>
+              <span style={{ color: "var(--navy)" }}>ASTRAEOS</span>
             </div>
             <div className="welcome-line" />
             <div className="welcome-name">Bonjour Bertrand,</div>
@@ -298,7 +298,7 @@ export default function Questionnaire({
             </div>
             <div className="info-block-text">
               Les informations recueillies dans ce questionnaire sont enregistrées dans un
-              fichier informatisé par PRIVEOS pour les besoins de votre qualification
+              fichier informatisé par ASTRAEOS pour les besoins de votre qualification
               réglementaire et pour vous délivrer un conseil personnalisé.
             </div>
             <div className="info-block-text">
@@ -728,7 +728,7 @@ export default function Questionnaire({
                 <strong>Je certifie l&apos;exactitude des informations</strong> communiquées
                 dans ce questionnaire. Je comprends qu&apos;elles serviront à déterminer mon
                 profil d&apos;investisseur et à fonder les recommandations qui me seront
-                formulées par mon ingénieur patrimonial PRIVEOS dans le cadre de la
+                formulées par mon ingénieur patrimonial ASTRAEOS dans le cadre de la
                 réglementation CIF/MIF.
               </span>
             </label>
@@ -761,7 +761,7 @@ export default function Questionnaire({
             </div>
             <div className="final-signature">
               À très bientôt,
-              <div className="final-signature-name">L&apos;ÉQUIPE PRIVEOS</div>
+              <div className="final-signature-name">L&apos;ÉQUIPE ASTRAEOS</div>
             </div>
           </div>
         </div>

@@ -13,7 +13,7 @@ import type { ProfilScreen } from "../../_data/profil";
  *   - hero « Annuler » / « Fermer » : Annuler revient à l'état chargé,
  *     Fermer mémorise les préférences (session) puis revient au cockpit.
  * Les données réglementaires (identité, agréments, formation) restent en
- * lecture seule : leur modification passe par le référent PRIVEOS (bandeau bas),
+ * lecture seule : leur modification passe par le référent ASTRAEOS (bandeau bas),
  * conformément à la maquette — aucune table d'édition n'existe côté base. */
 
 function IconTeam() {
@@ -523,7 +523,7 @@ export default function ProfilInteractive({ screen }: { screen: ProfilScreen }) 
               <div style={{ fontSize: "13px", fontWeight: 700, color: "var(--navy)" }}>Modifications réglementaires</div>
               <div style={{ fontSize: "11.5px", color: "var(--navy-300)", marginTop: "4px", lineHeight: 1.6 }}>
                 Les modifications de votre identité, de vos agréments réglementaires (CIF, IAS, ORIAS) et de vos
-                coordonnées professionnelles doivent être effectuées auprès de votre référent PRIVEOS pour mise à jour
+                coordonnées professionnelles doivent être effectuées auprès de votre référent ASTRAEOS pour mise à jour
                 réglementaire et synchronisation avec votre profil de marque.
               </div>
             </div>

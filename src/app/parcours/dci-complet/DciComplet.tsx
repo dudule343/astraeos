@@ -30,7 +30,7 @@ export default function DciComplet() {
             <div className="brand-mini-mark" style={{ color: 'var(--gold)' }}>
               <svg><use href="#ic-tree" /></svg>
             </div>
-            <div className="brand-mini-text">PRIVEOS</div>
+            <div className="brand-mini-text">ASTRAEOS</div>
           </div>
           <div className="progress-zone">
             <div className="progress-info">

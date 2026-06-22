@@ -20,7 +20,7 @@ const CATEGORIES: Categorie[] = [
     icon: "#i-finance",
     titre: "1 · Investissement financier",
     action: "relation",
-    desc: "Demande de mise en relation avec un référent PRIVEOS pour le placement de produits financiers (assurance vie, PEA, contrat de capitalisation, compte-titres, PER).",
+    desc: "Demande de mise en relation avec un référent ASTRAEOS pour le placement de produits financiers (assurance vie, PEA, contrat de capitalisation, compte-titres, PER).",
     tags: ["Assurance vie", "PEA", "Capitalisation", "Compte-titres", "PER"],
   },
   {
@@ -28,7 +28,7 @@ const CATEGORIES: Categorie[] = [
     icon: "#i-business",
     titre: "2 · Investissement immobilier",
     action: "relation",
-    desc: "Demande de mise en relation avec un partenaire immobilier référencé par PRIVEOS (Denormandie, LMNP, neuf, ancien rénové, SCPI).",
+    desc: "Demande de mise en relation avec un partenaire immobilier référencé par ASTRAEOS (Denormandie, LMNP, neuf, ancien rénové, SCPI).",
     tags: ["Projet Denormandie", "LMNP", "Neuf", "Ancien rénové", "SCPI"],
   },
   {
@@ -44,7 +44,7 @@ const CATEGORIES: Categorie[] = [
     icon: "#i-business",
     titre: "4 · Immatriculation de société",
     action: "relation",
-    desc: "Demande de mise en relation avec le partenaire juridique référencé par PRIVEOS pour l'immatriculation de sociétés patrimoniales (SCI, SAS, SARL holding, etc.).",
+    desc: "Demande de mise en relation avec le partenaire juridique référencé par ASTRAEOS pour l'immatriculation de sociétés patrimoniales (SCI, SAS, SARL holding, etc.).",
     tags: ["SCI", "SAS holding", "SARL holding", "SARL famille", "SCEA"],
   },
 ];
@@ -76,7 +76,7 @@ export default function CatalogueClient() {
             Catalogue <strong>produits</strong>
           </h1>
           <p className="hero-sub">
-            Catalogue complet des produits référencés au niveau PRIVEOS (licences). Quatre catégories
+            Catalogue complet des produits référencés au niveau ASTRAEOS (licences). Quatre catégories
             accessibles via une mise en relation directe ou un module dédié.
           </p>
         </div>

@@ -1,11 +1,11 @@
-// Catalogue produits référencés au niveau PRIVEOS (licences).
+// Catalogue produits référencés au niveau ASTRAEOS (licences).
 // Source unique pour la page `marketplace/` (écran maquette `page-ing-out-catalogue`).
 // Quatre catégories reprises de la maquette ingénieur v28, chacune dépliée en un
 // vrai catalogue de produits référencés. Chaque produit porte une fiche
 // consultable (caractéristiques) et peut être ajouté au comparateur.
 //
 // Pas de table dédiée : ce catalogue est une configuration métier (licences
-// PRIVEOS) qui évolue lentement, on l'assume en TS plutôt qu'en base.
+// ASTRAEOS) qui évolue lentement, on l'assume en TS plutôt qu'en base.
 
 export type CatalogueIcon = "finance" | "business" | "shield";
 
@@ -28,7 +28,7 @@ export type CatalogueCategorie = {
   /** Numéro + libellé tels qu'affichés dans l'en-tête de carte. */
   titre: string;
   icon: CatalogueIcon;
-  /** Type d'action : mise en relation PRIVEOS ou connexion d'un module. */
+  /** Type d'action : mise en relation ASTRAEOS ou connexion d'un module. */
   action: CatalogueAction;
   actionLabel: string;
   description: string;
@@ -43,7 +43,7 @@ export const catalogueCategories: CatalogueCategorie[] = [
     action: "relation",
     actionLabel: "Mise en relation",
     description:
-      "Demande de mise en relation avec un référent PRIVEOS pour le placement de produits financiers (assurance vie, PEA, contrat de capitalisation, compte-titres, PER).",
+      "Demande de mise en relation avec un référent ASTRAEOS pour le placement de produits financiers (assurance vie, PEA, contrat de capitalisation, compte-titres, PER).",
     produits: [
       {
         id: "fin-assurance-vie",
@@ -114,7 +114,7 @@ export const catalogueCategories: CatalogueCategorie[] = [
     action: "relation",
     actionLabel: "Mise en relation",
     description:
-      "Demande de mise en relation avec un partenaire immobilier référencé par PRIVEOS (Denormandie, LMNP, neuf, ancien rénové, SCPI).",
+      "Demande de mise en relation avec un partenaire immobilier référencé par ASTRAEOS (Denormandie, LMNP, neuf, ancien rénové, SCPI).",
     produits: [
       {
         id: "immo-denormandie",
@@ -248,7 +248,7 @@ export const catalogueCategories: CatalogueCategorie[] = [
     action: "relation",
     actionLabel: "Mise en relation",
     description:
-      "Demande de mise en relation avec le partenaire juridique référencé par PRIVEOS pour l'immatriculation de sociétés patrimoniales (SCI, SAS, SARL holding, etc.).",
+      "Demande de mise en relation avec le partenaire juridique référencé par ASTRAEOS pour l'immatriculation de sociétés patrimoniales (SCI, SAS, SARL holding, etc.).",
     produits: [
       {
         id: "immat-sci",
@@ -313,7 +313,7 @@ export function getCatalogueScreen() {
   return {
     heroEyebrow: "Outils · catalogue produits · consultation",
     heroSub:
-      "Catalogue complet des produits référencés au niveau PRIVEOS (licences). Quatre catégories accessibles via une mise en relation directe ou un module dédié pour vos clients.",
+      "Catalogue complet des produits référencés au niveau ASTRAEOS (licences). Quatre catégories accessibles via une mise en relation directe ou un module dédié pour vos clients.",
     categories: catalogueCategories,
   };
 }

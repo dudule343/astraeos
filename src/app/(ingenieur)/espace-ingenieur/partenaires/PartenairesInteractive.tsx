@@ -718,7 +718,7 @@ export default function PartenairesInteractive({ screen }: { screen: Partenaires
         eyebrow="Partenaire recommandable"
         title="Fiche"
         titleStrong="partenaire"
-        sub="Partenaire identifié et qualifié par PRIVEOS, activable pour un dossier client."
+        sub="Partenaire identifié et qualifié par ASTRAEOS, activable pour un dossier client."
       >
         {recoDetail ? (
           <DetailGrid
@@ -740,7 +740,7 @@ export default function PartenairesInteractive({ screen }: { screen: Partenaires
         eyebrow="Apporteur d'affaires"
         title="Fiche"
         titleStrong="apporteur"
-        sub="Personne qui amène des clients à PRIVEOS et au cabinet."
+        sub="Personne qui amène des clients à ASTRAEOS et au cabinet."
       >
         {apporteurDetail ? (
           <>

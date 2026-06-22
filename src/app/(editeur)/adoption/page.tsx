@@ -18,7 +18,7 @@ const TOP_USERS: TopUser[] = [
   {
     rank: 1,
     engineer: "Julien VASSEUR",
-    cabinet: "PRIVEOS Capital · Paris Étoile",
+    cabinet: "ASTRAEOS Capital · Paris Étoile",
     sessions: "42",
     time: "18h 24min",
     studies: "14",
@@ -27,7 +27,7 @@ const TOP_USERS: TopUser[] = [
   {
     rank: 2,
     engineer: "Marie SOREL",
-    cabinet: "PRIVEOS Capital · Lyon",
+    cabinet: "ASTRAEOS Capital · Lyon",
     sessions: "38",
     time: "16h 12min",
     studies: "12",

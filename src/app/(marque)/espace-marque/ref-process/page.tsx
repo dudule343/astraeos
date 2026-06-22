@@ -10,7 +10,7 @@ export default function RefProcessPage() {
       current="Process &amp; méthodologie"
       eyebrow="Référentiel"
       title="Process &amp; méthodologie"
-      description="Référentiel des process et de la méthodologie PRIVEOS partagés avec l&apos;ensemble du réseau : étapes du parcours patrimonial, standards de production et bonnes pratiques. Centralisé au niveau de la tête de réseau."
+      description="Référentiel des process et de la méthodologie ASTRAEOS partagés avec l&apos;ensemble du réseau : étapes du parcours patrimonial, standards de production et bonnes pratiques. Centralisé au niveau de la tête de réseau."
     />
   );
 }

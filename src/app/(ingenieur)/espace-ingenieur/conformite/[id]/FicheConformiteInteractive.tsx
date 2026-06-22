@@ -418,7 +418,7 @@ export function EnvoiPack() {
               <br />
               Bien à vous,
               <br />
-              <strong>Luc THILLIEZ</strong> · Président associé du cabinet PRIVEOS
+              <strong>Luc THILLIEZ</strong> · Président associé du cabinet ASTRAEOS
             </p>
           </div>
         </div>
@@ -569,7 +569,7 @@ function DerModal({ open, onClose }: { open: boolean; onClose: () => void }) {
           </button>
           <div className="s1a-modal-eyebrow">{DER.modalEyebrow}</div>
           <h2 className="s1a-modal-title">
-            DER officiel PRIVEOS · <strong>{DER.client}</strong>
+            DER officiel ASTRAEOS · <strong>{DER.client}</strong>
           </h2>
           <p className="s1a-modal-sub">{DER.modalSub}</p>
         </div>
@@ -588,7 +588,7 @@ function DerModal({ open, onClose }: { open: boolean; onClose: () => void }) {
             </div>
 
             <div className="der-identity">
-              <strong>PRIVEOS</strong> — SAS au capital de 10 000 euros
+              <strong>ASTRAEOS</strong> — SAS au capital de 10 000 euros
               <br />
               <strong>Siège social :</strong> 10 avenue Kléber 75116 Paris
               <br />
@@ -601,13 +601,13 @@ function DerModal({ open, onClose }: { open: boolean; onClose: () => void }) {
               Adhérent de l&apos;association professionnelle <strong>ANACOFI-CIF</strong>,
               association agréée par l&apos;Autorité des Marchés Financiers (AMF), 17
               Place de la Bourse — 75082 Paris cedex 02 — <em>www.amf-france.org</em>.
-              PRIVEOS s&apos;est engagé à respecter le Code de bonne conduite ANACOFI-CIF.
+              ASTRAEOS s&apos;est engagé à respecter le Code de bonne conduite ANACOFI-CIF.
             </p>
             <p style={{ fontStyle: "italic", color: "var(--navy-300)" }}>
               Cette activité est contrôlée par l&apos;AMF.
             </p>
             <p>
-              Le cabinet PRIVEOS ne prend pas actuellement en compte, au niveau de
+              Le cabinet ASTRAEOS ne prend pas actuellement en compte, au niveau de
               l&apos;entité, les principales incidences négatives des décisions
               d&apos;investissement sur les facteurs de durabilité.
             </p>
@@ -626,11 +626,11 @@ function DerModal({ open, onClose }: { open: boolean; onClose: () => void }) {
               place de Budapest, CS 92459 — 75436 Paris cedex 9.
             </p>
             <p>
-              PRIVEOS exerce son activité de courtage d&apos;assurance conformément à
+              ASTRAEOS exerce son activité de courtage d&apos;assurance conformément à
               l&apos;article L521-2, II, 1°b) du Code des Assurances.
             </p>
             <p>
-              PRIVEOS délivre un conseil basé sur les connaissances et l&apos;expérience
+              ASTRAEOS délivre un conseil basé sur les connaissances et l&apos;expérience
               financière du client ainsi que sa situation financière et ses objectifs
               de souscription. Le Cabinet vérifie que le contrat proposé est cohérent
               avec les exigences et les besoins du client en matière d&apos;assurance
@@ -653,7 +653,7 @@ function DerModal({ open, onClose }: { open: boolean; onClose: () => void }) {
             </p>
             <p>
               Dans le cadre de son activité d&apos;Intermédiaire en Opérations de
-              Banque, PRIVEOS peut percevoir de la part des partenaires bancaires une
+              Banque, ASTRAEOS peut percevoir de la part des partenaires bancaires une
               commission ainsi que des honoraires de courtage au titre du mandat de
               recherche de capitaux.
             </p>
@@ -748,7 +748,7 @@ function DerModal({ open, onClose }: { open: boolean; onClose: () => void }) {
             <h3>Mode de facturation et rémunération</h3>
             <p>
               Dans le cadre de la réalisation d&apos;un Bilan patrimonial complet,
-              PRIVEOS est amené à facturer des honoraires au client au titre de la
+              ASTRAEOS est amené à facturer des honoraires au client au titre de la
               réalisation de l&apos;Étude Patrimoniale.
             </p>
             <p>
@@ -773,7 +773,7 @@ function DerModal({ open, onClose }: { open: boolean; onClose: () => void }) {
               l&apos;Entreprise) peut être contacté selon les modalités suivantes :
             </p>
             <div className="der-identity" style={{ borderLeftColor: "var(--navy)" }}>
-              <strong>Par courrier :</strong> PRIVEOS — 10 avenue Kléber 75116 Paris
+              <strong>Par courrier :</strong> ASTRAEOS — 10 avenue Kléber 75116 Paris
               <br />
               <strong>Par e-mail :</strong> contact@priveos.io
             </div>
@@ -833,11 +833,11 @@ function DerModal({ open, onClose }: { open: boolean; onClose: () => void }) {
             <h3>Traitement des Données Personnelles</h3>
             <p>
               Les informations recueillies sur ce formulaire sont enregistrées dans un
-              fichier informatisé par PRIVEOS pour lui permettre de respecter son
+              fichier informatisé par ASTRAEOS pour lui permettre de respecter son
               obligation légale d&apos;information sur ses habilitations. Elles sont
               conservées pendant <strong>trois (3) ans</strong> après l&apos;entrée en
               relation s&apos;il n&apos;y a pas de relation d&apos;affaires et sont
-              destinées au cabinet PRIVEOS.
+              destinées au cabinet ASTRAEOS.
             </p>
             <p>
               Conformément à la loi « informatique et libertés », vous pouvez exercer
@@ -849,7 +849,7 @@ function DerModal({ open, onClose }: { open: boolean; onClose: () => void }) {
 
             <div className="der-sig-zone">
               <div className="der-sig-block">
-                <div className="der-sig-label">Le Conseiller PRIVEOS</div>
+                <div className="der-sig-label">Le Conseiller ASTRAEOS</div>
                 <div className="der-sig-name">{DER.signConseiller.name}</div>
                 <div style={{ fontSize: "9.5px", color: "var(--navy-300)", marginTop: 2 }}>
                   {DER.signConseiller.role}
