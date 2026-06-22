@@ -723,9 +723,44 @@ function ItemRow({
             <div style={{ fontSize: 12, color: "var(--red-text)", marginTop: 4 }}>{error}</div>
           )}
           {isDocument && !done && (
-            <div style={{ fontSize: 11.5, color: "var(--navy-300)", marginTop: 4 }}>
-              ou glissez-déposez votre fichier sur cette ligne
-            </div>
+            <label
+              htmlFor={inputId}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 11,
+                marginTop: 9,
+                padding: "12px 14px",
+                border: `1.5px dashed ${dragOver ? "var(--gold, #C8A55C)" : "#cdbf9e"}`,
+                borderRadius: 10,
+                background: dragOver ? "rgba(200,165,92,0.10)" : "var(--ivory, #FAF7F0)",
+                cursor: busy ? "default" : "pointer",
+                transition: "border-color 120ms ease, background 120ms ease",
+              }}
+            >
+              <span
+                style={{
+                  flexShrink: 0,
+                  width: 34,
+                  height: 34,
+                  borderRadius: "50%",
+                  background: "var(--gold, #C8A55C)",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 16V4" />
+                  <path d="M6 10l6-6 6 6" />
+                  <path d="M4 20h16" />
+                </svg>
+              </span>
+              <span style={{ fontSize: 12.5, color: "var(--navy-300)", lineHeight: 1.4 }}>
+                <strong style={{ color: "var(--navy)" }}>Glissez votre fichier ici</strong> ou cliquez pour parcourir
+                <span style={{ display: "block", fontSize: 11, marginTop: 1 }}>PDF, JPG, PNG · 15 Mo max</span>
+              </span>
+            </label>
           )}
           <button
             type="button"
