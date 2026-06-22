@@ -102,6 +102,7 @@ export default async function AgendaPage() {
           days={days}
           rdvsBySlot={rdvsBySlot}
           realRdvs={data.realRdvs}
+          googleEventsByDate={data.googleEventsByDate}
         />
 
         {/* Panneau de droite */}

@@ -2,7 +2,10 @@ import Link from "next/link";
 
 import { type HistoItem } from "../../../_data/fiche-client";
 import { getFicheClient } from "../../../_data/fiche-client-server";
+import { getFicheClientRiskProfile } from "../../../_data/fiche-client-risk";
 import "../../../_styles/fiche-client.css";
+import "../../../_styles/fiche-prospect.css";
+import RiskProfileCard from "../../prospects/[id]/RiskProfileCard";
 import { DocumentRowActions } from "./DocumentRowActions";
 import { FicheClientInteractive } from "./FicheClientInteractive";
 
@@ -47,6 +50,12 @@ export default async function FicheClientPage({
 }) {
   const { id } = await params;
   const fiche = await getFicheClient(id);
+  // Le foyer réel porte son `clientId` (clients.id) ; on s'en sert pour
+  // retrouver la soumission de risque rattachée au dossier. Sur la fiche
+  // modèle (pas de base), `editable` est absent et le profil reste null.
+  const riskProfile = fiche.editable
+    ? await getFicheClientRiskProfile(fiche.editable.clientId)
+    : null;
 
   return (
     <div className="fiche-client-wrap">
@@ -106,6 +115,33 @@ export default async function FicheClientPage({
         regimeFields={fiche.regimeFields}
         editable={fiche.editable}
       />
+
+      {/* Profil de risque — rempli par le client depuis son espace. La carte
+          n'apparaît que pour un foyer réel ; sans soumission, mention discrète. */}
+      {fiche.editable ? (
+        <div className="mb-18">
+          {riskProfile ? (
+            <RiskProfileCard profile={riskProfile} />
+          ) : (
+            <div className="card">
+              <div className="card-header">
+                <div className="card-title">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                    <path d="M9 12l2 2 4-4" />
+                  </svg>
+                  Profil de risque
+                </div>
+              </div>
+              <div className="card-body">
+                <div style={{ fontSize: "11.5px", color: "var(--navy-300)" }}>
+                  Questionnaire de risque non complété.
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      ) : null}
 
       {/* Historique de l'accompagnement */}
       <div className="card mb-18">

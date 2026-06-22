@@ -12,6 +12,7 @@
 /** Un RDV positionné dans la grille semaine. */
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getSessionContext } from "@/lib/auth/context";
+import { engineerSlugFromContext, getValidAccessToken } from "@/lib/google-oauth";
 
 export type AgendaRdv = {
   id: string;
@@ -25,8 +26,8 @@ export type AgendaRdv = {
   /** texte de la ligne `.ev-meta` complet, tel que la maquette ("Suivi annuel · visio") */
   metaLabel: string;
   isVisio: boolean;
-  /** classe de couleur portée de la maquette (ev-gold / ev-navy / ev-success / ev-internal) */
-  variant: "ev-gold" | "ev-navy" | "ev-success" | "ev-internal";
+  /** classe de couleur portée de la maquette (ev-gold / ev-navy / ev-success / ev-internal / ev-google) */
+  variant: "ev-gold" | "ev-navy" | "ev-success" | "ev-internal" | "ev-google";
   /**
    * Destination du clic, comme la maquette (goToPage) :
    *  - JOUBERT-BERTHOUX → fiche RDV Joubert,
@@ -62,6 +63,10 @@ export type AgendaData = {
   rdvsBySlot: Map<string, AgendaRdv>;
   /** vrais RDV pris en ligne, indexés par date absolue "année-mois-jour:créneau" */
   realRdvs: Map<string, AgendaRdv>;
+  /** events Google Calendar de l'ingénieur (lecture seule), indexés par date
+   *  absolue "année-mois-jour:créneau" — même clé que realRdvs. Vide si Google
+   *  non connecté / erreur. */
+  googleEventsByDate: Map<string, AgendaRdv>;
   kpiWeekCount: number;
   kpiWeekMeta: string;
   kpiWeekCompare: KpiCompareCell[];
@@ -501,6 +506,83 @@ async function loadEngineerRdvs(): Promise<{
   }
 }
 
+type GoogleEvent = {
+  id?: string;
+  summary?: string;
+  start?: { dateTime?: string; date?: string };
+};
+
+/** Arrondit une heure/minute au créneau le plus proche de la grille (pas de 30 min). */
+function roundToSlot(hh: number, mm: number): { hh: number; mm: number } {
+  let totalMin = hh * 60 + mm;
+  totalMin = Math.round(totalMin / 30) * 30;
+  return { hh: Math.floor(totalMin / 60) % 24, mm: totalMin % 60 };
+}
+
+/**
+ * Charge les events du Google Calendar primaire de l'ingénieur de la session,
+ * indexés par DATE ABSOLUE "année-mois-jour:créneau" (même clé que realRdvs).
+ * Lecture seule, best-effort : map vide si Google non connecté / erreur / event
+ * sans heure (journée entière ignorée, pas de créneau).
+ */
+async function loadGoogleEventsByDate(): Promise<Map<string, AgendaRdv>> {
+  const out = new Map<string, AgendaRdv>();
+  try {
+    const ctx = await getSessionContext();
+    if (!ctx) return out;
+    const accessToken = await getValidAccessToken(
+      engineerSlugFromContext(ctx),
+      ctx.tenantId,
+    );
+    if (!accessToken) return out;
+
+    // Fenêtre large autour de maintenant + de la semaine de base de la maquette,
+    // pour couvrir la navigation de semaine dans les deux sens.
+    const now = Date.now();
+    const span = 120 * 24 * 3600 * 1000;
+    const timeMin = new Date(Math.min(now, BASE_MONDAY.getTime()) - span).toISOString();
+    const timeMax = new Date(Math.max(now, BASE_MONDAY.getTime()) + span).toISOString();
+
+    const url = new URL("https://www.googleapis.com/calendar/v3/calendars/primary/events");
+    url.searchParams.set("timeMin", timeMin);
+    url.searchParams.set("timeMax", timeMax);
+    url.searchParams.set("singleEvents", "true");
+    url.searchParams.set("orderBy", "startTime");
+    url.searchParams.set("maxResults", "250");
+
+    const res = await fetch(url, { headers: { Authorization: `Bearer ${accessToken}` } });
+    if (!res.ok) return out;
+    const data = (await res.json()) as { items?: GoogleEvent[] };
+
+    for (const ev of data.items ?? []) {
+      const startIso = ev.start?.dateTime;
+      if (!startIso) continue; // event journée entière : pas de créneau dans la grille
+      const dt = new Date(startIso);
+      if (!Number.isFinite(dt.getTime())) continue;
+      const { hh, mm } = roundToSlot(dt.getHours(), dt.getMinutes());
+      const slotKey = `${hh}h${String(mm).padStart(2, "0")}`;
+      const hourLabel = `${String(hh).padStart(2, "0")}h${mm === 0 ? "" : String(mm).padStart(2, "0")}`;
+      const title = (ev.summary ?? "Événement Google").trim() || "Événement Google";
+      out.set(`${dt.getFullYear()}-${dt.getMonth()}-${dt.getDate()}:${slotKey}`, {
+        id: `gcal-${ev.id ?? `${dt.getTime()}`}`,
+        dayIndex: 0,
+        slotKey,
+        hourLabel,
+        surname: title,
+        metaLabel: "Google Agenda",
+        isVisio: false,
+        variant: "ev-google",
+        href: "",
+      });
+    }
+  } catch {
+    // best-effort : grille inchangée
+  }
+  return out;
+}
+
+const BASE_MONDAY = new Date(2026, 4, 11);
+
 function formatAvgDuration(minutes: number | null): { value: string; unit: string } {
   if (minutes == null) return { value: "—", unit: "" };
   const h = Math.floor(minutes / 60);
@@ -513,9 +595,10 @@ function formatAvgDuration(minutes: number | null): { value: string; unit: strin
  *  RDV pris en ligne (dci_submissions), placés par date réelle ; KPI calculés
  *  sur les vrais RDV. La semaine de base maquette sert de repère visuel. */
 export async function getAgenda(): Promise<AgendaData> {
-  const [onlineRdvs, eng] = await Promise.all([
+  const [onlineRdvs, eng, googleEventsByDate] = await Promise.all([
     loadRealRdvsByDate(),
     loadEngineerRdvs(),
+    loadGoogleEventsByDate(),
   ]);
 
   // Fusion : les vrais RDV de la table rdv + les prises de RDV en ligne, tous
@@ -529,6 +612,7 @@ export async function getAgenda(): Promise<AgendaData> {
   return {
     rdvsBySlot: buildSlotMap(),
     realRdvs,
+    googleEventsByDate,
     weekLabel: "Semaine du lundi 11 au dimanche 17 mai 2026",
     weekEyebrow: `Mon agenda · synchronisé Google Agenda · semaine ${isoWeek(now)}`,
     syncLabel: "Google Agenda · sync activée",

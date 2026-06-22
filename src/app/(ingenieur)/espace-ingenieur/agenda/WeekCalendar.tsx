@@ -72,6 +72,22 @@ function EventCard({ rdv }: { rdv: AgendaRdv }) {
   );
 }
 
+/** Event Google en lecture seule : liseré bleu Google + petite icône G, non cliquable. */
+function GoogleEventCard({ rdv }: { rdv: AgendaRdv }) {
+  return (
+    <div
+      className="agenda-v2-event ev-google"
+      title={`${rdv.hourLabel} · ${rdv.surname} — Google Agenda (lecture seule)`}
+    >
+      <strong>
+        <span className="ev-google-badge" aria-hidden="true">G</span>
+        {rdv.hourLabel} · {rdv.surname}
+      </strong>
+      <div className="ev-meta">{rdv.metaLabel}</div>
+    </div>
+  );
+}
+
 function openNewRdv(slotKey: string, dayLabel: string) {
   window.dispatchEvent(
     new CustomEvent<OpenNewRdvDetail>(OPEN_NEW_RDV_EVENT, {
@@ -85,6 +101,7 @@ export function WeekCalendar({
   days,
   rdvsBySlot,
   realRdvs,
+  googleEventsByDate,
 }: {
   baseWeekLabel: string;
   days: AgendaDayHeader[];
@@ -93,6 +110,9 @@ export function WeekCalendar({
   /** vrais RDV pris en ligne, indexés par date absolue "année-mois-jour:créneau",
    *  placés dans la semaine réelle où ils tombent (n'importe quelle date) */
   realRdvs: Map<string, AgendaRdv>;
+  /** events Google Calendar (lecture seule), indexés par date absolue
+   *  "année-mois-jour:créneau" ; affichés seulement si aucun RDV interne sur la cellule */
+  googleEventsByDate: Map<string, AgendaRdv>;
 }) {
   const [weekOffset, setWeekOffset] = useState(0);
   const isBaseWeek = weekOffset === 0;
@@ -203,13 +223,17 @@ export function WeekCalendar({
                   // dans n'importe quelle semaine consultée. La démo reste sur la
                   // semaine de base.
                   const cellDate = addDays(monday, day.index);
-                  const realKey = `${cellDate.getFullYear()}-${cellDate.getMonth()}-${cellDate.getDate()}:${slot.key}`;
+                  const dateKey = `${cellDate.getFullYear()}-${cellDate.getMonth()}-${cellDate.getDate()}:${slot.key}`;
+                  // Priorité aux RDV internes (pris en ligne ou démo de la semaine
+                  // de base). Un event Google ne s'affiche que si la cellule est libre.
                   const rdv =
-                    realRdvs.get(realKey) ??
+                    realRdvs.get(dateKey) ??
                     (isBaseWeek ? rdvsBySlot.get(`${day.index}:${slot.key}`) : undefined);
+                  const googleEvent = rdv ? undefined : googleEventsByDate.get(dateKey);
+                  const cellEvent = rdv ?? googleEvent;
                   const isLunch =
-                    LUNCH_SLOTS.has(slot.key) && day.index <= 4 && !rdv;
-                  const isEmpty = !rdv && !isLunch;
+                    LUNCH_SLOTS.has(slot.key) && day.index <= 4 && !cellEvent;
+                  const isEmpty = !cellEvent && !isLunch;
                   const classes = [
                     "agenda-v2-cell",
                     slot.half ? "half-line" : "",
@@ -238,7 +262,11 @@ export function WeekCalendar({
                       className={classes}
                       style={cellStyle}
                     >
-                      {rdv ? <EventCard rdv={rdv} /> : null}
+                      {rdv ? (
+                        <EventCard rdv={rdv} />
+                      ) : googleEvent ? (
+                        <GoogleEventCard rdv={googleEvent} />
+                      ) : null}
                     </div>
                   );
                 })}

@@ -416,6 +416,30 @@
   background: rgba(112, 129, 150, 0.12);
   border-left: 3px solid var(--navy-300);
 }
+/* Event Google Calendar (lecture seule) : liseré bleu Google, non cliquable. */
+.maquette-ing .agenda-v2-event.ev-google {
+  background: rgba(66, 133, 244, 0.08);
+  border-left: 3px solid #4285f4;
+  cursor: default;
+}
+.maquette-ing .agenda-v2-event.ev-google:hover {
+  transform: none;
+  box-shadow: none;
+}
+.maquette-ing .agenda-v2-event.ev-google .ev-google-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 12px;
+  height: 12px;
+  margin-right: 4px;
+  border-radius: 50%;
+  background: #4285f4;
+  color: #fff;
+  font-size: 8px;
+  font-weight: 700;
+  vertical-align: middle;
+}
 
 /* Lien "configurer mes types de RDV" ------------------------------------ */
 .maquette-ing .types-rdv-config-link {
