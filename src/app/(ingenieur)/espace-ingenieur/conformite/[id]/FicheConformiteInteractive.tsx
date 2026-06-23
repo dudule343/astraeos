@@ -944,6 +944,19 @@ function KycModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   // de la modale à chaque ouverture (`key` côté parent), comme openModalKYC().
   const [mode, setMode] = useState<"readonly" | "edit">("readonly");
   const [tab, setTab] = useState<KycTab>("synthese");
+  const [generating, setGenerating] = useState(false);
+
+  const handleGenerate = useCallback(async () => {
+    setGenerating(true);
+    try {
+      await downloadConformitePdf(
+        { kind: "kyc" },
+        `KYC-${DER_PDF_INPUT.dossierId}.pdf`,
+      );
+    } finally {
+      setGenerating(false);
+    }
+  }, []);
 
   return (
     <div
@@ -1221,6 +1234,16 @@ function KycModal({ open, onClose }: { open: boolean; onClose: () => void }) {
           <div className="s1a-modal-footer-actions">
             <button type="button" className="s1a-btn s1a-btn-ghost" onClick={onClose}>
               Fermer
+            </button>
+            {/* Génération PDF RÉELLE du recueil de connaissance client
+                (lib/conformite-pdf.ts · buildKycPdf via /api/conformite/der-pdf). */}
+            <button
+              type="button"
+              className="s1a-btn s1a-btn-primary"
+              onClick={handleGenerate}
+              disabled={generating}
+            >
+              {generating ? "Génération…" : "Générer le PDF"}
             </button>
           </div>
         </div>

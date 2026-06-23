@@ -1,14 +1,19 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 import { getSessionContext } from "@/lib/auth/context";
-import { buildDerPdf, buildLettreMissionPdf, type ConformitePdfInput } from "@/lib/conformite-pdf";
+import {
+  buildDerPdf,
+  buildKycPdf,
+  buildLettreMissionPdf,
+  type ConformitePdfInput,
+} from "@/lib/conformite-pdf";
 import { DER_PDF_INPUT } from "../../../(ingenieur)/_data/fiche-conformite";
 
 /**
  * POST /api/conformite/der-pdf
- * Body : { kind?: "der" | "lettre_mission", personnes?, lieu?, date? }
+ * Body : { kind?: "der" | "kyc" | "lettre_mission", personnes?, lieu?, date? }
  *
- * Génère RÉELLEMENT le PDF du DER (ou de la lettre de mission) via pdf-lib
+ * Génère RÉELLEMENT le PDF du DER, du KYC ou de la lettre de mission via pdf-lib
  * (lib/conformite-pdf.ts) à partir des vraies données du dossier de référence,
  * enrichies des 3 champs éditables de la modale (mode personne/personnes, lieu
  * et date de signature). Renvoie un flux application/pdf en pièce jointe : le
@@ -28,7 +33,8 @@ export async function POST(req: NextRequest) {
     // Corps absent ou invalide : on retombe sur les valeurs par défaut du dossier.
   }
 
-  const kind = body.kind === "lettre_mission" ? "lettre_mission" : "der";
+  const kind =
+    body.kind === "lettre_mission" ? "lettre_mission" : body.kind === "kyc" ? "kyc" : "der";
   const personnes = typeof body.personnes === "string" ? body.personnes.trim() : "";
   const lieu = typeof body.lieu === "string" ? body.lieu.trim() : "";
   const date = typeof body.date === "string" ? body.date.trim() : "";
@@ -50,12 +56,18 @@ export async function POST(req: NextRequest) {
   };
 
   const bytes =
-    kind === "lettre_mission" ? await buildLettreMissionPdf(input) : await buildDerPdf(input);
+    kind === "lettre_mission"
+      ? await buildLettreMissionPdf(input)
+      : kind === "kyc"
+        ? await buildKycPdf(input)
+        : await buildDerPdf(input);
 
   const filename =
     kind === "lettre_mission"
       ? `Lettre-de-mission-${input.dossierId}.pdf`
-      : `DER-${input.dossierId}.pdf`;
+      : kind === "kyc"
+        ? `KYC-${input.dossierId}.pdf`
+        : `DER-${input.dossierId}.pdf`;
 
   return new NextResponse(Buffer.from(bytes), {
     status: 200,

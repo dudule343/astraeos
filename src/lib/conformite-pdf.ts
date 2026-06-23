@@ -407,6 +407,228 @@ export async function buildLettreMissionPdf(input: ConformitePdfInput): Promise<
 }
 
 /* ------------------------------------------------------------------------- *
+ * KYC — Connaissance client (recueil d'informations)
+ * ------------------------------------------------------------------------- */
+
+/**
+ * Écrit une ligne de formulaire « libellé : valeur » lorsque la donnée existe,
+ * sinon « libellé : ........ » (ligne pointillée à compléter à la main / en
+ * collecte). Sert à matérialiser un vrai KYC pré-rempli des données connues.
+ */
+function writeField(
+  doc: PDFDocument,
+  cur: Cursor,
+  fonts: Fonts,
+  label: string,
+  value: string | null | undefined,
+): void {
+  const size = 10.5;
+  const maxWidth = PAGE_W - MARGIN * 2;
+  const labelText = `${label} : `;
+  const labelWidth = fonts.bold.widthOfTextAtSize(sanitize(labelText), size);
+  const lineHeight = size * 1.6;
+
+  if (cur.y < MARGIN + lineHeight) {
+    const next = addPage(doc);
+    cur.page = next.page;
+    cur.y = next.y;
+  }
+
+  cur.page.drawText(sanitize(labelText), {
+    x: MARGIN,
+    y: cur.y,
+    size,
+    font: fonts.bold,
+    color: NAVY,
+  });
+
+  const trimmed = (value ?? "").trim();
+  if (trimmed) {
+    // Valeur connue : on l'écrit (repliée sur plusieurs lignes au besoin).
+    const valueWidth = maxWidth - labelWidth;
+    const lines = wrapLines(trimmed, fonts.regular, size, valueWidth);
+    cur.page.drawText(lines[0], {
+      x: MARGIN + labelWidth,
+      y: cur.y,
+      size,
+      font: fonts.regular,
+      color: BLACK,
+    });
+    cur.y -= lineHeight;
+    for (const extra of lines.slice(1)) {
+      if (cur.y < MARGIN + lineHeight) {
+        const next = addPage(doc);
+        cur.page = next.page;
+        cur.y = next.y;
+      }
+      cur.page.drawText(extra, { x: MARGIN, y: cur.y, size, font: fonts.regular, color: BLACK });
+      cur.y -= lineHeight;
+    }
+  } else {
+    // Donnée manquante : ligne pointillée à compléter.
+    const dotsStart = MARGIN + labelWidth;
+    const dotsEnd = PAGE_W - MARGIN;
+    cur.page.drawLine({
+      start: { x: dotsStart, y: cur.y - 1 },
+      end: { x: dotsEnd, y: cur.y - 1 },
+      thickness: 0.5,
+      color: rgb(0.7, 0.73, 0.78),
+      dashArray: [1.5, 2.5],
+    });
+    cur.y -= lineHeight;
+  }
+}
+
+/** Case à cocher binaire « Oui ☐  Non ☐ » sur une ligne à compléter. */
+function writeChoiceField(
+  doc: PDFDocument,
+  cur: Cursor,
+  fonts: Fonts,
+  label: string,
+  options: string[],
+): void {
+  const size = 10.5;
+  const lineHeight = size * 1.6;
+  if (cur.y < MARGIN + lineHeight) {
+    const next = addPage(doc);
+    cur.page = next.page;
+    cur.y = next.y;
+  }
+  const labelText = sanitize(`${label} : `);
+  cur.page.drawText(labelText, {
+    x: MARGIN,
+    y: cur.y,
+    size,
+    font: fonts.bold,
+    color: NAVY,
+  });
+  const indent = MARGIN + 14;
+  const rightEdge = PAGE_W - MARGIN;
+  let x = MARGIN + fonts.bold.widthOfTextAtSize(labelText, size) + 6;
+  const boxWidth = fonts.regular.widthOfTextAtSize("[ ] ", size) + 2;
+
+  for (const opt of options) {
+    const optLabel = sanitize(opt);
+    const optWidth = boxWidth + fonts.regular.widthOfTextAtSize(`${optLabel}   `, size);
+    // Repli sur une nouvelle ligne (indentée) si l'option déborde la marge.
+    if (x + optWidth > rightEdge && x > indent) {
+      cur.y -= lineHeight;
+      if (cur.y < MARGIN + lineHeight) {
+        const next = addPage(doc);
+        cur.page = next.page;
+        cur.y = next.y;
+      }
+      x = indent;
+    }
+    cur.page.drawText("[ ]", { x, y: cur.y, size, font: fonts.regular, color: GREY });
+    cur.page.drawText(optLabel, {
+      x: x + boxWidth,
+      y: cur.y,
+      size,
+      font: fonts.regular,
+      color: BLACK,
+    });
+    x += optWidth;
+  }
+  cur.y -= lineHeight;
+}
+
+export async function buildKycPdf(input: ConformitePdfInput): Promise<Uint8Array> {
+  const { doc, cur, fonts } = await initDoc(
+    input,
+    "Recueil de connaissance client (KYC)",
+  );
+  const who = [input.clientName, input.conjointName].filter(Boolean).join(" & ") || "le client";
+
+  const P = (t: string, o?: Parameters<typeof writeParagraph>[4]) =>
+    writeParagraph(doc, cur, fonts, t, o);
+  const F = (label: string, value?: string | null) => writeField(doc, cur, fonts, label, value);
+  const C = (label: string, options: string[]) => writeChoiceField(doc, cur, fonts, label, options);
+  const H = (t: string) => P(t, { bold: true, size: 12, color: NAVY, gap: 8 });
+
+  P(`À l'attention de ${who}`, { bold: true, size: 11 });
+  P(
+    "Le présent recueil de connaissance client est établi en application des obligations d'évaluation de l'adéquation (directive MIF II, articles L.533-13 et suivants du Code monétaire et financier) et de lutte contre le blanchiment et le financement du terrorisme (articles L.561-1 et suivants). Les informations collectées sont nécessaires à la formulation d'un conseil adapté et sont traitées de manière confidentielle.",
+  );
+
+  H("1. Identité du ou des clients");
+  F("Client 1, nom et prénom", input.clientName);
+  F("Date et lieu de naissance");
+  F("Nationalité");
+  F("Adresse du domicile fiscal");
+  F("Téléphone et adresse électronique");
+  F("Client 2 (conjoint ou co-souscripteur)", input.conjointName);
+  F("Date et lieu de naissance du client 2");
+
+  H("2. Situation familiale et régime matrimonial");
+  C("Situation matrimoniale", ["Célibataire", "Marié(e)", "Pacsé(e)", "Divorcé(e)", "Veuf(ve)"]);
+  F("Régime matrimonial ou conventions");
+  F("Nombre d'enfants ou de personnes à charge");
+  F("Nombre de parts fiscales du foyer");
+  F("Dispositions de protection (donation, testament, mandat)");
+
+  H("3. Situation professionnelle et revenus");
+  F("Profession du client 1");
+  F("Profession du client 2");
+  F("Revenus nets annuels du foyer");
+  F("Tranche marginale d'imposition");
+  F("Nature des revenus (salaires, BIC, BNC, fonciers, mobiliers)");
+
+  H("4. Situation patrimoniale (actifs et passifs)");
+  F("Patrimoine immobilier (résidence principale, locatif)");
+  F("Patrimoine financier (comptes-titres, assurance-vie, épargne)");
+  F("Patrimoine professionnel et autres actifs");
+  F("Passifs et encours de crédits");
+  F("Patrimoine net global estimé");
+
+  H("5. Connaissance et expérience des instruments financiers");
+  P(
+    "Évaluez votre niveau de connaissance et d'expérience pour chaque catégorie d'instruments (aucune, faible, moyenne, bonne).",
+  );
+  F("Fonds en euros et supports garantis");
+  F("OPCVM, fonds actions et obligations");
+  F("Actions et obligations en direct");
+  F("Produits structurés et instruments complexes");
+  F("Private equity, SCPI et actifs non cotés");
+
+  H("6. Objectifs et horizon d'investissement");
+  C("Objectifs principaux", [
+    "Valoriser un capital",
+    "Préparer la retraite",
+    "Transmettre",
+    "Générer des revenus",
+    "Protéger les proches",
+  ]);
+  C("Horizon d'investissement", ["Court (< 3 ans)", "Moyen (3 à 8 ans)", "Long (> 8 ans)"]);
+  F("Précisions sur le ou les projets patrimoniaux", input.perimetre);
+
+  H("7. Tolérance au risque et profil investisseur");
+  C("Profil de risque accepté", ["Prudent", "Équilibré", "Dynamique", "Offensif"]);
+  F("Perte maximale annuelle acceptable");
+  F("Réaction en cas de baisse marquée des marchés");
+
+  H("8. Origine des fonds et capacité d'épargne");
+  F("Origine des capitaux investis");
+  F("Capacité d'épargne mensuelle ou annuelle");
+  F("Besoins de liquidité à court terme");
+
+  H("9. Lutte contre le blanchiment (LCB-FT)");
+  C("Personne politiquement exposée (PPE)", ["Oui", "Non"]);
+  C("Agissez-vous pour votre propre compte", ["Oui", "Non, préciser le bénéficiaire effectif"]);
+  F("Justificatif d'identité présenté (nature et date de validité)");
+  F("Justificatif de domicile présenté");
+  F("Résidence fiscale et pays d'imposition");
+
+  H("10. Déclaration sur l'honneur");
+  P(
+    "Je certifie sur l'honneur l'exactitude et la sincérité des informations communiquées ci-dessus. Je m'engage à signaler au cabinet toute évolution significative de ma situation personnelle, professionnelle ou patrimoniale susceptible de modifier le conseil délivré. Je reconnais avoir été informé que ces données sont collectées dans le strict cadre réglementaire et conservées conformément à la réglementation applicable.",
+  );
+
+  drawSignatureBlock(doc, cur, fonts, input);
+  return doc.save();
+}
+
+/* ------------------------------------------------------------------------- *
  * Dispatch par type de pièce
  * ------------------------------------------------------------------------- */
 
@@ -427,11 +649,11 @@ export function pdfFileLabel(type: ConformiteType): string {
 }
 
 /** Les types pour lesquels un PDF réel est généré. */
-export const PDF_GENERATED_TYPES: ConformiteType[] = ["der", "lettre_mission"];
+export const PDF_GENERATED_TYPES: ConformiteType[] = ["der", "kyc", "lettre_mission"];
 
 /**
  * Génère le PDF correspondant au type de pièce, ou null si le type n'a pas
- * (encore) de générateur dédié (KYC / mandat restent des enveloppes externes).
+ * (encore) de générateur dédié (le mandat reste une enveloppe externe).
  */
 export async function buildConformitePdf(
   type: ConformiteType,
@@ -440,6 +662,8 @@ export async function buildConformitePdf(
   switch (type) {
     case "der":
       return buildDerPdf(input);
+    case "kyc":
+      return buildKycPdf(input);
     case "lettre_mission":
       return buildLettreMissionPdf(input);
     default:
