@@ -25,7 +25,8 @@ type IconId =
   | "finance"
   | "shield"
   | "business"
-  | "marketplace";
+  | "marketplace"
+  | "edit";
 
 function NavIcon({ id }: { id: IconId }) {
   const common = {
@@ -103,6 +104,13 @@ function NavIcon({ id }: { id: IconId }) {
           <rect x="14" y="3" width="7" height="7" rx="1" />
           <rect x="3" y="14" width="7" height="7" rx="1" />
           <rect x="14" y="14" width="7" height="7" rx="1" />
+        </svg>
+      );
+    case "edit":
+      return (
+        <svg {...common} strokeWidth={1.6}>
+          <path d="M12 20h9" />
+          <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" />
         </svg>
       );
   }
@@ -193,6 +201,12 @@ const SECTIONS: Section[] = [
       { href: "#", label: "Master Dataset", icon: "doc", external: true },
       { href: "#", label: "Data Architecture", icon: "chart", external: true },
       { href: "#", label: "Doc 1 · Espace Marque", icon: "business", external: true },
+    ],
+  },
+  {
+    title: "Support",
+    items: [
+      { href: `${BASE}/modifications`, label: "Signaler un problème", icon: "edit" },
     ],
   },
 ];

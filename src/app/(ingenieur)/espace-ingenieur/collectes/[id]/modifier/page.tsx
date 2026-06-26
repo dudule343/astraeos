@@ -15,12 +15,12 @@ export const dynamic = "force-dynamic";
 const KIND_PRIORITY: DciKind[] = ["complet", "qualification", "simple"];
 
 /**
- * Charge le DCI du prospect <slug> (kind 'complet' prioritaire, fallback
+ * Charge le DCI du prospect <id> (kind 'complet' prioritaire, fallback
  * 'qualification' puis 'simple'), le valide, et en dérive les Facts. Renvoie des
  * Facts vides si aucun DCI exploitable : le moteur ressort alors le catalogue
  * complet. Réplique exactement la logique de la page éditeur.
  */
-async function loadFactsForProspect(slug: string): Promise<{
+async function loadFactsForProspect(id: string): Promise<{
   facts: Facts;
   usedKind: DciKind | null;
   displayName: string | null;
@@ -28,7 +28,7 @@ async function loadFactsForProspect(slug: string): Promise<{
   try {
     const ctx = await getSessionContext();
     if (!ctx) return { facts: {}, usedKind: null, displayName: null };
-    const { submissions } = await loadSubmissions(slug, ctx.tenantId);
+    const { submissions } = await loadSubmissions(id, ctx.tenantId);
     for (const kind of KIND_PRIORITY) {
       const sub = submissions[kind];
       if (!sub) continue;
@@ -49,12 +49,12 @@ async function loadFactsForProspect(slug: string): Promise<{
 export default async function CollecteBuilderPage({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ id: string }>;
 }) {
-  const { slug: rawSlug } = await params;
-  const slug = rawSlug.trim();
+  const { id: rawId } = await params;
+  const id = rawId.trim();
 
-  const { facts, displayName } = await loadFactsForProspect(slug);
+  const { facts, displayName } = await loadFactsForProspect(id);
 
   // Pièces pré-sélectionnées + nombre de rubriques (catégories) ouvertes par le
   // moteur sur la situation dérivée du DCI — alimente la detect-line du hero.
@@ -66,10 +66,10 @@ export default async function CollecteBuilderPage({
   return (
     <div className="px-10 py-8">
       <Link
-        href="/espace-ingenieur/collectes"
+        href={`/espace-ingenieur/collectes/${id}`}
         className="mb-4 inline-flex items-center gap-1 text-[12px] font-semibold text-[var(--navy-300)] transition hover:text-[var(--navy)]"
       >
-        ← Retour aux collectes
+        ← Retour à la fiche de collecte
       </Link>
 
       {/* HERO v40 · ci-fiche-header */}
@@ -91,7 +91,7 @@ export default async function CollecteBuilderPage({
 
       <CollecteBuilder
         initialFacts={facts}
-        dossierId={slug}
+        dossierId={id}
         defaultParticipant={{
           nom: displayName || "",
           email: "",
