@@ -9,7 +9,7 @@ export const metadata = {
   title: "ASTRAEOS · Suivi & restitution",
 };
 
-// Les 7 étapes du parcours patrimonial, dans l'ordre — la timeline de suivi.
+// Les 6 étapes du parcours patrimonial, dans l'ordre — la timeline de suivi.
 const JOURNEY_STAGES = [
   "01_prospect",
   "02_compliance",

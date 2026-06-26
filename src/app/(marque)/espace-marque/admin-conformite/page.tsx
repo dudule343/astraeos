@@ -1,7 +1,7 @@
 import { PlaceholderPage } from "../../_components/PlaceholderPage";
 
 export const metadata = {
-  title: "ASTRAEOS · Espace Marque · Conformité &amp; juridique",
+  title: "ASTRAEOS · Espace Marque · Conformité & juridique",
 };
 
 export default function AdminConformitePage() {

@@ -138,7 +138,7 @@ export async function saveRiskProfile(
       tenant_id: owned.tenantId,
       cabinet_id: owned.cabinetId,
     });
-    revalidatePath(`${CLIENT_BASE}/questionnaire-risque`);
+    revalidatePath(`${CLIENT_BASE}/questionnaire`);
     return { ok: true };
   } catch {
     return { ok: false, error: "Enregistrement du profil de risque impossible." };

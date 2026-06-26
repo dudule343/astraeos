@@ -49,7 +49,7 @@ export function AgendaButton({
       "CALSCALE:GREGORIAN",
       "METHOD:PUBLISH",
       "BEGIN:VEVENT",
-      `UID:${start.getTime()}@priveos-espace-client`,
+      `UID:${start.getTime()}@astraeos-espace-client`,
       `DTSTAMP:${toIcsUtc(new Date())}`,
       `DTSTART:${toIcsUtc(start)}`,
       `DTEND:${toIcsUtc(end)}`,
@@ -64,7 +64,7 @@ export function AgendaButton({
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "rendez-vous-priveos.ics";
+    a.download = "rendez-vous-astraeos.ics";
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);

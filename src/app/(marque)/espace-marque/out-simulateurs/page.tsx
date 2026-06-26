@@ -1,7 +1,7 @@
 import { PlaceholderPage } from "../../_components/PlaceholderPage";
 
 export const metadata = {
-  title: "ASTRAEOS · Espace Marque · Simulateurs &amp; calculateurs",
+  title: "ASTRAEOS · Espace Marque · Simulateurs & calculateurs",
 };
 
 export default function OutSimulateursPage() {

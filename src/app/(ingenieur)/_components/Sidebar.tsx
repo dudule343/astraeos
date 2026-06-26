@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import type { SidebarIdentity } from "../_data/sidebar-identity";
 import "../_styles/sidebar.css";
 
 const BASE = "/espace-ingenieur";
@@ -226,7 +227,7 @@ function NavLink({ entry, active }: { entry: Entry; active: boolean }) {
   );
 }
 
-export function Sidebar() {
+export function Sidebar({ identity }: { identity?: SidebarIdentity | null }) {
   const pathname = usePathname();
 
   return (
@@ -259,11 +260,13 @@ export function Sidebar() {
 
       <div className="nav-user">
         <div className="nav-user-eyebrow">Connecté en tant que</div>
-        <div className="nav-user-name">Luc THILLIEZ</div>
+        <div className="nav-user-name">{identity?.nomComplet ?? "Luc THILLIEZ"}</div>
         <div className="nav-user-role">
-          Ingénieur patrimonial (dirigeant-praticien)
+          {identity?.role ?? "Ingénieur patrimonial (dirigeant-praticien)"}
         </div>
-        <div className="nav-user-cabinet">Cabinet Paris Étoile · Paris 8e</div>
+        <div className="nav-user-cabinet">
+          {identity?.cabinet ?? "Cabinet Paris Étoile · Paris 8e"}
+        </div>
       </div>
     </aside>
   );

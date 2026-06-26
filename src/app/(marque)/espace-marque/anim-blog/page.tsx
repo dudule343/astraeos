@@ -1,7 +1,7 @@
 import { PlaceholderPage } from "../../_components/PlaceholderPage";
 
 export const metadata = {
-  title: "ASTRAEOS · Espace Marque · Articles &amp; blog",
+  title: "ASTRAEOS · Espace Marque · Articles & blog",
 };
 
 export default function AnimBlogPage() {

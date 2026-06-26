@@ -1,7 +1,7 @@
 import { PlaceholderPage } from "../../_components/PlaceholderPage";
 
 export const metadata = {
-  title: "ASTRAEOS · Espace Marque · Charte &amp; templates",
+  title: "ASTRAEOS · Espace Marque · Charte & templates",
 };
 
 export default function IdentitePage() {

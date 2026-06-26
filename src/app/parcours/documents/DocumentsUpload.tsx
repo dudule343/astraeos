@@ -79,6 +79,7 @@ export default function DocumentsUpload() {
     setError(null);
     const fd = new FormData();
     for (const f of files) fd.append("files", f);
+    if (displayName) fd.append("name", displayName);
     const res = await uploadProspectDocument(prospectSlug, fd);
     setSubmitting(false);
     if (res.ok) {
@@ -86,7 +87,7 @@ export default function DocumentsUpload() {
     } else {
       setError(res.error || "Le dépôt a échoué. Réessayez.");
     }
-  }, [files, prospectSlug]);
+  }, [files, prospectSlug, displayName]);
 
   if (done) {
     return (

@@ -1,7 +1,7 @@
 import { PlaceholderPage } from "../../_components/PlaceholderPage";
 
 export const metadata = {
-  title: "ASTRAEOS · Espace Marque · Notifications &amp; alertes",
+  title: "ASTRAEOS · Espace Marque · Notifications & alertes",
 };
 
 export default function AdminNotificationsPage() {

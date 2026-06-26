@@ -124,10 +124,10 @@ export default function VisioLobby() {
         {/* Marque */}
         <div className="mb-5 flex items-center gap-2.5">
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#C68E0E] text-base font-extrabold text-white">
-            P
+            A
           </div>
           <span className="text-sm font-semibold tracking-wide text-white/90">
-            PRI<span className="font-extrabold text-[#f0c869]">VEOS</span>
+            AST<span className="font-extrabold text-[#f0c869]">RAEOS</span>
             <span className="ml-2 font-normal text-white/50">· Visio</span>
           </span>
         </div>

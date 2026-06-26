@@ -1,7 +1,7 @@
 import { PlaceholderPage } from "../../_components/PlaceholderPage";
 
 export const metadata = {
-  title: "ASTRAEOS · Espace Marque · Process &amp; méthodologie",
+  title: "ASTRAEOS · Espace Marque · Process & méthodologie",
 };
 
 export default function RefProcessPage() {

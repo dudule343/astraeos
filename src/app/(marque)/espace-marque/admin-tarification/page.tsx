@@ -1,7 +1,7 @@
 import { PlaceholderPage } from "../../_components/PlaceholderPage";
 
 export const metadata = {
-  title: "ASTRAEOS · Espace Marque · Tarification &amp; commissions",
+  title: "ASTRAEOS · Espace Marque · Tarification & commissions",
 };
 
 export default function AdminTarificationPage() {

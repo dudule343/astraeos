@@ -221,7 +221,7 @@ export default function DciSimplifieForm() {
             <div className="field">
               <label className="field-label">Adresse e-mail <span className="required">*</span></label>
               <input type="email" className="text-input" defaultValue="bertrand.dupont@email.fr" readOnly />
-              <div className="field-help">Cette adresse est utilisée pour l&apos;envoi de votre confirmation dans votre agenda · <a href="#" onClick={(e) => { e.preventDefault(); alert("Ouverture de la messagerie pour contacter votre ingénieur patrimonial"); }}>Cliquez ici pour contacter votre ingénieur patrimonial</a></div>
+              <div className="field-help">Cette adresse est utilisée pour l&apos;envoi de votre confirmation dans votre agenda · <a href="mailto:contact@priveos.io">Contacter votre ingénieur patrimonial</a></div>
             </div>
           </div>
         </div>

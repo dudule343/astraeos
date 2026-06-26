@@ -2,7 +2,7 @@ import { Topbar } from "../_components/Topbar";
 import { NetworkExportButton } from "../_components/NetworkExportButton";
 import { KpiCard, type KpiBlock } from "@/app/_components/shared/KpiCard";
 import { PageHero, SectionHeader } from "@/app/_components/shared/PageHeader";
-import { EmptyState } from "../../(dirigeant)/_components/EmptyState";
+import { EmptyState } from "../_components/EmptyState";
 import {
   fetchNetworkCabinets,
   computeNetworkPerfKpis,

@@ -1,7 +1,7 @@
 import { PlaceholderPage } from "../../_components/PlaceholderPage";
 
 export const metadata = {
-  title: "ASTRAEOS · Espace Marque · Templates &amp; communication",
+  title: "ASTRAEOS · Espace Marque · Templates & communication",
 };
 
 export default function AdminTemplatesPage() {

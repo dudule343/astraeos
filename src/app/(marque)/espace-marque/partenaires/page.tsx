@@ -1,7 +1,7 @@
 import { PlaceholderPage } from "../../_components/PlaceholderPage";
 
 export const metadata = {
-  title: "ASTRAEOS · Espace Marque · Partenaires &amp; apporteurs du réseau",
+  title: "ASTRAEOS · Espace Marque · Partenaires & apporteurs du réseau",
 };
 
 export default function PartenairesPage() {

@@ -1,7 +1,7 @@
 import { PlaceholderPage } from "../../_components/PlaceholderPage";
 
 export const metadata = {
-  title: "ASTRAEOS · Espace Marque · Intégrations &amp; connecteurs",
+  title: "ASTRAEOS · Espace Marque · Intégrations & connecteurs",
 };
 
 export default function AdminIntegrationsPage() {

@@ -122,13 +122,27 @@ export function EditeurSidebar() {
           <span className="dot" />
           Documents fondateurs
         </div>
-        <a className="nav-item" href="#" aria-disabled="true">
+        <a
+          className="nav-item"
+          href="#"
+          aria-disabled="true"
+          onClick={(e) => e.preventDefault()}
+          style={{ cursor: "not-allowed" }}
+          title="Document fondateur non encore disponible dans le cockpit"
+        >
           <svg className="nav-item-icon">
             <use href="#i-doc" />
           </svg>
           <span>Master Dataset</span>
         </a>
-        <a className="nav-item" href="#" aria-disabled="true">
+        <a
+          className="nav-item"
+          href="#"
+          aria-disabled="true"
+          onClick={(e) => e.preventDefault()}
+          style={{ cursor: "not-allowed" }}
+          title="Document fondateur non encore disponible dans le cockpit"
+        >
           <svg className="nav-item-icon">
             <use href="#i-chart" />
           </svg>
