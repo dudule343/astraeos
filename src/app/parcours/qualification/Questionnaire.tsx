@@ -208,13 +208,6 @@ export default function Questionnaire({
     <>
       <SvgDefs />
 
-      <div className="wf-annotation">
-        <strong>
-          WIREFRAME · 06 · ESPACE CLIENT · QUESTIONNAIRE DE QUALIFICATION CLIENT
-        </strong>{" "}
-        · Document individuel et nominatif · à signer par chaque personne physique
-      </div>
-
       {!submitted && (
         <div className="top-bar">
           <div className="top-bar-inner">
@@ -305,7 +298,7 @@ export default function Questionnaire({
               Conservation : pendant la durée nécessaire à l&apos;exécution des prestations.
               Vous disposez d&apos;un droit d&apos;accès, de rectification et de suppression
               de vos données. Pour toute demande :{" "}
-              <a href="mailto:contact@priveos.io">contact@priveos.io</a>
+              <a href="mailto:contact@astraeos.fr">contact@astraeos.fr</a>
             </div>
           </div>
 

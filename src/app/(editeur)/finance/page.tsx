@@ -3,13 +3,65 @@
 // <div id="page-finance">, lignes 3352-4060. Données EN DUR = valeurs d'exemple
 // de la maquette (pas branché Supabase). Pattern + détails : (editeur)/README.md.
 import { EditeurTopbar } from "../_components/EditeurTopbar";
-import { FinanceConsolidee } from "./FinanceConsolidee";
+import { FinanceConsolidee, type FinanceView } from "./FinanceConsolidee";
+import {
+  type EditeurCommission,
+  computeBreakdownByCategory,
+  computeEditeurResultat,
+  computeMonthlyRevenue,
+  computeSourceRows,
+  fetchEditeurCommissions,
+  fmtEur,
+  fmtEurCell,
+  pct,
+} from "./data";
 
 export const metadata = {
   title: "ASTRAEOS · Finance consolidée",
 };
 
-export default function Page() {
+export const dynamic = "force-dynamic";
+
+// Construit la vue financière réelle (part marque de l'éditeur) à partir des
+// commissions encaissées/dues, pré-formatée pour le composant client.
+function buildFinanceView(commissions: EditeurCommission[]): FinanceView {
+  const resultat = computeEditeurResultat(commissions);
+  const breakdown = computeBreakdownByCategory(commissions);
+  const monthly = computeMonthlyRevenue(commissions);
+  const rows = computeSourceRows(commissions);
+  const total = resultat.totalGenere;
+  const maxMonth = Math.max(1, ...monthly.map((m) => m.generated));
+
+  return {
+    caRealise: fmtEur(resultat.totalGenere),
+    caEncaisse: fmtEur(resultat.totalEncaisse),
+    encaisseMeta: `${pct(resultat.totalEncaisse, total)} encaissé`,
+    repartition: breakdown.map((b) => ({
+      label: b.label,
+      pct: pct(b.generated, total),
+      value: fmtEurCell(b.generated),
+    })),
+    monthly: monthly.map((m) => ({
+      label: m.current ? `${m.label}*` : m.label,
+      height: `${Math.round((m.generated / maxMonth) * 100)}%`,
+      navy: m.current,
+    })),
+    packRows: rows.map((r) => ({
+      pack: r.source,
+      souscriptions: String(r.subs),
+      genere: fmtEurCell(r.gen),
+      encaisse: fmtEurCell(r.enc),
+      reste: fmtEurCell(r.rest),
+      pca: "—",
+      part: pct(r.gen, total),
+    })),
+  };
+}
+
+export default async function Page() {
+  const commissions = await fetchEditeurCommissions();
+  const real = commissions.length > 0 ? buildFinanceView(commissions) : null;
+
   return (
     <>
       <EditeurTopbar current="Finance consolidée" />
@@ -37,7 +89,7 @@ export default function Page() {
           </div>
         </div>
 
-        <FinanceConsolidee />
+        <FinanceConsolidee real={real} />
       </div>
     </>
   );

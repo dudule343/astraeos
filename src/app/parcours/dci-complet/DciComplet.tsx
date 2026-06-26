@@ -20,10 +20,6 @@ export default function DciComplet() {
     <div className="maq-dci-complet" ref={rootRef}>
       <svg className="svg-defs" xmlns="http://www.w3.org/2000/svg" dangerouslySetInnerHTML={{ __html: SVG_SPRITE }} />
 
-      <div className="wf-annotation">
-        <strong>WIREFRAME · 05 · ESPACE CLIENT · DCI COMPLET</strong> · Document de collecte d&apos;informations détaillé · à compléter après l&apos;entretien initial · bien par bien
-      </div>
-
       <div className="top-bar">
         <div className="top-bar-inner">
           <div className="brand-mini">

@@ -5,6 +5,9 @@
 import { EditeurTopbar } from "../_components/EditeurTopbar";
 import { ReferralTabs } from "./ReferralTabs";
 import { CopyLinkButton } from "./CopyLinkButton";
+import { fetchReferralData } from "./data";
+
+export const dynamic = "force-dynamic";
 
 type Sponsor = {
   logo: string;
@@ -131,7 +134,13 @@ export const metadata = {
   title: "ASTRAEOS · Programme de parrainage",
 };
 
-export default function Page() {
+export default async function Page() {
+  // Le programme de parrainage SaaS n'a aucune table dédiée en base : le
+  // fetcher renvoie des valeurs nulles tant que la source n'existe pas → repli
+  // sur les valeurs d'exemple (sponsors / activité). On affiche les compteurs
+  // réels du programme dès qu'ils seront disponibles.
+  const { program } = await fetchReferralData();
+
   return (
     <>
       <EditeurTopbar current="Programme de parrainage" />
@@ -178,32 +187,38 @@ export default function Page() {
         <div className="kpis kpis-5 mb-20">
           <div className="kpi">
             <div className="kpi-label">Parrains actifs</div>
-            <div className="kpi-value">14</div>
+            <div className="kpi-value">{program.parrainsActifs ?? 14}</div>
             <div className="kpi-meta">sur 23 clients · 61 %</div>
           </div>
           <div className="kpi">
             <div className="kpi-label">Filleuls reçus</div>
-            <div className="kpi-value">42</div>
+            <div className="kpi-value">{program.filleulsRecus ?? 42}</div>
             <div className="kpi-meta">
               leads parrainés <span className="ytd-pill">cumul depuis janv.</span>
             </div>
           </div>
           <div className="kpi">
             <div className="kpi-label">Filleuls payants</div>
-            <div className="kpi-value">9</div>
+            <div className="kpi-value">{program.filleulsPayants ?? 9}</div>
             <div className="kpi-meta">21 % de conversion · vs 7 % autres canaux</div>
           </div>
           <div className="kpi">
             <div className="kpi-label">CA récurrent généré</div>
             <div className="kpi-value">
-              9 460 <span className="unit">€</span>
+              {program.caRecurrent != null
+                ? program.caRecurrent.toLocaleString("fr-FR")
+                : "9 460"}{" "}
+              <span className="unit">€</span>
             </div>
             <div className="kpi-meta">9 abonnements actifs · ~1 050 €/mois</div>
           </div>
           <div className="kpi">
             <div className="kpi-label">Commissions versées</div>
             <div className="kpi-value">
-              1 892 <span className="unit">€</span>
+              {program.commissionsVersees != null
+                ? program.commissionsVersees.toLocaleString("fr-FR")
+                : "1 892"}{" "}
+              <span className="unit">€</span>
             </div>
             <div className="kpi-meta">20 % du CA récurrent · cumulé</div>
           </div>

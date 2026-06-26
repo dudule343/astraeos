@@ -11,6 +11,9 @@ import {
   ltvKpis,
   chartBars,
 } from "./businessData";
+import { fetchBusinessData, fmtSigned } from "./data";
+
+export const dynamic = "force-dynamic";
 
 function KpiCard({ kpi }: { kpi: Kpi }) {
   return (
@@ -42,7 +45,26 @@ function KpiCard({ kpi }: { kpi: Kpi }) {
   );
 }
 
-export default function Page() {
+export default async function Page() {
+  // Source réelle : mouvement net du parc clients (tenants). Les autres sections
+  // (RMR/RAR/croissance, LTV/CAC, graphe, top comptes) n'ont aucune source de
+  // facturation plateforme en base → repli sur les valeurs d'exemple.
+  const { parc } = await fetchBusinessData();
+  const volumeKpisData: Kpi[] = parc.hasData
+    ? volumeKpis.map((kpi) => {
+        switch (kpi.label) {
+          case "Acquisitions":
+            return { ...kpi, value: fmtSigned(parc.acquisitions) };
+          case "Désabonnements":
+            return { ...kpi, value: fmtSigned(-parc.desabonnements) };
+          case "Mouvement net":
+            return { ...kpi, value: fmtSigned(parc.mouvementNet) };
+          default:
+            return kpi;
+        }
+      })
+    : volumeKpis;
+
   return (
     <>
       <EditeurTopbar current="Pilotage business" />
@@ -144,7 +166,7 @@ export default function Page() {
             </div>
           </div>
           <div className="kpis">
-            {volumeKpis.map((kpi) => (
+            {volumeKpisData.map((kpi) => (
               <KpiCard key={kpi.label} kpi={kpi} />
             ))}
           </div>

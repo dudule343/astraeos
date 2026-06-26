@@ -3,6 +3,9 @@
 // <div id="page-product">, lignes 1843-1908. Données EN DUR = valeurs d'exemple
 // de la maquette (pas branché Supabase). Pattern + détails : (editeur)/README.md.
 import { EditeurTopbar } from "../_components/EditeurTopbar";
+import { fetchAnalyseProduit } from "./data";
+
+export const dynamic = "force-dynamic";
 
 const TOP_FEATURES = [
   { label: "Étude patrimoniale globale", value: "214 utilisateurs", pct: "100 %", width: "100%" },
@@ -39,7 +42,20 @@ const FRICTIONS = [
   },
 ];
 
-export default function Page() {
+export default async function Page() {
+  // Seul axe câblable en base = le mix produit (souscriptions × catégories).
+  // L'analyse comportementale (frictions, abandons) reste Phase 2 sans source
+  // → repli sur les valeurs d'exemple.
+  const data = await fetchAnalyseProduit();
+  const topFeatures = data.hasData
+    ? data.parCategorie.map((c) => ({
+        label: c.label,
+        value: `${c.count.toLocaleString("fr-FR")} souscriptions`,
+        pct: `${c.pct} %`,
+        width: `${c.pct}%`,
+      }))
+    : TOP_FEATURES;
+
   return (
     <>
       <EditeurTopbar current="Analyse produit" />
@@ -84,7 +100,7 @@ export default function Page() {
           </div>
           <div className="card">
             <div className="card-body">
-              {TOP_FEATURES.map((f) => (
+              {topFeatures.map((f) => (
                 <div key={f.label} style={{ marginBottom: "14px" }}>
                   <div
                     style={{

@@ -3,10 +3,16 @@
 // <div id="page-ttv">, lignes 1657-1712. Données EN DUR = valeurs d'exemple
 // de la maquette (pas branché Supabase). Pattern + détails : (editeur)/README.md.
 import { EditeurTopbar } from "../_components/EditeurTopbar";
+import { fetchTtv } from "./data";
 
 export const metadata = {
   title: "ASTRAEOS · Vitesse première valeur",
 };
+
+export const dynamic = "force-dynamic";
+
+type MilestoneView = { label: string; value: string; unit?: string; meta?: string };
+type FunnelView = { label: string; pct: number; strong: string; count: string };
 
 const MILESTONES = [
   { label: "Connexion initiale", value: "4", unit: "min", meta: "après création compte" },
@@ -24,7 +30,21 @@ const FUNNEL = [
   { label: "Premier rapport généré", pct: 44, strong: "44 %", count: "8/18" },
 ] as const;
 
-export default function Page() {
+export default async function Page() {
+  // Source réelle = délais médians dérivés des dossiers/études du cabinet et
+  // funnel d'atteinte des jalons par la cohorte d'ingénieurs. Jalons non
+  // instrumentés (connexion initiale, simulation) en état vide honnête.
+  const data = await fetchTtv();
+  const milestones: MilestoneView[] = data.hasData ? data.milestones : MILESTONES.map((m) => ({ ...m }));
+  const funnel: FunnelView[] = data.hasData
+    ? data.funnel.map((f) => ({
+        label: f.label,
+        pct: f.pct ?? 0,
+        strong: f.pct != null ? `${f.pct} %` : "—",
+        count: f.tracked ? `${f.reached}/${f.cohort}` : "—",
+      }))
+    : FUNNEL.map((s) => ({ ...s }));
+
   return (
     <>
       <EditeurTopbar current="Vitesse première valeur" />
@@ -57,7 +77,7 @@ export default function Page() {
             </div>
           </div>
           <div className="kpis kpis-5">
-            {MILESTONES.map((m) => (
+            {milestones.map((m) => (
               <div className="kpi" key={m.label}>
                 <span className="phase-tag p1">PHASE 1</span>
                 <div className="kpi-label">{m.label}</div>
@@ -81,8 +101,8 @@ export default function Page() {
           </div>
           <div className="card">
             <div className="card-body">
-              {FUNNEL.map((step, i) => (
-                <div key={step.label} style={i < FUNNEL.length - 1 ? { marginBottom: "18px" } : undefined}>
+              {funnel.map((step, i) => (
+                <div key={step.label} style={i < funnel.length - 1 ? { marginBottom: "18px" } : undefined}>
                   <div
                     style={{
                       display: "flex",

@@ -18,10 +18,26 @@ import {
   previMonths,
   previGlobalFields,
   definitionBlocks,
+  type PackRow,
   type TresoView,
 } from "./financeConsolideeData";
 
 type FinanceTab = "resultat" | "detail-ca" | "detail-charges" | "treso" | "previ" | "definitions";
+
+/**
+ * Vue financière dérivée des commissions réelles de l'éditeur (part marque),
+ * pré-formatée côté serveur (page.tsx) pour éviter d'embarquer le code
+ * serveur Supabase dans ce composant client. `null` = aucune commission en
+ * base → la page conserve les valeurs d'exemple.
+ */
+export type FinanceView = {
+  caRealise: string;
+  caEncaisse: string;
+  encaisseMeta: string;
+  repartition: { label: string; pct: string; value: string }[];
+  monthly: { label: string; height: string; navy: boolean }[];
+  packRows: PackRow[];
+};
 
 const FINANCE_TABS: { id: FinanceTab; label: string }[] = [
   { id: "resultat", label: "Compte de résultat" },
@@ -43,7 +59,7 @@ function InfoBar({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function FinanceConsolidee() {
+export function FinanceConsolidee({ real }: { real: FinanceView | null }) {
   const [tab, setTab] = useState<FinanceTab>("resultat");
   const [resultatFilter, setResultatFilter] = useState(0);
   const [tresoView, setTresoView] = useState<TresoView>("mois");
@@ -51,11 +67,27 @@ export function FinanceConsolidee() {
 
   const togglePrevi = (id: string) => setOpenPrevi((cur) => (cur === id ? null : id));
 
+  // Données réelles (part marque de l'éditeur) là où une source existe ;
+  // repli sur les valeurs d'exemple pour les blocs sans source (résultat
+  // complet, charges, trésorerie, prévisionnel, définitions).
+  const headline = real
+    ? headlineKpis.map((k) => {
+        if (k.label === "CA réalisé · mai") return { ...k, value: real.caRealise };
+        if (k.label === "CA encaissé · mai")
+          return { ...k, value: real.caEncaisse, meta: real.encaisseMeta };
+        return k;
+      })
+    : headlineKpis;
+  const caRepartitionData =
+    real && real.repartition.length > 0 ? real.repartition : caRepartition;
+  const caMonthlyData = real && real.monthly.length > 0 ? real.monthly : caMonthlyBars;
+  const packRowsData = real && real.packRows.length > 0 ? real.packRows : packRows;
+
   return (
     <>
       {/* KPIs étendus (7 KPIs) */}
       <div className="kpis kpis-7 mb-20">
-        {headlineKpis.map((k) => (
+        {headline.map((k) => (
           <div className="kpi" key={k.label}>
             <div className="kpi-label">{k.label}</div>
             <div className="kpi-value">
@@ -165,7 +197,7 @@ export function FinanceConsolidee() {
                   251 600 €
                 </span>
               </div>
-              {caRepartition.map((r) => (
+              {caRepartitionData.map((r) => (
                 <div className="finance-detail-row" key={r.label}>
                   <span className="finance-detail-label">
                     {r.label} <span className="finance-detail-pct">({r.pct})</span>
@@ -188,7 +220,7 @@ export function FinanceConsolidee() {
             <div className="card-body">
               <div className="chart-area">
                 <div className="chart-bars">
-                  {caMonthlyBars.map((b) => (
+                  {caMonthlyData.map((b) => (
                     <div
                       className={`chart-bar${b.navy ? " navy" : ""}`}
                       style={{ height: b.height }}
@@ -240,7 +272,7 @@ export function FinanceConsolidee() {
               </tr>
             </thead>
             <tbody>
-              {packRows.map((r, i) => (
+              {packRowsData.map((r, i) => (
                 <tr key={i} style={r.rowStyle}>
                   <td className="cell-primary">{r.pack}</td>
                   <td className="num">{r.souscriptions}</td>

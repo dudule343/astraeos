@@ -3,6 +3,9 @@
 // <div id="page-roadmap">, lignes 4183-4239. Données EN DUR = valeurs d'exemple
 // de la maquette (pas branché Supabase). Pattern + détails : (editeur)/README.md.
 import { EditeurTopbar } from "../_components/EditeurTopbar";
+import { fetchRoadmap } from "./data";
+
+export const dynamic = "force-dynamic";
 
 type RoadmapCard = {
   title: string;
@@ -104,7 +107,35 @@ const COLUMNS: RoadmapColumn[] = [
   },
 ];
 
-export default function Page() {
+export default async function Page() {
+  // Aucune table backlog/releases produit en base : le fetcher renvoie des
+  // colonnes vides tant qu'il n'y a pas de source → repli sur la roadmap
+  // éditoriale d'exemple. Le jour où une source existera, elle alimente ici.
+  const data = await fetchRoadmap();
+  const columns: RoadmapColumn[] =
+    data.hasData && data.columns.length > 0
+      ? data.columns.map((col) => ({
+          header: `${col.title} · ${col.cards.length}`,
+          badge: {
+            label: String(col.cards.length),
+            style: {
+              background: "var(--navy-100)",
+              padding: "1px 8px",
+              borderRadius: "10px",
+              fontSize: "9.5px",
+            },
+          },
+          cards: col.cards.map((c) => ({
+            title: c.title,
+            meta: c.meta,
+            style:
+              c.tone === "blocker"
+                ? { borderLeft: "3px solid var(--red-text)" }
+                : undefined,
+          })),
+        }))
+      : COLUMNS;
+
   return (
     <>
       <EditeurTopbar current="Roadmap & releases" />
@@ -143,7 +174,7 @@ export default function Page() {
         </div>
 
         <div className="grid-4 mb-24">
-          {COLUMNS.map((col) => (
+          {columns.map((col) => (
             <div className="roadmap-col" key={col.header}>
               <div className="roadmap-col-header">
                 {col.header}

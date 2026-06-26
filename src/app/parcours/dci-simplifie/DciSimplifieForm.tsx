@@ -120,10 +120,6 @@ export default function DciSimplifieForm() {
     <div className="maq-dci-simplifie">
       <svg className="svg-defs" xmlns="http://www.w3.org/2000/svg" dangerouslySetInnerHTML={{ __html: SVG_DEFS }} />
 
-      <div className="wf-annotation">
-        <strong>WIREFRAME · 03 v2 · ESPACE PROSPECT · DCI SIMPLIFIÉ</strong> · Direction artistique haut de gamme éditoriale · fond ivory · à remplir avant l&apos;entretien initial
-      </div>
-
       {!submitted && (
         <div className="top-bar">
           <div className="top-bar-inner">
@@ -195,7 +191,7 @@ export default function DciSimplifieForm() {
               Les informations recueillies dans ce document sont enregistrées dans un fichier informatisé par ASTRAEOS afin de connaître votre situation familiale, financière et patrimoniale, et de vous conseiller au mieux de vos intérêts.
             </div>
             <div className="rgpd-text">
-              Conservation : pendant la durée nécessaire à l&apos;exécution des prestations. Vous disposez d&apos;un droit d&apos;accès, de rectification et de suppression de vos données. Pour toute demande : <a href="mailto:contact@priveos.io">contact@priveos.io</a>
+              Conservation : pendant la durée nécessaire à l&apos;exécution des prestations. Vous disposez d&apos;un droit d&apos;accès, de rectification et de suppression de vos données. Pour toute demande : <a href="mailto:contact@astraeos.fr">contact@astraeos.fr</a>
             </div>
           </div>
 
@@ -221,7 +217,7 @@ export default function DciSimplifieForm() {
             <div className="field">
               <label className="field-label">Adresse e-mail <span className="required">*</span></label>
               <input type="email" className="text-input" defaultValue="bertrand.dupont@email.fr" readOnly />
-              <div className="field-help">Cette adresse est utilisée pour l&apos;envoi de votre confirmation dans votre agenda · <a href="mailto:contact@priveos.io">Contacter votre ingénieur patrimonial</a></div>
+              <div className="field-help">Cette adresse est utilisée pour l&apos;envoi de votre confirmation dans votre agenda · <a href="mailto:contact@astraeos.fr">Contacter votre ingénieur patrimonial</a></div>
             </div>
           </div>
         </div>

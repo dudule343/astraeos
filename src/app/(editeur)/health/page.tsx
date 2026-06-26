@@ -3,6 +3,9 @@
 // <div id="page-health">, lignes 1713-1842. Données EN DUR = valeurs d'exemple
 // de la maquette (pas branché Supabase). Pattern + détails : (editeur)/README.md.
 import { EditeurTopbar } from "../_components/EditeurTopbar";
+import { fetchSanteClients, fmtJoursDepuis, pct } from "./data";
+
+export const dynamic = "force-dynamic";
 
 type RiskRow = {
   logoClass: string;
@@ -89,7 +92,28 @@ const scoreComponents: ScoreComponent[] = [
   },
 ];
 
-export default function Page() {
+export default async function Page() {
+  // Source réelle = fraîcheur d'activité des cabinets du réseau (dossiers /
+  // dernières connexions / études récentes). Pas de score composite ni de MRR
+  // en base → ces colonnes restent en état vide honnête ("—").
+  const sante = await fetchSanteClients();
+  const risk: RiskRow[] =
+    sante.aRisque.length > 0
+      ? sante.aRisque.map((c) => ({
+          logoClass: "tlogo tlogo-1",
+          initial: c.initials,
+          name: c.name,
+          typeClass: "tt tt-cabinet",
+          typeLabel: "Cabinet",
+          badgeClass: "badge badge-danger",
+          score: "—",
+          signal: c.signal,
+          lastSeen: fmtJoursDepuis(c.daysSinceActivity),
+          mrr: "—",
+          actionLabel: "Briefer la relation client",
+        }))
+      : riskRows;
+
   return (
     <>
       <EditeurTopbar current="Santé clients" />
@@ -125,9 +149,13 @@ export default function Page() {
               <span className="phase-tag p2">PHASE 2</span>
               <div className="kpi-label">Comptes en bonne santé</div>
               <div className="kpi-value" style={{ color: "var(--green-text)" }}>
-                15
+                {sante.hasData ? sante.sains : 15}
               </div>
-              <div className="kpi-meta">65 % du portefeuille · score &gt; 80</div>
+              <div className="kpi-meta">
+                {sante.hasData
+                  ? `${pct(sante.sains, sante.totalCabinets)} du portefeuille · activité < 14 j`
+                  : "65 % du portefeuille · score > 80"}
+              </div>
             </div>
             <div className="kpi clickable">
               <span className="phase-tag p2">PHASE 2</span>
@@ -141,9 +169,13 @@ export default function Page() {
               <span className="phase-tag p2">PHASE 2</span>
               <div className="kpi-label">Comptes à risque</div>
               <div className="kpi-value" style={{ color: "var(--red-text)" }}>
-                3
+                {sante.hasData ? sante.risque : 3}
               </div>
-              <div className="kpi-meta">13 % · score &lt; 60 ou usage en chute</div>
+              <div className="kpi-meta">
+                {sante.hasData
+                  ? `${pct(sante.risque, sante.totalCabinets)} · inactif > 30 j ou aucun signal`
+                  : "13 % · score < 60 ou usage en chute"}
+              </div>
             </div>
             <div className="kpi clickable">
               <span className="phase-tag p2">PHASE 2</span>
@@ -185,7 +217,7 @@ export default function Page() {
                 </tr>
               </thead>
               <tbody>
-                {riskRows.map((row) => (
+                {risk.map((row) => (
                   <tr className="dt-clickable" key={row.name}>
                     <td>
                       <div

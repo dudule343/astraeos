@@ -258,7 +258,7 @@ export function Sections19to22() {
           <details className="compliance-accordion">
             <summary>Protection des données personnelles · RGPD</summary>
             <div className="compliance-accordion-content">
-              Les informations recueillies sont enregistrées dans un fichier informatisé par ASTRAEOS aux fins d&apos;exécution de la prestation de conseil patrimonial et de respect de nos obligations réglementaires (CIF, courtage en assurance, LCB-FT). Ces données sont conservées pendant la durée nécessaire à l&apos;exécution des prestations puis archivées conformément aux durées légales applicables. Vous disposez d&apos;un droit d&apos;accès, de rectification, de suppression, de limitation et de portabilité de vos données. Pour toute demande : <a href="mailto:contact@priveos.io">contact@priveos.io</a>
+              Les informations recueillies sont enregistrées dans un fichier informatisé par ASTRAEOS aux fins d&apos;exécution de la prestation de conseil patrimonial et de respect de nos obligations réglementaires (CIF, courtage en assurance, LCB-FT). Ces données sont conservées pendant la durée nécessaire à l&apos;exécution des prestations puis archivées conformément aux durées légales applicables. Vous disposez d&apos;un droit d&apos;accès, de rectification, de suppression, de limitation et de portabilité de vos données. Pour toute demande : <a href="mailto:contact@astraeos.fr">contact@astraeos.fr</a>
             </div>
           </details>
 

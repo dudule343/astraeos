@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { createClientAction } from "./actions";
 
 // État initial repris de la maquette : seules deux classes indépendantes existent
 // sur chaque carte, .active (étape ouverte) et .completed (étape validée ✓ Validé).
@@ -59,8 +61,34 @@ const documents = [
 ];
 
 export function ClientNewWizard() {
+  const router = useRouter();
+  const formRef = useRef<HTMLFormElement>(null);
   const [activeStep, setActiveStep] = useState<number>(INITIAL_ACTIVE_STEP);
   const [completed, setCompleted] = useState<number[]>(INITIAL_COMPLETED);
+  const [error, setError] = useState<string | null>(null);
+  const [submitting, startSubmit] = useTransition();
+
+  function handleActivate() {
+    const form = formRef.current;
+    if (!form) return;
+    // Déclenche la validation native (champs requis) avant de soumettre.
+    if (!form.reportValidity()) {
+      // Ouvre l'étape Identité où vivent la plupart des champs requis.
+      setActiveStep(2);
+      return;
+    }
+    setError(null);
+    const fd = new FormData(form);
+    startSubmit(async () => {
+      try {
+        // createClientAction insère clients + personnes + dossiers puis redirige
+        // vers /clients en cas de succès (la redirection n'est pas une erreur ici).
+        await createClientAction(fd);
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Échec de la création du client");
+      }
+    });
+  }
 
   function toggleWizardStep(stepNum: number) {
     // Comme la maquette : on retire .active partout puis on rouvre la cible si
@@ -101,9 +129,15 @@ export function ClientNewWizard() {
           </p>
         </div>
         <div className="hero-actions">
-          <button className="btn btn-ghost btn-sm" data-stub="Annuler">Annuler</button>
+          <button type="button" className="btn btn-ghost btn-sm" onClick={() => router.back()}>
+            Annuler
+          </button>
         </div>
       </div>
+
+      <form ref={formRef} onSubmit={(e) => e.preventDefault()}>
+      {/* Type de structure : seul « Cabinet direct » est sélectionnable dans la maquette. */}
+      <input type="hidden" name="category" value="cabinet_direct" />
 
       <div className="info-bar">
         <svg><use href="#i-info" /></svg>
@@ -146,7 +180,7 @@ export function ClientNewWizard() {
             </div>
           </div>
           <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "18px" }}>
-            <button className="btn btn-gold" onClick={() => goToWizardStep(2)}>Continuer vers Identité <svg><use href="#i-arrow-right" /></svg></button>
+            <button type="button" className="btn btn-gold" onClick={() => goToWizardStep(2)}>Continuer vers Identité <svg><use href="#i-arrow-right" /></svg></button>
           </div>
         </div>
       </div>
@@ -166,25 +200,25 @@ export function ClientNewWizard() {
         </div>
         <div className="wizard-step-body">
           <div className="form-row">
-            <div className="form-group"><label className="form-label">Raison sociale<span className="req">*</span></label><input className="form-input" defaultValue="Patrimoine Conseil Avignon SAS" /></div>
-            <div className="form-group"><label className="form-label">Nom commercial</label><input className="form-input" defaultValue="Patrimoine Conseil" /></div>
+            <div className="form-group"><label className="form-label">Raison sociale<span className="req">*</span></label><input name="raison_sociale" className="form-input" defaultValue="Patrimoine Conseil Avignon SAS" required /></div>
+            <div className="form-group"><label className="form-label">Nom commercial</label><input name="nom_commercial" className="form-input" defaultValue="Patrimoine Conseil" /></div>
           </div>
           <div className="form-row-3">
-            <div className="form-group"><label className="form-label">SIREN<span className="req">*</span></label><input className="form-input" defaultValue="892 547 318" /><div className="form-help">Vérifié auprès de l&apos;INSEE ✓</div></div>
-            <div className="form-group"><label className="form-label">Statut juridique</label><select className="form-select" defaultValue="SAS"><option>SAS</option><option>SARL</option><option>SA</option><option>SCP</option></select></div>
-            <div className="form-group"><label className="form-label">Numéro ORIAS<span className="req">*</span></label><input className="form-input" defaultValue="24 002 845" /><div className="form-help">CIF + Courtier en assurance</div></div>
+            <div className="form-group"><label className="form-label">SIREN<span className="req">*</span></label><input name="siren" className="form-input" defaultValue="892 547 318" required /><div className="form-help">Vérifié auprès de l&apos;INSEE ✓</div></div>
+            <div className="form-group"><label className="form-label">Statut juridique</label><select name="statut_juridique" className="form-select" defaultValue="SAS"><option>SAS</option><option>SARL</option><option>SA</option><option>SCP</option></select></div>
+            <div className="form-group"><label className="form-label">Numéro ORIAS<span className="req">*</span></label><input name="numero_orias" className="form-input" defaultValue="24 002 845" /><div className="form-help">CIF + Courtier en assurance</div></div>
           </div>
           <div className="form-row">
-            <div className="form-group"><label className="form-label">Adresse siège<span className="req">*</span></label><input className="form-input" defaultValue="42 boulevard Saint-Roch, 84000 Avignon" /></div>
-            <div className="form-group"><label className="form-label">Représentant légal<span className="req">*</span></label><input className="form-input" defaultValue="Marc DELORME" /></div>
+            <div className="form-group"><label className="form-label">Adresse siège<span className="req">*</span></label><input name="adresse_siege" className="form-input" defaultValue="42 boulevard Saint-Roch, 84000 Avignon" required /></div>
+            <div className="form-group"><label className="form-label">Représentant légal<span className="req">*</span></label><input name="representant_legal" className="form-input" defaultValue="Marc DELORME" required /></div>
           </div>
           <div className="form-row">
-            <div className="form-group"><label className="form-label">Email principal<span className="req">*</span></label><input className="form-input" defaultValue="m.delorme@patrimoine-avignon.fr" /></div>
-            <div className="form-group"><label className="form-label">Téléphone</label><input className="form-input" defaultValue="04 90 12 34 56" /></div>
+            <div className="form-group"><label className="form-label">Email principal<span className="req">*</span></label><input name="email_principal" type="email" className="form-input" defaultValue="m.delorme@patrimoine-avignon.fr" required /></div>
+            <div className="form-group"><label className="form-label">Téléphone</label><input name="telephone" className="form-input" defaultValue="04 90 12 34 56" /></div>
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", marginTop: "18px" }}>
-            <button className="btn btn-ghost" onClick={() => goToWizardStep(1)}>← Retour</button>
-            <button className="btn btn-gold" onClick={() => goToWizardStep(3)}>Continuer vers Configuration <svg><use href="#i-arrow-right" /></svg></button>
+            <button type="button" className="btn btn-ghost" onClick={() => goToWizardStep(1)}>← Retour</button>
+            <button type="button" className="btn btn-gold" onClick={() => goToWizardStep(3)}>Continuer vers Configuration <svg><use href="#i-arrow-right" /></svg></button>
           </div>
         </div>
       </div>
@@ -205,23 +239,23 @@ export function ClientNewWizard() {
         <div className="wizard-step-body">
           <div className="form-row">
             <div className="form-group"><label className="form-label">Sous-domaine<span className="req">*</span></label>
-              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}><input className="form-input" defaultValue="patrimoine-avignon" style={{ flex: 1 }} /><span style={{ fontSize: "12px", color: "var(--navy-300)" }}>.astraeos.fr</span></div>
+              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}><input name="sous_domaine" className="form-input" defaultValue="patrimoine-avignon" style={{ flex: 1 }} /><span style={{ fontSize: "12px", color: "var(--navy-300)" }}>.astraeos.fr</span></div>
               <div className="form-help">URL d&apos;accès des ingénieurs : https://patrimoine-avignon.astraeos.fr</div>
             </div>
-            <div className="form-group"><label className="form-label">Nom de marque affiché</label><input className="form-input" defaultValue="Patrimoine Conseil" /><div className="form-help">Visible dans l&apos;interface ingénieur et clients finaux</div></div>
+            <div className="form-group"><label className="form-label">Nom de marque affiché</label><input name="nom_marque" className="form-input" defaultValue="Patrimoine Conseil" /><div className="form-help">Visible dans l&apos;interface ingénieur et clients finaux</div></div>
           </div>
           <div className="form-row-3">
-            <div className="form-group"><label className="form-label">Couleur principale</label><input type="color" className="form-input" defaultValue="#102D50" style={{ height: "40px" }} /></div>
-            <div className="form-group"><label className="form-label">Couleur d&apos;accent</label><input type="color" className="form-input" defaultValue="#C68E0E" style={{ height: "40px" }} /></div>
-            <div className="form-group"><label className="form-label">Logo</label><button className="btn btn-ghost" style={{ width: "100%", justifyContent: "center" }} data-stub="Téléverser"><svg><use href="#i-download" /></svg>Téléverser</button></div>
+            <div className="form-group"><label className="form-label">Couleur principale</label><input name="couleur_principale" type="color" className="form-input" defaultValue="#102D50" style={{ height: "40px" }} /></div>
+            <div className="form-group"><label className="form-label">Couleur d&apos;accent</label><input name="couleur_accent" type="color" className="form-input" defaultValue="#C68E0E" style={{ height: "40px" }} /></div>
+            <div className="form-group"><label className="form-label">Logo</label><div className="form-help" style={{ marginTop: "10px" }}>Le logo se téléverse depuis la fiche client, une fois celle-ci créée.</div></div>
           </div>
           <div className="form-row">
-            <div className="form-group"><label className="form-label">Mode de facturation<span className="req">*</span></label><select className="form-select" defaultValue="Mensuel · prélèvement automatique"><option>Mensuel · prélèvement automatique</option><option>Mensuel · virement</option><option>Annuel · 1 paiement</option></select></div>
-            <div className="form-group"><label className="form-label">Date d&apos;activation<span className="req">*</span></label><input type="date" className="form-input" defaultValue="2026-05-15" /></div>
+            <div className="form-group"><label className="form-label">Mode de facturation<span className="req">*</span></label><select name="mode_facturation" className="form-select" defaultValue="Mensuel · prélèvement automatique"><option>Mensuel · prélèvement automatique</option><option>Mensuel · virement</option><option>Annuel · 1 paiement</option></select></div>
+            <div className="form-group"><label className="form-label">Date d&apos;activation<span className="req">*</span></label><input name="date_activation" type="date" className="form-input" defaultValue="2026-05-15" /></div>
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", marginTop: "18px" }}>
-            <button className="btn btn-ghost" onClick={() => goToWizardStep(2)}>← Retour</button>
-            <button className="btn btn-gold" onClick={() => goToWizardStep(4)}>Continuer vers Packs <svg><use href="#i-arrow-right" /></svg></button>
+            <button type="button" className="btn btn-ghost" onClick={() => goToWizardStep(2)}>← Retour</button>
+            <button type="button" className="btn btn-gold" onClick={() => goToWizardStep(4)}>Continuer vers Packs <svg><use href="#i-arrow-right" /></svg></button>
           </div>
         </div>
       </div>
@@ -246,7 +280,7 @@ export function ClientNewWizard() {
             <tbody>
               {packs.map((p) => (
                 <tr key={p.pack}>
-                  <td><input type="checkbox" defaultChecked={p.checked} /></td>
+                  <td><input type="checkbox" name="packs" value={p.pack} defaultChecked={p.checked} /></td>
                   <td className="cell-primary">{p.pack}</td>
                   <td><span className={p.badge}>{p.type}</span></td>
                   <td className={p.priceClass}>{p.price}</td>
@@ -255,8 +289,8 @@ export function ClientNewWizard() {
             </tbody>
           </table>
           <div style={{ display: "flex", justifyContent: "space-between", marginTop: "18px" }}>
-            <button className="btn btn-ghost" onClick={() => goToWizardStep(3)}>← Retour</button>
-            <button className="btn btn-gold" onClick={() => goToWizardStep(5)}>Continuer vers Ingénieurs <svg><use href="#i-arrow-right" /></svg></button>
+            <button type="button" className="btn btn-ghost" onClick={() => goToWizardStep(3)}>← Retour</button>
+            <button type="button" className="btn btn-gold" onClick={() => goToWizardStep(5)}>Continuer vers Ingénieurs <svg><use href="#i-arrow-right" /></svg></button>
           </div>
         </div>
       </div>
@@ -284,15 +318,15 @@ export function ClientNewWizard() {
                   <td className="cell-primary">{i.nom}</td>
                   <td>{i.email}</td>
                   <td><span className={i.roleClass}>{i.role}</span></td>
-                  <td className="center"><button className="btn btn-ghost btn-sm" data-stub="Modifier">Modifier</button></td>
+                  <td className="center"><button type="button" className="btn btn-ghost btn-sm" data-stub="Modifier">Modifier</button></td>
                 </tr>
               ))}
             </tbody>
           </table>
-          <button className="btn btn-ghost btn-sm" style={{ marginTop: "12px" }} data-stub="Ajouter un ingénieur"><svg><use href="#i-new" /></svg>Ajouter un ingénieur</button>
+          <button type="button" className="btn btn-ghost btn-sm" style={{ marginTop: "12px" }} data-stub="Ajouter un ingénieur"><svg><use href="#i-new" /></svg>Ajouter un ingénieur</button>
           <div style={{ display: "flex", justifyContent: "space-between", marginTop: "18px" }}>
-            <button className="btn btn-ghost" onClick={() => goToWizardStep(4)}>← Retour</button>
-            <button className="btn btn-gold" onClick={() => goToWizardStep(6)}>Continuer vers Validation <svg><use href="#i-arrow-right" /></svg></button>
+            <button type="button" className="btn btn-ghost" onClick={() => goToWizardStep(4)}>← Retour</button>
+            <button type="button" className="btn btn-gold" onClick={() => goToWizardStep(6)}>Continuer vers Validation <svg><use href="#i-arrow-right" /></svg></button>
           </div>
         </div>
       </div>
@@ -326,18 +360,28 @@ export function ClientNewWizard() {
               <div className="card-body">
                 <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                   {documents.map((d) => (
-                    <button className="btn btn-ghost" style={{ justifyContent: "flex-start" }} key={d} data-stub={d}><svg><use href="#i-doc" /></svg>{d}</button>
+                    <button type="button" className="btn btn-ghost" style={{ justifyContent: "flex-start" }} key={d} data-stub={d}><svg><use href="#i-doc" /></svg>{d}</button>
                   ))}
                 </div>
               </div>
             </div>
           </div>
+          {error && (
+            <div className="info-bar" style={{ marginTop: "16px", borderColor: "var(--red-text)", color: "var(--red-text)", background: "var(--red-bg)" }} role="alert">
+              <svg><use href="#i-info" /></svg>
+              <div><strong>Création impossible :</strong> {error}</div>
+            </div>
+          )}
           <div style={{ display: "flex", justifyContent: "space-between", marginTop: "18px" }}>
-            <button className="btn btn-ghost" onClick={() => goToWizardStep(5)}>← Retour</button>
-            <button className="btn btn-gold" style={{ fontWeight: 700 }} data-stub="Activer le client maintenant"><svg><use href="#i-success" /></svg>Activer le client maintenant</button>
+            <button type="button" className="btn btn-ghost" onClick={() => goToWizardStep(5)}>← Retour</button>
+            <button type="button" className="btn btn-gold" style={{ fontWeight: 700 }} onClick={handleActivate} disabled={submitting}>
+              <svg><use href="#i-success" /></svg>
+              {submitting ? "Activation…" : "Activer le client maintenant"}
+            </button>
           </div>
         </div>
       </div>
+      </form>
     </>
   );
 }

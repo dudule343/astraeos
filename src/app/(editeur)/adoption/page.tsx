@@ -3,6 +3,9 @@
 // <div id="page-adoption">, lignes 1605-1656. Données EN DUR = valeurs d'exemple
 // de la maquette (pas branché Supabase). Pattern + détails : (editeur)/README.md.
 import { EditeurTopbar } from "../_components/EditeurTopbar";
+import { fetchAdoption, fmtCount } from "./data";
+
+export const dynamic = "force-dynamic";
 
 type TopUser = {
   rank: number;
@@ -62,7 +65,25 @@ const TOP_USERS: TopUser[] = [
   },
 ];
 
-export default function Page() {
+export default async function Page() {
+  // Source réelle = profils internes + activité (timeline_events / last_login_at)
+  // + études livrées et entretiens. Les métriques sans source (actifs jour,
+  // sessions/utilisateur, durée de session, temps cumulé, étoiles) restent en
+  // repli sur les valeurs d'exemple ou en état vide honnête.
+  const a = await fetchAdoption();
+  const topUsers: TopUser[] =
+    a.topUsers.length > 0
+      ? a.topUsers.map((u) => ({
+          rank: u.rank,
+          engineer: u.name,
+          cabinet: u.cabinet ?? "—",
+          sessions: u.entretiens > 0 ? String(u.entretiens) : "—",
+          time: "—",
+          studies: u.etudesLivrees > 0 ? String(u.etudesLivrees) : "—",
+          stars: "—",
+        }))
+      : TOP_USERS;
+
   return (
     <>
       <EditeurTopbar current="Adoption produit" />
@@ -105,14 +126,16 @@ export default function Page() {
             <div className="kpi">
               <span className="phase-tag p1">PHASE 1</span>
               <div className="kpi-label">Utilisateurs actifs semaine</div>
-              <div className="kpi-value">158</div>
+              <div className="kpi-value">{a.hasData ? fmtCount(a.actifs7j) : "158"}</div>
               <div className="kpi-meta">7 derniers jours</div>
             </div>
             <div className="kpi">
               <span className="phase-tag p1">PHASE 1</span>
               <div className="kpi-label">Utilisateurs actifs mois</div>
-              <div className="kpi-value">214</div>
-              <div className="kpi-meta">sur ~280 ingénieurs créés</div>
+              <div className="kpi-value">{a.hasData ? fmtCount(a.actifs30j) : "214"}</div>
+              <div className="kpi-meta">
+                sur {a.hasData ? a.usersCrees : "~280"} ingénieurs créés
+              </div>
             </div>
             <div className="kpi">
               <span className="phase-tag p1">PHASE 1</span>
@@ -152,7 +175,7 @@ export default function Page() {
             <div className="kpi">
               <span className="phase-tag p1">PHASE 1</span>
               <div className="kpi-label">Utilisateurs dormants</div>
-              <div className="kpi-value">68</div>
+              <div className="kpi-value">{a.hasData ? fmtCount(a.dormants) : "68"}</div>
               <div className="kpi-meta">aucune connexion 30 jours</div>
             </div>
           </div>
@@ -179,7 +202,7 @@ export default function Page() {
                 </tr>
               </thead>
               <tbody>
-                {TOP_USERS.map((u) => (
+                {topUsers.map((u) => (
                   <tr key={u.rank}>
                     <td>{u.rank}</td>
                     <td className="cell-primary">{u.engineer}</td>

@@ -3,6 +3,11 @@
 // <div id="page-acquisition">, lignes 1491-1604. Données EN DUR = valeurs d'exemple
 // de la maquette (pas branché Supabase). Pattern + détails : (editeur)/README.md.
 import { EditeurTopbar } from "../_components/EditeurTopbar";
+import { fetchAcquisition, fmtInt, fmtPct } from "./data";
+
+export const dynamic = "force-dynamic";
+
+type FunnelView = { label: string; width: number; num: string; pct: string; gold: boolean };
 
 const FUNNEL_STAGES = [
   { label: "Visiteurs site web", width: 100, num: "4 280", pct: "100 %", gold: false },
@@ -109,7 +114,42 @@ const SOURCE_ROWS: {
   },
 ];
 
-export default function Page() {
+export default async function Page() {
+  // Source réelle = pipeline des dossiers du cabinet (funnel + conversion).
+  // Les volumes marketing amont (visiteurs web, leads, essais) et les coûts
+  // par canal n'ont aucune source en base → repli sur les valeurs d'exemple.
+  const data = await fetchAcquisition();
+
+  const funnelStages: FunnelView[] = data.hasData
+    ? data.funnel.map((f) => ({
+        label: f.label,
+        width: f.width,
+        num: f.count.toLocaleString("fr-FR"),
+        pct: `${f.pct} %`,
+        gold: f.highlight,
+      }))
+    : FUNNEL_STAGES.map((s) => ({ ...s }));
+
+  const volumeKpis = data.hasData
+    ? VOLUME_KPIS.map((kpi) =>
+        kpi.label === "Clients convertis"
+          ? { ...kpi, value: fmtInt(data.clientsConvertisMois) }
+          : kpi,
+      )
+    : VOLUME_KPIS;
+
+  const conversionKpis = data.hasData
+    ? CONVERSION_KPIS.map((kpi) => {
+        if (kpi.label === "Durée moyenne de conversion") {
+          return { ...kpi, value: `${fmtInt(data.dureeConversionJours ?? 0)} ` };
+        }
+        if (kpi.label === "Taux de conversion global") {
+          return { ...kpi, value: `${fmtPct(data.tauxConversion)} ` };
+        }
+        return kpi;
+      })
+    : CONVERSION_KPIS;
+
   return (
     <>
       <EditeurTopbar current="Acquisition & conversion" />
@@ -144,7 +184,7 @@ export default function Page() {
               30 jours ▾
             </button>
           </div>
-          {FUNNEL_STAGES.map((stage) => (
+          {funnelStages.map((stage) => (
             <div
               key={stage.label}
               className="funnel-stage"
@@ -179,7 +219,7 @@ export default function Page() {
             </div>
           </div>
           <div className="kpis">
-            {VOLUME_KPIS.map((kpi) => (
+            {volumeKpis.map((kpi) => (
               <div className="kpi" key={kpi.label}>
                 <span className="phase-tag p1">PHASE 1</span>
                 <div className="kpi-label">{kpi.label}</div>
@@ -189,7 +229,7 @@ export default function Page() {
             ))}
           </div>
           <div className="kpis kpis-3" style={{ marginTop: "12px" }}>
-            {CONVERSION_KPIS.map((kpi) => (
+            {conversionKpis.map((kpi) => (
               <div className="kpi" key={kpi.label}>
                 <span className="phase-tag p1">PHASE 1</span>
                 <div className="kpi-label">{kpi.label}</div>
