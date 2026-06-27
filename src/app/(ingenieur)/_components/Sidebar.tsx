@@ -204,7 +204,7 @@ const SECTIONS: Section[] = [
     ],
   },
   {
-    title: "Support",
+    title: "Modifications",
     items: [
       { href: `${BASE}/modifications`, label: "Signaler un problème", icon: "edit" },
     ],
