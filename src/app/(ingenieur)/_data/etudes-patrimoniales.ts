@@ -56,6 +56,8 @@ export type EtudePersonne = {
   employer: string | null;
   employmentStatus: string | null;
   tmi: number | null;
+  phone: string | null;
+  email: string | null;
 };
 
 /** Composition et régime du foyer (pré-rempli depuis `clients`). */
@@ -274,6 +276,8 @@ function normalizePersonne(raw: unknown): EtudePersonne {
     employer: asString(r.employer),
     employmentStatus: asString(r.employmentStatus),
     tmi: asNumber(r.tmi),
+    phone: asString(r.phone),
+    email: asString(r.email),
   };
 }
 

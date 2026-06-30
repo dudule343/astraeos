@@ -217,6 +217,8 @@ export async function seedDonneesFromClient(clientId: string): Promise<EtudeDonn
           employer: p.employer,
           employmentStatus: p.employment_status,
           tmi: p.tmi_estimated,
+          phone: p.phone,
+          email: p.email,
         })),
       };
     }

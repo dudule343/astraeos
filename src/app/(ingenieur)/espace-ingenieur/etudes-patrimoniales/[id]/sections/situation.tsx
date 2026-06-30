@@ -435,7 +435,7 @@ export function SituationFoyer({ donnees }: { donnees: EtudeDonnees }): ReactNod
                       <PhoneIcon />
                       <span>
                         <span className="who">{prenomCourt(p)}</span>
-                        <span className="val">{DASH}</span>
+                        <span className="val">{p.phone ?? DASH}</span>
                       </span>
                     </div>
                   ))
@@ -456,7 +456,7 @@ export function SituationFoyer({ donnees }: { donnees: EtudeDonnees }): ReactNod
                       <MailIcon />
                       <span>
                         <span className="who">{prenomCourt(p)}</span>
-                        <span className="val">{DASH}</span>
+                        <span className="val">{p.email ?? DASH}</span>
                       </span>
                     </div>
                   ))
