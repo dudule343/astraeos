@@ -110,7 +110,7 @@
   background: var(--gold);
   opacity: 0.5;
 }.maq-qualification .section-title {
-  font-family: 'Cormorant Garamond', 'Georgia', serif;
+  font-family: var(--font-cormorant), 'Georgia', serif;
   font-size: 44px;
   font-weight: 500;
   color: var(--navy);
@@ -146,7 +146,7 @@
   font-weight: 700;
   margin-bottom: 8px;
 }.maq-qualification .product-def-text {
-  font-family: 'Cormorant Garamond', 'Georgia', serif;
+  font-family: var(--font-cormorant), 'Georgia', serif;
   font-size: 18px;
   color: var(--navy);
   font-weight: 500;
@@ -292,7 +292,7 @@
   padding: 26px 32px;
   margin-bottom: 28px;
 }.maq-qualification .info-block-title {
-  font-family: 'Cormorant Garamond', 'Georgia', serif;
+  font-family: var(--font-cormorant), 'Georgia', serif;
   font-size: 18px;
   color: var(--navy);
   font-weight: 600;
@@ -315,7 +315,7 @@
   padding: 28px 32px;
   margin-bottom: 28px;
 }.maq-qualification .guide-title {
-  font-family: 'Cormorant Garamond', 'Georgia', serif;
+  font-family: var(--font-cormorant), 'Georgia', serif;
   font-size: 18px;
   color: var(--navy);
   font-weight: 600;
@@ -342,7 +342,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: 'Cormorant Garamond', serif;
+  font-family: var(--font-cormorant), serif;
   font-size: 12px;
   font-weight: 700;
   flex-shrink: 0;
@@ -427,7 +427,7 @@
   border-left: 2px solid var(--gold);
 }.maq-qualification .conditional.visible { display: block; animation: condIn 0.3s ease; }
 @keyframes condIn { from { opacity: 0; } to { opacity: 1; } }.maq-qualification .conditional-title {
-  font-family: 'Cormorant Garamond', 'Georgia', serif;
+  font-family: var(--font-cormorant), 'Georgia', serif;
   font-size: 16px;
   color: var(--navy);
   font-weight: 600;
@@ -469,7 +469,7 @@
   color: var(--navy);
   border: 1px solid var(--navy-100);
 }.maq-qualification .nav-btn.prev:hover { background: var(--ivory); border-color: var(--navy); }.maq-qualification .nav-btn.next { background: var(--navy); color: var(--ivory); }.maq-qualification .nav-btn.next:hover { background: var(--navy-700); }.maq-qualification .nav-btn.next.final { background: var(--gold); color: var(--navy); }.maq-qualification .nav-btn.next.final:hover { background: var(--gold-light); }.maq-qualification .nav-btn:disabled { opacity: 0.35; cursor: not-allowed; }.maq-qualification .nav-btn svg { width: 14px; height: 14px; stroke-width: 2; }.maq-qualification .nav-step-indicator {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: var(--font-cormorant), serif;
   font-style: italic;
   font-size: 14px;
   color: var(--navy-300);
@@ -493,7 +493,7 @@
   align-items: center;
   gap: 14px;
 }.maq-qualification .welcome-mark svg { width: 38px; height: 38px; }.maq-qualification .welcome-line { width: 64px; height: 1px; background: var(--gold); margin: 0 auto 36px; }.maq-qualification .welcome-name {
-  font-family: 'Cormorant Garamond', 'Georgia', serif;
+  font-family: var(--font-cormorant), 'Georgia', serif;
   font-size: 38px;
   color: var(--navy);
   margin-bottom: 18px;
@@ -524,7 +524,7 @@
   font-weight: 700;
   margin-bottom: 12px;
 }.maq-qualification .profile-result-name {
-  font-family: 'Cormorant Garamond', 'Georgia', serif;
+  font-family: var(--font-cormorant), 'Georgia', serif;
   font-size: 36px;
   color: var(--navy);
   font-weight: 500;
@@ -543,7 +543,7 @@
   padding: 28px 32px;
   margin-bottom: 28px;
 }.maq-qualification .signature-block-title {
-  font-family: 'Cormorant Garamond', 'Georgia', serif;
+  font-family: var(--font-cormorant), 'Georgia', serif;
   font-size: 18px;
   color: var(--navy);
   font-weight: 600;
@@ -636,7 +636,7 @@
   border-left: none; border-top: none;
   border-radius: 0 0 16px 0;
 }.maq-qualification .final-seal { width: 100px; height: 100px; margin: 0 auto 36px; }.maq-qualification .final-seal svg { width: 100%; height: 100%; }.maq-qualification .final-line { width: 80px; height: 1px; background: var(--gold); margin: 0 auto 30px; }.maq-qualification .final-title {
-  font-family: 'Cormorant Garamond', 'Georgia', serif;
+  font-family: var(--font-cormorant), 'Georgia', serif;
   font-size: 46px;
   color: var(--navy);
   margin-bottom: 24px;

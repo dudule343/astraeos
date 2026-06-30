@@ -29,7 +29,7 @@
   margin-bottom: 10px;
 }
 .maquette-ing .hero-title {
-  font-family: var(--serif, "Cormorant Garamond", serif);
+  font-family: var(--serif, var(--font-cormorant), serif);
   font-size: 38px;
   font-weight: 600;
   color: var(--navy);

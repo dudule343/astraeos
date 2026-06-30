@@ -133,7 +133,7 @@
   background: var(--gold);
   opacity: 0.5;
 }.maq-dci-simplifie .section-title {
-  font-family: 'Cormorant Garamond', 'Georgia', serif;
+  font-family: var(--font-cormorant), 'Georgia', serif;
   font-size: 44px;
   font-weight: 500;
   color: var(--navy);
@@ -180,13 +180,13 @@
   border: 1px solid var(--gold);
   color: var(--gold);
   border-radius: 50%;
-  font-family: 'Cormorant Garamond', 'Georgia', serif;
+  font-family: var(--font-cormorant), 'Georgia', serif;
   font-size: 14px;
   font-weight: 700;
   flex-shrink: 0;
   margin-top: 2px;
 }.maq-dci-simplifie .q-block-text { flex: 1; }.maq-dci-simplifie .q-block-title {
-  font-family: 'Cormorant Garamond', 'Georgia', serif;
+  font-family: var(--font-cormorant), 'Georgia', serif;
   font-size: 22px;
   font-weight: 600;
   color: var(--navy);
@@ -408,7 +408,7 @@
   left: 24px;
   background: var(--ivory-card);
   padding: 0 10px;
-  font-family: 'Cormorant Garamond', serif;
+  font-family: var(--font-cormorant), serif;
   font-size: 13px;
   font-weight: 700;
   color: var(--gold);
@@ -470,7 +470,7 @@
   flex-shrink: 0;
   color: var(--gold);
 }.maq-dci-simplifie .accordion-head-icon-bg svg { width: 20px; height: 20px; stroke-width: 1.6; }.maq-dci-simplifie .accordion-head-text { flex: 1; }.maq-dci-simplifie .accordion-head-title {
-  font-family: 'Cormorant Garamond', 'Georgia', serif;
+  font-family: var(--font-cormorant), 'Georgia', serif;
   font-size: 19px;
   color: var(--navy);
   font-weight: 600;
@@ -570,7 +570,7 @@
   color: var(--navy-300);
   letter-spacing: 0.18em;
   font-weight: 600;
-  font-family: 'Cormorant Garamond', serif;
+  font-family: var(--font-cormorant), serif;
   font-style: italic;
   font-size: 14px;
   letter-spacing: 0.06em;
@@ -618,7 +618,7 @@
   background: var(--gold);
   margin: 0 auto 26px;
 }.maq-dci-simplifie .welcome-name {
-  font-family: 'Cormorant Garamond', 'Georgia', serif;
+  font-family: var(--font-cormorant), 'Georgia', serif;
   font-size: 36px;
   color: var(--navy);
   margin-bottom: 20px;
@@ -653,7 +653,7 @@
   margin: 0 auto 16px;
   color: var(--gold);
 }.maq-dci-simplifie .info-card-icon svg { width: 100%; height: 100%; stroke-width: 1.4; }.maq-dci-simplifie .info-card-title {
-  font-family: 'Cormorant Garamond', 'Georgia', serif;
+  font-family: var(--font-cormorant), 'Georgia', serif;
   font-size: 16px;
   font-weight: 600;
   color: var(--navy);
@@ -670,7 +670,7 @@
   padding: 26px 32px;
   margin-bottom: 32px;
 }.maq-dci-simplifie .rgpd-title {
-  font-family: 'Cormorant Garamond', 'Georgia', serif;
+  font-family: var(--font-cormorant), 'Georgia', serif;
   font-size: 18px;
   color: var(--navy);
   font-weight: 600;
@@ -777,7 +777,7 @@
   font-weight: 700;
   margin-bottom: 8px;
 }.maq-dci-simplifie .recap-hero-name {
-  font-family: 'Cormorant Garamond', 'Georgia', serif;
+  font-family: var(--font-cormorant), 'Georgia', serif;
   font-size: 26px;
   font-weight: 600;
   font-style: italic;
@@ -800,7 +800,7 @@
   font-weight: 700;
   margin-bottom: 8px;
 }.maq-dci-simplifie .recap-hero-side-value {
-  font-family: 'Cormorant Garamond', 'Georgia', serif;
+  font-family: var(--font-cormorant), 'Georgia', serif;
   font-size: 30px;
   font-weight: 600;
   font-style: italic;
@@ -812,7 +812,7 @@
   color: var(--text-muted);
   font-style: italic;
 }.maq-dci-simplifie .recap-section-title {
-  font-family: 'Cormorant Garamond', 'Georgia', serif;
+  font-family: var(--font-cormorant), 'Georgia', serif;
   font-size: 22px;
   color: var(--navy);
   font-style: italic;
@@ -845,7 +845,7 @@
   font-weight: 600;
   text-align: right;
 }.maq-dci-simplifie .recap-line-amount {
-  font-family: 'Cormorant Garamond', 'Georgia', serif;
+  font-family: var(--font-cormorant), 'Georgia', serif;
   font-size: 15px;
   font-weight: 600;
 }.maq-dci-simplifie .recap-line-positive { color: var(--gold); }.maq-dci-simplifie .recap-line.recap-line-neg .recap-line-val { color: #C0392B; }.maq-dci-simplifie .recap-objective {
@@ -864,7 +864,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: 'Cormorant Garamond', 'Georgia', serif;
+  font-family: var(--font-cormorant), 'Georgia', serif;
   font-size: 14px;
   font-weight: 700;
   flex-shrink: 0;
@@ -967,7 +967,7 @@
   background: var(--gold);
   margin: 0 auto 30px;
 }.maq-dci-simplifie .final-title {
-  font-family: 'Cormorant Garamond', 'Georgia', serif;
+  font-family: var(--font-cormorant), 'Georgia', serif;
   font-size: 46px;
   color: var(--navy);
   margin-bottom: 24px;

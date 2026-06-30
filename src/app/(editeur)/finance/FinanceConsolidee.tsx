@@ -709,7 +709,7 @@ export function FinanceConsolidee({ real }: { real: FinanceView | null }) {
                   {item.formula && (
                     <span
                       style={{
-                        fontFamily: "'JetBrains Mono', monospace",
+                        fontFamily: "var(--font-jetbrains), monospace",
                         fontSize: "11px",
                         color: "var(--medium-400)",
                         background: "var(--ivory)",

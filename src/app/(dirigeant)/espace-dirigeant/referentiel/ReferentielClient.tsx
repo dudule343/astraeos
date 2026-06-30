@@ -594,7 +594,7 @@ export function ReferentielClient() {
             >
               <div
                 style={{
-                  fontFamily: "'Cormorant Garamond', serif",
+                  fontFamily: "var(--font-cormorant), serif",
                   fontSize: 22,
                   fontWeight: 600,
                 }}
@@ -627,7 +627,7 @@ export function ReferentielClient() {
             >
               <div
                 style={{
-                  fontFamily: "'Cormorant Garamond', serif",
+                  fontFamily: "var(--font-cormorant), serif",
                   fontSize: 22,
                   fontWeight: 600,
                   color: "var(--gold)",

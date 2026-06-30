@@ -859,7 +859,7 @@ function PublicPreviewModal({
           </h2>
           <p className="s1a-modal-sub">
             Page accessible sur{" "}
-            <span style={{ fontFamily: "'JetBrains Mono', monospace" }}>
+            <span style={{ fontFamily: "var(--font-jetbrains), monospace" }}>
               {link}
             </span>{" "}
             · seuls les types publics et actifs y figurent.

@@ -75,7 +75,7 @@ export function Sections19to22() {
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v3M12 18v3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M3 12h3M18 12h3M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1" /><circle cx="12" cy="12" r="3" /></svg>
             </div>
             <div>
-              <div style={{ fontFamily: "'Cormorant Garamond', 'Georgia', serif", fontSize: '18px', color: 'var(--navy)', fontWeight: 600, marginBottom: '4px' }}>Capacité d&apos;épargne estimée par an</div>
+              <div style={{ fontFamily: "var(--font-cormorant), 'Georgia', serif", fontSize: '18px', color: 'var(--navy)', fontWeight: 600, marginBottom: '4px' }}>Capacité d&apos;épargne estimée par an</div>
               <div style={{ fontSize: '13.5px', color: 'var(--text-soft)', lineHeight: 1.6 }}>D&apos;après vos réponses : environ <strong style={{ color: 'var(--navy)', fontWeight: 700 }}>80 000 € par an</strong> · soit <strong style={{ color: 'var(--navy)', fontWeight: 700 }}>6 700 € par mois</strong>.</div>
             </div>
           </div>

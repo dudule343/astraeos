@@ -63,7 +63,7 @@ export function IdentiteClient() {
             >
               <div
                 style={{
-                  fontFamily: "'Cormorant Garamond', serif",
+                  fontFamily: "var(--font-cormorant), serif",
                   fontSize: "28px",
                   fontWeight: 600,
                   letterSpacing: "0.04em",
@@ -100,7 +100,7 @@ export function IdentiteClient() {
             >
               <div
                 style={{
-                  fontFamily: "'Cormorant Garamond', serif",
+                  fontFamily: "var(--font-cormorant), serif",
                   fontSize: "28px",
                   fontWeight: 600,
                   color: "var(--gold)",
@@ -137,7 +137,7 @@ export function IdentiteClient() {
             >
               <div
                 style={{
-                  fontFamily: "'Cormorant Garamond', serif",
+                  fontFamily: "var(--font-cormorant), serif",
                   fontSize: "28px",
                   fontWeight: 600,
                   color: "var(--navy)",
@@ -188,7 +188,7 @@ export function IdentiteClient() {
               ></div>
               <div
                 style={{
-                  fontFamily: "'Cormorant Garamond', serif",
+                  fontFamily: "var(--font-cormorant), serif",
                   fontSize: "24px",
                   fontWeight: 600,
                 }}
@@ -309,7 +309,7 @@ export function IdentiteClient() {
               <div className="kpi-label">Display · titres</div>
               <div
                 style={{
-                  fontFamily: "'Cormorant Garamond', serif",
+                  fontFamily: "var(--font-cormorant), serif",
                   fontSize: "28px",
                   fontWeight: 600,
                   color: "var(--navy)",
@@ -394,7 +394,7 @@ export function IdentiteClient() {
                   display: "grid",
                   placeItems: "center",
                   color: "white",
-                  fontFamily: "'Cormorant Garamond', serif",
+                  fontFamily: "var(--font-cormorant), serif",
                   fontSize: "18px",
                   marginBottom: "10px",
                 }}
@@ -430,7 +430,7 @@ export function IdentiteClient() {
                   display: "grid",
                   placeItems: "center",
                   color: "var(--gold)",
-                  fontFamily: "'Cormorant Garamond', serif",
+                  fontFamily: "var(--font-cormorant), serif",
                   fontSize: "18px",
                   marginBottom: "10px",
                 }}
@@ -465,7 +465,7 @@ export function IdentiteClient() {
                   display: "grid",
                   placeItems: "center",
                   color: "var(--navy)",
-                  fontFamily: "'Cormorant Garamond', serif",
+                  fontFamily: "var(--font-cormorant), serif",
                   fontSize: "18px",
                   marginBottom: "10px",
                 }}

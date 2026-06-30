@@ -456,7 +456,7 @@
 }
 
 .maquette-ing .ref-comm-logo {
-  font-family: "Cormorant Garamond", Georgia, serif;
+  font-family: var(--font-cormorant), Georgia, serif;
   font-size: 22px;
   font-weight: 600;
 }
