@@ -18,6 +18,7 @@
 import { type ReactNode } from "react";
 
 import { Bloc } from "../Bloc";
+import ValeurEditable from "../ValeurEditable";
 import {
   EMPLOYMENT_STATUS_LABELS,
   MARITAL_REGIME_LABELS,
@@ -480,7 +481,15 @@ export function SituationFoyer({ donnees }: { donnees: EtudeDonnees }): ReactNod
         <div className="fc-card">
           <div className="fc-top">{foyerFiscalLine(donnees)}</div>
           <div className="fc-parts">
-            <span className="fc-n">{DASH}</span> parts fiscales
+            <span className="fc-n">
+              <ValeurEditable
+                vKey="foyer_parts_fiscales"
+                format="number"
+                initial={donnees.valeurs["foyer_parts_fiscales"] ?? null}
+                label="Parts fiscales du foyer"
+              />
+            </span>{" "}
+            parts fiscales
           </div>
           <div className="fc-sub">{residenceFiscaleLine(f.taxResidency)}</div>
         </div>

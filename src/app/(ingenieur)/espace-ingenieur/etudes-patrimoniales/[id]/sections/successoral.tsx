@@ -33,12 +33,21 @@
 import { type ReactNode } from "react";
 
 import { Bloc } from "../Bloc";
+import ValeurEditable from "../ValeurEditable";
+import type { ValeurFormat } from "../format-valeur";
 import { MARITAL_REGIME_LABELS, formatFicheDate } from "../../../../_data/fiche-client";
 import type { EtudeDonnees } from "../../../../_data/etudes-patrimoniales";
 
 import "../../../../_styles/sections/successoral.css";
 
-const DASH = "—";
+/**
+ * Montant du patrimoine saisi par l'ingénieur, persisté dans donnees.valeurs via
+ * setValeur. Les montants successoraux n'existent pas en base : tous sont saisis
+ * par client, jamais recopiés des chiffres d'exemple de la maquette.
+ */
+function montant(donnees: EtudeDonnees, vKey: string, format: ValeurFormat = "euro") {
+  return <ValeurEditable vKey={vKey} format={format} initial={donnees.valeurs[vKey] ?? null} />;
+}
 
 // ---------------------------------------------------------------------------
 // Dérivations honnêtes depuis le réel
@@ -250,7 +259,7 @@ function AttributionPreferentielleBloc({ monsieur, madame }: { monsieur: string;
 // (présent dans le module « simulations » ET rappelé dans la synthèse)
 // ---------------------------------------------------------------------------
 
-function DroitsSuccessionBloc({ regime }: { regime: string | null }) {
+function DroitsSuccessionBloc({ regime, donnees }: { regime: string | null; donnees: EtudeDonnees }) {
   return (
     <Bloc blocKey="Droits de succession" className="ablock fold">
       <div className="ab-h">
@@ -275,7 +284,8 @@ function DroitsSuccessionBloc({ regime }: { regime: string | null }) {
             </li>
             <li>
               Le montant total des droits de succession au second décès est estimé entre{" "}
-              <strong>{DASH}</strong> et <strong>{DASH}</strong> selon l’ordre des décès.
+              <strong>{montant(donnees, "succ_droits_total_min")}</strong> et{" "}
+              <strong>{montant(donnees, "succ_droits_total_max")}</strong> selon l’ordre des décès.
             </li>
             <li>
               Les testaments olographes peuvent prévoir l’attribution de la quotité disponible maximale
@@ -322,8 +332,10 @@ function DroitsSuccessionBloc({ regime }: { regime: string | null }) {
             <CheckCircle /> Justification
           </div>
           <p>
-            Les droits de succession au second décès, estimés entre <strong>{DASH}</strong> et{" "}
-            <strong>{DASH}</strong> selon l’ordre des départs, pèsent sur un patrimoine peu liquide et
+            Les droits de succession au second décès, estimés entre{" "}
+            <strong>{montant(donnees, "succ_droits_total_min")}</strong> et{" "}
+            <strong>{montant(donnees, "succ_droits_total_max")}</strong> selon l’ordre des départs,
+            pèsent sur un patrimoine peu liquide et
             largement professionnel.
           </p>
         </div>
@@ -358,16 +370,38 @@ const SIM_HEADERS = [
 
 const SIM_COLS = [14, 9.5, 9, 9.5, 9, 9.5, 9, 9.5, 9.5, 11];
 
-type SimRow = { name: string; cells: boolean[] };
+/** Slug stable de chaque colonne de montant (ordre = SIM_HEADERS). */
+const SIM_COL_SLUGS = [
+  "masse_transmise",
+  "masse_taxable",
+  "droits",
+  "masse_nette",
+  "av_recue",
+  "taxe_990i",
+  "av_nette",
+  "total_recu",
+  "tranche",
+];
+
+/** La dernière colonne (« Tranche atteinte ») est un pourcentage, le reste des euros. */
+function simColFormat(ci: number): ValeurFormat {
+  return ci === SIM_COL_SLUGS.length - 1 ? "percent" : "euro";
+}
+
+type SimRow = { name: string; rowKey: string; cells: boolean[] };
 
 function SimTable({
   blocKey,
+  prefix,
   rows,
   foot,
+  donnees,
 }: {
   blocKey: string;
+  prefix: string;
   rows: SimRow[];
   foot: boolean[];
+  donnees: EtudeDonnees;
 }) {
   return (
     <Bloc blocKey={blocKey}>
@@ -389,8 +423,8 @@ function SimTable({
             </tr>
           </thead>
           <tbody>
-            {rows.map((r, ri) => (
-              <tr key={ri}>
+            {rows.map((r) => (
+              <tr key={r.rowKey}>
                 <td>
                   <div className="cell ed" data-fmt="txt">
                     {r.name}
@@ -399,8 +433,8 @@ function SimTable({
                 {r.cells.map((active, ci) => (
                   <td key={ci} className="num">
                     {active ? (
-                      <div className="cell ed" data-fmt="txt">
-                        {DASH}
+                      <div className="cell" data-fmt="txt">
+                        {montant(donnees, `${prefix}_${r.rowKey}_${SIM_COL_SLUGS[ci]}`, simColFormat(ci))}
                       </div>
                     ) : (
                       <div className="cell ed mt" />
@@ -415,7 +449,9 @@ function SimTable({
               <td>Total</td>
               {foot.map((active, ci) => (
                 <td key={ci} className="num">
-                  {active ? DASH : null}
+                  {active
+                    ? montant(donnees, `${prefix}_total_${SIM_COL_SLUGS[ci]}`, simColFormat(ci))
+                    : null}
                 </td>
               ))}
             </tr>
@@ -430,19 +466,22 @@ function SimTable({
 // Bloc « Détail du calcul » (méthode reproduite, montants « — »)
 // ---------------------------------------------------------------------------
 
-type BaremeRow = { f: ReactNode; t: string };
+type BaremeRow = { f: ReactNode; t: string; rate: string };
 
-function baremeRows(topTranche: 4 | 5): BaremeRow[] {
+function baremeRows(topTranche: 4 | 5, n: 1 | 2 | 3 | 4, donnees: EtudeDonnees): BaremeRow[] {
+  // La borne supérieure ouverte de la dernière tranche = la base nette taxable du
+  // client : on réutilise la même clé pour garder une source unique.
+  const base = montant(donnees, `succ_det${n}_base_nette_taxable`);
   const rows: BaremeRow[] = [
-    { f: "jusqu’à 8 072 €", t: "5 %" },
-    { f: "de 8 072 € à 12 109 €", t: "10 %" },
-    { f: "de 12 109 € à 15 932 €", t: "15 %" },
+    { f: "jusqu’à 8 072 €", t: "5 %", rate: "tr5" },
+    { f: "de 8 072 € à 12 109 €", t: "10 %", rate: "tr10" },
+    { f: "de 12 109 € à 15 932 €", t: "15 %", rate: "tr15" },
   ];
   if (topTranche === 4) {
-    rows.push({ f: <>de 15 932 € à {DASH}</>, t: "20 %" });
+    rows.push({ f: <>de 15 932 € à {base}</>, t: "20 %", rate: "tr20" });
   } else {
-    rows.push({ f: "de 15 932 € à 552 324 €", t: "20 %" });
-    rows.push({ f: <>de 552 324 € à {DASH}</>, t: "30 %" });
+    rows.push({ f: "de 15 932 € à 552 324 €", t: "20 %", rate: "tr20" });
+    rows.push({ f: <>de 552 324 € à {base}</>, t: "30 %", rate: "tr30" });
   }
   return rows;
 }
@@ -452,11 +491,13 @@ function DetailCalcul({
   conjoint,
   topTranche,
   hasAV,
+  donnees,
 }: {
   n: 1 | 2 | 3 | 4;
   conjoint: string | null;
   topTranche: 4 | 5;
   hasAV: boolean;
+  donnees: EtudeDonnees;
 }) {
   return (
     <div className="succ-detail" id={`succ-det-${n}`} hidden>
@@ -486,7 +527,7 @@ function DetailCalcul({
           <tbody>
             <tr>
               <td className="sb-l">Part nette taxable revenant à chaque enfant</td>
-              <td className="sb-m">{DASH}</td>
+              <td className="sb-m">{montant(donnees, `succ_det${n}_part_nette_taxable`)}</td>
             </tr>
             <tr>
               <td className="sb-l">
@@ -497,7 +538,7 @@ function DetailCalcul({
             </tr>
             <tr className="sb-base">
               <td className="sb-l">Base nette taxable</td>
-              <td className="sb-m">{DASH}</td>
+              <td className="sb-m">{montant(donnees, `succ_det${n}_base_nette_taxable`)}</td>
             </tr>
           </tbody>
         </table>
@@ -514,22 +555,23 @@ function DetailCalcul({
             </tr>
           </thead>
           <tbody>
-            {baremeRows(topTranche).map((r, i) => (
-              <tr key={i}>
+            {baremeRows(topTranche, n, donnees).map((r) => (
+              <tr key={r.rate}>
                 <td className="sb-f">{r.f}</td>
                 <td className="sb-t">{r.t}</td>
-                <td className="sb-m">{DASH}</td>
+                <td className="sb-m">{montant(donnees, `succ_det${n}_droits_${r.rate}`)}</td>
               </tr>
             ))}
             <tr className="sb-tot">
               <td colSpan={2}>Droits dus par chaque enfant</td>
-              <td className="sb-m">{DASH}</td>
+              <td className="sb-m">{montant(donnees, `succ_det${n}_droits_par_enfant`)}</td>
             </tr>
           </tbody>
         </table>
         <p className="sd-txt">
           Les deux enfants étant dans une situation identique, le total des droits de succession
-          s’établit à {DASH} × 2 = <b>{DASH}</b>{" "}
+          s’établit à {montant(donnees, `succ_det${n}_droits_par_enfant`)} × 2 ={" "}
+          <b>{montant(donnees, `succ_det${n}_droits_total`)}</b>{" "}
           <span className="sb-ref">
             montants arrondis à l’euro, article 1649 undecies du Code général des impôts
           </span>
@@ -550,15 +592,15 @@ function DetailCalcul({
             <tbody>
               <tr>
                 <td className="sb-l">Capital reçu par chaque enfant</td>
-                <td className="sb-m">{DASH}</td>
+                <td className="sb-m">{montant(donnees, `succ_det${n}_av_capital_par_enfant`)}</td>
               </tr>
               <tr>
                 <td className="sb-l">Prélèvement dû par chaque enfant</td>
-                <td className="sb-m">{DASH}</td>
+                <td className="sb-m">{montant(donnees, `succ_det${n}_av_prelevement_par_enfant`)}</td>
               </tr>
               <tr className="sb-tot">
                 <td>Total du prélèvement (2 bénéficiaires)</td>
-                <td className="sb-m">{DASH}</td>
+                <td className="sb-m">{montant(donnees, `succ_det${n}_av_prelevement_total`)}</td>
               </tr>
             </tbody>
           </table>
@@ -569,22 +611,23 @@ function DetailCalcul({
         <span className="sd-cg-f">
           {hasAV ? (
             <>
-              Droits de succession {DASH} + prélèvement assurance-vie {DASH}
+              Droits de succession {montant(donnees, `succ_det${n}_droits_total`)} + prélèvement
+              assurance-vie {montant(donnees, `succ_det${n}_av_prelevement_total`)}
             </>
           ) : (
             <>Total des droits de succession</>
           )}
         </span>
-        <span className="sd-cg-v">{DASH}</span>
+        <span className="sd-cg-v">{montant(donnees, `succ_t${n}_cout_global`)}</span>
       </div>
     </div>
   );
 }
 
-function CoutGlobal() {
+function CoutGlobal({ n, donnees }: { n: 1 | 2 | 3 | 4; donnees: EtudeDonnees }) {
   return (
     <p className="succ-cout">
-      Le coût global à la succession s’élève à <b>{DASH}</b>.
+      Le coût global à la succession s’élève à <b>{montant(donnees, `succ_t${n}_cout_global`)}</b>.
     </p>
   );
 }
@@ -892,62 +935,70 @@ export default function SuccessoralSection({ donnees }: { donnees: EtudeDonnees 
             </div>
             <SimTable
               blocKey="Tableau — décès de Monsieur en premier"
+              prefix="succ_t1"
+              donnees={donnees}
               rows={[
-                { name: madame, cells: [true, true, false, true, true, false, false, true, false] },
-                { name: enfant1, cells: [true, true, true, true, false, false, false, true, true] },
-                { name: enfant2, cells: [true, true, true, true, false, false, false, true, true] },
+                { name: madame, rowKey: "conjoint", cells: [true, true, false, true, true, false, false, true, false] },
+                { name: enfant1, rowKey: "enfant1", cells: [true, true, true, true, false, false, false, true, true] },
+                { name: enfant2, rowKey: "enfant2", cells: [true, true, true, true, false, false, false, true, true] },
               ]}
               foot={[true, true, true, true, true, false, false, false, false]}
             />
-            <CoutGlobal />
+            <CoutGlobal n={1} donnees={donnees} />
             <DetailButton n={1} />
-            <DetailCalcul n={1} conjoint={madame} topTranche={4} hasAV={false} />
+            <DetailCalcul n={1} conjoint={madame} topTranche={4} hasAV={false} donnees={donnees} />
 
             <div className="subttl anchor" id="succ-t2">
               <SwapIcon /> Décès de {madame} en second
             </div>
             <SimTable
               blocKey="Tableau — décès de Madame en second"
+              prefix="succ_t2"
+              donnees={donnees}
               rows={[
-                { name: enfant1, cells: [true, true, true, true, true, true, true, true, true] },
-                { name: enfant2, cells: [true, true, true, true, true, true, true, true, true] },
+                { name: enfant1, rowKey: "enfant1", cells: [true, true, true, true, true, true, true, true, true] },
+                { name: enfant2, rowKey: "enfant2", cells: [true, true, true, true, true, true, true, true, true] },
               ]}
               foot={[true, true, true, true, true, true, false, false, false]}
             />
-            <CoutGlobal />
+            <CoutGlobal n={2} donnees={donnees} />
             <DetailButton n={2} />
-            <DetailCalcul n={2} conjoint={null} topTranche={5} hasAV />
+            <DetailCalcul n={2} conjoint={null} topTranche={5} hasAV donnees={donnees} />
 
             <div className="subttl anchor" id="succ-t3">
               <SwapIcon /> Décès de {madame} en premier (application du testament)
             </div>
             <SimTable
               blocKey="Tableau — décès de Madame en premier"
+              prefix="succ_t3"
+              donnees={donnees}
               rows={[
-                { name: monsieur, cells: [true, true, false, true, true, false, true, true, false] },
-                { name: enfant1, cells: [true, true, true, true, false, false, false, true, true] },
-                { name: enfant2, cells: [true, true, true, true, false, false, false, true, true] },
+                { name: monsieur, rowKey: "conjoint", cells: [true, true, false, true, true, false, true, true, false] },
+                { name: enfant1, rowKey: "enfant1", cells: [true, true, true, true, false, false, false, true, true] },
+                { name: enfant2, rowKey: "enfant2", cells: [true, true, true, true, false, false, false, true, true] },
               ]}
               foot={[true, true, true, true, true, false, false, false, false]}
             />
-            <CoutGlobal />
+            <CoutGlobal n={3} donnees={donnees} />
             <DetailButton n={3} />
-            <DetailCalcul n={3} conjoint={monsieur} topTranche={4} hasAV={false} />
+            <DetailCalcul n={3} conjoint={monsieur} topTranche={4} hasAV={false} donnees={donnees} />
 
             <div className="subttl anchor" id="succ-t4">
               <SwapIcon /> Décès de {monsieur} en second
             </div>
             <SimTable
               blocKey="Tableau — décès de Monsieur en second"
+              prefix="succ_t4"
+              donnees={donnees}
               rows={[
-                { name: enfant1, cells: [true, true, true, true, true, true, true, true, true] },
-                { name: enfant2, cells: [true, true, true, true, true, true, true, true, true] },
+                { name: enfant1, rowKey: "enfant1", cells: [true, true, true, true, true, true, true, true, true] },
+                { name: enfant2, rowKey: "enfant2", cells: [true, true, true, true, true, true, true, true, true] },
               ]}
               foot={[true, true, true, true, true, true, false, false, false]}
             />
-            <CoutGlobal />
+            <CoutGlobal n={4} donnees={donnees} />
             <DetailButton n={4} />
-            <DetailCalcul n={4} conjoint={null} topTranche={5} hasAV />
+            <DetailCalcul n={4} conjoint={null} topTranche={5} hasAV donnees={donnees} />
 
             <div className="subttl anchor" id="succ-rio-s">
               <svg viewBox="0 0 24 24" fill="none" stroke="#102D50" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
@@ -960,7 +1011,7 @@ export default function SuccessoralSection({ donnees }: { donnees: EtudeDonnees 
               </svg>{" "}
               Risques et opportunités
             </div>
-            <DroitsSuccessionBloc regime={regime} />
+            <DroitsSuccessionBloc regime={regime} donnees={donnees} />
           </div>
         </div>
       </div>
@@ -1024,8 +1075,8 @@ export default function SuccessoralSection({ donnees }: { donnees: EtudeDonnees 
                       </div>
                     </td>
                     <td className="num">
-                      <div className="cell ed succ-gold" data-fmt="txt">
-                        {DASH}
+                      <div className="cell succ-gold" data-fmt="txt">
+                        {montant(donnees, "succ_synth_droits_total_mr_premier")}
                       </div>
                     </td>
                   </tr>
@@ -1046,8 +1097,8 @@ export default function SuccessoralSection({ donnees }: { donnees: EtudeDonnees 
                       </div>
                     </td>
                     <td className="num">
-                      <div className="cell ed succ-gold" data-fmt="txt">
-                        {DASH}
+                      <div className="cell succ-gold" data-fmt="txt">
+                        {montant(donnees, "succ_synth_droits_total_mme_premier")}
                       </div>
                     </td>
                   </tr>
@@ -1073,7 +1124,7 @@ export default function SuccessoralSection({ donnees }: { donnees: EtudeDonnees 
             </Bloc>
 
             <AttributionPreferentielleBloc monsieur={monsieur} madame={madame} />
-            <DroitsSuccessionBloc regime={regime} />
+            <DroitsSuccessionBloc regime={regime} donnees={donnees} />
 
             <div className="synthacc">
               <div className="subttl anchor synth-h" id="succ-synth">
@@ -1112,8 +1163,10 @@ export default function SuccessoralSection({ donnees }: { donnees: EtudeDonnees 
                   régime de retraite obligatoire.
                 </p>
                 <p>
-                  Le coût successoral se concentre au second décès, estimé entre <b>{DASH}</b> et{" "}
-                  <b>{DASH}</b> selon l’ordre des départs. Deux leviers principaux ressortent : la
+                  Le coût successoral se concentre au second décès, estimé entre{" "}
+                  <b>{montant(donnees, "succ_droits_total_min")}</b> et{" "}
+                  <b>{montant(donnees, "succ_droits_total_max")}</b> selon l’ordre des départs. Deux
+                  leviers principaux ressortent : la
                   constitution de liquidités pour sécuriser l’attribution préférentielle de la résidence
                   principale, et la révision des clauses bénéficiaires d’assurance-vie, en clause
                   usuelle, qui prive les enfants de leurs abattements de 152 500 € dès le premier décès.
@@ -1123,7 +1176,9 @@ export default function SuccessoralSection({ donnees }: { donnees: EtudeDonnees 
                     <div className="spr-h">Principaux risques</div>
                     <ul>
                       <li>
-                        Coût successoral élevé au second décès ({DASH} à {DASH}).
+                        Coût successoral élevé au second décès (
+                        {montant(donnees, "succ_droits_total_min")} à{" "}
+                        {montant(donnees, "succ_droits_total_max")}).
                       </li>
                       <li>
                         Clause bénéficiaire usuelle privant les enfants de leurs abattements de

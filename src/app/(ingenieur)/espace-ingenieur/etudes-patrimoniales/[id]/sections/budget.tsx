@@ -27,6 +27,8 @@ import "../../../../_styles/sections/budget.css";
 import { type ReactNode } from "react";
 
 import { Bloc } from "../Bloc";
+import ValeurEditable from "../ValeurEditable";
+import type { ValeurFormat } from "../format-valeur";
 import type { EtudeDonnees } from "../../../../_data/etudes-patrimoniales";
 
 const DASH = "—";
@@ -41,14 +43,6 @@ const CAT_STYLE = {
   letterSpacing: ".3px",
   padding: "7px 11px",
 } as const;
-
-/** Montant éditable lu dans le dictionnaire de valeurs, « — » si absent. */
-function fmtEuro(v: string | number | null | undefined): string {
-  if (v == null) return DASH;
-  if (typeof v === "number") return Number.isFinite(v) ? `${v.toLocaleString("fr-FR")} €` : DASH;
-  const s = String(v).trim();
-  return s === "" ? DASH : s;
-}
 
 /** Œil des badges de confiance (CERTIF). */
 function EyeIcon() {
@@ -117,9 +111,8 @@ function SubtotalRow() {
   );
 }
 
-/** Ligne de total (libellé + quatre montants, la dernière colonne pouvant être branchée). */
-function TotalRow({ label, total }: { label: string; total?: string }) {
-  const cells = [DASH, DASH, DASH, total ?? DASH];
+/** Ligne de total (libellé + quatre montants éditables Monsieur/Madame/Commun/Total). */
+function TotalRow({ label, cells }: { label: string; cells: ReactNode[] }) {
   return (
     <tr>
       <td>
@@ -139,8 +132,10 @@ function TotalRow({ label, total }: { label: string; total?: string }) {
 }
 
 export default function BudgetSection({ donnees }: { donnees: EtudeDonnees }) {
-  const revenus = fmtEuro(donnees.valeurs["revenus_annuels_foyer"]);
-  const charges = fmtEuro(donnees.valeurs["charges_annuelles"]);
+  /** Montant éditable lu dans donnees.valeurs (persisté via setValeur). */
+  const mt = (vKey: string, format: ValeurFormat) => (
+    <ValeurEditable vKey={vKey} format={format} initial={donnees.valeurs[vKey] ?? null} />
+  );
 
   return (
     <div className="immo-mod">
@@ -190,11 +185,13 @@ export default function BudgetSection({ donnees }: { donnees: EtudeDonnees }) {
                 maxWidth: "780px",
               }}
             >
-              Le foyer perçoit des revenus annuels de <strong>{revenus}</strong>, pour des charges de{" "}
-              <strong>{charges}</strong> (hors remboursements d’emprunt) et un service de la dette de{" "}
-              <strong>{DASH}</strong>. Il en résulte une capacité d’épargne de <strong>{DASH}</strong>.
-              La composition des revenus et leur répartition entre les membres du foyer restent à
-              préciser dans le détail ci-dessous.
+              Le foyer perçoit des revenus annuels de{" "}
+              <strong>{mt("revenus_annuels_foyer", "euro")}</strong>, pour des charges de{" "}
+              <strong>{mt("charges_annuelles", "euro")}</strong> (hors remboursements d’emprunt) et un
+              service de la dette de <strong>{mt("budget_service_dette_annuel", "euro")}</strong>. Il en
+              résulte une capacité d’épargne de{" "}
+              <strong>{mt("budget_capacite_epargne_an", "euro")}</strong>. La composition des revenus et
+              leur répartition entre les membres du foyer restent à préciser dans le détail ci-dessous.
             </p>
           </Bloc>
 
@@ -239,7 +236,15 @@ export default function BudgetSection({ donnees }: { donnees: EtudeDonnees }) {
               <SubtotalRow />
             </tbody>
             <tfoot>
-              <TotalRow label="Total des revenus" total={revenus} />
+              <TotalRow
+                label="Total des revenus"
+                cells={[
+                  mt("budget_revenus_total_monsieur", "euro"),
+                  mt("budget_revenus_total_madame", "euro"),
+                  mt("budget_revenus_total_commun", "euro"),
+                  mt("revenus_annuels_foyer", "euro"),
+                ]}
+              />
             </tfoot>
           </table>
           <div className="note" style={{ marginTop: "9px" }}>
@@ -316,20 +321,32 @@ export default function BudgetSection({ donnees }: { donnees: EtudeDonnees }) {
                     <strong>Service de la dette</strong>
                   </div>
                 </td>
-                {[0, 1, 2, 3].map((i) => (
+                {[
+                  mt("budget_service_dette_monsieur", "euro"),
+                  mt("budget_service_dette_madame", "euro"),
+                  mt("budget_service_dette_commun", "euro"),
+                  mt("budget_service_dette_annuel", "euro"),
+                ].map((c, i) => (
                   <td className="num" key={i}>
                     <div className="cell" data-fmt="txt">
-                      <strong>{DASH}</strong>
+                      <strong>{c}</strong>
                     </div>
                   </td>
                 ))}
               </tr>
             </tbody>
             <tfoot>
-              {/* Le total « charges + remboursements » n'a pas de clé dédiée en base
-                  (charges_annuelles s'entend hors service de la dette, cf. synthèse) :
-                  état vide honnête plutôt qu'un montant mal étiqueté. */}
-              <TotalRow label="Total des charges et remboursements" />
+              {/* charges_annuelles s'entend hors service de la dette (cf. synthèse) ;
+                  ce total « charges + remboursements » a donc sa propre clé éditable. */}
+              <TotalRow
+                label="Total des charges et remboursements"
+                cells={[
+                  mt("budget_charges_remb_monsieur", "euro"),
+                  mt("budget_charges_remb_madame", "euro"),
+                  mt("budget_charges_remb_commun", "euro"),
+                  mt("budget_charges_remboursements_total", "euro"),
+                ]}
+              />
             </tfoot>
           </table>
           <div className="note" style={{ marginTop: "9px" }}>
@@ -348,7 +365,7 @@ export default function BudgetSection({ donnees }: { donnees: EtudeDonnees }) {
           </div>
           <div className="kpirow">
             <div className="kpi">
-              <div className="kv">{DASH}</div>
+              <div className="kv">{mt("budget_taux_effort", "percent")}</div>
               <div className="kl">
                 Taux d’effort
                 <span className="kinfo">
@@ -368,7 +385,7 @@ export default function BudgetSection({ donnees }: { donnees: EtudeDonnees }) {
               </div>
             </div>
             <div className="kpi">
-              <div className="kv">{DASH}</div>
+              <div className="kv">{mt("budget_taux_endettement", "percent")}</div>
               <div className="kl">
                 Taux d’endettement
                 <span className="kinfo">
@@ -389,7 +406,7 @@ export default function BudgetSection({ donnees }: { donnees: EtudeDonnees }) {
               </div>
             </div>
             <div className="kpi">
-              <div className="kv">{DASH}</div>
+              <div className="kv">{mt("budget_reste_a_vivre_mois", "euro")}</div>
               <div className="kl">
                 Reste à vivre / mois
                 <span className="kinfo">
@@ -409,7 +426,7 @@ export default function BudgetSection({ donnees }: { donnees: EtudeDonnees }) {
               </div>
             </div>
             <div className="kpi">
-              <div className="kv">{DASH}</div>
+              <div className="kv">{mt("budget_capacite_epargne_an", "euro")}</div>
               <div className="kl">
                 Capacité d’épargne / an
                 <span className="kinfo">
@@ -564,10 +581,12 @@ export default function BudgetSection({ donnees }: { donnees: EtudeDonnees }) {
               </svg>
             </span>
             <p>
-              Le foyer dégage une <strong>capacité d’épargne de {DASH} par an</strong> (environ {DASH}{" "}
-              par mois), soit <strong>{DASH}</strong> de ses revenus. Le taux d’effort, une fois les
-              montants saisis, conditionnera la <strong>capacité d’endettement</strong> disponible pour
-              financer de nouveaux projets.
+              Le foyer dégage une{" "}
+              <strong>capacité d’épargne de {mt("budget_capacite_epargne_an", "euro")} par an</strong>{" "}
+              (environ {mt("budget_capacite_epargne_mois", "euro")} par mois), soit{" "}
+              <strong>{mt("budget_capacite_epargne_pct_revenus", "percent")}</strong> de ses revenus. Le
+              taux d’effort, une fois les montants saisis, conditionnera la{" "}
+              <strong>capacité d’endettement</strong> disponible pour financer de nouveaux projets.
             </p>
           </div>
 
@@ -608,8 +627,11 @@ export default function BudgetSection({ donnees }: { donnees: EtudeDonnees }) {
                 </div>
                 <ul className="dlist">
                   <li>
-                    Le foyer dégage <strong>{DASH} d’épargne par an</strong> (environ {DASH} par
-                    mois), soit <strong>{DASH}</strong> de ses revenus.
+                    Le foyer dégage{" "}
+                    <strong>{mt("budget_capacite_epargne_an", "euro")} d’épargne par an</strong>{" "}
+                    (environ {mt("budget_capacite_epargne_mois", "euro")} par mois), soit{" "}
+                    <strong>{mt("budget_capacite_epargne_pct_revenus", "percent")}</strong> de ses
+                    revenus.
                   </li>
                   <li>
                     Laissé sur des comptes peu rémunérés, cet excédent ne contribue pas à la
@@ -646,8 +668,9 @@ export default function BudgetSection({ donnees }: { donnees: EtudeDonnees }) {
                   Impact quantifié
                 </div>
                 <p>
-                  Réorientés vers des supports rémunérés, ces <strong>{DASH} annuels</strong>{" "}
-                  représentent, capitalisés, un levier patrimonial majeur sur 10 à 20 ans.
+                  Réorientés vers des supports rémunérés, ces{" "}
+                  <strong>{mt("budget_capacite_epargne_an", "euro")} annuels</strong> représentent,
+                  capitalisés, un levier patrimonial majeur sur 10 à 20 ans.
                 </p>
               </div>
               <div className="dim">
@@ -701,8 +724,9 @@ export default function BudgetSection({ donnees }: { donnees: EtudeDonnees }) {
                 </div>
                 <ul className="dlist">
                   <li>
-                    Les activités libérales représentent <strong>{DASH}</strong> de revenus, soit une
-                    part majoritaire du total.
+                    Les activités libérales représentent{" "}
+                    <strong>{mt("budget_revenus_liberaux_montant", "euro")}</strong> de revenus, soit
+                    une part majoritaire du total.
                   </li>
                   <li>
                     Les charges courantes, les impôts et le service de la dette demeurent dus
@@ -739,8 +763,10 @@ export default function BudgetSection({ donnees }: { donnees: EtudeDonnees }) {
                   Impact quantifié
                 </div>
                 <p>
-                  Un revenu de remplacement adapté couvrirait les <strong>{DASH} de charges</strong> et{" "}
-                  <strong>{DASH}</strong> de service de la dette annuels en cas d’incapacité.
+                  Un revenu de remplacement adapté couvrirait les{" "}
+                  <strong>{mt("charges_annuelles", "euro")} de charges</strong> et{" "}
+                  <strong>{mt("budget_service_dette_annuel", "euro")}</strong> de service de la dette
+                  annuels en cas d’incapacité.
                 </p>
               </div>
               <div className="dim">
@@ -798,7 +824,7 @@ export default function BudgetSection({ donnees }: { donnees: EtudeDonnees }) {
                 <ul className="dlist">
                   <li>
                     Le taux d’effort, à comparer aux seuils d’octroi usuels (de l’ordre de 35 %),
-                    s’établit à <strong>{DASH}</strong>.
+                    s’établit à <strong>{mt("budget_taux_effort", "percent")}</strong>.
                   </li>
                   <li>Le foyer conserve donc une capacité d’endettement à apprécier.</li>
                 </ul>
@@ -889,25 +915,31 @@ export default function BudgetSection({ donnees }: { donnees: EtudeDonnees }) {
                 <span className="sc-link">Voir le détail</span>
               </div>
               <p>
-                Le budget du foyer est <b>structurellement excédentaire</b> dès lors que les revenus
-                ({revenus}) couvrent les charges ({charges}) et le service de la dette ({DASH}), libérant une
-                épargne annuelle ({DASH}, soit {DASH} des revenus). Le taux d’effort ({DASH}), apprécié
-                au regard des seuils d’octroi usuels, indiquera la capacité d’endettement
-                supplémentaire dont dispose le foyer.
+                Le budget du foyer est <b>structurellement excédentaire</b> dès lors que les revenus (
+                {mt("revenus_annuels_foyer", "euro")}) couvrent les charges (
+                {mt("charges_annuelles", "euro")}) et le service de la dette (
+                {mt("budget_service_dette_annuel", "euro")}), libérant une épargne annuelle (
+                {mt("budget_capacite_epargne_an", "euro")}, soit{" "}
+                {mt("budget_capacite_epargne_pct_revenus", "percent")} des revenus). Le taux d’effort (
+                {mt("budget_taux_effort", "percent")}), apprécié au regard des seuils d’octroi usuels,
+                indiquera la capacité d’endettement supplémentaire dont dispose le foyer.
               </p>
               <p>
-                Les revenus reposent pour une part majeure ({DASH}) sur les activités professionnelles
-                : cette concentration appelle une attention particulière sur la prévoyance et sur la
-                diversification progressive des revenus passifs, fonciers et financiers. Le patrimoine
-                d’investissement et les éventuelles SCI fournissent un socle de revenus complémentaires
-                appelé à monter en puissance.
+                Les revenus reposent pour une part majeure ({mt("budget_revenus_pro_pct", "percent")})
+                sur les activités professionnelles : cette concentration appelle une attention
+                particulière sur la prévoyance et sur la diversification progressive des revenus
+                passifs, fonciers et financiers. Le patrimoine d’investissement et les éventuelles SCI
+                fournissent un socle de revenus complémentaires appelé à monter en puissance.
               </p>
               <p>
-                Le <b>taux d’endettement élargi</b>, qui intègre les impôts et taxes ({DASH}), s’établit
-                à <b>{DASH}</b> : selon le niveau d’impôt sur le revenu ({DASH}), il indiquera si le
-                principal levier d’allègement du budget est d’ordre fiscal, à instruire dans le volet
-                dédié. Après remboursements et impôts, le <b>reste à vivre mensuel</b> ({DASH})
-                financera le train de vie et alimentera l’épargne.
+                Le <b>taux d’endettement élargi</b>, qui intègre les impôts et taxes (
+                {mt("budget_impots_taxes", "euro")}), s’établit à{" "}
+                <b>{mt("budget_taux_endettement", "percent")}</b> : selon le niveau d’impôt sur le
+                revenu ({mt("budget_impot_revenu", "euro")}), il indiquera si le principal levier
+                d’allègement du budget est d’ordre fiscal, à instruire dans le volet dédié. Après
+                remboursements et impôts, le <b>reste à vivre mensuel</b> (
+                {mt("budget_reste_a_vivre_mois", "euro")}) financera le train de vie et alimentera
+                l’épargne.
               </p>
               <div className="sp-recap">
                 <div className="spr spr-r">

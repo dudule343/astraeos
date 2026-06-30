@@ -25,6 +25,7 @@ import { MARITAL_REGIME_LABELS } from "../../../../_data/fiche-client";
 import type { EtudeDonnees } from "../../../../_data/etudes-patrimoniales";
 
 import { Bloc } from "../Bloc";
+import ValeurEditable from "../ValeurEditable";
 import "../../../../_styles/sections/patrimoine-synthese.css";
 
 const DASH = "—";
@@ -44,18 +45,6 @@ function eur(donnees: EtudeDonnees, key: string): string {
   const n = num(donnees, key);
   if (n == null) return DASH;
   return `${n.toLocaleString("fr-FR", { maximumFractionDigits: 0 })} €`;
-}
-
-function pct(donnees: EtudeDonnees, key: string): string {
-  const n = num(donnees, key);
-  if (n == null) return DASH;
-  return `${n.toLocaleString("fr-FR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} %`;
-}
-
-function mois(donnees: EtudeDonnees, key: string): string {
-  const n = num(donnees, key);
-  if (n == null) return DASH;
-  return `${n.toLocaleString("fr-FR", { maximumFractionDigits: 0 })} mois`;
 }
 
 function regimeLabel(donnees: EtudeDonnees): string {
@@ -195,8 +184,12 @@ function LegRow({
     <div className="lr" id={id}>
       <span className="sw" style={{ background: color }} />
       <span className="ll">{label}</span>
-      <span className="lv">{eur(donnees, valKey)}</span>
-      <span className="lp">{pct(donnees, pctKey)}</span>
+      <span className="lv">
+        <ValeurEditable vKey={valKey} format="euro" initial={donnees.valeurs[valKey] ?? null} />
+      </span>
+      <span className="lp">
+        <ValeurEditable vKey={pctKey} format="percent" initial={donnees.valeurs[pctKey] ?? null} />
+      </span>
     </div>
   );
 }
@@ -205,8 +198,12 @@ function LegRow({
 function MP({ donnees, valKey, pctKey }: { donnees: EtudeDonnees; valKey: string; pctKey: string }) {
   return (
     <>
-      <span className="m">{eur(donnees, valKey)}</span>
-      <span className="p">{pct(donnees, pctKey)}</span>
+      <span className="m">
+        <ValeurEditable vKey={valKey} format="euro" initial={donnees.valeurs[valKey] ?? null} />
+      </span>
+      <span className="p">
+        <ValeurEditable vKey={pctKey} format="percent" initial={donnees.valeurs[pctKey] ?? null} />
+      </span>
     </>
   );
 }
@@ -252,12 +249,16 @@ export default function PatrimoineSynthese({ donnees }: { donnees: EtudeDonnees 
         <div className="pstat-grid">
           <div className="pstat">
             <div className="pl">Patrimoine brut</div>
-            <div className="pv">{eur(donnees, "patrimoine_brut")}</div>
+            <div className="pv">
+              <ValeurEditable vKey="patrimoine_brut" format="euro" initial={donnees.valeurs["patrimoine_brut"] ?? null} />
+            </div>
             <div className="ps">Valeur totale des actifs</div>
           </div>
           <div className="pstat">
             <div className="pl">Passif</div>
-            <div className="pv">{eur(donnees, "passif_total")}</div>
+            <div className="pv">
+              <ValeurEditable vKey="passif_total" format="euro" initial={donnees.valeurs["passif_total"] ?? null} />
+            </div>
             <div className="ps">
               Emprunts et dettes{" "}
               <span className="info-i" data-tip="Somme des emprunts et des dettes">
@@ -267,7 +268,9 @@ export default function PatrimoineSynthese({ donnees }: { donnees: EtudeDonnees 
           </div>
           <div className="pstat net">
             <div className="pl">Patrimoine net</div>
-            <div className="pv">{eur(donnees, "patrimoine_net")}</div>
+            <div className="pv">
+              <ValeurEditable vKey="patrimoine_net" format="euro" initial={donnees.valeurs["patrimoine_net"] ?? null} />
+            </div>
             <div className="ps">
               Brut − passif{" "}
               <span className="info-i" data-tip="Patrimoine brut − Passif = Patrimoine net">
@@ -302,10 +305,16 @@ export default function PatrimoineSynthese({ donnees }: { donnees: EtudeDonnees 
               return (
                 <tr key={c.key}>
                   <td>{c.bilan}</td>
-                  <td className="num">{eur(donnees, c.key)}</td>
-                  <td className="pct">{pct(donnees, `${c.key}_pct`)}</td>
+                  <td className="num">
+                    <ValeurEditable vKey={c.key} format="euro" initial={donnees.valeurs[c.key] ?? null} />
+                  </td>
+                  <td className="pct">
+                    <ValeurEditable vKey={`${c.key}_pct`} format="percent" initial={donnees.valeurs[`${c.key}_pct`] ?? null} />
+                  </td>
                   <td className="sp">{p ? p.label : ""}</td>
-                  <td className="num">{p ? eur(donnees, p.key) : ""}</td>
+                  <td className="num">
+                    {p ? <ValeurEditable vKey={p.key} format="euro" initial={donnees.valeurs[p.key] ?? null} /> : ""}
+                  </td>
                 </tr>
               );
             })}
@@ -313,10 +322,16 @@ export default function PatrimoineSynthese({ donnees }: { donnees: EtudeDonnees 
           <tfoot>
             <tr>
               <td>Total actif</td>
-              <td className="num">{eur(donnees, "total_actif")}</td>
-              <td className="pct">{pct(donnees, "total_actif_pct")}</td>
+              <td className="num">
+                <ValeurEditable vKey="total_actif" format="euro" initial={donnees.valeurs["total_actif"] ?? null} />
+              </td>
+              <td className="pct">
+                <ValeurEditable vKey="total_actif_pct" format="percent" initial={donnees.valeurs["total_actif_pct"] ?? null} />
+              </td>
               <td className="sp">Total passif</td>
-              <td className="num">{eur(donnees, "total_passif")}</td>
+              <td className="num">
+                <ValeurEditable vKey="total_passif" format="euro" initial={donnees.valeurs["total_passif"] ?? null} />
+              </td>
             </tr>
           </tfoot>
         </table>
@@ -327,7 +342,9 @@ export default function PatrimoineSynthese({ donnees }: { donnees: EtudeDonnees 
               i
             </span>
           </span>
-          <span className="anet-v">{eur(donnees, "actif_net")}</span>
+          <span className="anet-v">
+            <ValeurEditable vKey="actif_net" format="euro" initial={donnees.valeurs["actif_net"] ?? null} />
+          </span>
         </div>
         <div className="chart-wrap">
           <div className="chart-title">Synthèse du patrimoine</div>
@@ -573,8 +590,20 @@ export default function PatrimoineSynthese({ donnees }: { donnees: EtudeDonnees 
           </span>
           <p>
             Il est usuellement recommandé de conserver l’équivalent de <b>3 à 6 mois de charges courantes</b>{" "}
-            en liquidités. Le foyer en détient <b>{eur(donnees, "liquidites")}</b>, soit environ{" "}
-            <b>{mois(donnees, "liquidites_couverture_mois")}</b> de charges — une trésorerie à comparer au
+            en liquidités. Le foyer en détient{" "}
+            <b>
+              <ValeurEditable vKey="liquidites" format="euro" initial={donnees.valeurs["liquidites"] ?? null} />
+            </b>
+            , soit environ{" "}
+            <b>
+              <ValeurEditable
+                vKey="liquidites_couverture_mois"
+                format="number"
+                initial={donnees.valeurs["liquidites_couverture_mois"] ?? null}
+              />{" "}
+              mois
+            </b>{" "}
+            de charges — une trésorerie à comparer au
             seuil de précaution habituel, dont l’éventuel excédent pourra être partiellement optimisé.
           </p>
         </div>
@@ -667,9 +696,15 @@ export default function PatrimoineSynthese({ donnees }: { donnees: EtudeDonnees 
           </span>
           <p>
             Sous le régime de la <b>{regimeLabel(donnees)}</b>, la répartition du patrimoine entre les
-            conjoints — <b>{pct(donnees, "total_actif_m_pct")}</b> pour Monsieur,{" "}
-            <b>{pct(donnees, "total_actif_mme_pct")}</b> pour Madame — sera appréciée pour identifier un
-            éventuel déséquilibre.
+            conjoints —{" "}
+            <b>
+              <ValeurEditable vKey="total_actif_m_pct" format="percent" initial={donnees.valeurs["total_actif_m_pct"] ?? null} />
+            </b>{" "}
+            pour Monsieur,{" "}
+            <b>
+              <ValeurEditable vKey="total_actif_mme_pct" format="percent" initial={donnees.valeurs["total_actif_mme_pct"] ?? null} />
+            </b>{" "}
+            pour Madame — sera appréciée pour identifier un éventuel déséquilibre.
           </p>
         </div>
       </Bloc>

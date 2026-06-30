@@ -29,6 +29,7 @@
 import type { ReactNode } from "react";
 
 import { Bloc } from "../Bloc";
+import ValeurEditable from "../ValeurEditable";
 import {
   householdNameFromDonnees,
   type EtudeDonnees,
@@ -36,14 +37,6 @@ import {
 import "../../../../_styles/sections/patrimoine-immobilier.css";
 
 const DASH = "—";
-
-/** Montant éditable du patrimoine : lu dans `donnees.valeurs`, « — » si absent. */
-function montant(donnees: EtudeDonnees, key: string): string {
-  const v = donnees.valeurs[key];
-  if (v == null || v === "") return DASH;
-  if (typeof v === "number") return `${new Intl.NumberFormat("fr-FR").format(v)} €`;
-  return v;
-}
 
 // ---------------------------------------------------------------------------
 // Icônes (chemins SVG repris tels quels de la maquette)
@@ -227,9 +220,12 @@ function DimHead({ icon, children }: { icon: ReactNode; children: ReactNode }) {
 
 export default function PatrimoineImmobilier({ donnees }: { donnees: EtudeDonnees }) {
   const noms = householdNameFromDonnees(donnees);
-  const crd = montant(donnees, "credit_capital_restant");
-  const rapport = montant(donnees, "immobilier_locatif");
-  const usage = montant(donnees, "residence_principale");
+  const eur = (k: string) => (
+    <ValeurEditable vKey={k} format="euro" initial={donnees.valeurs[k] ?? null} />
+  );
+  const pct = (k: string) => (
+    <ValeurEditable vKey={k} format="percent" initial={donnees.valeurs[k] ?? null} />
+  );
 
   return (
     <div className="immo-mod">
@@ -278,22 +274,22 @@ export default function PatrimoineImmobilier({ donnees }: { donnees: EtudeDonnee
           </div>
           <div className="kpirow">
             <div className="kpi">
-              <div className="kv" id="kpi-tot">{DASH}</div>
+              <div className="kv" id="kpi-tot">{eur("immo_valeur_totale")}</div>
               <div className="kl">
                 Valeur totale
                 <span className="kinfo" title="Hors sociétés — les biens détenus en SCI sont traités dans le thème Sociétés">i</span>
               </div>
             </div>
             <div className="kpi">
-              <div className="kv" id="kpi-usage">{usage}</div>
+              <div className="kv" id="kpi-usage">{eur("residence_principale")}</div>
               <div className="kl">Immobilier d’usage</div>
             </div>
             <div className="kpi">
-              <div className="kv" id="kpi-rapport">{rapport}</div>
+              <div className="kv" id="kpi-rapport">{eur("immobilier_locatif")}</div>
               <div className="kl">Immobilier de rapport</div>
             </div>
             <div className="kpi">
-              <div className="kv">{DASH}</div>
+              <div className="kv">{pct("immo_part_patrimoine_global")}</div>
               <div className="kl">du patrimoine global</div>
             </div>
           </div>
@@ -309,17 +305,17 @@ export default function PatrimoineImmobilier({ donnees }: { donnees: EtudeDonnee
           <div className="rpgrid">
             <div className="rpc">
               <div className="rl">Revenus locatifs bruts</div>
-              <div className="rv" id="rp-loy">{DASH}</div>
+              <div className="rv" id="rp-loy">{eur("immo_revenus_locatifs_bruts")}</div>
               <div className="rs">loyers annuels, hors charges</div>
             </div>
             <div className="rpc">
               <div className="rl">Rendement locatif net moyen</div>
-              <div className="rv">{DASH}</div>
+              <div className="rv">{pct("immo_rendement_net_moyen")}</div>
               <div className="rs">avant impôt, biens loués</div>
             </div>
             <div className="rpc glob">
               <div className="rl">Capital restant dû</div>
-              <div className="rv">{crd}</div>
+              <div className="rv">{eur("credit_capital_restant")}</div>
               <div className="rs">financements en cours</div>
             </div>
           </div>
@@ -439,7 +435,7 @@ export default function PatrimoineImmobilier({ donnees }: { donnees: EtudeDonnee
                 <span className="sub">appartement · résidence principale · immobilier d’usage</span>
               </div>
               <div className="amt">
-                <span>{DASH}</span>
+                <span>{eur("immo_rp_valeur")}</span>
               </div>
               <span className="chev">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
@@ -477,9 +473,9 @@ export default function PatrimoineImmobilier({ donnees }: { donnees: EtudeDonnee
                       <td><div className="cell ed" data-fmt="txt">{DASH}</div></td>
                       <td className="num"><div className="cell ed" data-fmt="txt">{DASH}</div></td>
                       <td><div className="cell ed" data-fmt="txt">{DASH}</div></td>
-                      <td className="num"><div className="cell ed bien-val" data-fmt="eur" data-cat="usage">{DASH}</div></td>
-                      <td className="num"><div className="cell ed" data-fmt="eur">{DASH}</div></td>
-                      <td className="num"><div className="cell ed" data-fmt="eur">{DASH}</div></td>
+                      <td className="num"><div className="cell bien-val" data-fmt="eur" data-cat="usage">{eur("immo_rp_valeur")}</div></td>
+                      <td className="num"><div className="cell" data-fmt="eur">{eur("immo_rp_cout_acq")}</div></td>
+                      <td className="num"><div className="cell" data-fmt="eur">{eur("immo_rp_pv_latente")}</div></td>
                     </tr>
                   </tbody>
                 </table>
@@ -492,14 +488,14 @@ export default function PatrimoineImmobilier({ donnees }: { donnees: EtudeDonnee
                 </div>
                 <div className="regul r4">
                   <div className="rc"><div className="rl">Stratégie</div><div className="rv">Résidence principale</div></div>
-                  <div className="rc"><div className="rl">Capital restant dû</div><div className="rv">{DASH}</div></div>
-                  <div className="rc rc-click"><div className="rl">Charges annuelles</div><div className="rv">{DASH} <span style={{ color: "var(--gold-deep)" }}>›</span></div></div>
+                  <div className="rc"><div className="rl">Capital restant dû</div><div className="rv">{eur("immo_rp_crd")}</div></div>
+                  <div className="rc rc-click"><div className="rl">Charges annuelles</div><div className="rv">{eur("immo_rp_charges")} <span style={{ color: "var(--gold-deep)" }}>›</span></div></div>
                   <div className="rc"><div className="rl">Plus-value</div><div className="rv">Exonérée</div></div>
                 </div>
                 <div className="finbox">
                   <div className="fh"><FinIcon /> Financement</div>
                   <div className="finrow">
-                    <div className="fc"><div className="fk">Capital restant dû</div><div className="fv">{DASH}</div></div>
+                    <div className="fc"><div className="fk">Capital restant dû</div><div className="fv">{eur("immo_rp_crd")}</div></div>
                     <div className="fc"><div className="fk">Statut</div><div className="fv">Prêt amortissable soldé</div></div>
                     <div className="fc"><div className="fk">Encours bancaire</div><div className="fv">Aucun</div></div>
                   </div>
@@ -511,8 +507,8 @@ export default function PatrimoineImmobilier({ donnees }: { donnees: EtudeDonnee
                 </div>
                 <div className="consq">
                   <strong>Plus-value exonérée</strong> au titre de la résidence principale. Bien non
-                  loué — charges annuelles de {DASH} (taxe foncière et charges courantes). En cas de
-                  revente, retour de trésorerie estimé à {DASH}.
+                  loué — charges annuelles de {eur("immo_rp_charges")} (taxe foncière et charges courantes). En cas de
+                  revente, retour de trésorerie estimé à {eur("immo_rp_retour_tresorerie")}.
                 </div>
               </div>
             </div>
@@ -532,7 +528,7 @@ export default function PatrimoineImmobilier({ donnees }: { donnees: EtudeDonnee
                 <span className="sub">appartement · location nue · pleine propriété</span>
               </div>
               <div className="amt">
-                <span>{DASH}</span>
+                <span>{eur("immo_nu_valeur")}</span>
               </div>
               <span className="chev">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
@@ -566,9 +562,9 @@ export default function PatrimoineImmobilier({ donnees }: { donnees: EtudeDonnee
                       <td><div className="cell ed" data-fmt="txt">{DASH}</div></td>
                       <td className="num"><div className="cell ed" data-fmt="txt">{DASH}</div></td>
                       <td><div className="cell ed" data-fmt="txt">{DASH}</div></td>
-                      <td className="num"><div className="cell ed bien-val" data-fmt="eur" data-cat="usage">{DASH}</div></td>
-                      <td className="num"><div className="cell ed bien-loy" data-fmt="eur">{DASH}</div></td>
-                      <td className="num"><div className="cell ed" data-fmt="pct">{DASH}</div></td>
+                      <td className="num"><div className="cell bien-val" data-fmt="eur" data-cat="usage">{eur("immo_nu_valeur")}</div></td>
+                      <td className="num"><div className="cell bien-loy" data-fmt="eur">{eur("immo_nu_loyer")}</div></td>
+                      <td className="num"><div className="cell" data-fmt="pct">{pct("immo_nu_rendement_net")}</div></td>
                     </tr>
                   </tbody>
                 </table>
@@ -579,23 +575,23 @@ export default function PatrimoineImmobilier({ donnees }: { donnees: EtudeDonnee
                 </div>
                 <div className="regul r4">
                   <div className="rc"><div className="rl">Stratégie</div><div className="rv">Location nue</div></div>
-                  <div className="rc"><div className="rl">Rendement brut</div><div className="rv">{DASH}</div></div>
-                  <div className="rc rc-click"><div className="rl">Charges annuelles</div><div className="rv">{DASH} <span style={{ color: "var(--gold-deep)" }}>›</span></div></div>
-                  <div className="rc"><div className="rl">Cashflow avant impôt</div><div className="rv">{DASH}</div></div>
+                  <div className="rc"><div className="rl">Rendement brut</div><div className="rv">{pct("immo_nu_rendement_brut")}</div></div>
+                  <div className="rc rc-click"><div className="rl">Charges annuelles</div><div className="rv">{eur("immo_nu_charges")} <span style={{ color: "var(--gold-deep)" }}>›</span></div></div>
+                  <div className="rc"><div className="rl">Cashflow avant impôt</div><div className="rv">{eur("immo_nu_cashflow")}</div></div>
                 </div>
                 <div className="finbox">
-                  <div className="fh"><FinIcon /> Financement — {DASH}</div>
+                  <div className="fh"><FinIcon /> Financement — {eur("immo_nu_financement_montant")}</div>
                   <div className="finrow">
-                    <div className="fc"><div className="fk">Capital initial</div><div className="fv">{DASH}</div></div>
-                    <div className="fc"><div className="fk">Capital restant dû</div><div className="fv">{DASH}</div></div>
-                    <div className="fc"><div className="fk">Taux</div><div className="fv">{DASH}</div></div>
+                    <div className="fc"><div className="fk">Capital initial</div><div className="fv">{eur("immo_nu_capital_initial")}</div></div>
+                    <div className="fc"><div className="fk">Capital restant dû</div><div className="fv">{eur("immo_nu_crd")}</div></div>
+                    <div className="fc"><div className="fk">Taux</div><div className="fv">{pct("immo_nu_taux")}</div></div>
                     <div className="fc"><div className="fk">Durée restante</div><div className="fv">{DASH}</div></div>
                   </div>
                   <div className="finrow" style={{ marginTop: "11px" }}>
-                    <div className="fc"><div className="fk">Mensualité</div><div className="fv">{DASH}</div></div>
-                    <div className="fc"><div className="fk">Quotité d’assurance</div><div className="fv">{DASH}</div></div>
+                    <div className="fc"><div className="fk">Mensualité</div><div className="fv">{eur("immo_nu_mensualite")}</div></div>
+                    <div className="fc"><div className="fk">Quotité d’assurance</div><div className="fv">{pct("immo_nu_quotite_assurance")}</div></div>
                     <div className="fc"><div className="fk">Type de prêt</div><div className="fv">Amortissable</div></div>
-                    <div className="fc"><div className="fk" title="Mensualité × 12 : capital, intérêts et assurance remboursés sur l'année">Service annuel de la dette</div><div className="fv">{DASH}</div></div>
+                    <div className="fc"><div className="fk" title="Mensualité × 12 : capital, intérêts et assurance remboursés sur l'année">Service annuel de la dette</div><div className="fv">{eur("immo_nu_service_dette")}</div></div>
                   </div>
                 </div>
                 <div className="consq">
@@ -629,7 +625,7 @@ export default function PatrimoineImmobilier({ donnees }: { donnees: EtudeDonnee
                 <span className="sub">appartement · location meublée · immobilier de rapport</span>
               </div>
               <div className="amt">
-                <span>{DASH}</span>
+                <span>{eur("immo_lmnp_valeur")}</span>
               </div>
               <span className="chev">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
@@ -665,10 +661,10 @@ export default function PatrimoineImmobilier({ donnees }: { donnees: EtudeDonnee
                       <td><div className="cell ed" data-fmt="txt">{DASH}</div></td>
                       <td className="num"><div className="cell ed" data-fmt="txt">{DASH}</div></td>
                       <td><div className="cell ed" data-fmt="txt">{DASH}</div></td>
-                      <td className="num"><div className="cell ed bien-val" data-fmt="eur" data-cat="rapport">{DASH}</div></td>
-                      <td className="num"><div className="cell ed" data-fmt="eur">{DASH}</div></td>
-                      <td className="num"><div className="cell ed bien-loy" data-fmt="eur">{DASH}</div></td>
-                      <td className="num"><div className="cell ed" data-fmt="pct">{DASH}</div></td>
+                      <td className="num"><div className="cell bien-val" data-fmt="eur" data-cat="rapport">{eur("immo_lmnp_valeur")}</div></td>
+                      <td className="num"><div className="cell" data-fmt="eur">{eur("immo_lmnp_prix_achat")}</div></td>
+                      <td className="num"><div className="cell bien-loy" data-fmt="eur">{eur("immo_lmnp_loyer")}</div></td>
+                      <td className="num"><div className="cell" data-fmt="pct">{pct("immo_lmnp_rendement_net")}</div></td>
                     </tr>
                   </tbody>
                 </table>
@@ -681,23 +677,23 @@ export default function PatrimoineImmobilier({ donnees }: { donnees: EtudeDonnee
                 </div>
                 <div className="regul r4">
                   <div className="rc"><div className="rl">Stratégie</div><div className="rv">Location meublée</div></div>
-                  <div className="rc"><div className="rl">Rendement brut</div><div className="rv">{DASH}</div></div>
-                  <div className="rc rc-click"><div className="rl">Charges annuelles</div><div className="rv">{DASH} <span style={{ color: "var(--gold-deep)" }}>›</span></div></div>
-                  <div className="rc"><div className="rl">Cashflow avant impôt</div><div className="rv">{DASH}</div></div>
+                  <div className="rc"><div className="rl">Rendement brut</div><div className="rv">{pct("immo_lmnp_rendement_brut")}</div></div>
+                  <div className="rc rc-click"><div className="rl">Charges annuelles</div><div className="rv">{eur("immo_lmnp_charges")} <span style={{ color: "var(--gold-deep)" }}>›</span></div></div>
+                  <div className="rc"><div className="rl">Cashflow avant impôt</div><div className="rv">{eur("immo_lmnp_cashflow")}</div></div>
                 </div>
                 <div className="finbox">
-                  <div className="fh"><FinIcon /> Financement — {DASH}</div>
+                  <div className="fh"><FinIcon /> Financement — {eur("immo_lmnp_financement_montant")}</div>
                   <div className="finrow">
-                    <div className="fc"><div className="fk">Capital initial</div><div className="fv">{DASH}</div></div>
-                    <div className="fc"><div className="fk">Capital restant dû</div><div className="fv">{DASH}</div></div>
-                    <div className="fc"><div className="fk">Taux</div><div className="fv">{DASH}</div></div>
+                    <div className="fc"><div className="fk">Capital initial</div><div className="fv">{eur("immo_lmnp_capital_initial")}</div></div>
+                    <div className="fc"><div className="fk">Capital restant dû</div><div className="fv">{eur("immo_lmnp_crd")}</div></div>
+                    <div className="fc"><div className="fk">Taux</div><div className="fv">{pct("immo_lmnp_taux")}</div></div>
                     <div className="fc"><div className="fk">Durée restante</div><div className="fv">{DASH}</div></div>
                   </div>
                   <div className="finrow" style={{ marginTop: "11px" }}>
-                    <div className="fc"><div className="fk">Mensualité</div><div className="fv">{DASH}</div></div>
-                    <div className="fc"><div className="fk">Quotité d’assurance</div><div className="fv">{DASH}</div></div>
+                    <div className="fc"><div className="fk">Mensualité</div><div className="fv">{eur("immo_lmnp_mensualite")}</div></div>
+                    <div className="fc"><div className="fk">Quotité d’assurance</div><div className="fv">{pct("immo_lmnp_quotite_assurance")}</div></div>
                     <div className="fc"><div className="fk">Type de prêt</div><div className="fv">Amortissable</div></div>
-                    <div className="fc"><div className="fk" title="Mensualité × 12 : capital, intérêts et assurance remboursés sur l'année">Service annuel de la dette</div><div className="fv">{DASH}</div></div>
+                    <div className="fc"><div className="fk" title="Mensualité × 12 : capital, intérêts et assurance remboursés sur l'année">Service annuel de la dette</div><div className="fv">{eur("immo_lmnp_service_dette")}</div></div>
                   </div>
                 </div>
                 <div className="consq">
@@ -705,10 +701,10 @@ export default function PatrimoineImmobilier({ donnees }: { donnees: EtudeDonnee
                     <span className="lbl-info" title="Gain potentiel non réalisé : valeur de marché moins coût d'acquisition corrigé">
                       Plus-value latente
                     </span>{" "}
-                    estimée {DASH}
+                    estimée {eur("immo_lmnp_pv_latente")}
                   </strong>{" "}
                   (avec réintégration des amortissements à date) — impôt sur la plus-value estimé{" "}
-                  {DASH}, soit une plus-value nette de {DASH} et un retour de trésorerie de {DASH} en
+                  {eur("immo_lmnp_pv_impot")}, soit une plus-value nette de {eur("immo_lmnp_pv_nette")} et un retour de trésorerie de {eur("immo_lmnp_retour_tresorerie")} en
                   cas de revente.{" "}
                   <span className="eye eng-only">
                     <EyeIcon /> détail des charges
@@ -732,7 +728,7 @@ export default function PatrimoineImmobilier({ donnees }: { donnees: EtudeDonnee
                 <span className="sub">lots de stationnement · immobilier de rapport</span>
               </div>
               <div className="amt">
-                <span>{DASH}</span>
+                <span>{eur("immo_park_valeur_totale")}</span>
               </div>
               <span className="chev">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
@@ -765,27 +761,27 @@ export default function PatrimoineImmobilier({ donnees }: { donnees: EtudeDonnee
                       <td><div className="cell ed" data-fmt="txt">{DASH}</div></td>
                       <td className="num"><div className="cell ed" data-fmt="txt">{DASH}</div></td>
                       <td><div className="cell ed" data-fmt="txt">{DASH}</div></td>
-                      <td className="num"><div className="cell ed bien-val" data-fmt="eur" data-cat="rapport">{DASH}</div></td>
+                      <td className="num"><div className="cell bien-val" data-fmt="eur" data-cat="rapport">{eur("immo_park_1_valeur")}</div></td>
                     </tr>
                     <tr>
                       <td><div className="cell ed" data-fmt="txt">{DASH}</div></td>
                       <td><div className="cell ed" data-fmt="txt">{DASH}</div></td>
                       <td className="num"><div className="cell ed" data-fmt="txt">{DASH}</div></td>
                       <td><div className="cell ed" data-fmt="txt">{DASH}</div></td>
-                      <td className="num"><div className="cell ed bien-val" data-fmt="eur" data-cat="rapport">{DASH}</div></td>
+                      <td className="num"><div className="cell bien-val" data-fmt="eur" data-cat="rapport">{eur("immo_park_2_valeur")}</div></td>
                     </tr>
                   </tbody>
                   <tfoot>
                     <tr>
                       <td colSpan={4}><div className="cell">Total parkings</div></td>
-                      <td className="num"><div className="cell">{DASH}</div></td>
+                      <td className="num"><div className="cell">{eur("immo_park_valeur_totale")}</div></td>
                     </tr>
                   </tfoot>
                 </table>
                 <div className="finbox">
                   <div className="fh"><FinIcon /> Financement</div>
                   <div className="finrow">
-                    <div className="fc"><div className="fk">Capital restant dû</div><div className="fv">{DASH}</div></div>
+                    <div className="fc"><div className="fk">Capital restant dû</div><div className="fv">{eur("immo_park_crd")}</div></div>
                     <div className="fc"><div className="fk">Statut</div><div className="fv">Acquisition comptant</div></div>
                     <div className="fc"><div className="fk">Encours bancaire</div><div className="fv">Aucun</div></div>
                   </div>
@@ -796,7 +792,7 @@ export default function PatrimoineImmobilier({ donnees }: { donnees: EtudeDonnee
                   </div>
                 </div>
                 <div className="consq">
-                  Non loués à ce jour — charges minimes (taxe foncière {DASH} et {DASH}). Légère
+                  Non loués à ce jour — charges minimes (taxe foncière {eur("immo_park_taxe_fonciere")} et {eur("immo_park_charges_autres")}). Légère
                   moins-value latente par rapport au coût d’acquisition corrigé.
                 </div>
               </div>
@@ -813,12 +809,12 @@ export default function PatrimoineImmobilier({ donnees }: { donnees: EtudeDonnee
           </div>
           <div className="kpirow">
             <div className="kpi">
-              <div className="kv">{crd}</div>
+              <div className="kv">{eur("credit_capital_restant")}</div>
               <div className="kl">Capital restant dû</div>
               <div className="kf">ensemble du parc immobilier</div>
             </div>
             <div className="kpi">
-              <div className="kv">{DASH}</div>
+              <div className="kv">{eur("immo_service_dette_total")}</div>
               <div className="kl">
                 Service annuel de la dette
                 <span className="kinfo" title="Définition et calcul">i</span>
@@ -826,7 +822,7 @@ export default function PatrimoineImmobilier({ donnees }: { donnees: EtudeDonnee
               <div className="kf">prêts amortissables</div>
             </div>
             <div className="kpi">
-              <div className="kv">{DASH}</div>
+              <div className="kv">{pct("immo_rendement_net_moyen")}</div>
               <div className="kl">
                 Rendement locatif net
                 <span className="kinfo" title="Définition et calcul">i</span>
@@ -834,12 +830,12 @@ export default function PatrimoineImmobilier({ donnees }: { donnees: EtudeDonnee
               <div className="kf">moyen avant impôt</div>
             </div>
             <div className="kpi">
-              <div className="kv">{DASH}</div>
+              <div className="kv">{eur("immo_pv_latentes_total")}</div>
               <div className="kl">
                 Plus-values latentes
                 <span className="kinfo" title="Définition et calcul">i</span>
               </div>
-              <div className="kf">dont {DASH} exonérés</div>
+              <div className="kf">dont {eur("immo_pv_latentes_exonerees")} exonérés</div>
             </div>
           </div>
           <div className="rappel">
@@ -879,7 +875,7 @@ export default function PatrimoineImmobilier({ donnees }: { donnees: EtudeDonnee
               <div className="dim">
                 <DimHead icon={<ConstatIcon />}>Constat &amp; origine</DimHead>
                 <ul className="dlist">
-                  <li>La résidence principale et les parkings (<strong>{DASH}</strong>) sont libres de toute hypothèque ; le capital restant dû total s’élève à <strong>{DASH}</strong> sur les deux appartements.</li>
+                  <li>La résidence principale et les parkings (<strong>{eur("immo_park_valeur_totale")}</strong>) sont libres de toute hypothèque ; le capital restant dû total s’élève à <strong>{eur("credit_capital_restant")}</strong> sur les deux appartements.</li>
                   <li>Le service annuel de la dette reste modéré au regard de la valeur du parc.</li>
                   <li>La valeur nette immobilisée demeure importante — une capacité de levier bancaire <strong>partiellement exploitée</strong>, encore largement disponible.</li>
                 </ul>
@@ -895,7 +891,7 @@ export default function PatrimoineImmobilier({ donnees }: { donnees: EtudeDonnee
             <div className="ab-grid" style={{ borderTop: "1px solid var(--navy-100)" }}>
               <div className="dim">
                 <DimHead icon={<ImpactIcon />}>Impact quantifié</DimHead>
-                <p>À une quotité prudente de 60 à 70 %, et après déduction du capital restant dû ({DASH}), la capacité de refinancement mobilisable s’élève à <strong>{DASH}</strong>, déployable sans céder le moindre actif (voir module ci-dessous).</p>
+                <p>À une quotité prudente de 60 à 70 %, et après déduction du capital restant dû ({eur("credit_capital_restant")}), la capacité de refinancement mobilisable s’élève à <strong>{eur("immo_refi_capacite")}</strong>, déployable sans céder le moindre actif (voir module ci-dessous).</p>
               </div>
               <div className="dim">
                 <DimHead icon={<JustifIcon />}>Justification<span className="fn client-only">¹</span></DimHead>
@@ -933,7 +929,7 @@ export default function PatrimoineImmobilier({ donnees }: { donnees: EtudeDonnee
               <div className="dim">
                 <DimHead icon={<ConstatIcon />}>Constat &amp; origine</DimHead>
                 <ul className="dlist">
-                  <li>Une <strong>Contribution sur les revenus locatifs</strong> est acquittée pour deux appartements ({DASH} et {DASH}).</li>
+                  <li>Une <strong>Contribution sur les revenus locatifs</strong> est acquittée pour deux appartements ({eur("immo_crl_app1")} et {eur("immo_crl_app2")}).</li>
                   <li>Cette contribution vise principalement les revenus perçus par des personnes morales soumises à l’impôt sur les sociétés.</li>
                   <li>Or ces biens sont détenus par des <strong>personnes physiques</strong> — l’assujettissement ne paraît pas juridiquement fondé.</li>
                 </ul>
@@ -949,7 +945,7 @@ export default function PatrimoineImmobilier({ donnees }: { donnees: EtudeDonnee
             <div className="ab-grid" style={{ borderTop: "1px solid var(--navy-100)" }}>
               <div className="dim">
                 <DimHead icon={<ImpactIcon />}>Impact quantifié</DimHead>
-                <p>Économie pérenne de <strong>{DASH}</strong>, et remboursement potentiel d’environ <strong>{DASH}</strong> au titre des trois derniers exercices.</p>
+                <p>Économie pérenne de <strong>{eur("immo_crl_economie")}</strong>, et remboursement potentiel d’environ <strong>{eur("immo_crl_remboursement")}</strong> au titre des trois derniers exercices.</p>
               </div>
               <div className="dim">
                 <DimHead icon={<JustifIcon />}>Justification<span className="fn client-only">²</span></DimHead>
@@ -1039,8 +1035,8 @@ export default function PatrimoineImmobilier({ donnees }: { donnees: EtudeDonnee
               <div className="dim">
                 <DimHead icon={<ConstatIcon />}>Constat &amp; origine</DimHead>
                 <ul className="dlist">
-                  <li>Sur l’appartement meublé détenu en nom propre, les charges représentent <strong>{DASH}</strong>, soit ≈ <strong>{DASH}</strong> du chiffre d’affaires — un poste à surveiller.</li>
-                  <li>Sur les studios détenus en <strong>SCI</strong>, ce ratio atteint près de <strong>{DASH}</strong> (honoraires comptables, copropriété, assurances, frais d’agence) — analysé dans le thème « Sociétés ».</li>
+                  <li>Sur l’appartement meublé détenu en nom propre, les charges représentent <strong>{eur("immo_charges_lmnp_montant")}</strong>, soit ≈ <strong>{pct("immo_charges_lmnp_ratio")}</strong> du chiffre d’affaires — un poste à surveiller.</li>
+                  <li>Sur les studios détenus en <strong>SCI</strong>, ce ratio atteint près de <strong>{pct("immo_charges_sci_ratio")}</strong> (honoraires comptables, copropriété, assurances, frais d’agence) — analysé dans le thème « Sociétés ».</li>
                 </ul>
               </div>
               <div className="dim">
@@ -1079,7 +1075,7 @@ export default function PatrimoineImmobilier({ donnees }: { donnees: EtudeDonnee
               <div className="dim">
                 <DimHead icon={<ConstatIcon />}>Constat &amp; origine</DimHead>
                 <ul className="dlist">
-                  <li>L’appartement meublé est exploité en location meublée non professionnelle : les recettes ({DASH}) restent inférieures à 23 000 € et aux autres revenus du foyer.</li>
+                  <li>L’appartement meublé est exploité en location meublée non professionnelle : les recettes ({eur("immo_lmnp_recettes")}) restent inférieures à 23 000 € et aux autres revenus du foyer.</li>
                   <li>Ce régime relève des bénéfices industriels et commerciaux, au régime réel, avec amortissement du bien et du mobilier.</li>
                 </ul>
               </div>
@@ -1094,7 +1090,7 @@ export default function PatrimoineImmobilier({ donnees }: { donnees: EtudeDonnee
             <div className="ab-grid" style={{ borderTop: "1px solid var(--navy-100)" }}>
               <div className="dim">
                 <DimHead icon={<ImpactIcon />}>Impact quantifié</DimHead>
-                <p>Loyers de <b>{DASH}</b> par an largement neutralisés par l’amortissement pendant la détention ; en contrepartie, plus-value brute portée à <b>{DASH}</b> à la cession après réintégration des amortissements (voir le coût d’opportunité immobilier).</p>
+                <p>Loyers de <b>{eur("immo_lmnp_loyer")}</b> par an largement neutralisés par l’amortissement pendant la détention ; en contrepartie, plus-value brute portée à <b>{eur("immo_lmnp_pv_brute")}</b> à la cession après réintégration des amortissements (voir le coût d’opportunité immobilier).</p>
               </div>
               <div className="dim">
                 <DimHead icon={<JustifIcon />}>Justification<span className="fn client-only">⁶</span></DimHead>
@@ -1146,7 +1142,7 @@ export default function PatrimoineImmobilier({ donnees }: { donnees: EtudeDonnee
             <div className="ab-grid" style={{ borderTop: "1px solid var(--navy-100)" }}>
               <div className="dim">
                 <DimHead icon={<ImpactIcon />}>Impact quantifié</DimHead>
-                <p><b>SCI à l’impôt sur les sociétés :</b> produit = capital restant dû remboursé (à titre d’illustration, ≈ {DASH} sur le local financé), imposé à l’impôt sur les sociétés, <b>étalable sur 5 ans</b>. <b>SCI à l’impôt sur le revenu :</b> l’indemnité constitue des <b>recettes foncières</b> dès lors que les intérêts ont été déduits. <b>Location meublée au réel (LMNP ou LMP) :</b> le capital remboursé constitue un <b>produit imposable au titre des bénéfices industriels et commerciaux</b>, étalable sur cinq exercices.</p>
+                <p><b>SCI à l’impôt sur les sociétés :</b> produit = capital restant dû remboursé (à titre d’illustration, ≈ {eur("immo_assur_capital_local")} sur le local financé), imposé à l’impôt sur les sociétés, <b>étalable sur 5 ans</b>. <b>SCI à l’impôt sur le revenu :</b> l’indemnité constitue des <b>recettes foncières</b> dès lors que les intérêts ont été déduits. <b>Location meublée au réel (LMNP ou LMP) :</b> le capital remboursé constitue un <b>produit imposable au titre des bénéfices industriels et commerciaux</b>, étalable sur cinq exercices.</p>
               </div>
               <div className="dim">
                 <DimHead icon={<JustifIcon />}>Justification<span className="fn client-only">⁴</span></DimHead>
@@ -1262,17 +1258,17 @@ export default function PatrimoineImmobilier({ donnees }: { donnees: EtudeDonnee
             </div>
             <div className="copp-body">
               <div className="compare">
-                <div className="cstate now"><div className="cl">Valeur du parc immobilier</div><div className="cv" id="cmp-parc">{DASH}</div><div className="cd">&nbsp;</div></div>
+                <div className="cstate now"><div className="cl">Valeur du parc immobilier</div><div className="cv" id="cmp-parc">{eur("immo_valeur_totale")}</div><div className="cd">&nbsp;</div></div>
                 <div className="carrow"><CarrowIcon /></div>
-                <div className="cstate cur"><div className="cl">Capital restant dû</div><div className="cv">{crd}</div><div className="cd">financements en cours</div></div>
+                <div className="cstate cur"><div className="cl">Capital restant dû</div><div className="cv">{eur("credit_capital_restant")}</div><div className="cd">financements en cours</div></div>
                 <div className="carrow"><CarrowIcon /></div>
-                <div className="cstate opt"><div className="cl">Mobilisable à <span id="cmp-l">70</span> %</div><div className="cv" id="cmp-capa">{DASH}</div><div className="cd">sans cession d’actif</div></div>
+                <div className="cstate opt"><div className="cl">Mobilisable à <span id="cmp-l">70</span> %</div><div className="cv" id="cmp-capa">{eur("immo_refi_capacite")}</div><div className="cd">sans cession d’actif</div></div>
               </div>
               <div className="gapband">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
                   <path d="M12 3v18M5 10l7-7 7 7" />
                 </svg>{" "}
-                Capacité de refinancement mobilisable : <b id="gap-v">{DASH}</b>
+                Capacité de refinancement mobilisable : <b id="gap-v">{eur("immo_refi_capacite")}</b>
               </div>
               <div className="note">
                 <InfoNoteIcon /> Capacité indicative, sous réserve de l’accord bancaire et de la
@@ -1322,11 +1318,11 @@ export default function PatrimoineImmobilier({ donnees }: { donnees: EtudeDonnee
             </div>
             <div className="copp-body">
               <div className="compare">
-                <div className="cstate now"><div className="cl">Conserver le bien</div><div className="cv">{DASH}</div><div className="cd">revenu net annuel · rendement {DASH}</div></div>
+                <div className="cstate now"><div className="cl">Conserver le bien</div><div className="cv">{eur("immo_arb_revenu_conserve")}</div><div className="cd">revenu net annuel · rendement {pct("immo_arb_rendement_conserve")}</div></div>
                 <div className="carrow"><CarrowIcon /></div>
-                <div className="cstate cur"><div className="cl">Produit net de cession</div><div className="cv">{DASH}</div><div className="cd">après impôt sur la plus-value</div></div>
+                <div className="cstate cur"><div className="cl">Produit net de cession</div><div className="cv">{eur("immo_arb_produit_cession")}</div><div className="cd">après impôt sur la plus-value</div></div>
                 <div className="carrow"><CarrowIcon /></div>
-                <div className="cstate opt"><div className="cl">Réinvesti à&nbsp;<span id="arb-l">5</span>&nbsp;%</div><div className="cv" id="arb-rev">{DASH}</div><div className="cd">revenu net annuel potentiel</div></div>
+                <div className="cstate opt"><div className="cl">Réinvesti à&nbsp;<span id="arb-l">5</span>&nbsp;%</div><div className="cv" id="arb-rev">{eur("immo_arb_revenu_reinvesti")}</div><div className="cd">revenu net annuel potentiel</div></div>
               </div>
               <div className="pvacc">
                 <div className="pvacc-h">
@@ -1345,16 +1341,16 @@ export default function PatrimoineImmobilier({ donnees }: { donnees: EtudeDonnee
                       <col style={{ width: "36%" }} />
                     </colgroup>
                     <tbody>
-                      <tr><td>Valeur de marché (cession)</td><td className="num">{DASH}</td></tr>
-                      <tr><td>Coût d’acquisition corrigé (prix, frais et travaux)</td><td className="num">{DASH}</td></tr>
-                      <tr><td>Amortissements cumulés réintégrés <span className="pvnote">(réforme 2025)</span></td><td className="num">{DASH}</td></tr>
-                      <tr className="pvsub"><td>Base d’acquisition nette retenue</td><td className="num">{DASH}</td></tr>
-                      <tr><td>Plus-value brute imposable</td><td className="num">{DASH}</td></tr>
-                      <tr><td>Impôt sur la plus-value (19&nbsp;% + 17,2&nbsp;%, après abattements pour durée de détention)</td><td className="num">{DASH}</td></tr>
-                      <tr><td>Plus-value nette</td><td className="num">{DASH}</td></tr>
+                      <tr><td>Valeur de marché (cession)</td><td className="num">{eur("immo_lmnp_valeur")}</td></tr>
+                      <tr><td>Coût d’acquisition corrigé (prix, frais et travaux)</td><td className="num">{eur("immo_lmnp_cout_acq")}</td></tr>
+                      <tr><td>Amortissements cumulés réintégrés <span className="pvnote">(réforme 2025)</span></td><td className="num">{eur("immo_lmnp_amortissements")}</td></tr>
+                      <tr className="pvsub"><td>Base d’acquisition nette retenue</td><td className="num">{eur("immo_lmnp_base_acq_nette")}</td></tr>
+                      <tr><td>Plus-value brute imposable</td><td className="num">{eur("immo_lmnp_pv_brute")}</td></tr>
+                      <tr><td>Impôt sur la plus-value (19&nbsp;% + 17,2&nbsp;%, après abattements pour durée de détention)</td><td className="num">{eur("immo_lmnp_pv_impot")}</td></tr>
+                      <tr><td>Plus-value nette</td><td className="num">{eur("immo_lmnp_pv_nette")}</td></tr>
                     </tbody>
                     <tfoot>
-                      <tr><td>Produit net de cession (retour de trésorerie)</td><td className="num">{DASH}</td></tr>
+                      <tr><td>Produit net de cession (retour de trésorerie)</td><td className="num">{eur("immo_arb_produit_cession")}</td></tr>
                     </tfoot>
                   </table>
                 </div>
@@ -1362,9 +1358,9 @@ export default function PatrimoineImmobilier({ donnees }: { donnees: EtudeDonnee
 
               <div className="consq" style={{ marginTop: "14px" }}>
                 La conservation présente un <strong>coût d’opportunité</strong> : le rendement net du
-                bien ({DASH}) est inférieur à ce qu’offrirait le réinvestissement du produit de
+                bien ({pct("immo_lmnp_rendement_net")}) est inférieur à ce qu’offrirait le réinvestissement du produit de
                 cession. L’arbitrage doit toutefois être mis en balance avec la <strong>fiscalité de
-                la plus-value</strong> ({DASH}), la perte de l’effet de levier futur, le potentiel
+                la plus-value</strong> ({eur("immo_lmnp_pv_impot")}), la perte de l’effet de levier futur, le potentiel
                 d’appréciation du bien et les <strong>conséquences patrimoniales et
                 successorales</strong> de la sortie de l’actif.
               </div>
@@ -1411,9 +1407,9 @@ export default function PatrimoineImmobilier({ donnees }: { donnees: EtudeDonnee
                 <span><b>Confiance forte · 90 %</b> · synthèse fondée sur les constats du thème</span>
                 <span className="sc-link">Voir le détail</span>
               </div>
-              <p>Le patrimoine immobilier de {noms}, d’un montant de <b>{DASH}</b>, constitue l’un des socles du patrimoine global du foyer. Il se partage entre immobilier d’usage (<b>{DASH}</b>) et immobilier de rapport (<b>{DASH}</b>), et se distingue par la qualité de ses actifs comme par une dette à préciser : la résidence principale et les emplacements de stationnement sont détenus libres de tout financement, tandis que les appartements de rapport portent un capital restant dû de <b>{DASH}</b>. Cette structure dégage une valeur nette et une capacité de refinancement estimée à <b>{DASH}</b>, à ce jour largement inexploitée.</p>
-              <p>Le cabinet relève plusieurs points forts. La résidence principale recèle une plus-value latente de <b>{DASH}</b>, intégralement exonérée ; l’appartement meublé porte une plus-value latente significative et bénéficie, sous le régime réel, d’un amortissement qui neutralise l’imposition des loyers pendant la phase de détention. L’ensemble offre une assise patrimoniale solide et un effet de levier mobilisable sans cession d’actif.</p>
-              <p>La principale fragilité tient au rendement locatif. Modeste en brut (<b>{DASH}</b>), il devient négatif en trésorerie sous l’effet des financements en cours, et se trouve grevé par un niveau de charges élevé sur la location meublée. S’y ajoutent des points de conformité à régulariser : des diagnostics de performance énergétique manquants, qui exposent les biens concernés au gel des loyers et à une décote, ainsi qu’une contribution sur les revenus locatifs acquittée alors qu’elle n’est pas due par des personnes physiques.</p>
+              <p>Le patrimoine immobilier de {noms}, d’un montant de <b>{eur("immo_valeur_totale")}</b>, constitue l’un des socles du patrimoine global du foyer. Il se partage entre immobilier d’usage (<b>{eur("residence_principale")}</b>) et immobilier de rapport (<b>{eur("immobilier_locatif")}</b>), et se distingue par la qualité de ses actifs comme par une dette à préciser : la résidence principale et les emplacements de stationnement sont détenus libres de tout financement, tandis que les appartements de rapport portent un capital restant dû de <b>{eur("credit_capital_restant")}</b>. Cette structure dégage une valeur nette et une capacité de refinancement estimée à <b>{eur("immo_refi_capacite")}</b>, à ce jour largement inexploitée.</p>
+              <p>Le cabinet relève plusieurs points forts. La résidence principale recèle une plus-value latente de <b>{eur("immo_rp_pv_latente")}</b>, intégralement exonérée ; l’appartement meublé porte une plus-value latente significative et bénéficie, sous le régime réel, d’un amortissement qui neutralise l’imposition des loyers pendant la phase de détention. L’ensemble offre une assise patrimoniale solide et un effet de levier mobilisable sans cession d’actif.</p>
+              <p>La principale fragilité tient au rendement locatif. Modeste en brut (<b>{pct("immo_rendement_brut_moyen")}</b>), il devient négatif en trésorerie sous l’effet des financements en cours, et se trouve grevé par un niveau de charges élevé sur la location meublée. S’y ajoutent des points de conformité à régulariser : des diagnostics de performance énergétique manquants, qui exposent les biens concernés au gel des loyers et à une décote, ainsi qu’une contribution sur les revenus locatifs acquittée alors qu’elle n’est pas due par des personnes physiques.</p>
               <p>Plusieurs leviers se dégagent de cette lecture. La capacité de refinancement autoriserait une diversification du patrimoine sans céder d’actif ; l’arbitrage de l’appartement meublé, à faible rendement, mérite d’être étudié au regard de la fiscalité de sa plus-value, désormais alourdie par la réintégration des amortissements ; la dimension fiscale et assurantielle des structures gagnerait enfin à être sécurisée, notamment quant au traitement d’un éventuel produit exceptionnel en cas de décès ou d’invalidité d’un emprunteur. Les principaux enjeux à surveiller portent sur la fiabilisation des valorisations, aujourd’hui forfaitaires, et sur le suivi rigoureux des obligations déclaratives entre établissements, dont dépend la stabilité des financements.</p>
               <div className="sp-recap">
                 <div className="spr spr-r">

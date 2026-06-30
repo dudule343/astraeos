@@ -29,7 +29,15 @@
 import { type CSSProperties, type ReactNode } from "react";
 
 import { Bloc } from "../Bloc";
+import ValeurEditable from "../ValeurEditable";
 import type { EtudeDonnees } from "../../../../_data/etudes-patrimoniales";
+
+/**
+ * Helpers de saisie inline (montants du client persistés dans donnees.valeurs).
+ * Construits dans le composant (ils ferment sur `donnees`) puis passés aux
+ * fabriques de blocs risques définies au niveau module.
+ */
+type Vh = (k: string) => ReactNode;
 
 import "../../../../_styles/sections/assurances.css";
 
@@ -285,36 +293,42 @@ function RiskBlock({ data }: { data: RiskData }) {
 // Données des blocs risques (textes méthodologiques fidèles, chiffres honnêtes)
 // ---------------------------------------------------------------------------
 
-const riskPrevDeces: RiskData = {
-  blocKey: "Prévoyance décès et contrat Madelin",
-  icon: <ShieldExcl />,
-  cert: { level: "c-moy", label: "Confiance modérée · 82 %", id: "assPrev" },
-  title: "Capital décès obligatoirement servi sous forme de rente viagère",
-  constats: [
-    "Monsieur et Madame sont titulaires de contrats de prévoyance individuelle Madelin auprès de la compagnie.",
-    <>Les capitaux garantis s’élèvent à {DASH} pour Monsieur et {DASH} pour Madame.</>,
-    "La sortie des prestations décès est prévue sous forme de rente viagère.",
-  ],
-  risque: (
-    <>
-      Le conjoint survivant se verrait privé d’un capital immédiat au profit d’une rente dérisoire
-      d’environ {DASH} par mois, et le foyer perdrait l’exonération fiscale du capital décès (loi
-      TEPA) au profit d’une rente imposable à l’impôt sur le revenu.
-    </>
-  ),
-  opportunite:
-    "Une prévoyance classique (hors Madelin) permettrait au conjoint marié de percevoir un capital totalement exonéré au titre de la loi TEPA.",
-  optimisation:
-    "Compléter ou substituer une prévoyance décès hors cadre Madelin afin de rétablir une sortie en capital.",
-  impact: (
-    <>
-      Pour un capital de {DASH}, la rente servie au survivant ne serait que d’environ {DASH} par
-      mois.
-    </>
-  ),
-  justification: "Conditions générales des contrats de prévoyance Madelin et cadre fiscal applicable.",
-  preco: <>rétablir une sortie en capital pour la protection du conjoint (partie « Préconisations »).</>,
-};
+function riskPrevDeces(eur: Vh): RiskData {
+  return {
+    blocKey: "Prévoyance décès et contrat Madelin",
+    icon: <ShieldExcl />,
+    cert: { level: "c-moy", label: "Confiance modérée · 82 %", id: "assPrev" },
+    title: "Capital décès obligatoirement servi sous forme de rente viagère",
+    constats: [
+      "Monsieur et Madame sont titulaires de contrats de prévoyance individuelle Madelin auprès de la compagnie.",
+      <>
+        Les capitaux garantis s’élèvent à {eur("prev_capital_garanti_monsieur")} pour Monsieur et{" "}
+        {eur("prev_capital_garanti_madame")} pour Madame.
+      </>,
+      "La sortie des prestations décès est prévue sous forme de rente viagère.",
+    ],
+    risque: (
+      <>
+        Le conjoint survivant se verrait privé d’un capital immédiat au profit d’une rente dérisoire
+        d’environ {eur("prev_deces_rente_survivant_mensuelle")} par mois, et le foyer perdrait
+        l’exonération fiscale du capital décès (loi TEPA) au profit d’une rente imposable à l’impôt
+        sur le revenu.
+      </>
+    ),
+    opportunite:
+      "Une prévoyance classique (hors Madelin) permettrait au conjoint marié de percevoir un capital totalement exonéré au titre de la loi TEPA.",
+    optimisation:
+      "Compléter ou substituer une prévoyance décès hors cadre Madelin afin de rétablir une sortie en capital.",
+    impact: (
+      <>
+        Pour un capital de {eur("prev_deces_capital")}, la rente servie au survivant ne serait que
+        d’environ {eur("prev_deces_rente_survivant_mensuelle")} par mois.
+      </>
+    ),
+    justification: "Conditions générales des contrats de prévoyance Madelin et cadre fiscal applicable.",
+    preco: <>rétablir une sortie en capital pour la protection du conjoint (partie « Préconisations »).</>,
+  };
+}
 
 const riskTarif: RiskData = {
   blocKey: "Tarification évolutive de la prévoyance",
@@ -402,28 +416,36 @@ function riskDesignation(surname: string | null): RiskData {
   };
 }
 
-const riskMateriel: RiskData = {
-  blocKey: "Sous-évaluation du matériel professionnel",
-  icon: <ShieldGauge />,
-  cert: { level: "c-moy", label: "Confiance modérée · 80 %", id: "assProMat" },
-  title: "Capitaux déclarés inférieurs à la valeur réelle : la règle proportionnelle",
-  constats: [
-    <>
-      Le capital mobilier déclaré au contrat multirisque s’élève à {DASH} pour un parc
-      d’équipements dont la valeur de remplacement est estimée à {DASH}.
-    </>,
-    "Le contrat ne comporte pas de clause de renonciation à la règle proportionnelle de capitaux.",
-  ],
-  risque:
-    "En cas de sinistre partiel, l’assureur appliquerait la règle proportionnelle et réduirait l’indemnité dans la proportion de la sous-évaluation, laissant un reste à charge significatif sur le foyer.",
-  opportunite:
-    "Une réévaluation des capitaux et l’ajout d’une clause de renonciation à la règle proportionnelle sécuriseraient l’indemnisation.",
-  optimisation:
-    "Faire expertiser le matériel, actualiser les capitaux déclarés et négocier la renonciation à la proportionnelle.",
-  impact: <>Pour un sinistre, l’indemnité pourrait être réduite d’environ {DASH} au titre de la sous-assurance.</>,
-  justification: "Conditions particulières du contrat multirisque et inventaire du matériel d’exploitation.",
-  preco: <>réévaluer les capitaux du matériel professionnel (partie « Préconisations »).</>,
-};
+function riskMateriel(eur: Vh): RiskData {
+  return {
+    blocKey: "Sous-évaluation du matériel professionnel",
+    icon: <ShieldGauge />,
+    cert: { level: "c-moy", label: "Confiance modérée · 80 %", id: "assProMat" },
+    title: "Capitaux déclarés inférieurs à la valeur réelle : la règle proportionnelle",
+    constats: [
+      <>
+        Le capital mobilier déclaré au contrat multirisque s’élève à{" "}
+        {eur("promat_capital_mobilier_declare")} pour un parc d’équipements dont la valeur de
+        remplacement est estimée à {eur("promat_valeur_remplacement")}.
+      </>,
+      "Le contrat ne comporte pas de clause de renonciation à la règle proportionnelle de capitaux.",
+    ],
+    risque:
+      "En cas de sinistre partiel, l’assureur appliquerait la règle proportionnelle et réduirait l’indemnité dans la proportion de la sous-évaluation, laissant un reste à charge significatif sur le foyer.",
+    opportunite:
+      "Une réévaluation des capitaux et l’ajout d’une clause de renonciation à la règle proportionnelle sécuriseraient l’indemnisation.",
+    optimisation:
+      "Faire expertiser le matériel, actualiser les capitaux déclarés et négocier la renonciation à la proportionnelle.",
+    impact: (
+      <>
+        Pour un sinistre, l’indemnité pourrait être réduite d’environ{" "}
+        {eur("promat_indemnite_reduction")} au titre de la sous-assurance.
+      </>
+    ),
+    justification: "Conditions particulières du contrat multirisque et inventaire du matériel d’exploitation.",
+    preco: <>réévaluer les capitaux du matériel professionnel (partie « Préconisations »).</>,
+  };
+}
 
 const riskPertesExpl: RiskData = {
   blocKey: "Absence de garantie des pertes d’exploitation",
@@ -464,30 +486,33 @@ const riskNumerique: RiskData = {
   preco: <>étudier une garantie des risques numériques (partie « Préconisations »).</>,
 };
 
-const consoPersonnes: RiskData = {
-  blocKey: "Protection des personnes",
-  icon: <ShieldPlus />,
-  cert: { level: "c-forte", label: "Confiance forte · 84 %", id: "globAssP" },
-  title: "Une protection des personnes solide mais à optimiser",
-  constats: [
-    "Prévoyance Madelin adaptée à la profession, mais capital décès servi en rente viagère.",
-    "Tarification à l’âge atteint et clauses bénéficiaires standard.",
-  ],
-  risque:
-    "Le conjoint survivant percevrait une rente dérisoire et fiscalisée ; le coût de la prévoyance s’alourdit à l’approche de la retraite ; les clauses sont exposées en cas de divorce.",
-  opportunite:
-    "Une prévoyance hors Madelin, une cotisation nivelée et des clauses démembrées sécuriseraient la transmission et le budget.",
-  optimisation:
-    "Compléter la couverture décès, mettre les garanties en concurrence et réécrire les clauses bénéficiaires.",
-  impact: (
-    <>
-      Capital décès de {DASH} converti en une rente d’environ {DASH} par mois ; couverture
-      invalidité de Madame plafonnée à environ {DASH}.
-    </>
-  ),
-  justification: "Contrats de prévoyance, certificats d’adhésion et clauses bénéficiaires du couple.",
-  preco: <>renforcer la protection des personnes (partie « Préconisations »).</>,
-};
+function consoPersonnes(eur: Vh): RiskData {
+  return {
+    blocKey: "Protection des personnes",
+    icon: <ShieldPlus />,
+    cert: { level: "c-forte", label: "Confiance forte · 84 %", id: "globAssP" },
+    title: "Une protection des personnes solide mais à optimiser",
+    constats: [
+      "Prévoyance Madelin adaptée à la profession, mais capital décès servi en rente viagère.",
+      "Tarification à l’âge atteint et clauses bénéficiaires standard.",
+    ],
+    risque:
+      "Le conjoint survivant percevrait une rente dérisoire et fiscalisée ; le coût de la prévoyance s’alourdit à l’approche de la retraite ; les clauses sont exposées en cas de divorce.",
+    opportunite:
+      "Une prévoyance hors Madelin, une cotisation nivelée et des clauses démembrées sécuriseraient la transmission et le budget.",
+    optimisation:
+      "Compléter la couverture décès, mettre les garanties en concurrence et réécrire les clauses bénéficiaires.",
+    impact: (
+      <>
+        Capital décès de {eur("prev_deces_capital")} converti en une rente d’environ{" "}
+        {eur("prev_deces_rente_survivant_mensuelle")} par mois ; couverture invalidité de Madame
+        plafonnée à environ {eur("prev_invalidite_madame_plafond")}.
+      </>
+    ),
+    justification: "Contrats de prévoyance, certificats d’adhésion et clauses bénéficiaires du couple.",
+    preco: <>renforcer la protection des personnes (partie « Préconisations »).</>,
+  };
+}
 
 const consoBiens: RiskData = {
   blocKey: "Assurance des biens",
@@ -510,30 +535,32 @@ const consoBiens: RiskData = {
   preco: <>régulariser l’assurance des biens (partie « Préconisations »).</>,
 };
 
-const consoActifs: RiskData = {
-  blocKey: "Actifs professionnels",
-  icon: <ShieldGauge />,
-  cert: { level: "c-moy", label: "Confiance modérée · 78 %", id: "globAssPro" },
-  title: "Un outil professionnel à mieux protéger",
-  constats: [
-    "Responsabilités professionnelle et d’exploitation couvertes.",
-    "Matériel sous-évalué, pertes d’exploitation et risques numériques non couverts.",
-  ],
-  risque:
-    "Un sinistre matériel ou numérique réduirait l’indemnisation et interromprait l’activité, alors que le revenu du foyer dépend des deux cabinets.",
-  opportunite:
-    "La réévaluation du matériel, une garantie de pertes d’exploitation et une garantie des risques numériques sécuriseraient l’outil de travail.",
-  optimisation:
-    "Actualiser les capitaux, souscrire les pertes d’exploitation et étudier une garantie des risques numériques.",
-  impact: (
-    <>
-      Indemnité du matériel réduite d’environ {DASH} en cas de sous-assurance ; plusieurs mois de
-      charges fixes en cas d’arrêt non couvert.
-    </>
-  ),
-  justification: "Conditions du contrat multirisque, inventaire du matériel et structure des revenus du foyer.",
-  preco: <>renforcer la protection de l’outil professionnel (partie « Préconisations »).</>,
-};
+function consoActifs(eur: Vh): RiskData {
+  return {
+    blocKey: "Actifs professionnels",
+    icon: <ShieldGauge />,
+    cert: { level: "c-moy", label: "Confiance modérée · 78 %", id: "globAssPro" },
+    title: "Un outil professionnel à mieux protéger",
+    constats: [
+      "Responsabilités professionnelle et d’exploitation couvertes.",
+      "Matériel sous-évalué, pertes d’exploitation et risques numériques non couverts.",
+    ],
+    risque:
+      "Un sinistre matériel ou numérique réduirait l’indemnisation et interromprait l’activité, alors que le revenu du foyer dépend des deux cabinets.",
+    opportunite:
+      "La réévaluation du matériel, une garantie de pertes d’exploitation et une garantie des risques numériques sécuriseraient l’outil de travail.",
+    optimisation:
+      "Actualiser les capitaux, souscrire les pertes d’exploitation et étudier une garantie des risques numériques.",
+    impact: (
+      <>
+        Indemnité du matériel réduite d’environ {eur("promat_indemnite_reduction")} en cas de
+        sous-assurance ; plusieurs mois de charges fixes en cas d’arrêt non couvert.
+      </>
+    ),
+    justification: "Conditions du contrat multirisque, inventaire du matériel et structure des revenus du foyer.",
+    preco: <>renforcer la protection de l’outil professionnel (partie « Préconisations »).</>,
+  };
+}
 
 // ---------------------------------------------------------------------------
 // Section complète
@@ -542,6 +569,14 @@ const consoActifs: RiskData = {
 export default function AssurancesSection({ donnees }: { donnees: EtudeDonnees }): ReactNode {
   const surname = foyerSurname(donnees);
   const designation = riskDesignation(surname);
+
+  const eur: Vh = (k) => <ValeurEditable vKey={k} format="euro" initial={donnees.valeurs[k] ?? null} />;
+  const pct: Vh = (k) => <ValeurEditable vKey={k} format="percent" initial={donnees.valeurs[k] ?? null} />;
+
+  const dPrevDeces = riskPrevDeces(eur);
+  const dMateriel = riskMateriel(eur);
+  const dConsoPersonnes = consoPersonnes(eur);
+  const dConsoActifs = consoActifs(eur);
 
   return (
     <>
@@ -705,13 +740,15 @@ export default function AssurancesSection({ donnees }: { donnees: EtudeDonnees }
                   </li>
                   <li>
                     <b>Seuil de déclenchement bas :</b> la rente d’invalidité complémentaire s’active
-                    dès {DASH} d’incapacité, protégeant le couple contre des pathologies légères mais
-                    invalidantes pour la précision gestuelle.
+                    dès {pct("prev_seuil_declenchement_invalidite")} d’incapacité, protégeant le
+                    couple contre des pathologies légères mais invalidantes pour la précision
+                    gestuelle.
                   </li>
                   <li>
-                    <b>Efficience fiscale immédiate :</b> les cotisations ({DASH} pour Monsieur et{" "}
-                    {DASH} pour Madame) sont intégralement déductibles de leurs bénéfices non
-                    commerciaux respectifs au titre de la loi Madelin.
+                    <b>Efficience fiscale immédiate :</b> les cotisations (
+                    {eur("prev_cotisation_monsieur")} pour Monsieur et{" "}
+                    {eur("prev_cotisation_madame")} pour Madame) sont intégralement déductibles de
+                    leurs bénéfices non commerciaux respectifs au titre de la loi Madelin.
                   </li>
                 </ul>
 
@@ -732,16 +769,19 @@ export default function AssurancesSection({ donnees }: { donnees: EtudeDonnees }
                 <ul className="dlist">
                   <li>Durant cette phase, le couple bénéficierait de l’indemnité journalière de la CPAM.</li>
                   <li>
-                    Madame (revenu de {DASH} par mois) percevrait une indemnité journalière de la
-                    CPAM d’environ {DASH} par jour, complétée par la prévoyance à hauteur de {DASH}{" "}
-                    par jour. Sa couverture globale s’élèverait à {DASH} par jour, soit environ {DASH}{" "}
-                    de son revenu net.
+                    Madame (revenu de {eur("madame_revenu_mensuel")} par mois) percevrait une
+                    indemnité journalière de la CPAM d’environ {eur("madame_ij_cpam_jour")} par jour,
+                    complétée par la prévoyance à hauteur de {eur("madame_ij_prev_0_90_jour")} par
+                    jour. Sa couverture globale s’élèverait à {eur("madame_ij_couverture_0_90_jour")}{" "}
+                    par jour, soit environ {pct("madame_taux_remplacement_0_90")} de son revenu net.
                   </li>
                   <li>
-                    Monsieur (revenu de {DASH} par mois) percevrait l’indemnité journalière maximale
-                    de la CPAM, soit {DASH} par jour, complétée par {DASH} par jour de la prévoyance.
-                    Sa couverture globale s’établirait à {DASH} par jour, soit environ {DASH} de son
-                    revenu net.
+                    Monsieur (revenu de {eur("monsieur_revenu_mensuel")} par mois) percevrait
+                    l’indemnité journalière maximale de la CPAM, soit {eur("monsieur_ij_cpam_jour")}{" "}
+                    par jour, complétée par {eur("monsieur_ij_prev_0_90_jour")} par jour de la
+                    prévoyance. Sa couverture globale s’établirait à{" "}
+                    {eur("monsieur_ij_couverture_0_90_jour")} par jour, soit environ{" "}
+                    {pct("monsieur_taux_remplacement_0_90")} de son revenu net.
                   </li>
                 </ul>
                 <p>
@@ -750,18 +790,20 @@ export default function AssurancesSection({ donnees }: { donnees: EtudeDonnees }
                 <ul className="dlist">
                   <li>
                     À compter du 91e jour, la CARCDSF prendrait le relais de la CPAM avec une
-                    indemnité journalière forfaitaire d’environ {DASH} par jour (soit environ {DASH}{" "}
-                    par mois).
+                    indemnité journalière forfaitaire d’environ {eur("carcdsf_ij_forfait_jour")} par
+                    jour (soit environ {eur("carcdsf_ij_forfait_mois")} par mois).
                   </li>
                   <li>
-                    Madame : son complément privé chuterait à {DASH} par jour. Avec le cumul de la
-                    CARCDSF, elle ne percevrait plus qu’environ {DASH} par mois, soit un taux de
-                    remplacement de {DASH}.
+                    Madame : son complément privé chuterait à {eur("madame_ij_prev_91_730_jour")} par
+                    jour. Avec le cumul de la CARCDSF, elle ne percevrait plus qu’environ{" "}
+                    {eur("madame_revenu_91_730_mois")} par mois, soit un taux de remplacement de{" "}
+                    {pct("madame_taux_remplacement_91_730")}.
                   </li>
                   <li>
-                    Monsieur : son complément privé passerait à {DASH} par jour. Avec le cumul de la
-                    CARCDSF, il percevrait environ {DASH} par mois, soit un taux de remplacement de{" "}
-                    {DASH}.
+                    Monsieur : son complément privé passerait à {eur("monsieur_ij_prev_91_730_jour")}{" "}
+                    par jour. Avec le cumul de la CARCDSF, il percevrait environ{" "}
+                    {eur("monsieur_revenu_91_730_mois")} par mois, soit un taux de remplacement de{" "}
+                    {pct("monsieur_taux_remplacement_91_730")}.
                   </li>
                 </ul>
                 <p>
@@ -773,13 +815,15 @@ export default function AssurancesSection({ donnees }: { donnees: EtudeDonnees }
                     que les garanties de la compagnie atteindraient leur palier maximal.
                   </li>
                   <li>
-                    Madame : son complément remonterait à {DASH} par jour. Son revenu total
-                    s’établirait à environ {DASH} par mois, soit une couverture de {DASH}.
+                    Madame : son complément remonterait à {eur("madame_ij_prev_731_1095_jour")} par
+                    jour. Son revenu total s’établirait à environ {eur("madame_revenu_731_1095_mois")}{" "}
+                    par mois, soit une couverture de {pct("madame_taux_remplacement_731_1095")}.
                   </li>
                   <li>
-                    Monsieur : son complément bondirait à {DASH} par jour. Il bénéficierait alors
-                    d’une protection optimale d’environ {DASH} par mois, couvrant près de {DASH} de
-                    ses revenus.
+                    Monsieur : son complément bondirait à {eur("monsieur_ij_prev_731_1095_jour")} par
+                    jour. Il bénéficierait alors d’une protection optimale d’environ{" "}
+                    {eur("monsieur_revenu_731_1095_mois")} par mois, couvrant près de{" "}
+                    {pct("monsieur_taux_remplacement_731_1095")} de ses revenus.
                   </li>
                 </ul>
                 <p style={{ marginTop: "8px" }}>
@@ -791,15 +835,19 @@ export default function AssurancesSection({ donnees }: { donnees: EtudeDonnees }
                 </p>
                 <ul className="dlist">
                   <li>
-                    Monsieur : sa rente privée s’établirait à {DASH} par mois. En y ajoutant la rente
-                    d’invalidité de la CARCDSF (estimée à environ {DASH} par mois), son revenu
-                    chuterait à environ {DASH} par mois. Sa protection globale s’effondrerait de{" "}
-                    {DASH} à {DASH} de son revenu net initial.
+                    Monsieur : sa rente privée s’établirait à{" "}
+                    {eur("monsieur_rente_invalidite_privee_mois")} par mois. En y ajoutant la rente
+                    d’invalidité de la CARCDSF (estimée à environ{" "}
+                    {eur("monsieur_rente_invalidite_carcdsf_mois")} par mois), son revenu chuterait à
+                    environ {eur("monsieur_revenu_invalidite_mois")} par mois. Sa protection globale
+                    s’effondrerait de {pct("monsieur_protection_invalidite_avant")} à{" "}
+                    {pct("monsieur_protection_invalidite_apres")} de son revenu net initial.
                   </li>
                   <li>
-                    Madame : sa rente privée s’élèverait à {DASH} par mois. Avec la rente obligatoire,
-                    elle maintiendrait un revenu de remplacement d’environ {DASH} par mois, soit une
-                    protection constante d’environ {DASH} de son revenu.
+                    Madame : sa rente privée s’élèverait à {eur("madame_rente_invalidite_privee_mois")}{" "}
+                    par mois. Avec la rente obligatoire, elle maintiendrait un revenu de remplacement
+                    d’environ {eur("madame_revenu_invalidite_mois")} par mois, soit une protection
+                    constante d’environ {pct("madame_protection_invalidite")} de son revenu.
                   </li>
                 </ul>
 
@@ -807,9 +855,10 @@ export default function AssurancesSection({ donnees }: { donnees: EtudeDonnees }
                 <ul className="dlist">
                   <li>
                     <b>Sortie obligatoire en rente :</b> le cadre Madelin interdit le versement d’un
-                    capital au conjoint et impose une rente viagère. Pour un capital de {DASH}, la
-                    rente générée pour le survivant ne serait que d’environ {DASH} par mois, privant
-                    le foyer de liquidités immédiates.
+                    capital au conjoint et impose une rente viagère. Pour un capital de{" "}
+                    {eur("prev_deces_capital")}, la rente générée pour le survivant ne serait que
+                    d’environ {eur("prev_deces_rente_survivant_mensuelle")} par mois, privant le foyer
+                    de liquidités immédiates.
                   </li>
                   <li>
                     <b>Fiscalité pénalisante au sinistre :</b> contrairement à une prévoyance
@@ -829,7 +878,7 @@ export default function AssurancesSection({ donnees }: { donnees: EtudeDonnees }
                 </ul>
 
                 <Kicker>Risques et opportunités</Kicker>
-                <RiskBlock data={riskPrevDeces} />
+                <RiskBlock data={dPrevDeces} />
                 <RiskBlock data={riskTarif} />
               </div>
             </div>
@@ -1103,9 +1152,10 @@ export default function AssurancesSection({ donnees }: { donnees: EtudeDonnees }
                   <p>
                     La couverture d’assurance emprunteur inclut les risques de décès, de perte totale
                     et irréversible d’autonomie (PTIA), ainsi que l’invalidité. Le taux de couverture
-                    (quotité) appliqué est de {DASH} pour chacun de ces risques. Ainsi, en cas de
-                    sinistre couvert, le partenaire non concerné demeurerait responsable de {DASH} du
-                    montant restant dû sur le prêt.
+                    (quotité) appliqué est de {pct("emprunteur_quotite")} pour chacun de ces risques.
+                    Ainsi, en cas de sinistre couvert, le partenaire non concerné demeurerait
+                    responsable de {pct("emprunteur_quotite_restante")} du montant restant dû sur le
+                    prêt.
                   </p>
                 </Bloc>
               </div>
@@ -1171,7 +1221,7 @@ export default function AssurancesSection({ donnees }: { donnees: EtudeDonnees }
                 <p>
                   Le parc immobilier est globalement assuré (habitation propriétaire non occupant ou
                   multirisque), et le prêt unique est couvert en décès, perte totale et irréversible
-                  d’autonomie et invalidité, à une quotité de {DASH} par tête.
+                  d’autonomie et invalidité, à une quotité de {pct("emprunteur_quotite")} par tête.
                 </p>
                 <p>
                   Deux points appellent une régularisation rapide : des parkings détenus en nom propre
@@ -1185,7 +1235,7 @@ export default function AssurancesSection({ donnees }: { donnees: EtudeDonnees }
                     <ul>
                       <li>Parkings sans responsabilité civile (charge sur le patrimoine personnel).</li>
                       <li>Désignation erronée de l’assuré (risque de nullité).</li>
-                      <li>Quotité d’assurance emprunteur de {DASH} par tête à apprécier.</li>
+                      <li>Quotité d’assurance emprunteur de {pct("emprunteur_quotite")} par tête à apprécier.</li>
                     </ul>
                   </div>
                   <div className="spr spr-o">
@@ -1327,7 +1377,7 @@ export default function AssurancesSection({ donnees }: { donnees: EtudeDonnees }
                   </p>
                 </Bloc>
                 <Kicker>Risques et opportunités</Kicker>
-                <RiskBlock data={riskMateriel} />
+                <RiskBlock data={dMateriel} />
               </div>
             </div>
 
@@ -1499,9 +1549,9 @@ export default function AssurancesSection({ donnees }: { donnees: EtudeDonnees }
           </div>
           <div className="mod-body">
             <Kicker>Risques et opportunités consolidés</Kicker>
-            <RiskBlock data={consoPersonnes} />
+            <RiskBlock data={dConsoPersonnes} />
             <RiskBlock data={consoBiens} />
-            <RiskBlock data={consoActifs} />
+            <RiskBlock data={dConsoActifs} />
 
             <Kicker style={{ margin: "18px 0 5px" }}>
               Rappel des risques et opportunités des modules
@@ -1510,12 +1560,12 @@ export default function AssurancesSection({ donnees }: { donnees: EtudeDonnees }
               Pour mémoire, cette section rassemble en un seul endroit l’ensemble des risques et
               opportunités identifiés dans les modules de l’analyse des assurances.
             </Bloc>
-            <RiskBlock data={riskPrevDeces} />
+            <RiskBlock data={dPrevDeces} />
             <RiskBlock data={riskTarif} />
             <RiskBlock data={riskClause} />
             <RiskBlock data={riskParkings} />
             <RiskBlock data={designation} />
-            <RiskBlock data={riskMateriel} />
+            <RiskBlock data={dMateriel} />
             <RiskBlock data={riskPertesExpl} />
             <RiskBlock data={riskNumerique} />
 

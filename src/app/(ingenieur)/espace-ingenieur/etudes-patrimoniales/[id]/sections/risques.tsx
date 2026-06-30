@@ -32,12 +32,12 @@
 import { Fragment, type ReactNode } from "react";
 
 import { Bloc } from "../Bloc";
+import ValeurEditable from "../ValeurEditable";
+import type { ValeurFormat } from "../format-valeur";
 import { formatFicheDate } from "../../../../_data/fiche-client";
 import type { EtudeDonnees, EtudePersonne } from "../../../../_data/etudes-patrimoniales";
 
 import "../../../../_styles/sections/risques.css";
-
-const D = "—";
 
 // Cible du panneau de confiance (« CERTIF ») de chaque fiche, transcrite des
 // appels openCertif(...) / f_openCertif(...) de la maquette. Portée par
@@ -661,6 +661,12 @@ export default function RisquesSection({ donnees }: { donnees: EtudeDonnees }): 
   const signeEn = anneeMariage != null ? `signé en ${anneeMariage}` : "signé lors de sa conclusion";
   const contratMariageAnnee = anneeMariage != null ? `de ${anneeMariage}` : "sans millésime renseigné";
 
+  // Montants du foyer saisis par l'ingénieur (persistés dans donnees.valeurs,
+  // « — » tant qu'absents). Constantes légales et taux de méthode restent en dur.
+  const v = (k: string, format: ValeurFormat = "euro") => (
+    <ValeurEditable vKey={k} format={format} initial={donnees.valeurs[k] ?? null} />
+  );
+
   const THEMES: Theme[] = [
     // ===================== Thème 1 — Patrimoine =====================
     {
@@ -681,8 +687,8 @@ export default function RisquesSection({ donnees }: { donnees: EtudeDonnees }): 
               title: "Potentiel de refinancement",
               constat: [
                 <>
-                  La résidence principale et les parkings (<strong>{D}</strong>) sont libres de toute
-                  hypothèque ; le capital restant dû total s’élève à <strong>{D}</strong> sur les deux
+                  La résidence principale et les parkings (<strong>{v("refi_rp_parkings_valeur")}</strong>) sont libres de toute
+                  hypothèque ; le capital restant dû total s’élève à <strong>{v("refi_crd_total")}</strong> sur les deux
                   appartements.
                 </>,
                 <>Le service annuel de la dette reste modéré au regard de la valeur du parc.</>,
@@ -703,8 +709,8 @@ export default function RisquesSection({ donnees }: { donnees: EtudeDonnees }): 
               },
               impact: (
                 <>
-                  À une quotité prudente de 60 à 70 %, et après déduction du capital restant dû ({D}),
-                  la capacité de refinancement mobilisable s’élève à <strong>{D}</strong>, déployables
+                  À une quotité prudente de 60 à 70 %, et après déduction du capital restant dû ({v("refi_crd_total")}),
+                  la capacité de refinancement mobilisable s’élève à <strong>{v("refi_capacite_mobilisable")}</strong>, déployables
                   sans céder le moindre actif (voir module ci-dessous).
                 </>
               ),
@@ -749,7 +755,7 @@ export default function RisquesSection({ donnees }: { donnees: EtudeDonnees }): 
               constat: [
                 <>
                   Une <strong>Contribution sur les revenus locatifs</strong> est acquittée pour deux
-                  appartements ({D} et {D}).
+                  appartements ({v("crl_appart_1")} et {v("crl_appart_2")}).
                 </>,
                 <>
                   Cette contribution vise principalement les revenus perçus par des personnes morales
@@ -767,8 +773,8 @@ export default function RisquesSection({ donnees }: { donnees: EtudeDonnees }): 
               },
               impact: (
                 <>
-                  Économie pérenne de <strong>{D}</strong>, et remboursement potentiel d’environ{" "}
-                  <strong>{D}</strong> au titre des trois derniers exercices.
+                  Économie pérenne de <strong>{v("crl_economie_annuelle")}</strong>, et remboursement potentiel d’environ{" "}
+                  <strong>{v("crl_remboursement_3ans")}</strong> au titre des trois derniers exercices.
                 </>
               ),
               justif: {
@@ -868,12 +874,12 @@ export default function RisquesSection({ donnees }: { donnees: EtudeDonnees }): 
               constat: [
                 <>
                   Sur l’appartement meublé détenu en nom propre, les charges représentent{" "}
-                  <strong>{D}</strong>, soit ≈ <strong>{D}</strong> du chiffre d’affaires — un poste à
+                  <strong>{v("charges_meuble_montant")}</strong>, soit ≈ <strong>{v("charges_meuble_ratio", "percent")}</strong> du chiffre d’affaires — un poste à
                   surveiller.
                 </>,
                 <>
                   Sur les studios détenus en <strong>SCI</strong>, ce ratio atteint près de{" "}
-                  <strong>{D}</strong> (honoraires comptables, copropriété, assurances, frais d’agence)
+                  <strong>{v("charges_sci_ratio", "percent")}</strong> (honoraires comptables, copropriété, assurances, frais d’agence)
                   — analysé dans le thème « Sociétés ».
                 </>,
               ],
@@ -912,7 +918,7 @@ export default function RisquesSection({ donnees }: { donnees: EtudeDonnees }): 
               constat: [
                 <>
                   L’appartement meublé est exploité en location meublée non professionnelle : les
-                  recettes ({D}) restent inférieures à 23 000 € et aux autres revenus du foyer.
+                  recettes ({v("lmnp_recettes")}) restent inférieures à 23 000 € et aux autres revenus du foyer.
                 </>,
                 <>
                   Ce régime relève des bénéfices industriels et commerciaux, au régime réel, avec
@@ -940,8 +946,8 @@ export default function RisquesSection({ donnees }: { donnees: EtudeDonnees }): 
               },
               impact: (
                 <>
-                  Loyers de <b>{D}</b> par an largement neutralisés par l’amortissement pendant la
-                  détention ; en contrepartie, plus-value brute portée à <b>{D}</b> à la cession après
+                  Loyers de <b>{v("lmnp_loyers_annuels")}</b> par an largement neutralisés par l’amortissement pendant la
+                  détention ; en contrepartie, plus-value brute portée à <b>{v("lmnp_plusvalue_brute")}</b> à la cession après
                   réintégration des amortissements (voir le coût d’opportunité immobilier).
                 </>
               ),
@@ -1031,7 +1037,7 @@ export default function RisquesSection({ donnees }: { donnees: EtudeDonnees }): 
               impact: (
                 <>
                   <b>SCI à l’impôt sur les sociétés :</b> produit = capital restant dû remboursé (à titre
-                  d’illustration, ≈ {D} sur le local financé), imposé à l’impôt sur les sociétés,{" "}
+                  d’illustration, ≈ {v("assur_crd_local")} sur le local financé), imposé à l’impôt sur les sociétés,{" "}
                   <b>étalable sur 5 ans</b>. <b>SCI à l’impôt sur le revenu :</b> l’indemnité constitue
                   des <b>recettes foncières</b> dès lors que les intérêts ont été déduits.{" "}
                   <b>Location meublée au réel (LMNP ou LMP) :</b> le capital remboursé constitue un{" "}
@@ -1165,10 +1171,10 @@ export default function RisquesSection({ donnees }: { donnees: EtudeDonnees }): 
               title: "Excédent de liquidités",
               constat: [
                 <>
-                  Liquidités immédiatement disponibles : <strong>{D}</strong>, soit <strong>{D}</strong>{" "}
+                  Liquidités immédiatement disponibles : <strong>{v("liq_disponibles")}</strong>, soit <strong>{v("liq_mois_couverts", "number")}</strong>{" "}
                   de dépenses courantes.
                 </>,
-                <>Norme d’épargne de précaution : 3 à 6 mois, soit une réserve cible de ~{D}.</>,
+                <>Norme d’épargne de précaution : 3 à 6 mois, soit une réserve cible de ~{v("liq_reserve_cible")}.</>,
                 <>Origine : accumulation progressive sur comptes courants et livrets, sans réallocation.</>,
               ],
               rio: {
@@ -1176,15 +1182,15 @@ export default function RisquesSection({ donnees }: { donnees: EtudeDonnees }): 
                 o: "Liquidité = atout : apport pour un investissement à effet de levier, ou saisie d’opportunités lors d’une correction de marché.",
                 opt: (
                   <>
-                    Arbitrer l’excédent (~{D}) vers des supports rémunérateurs, en conservant une
-                    réserve de précaution de ~{D}.
+                    Arbitrer l’excédent (~{v("liq_excedent")}) vers des supports rémunérateurs, en conservant une
+                    réserve de précaution de ~{v("liq_reserve_cible")}.
                   </>
                 ),
               },
               impact: (
                 <>
-                  Excédent au-delà de la réserve : <strong>{D}</strong>. À 1,9 % il rapporterait ~{D} ; à
-                  5 %, ~{D} — un différentiel de <strong>{D}</strong> de performance non captée.
+                  Excédent au-delà de la réserve : <strong>{v("liq_excedent")}</strong>. À 1,9 % il rapporterait ~{v("liq_rendement_bas")} ; à
+                  5 %, ~{v("liq_rendement_haut")} — un différentiel de <strong>{v("liq_differentiel")}</strong> de performance non captée.
                 </>
               ),
               justif: {
@@ -1208,22 +1214,22 @@ export default function RisquesSection({ donnees }: { donnees: EtudeDonnees }): 
               title: "Faible performance des contrats",
               constat: [
                 <>
-                  Depuis l’origine des contrats, rendements nets de <strong>{D}</strong> (Monsieur) et{" "}
-                  <strong>{D}</strong> (Madame). Inflation moyenne sur la période : {D}.
+                  Depuis l’origine des contrats, rendements nets de <strong>{v("perf_rdt_monsieur", "percent")}</strong> (Monsieur) et{" "}
+                  <strong>{v("perf_rdt_madame", "percent")}</strong> (Madame). Inflation moyenne sur la période : {v("perf_inflation_periode", "percent")}.
                 </>,
                 <>
-                  Contrats des enfants : {D} et {D} pour une inflation de {D} sur la période —
+                  Contrats des enfants : {v("perf_rdt_enfant_1", "percent")} et {v("perf_rdt_enfant_2", "percent")} pour une inflation de {v("perf_inflation_enfants", "percent")} sur la période —
                   performance réelle à apprécier.
                 </>,
                 <>
                   Origine : forte exposition aux fonds euros ; une injection récente de{" "}
-                  <strong>{D}</strong> fige une part prépondérante du capital.
+                  <strong>{v("perf_injection_recente")}</strong> fige une part prépondérante du capital.
                 </>,
               ],
               rio: {
                 r: (
                   <>
-                    Rendement réel négatif de <strong>{D}</strong> : le patrimoine se déprécie en
+                    Rendement réel négatif de <strong>{v("perf_rdt_reel_negatif", "percent")}</strong> : le patrimoine se déprécie en
                     pouvoir d’achat malgré la protection nominale.
                   </>
                 ),
@@ -1232,8 +1238,8 @@ export default function RisquesSection({ donnees }: { donnees: EtudeDonnees }): 
               },
               impact: (
                 <>
-                  Sur ~{D}, le différentiel de {D} représente <strong>{D}</strong> de richesse réelle
-                  perdue, avant fiscalité. Sur 10 ans, manque à gagner cumulé <strong>{D}</strong>{" "}
+                  Sur ~{v("perf_capital_concerne")}, le différentiel de {v("perf_differentiel_taux", "percent")} représente <strong>{v("perf_richesse_perdue")}</strong> de richesse réelle
+                  perdue, avant fiscalité. Sur 10 ans, manque à gagner cumulé <strong>{v("perf_manque_gagner_10ans")}</strong>{" "}
                   (détail ci-dessous).
                 </>
               ),
@@ -1265,10 +1271,10 @@ export default function RisquesSection({ donnees }: { donnees: EtudeDonnees }): 
                 "Évaluation de la charge d’emprunt — opportunité de renégociation ou de rachat",
               constat: [
                 <>
-                  Les financements en cours s’échelonnent de <strong>{D}</strong>.
+                  Les financements en cours s’échelonnent de <strong>{v("passif_credits_taux", "percent")}</strong>.
                 </>,
                 <>
-                  Le prêt de l’appartement meublé ({D}) et le crédit à la consommation ({D}) ressortent{" "}
+                  Le prêt de l’appartement meublé ({v("passif_taux_pret_meuble", "percent")}) et le crédit à la consommation ({v("passif_taux_credit_conso", "percent")}) ressortent{" "}
                   <strong>au-dessus des conditions de marché</strong> actuelles (≈ 3,50 % sur 15 ans).
                 </>,
               ],
@@ -1297,7 +1303,7 @@ export default function RisquesSection({ donnees }: { donnees: EtudeDonnees }): 
               impact: (
                 <>
                   Allègement mécanique de la charge d’intérêts et amélioration du cash-flow, à arbitrer
-                  contre les indemnités de remboursement anticipé (≈ {D} sur le meublé, sans indemnité
+                  contre les indemnités de remboursement anticipé (≈ {v("passif_ira_meuble")} sur le meublé, sans indemnité
                   sur le crédit à la consommation).
                 </>
               ),
@@ -1326,7 +1332,7 @@ export default function RisquesSection({ donnees }: { donnees: EtudeDonnees }): 
                   <strong>quotité de 30 % par tête</strong>, soit 60 % au global.
                 </>,
                 <>
-                  Son coût (≈ {D}) <strong>pèse sur la rentabilité</strong> de la SCI.
+                  Son coût (≈ {v("assemp_cout_assurance")}) <strong>pèse sur la rentabilité</strong> de la SCI.
                 </>,
               ],
               rio: {
@@ -1395,7 +1401,7 @@ export default function RisquesSection({ donnees }: { donnees: EtudeDonnees }): 
               constat: [
                 <>
                   Les deux financements logés dans les SCI (studios locatifs et local professionnel)
-                  représentent <strong>{D}</strong> de capital restant dû.
+                  représentent <strong>{v("caution_crd_sci")}</strong> de capital restant dû.
                 </>,
                 <>
                   Ces prêts sont assortis d’une <strong>caution solidaire</strong> consentie
@@ -1423,8 +1429,8 @@ export default function RisquesSection({ donnees }: { donnees: EtudeDonnees }): 
               },
               impact: (
                 <>
-                  La caution porte le taux d’endettement <b>de {D} à {D}</b> : un écart de près de{" "}
-                  <b>{D} de service annuel</b> de la dette, supporté personnellement en cas de
+                  La caution porte le taux d’endettement <b>de {v("caution_taux_avant", "percent")} à {v("caution_taux_apres", "percent")}</b> : un écart de près de{" "}
+                  <b>{v("caution_ecart_service")} de service annuel</b> de la dette, supporté personnellement en cas de
                   défaillance des sociétés. La renégociation viserait à substituer ou plafonner ces
                   engagements ; la délégation d’assurance à garantir le remboursement en cas de décès ou
                   d’invalidité d’un associé.
@@ -1476,7 +1482,7 @@ export default function RisquesSection({ donnees }: { donnees: EtudeDonnees }): 
               title: "Une assurance-vie au cœur du patrimoine, levier de transmission",
               constat: [
                 <>
-                  L’assurance-vie représente <strong>{D}</strong>, premier actif du foyer (environ {D}{" "}
+                  L’assurance-vie représente <strong>{v("av_valeur_totale")}</strong>, premier actif du foyer (environ {v("av_part_patrimoine", "percent")}{" "}
                   du patrimoine brut).
                 </>,
                 <>Elle concentre une part importante de l’épargne financière disponible.</>,
@@ -1489,7 +1495,7 @@ export default function RisquesSection({ donnees }: { donnees: EtudeDonnees }): 
               impact: (
                 <>
                   Bien calibrée, l’assurance-vie permet de transmettre une part importante des{" "}
-                  <strong>{D}</strong> dans un cadre fiscal optimisé.
+                  <strong>{v("av_valeur_totale")}</strong> dans un cadre fiscal optimisé.
                 </>
               ),
               justif: { text: "Relevés des contrats d’assurance-vie et clauses bénéficiaires." },
@@ -1509,8 +1515,8 @@ export default function RisquesSection({ donnees }: { donnees: EtudeDonnees }): 
               title: "Un patrimoine professionnel significatif, à sécuriser et rendre liquide",
               constat: [
                 <>
-                  Le patrimoine professionnel s’élève à <strong>{D}</strong>, deuxième poste du
-                  patrimoine ({D}).
+                  Le patrimoine professionnel s’élève à <strong>{v("patrpro_valeur")}</strong>, deuxième poste du
+                  patrimoine ({v("patrpro_part_patrimoine", "percent")}).
                 </>,
                 <>Il est étroitement lié à l’activité libérale et peu liquide.</>,
               ],
@@ -1521,7 +1527,7 @@ export default function RisquesSection({ donnees }: { donnees: EtudeDonnees }): 
               },
               impact: (
                 <>
-                  Les <strong>{D}</strong> de patrimoine professionnel gagnent en sécurité et en
+                  Les <strong>{v("patrpro_valeur")}</strong> de patrimoine professionnel gagnent en sécurité et en
                   liquidité par une structuration anticipée.
                 </>
               ),
@@ -1542,7 +1548,7 @@ export default function RisquesSection({ donnees }: { donnees: EtudeDonnees }): 
               title: "Un patrimoine conséquent appelant une stratégie de transmission",
               constat: [
                 <>
-                  Le patrimoine net atteint <strong>{D}</strong>, détenu sous le régime de la séparation
+                  Le patrimoine net atteint <strong>{v("patrimoine_net")}</strong>, détenu sous le régime de la séparation
                   de biens, avec deux enfants.
                 </>,
                 <>La détention combine indivision, SCI et biens propres.</>,
@@ -1555,7 +1561,7 @@ export default function RisquesSection({ donnees }: { donnees: EtudeDonnees }): 
               impact: (
                 <>
                   Une anticipation structurée peut réduire significativement la fiscalité de
-                  transmission des <strong>{D}</strong> de patrimoine net.
+                  transmission des <strong>{v("patrimoine_net")}</strong> de patrimoine net.
                 </>
               ),
               justif: {
@@ -1591,7 +1597,7 @@ export default function RisquesSection({ donnees }: { donnees: EtudeDonnees }): 
               title: "Une capacité d’épargne élevée, à structurer et à investir",
               constat: [
                 <>
-                  Le foyer dégage <strong>{D} d’épargne par an</strong> (environ {D} par mois), soit {D}{" "}
+                  Le foyer dégage <strong>{v("budget_epargne_annuelle")} d’épargne par an</strong> (environ {v("budget_epargne_mensuelle")} par mois), soit {v("budget_epargne_taux", "percent")}{" "}
                   de ses revenus.
                 </>,
                 <>
@@ -1606,7 +1612,7 @@ export default function RisquesSection({ donnees }: { donnees: EtudeDonnees }): 
               },
               impact: (
                 <>
-                  Réorientés vers des supports rémunérés, ces <strong>{D} annuels</strong> représentent,
+                  Réorientés vers des supports rémunérés, ces <strong>{v("budget_epargne_annuelle")} annuels</strong> représentent,
                   capitalisés, un levier patrimonial majeur sur 10 à 20 ans.
                 </>
               ),
@@ -1627,8 +1633,8 @@ export default function RisquesSection({ donnees }: { donnees: EtudeDonnees }): 
               title: "Des revenus concentrés sur l’activité libérale",
               constat: [
                 <>
-                  Les deux activités libérales représentent <strong>{D}</strong> de revenus, soit
-                  environ {D} du total.
+                  Les deux activités libérales représentent <strong>{v("budget_revenus_liberaux")}</strong> de revenus, soit
+                  environ {v("budget_part_liberaux", "percent")} du total.
                 </>,
                 <>
                   Les charges courantes, les impôts et le service de la dette demeurent dus
@@ -1642,7 +1648,7 @@ export default function RisquesSection({ donnees }: { donnees: EtudeDonnees }): 
               },
               impact: (
                 <>
-                  Un revenu de remplacement adapté couvrirait les <strong>{D} de charges</strong> et {D}{" "}
+                  Un revenu de remplacement adapté couvrirait les <strong>{v("budget_charges_annuelles")} de charges</strong> et {v("budget_service_dette_annuel")}{" "}
                   de service de la dette annuels en cas d’incapacité.
                 </>
               ),
@@ -1665,7 +1671,7 @@ export default function RisquesSection({ donnees }: { donnees: EtudeDonnees }): 
               title: "Une marge d’endettement préservée, mobilisable en effet de levier",
               constat: [
                 <>
-                  Le taux d’effort s’établit à <strong>{D}</strong>, nettement en deçà des seuils
+                  Le taux d’effort s’établit à <strong>{v("budget_taux_effort", "percent")}</strong>, nettement en deçà des seuils
                   d’octroi usuels (de l’ordre de 35 %).
                 </>,
                 <>Le foyer conserve donc une capacité d’endettement substantielle.</>,
@@ -1705,18 +1711,18 @@ export default function RisquesSection({ donnees }: { donnees: EtudeDonnees }): 
               prio: "haute",
               cert: { cls: "c-moy", label: "Confiance modérée · 82 %" },
               icon: IcoShieldClock,
-              title: <>Un taux de remplacement faible : baisse des ressources de {D} à la retraite</>,
+              title: <>Un taux de remplacement faible : baisse des ressources de {v("retr_taux_baisse", "percent")} à la retraite</>,
               constat: [
                 <>
-                  Le revenu professionnel annuel actuel du couple s’élève à <strong>{D}</strong> (net
+                  Le revenu professionnel annuel actuel du couple s’élève à <strong>{v("retr_revenu_actuel")}</strong> (net
                   imposable).
                 </>,
                 <>
                   Le montant prévisionnel des pensions (régime de base et complémentaire) est estimé à{" "}
-                  <strong>{D}</strong> bruts par an.
+                  <strong>{v("retr_pension_estimee")}</strong> bruts par an.
                 </>,
                 <>
-                  Cette projection met en évidence une baisse de revenus de <strong>{D}</strong> au
+                  Cette projection met en évidence une baisse de revenus de <strong>{v("retr_baisse_revenus")}</strong> au
                   moment du départ à la retraite.
                 </>,
               ],
@@ -1761,7 +1767,7 @@ export default function RisquesSection({ donnees }: { donnees: EtudeDonnees }): 
               constat: [
                 <>
                   Au 1<sup>er</sup> janvier 2026, le patrimoine net taxable à l’IFI atteint{" "}
-                  <strong>{D}</strong> (incluant un appartement situé à l’étranger pour {D}).
+                  <strong>{v("ifi_assiette")}</strong> (incluant un appartement situé à l’étranger pour {v("ifi_appart_etranger")}).
                 </>,
                 <>
                   Cette situation s’explique par l’absence de dettes sur la totalité du parc immobilier
@@ -1770,7 +1776,7 @@ export default function RisquesSection({ donnees }: { donnees: EtudeDonnees }): 
                 <>
                   Le local professionnel (détenu en SCI) est actuellement exonéré, mais son
                   amortissement et surtout la cessation d’activité future réintégreront cet actif
-                  (environ {D}) dans l’assiette.
+                  (environ {v("ifi_local_pro")}) dans l’assiette.
                 </>,
               ],
               rio: {
@@ -1782,7 +1788,7 @@ export default function RisquesSection({ donnees }: { donnees: EtudeDonnees }): 
                 <>
                   L’absence de passif déductible rend l’assiette perméable à toute hausse des prix de
                   l’immobilier. À l’arrêt de l’activité, le patrimoine taxable dépassera{" "}
-                  <strong>{D}</strong>, plaçant le foyer dans une tranche d’IFI supérieure sans passif
+                  <strong>{v("ifi_assiette_future")}</strong>, plaçant le foyer dans une tranche d’IFI supérieure sans passif
                   pour contrebalancer.
                 </>
               ),
@@ -1805,7 +1811,7 @@ export default function RisquesSection({ donnees }: { donnees: EtudeDonnees }): 
               title: "Bien détenu à l’étranger : un risque de redressement à neutraliser",
               constat: [
                 <>
-                  Maintenir l’appartement étranger (estimé à {D}) hors des déclarations fiscales, et
+                  Maintenir l’appartement étranger (estimé à {v("ifi_appart_etranger")}) hors des déclarations fiscales, et
                   organiser une mise en location sans déclarer les revenus perçus, exposerait le foyer à
                   une fragilité juridique.
                 </>,
@@ -1870,7 +1876,7 @@ export default function RisquesSection({ donnees }: { donnees: EtudeDonnees }): 
                     En cas de désaccord entre les deux époux, aucune décision ne peut être validée ; un
                     blocage persistant pourrait paralyser le fonctionnement de la société et ouvrir la
                     voie à une dissolution judiciaire. Au premier décès, l’application du testament
-                    donnerait aux enfants la nue-propriété de {D} des parts (3/4 de la moitié du défunt),
+                    donnerait aux enfants la nue-propriété de {v("soc_np_enfants_part", "percent")} des parts (3/4 de la moitié du défunt),
                     avec un droit de vote en AGE conférant une minorité de blocage automatique.
                   </>
                 ),
@@ -1879,8 +1885,8 @@ export default function RisquesSection({ donnees }: { donnees: EtudeDonnees }): 
               },
               impact: (
                 <>
-                  Le conjoint survivant ne disposerait que de <strong>{D}</strong> des voix ({D}{" "}
-                  d’origine + {D} hérités en pleine propriété), en deçà des deux tiers (66,67 %) requis
+                  Le conjoint survivant ne disposerait que de <strong>{v("soc_voix_survivant", "percent")}</strong> des voix ({v("soc_voix_origine", "percent")}{" "}
+                  d’origine + {v("soc_voix_herite", "percent")} hérités en pleine propriété), en deçà des deux tiers (66,67 %) requis
                   pour modifier les statuts ou céder l’actif.
                 </>
               ),
@@ -2005,7 +2011,7 @@ export default function RisquesSection({ donnees }: { donnees: EtudeDonnees }): 
                 opt: "Piloter la rémunération via une structure à l’IS et orienter l’excédent vers la capitalisation.",
               },
               impact: (
-                <>En l’état, le prélèvement représente {D} du bénéfice, sur des revenus déjà lourdement taxés.</>
+                <>En l’état, le prélèvement représente {v("eim_prelevement_pct", "percent")} du bénéfice, sur des revenus déjà lourdement taxés.</>
               ),
               justif: { text: "Transparence fiscale du régime de l’Entreprise Individuelle." },
               foot: (
@@ -2051,7 +2057,7 @@ export default function RisquesSection({ donnees }: { donnees: EtudeDonnees }): 
               constat: [
                 <>Monsieur exerce en Entreprise Individuelle à l’impôt sur le revenu.</>,
                 <>
-                  L’intégralité du bénéfice net ({D}, dernier exercice) est soumise au barème
+                  L’intégralité du bénéfice net ({v("eim_benefice_net")}, dernier exercice) est soumise au barème
                   progressif de l’impôt sur le revenu (TMI à 41 %) et aux cotisations sociales (URSSAF /
                   CARCDSF).
                 </>,
@@ -2064,7 +2070,7 @@ export default function RisquesSection({ donnees }: { donnees: EtudeDonnees }): 
               impact: (
                 <>
                   En l’état, aucune stratégie de capitalisation à taux réduit n’est possible au sein de
-                  l’outil professionnel ; le prélèvement représente {D} du bénéfice.
+                  l’outil professionnel ; le prélèvement représente {v("eim_prelevement_pct", "percent")} du bénéfice.
                 </>
               ),
               justif: { text: "Régime fiscal et social de l’Entreprise Individuelle (BNC)." },
@@ -2129,7 +2135,7 @@ export default function RisquesSection({ donnees }: { donnees: EtudeDonnees }): 
                 opt: "Piloter la rémunération via une structure à l’IS et orienter l’excédent vers la capitalisation.",
               },
               impact: (
-                <>En l’état, le prélèvement représente {D} du bénéfice, sur des revenus déjà lourdement taxés.</>
+                <>En l’état, le prélèvement représente {v("eif_prelevement_pct", "percent")} du bénéfice, sur des revenus déjà lourdement taxés.</>
               ),
               justif: { text: "Transparence fiscale du régime de l’Entreprise Individuelle." },
               foot: (
@@ -2157,7 +2163,7 @@ export default function RisquesSection({ donnees }: { donnees: EtudeDonnees }): 
               },
               impact: (
                 <>
-                  Le surplus de {D}, déjà fiscalisé, peut être extrait sans frottement vers des supports
+                  Le surplus de {v("eif_surplus_tresorerie")}, déjà fiscalisé, peut être extrait sans frottement vers des supports
                   de placement personnels.
                 </>
               ),
@@ -2179,7 +2185,7 @@ export default function RisquesSection({ donnees }: { donnees: EtudeDonnees }): 
               constat: [
                 <>Madame exerce en Entreprise Individuelle à l’impôt sur le revenu.</>,
                 <>
-                  L’intégralité du bénéfice net ({D}, dernier exercice) est soumise au barème
+                  L’intégralité du bénéfice net ({v("eif_benefice_net")}, dernier exercice) est soumise au barème
                   progressif de l’impôt sur le revenu (TMI à 41 % ou 45 %) et aux cotisations sociales
                   (URSSAF / CARCDSF).
                 </>,
@@ -2192,7 +2198,7 @@ export default function RisquesSection({ donnees }: { donnees: EtudeDonnees }): 
               impact: (
                 <>
                   En l’état, aucune stratégie de capitalisation à taux réduit n’est possible au sein de
-                  l’outil professionnel ; le prélèvement représente {D} du bénéfice.
+                  l’outil professionnel ; le prélèvement représente {v("eif_prelevement_pct", "percent")} du bénéfice.
                 </>
               ),
               justif: { text: "Régime fiscal et social de l’Entreprise Individuelle (BNC)." },
@@ -2219,7 +2225,7 @@ export default function RisquesSection({ donnees }: { donnees: EtudeDonnees }): 
               constat: [
                 <>Les deux activités sont exercées en Entreprise Individuelle au régime BNC.</>,
                 <>
-                  Les bénéfices cumulés ({D}, dernier exercice) supportent l’impôt sur le revenu (TMI
+                  Les bénéfices cumulés ({v("glob_benefices_cumules")}, dernier exercice) supportent l’impôt sur le revenu (TMI
                   41 %) et les cotisations sociales.
                 </>,
               ],
@@ -2230,7 +2236,7 @@ export default function RisquesSection({ donnees }: { donnees: EtudeDonnees }): 
               },
               impact: (
                 <>
-                  Prélèvements de {D} (Monsieur) et {D} (Madame) du bénéfice, sans levier de
+                  Prélèvements de {v("eim_prelevement_pct", "percent")} (Monsieur) et {v("eif_prelevement_pct", "percent")} (Madame) du bénéfice, sans levier de
                   capitalisation à taux réduit.
                 </>
               ),
@@ -2261,7 +2267,12 @@ export default function RisquesSection({ donnees }: { donnees: EtudeDonnees }): 
                 o: "Un pacte d’associés, une clause d’agrément et la révision des testaments sécurisent la structure.",
                 opt: "Réviser les statuts et les dispositions testamentaires, et prévoir l’acte authentique pour les cessions.",
               },
-              impact: `Conjoint survivant à ${D} des voix, en deçà des deux tiers requis pour décider seul.`,
+              impact: (
+                <>
+                  Conjoint survivant à {v("soc_voix_survivant", "percent")} des voix, en deçà des deux tiers requis pour
+                  décider seul.
+                </>
+              ),
               justif: { text: "Statuts de la SCI et dispositions testamentaires." },
               foot: (
                 <>
@@ -2287,7 +2298,7 @@ export default function RisquesSection({ donnees }: { donnees: EtudeDonnees }): 
                 opt: "Mobiliser les trésoreries vers des supports de placement adaptés.",
               },
               impact: (
-                <>Surplus extractible ({D} chez Madame) et rémunération possible du matelas de sécurité.</>
+                <>Surplus extractible ({v("eif_surplus_tresorerie")} chez Madame) et rémunération possible du matelas de sécurité.</>
               ),
               justif: { text: "Soldes bancaires professionnels et niveaux de trésorerie." },
               foot: (
@@ -2323,14 +2334,14 @@ export default function RisquesSection({ donnees }: { donnees: EtudeDonnees }): 
                   Monsieur et Madame sont titulaires de contrats de prévoyance individuelle Madelin
                   auprès de la compagnie.
                 </>,
-                <>Les capitaux garantis s’élèvent à {D} pour Monsieur et {D} pour Madame.</>,
+                <>Les capitaux garantis s’élèvent à {v("assprev_capital_monsieur")} pour Monsieur et {v("assprev_capital_madame")} pour Madame.</>,
                 <>La sortie des prestations décès est prévue sous forme de rente viagère.</>,
               ],
               rio: {
                 r: (
                   <>
                     Le conjoint survivant se verrait privé d’un capital immédiat au profit d’une rente
-                    dérisoire d’environ {D}, et le foyer perdrait l’exonération fiscale du capital décès
+                    dérisoire d’environ {v("assprev_rente_annuelle")}, et le foyer perdrait l’exonération fiscale du capital décès
                     (loi TEPA) au profit d’une rente imposable à l’impôt sur le revenu.
                   </>
                 ),
@@ -2338,7 +2349,7 @@ export default function RisquesSection({ donnees }: { donnees: EtudeDonnees }): 
                 opt: "Compléter ou substituer une prévoyance décès hors cadre Madelin afin de rétablir une sortie en capital.",
               },
               impact: (
-                <>Pour un capital de {D}, la rente servie au survivant ne serait que d’environ {D}.</>
+                <>Pour un capital de {v("assprev_capital_illustration")}, la rente servie au survivant ne serait que d’environ {v("assprev_rente_annuelle")}.</>
               ),
               justif: {
                 text: "Conditions générales des contrats de prévoyance Madelin et cadre fiscal applicable.",
@@ -2499,8 +2510,8 @@ export default function RisquesSection({ donnees }: { donnees: EtudeDonnees }): 
               title: "Capitaux déclarés inférieurs à la valeur réelle : la règle proportionnelle",
               constat: [
                 <>
-                  Le capital mobilier déclaré au contrat multirisque s’élève à {D} pour un parc
-                  d’équipements dont la valeur de remplacement est estimée à {D}.
+                  Le capital mobilier déclaré au contrat multirisque s’élève à {v("asspro_capital_declare")} pour un parc
+                  d’équipements dont la valeur de remplacement est estimée à {v("asspro_valeur_remplacement")}.
                 </>,
                 <>
                   Le contrat ne comporte pas de clause de renonciation à la règle proportionnelle de
@@ -2513,7 +2524,7 @@ export default function RisquesSection({ donnees }: { donnees: EtudeDonnees }): 
                 opt: "Faire expertiser le matériel, actualiser les capitaux déclarés et négocier la renonciation à la proportionnelle.",
               },
               impact: (
-                <>Pour un sinistre, l’indemnité pourrait être réduite d’environ {D} au titre de la sous-assurance.</>
+                <>Pour un sinistre, l’indemnité pourrait être réduite d’environ {v("asspro_reduction_indemnite")} au titre de la sous-assurance.</>
               ),
               justif: {
                 text: "Conditions particulières du contrat multirisque et inventaire du matériel d’exploitation.",
@@ -2604,8 +2615,8 @@ export default function RisquesSection({ donnees }: { donnees: EtudeDonnees }): 
               },
               impact: (
                 <>
-                  Capital décès de {D} converti en une rente d’environ {D} par mois ; couverture
-                  invalidité de Madame plafonnée à environ {D}.
+                  Capital décès de {v("globass_capital_deces")} converti en une rente d’environ {v("globass_rente_mensuelle")} par mois ; couverture
+                  invalidité de Madame plafonnée à environ {v("globass_invalidite_madame")}.
                 </>
               ),
               justif: { text: "Contrats de prévoyance, certificats d’adhésion et clauses bénéficiaires du couple." },
@@ -2661,7 +2672,7 @@ export default function RisquesSection({ donnees }: { donnees: EtudeDonnees }): 
               },
               impact: (
                 <>
-                  Indemnité du matériel réduite d’environ {D} en cas de sous-assurance ; plusieurs mois
+                  Indemnité du matériel réduite d’environ {v("asspro_reduction_indemnite")} en cas de sous-assurance ; plusieurs mois
                   de charges fixes en cas d’arrêt non couvert.
                 </>
               ),
@@ -2936,7 +2947,7 @@ export default function RisquesSection({ donnees }: { donnees: EtudeDonnees }): 
                 <>Le foyer est marié sous le régime de la séparation de biens, avec deux enfants à charge.</>,
                 <>
                   Le montant total des droits de succession au second décès est estimé à{" "}
-                  <strong>{D}</strong> selon l’ordre des décès.
+                  <strong>{v("succ_droits_second_deces")}</strong> selon l’ordre des décès.
                 </>,
                 <>
                   Les testaments olographes prévoient l’attribution de la quotité disponible maximale au
@@ -2961,7 +2972,12 @@ export default function RisquesSection({ donnees }: { donnees: EtudeDonnees }): 
                 </>
               ),
               justif: {
-                text: `Les droits de succession au second décès, estimés à ${D} selon l’ordre des départs, pèsent sur un patrimoine peu liquide et largement professionnel.`,
+                text: (
+                  <>
+                    Les droits de succession au second décès, estimés à {v("succ_droits_second_deces")} selon l’ordre des
+                    départs, pèsent sur un patrimoine peu liquide et largement professionnel.
+                  </>
+                ),
               },
               foot: (
                 <>

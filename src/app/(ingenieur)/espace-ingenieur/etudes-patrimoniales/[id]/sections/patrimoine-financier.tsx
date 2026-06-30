@@ -34,6 +34,7 @@ import {
 import type { EtudeDonnees, EtudeProduit } from "../../../../_data/etudes-patrimoniales";
 
 import { Bloc } from "../Bloc";
+import ValeurEditable from "../ValeurEditable";
 import "../../../../_styles/sections/patrimoine-financier.css";
 
 const DASH = "—";
@@ -42,20 +43,9 @@ const DASH = "—";
 // Lecture honnête des montants (donnees.valeurs) — « — » tant qu'absent
 // ---------------------------------------------------------------------------
 
-function num(donnees: EtudeDonnees, key: string): number | null {
-  const v = donnees.valeurs[key];
-  if (v == null || v === "") return null;
-  const n = typeof v === "number" ? v : Number(v);
-  return Number.isFinite(n) ? n : null;
-}
-
 function eurNum(n: number | null): string {
   if (n == null) return DASH;
   return `${n.toLocaleString("fr-FR", { maximumFractionDigits: 0 })} €`;
-}
-
-function eur(donnees: EtudeDonnees, key: string): string {
-  return eurNum(num(donnees, key));
 }
 
 /** Date ISO « yyyy-mm-dd » → « mm/yyyy » (souscription), « — » si absente. */
@@ -140,19 +130,27 @@ export default function PatrimoineFinancier({ donnees }: { donnees: EtudeDonnees
           </div>
           <div className="kpirow">
             <div className="kpi">
-              <div className="kv" id="kpi-av">{eur(donnees, "assurance_vie")}</div>
+              <div className="kv" id="kpi-av">
+                <ValeurEditable vKey="assurance_vie" format="euro" initial={donnees.valeurs["assurance_vie"] ?? null} label="Assurance-vie & capitalisation" />
+              </div>
               <div className="kl">Assurance-vie &amp; capitalisation</div>
             </div>
             <div className="kpi">
-              <div className="kv" id="kpi-liq">{eur(donnees, "liquidites")}</div>
+              <div className="kv" id="kpi-liq">
+                <ValeurEditable vKey="liquidites" format="euro" initial={donnees.valeurs["liquidites"] ?? null} label="Liquidités et comptes réglementés" />
+              </div>
               <div className="kl">Liquidités et comptes réglementés</div>
             </div>
             <div className="kpi">
-              <div className="kv" id="kpi-tot-f">{eur(donnees, "actifs_financiers")}</div>
+              <div className="kv" id="kpi-tot-f">
+                <ValeurEditable vKey="actifs_financiers" format="euro" initial={donnees.valeurs["actifs_financiers"] ?? null} label="Patrimoine financier total" />
+              </div>
               <div className="kl">Patrimoine financier total</div>
             </div>
             <div className="kpi">
-              <div className="kv">{DASH}</div>
+              <div className="kv">
+                <ValeurEditable vKey="fin_part_patrimoine_global" format="percent" initial={donnees.valeurs["fin_part_patrimoine_global"] ?? null} label="Part du patrimoine global" />
+              </div>
               <div className="kl">du patrimoine global</div>
             </div>
           </div>
@@ -168,17 +166,23 @@ export default function PatrimoineFinancier({ donnees }: { donnees: EtudeDonnees
           <div className="rpgrid">
             <div className="rpc">
               <div className="rl">Assurance-vie &amp; capitalisation</div>
-              <div className="rv" id="rp-av">{DASH}</div>
+              <div className="rv" id="rp-av">
+                <ValeurEditable vKey="fin_rendement_av" format="percent" initial={donnees.valeurs["fin_rendement_av"] ?? null} label="Rendement assurance-vie" />
+              </div>
               <div className="rs">net de frais de gestion</div>
             </div>
             <div className="rpc">
               <div className="rl">Liquidités et comptes réglementés</div>
-              <div className="rv" id="rp-liq">{DASH}</div>
+              <div className="rv" id="rp-liq">
+                <ValeurEditable vKey="fin_rendement_liquidites" format="percent" initial={donnees.valeurs["fin_rendement_liquidites"] ?? null} label="Rendement des liquidités" />
+              </div>
               <div className="rs">livrets + comptes</div>
             </div>
             <div className="rpc glob">
               <div className="rl">Patrimoine financier global</div>
-              <div className="rv" id="rp-glob">{DASH}</div>
+              <div className="rv" id="rp-glob">
+                <ValeurEditable vKey="fin_rendement_global" format="percent" initial={donnees.valeurs["fin_rendement_global"] ?? null} label="Rendement financier global" />
+              </div>
               <div className="rs" id="rp-real">réel vs inflation</div>
             </div>
           </div>
@@ -306,7 +310,9 @@ export default function PatrimoineFinancier({ donnees }: { donnees: EtudeDonnees
                 </span>
               </div>
               <div className="amt">
-                <span id="amt-liq">{eur(donnees, "liquidites")}</span>
+                <span id="amt-liq">
+                  <ValeurEditable vKey="liquidites" format="euro" initial={donnees.valeurs["liquidites"] ?? null} label="Total liquidités et comptes réglementés" />
+                </span>
               </div>
               <span className="chev">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
@@ -369,7 +375,9 @@ export default function PatrimoineFinancier({ donnees }: { donnees: EtudeDonnees
                 <span className="sub">{avSub}</span>
               </div>
               <div className="amt">
-                <span id="amt-av">{eur(donnees, "assurance_vie")}</span>
+                <span id="amt-av">
+                  <ValeurEditable vKey="assurance_vie" format="euro" initial={donnees.valeurs["assurance_vie"] ?? null} label="Total contrats d'assurance-vie et de capitalisation" />
+                </span>
               </div>
               <span className="chev">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
@@ -816,22 +824,32 @@ export default function PatrimoineFinancier({ donnees }: { donnees: EtudeDonnees
             <div className="synthbody">
               <div className="kpirow">
                 <div className="kpi">
-                  <div className="kv">{eur(donnees, "capacite_epargne_mensuelle")}</div>
+                  <div className="kv">
+                    <ValeurEditable vKey="capacite_epargne_mensuelle" format="euro" initial={donnees.valeurs["capacite_epargne_mensuelle"] ?? null} label="Capacité d'épargne mensuelle" />
+                  </div>
                   <div className="kl">Capacité d&apos;épargne mensuelle</div>
-                  <div className="kf">{DASH} du budget</div>
+                  <div className="kf">
+                    <ValeurEditable vKey="fin_taux_epargne_budget" format="percent" initial={donnees.valeurs["fin_taux_epargne_budget"] ?? null} label="Taux d'épargne du budget" /> du budget
+                  </div>
                 </div>
                 <div className="kpi">
-                  <div className="kv">{DASH}</div>
+                  <div className="kv">
+                    <ValeurEditable vKey="fin_epargne_precaution" format="euro" initial={donnees.valeurs["fin_epargne_precaution"] ?? null} label="Épargne de précaution" />
+                  </div>
                   <div className="kl">Épargne de précaution</div>
                   <div className="kf">cible 3 à 6 mois de charges</div>
                 </div>
                 <div className="kpi">
-                  <div className="kv">{eur(donnees, "epargne_disponible")}</div>
+                  <div className="kv">
+                    <ValeurEditable vKey="epargne_disponible" format="euro" initial={donnees.valeurs["epargne_disponible"] ?? null} label="Excédent mobilisable" />
+                  </div>
                   <div className="kl">Excédent mobilisable</div>
                   <div className="kf">au-delà de la réserve</div>
                 </div>
                 <div className="kpi">
-                  <div className="kv">{DASH}</div>
+                  <div className="kv">
+                    <ValeurEditable vKey="fin_liquidite_courante_mois" format="number" initial={donnees.valeurs["fin_liquidite_courante_mois"] ?? null} label="Liquidité courante (mois)" />
+                  </div>
                   <div className="kl">Liquidité courante</div>
                   <div className="kf">cible 3 à 6 mois</div>
                 </div>
@@ -843,8 +861,11 @@ export default function PatrimoineFinancier({ donnees }: { donnees: EtudeDonnees
                   <circle cx="12" cy="12" r="9" />
                 </svg>
                 <span>
-                  <b>Rappel synthétique</b> — taux d&apos;effort {DASH} · taux d&apos;endettement {DASH}{" "}
-                  · reste à vivre {DASH}/mois.{" "}
+                  <b>Rappel synthétique</b> — taux d&apos;effort{" "}
+                  <ValeurEditable vKey="budget_taux_effort" format="percent" initial={donnees.valeurs["budget_taux_effort"] ?? null} label="Taux d'effort" /> · taux d&apos;endettement{" "}
+                  <ValeurEditable vKey="budget_taux_endettement" format="percent" initial={donnees.valeurs["budget_taux_endettement"] ?? null} label="Taux d'endettement" />{" "}
+                  · reste à vivre{" "}
+                  <ValeurEditable vKey="budget_reste_a_vivre" format="euro" initial={donnees.valeurs["budget_reste_a_vivre"] ?? null} label="Reste à vivre mensuel" />/mois.{" "}
                   <span className="lk">Détail complet dans « Budget »</span>.
                 </span>
               </div>
@@ -893,7 +914,7 @@ export default function PatrimoineFinancier({ donnees }: { donnees: EtudeDonnees
                   Constat &amp; origine
                 </div>
                 <ul className="dlist">
-                  <li>Liquidités immédiatement disponibles : <strong>{DASH}</strong>, soit <strong>{DASH}</strong> de dépenses courantes.</li>
+                  <li>Liquidités immédiatement disponibles : <strong><ValeurEditable vKey="fin_liquidites_immediates" format="euro" initial={donnees.valeurs["fin_liquidites_immediates"] ?? null} label="Liquidités immédiatement disponibles" /></strong>, soit <strong><ValeurEditable vKey="fin_liquidites_mois_depenses" format="number" initial={donnees.valeurs["fin_liquidites_mois_depenses"] ?? null} label="Mois de dépenses courantes couverts" /></strong> de dépenses courantes.</li>
                   <li>Norme d&apos;épargne de précaution : 3 à 6 mois de charges courantes.</li>
                   <li>Origine : accumulation progressive sur comptes courants et livrets, à apprécier une fois les soldes collectés.</li>
                 </ul>
@@ -914,7 +935,7 @@ export default function PatrimoineFinancier({ donnees }: { donnees: EtudeDonnees
                   </svg>{" "}
                   Impact quantifié
                 </div>
-                <p>Excédent au-delà de la réserve : <strong>{DASH}</strong>. Le différentiel de performance entre le taux actuel et un taux cible chiffre le manque à gagner annuel, à compléter une fois les montants renseignés.</p>
+                <p>Excédent au-delà de la réserve : <strong><ValeurEditable vKey="epargne_disponible" format="euro" initial={donnees.valeurs["epargne_disponible"] ?? null} label="Excédent au-delà de la réserve" /></strong>. Le différentiel de performance entre le taux actuel et un taux cible chiffre le manque à gagner annuel, à compléter une fois les montants renseignés.</p>
               </div>
               <div className="dim">
                 <div className="dh">
@@ -977,7 +998,7 @@ export default function PatrimoineFinancier({ donnees }: { donnees: EtudeDonnees
                   Constat &amp; origine
                 </div>
                 <ul className="dlist">
-                  <li>Rendements nets des contrats à comparer à l&apos;inflation moyenne de la période de détention : <strong>{DASH}</strong>.</li>
+                  <li>Rendements nets des contrats à comparer à l&apos;inflation moyenne de la période de détention : <strong><ValeurEditable vKey="fin_rendement_net_contrats" format="percent" initial={donnees.valeurs["fin_rendement_net_contrats"] ?? null} label="Rendement net des contrats depuis l'origine" /></strong>.</li>
                   <li>Une exposition prépondérante aux fonds en euros plafonne le rendement réel.</li>
                   <li>Origine : structure d&apos;allocation à objectiver une fois les rendements collectés.</li>
                 </ul>
@@ -998,7 +1019,7 @@ export default function PatrimoineFinancier({ donnees }: { donnees: EtudeDonnees
                   </svg>{" "}
                   Impact quantifié
                 </div>
-                <p>Sur l&apos;encours concerné, le différentiel de rendement réel représente un manque à gagner annuel, cumulé sur dix ans : <strong>{DASH}</strong> (détail ci-dessous).</p>
+                <p>Sur l&apos;encours concerné, le différentiel de rendement réel représente un manque à gagner annuel, cumulé sur dix ans : <strong><ValeurEditable vKey="fin_manque_a_gagner_10ans" format="euro" initial={donnees.valeurs["fin_manque_a_gagner_10ans"] ?? null} label="Manque à gagner cumulé sur dix ans" /></strong> (détail ci-dessous).</p>
               </div>
               <div className="dim">
                 <div className="dh">
@@ -1176,24 +1197,24 @@ export default function PatrimoineFinancier({ donnees }: { donnees: EtudeDonnees
                 <span className="sc-link">Voir le détail</span>
               </div>
               <p>
-                Le patrimoine financier du foyer s&apos;élève à <b>{DASH}</b>, soit une part à préciser du
+                Le patrimoine financier du foyer s&apos;élève à <b><ValeurEditable vKey="actifs_financiers" format="euro" initial={donnees.valeurs["actifs_financiers"] ?? null} label="Patrimoine financier total" /></b>, soit une part à préciser du
                 patrimoine global. Il se compose de contrats d&apos;assurance-vie et de capitalisation
-                (<b>{DASH}</b>), de liquidités disponibles (<b>{DASH}</b>) et de valeurs mobilières
-                diversifiées (<b>{DASH}</b> — PEA, compte-titres, métaux précieux, capital-investissement).
+                (<b><ValeurEditable vKey="assurance_vie" format="euro" initial={donnees.valeurs["assurance_vie"] ?? null} label="Contrats d'assurance-vie et de capitalisation" /></b>), de liquidités disponibles (<b><ValeurEditable vKey="liquidites" format="euro" initial={donnees.valeurs["liquidites"] ?? null} label="Liquidités disponibles" /></b>) et de valeurs mobilières
+                diversifiées (<b><ValeurEditable vKey="fin_valeurs_mobilieres" format="euro" initial={donnees.valeurs["fin_valeurs_mobilieres"] ?? null} label="Valeurs mobilières diversifiées" /></b> — PEA, compte-titres, métaux précieux, capital-investissement).
                 Une fois les encours collectés, l&apos;analyse pourra confronter le volume de l&apos;assise
                 financière à sa structure, en particulier la part de trésorerie non rémunérée et le
                 rendement réel des contrats.
               </p>
               <p>
                 Les liquidités sont à comparer à la réserve de précaution usuelle de 3 à 6 mois de charges
-                courantes. L&apos;excédent mobilisable (<b>{DASH}</b>), s&apos;il demeure placé sur des
+                courantes. L&apos;excédent mobilisable (<b><ValeurEditable vKey="epargne_disponible" format="euro" initial={donnees.valeurs["epargne_disponible"] ?? null} label="Excédent mobilisable" /></b>), s&apos;il demeure placé sur des
                 supports peu ou pas rémunérés, reste exposé à l&apos;érosion monétaire.
               </p>
               <p>
                 Les contrats d&apos;assurance-vie seront appréciés au regard de leur rendement net depuis
-                l&apos;origine (<b>{DASH}</b>), confronté à l&apos;inflation moyenne de la période : un
+                l&apos;origine (<b><ValeurEditable vKey="fin_rendement_net_contrats" format="percent" initial={donnees.valeurs["fin_rendement_net_contrats"] ?? null} label="Rendement net des contrats depuis l'origine" /></b>), confronté à l&apos;inflation moyenne de la période : un
                 rendement réel négatif signalerait un capital figé sur des fonds en euros. Sur l&apos;encours
-                concerné, le manque à gagner cumulé sur dix ans est estimé à <b>{DASH}</b>.
+                concerné, le manque à gagner cumulé sur dix ans est estimé à <b><ValeurEditable vKey="fin_manque_a_gagner_10ans" format="euro" initial={donnees.valeurs["fin_manque_a_gagner_10ans"] ?? null} label="Manque à gagner cumulé sur dix ans" /></b>.
               </p>
               <p>
                 Plusieurs leviers se dégageront de cette lecture. La réallocation de l&apos;excédent de

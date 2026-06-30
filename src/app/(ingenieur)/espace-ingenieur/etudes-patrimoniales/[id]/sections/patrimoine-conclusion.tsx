@@ -26,21 +26,11 @@ import "../../../../_styles/sections/patrimoine-conclusion.css";
 import { type ReactNode } from "react";
 
 import { Bloc } from "../Bloc";
+import ValeurEditable from "../ValeurEditable";
 import { MARITAL_REGIME_LABELS } from "../../../../_data/fiche-client";
 import type { EtudeDonnees } from "../../../../_data/etudes-patrimoniales";
 
 const DASH = "—";
-
-type Valeur = string | number | null | undefined;
-
-/** Montant éditable : valeur réelle formatée, sinon « — » honnête. */
-function eur(v: Valeur): string {
-  if (v == null || v === "") return DASH;
-  if (typeof v === "number") {
-    return `${new Intl.NumberFormat("fr-FR").format(v)} €`;
-  }
-  return v;
-}
 
 const MOTS = ["zéro", "un", "deux", "trois", "quatre", "cinq", "six", "sept", "huit", "neuf", "dix"];
 
@@ -478,8 +468,19 @@ export default function PatrimoineConclusion({ donnees }: { donnees: EtudeDonnee
           <DimConstat>
             <ul className="dlist">
               <li>
-                L’assurance-vie représente <strong>{eur(v.assurance_vie)}</strong>, premier actif du
-                foyer (environ <strong>{DASH}</strong> % du patrimoine brut).
+                L’assurance-vie représente{" "}
+                <strong>
+                  <ValeurEditable vKey="assurance_vie" format="euro" initial={v["assurance_vie"] ?? null} />
+                </strong>
+                , premier actif du foyer (environ{" "}
+                <strong>
+                  <ValeurEditable
+                    vKey="assurance_vie_part_brut"
+                    format="percent"
+                    initial={v["assurance_vie_part_brut"] ?? null}
+                  />
+                </strong>{" "}
+                du patrimoine brut).
               </li>
               <li>Elle concentre une part importante de l’épargne financière disponible.</li>
             </ul>
@@ -494,7 +495,10 @@ export default function PatrimoineConclusion({ donnees }: { donnees: EtudeDonnee
           <DimImpact>
             <p>
               Bien calibrée, l’assurance-vie permet de transmettre une part importante des{" "}
-              <strong>{eur(v.assurance_vie)}</strong> dans un cadre fiscal optimisé.
+              <strong>
+                <ValeurEditable vKey="assurance_vie" format="euro" initial={v["assurance_vie"] ?? null} />
+              </strong>{" "}
+              dans un cadre fiscal optimisé.
             </p>
           </DimImpact>
           <DimJustif>Relevés des contrats d’assurance-vie et clauses bénéficiaires.</DimJustif>
@@ -517,8 +521,23 @@ export default function PatrimoineConclusion({ donnees }: { donnees: EtudeDonnee
           <DimConstat>
             <ul className="dlist">
               <li>
-                Le patrimoine professionnel s’élève à <strong>{eur(v.actifs_professionnels)}</strong>,
-                deuxième poste du patrimoine (<strong>{DASH}</strong> %).
+                Le patrimoine professionnel s’élève à{" "}
+                <strong>
+                  <ValeurEditable
+                    vKey="actifs_professionnels"
+                    format="euro"
+                    initial={v["actifs_professionnels"] ?? null}
+                  />
+                </strong>
+                , deuxième poste du patrimoine (
+                <strong>
+                  <ValeurEditable
+                    vKey="actifs_professionnels_part"
+                    format="percent"
+                    initial={v["actifs_professionnels_part"] ?? null}
+                  />
+                </strong>
+                ).
               </li>
               <li>Il est étroitement lié à l’activité professionnelle et peu liquide.</li>
             </ul>
@@ -532,8 +551,16 @@ export default function PatrimoineConclusion({ donnees }: { donnees: EtudeDonnee
         <AbGrid2>
           <DimImpact>
             <p>
-              Les <strong>{eur(v.actifs_professionnels)}</strong> de patrimoine professionnel gagnent
-              en sécurité et en liquidité par une structuration anticipée.
+              Les{" "}
+              <strong>
+                <ValeurEditable
+                  vKey="actifs_professionnels"
+                  format="euro"
+                  initial={v["actifs_professionnels"] ?? null}
+                />
+              </strong>{" "}
+              de patrimoine professionnel gagnent en sécurité et en liquidité par une structuration
+              anticipée.
             </p>
           </DimImpact>
           <DimJustif>Bilans des activités professionnelles et structure de détention.</DimJustif>
@@ -556,8 +583,11 @@ export default function PatrimoineConclusion({ donnees }: { donnees: EtudeDonnee
           <DimConstat>
             <ul className="dlist">
               <li>
-                Le patrimoine net atteint <strong>{eur(v.patrimoine_net)}</strong>, détenu sous{" "}
-                {RegimeFragment}, avec {enfants}.
+                Le patrimoine net atteint{" "}
+                <strong>
+                  <ValeurEditable vKey="patrimoine_net" format="euro" initial={v["patrimoine_net"] ?? null} />
+                </strong>
+                , détenu sous {RegimeFragment}, avec {enfants}.
               </li>
               <li>
                 La structure de détention est à préciser au regard de l’inventaire (indivision,
@@ -575,7 +605,11 @@ export default function PatrimoineConclusion({ donnees }: { donnees: EtudeDonnee
           <DimImpact>
             <p>
               Une anticipation structurée peut réduire significativement la fiscalité de transmission
-              des <strong>{eur(v.patrimoine_net)}</strong> de patrimoine net.
+              des{" "}
+              <strong>
+                <ValeurEditable vKey="patrimoine_net" format="euro" initial={v["patrimoine_net"] ?? null} />
+              </strong>{" "}
+              de patrimoine net.
             </p>
           </DimImpact>
           <DimJustif>
@@ -606,9 +640,23 @@ export default function PatrimoineConclusion({ donnees }: { donnees: EtudeDonnee
           <DimConstat>
             <ul className="dlist">
               <li>
-                Une partie du parc immobilier (<strong>{eur(v.residence_principale)}</strong>) est
-                libre de toute hypothèque ; le capital restant dû total s&rsquo;élève à{" "}
-                <strong>{eur(v.credit_capital_restant)}</strong> sur les biens financés.
+                Une partie du parc immobilier (
+                <strong>
+                  <ValeurEditable
+                    vKey="residence_principale"
+                    format="euro"
+                    initial={v["residence_principale"] ?? null}
+                  />
+                </strong>
+                ) est libre de toute hypothèque ; le capital restant dû total s&rsquo;élève à{" "}
+                <strong>
+                  <ValeurEditable
+                    vKey="credit_capital_restant"
+                    format="euro"
+                    initial={v["credit_capital_restant"] ?? null}
+                  />
+                </strong>{" "}
+                sur les biens financés.
               </li>
               <li>Le service annuel de la dette reste modéré au regard de la valeur du parc.</li>
               <li>
@@ -632,8 +680,20 @@ export default function PatrimoineConclusion({ donnees }: { donnees: EtudeDonnee
           <DimImpact>
             <p>
               À une quotité prudente de 60 à 70 %, et après déduction du capital restant dû (
-              {eur(v.credit_capital_restant)}), la capacité de refinancement mobilisable s&rsquo;élève à{" "}
-              <strong>{DASH}</strong>, déployables sans céder le moindre actif (voir module ci-dessous).
+              <ValeurEditable
+                vKey="credit_capital_restant"
+                format="euro"
+                initial={v["credit_capital_restant"] ?? null}
+              />
+              ), la capacité de refinancement mobilisable s&rsquo;élève à{" "}
+              <strong>
+                <ValeurEditable
+                  vKey="refi_capacite_mobilisable"
+                  format="euro"
+                  initial={v["refi_capacite_mobilisable"] ?? null}
+                />
+              </strong>
+              , déployables sans céder le moindre actif (voir module ci-dessous).
             </p>
           </DimImpact>
           <DimJustif fn="¹" sources="2 sources">
@@ -666,7 +726,15 @@ export default function PatrimoineConclusion({ donnees }: { donnees: EtudeDonnee
             <ul className="dlist">
               <li>
                 Une <strong>Contribution sur les revenus locatifs</strong> est acquittée pour les
-                biens concernés (<strong>{DASH}</strong>).
+                biens concernés (
+                <strong>
+                  <ValeurEditable
+                    vKey="crl_montant_annuel"
+                    format="euro"
+                    initial={v["crl_montant_annuel"] ?? null}
+                  />
+                </strong>
+                ).
               </li>
               <li>
                 Cette contribution vise principalement les revenus perçus par des personnes morales
@@ -687,8 +755,25 @@ export default function PatrimoineConclusion({ donnees }: { donnees: EtudeDonnee
         <AbGrid2>
           <DimImpact>
             <p>
-              Économie pérenne de <strong>≈ {DASH}/an</strong>, et remboursement potentiel d’environ{" "}
-              <strong>{DASH}</strong> au titre des trois derniers exercices.
+              Économie pérenne de{" "}
+              <strong>
+                ≈{" "}
+                <ValeurEditable
+                  vKey="crl_montant_annuel"
+                  format="euro"
+                  initial={v["crl_montant_annuel"] ?? null}
+                />
+                /an
+              </strong>
+              , et remboursement potentiel d’environ{" "}
+              <strong>
+                <ValeurEditable
+                  vKey="crl_remboursement_3ans"
+                  format="euro"
+                  initial={v["crl_remboursement_3ans"] ?? null}
+                />
+              </strong>{" "}
+              au titre des trois derniers exercices.
             </p>
           </DimImpact>
           <DimJustif fn="²" sources="2 sources">
@@ -779,13 +864,34 @@ export default function PatrimoineConclusion({ donnees }: { donnees: EtudeDonnee
             <ul className="dlist">
               <li>
                 Sur le bien meublé détenu en nom propre, le cas échéant, les charges représentent{" "}
-                <strong>{DASH}</strong>, soit ≈ <strong>{DASH} %</strong> du chiffre d’affaires — un
-                poste à surveiller.
+                <strong>
+                  <ValeurEditable
+                    vKey="charges_meuble_montant"
+                    format="euro"
+                    initial={v["charges_meuble_montant"] ?? null}
+                  />
+                </strong>
+                , soit ≈{" "}
+                <strong>
+                  <ValeurEditable
+                    vKey="charges_meuble_ratio"
+                    format="percent"
+                    initial={v["charges_meuble_ratio"] ?? null}
+                  />
+                </strong>{" "}
+                du chiffre d’affaires — un poste à surveiller.
               </li>
               <li>
                 Sur les biens détenus en <strong>société civile</strong>, ce ratio atteint près de{" "}
-                <strong>{DASH} %</strong> (honoraires comptables, copropriété, assurances, frais
-                d’agence) — analysé dans le thème « Sociétés ».
+                <strong>
+                  <ValeurEditable
+                    vKey="charges_sci_ratio"
+                    format="percent"
+                    initial={v["charges_sci_ratio"] ?? null}
+                  />
+                </strong>{" "}
+                (honoraires comptables, copropriété, assurances, frais d’agence) — analysé dans le
+                thème « Sociétés ».
               </li>
             </ul>
           </DimConstat>
@@ -817,8 +923,11 @@ export default function PatrimoineConclusion({ donnees }: { donnees: EtudeDonnee
             <ul className="dlist">
               <li>
                 Le bien meublé concerné est exploité en location meublée non professionnelle : les
-                recettes (<strong>{DASH}</strong>) restent inférieures à 23 000 € et aux autres
-                revenus du foyer.
+                recettes (
+                <strong>
+                  <ValeurEditable vKey="lmnp_recettes" format="euro" initial={v["lmnp_recettes"] ?? null} />
+                </strong>
+                ) restent inférieures à 23 000 € et aux autres revenus du foyer.
               </li>
               <li>
                 Ce régime relève des bénéfices industriels et commerciaux, au régime réel, avec
@@ -849,9 +958,21 @@ export default function PatrimoineConclusion({ donnees }: { donnees: EtudeDonnee
         <AbGrid2>
           <DimImpact>
             <p>
-              Loyers de <b>{DASH}</b> par an largement neutralisés par l’amortissement pendant la
-              détention ; en contrepartie, plus-value brute portée à <b>{DASH}</b> à la cession après
-              réintégration des amortissements (voir le coût d’opportunité immobilier).
+              Loyers de{" "}
+              <b>
+                <ValeurEditable vKey="lmnp_recettes" format="euro" initial={v["lmnp_recettes"] ?? null} />
+              </b>{" "}
+              par an largement neutralisés par l’amortissement pendant la détention ; en
+              contrepartie, plus-value brute portée à{" "}
+              <b>
+                <ValeurEditable
+                  vKey="lmnp_plus_value_brute"
+                  format="euro"
+                  initial={v["lmnp_plus_value_brute"] ?? null}
+                />
+              </b>{" "}
+              à la cession après réintégration des amortissements (voir le coût d’opportunité
+              immobilier).
             </p>
           </DimImpact>
           <DimJustif fn="⁶" sources="sources">
@@ -922,7 +1043,15 @@ export default function PatrimoineConclusion({ donnees }: { donnees: EtudeDonnee
           <DimImpact>
             <p>
               <b>SCI à l’impôt sur les sociétés :</b> produit = capital restant dû remboursé (à titre
-              d’illustration, ≈ <b>{DASH}</b> sur le bien financé), imposé à l’impôt sur les sociétés,{" "}
+              d’illustration, ≈{" "}
+              <b>
+                <ValeurEditable
+                  vKey="assurance_emprunteur_capital_sci"
+                  format="euro"
+                  initial={v["assurance_emprunteur_capital_sci"] ?? null}
+                />
+              </b>{" "}
+              sur le bien financé), imposé à l’impôt sur les sociétés,{" "}
               <b>étalable sur 5 ans</b>. <b>SCI à l’impôt sur le revenu :</b> l’indemnité constitue des{" "}
               <b>recettes foncières</b> dès lors que les intérêts ont été déduits.{" "}
               <b>Location meublée au réel (LMNP ou LMP) :</b> le capital remboursé constitue un{" "}
@@ -1024,11 +1153,30 @@ export default function PatrimoineConclusion({ donnees }: { donnees: EtudeDonnee
           <DimConstat>
             <ul className="dlist">
               <li>
-                Liquidités immédiatement disponibles : <strong>{eur(v.liquidites)}</strong>, soit{" "}
-                <strong>{DASH}</strong> de dépenses courantes.
+                Liquidités immédiatement disponibles :{" "}
+                <strong>
+                  <ValeurEditable vKey="liquidites" format="euro" initial={v["liquidites"] ?? null} />
+                </strong>
+                , soit{" "}
+                <strong>
+                  <ValeurEditable
+                    vKey="liquidites_couverture_mois"
+                    format="text"
+                    initial={v["liquidites_couverture_mois"] ?? null}
+                  />
+                </strong>{" "}
+                de dépenses courantes.
               </li>
               <li>
-                Norme d’épargne de précaution : 3 à 6 mois, soit une réserve cible de ~<strong>{DASH}</strong>.
+                Norme d’épargne de précaution : 3 à 6 mois, soit une réserve cible de ~
+                <strong>
+                  <ValeurEditable
+                    vKey="epargne_precaution_cible"
+                    format="euro"
+                    initial={v["epargne_precaution_cible"] ?? null}
+                  />
+                </strong>
+                .
               </li>
               <li>Origine : accumulation progressive sur comptes courants et livrets, sans réallocation.</li>
             </ul>
@@ -1038,8 +1186,23 @@ export default function PatrimoineConclusion({ donnees }: { donnees: EtudeDonnee
             opportunite="Liquidité = atout : apport pour un investissement à effet de levier, ou saisie d’opportunités lors d’une correction de marché."
             optimisation={
               <>
-                Arbitrer l’excédent (~<strong>{DASH}</strong>) vers des supports rémunérateurs, en
-                conservant une réserve de précaution de ~<strong>{DASH}</strong>.
+                Arbitrer l’excédent (~
+                <strong>
+                  <ValeurEditable
+                    vKey="liquidites_excedent"
+                    format="euro"
+                    initial={v["liquidites_excedent"] ?? null}
+                  />
+                </strong>
+                ) vers des supports rémunérateurs, en conservant une réserve de précaution de ~
+                <strong>
+                  <ValeurEditable
+                    vKey="epargne_precaution_cible"
+                    format="euro"
+                    initial={v["epargne_precaution_cible"] ?? null}
+                  />
+                </strong>
+                .
               </>
             }
           />
@@ -1047,9 +1210,50 @@ export default function PatrimoineConclusion({ donnees }: { donnees: EtudeDonnee
         <AbGrid2>
           <DimImpact>
             <p>
-              Excédent au-delà de la réserve : <strong>≈ {DASH}</strong>. À <strong>{DASH}</strong> il
-              rapporterait ~<strong>{DASH}</strong>/an ; à 5 %, ~<strong>{DASH}</strong>/an — un
-              différentiel de <strong>~{DASH}/an</strong> de performance non captée.
+              Excédent au-delà de la réserve :{" "}
+              <strong>
+                ≈{" "}
+                <ValeurEditable
+                  vKey="liquidites_excedent"
+                  format="euro"
+                  initial={v["liquidites_excedent"] ?? null}
+                />
+              </strong>
+              . À{" "}
+              <strong>
+                <ValeurEditable
+                  vKey="liquidites_taux_actuel"
+                  format="percent"
+                  initial={v["liquidites_taux_actuel"] ?? null}
+                />
+              </strong>{" "}
+              il rapporterait ~
+              <strong>
+                <ValeurEditable
+                  vKey="liquidites_rendement_actuel"
+                  format="euro"
+                  initial={v["liquidites_rendement_actuel"] ?? null}
+                />
+              </strong>
+              /an ; à 5 %, ~
+              <strong>
+                <ValeurEditable
+                  vKey="liquidites_rendement_cible"
+                  format="euro"
+                  initial={v["liquidites_rendement_cible"] ?? null}
+                />
+              </strong>
+              /an — un différentiel de{" "}
+              <strong>
+                ~
+                <ValeurEditable
+                  vKey="liquidites_differentiel_an"
+                  format="euro"
+                  initial={v["liquidites_differentiel_an"] ?? null}
+                />
+                /an
+              </strong>{" "}
+              de performance non captée.
             </p>
           </DimImpact>
           <DimJustif fn="¹" sources="3 sources">
@@ -1074,25 +1278,84 @@ export default function PatrimoineConclusion({ donnees }: { donnees: EtudeDonnee
           <DimConstat>
             <ul className="dlist">
               <li>
-                Depuis l’origine, rendements nets de <strong>{DASH}</strong> (Monsieur) et{" "}
-                <strong>{DASH}</strong> (Madame), à comparer à l’inflation moyenne de la période :{" "}
-                <strong>{DASH}</strong>.
+                Depuis l’origine, rendements nets de{" "}
+                <strong>
+                  <ValeurEditable
+                    vKey="perf_rendement_monsieur"
+                    format="percent"
+                    initial={v["perf_rendement_monsieur"] ?? null}
+                  />
+                </strong>{" "}
+                (Monsieur) et{" "}
+                <strong>
+                  <ValeurEditable
+                    vKey="perf_rendement_madame"
+                    format="percent"
+                    initial={v["perf_rendement_madame"] ?? null}
+                  />
+                </strong>{" "}
+                (Madame), à comparer à l’inflation moyenne de la période :{" "}
+                <strong>
+                  <ValeurEditable
+                    vKey="perf_inflation_moyenne"
+                    format="percent"
+                    initial={v["perf_inflation_moyenne"] ?? null}
+                  />
+                </strong>
+                .
               </li>
               <li>
-                Contrats des enfants : <strong>{DASH}</strong> et <strong>{DASH}</strong> pour une
-                inflation de <strong>{DASH}</strong> — réel également négatif.
+                Contrats des enfants :{" "}
+                <strong>
+                  <ValeurEditable
+                    vKey="perf_rendement_enfant_1"
+                    format="percent"
+                    initial={v["perf_rendement_enfant_1"] ?? null}
+                  />
+                </strong>{" "}
+                et{" "}
+                <strong>
+                  <ValeurEditable
+                    vKey="perf_rendement_enfant_2"
+                    format="percent"
+                    initial={v["perf_rendement_enfant_2"] ?? null}
+                  />
+                </strong>{" "}
+                pour une inflation de{" "}
+                <strong>
+                  <ValeurEditable
+                    vKey="perf_inflation_moyenne"
+                    format="percent"
+                    initial={v["perf_inflation_moyenne"] ?? null}
+                  />
+                </strong>{" "}
+                — réel également négatif.
               </li>
               <li>
                 Origine : exposition massive aux fonds euros ; une injection récente de{" "}
-                <strong>{DASH}</strong> fige une part prépondérante du capital.
+                <strong>
+                  <ValeurEditable
+                    vKey="perf_injection_recente"
+                    format="euro"
+                    initial={v["perf_injection_recente"] ?? null}
+                  />
+                </strong>{" "}
+                fige une part prépondérante du capital.
               </li>
             </ul>
           </DimConstat>
           <Rio
             risque={
               <>
-                Rendement réel négatif de <strong>{DASH}</strong> : le patrimoine se déprécie en
-                pouvoir d’achat malgré la protection nominale.
+                Rendement réel négatif de{" "}
+                <strong>
+                  <ValeurEditable
+                    vKey="perf_rendement_reel_negatif"
+                    format="percent"
+                    initial={v["perf_rendement_reel_negatif"] ?? null}
+                  />
+                </strong>{" "}
+                : le patrimoine se déprécie en pouvoir d’achat malgré la protection nominale.
               </>
             }
             opportunite="Réallouer un capital de cette taille sur des supports diversifiés peut transformer une perte réelle en croissance significative."
@@ -1102,9 +1365,42 @@ export default function PatrimoineConclusion({ donnees }: { donnees: EtudeDonnee
         <AbGrid2>
           <DimImpact>
             <p>
-              Sur ~<strong>{DASH}</strong>, le différentiel de <strong>{DASH}</strong> représente{" "}
-              <strong>≈ {DASH}/an</strong> de richesse réelle perdue, avant fiscalité. Sur 10 ans,
-              manque à gagner cumulé <strong>≈ {DASH}</strong> (détail ci-dessous).
+              Sur ~
+              <strong>
+                <ValeurEditable
+                  vKey="perf_encours_total"
+                  format="euro"
+                  initial={v["perf_encours_total"] ?? null}
+                />
+              </strong>
+              , le différentiel de{" "}
+              <strong>
+                <ValeurEditable
+                  vKey="perf_differentiel_taux"
+                  format="percent"
+                  initial={v["perf_differentiel_taux"] ?? null}
+                />
+              </strong>{" "}
+              représente{" "}
+              <strong>
+                ≈{" "}
+                <ValeurEditable
+                  vKey="perf_perte_annuelle"
+                  format="euro"
+                  initial={v["perf_perte_annuelle"] ?? null}
+                />
+                /an
+              </strong>{" "}
+              de richesse réelle perdue, avant fiscalité. Sur 10 ans, manque à gagner cumulé{" "}
+              <strong>
+                ≈{" "}
+                <ValeurEditable
+                  vKey="perf_manque_gagner_10ans"
+                  format="euro"
+                  initial={v["perf_manque_gagner_10ans"] ?? null}
+                />
+              </strong>{" "}
+              (détail ci-dessous).
             </p>
           </DimImpact>
           <DimJustif fn="²" sources="3 sources">
@@ -1128,12 +1424,41 @@ export default function PatrimoineConclusion({ donnees }: { donnees: EtudeDonnee
           <DimConstat>
             <ul className="dlist">
               <li>
-                Les financements en cours s’échelonnent de <strong>{DASH}</strong>.
+                Les financements en cours s’échelonnent de{" "}
+                <strong>
+                  <ValeurEditable
+                    vKey="emprunt_taux_fourchette"
+                    format="text"
+                    initial={v["emprunt_taux_fourchette"] ?? null}
+                  />
+                </strong>
+                .
               </li>
               <li>
-                Le prêt du bien meublé (<strong>{DASH}</strong>) et le crédit à la
-                consommation (<strong>{DASH}</strong>) ressortent{" "}
-                <strong>au-dessus des conditions de marché</strong> actuelles (≈ <strong>{DASH}</strong>{" "}
+                Le prêt du bien meublé (
+                <strong>
+                  <ValeurEditable
+                    vKey="emprunt_meuble_taux"
+                    format="percent"
+                    initial={v["emprunt_meuble_taux"] ?? null}
+                  />
+                </strong>
+                ) et le crédit à la consommation (
+                <strong>
+                  <ValeurEditable
+                    vKey="emprunt_conso_taux"
+                    format="percent"
+                    initial={v["emprunt_conso_taux"] ?? null}
+                  />
+                </strong>
+                ) ressortent <strong>au-dessus des conditions de marché</strong> actuelles (≈{" "}
+                <strong>
+                  <ValeurEditable
+                    vKey="emprunt_taux_marche"
+                    format="percent"
+                    initial={v["emprunt_taux_marche"] ?? null}
+                  />
+                </strong>{" "}
                 sur 15 ans).
               </li>
             </ul>
@@ -1164,8 +1489,15 @@ export default function PatrimoineConclusion({ donnees }: { donnees: EtudeDonnee
           <DimImpact>
             <p>
               Allègement mécanique de la charge d’intérêts et amélioration du cash-flow, à arbitrer
-              contre les indemnités de remboursement anticipé (≈ <strong>{DASH}</strong> sur le
-              meublé, sans indemnité sur le crédit à la consommation).
+              contre les indemnités de remboursement anticipé (≈{" "}
+              <strong>
+                <ValeurEditable
+                  vKey="emprunt_ira_meuble"
+                  format="euro"
+                  initial={v["emprunt_ira_meuble"] ?? null}
+                />
+              </strong>{" "}
+              sur le meublé, sans indemnité sur le crédit à la consommation).
             </p>
           </DimImpact>
           <DimJustif fn="¹" sources="sources">
@@ -1190,20 +1522,59 @@ export default function PatrimoineConclusion({ donnees }: { donnees: EtudeDonnee
             <ul className="dlist">
               <li>
                 Le prêt du local professionnel (société civile) est assuré à une{" "}
-                <strong>quotité de {DASH} par tête</strong>, soit <strong>{DASH}</strong> au global.
+                <strong>
+                  quotité de{" "}
+                  <ValeurEditable
+                    vKey="assur_quotite_par_tete"
+                    format="percent"
+                    initial={v["assur_quotite_par_tete"] ?? null}
+                  />{" "}
+                  par tête
+                </strong>
+                , soit{" "}
+                <strong>
+                  <ValeurEditable
+                    vKey="assur_quotite_globale"
+                    format="percent"
+                    initial={v["assur_quotite_globale"] ?? null}
+                  />
+                </strong>{" "}
+                au global.
               </li>
               <li>
-                Son coût (≈ <strong>{DASH}</strong> / mois) <strong>pèse sur la rentabilité</strong> de
-                la société civile.
+                Son coût (≈{" "}
+                <strong>
+                  <ValeurEditable
+                    vKey="assur_cout_mensuel"
+                    format="euro"
+                    initial={v["assur_cout_mensuel"] ?? null}
+                  />
+                </strong>{" "}
+                / mois) <strong>pèse sur la rentabilité</strong> de la société civile.
               </li>
             </ul>
           </DimConstat>
           <Rio
             risque={
               <>
-                La faible quotité globale (<strong>{DASH}</strong>) contraindrait le{" "}
-                <strong>conjoint survivant à supporter seul environ {DASH}</strong> de l’échéance en
-                cas de décès du partenaire.
+                La faible quotité globale (
+                <strong>
+                  <ValeurEditable
+                    vKey="assur_quotite_globale"
+                    format="percent"
+                    initial={v["assur_quotite_globale"] ?? null}
+                  />
+                </strong>
+                ) contraindrait le{" "}
+                <strong>
+                  conjoint survivant à supporter seul environ{" "}
+                  <ValeurEditable
+                    vKey="assur_charge_echeance_conjoint"
+                    format="euro"
+                    initial={v["assur_charge_echeance_conjoint"] ?? null}
+                  />
+                </strong>{" "}
+                de l’échéance en cas de décès du partenaire.
               </>
             }
             opportunite={
@@ -1256,7 +1627,10 @@ export default function PatrimoineConclusion({ donnees }: { donnees: EtudeDonnee
             <ul className="dlist">
               <li>
                 Les financements logés dans les sociétés civiles représentent{" "}
-                <strong>{DASH}</strong> de capital restant dû.
+                <strong>
+                  <ValeurEditable vKey="caution_crd_sci" format="euro" initial={v["caution_crd_sci"] ?? null} />
+                </strong>{" "}
+                de capital restant dû.
               </li>
               <li>
                 Ces prêts sont assortis d’une <strong>caution solidaire</strong> consentie
@@ -1287,8 +1661,31 @@ export default function PatrimoineConclusion({ donnees }: { donnees: EtudeDonnee
         <AbGrid2>
           <DimImpact>
             <p>
-              La caution porte le taux d’endettement <b>de {DASH} à {DASH}</b> : un écart de près de{" "}
-              <b>{DASH} de service annuel</b> de la dette, supporté personnellement en cas de
+              La caution porte le taux d’endettement{" "}
+              <b>
+                de{" "}
+                <ValeurEditable
+                  vKey="caution_taux_endettement_avant"
+                  format="percent"
+                  initial={v["caution_taux_endettement_avant"] ?? null}
+                />{" "}
+                à{" "}
+                <ValeurEditable
+                  vKey="caution_taux_endettement_apres"
+                  format="percent"
+                  initial={v["caution_taux_endettement_apres"] ?? null}
+                />
+              </b>{" "}
+              : un écart de près de{" "}
+              <b>
+                <ValeurEditable
+                  vKey="caution_ecart_service_annuel"
+                  format="euro"
+                  initial={v["caution_ecart_service_annuel"] ?? null}
+                />{" "}
+                de service annuel
+              </b>{" "}
+              de la dette, supporté personnellement en cas de
               défaillance des sociétés. La renégociation viserait à substituer ou plafonner ces
               engagements ; la délégation d’assurance à garantir le remboursement en cas de décès ou
               d’invalidité d’un associé.
@@ -1342,10 +1739,30 @@ export default function PatrimoineConclusion({ donnees }: { donnees: EtudeDonnee
             <span className="sc-link">Voir le détail</span>
           </div>
           <p>
-            Le patrimoine net du foyer s’établit à <b>{eur(v.patrimoine_net)}</b>, pour un patrimoine
-            brut de {eur(v.patrimoine_brut)}. Il est diversifié entre l’immobilier (d’usage et de
-            rapport), le patrimoine professionnel, l’assurance-vie et les placements financiers, et se
-            répartit entre les conjoints (<b>{DASH}</b> et <b>{DASH}</b>) sous{" "}
+            Le patrimoine net du foyer s’établit à{" "}
+            <b>
+              <ValeurEditable vKey="patrimoine_net" format="euro" initial={v["patrimoine_net"] ?? null} />
+            </b>
+            , pour un patrimoine brut de{" "}
+            <ValeurEditable vKey="patrimoine_brut" format="euro" initial={v["patrimoine_brut"] ?? null} />. Il
+            est diversifié entre l’immobilier (d’usage et de rapport), le patrimoine professionnel,
+            l’assurance-vie et les placements financiers, et se répartit entre les conjoints (
+            <b>
+              <ValeurEditable
+                vKey="repartition_conjoint_a"
+                format="euro"
+                initial={v["repartition_conjoint_a"] ?? null}
+              />
+            </b>{" "}
+            et{" "}
+            <b>
+              <ValeurEditable
+                vKey="repartition_conjoint_b"
+                format="euro"
+                initial={v["repartition_conjoint_b"] ?? null}
+              />
+            </b>
+            ) sous{" "}
             {regime ? (
               <>
                 le régime de la <b>{regime}</b>
@@ -1358,16 +1775,34 @@ export default function PatrimoineConclusion({ donnees }: { donnees: EtudeDonnee
             .
           </p>
           <p>
-            Trois actifs structurent le patrimoine : l’<b>assurance-vie ({eur(v.assurance_vie)})</b>,
-            premier poste et levier de transmission ; le{" "}
-            <b>patrimoine professionnel ({eur(v.actifs_professionnels)})</b>, lié à l’activité et à
-            rendre plus liquide ; et l’<b>immobilier ({DASH}</b> entre usage et rapport), socle
-            patrimonial et source de revenus.
+            Trois actifs structurent le patrimoine : l’
+            <b>
+              assurance-vie (
+              <ValeurEditable vKey="assurance_vie" format="euro" initial={v["assurance_vie"] ?? null} />)
+            </b>
+            , premier poste et levier de transmission ; le{" "}
+            <b>
+              patrimoine professionnel (
+              <ValeurEditable
+                vKey="actifs_professionnels"
+                format="euro"
+                initial={v["actifs_professionnels"] ?? null}
+              />
+              )
+            </b>
+            , lié à l’activité et à rendre plus liquide ; et l’
+            <b>
+              immobilier (
+              <ValeurEditable vKey="immobilier_total" format="euro" initial={v["immobilier_total"] ?? null} />
+            </b>{" "}
+            entre usage et rapport), socle patrimonial et source de revenus.
           </p>
           <p>
             La principale marge de progression tient à l’<b>anticipation de la transmission</b>. Avec
-            un patrimoine net de {eur(v.patrimoine_net)}, {enfants} et {RegimeFragment}, la mise en
-            place d’une stratégie successorale (donation, démembrement, optimisation des clauses
+            un patrimoine net de{" "}
+            <ValeurEditable vKey="patrimoine_net" format="euro" initial={v["patrimoine_net"] ?? null} />,{" "}
+            {enfants} et {RegimeFragment}, la mise en place d’une stratégie successorale (donation,
+            démembrement, optimisation des clauses
             bénéficiaires) constitue le principal levier d’optimisation, développé dans le volet
             successoral.
           </p>
@@ -1375,10 +1810,23 @@ export default function PatrimoineConclusion({ donnees }: { donnees: EtudeDonnee
             <div className="spr spr-r">
               <div className="spr-h">Principaux risques</div>
               <ul>
-                <li>Concentration de près de {DASH} % du patrimoine sur l’assurance-vie.</li>
                 <li>
-                  Patrimoine professionnel ({eur(v.actifs_professionnels)}) peu liquide et lié à
-                  l’activité.
+                  Concentration de près de{" "}
+                  <ValeurEditable
+                    vKey="assurance_vie_part_brut"
+                    format="percent"
+                    initial={v["assurance_vie_part_brut"] ?? null}
+                  />{" "}
+                  du patrimoine sur l’assurance-vie.
+                </li>
+                <li>
+                  Patrimoine professionnel (
+                  <ValeurEditable
+                    vKey="actifs_professionnels"
+                    format="euro"
+                    initial={v["actifs_professionnels"] ?? null}
+                  />
+                  ) peu liquide et lié à l’activité.
                 </li>
                 <li>Fiscalité successorale potentiellement lourde en l’absence d’anticipation.</li>
               </ul>

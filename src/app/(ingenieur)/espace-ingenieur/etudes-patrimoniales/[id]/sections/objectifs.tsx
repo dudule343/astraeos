@@ -12,18 +12,18 @@
  * par l'ingénieur (titre + description). Quand un objectif est renseigné, son
  * intitulé et son corps remplacent le texte de la maquette ; sinon le libellé
  * méthodologique de la maquette sert d'amorce éditorale honnête, éditable. Les
- * valeurs cibles de la carte 2 (montant mensuel, horizon) n'existent pas en
- * base : elles restent à « — », éditables, jamais l'exemple de la maquette.
+ * valeurs cibles de la carte 2 (rente mensuelle, horizon) n'existent pas en
+ * base : elles sont saisies par l'ingénieur via <ValeurEditable> et persistées
+ * dans donnees.valeurs, jamais figées sur l'exemple de la maquette.
  */
 
 import { type ReactNode } from "react";
 
 import { Bloc } from "../Bloc";
+import ValeurEditable from "../ValeurEditable";
 import type { EtudeDonnees, EtudeObjectif } from "../../../../_data/etudes-patrimoniales";
 
 import "../../../../_styles/sections/objectifs.css";
-
-const DASH = "—";
 
 /** Gabarit d'une carte : clé de bloc + intitulé et corps de la maquette. */
 type CarteDefaut = {
@@ -96,11 +96,25 @@ export default function ObjectifsSection({ donnees }: { donnees: EtudeDonnees })
           {carte.target ? (
             <div className="obj-target">
               <div className="ot-item">
-                <span className="ot-v">{DASH}</span>
+                <span className="ot-v">
+                  <ValeurEditable
+                    vKey="objectif_retraite_rente_mensuelle_cible"
+                    format="euro"
+                    label="Rente mensuelle cible"
+                    initial={donnees.valeurs["objectif_retraite_rente_mensuelle_cible"] ?? null}
+                  />
+                </span>
                 <span className="ot-l">par mois (minimum)</span>
               </div>
               <div className="ot-item">
-                <span className="ot-v">{DASH}</span>
+                <span className="ot-v">
+                  <ValeurEditable
+                    vKey="objectif_retraite_horizon_annees"
+                    format="number"
+                    label="Horizon (années)"
+                    initial={donnees.valeurs["objectif_retraite_horizon_annees"] ?? null}
+                  />
+                </span>
                 <span className="ot-l">horizon</span>
               </div>
             </div>

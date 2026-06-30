@@ -30,6 +30,7 @@
 import { type ReactNode } from "react";
 
 import { Bloc } from "../Bloc";
+import ValeurEditable from "../ValeurEditable";
 import type { EtudeDonnees } from "../../../../_data/etudes-patrimoniales";
 
 import "../../../../_styles/sections/fiscalite.css";
@@ -53,6 +54,8 @@ function foyerTmi(donnees: EtudeDonnees): number | null {
 
 /** Une ligne du tableau : libellé éditable + présence d'un montant par colonne. */
 type LigneFisc = {
+  /** clé STABLE de la ligne, préfixe des montants éditables par colonne. */
+  cle: string;
   designation: string;
   monsieur: boolean;
   madame: boolean;
@@ -64,19 +67,20 @@ type LigneFisc = {
 /**
  * Lignes reprises de la maquette comme amorces ÉDITABLES. Les libellés sont
  * conservés (textes méthodologiques), mais aucun montant d'exemple n'est
- * recopié : chaque cellule chiffrée présente affiche « — ».
+ * recopié : chaque cellule chiffrée présente est saisie par l'ingénieur.
  */
 const LIGNES_IMPOTS: LigneFisc[] = [
-  { designation: "Taxe foncière – Résidence principale", monsieur: true, madame: true, commun: false, total: true },
-  { designation: "Impôt sur le revenu", monsieur: false, madame: false, commun: true, total: true },
-  { designation: "Taxe foncière – Parking Monsieur", monsieur: true, madame: false, commun: false, total: true },
-  { designation: "Taxe foncière – Parking Madame", monsieur: false, madame: true, commun: false, total: true },
-  { designation: "Taxe foncière – Appartement 1", monsieur: true, madame: true, commun: false, total: true },
-  { designation: "Taxe foncière – Appartement 2", monsieur: true, madame: true, commun: false, total: true },
-  { designation: "Taxe foncière – Appartement 3", monsieur: true, madame: true, commun: false, total: true },
+  { cle: "tf_residence_principale", designation: "Taxe foncière – Résidence principale", monsieur: true, madame: true, commun: false, total: true },
+  { cle: "impot_revenu", designation: "Impôt sur le revenu", monsieur: false, madame: false, commun: true, total: true },
+  { cle: "tf_parking_monsieur", designation: "Taxe foncière – Parking Monsieur", monsieur: true, madame: false, commun: false, total: true },
+  { cle: "tf_parking_madame", designation: "Taxe foncière – Parking Madame", monsieur: false, madame: true, commun: false, total: true },
+  { cle: "tf_appartement_1", designation: "Taxe foncière – Appartement 1", monsieur: true, madame: true, commun: false, total: true },
+  { cle: "tf_appartement_2", designation: "Taxe foncière – Appartement 2", monsieur: true, madame: true, commun: false, total: true },
+  { cle: "tf_appartement_3", designation: "Taxe foncière – Appartement 3", monsieur: true, madame: true, commun: false, total: true },
 ];
 
 const SOUS_TOTAL_IMPOTS: LigneFisc = {
+  cle: "sous_total_impots",
   designation: "Sous-total impôts et taxes",
   monsieur: true,
   madame: true,
@@ -86,6 +90,7 @@ const SOUS_TOTAL_IMPOTS: LigneFisc = {
 };
 
 const TOTAL_CHARGES: LigneFisc = {
+  cle: "total_charges",
   designation: "Total des charges",
   monsieur: true,
   madame: true,
@@ -94,19 +99,41 @@ const TOTAL_CHARGES: LigneFisc = {
   strong: true,
 };
 
-/** Cellule chiffrée : « — » honnête si la colonne porte un montant, sinon vide. */
-function NumCell({ present, strong }: { present: boolean; strong?: boolean }) {
+/** Colonnes porteuses d'un montant dans le tableau de composition. */
+type ColFisc = "monsieur" | "madame" | "commun" | "total";
+
+/**
+ * Cellule chiffrée du tableau : montant éditable (euro) saisi par client si la
+ * colonne porte une valeur, sinon cellule vide. Clé stable « fisc_<ligne>_<col> ».
+ */
+function NumCell({
+  cle,
+  col,
+  present,
+  strong,
+  donnees,
+}: {
+  cle: string;
+  col: ColFisc;
+  present: boolean;
+  strong?: boolean;
+  donnees: EtudeDonnees;
+}) {
   if (!present) return <td className="num" />;
+  const vKey = `fisc_${cle}_${col}`;
+  const champ = (
+    <ValeurEditable vKey={vKey} format="euro" initial={donnees.valeurs[vKey] ?? null} />
+  );
   return (
     <td className="num">
       <div className="cell" data-fmt="txt">
-        {strong ? <strong>{DASH}</strong> : DASH}
+        {strong ? <strong>{champ}</strong> : champ}
       </div>
     </td>
   );
 }
 
-function LigneTbody({ l }: { l: LigneFisc }) {
+function LigneTbody({ l, donnees }: { l: LigneFisc; donnees: EtudeDonnees }) {
   return (
     <tr>
       <td>
@@ -117,10 +144,10 @@ function LigneTbody({ l }: { l: LigneFisc }) {
       <td>
         <div className="cell ed" data-fmt="txt" />
       </td>
-      <NumCell present={l.monsieur} strong={l.strong} />
-      <NumCell present={l.madame} strong={l.strong} />
-      <NumCell present={l.commun} strong={l.strong} />
-      <NumCell present={l.total} strong={l.strong} />
+      <NumCell cle={l.cle} col="monsieur" present={l.monsieur} strong={l.strong} donnees={donnees} />
+      <NumCell cle={l.cle} col="madame" present={l.madame} strong={l.strong} donnees={donnees} />
+      <NumCell cle={l.cle} col="commun" present={l.commun} strong={l.strong} donnees={donnees} />
+      <NumCell cle={l.cle} col="total" present={l.total} strong={l.strong} donnees={donnees} />
     </tr>
   );
 }
@@ -227,9 +254,9 @@ export default function FiscaliteSection({ donnees }: { donnees: EtudeDonnees })
                 </td>
               </tr>
               {LIGNES_IMPOTS.map((l) => (
-                <LigneTbody key={l.designation} l={l} />
+                <LigneTbody key={l.cle} l={l} donnees={donnees} />
               ))}
-              <LigneTbody l={SOUS_TOTAL_IMPOTS} />
+              <LigneTbody l={SOUS_TOTAL_IMPOTS} donnees={donnees} />
             </tbody>
             <tfoot>
               <tr>
@@ -241,10 +268,10 @@ export default function FiscaliteSection({ donnees }: { donnees: EtudeDonnees })
                 <td>
                   <div className="cell" data-fmt="txt" />
                 </td>
-                <NumCell present={TOTAL_CHARGES.monsieur} strong />
-                <NumCell present={TOTAL_CHARGES.madame} strong />
-                <NumCell present={TOTAL_CHARGES.commun} strong />
-                <NumCell present={TOTAL_CHARGES.total} strong />
+                <NumCell cle={TOTAL_CHARGES.cle} col="monsieur" present={TOTAL_CHARGES.monsieur} strong donnees={donnees} />
+                <NumCell cle={TOTAL_CHARGES.cle} col="madame" present={TOTAL_CHARGES.madame} strong donnees={donnees} />
+                <NumCell cle={TOTAL_CHARGES.cle} col="commun" present={TOTAL_CHARGES.commun} strong donnees={donnees} />
+                <NumCell cle={TOTAL_CHARGES.cle} col="total" present={TOTAL_CHARGES.total} strong donnees={donnees} />
               </tr>
             </tfoot>
           </table>
@@ -257,7 +284,13 @@ export default function FiscaliteSection({ donnees }: { donnees: EtudeDonnees })
           </div>
           <div className="kpirow" style={{ gridTemplateColumns: "repeat(3,1fr)" }}>
             <div className="kpi">
-              <div className="kv">{DASH}</div>
+              <div className="kv">
+                <ValeurEditable
+                  vKey="fisc_total_impots_taxes"
+                  format="euro"
+                  initial={donnees.valeurs["fisc_total_impots_taxes"] ?? null}
+                />
+              </div>
               <div className="kl">
                 Total des impôts et taxes
                 <span className="kinfo">
@@ -276,7 +309,13 @@ export default function FiscaliteSection({ donnees }: { donnees: EtudeDonnees })
               </div>
             </div>
             <div className="kpi">
-              <div className="kv">{DASH}</div>
+              <div className="kv">
+                <ValeurEditable
+                  vKey="fisc_taux_pression_fiscale"
+                  format="percent"
+                  initial={donnees.valeurs["fisc_taux_pression_fiscale"] ?? null}
+                />
+              </div>
               <div className="kl">
                 Taux de pression fiscale
                 <span className="kinfo">
@@ -364,8 +403,15 @@ export default function FiscaliteSection({ donnees }: { donnees: EtudeDonnees })
                 <ul className="dlist">
                   <li>
                     Au 1<sup>er</sup> janvier de l’année en cours, le patrimoine net taxable à l’IFI
-                    s’élève à <strong>{DASH}</strong> (à compléter, le cas échéant en y intégrant un
-                    bien situé à l’étranger).
+                    s’élève à{" "}
+                    <strong>
+                      <ValeurEditable
+                        vKey="ifi_patrimoine_net_taxable"
+                        format="euro"
+                        initial={donnees.valeurs["ifi_patrimoine_net_taxable"] ?? null}
+                      />
+                    </strong>{" "}
+                    (à compléter, le cas échéant en y intégrant un bien situé à l’étranger).
                   </li>
                   <li>
                     Une telle situation s’explique le plus souvent par l’absence de dettes
@@ -410,8 +456,14 @@ export default function FiscaliteSection({ donnees }: { donnees: EtudeDonnees })
                 </div>
                 <p>
                   L’absence de passif déductible rend l’assiette perméable à toute hausse des prix de
-                  l’immobilier. À l’arrêt de l’activité, le patrimoine taxable ({DASH}, à compléter)
-                  peut basculer dans une tranche d’IFI supérieure sans passif pour contrebalancer.
+                  l’immobilier. À l’arrêt de l’activité, le patrimoine taxable (
+                  <ValeurEditable
+                    vKey="ifi_patrimoine_taxable_cessation"
+                    format="euro"
+                    initial={donnees.valeurs["ifi_patrimoine_taxable_cessation"] ?? null}
+                  />
+                  , à compléter) peut basculer dans une tranche d’IFI supérieure sans passif pour
+                  contrebalancer.
                 </p>
               </div>
               <div className="dim">
@@ -477,9 +529,16 @@ export default function FiscaliteSection({ donnees }: { donnees: EtudeDonnees })
                 </div>
                 <ul className="dlist">
                   <li>
-                    Maintenir un appartement étranger (estimé à <strong>{DASH}</strong>) hors des
-                    déclarations fiscales, et organiser une mise en location sans déclarer les
-                    revenus perçus, exposerait le foyer à une fragilité juridique.
+                    Maintenir un appartement étranger (estimé à{" "}
+                    <strong>
+                      <ValeurEditable
+                        vKey="etranger_appartement_valeur"
+                        format="euro"
+                        initial={donnees.valeurs["etranger_appartement_valeur"] ?? null}
+                      />
+                    </strong>
+                    ) hors des déclarations fiscales, et organiser une mise en location sans
+                    déclarer les revenus perçus, exposerait le foyer à une fragilité juridique.
                   </li>
                   <li>
                     Ce risque serait démultiplié si les loyers étaient encaissés sur un compte
@@ -581,9 +640,24 @@ export default function FiscaliteSection({ donnees }: { donnees: EtudeDonnees })
                 <span className="sc-link">Voir le détail</span>
               </div>
               <p>
-                Les impôts et taxes du foyer s’élèvent à <b>{DASH}</b> par an, l’impôt sur le revenu
-                en constituant généralement la part prépondérante. Le taux de pression fiscale
-                ressort à <b>{DASH}</b> et le taux marginal d’imposition à <b>{tmiLabel}</b>.
+                Les impôts et taxes du foyer s’élèvent à{" "}
+                <b>
+                  <ValeurEditable
+                    vKey="fisc_total_impots_taxes"
+                    format="euro"
+                    initial={donnees.valeurs["fisc_total_impots_taxes"] ?? null}
+                  />
+                </b>{" "}
+                par an, l’impôt sur le revenu en constituant généralement la part prépondérante. Le
+                taux de pression fiscale ressort à{" "}
+                <b>
+                  <ValeurEditable
+                    vKey="fisc_taux_pression_fiscale"
+                    format="percent"
+                    initial={donnees.valeurs["fisc_taux_pression_fiscale"] ?? null}
+                  />
+                </b>{" "}
+                et le taux marginal d’imposition à <b>{tmiLabel}</b>.
               </p>
               <p>
                 Le principal enjeu fiscal est l’<b>impôt sur la fortune immobilière</b> : il convient

@@ -6,30 +6,32 @@
  * <Bloc> dont la clé reprend exactement la valeur data-block (apostrophes
  * courbes comprises) : sélectionnable, éditable et validable par le volet.
  *
- * Branchement réel : le nom du foyer et le total du passif sont dérivés de
- * `donnees` (foyer.personnes, valeurs.passif_total / patrimoine_brut /
- * patrimoine_net) quand ils existent. Tous les MONTANTS du passif (capital
- * restant dû prêt par prêt, taux, durées, échéances, quotités, cautions, ratios
- * d'endettement) N'EXISTENT PAS en base : ils sont affichés en état vide honnête
- * (« — »), jamais recopiés depuis les chiffres-exemple de la maquette. Les
- * textes éditoriaux et méthodologiques (analyse, risques & opportunités,
- * synthèse, sources) sont reproduits comme contenu ; seuls les chiffres
- * nominatifs qu'ils citaient deviennent honnêtes.
+ * Branchement réel : le nom du foyer est dérivé de `donnees` (foyer.personnes).
+ * Tous les MONTANTS du passif (capital restant dû prêt par prêt, taux, durées,
+ * échéances, quotités, coûts d'assurance, taux d'endettement, indemnités de
+ * remboursement anticipé) N'EXISTENT PAS en base : ils sont désormais SAISIS par
+ * l'ingénieur via <ValeurEditable>, persistés dans donnees.valeurs (JSONB) sous
+ * des clés stables, et affichés en état vide honnête (« — ») tant qu'ils ne sont
+ * pas renseignés. Les constantes légales (seuils, taux de marché de référence,
+ * cibles de quotité) et les textes éditoriaux restent du texte fixe. Les
+ * camemberts SVG et leurs légendes restent inchangés (vague suivante).
  *
- * Server Component : il compose des <Bloc> (composant client) rendus dans
- * l'arbre du BlocProvider. Les comportements JS (accordéons, camemberts) sont
- * câblés ensuite par le câblage global ; ce module ne fait que produire le
- * markup fidèle avec les ids et classes attendus.
+ * Server Component : il compose des <Bloc> et des <ValeurEditable> (composants
+ * client) rendus dans l'arbre des providers (BlocProvider + ValeurProvider). Ce
+ * module ne fait que produire le markup fidèle avec les ids et classes attendus.
  */
 
 import { type CSSProperties, type ReactNode } from "react";
 
 import { Bloc } from "../Bloc";
+import ValeurEditable from "../ValeurEditable";
 import type { EtudeDonnees } from "../../../../_data/etudes-patrimoniales";
 
 import "../../../../_styles/sections/patrimoine-passif.css";
 
 const DASH = "—";
+
+type MontantFormat = "euro" | "percent" | "number";
 
 // ---------------------------------------------------------------------------
 // Helpers purs
@@ -74,6 +76,32 @@ function cautionsSubject(donnees: EtudeDonnees): string {
 }
 
 // ---------------------------------------------------------------------------
+// Saisie inline d'un montant du passif (lecture depuis donnees.valeurs)
+// ---------------------------------------------------------------------------
+
+/** Raccourci : <ValeurEditable> dont l'initial est lu dans donnees.valeurs. */
+function Saisie({
+  donnees,
+  vKey,
+  format,
+  label,
+}: {
+  donnees: EtudeDonnees;
+  vKey: string;
+  format: MontantFormat;
+  label?: string;
+}): ReactNode {
+  return (
+    <ValeurEditable
+      vKey={vKey}
+      format={format}
+      initial={donnees.valeurs[vKey] ?? null}
+      label={label}
+    />
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Styles inline repris de la maquette (cellules d'en-tête de catégorie)
 // ---------------------------------------------------------------------------
 
@@ -88,16 +116,32 @@ const CAT_HEAD: CSSProperties = {
 };
 
 // ---------------------------------------------------------------------------
+// Prêts : un seul socle de données (slug + intitulé data-block + icône) pour le
+// tableau récapitulatif ET les accordéons, afin que chaque montant ait UNE clé
+// stable partagée (le capital restant dû d'un prêt est le même dans le tableau,
+// l'entête de l'accordéon et son détail).
+// ---------------------------------------------------------------------------
+
+const PRETS = [
+  { slug: "appt_rapport", blocKey: "Prêt — Appartement de rapport", Icon: IconImmeuble },
+  { slug: "appt_meuble", blocKey: "Prêt — Appartement meublé (LMNP)", Icon: IconImmeuble },
+  { slug: "studios", blocKey: "Prêt — Studios locatifs", Icon: IconResidence },
+  { slug: "local_pro", blocKey: "Prêt — Local professionnel", Icon: IconResidence },
+  { slug: "conso", blocKey: "Prêt — Crédit à la consommation", Icon: IconCredit },
+] as const;
+
+// ---------------------------------------------------------------------------
 // Fragments d'affichage
 // ---------------------------------------------------------------------------
 
 /**
  * Détail d'un prêt (corps d'accordéon). La structure du tableau est reproduite
- * 1:1 ; chaque valeur du prêt n'existant pas en base, toutes les cellules
- * éditables affichent « — » (état vide honnête), prêtes à être saisies.
+ * 1:1 ; chaque MONTANT du prêt est saisissable (vide honnête « — » par défaut).
+ * Les champs purement textuels (établissement, options, garanties) restent en
+ * « — » : ils ne sont pas des montants et relèvent d'une autre vague de saisie.
  */
-function PretDetail() {
-  const cell = (label: string) => (
+function PretDetail({ slug, donnees }: { slug: string; donnees: EtudeDonnees }) {
+  const txt = (label: string) => (
     <tr>
       <td>
         <div className="cell" data-fmt="txt">
@@ -111,6 +155,23 @@ function PretDetail() {
       </td>
     </tr>
   );
+  const ed = (label: string, field: string, format: MontantFormat) => {
+    const vKey = `passif_pret_${slug}_${field}`;
+    return (
+      <tr>
+        <td>
+          <div className="cell" data-fmt="txt">
+            {label}
+          </div>
+        </td>
+        <td className="num">
+          <div className="cell ed" data-fmt="txt">
+            <Saisie donnees={donnees} vKey={vKey} format={format} label={label} />
+          </div>
+        </td>
+      </tr>
+    );
+  };
   return (
     <div className="acc-b">
       <div className="acc-in">
@@ -125,38 +186,38 @@ function PretDetail() {
                 Informations générales
               </td>
             </tr>
-            {cell("Établissement prêteur")}
-            {cell("Capital emprunté")}
-            {cell("Durée totale du prêt")}
-            {cell("Capital restant dû")}
+            {txt("Établissement prêteur")}
+            {ed("Capital emprunté", "capital_emprunte", "euro")}
+            {ed("Durée totale du prêt", "duree_totale", "number")}
+            {ed("Capital restant dû", "crd", "euro")}
             <tr>
               <td colSpan={2} style={CAT_HEAD}>
                 Taux / coût
               </td>
             </tr>
-            {cell("Taux d’intérêt nominal")}
-            {cell("TAEG")}
-            {cell("Montant des échéances du prêt")}
-            {cell("Montant des échéances de l’assurance")}
-            {cell("Montant total des échéances (par mois)")}
-            {cell("Montant total des échéances (par an)")}
+            {ed("Taux d’intérêt nominal", "taux_nominal", "percent")}
+            {ed("TAEG", "taeg", "percent")}
+            {ed("Montant des échéances du prêt", "echeance_pret", "euro")}
+            {ed("Montant des échéances de l’assurance", "echeance_assurance", "euro")}
+            {ed("Montant total des échéances (par mois)", "echeance_mois", "euro")}
+            {ed("Montant total des échéances (par an)", "echeance_an", "euro")}
             <tr>
               <td colSpan={2} style={CAT_HEAD}>
                 Assurance emprunteur
               </td>
             </tr>
-            {cell("Délégation d’assurance")}
-            {cell("Risque couvert")}
+            {txt("Délégation d’assurance")}
+            {txt("Risque couvert")}
             <tr>
               <td colSpan={2} style={CAT_HEAD}>
                 Options &amp; spécificités
               </td>
             </tr>
-            {cell("Option de modulation des échéances")}
-            {cell("Option de suspension des échéances")}
-            {cell("Indemnités de remboursement anticipé")}
-            {cell("Garantie du prêt")}
-            {cell("Clause de bonification")}
+            {txt("Option de modulation des échéances")}
+            {txt("Option de suspension des échéances")}
+            {ed("Indemnités de remboursement anticipé", "ira", "euro")}
+            {txt("Garantie du prêt")}
+            {txt("Clause de bonification")}
           </tbody>
         </table>
       </div>
@@ -167,9 +228,20 @@ function PretDetail() {
 /**
  * Un accordéon de prêt : le <Bloc> EST l'élément .acc (il porte le data-block,
  * comme dans la maquette où id/data-block/classe sont sur le même div). Entête
- * (icône, nom honnête, montant honnête) + détail. Le pliage est câblé ensuite.
+ * (icône, nom honnête, montant saisissable = capital restant dû) + détail. Le
+ * capital restant dû de l'entête partage la clé du détail et du tableau.
  */
-function PretAccordion({ blocKey, icon }: { blocKey: string; icon: ReactNode }) {
+function PretAccordion({
+  slug,
+  blocKey,
+  icon,
+  donnees,
+}: {
+  slug: string;
+  blocKey: string;
+  icon: ReactNode;
+  donnees: EtudeDonnees;
+}) {
   return (
     <Bloc blocKey={blocKey} className="acc">
       <div className="acc-h">
@@ -179,7 +251,12 @@ function PretAccordion({ blocKey, icon }: { blocKey: string; icon: ReactNode }) 
           <span className="sub">{DASH}</span>
         </div>
         <div className="amt">
-          <span>{DASH}</span>
+          <Saisie
+            donnees={donnees}
+            vKey={`passif_pret_${slug}_crd`}
+            format="euro"
+            label="Capital restant dû"
+          />
         </div>
         <span className="chev">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
@@ -187,7 +264,7 @@ function PretAccordion({ blocKey, icon }: { blocKey: string; icon: ReactNode }) 
           </svg>
         </span>
       </div>
-      <PretDetail />
+      <PretDetail slug={slug} donnees={donnees} />
     </Bloc>
   );
 }
@@ -231,8 +308,6 @@ function IconCredit() {
 
 export default function PatrimoinePassif({ donnees }: { donnees: EtudeDonnees }): ReactNode {
   const passifTotal = montant(donnees, "passif_total");
-  const brut = montant(donnees, "patrimoine_brut");
-  const net = montant(donnees, "patrimoine_net");
   const foyer = foyerLabel(donnees);
   const cautions = cautionsSubject(donnees);
 
@@ -283,10 +358,19 @@ export default function PatrimoinePassif({ donnees }: { donnees: EtudeDonnees })
       <Bloc blocKey="Synthèse du passif">
         <div style={{ margin: "2px 0 16px", maxWidth: "760px" }}>
           <p style={{ fontSize: "13.5px", color: "var(--text)", lineHeight: 1.62 }}>
-            Le passif {foyer} s’établit à <strong>{passifTotal}</strong>. Il associe une dette
-            personnelle de {DASH} (dont {DASH} de financements immobiliers en nom propre et un crédit
-            à la consommation résiduel) et une dette de {DASH} logée dans les SCI, pour laquelle{" "}
-            {cautions} se sont portés <strong>cautions solidaires</strong>.
+            Le passif {foyer} s’établit à{" "}
+            <strong>
+              <Saisie donnees={donnees} vKey="passif_total" format="euro" label="Total du passif" />
+            </strong>
+            . Il associe une dette personnelle de{" "}
+            <Saisie donnees={donnees} vKey="passif_dette_personnelle" format="euro" label="Dette personnelle" />{" "}
+            (dont{" "}
+            <Saisie donnees={donnees} vKey="passif_immo_nom_propre" format="euro" label="Financements immobiliers en nom propre" />{" "}
+            de financements immobiliers en nom propre et un crédit à la consommation résiduel) et une
+            dette de{" "}
+            <Saisie donnees={donnees} vKey="passif_dette_sci" format="euro" label="Dette logée dans les SCI" />{" "}
+            logée dans les SCI, pour laquelle {cautions} se sont portés{" "}
+            <strong>cautions solidaires</strong>.
           </p>
         </div>
       </Bloc>
@@ -316,8 +400,8 @@ export default function PatrimoinePassif({ donnees }: { donnees: EtudeDonnees })
           </tr>
         </thead>
         <tbody>
-          {[0, 1, 2, 3, 4].map((i) => (
-            <tr key={i}>
+          {PRETS.map((p) => (
+            <tr key={p.slug}>
               <td>
                 <div className="cell" data-fmt="txt">
                   {DASH}
@@ -330,17 +414,32 @@ export default function PatrimoinePassif({ donnees }: { donnees: EtudeDonnees })
               </td>
               <td className="num">
                 <div className="cell" data-fmt="txt">
-                  {DASH}
+                  <Saisie
+                    donnees={donnees}
+                    vKey={`passif_pret_${p.slug}_crd`}
+                    format="euro"
+                    label="Capital restant dû"
+                  />
                 </div>
               </td>
               <td className="num">
                 <div className="cell" data-fmt="txt">
-                  {DASH}
+                  <Saisie
+                    donnees={donnees}
+                    vKey={`passif_pret_${p.slug}_taux_nominal`}
+                    format="percent"
+                    label="Taux"
+                  />
                 </div>
               </td>
               <td className="num">
                 <div className="cell" data-fmt="txt">
-                  {DASH}
+                  <Saisie
+                    donnees={donnees}
+                    vKey={`passif_pret_${p.slug}_duree_restante`}
+                    format="number"
+                    label="Durée restante"
+                  />
                 </div>
               </td>
             </tr>
@@ -356,7 +455,7 @@ export default function PatrimoinePassif({ donnees }: { donnees: EtudeDonnees })
             <td></td>
             <td className="num">
               <div className="cell" data-fmt="txt">
-                {passifTotal}
+                <Saisie donnees={donnees} vKey="passif_total" format="euro" label="Total du passif" />
               </div>
             </td>
             <td className="num"></td>
@@ -365,10 +464,17 @@ export default function PatrimoinePassif({ donnees }: { donnees: EtudeDonnees })
         </tfoot>
       </table>
       <div className="note" style={{ marginTop: "9px" }}>
-        Trois financements immobiliers ({DASH}), un emprunt d’investissement sur le local
-        professionnel ({DASH}) et un crédit à la consommation résiduel ({DASH}) composent le passif
-        de <strong>{passifTotal}</strong>. Le détail prêt par prêt — conditions, assurance et
-        cautions — figure ci-dessous.
+        Trois financements immobiliers (
+        <Saisie donnees={donnees} vKey="passif_immo_total" format="euro" label="Total des financements immobiliers" />
+        ), un emprunt d’investissement sur le local professionnel (
+        <Saisie donnees={donnees} vKey="passif_pret_local_pro_crd" format="euro" label="Emprunt du local professionnel" />
+        ) et un crédit à la consommation résiduel (
+        <Saisie donnees={donnees} vKey="passif_pret_conso_crd" format="euro" label="Crédit à la consommation" />
+        ) composent le passif de{" "}
+        <strong>
+          <Saisie donnees={donnees} vKey="passif_total" format="euro" label="Total du passif" />
+        </strong>
+        . Le détail prêt par prêt — conditions, assurance et cautions — figure ci-dessous.
       </div>
 
       {/* VENTILATION */}
@@ -508,15 +614,26 @@ export default function PatrimoinePassif({ donnees }: { donnees: EtudeDonnees })
         </svg>{" "}
         Analyse des prêts en cours
       </div>
-      <PretAccordion blocKey="Prêt — Appartement de rapport" icon={<IconImmeuble />} />
-      <PretAccordion blocKey="Prêt — Appartement meublé (LMNP)" icon={<IconImmeuble />} />
-      <PretAccordion blocKey="Prêt — Studios locatifs" icon={<IconResidence />} />
-      <PretAccordion blocKey="Prêt — Local professionnel" icon={<IconResidence />} />
-      <PretAccordion blocKey="Prêt — Crédit à la consommation" icon={<IconCredit />} />
+      {PRETS.map((p) => (
+        <PretAccordion
+          key={p.slug}
+          slug={p.slug}
+          blocKey={p.blocKey}
+          icon={<p.Icon />}
+          donnees={donnees}
+        />
+      ))}
       <div className="note" style={{ marginTop: "2px" }}>
         * Les montants indiqués sont arrondis à l’euro le plus proche. Le total des capitaux restant
-        dus s’élève à <strong>{passifTotal}</strong>, pour un service annuel cumulé de{" "}
-        <strong>{DASH}</strong>.
+        dus s’élève à{" "}
+        <strong>
+          <Saisie donnees={donnees} vKey="passif_total" format="euro" label="Total du passif" />
+        </strong>
+        , pour un service annuel cumulé de{" "}
+        <strong>
+          <Saisie donnees={donnees} vKey="passif_service_annuel" format="euro" label="Service annuel de la dette" />
+        </strong>
+        .
       </div>
 
       {/* RISQUES & OPPORTUNITÉS - PRÊTS */}
@@ -569,12 +686,22 @@ export default function PatrimoinePassif({ donnees }: { donnees: EtudeDonnees })
             </div>
             <ul className="dlist">
               <li>
-                Les financements en cours s’échelonnent de <strong>{DASH}</strong> à{" "}
-                <strong>{DASH}</strong>.
+                Les financements en cours s’échelonnent de{" "}
+                <strong>
+                  <Saisie donnees={donnees} vKey="passif_pret_min" format="euro" label="Plus petit financement en cours" />
+                </strong>{" "}
+                à{" "}
+                <strong>
+                  <Saisie donnees={donnees} vKey="passif_pret_max" format="euro" label="Plus grand financement en cours" />
+                </strong>
+                .
               </li>
               <li>
-                Le prêt de l’appartement meublé ({DASH}) et le crédit à la consommation ({DASH})
-                ressortent <strong>au-dessus des conditions de marché</strong> actuelles (≈ 3,50 %
+                Le prêt de l’appartement meublé (
+                <Saisie donnees={donnees} vKey="passif_pret_appt_meuble_crd" format="euro" label="Capital restant dû du prêt meublé" />
+                ) et le crédit à la consommation (
+                <Saisie donnees={donnees} vKey="passif_pret_conso_crd" format="euro" label="Crédit à la consommation" />
+                ) ressortent <strong>au-dessus des conditions de marché</strong> actuelles (≈ 3,50 %
                 sur 15 ans).
               </li>
             </ul>
@@ -609,7 +736,9 @@ export default function PatrimoinePassif({ donnees }: { donnees: EtudeDonnees })
             </div>
             <p>
               Allègement mécanique de la charge d’intérêts et amélioration du cash-flow, à arbitrer
-              contre les indemnités de remboursement anticipé ({DASH}).
+              contre les indemnités de remboursement anticipé (
+              <Saisie donnees={donnees} vKey="passif_ira_renego" format="euro" label="Indemnités de remboursement anticipé estimées" />
+              ).
             </p>
           </div>
           <div className="dim">
@@ -685,19 +814,30 @@ export default function PatrimoinePassif({ donnees }: { donnees: EtudeDonnees })
             <ul className="dlist">
               <li>
                 Le prêt du local professionnel (SCI) est assuré à une{" "}
-                <strong>quotité de {DASH} par tête</strong>, soit {DASH} au global.
+                <strong>
+                  quotité de{" "}
+                  <Saisie donnees={donnees} vKey="assurance_local_quotite_tete" format="percent" label="Quotité d’assurance par tête" />{" "}
+                  par tête
+                </strong>
+                , soit{" "}
+                <Saisie donnees={donnees} vKey="assurance_local_quotite_global" format="percent" label="Quotité d’assurance globale" />{" "}
+                au global.
               </li>
               <li>
-                Son coût ({DASH}) <strong>pèse sur la rentabilité</strong> de la SCI.
+                Son coût (
+                <Saisie donnees={donnees} vKey="assurance_local_cout" format="euro" label="Coût de l’assurance emprunteur du local" />
+                ) <strong>pèse sur la rentabilité</strong> de la SCI.
               </li>
             </ul>
           </div>
           <div className="dim">
             <div className="rio">
               <div className="it r">
-                <span className="lab">Risque</span>La faible quotité globale ({DASH}) contraindrait
-                le <strong>conjoint survivant à supporter seul une part majeure</strong> de
-                l’échéance en cas de décès du partenaire.
+                <span className="lab">Risque</span>La faible quotité globale (
+                <Saisie donnees={donnees} vKey="assurance_local_quotite_global" format="percent" label="Quotité d’assurance globale" />
+                ) contraindrait le{" "}
+                <strong>conjoint survivant à supporter seul une part majeure</strong> de l’échéance
+                en cas de décès du partenaire.
               </div>
               <div className="it o">
                 <span className="lab">Opportunité</span>Une renégociation ou une{" "}
@@ -821,7 +961,11 @@ export default function PatrimoinePassif({ donnees }: { donnees: EtudeDonnees })
             <ul className="dlist">
               <li>
                 Les deux financements logés dans les SCI (studios locatifs et local professionnel)
-                représentent <strong>{DASH}</strong> de capital restant dû.
+                représentent{" "}
+                <strong>
+                  <Saisie donnees={donnees} vKey="passif_dette_sci" format="euro" label="Capital restant dû logé dans les SCI" />
+                </strong>{" "}
+                de capital restant dû.
               </li>
               <li>
                 Ces prêts sont assortis d’une <strong>caution solidaire</strong> consentie
@@ -861,11 +1005,21 @@ export default function PatrimoinePassif({ donnees }: { donnees: EtudeDonnees })
               Impact quantifié
             </div>
             <p>
-              La caution porte le taux d’endettement <b>de {DASH} à {DASH}</b> : un écart de{" "}
-              <b>{DASH} de service annuel</b> de la dette, supporté personnellement en cas de
-              défaillance des sociétés. La renégociation viserait à substituer ou plafonner ces
-              engagements ; la délégation d’assurance à garantir le remboursement en cas de décès ou
-              d’invalidité d’un associé.
+              La caution porte le taux d’endettement{" "}
+              <b>
+                de{" "}
+                <Saisie donnees={donnees} vKey="passif_taux_endettement_perso" format="percent" label="Taux d’endettement personnel" />{" "}
+                à{" "}
+                <Saisie donnees={donnees} vKey="passif_taux_endettement_consolide" format="percent" label="Taux d’endettement consolidé" />
+              </b>{" "}
+              : un écart de{" "}
+              <b>
+                <Saisie donnees={donnees} vKey="passif_ecart_service_sci" format="euro" label="Écart de service annuel lié aux cautions" />{" "}
+                de service annuel
+              </b>{" "}
+              de la dette, supporté personnellement en cas de défaillance des sociétés. La
+              renégociation viserait à substituer ou plafonner ces engagements ; la délégation
+              d’assurance à garantir le remboursement en cas de décès ou d’invalidité d’un associé.
             </p>
           </div>
           <div className="dim">
@@ -964,26 +1118,50 @@ export default function PatrimoinePassif({ donnees }: { donnees: EtudeDonnees })
             <span className="sc-link">Voir le détail</span>
           </div>
           <p>
-            Le passif {foyer} s’établit à <b>{passifTotal}</b>, pour un patrimoine brut de{" "}
-            <b>{brut}</b> : l’endettement reste à mettre en regard de l’actif, pour un patrimoine net
-            de <b>{net}</b>. Sa structure repose en majorité sur l’immobilier, le solde se partageant
-            entre un emprunt d’investissement et un crédit à la consommation résiduel. Le service
-            annuel de la dette, assurance comprise, s’élève à <b>{DASH}</b>.
+            Le passif {foyer} s’établit à{" "}
+            <b>
+              <Saisie donnees={donnees} vKey="passif_total" format="euro" label="Total du passif" />
+            </b>
+            , pour un patrimoine brut de{" "}
+            <b>
+              <Saisie donnees={donnees} vKey="patrimoine_brut" format="euro" label="Patrimoine brut" />
+            </b>{" "}
+            : l’endettement reste à mettre en regard de l’actif, pour un patrimoine net de{" "}
+            <b>
+              <Saisie donnees={donnees} vKey="patrimoine_net" format="euro" label="Patrimoine net" />
+            </b>
+            . Sa structure repose en majorité sur l’immobilier, le solde se partageant entre un
+            emprunt d’investissement et un crédit à la consommation résiduel. Le service annuel de la
+            dette, assurance comprise, s’élève à{" "}
+            <b>
+              <Saisie donnees={donnees} vKey="passif_service_annuel" format="euro" label="Service annuel de la dette" />
+            </b>
+            .
           </p>
           <p>
             Plusieurs éléments confortent cette lecture. Aucun financement n’est adossé à la
             résidence principale, libre de toute charge ; les taux des prêts immobiliers demeurent à
             apprécier au regard des conditions de marché ; et le taux d’endettement strictement
-            personnel, limité à <b>{DASH}</b> des revenus du foyer, laisse une capacité d’emprunt à
-            quantifier.
+            personnel, limité à{" "}
+            <b>
+              <Saisie donnees={donnees} vKey="passif_taux_endettement_perso" format="percent" label="Taux d’endettement personnel" />
+            </b>{" "}
+            des revenus du foyer, laisse une capacité d’emprunt à quantifier.
           </p>
           <p>
             La principale vigilance tient à l’exposition personnelle au titre des{" "}
-            <b>cautions solidaires</b>. Les deux financements logés dans les SCI — <b>{DASH}</b> de
-            capital restant dû — sont garantis personnellement par les associés. Réintégrée, cette
-            dette porte le taux d’endettement consolidé à <b>{DASH}</b> : un niveau à apprécier, qui
-            rappelle que, sous le régime de la séparation de biens, l’engagement de caution pèse sur
-            le patrimoine propre de chacun, sans la protection attachée aux régimes communautaires.
+            <b>cautions solidaires</b>. Les deux financements logés dans les SCI —{" "}
+            <b>
+              <Saisie donnees={donnees} vKey="passif_dette_sci" format="euro" label="Capital restant dû logé dans les SCI" />
+            </b>{" "}
+            de capital restant dû — sont garantis personnellement par les associés. Réintégrée, cette
+            dette porte le taux d’endettement consolidé à{" "}
+            <b>
+              <Saisie donnees={donnees} vKey="passif_taux_endettement_consolide" format="percent" label="Taux d’endettement consolidé" />
+            </b>{" "}
+            : un niveau à apprécier, qui rappelle que, sous le régime de la séparation de biens,
+            l’engagement de caution pèse sur le patrimoine propre de chacun, sans la protection
+            attachée aux régimes communautaires.
           </p>
           <p>
             Deux leviers se dégagent. La renégociation des cautions bancaires des SCI allégerait

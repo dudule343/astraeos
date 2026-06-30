@@ -31,9 +31,24 @@ import "../../../../_styles/sections/societes.css";
 import { type ReactNode } from "react";
 
 import { Bloc } from "../Bloc";
+import ValeurEditable from "../ValeurEditable";
+import type { ValeurFormat } from "../format-valeur";
 import type { EtudeDonnees, EtudePersonne } from "../../../../_data/etudes-patrimoniales";
 
 const DASH = "—";
+
+/** Montant éditable du patrimoine, lu dans donnees.valeurs (« — » tant qu'absent). */
+function Val({
+  donnees,
+  k,
+  format = "euro",
+}: {
+  donnees: EtudeDonnees;
+  k: string;
+  format?: ValeurFormat;
+}) {
+  return <ValeurEditable vKey={k} format={format} initial={donnees.valeurs[k] ?? null} />;
+}
 
 function roleRank(role: EtudePersonne["role"]): number {
   return role === "person_a" ? 0 : 1;
@@ -742,7 +757,7 @@ function AbEifSoc() {
   );
 }
 
-function PilotageRemTexts() {
+function PilotageRemTexts(donnees: EtudeDonnees, prefix: string) {
   return {
     constat: (
       <>
@@ -771,8 +786,11 @@ function PilotageRemTexts() {
     ),
     impact: (
       <>
-        En l&apos;état, le prélèvement représente <strong>{DASH}</strong> du bénéfice, sur des revenus
-        déjà lourdement taxés.
+        En l&apos;état, le prélèvement représente{" "}
+        <strong>
+          <Val donnees={donnees} k={`${prefix}_taux_prelevement`} format="percent" />
+        </strong>{" "}
+        du bénéfice, sur des revenus déjà lourdement taxés.
       </>
     ),
     justification: "Transparence fiscale du régime de l’Entreprise Individuelle.",
@@ -780,8 +798,8 @@ function PilotageRemTexts() {
   };
 }
 
-function AbEimRem() {
-  const t = PilotageRemTexts();
+function AbEimRem({ donnees }: { donnees: EtudeDonnees }) {
+  const t = PilotageRemTexts(donnees, "eim");
   return (
     <AbBlock
       blocKey="Pilotage de la rémunération — Monsieur"
@@ -799,8 +817,8 @@ function AbEimRem() {
   );
 }
 
-function AbEifRem() {
-  const t = PilotageRemTexts();
+function AbEifRem({ donnees }: { donnees: EtudeDonnees }) {
+  const t = PilotageRemTexts(donnees, "eif");
   return (
     <AbBlock
       blocKey="Pilotage de la rémunération — Madame"
@@ -873,7 +891,7 @@ function AbEimTres() {
   );
 }
 
-function AbEifTres() {
+function AbEifTres({ donnees }: { donnees: EtudeDonnees }) {
   const t = TresorerieTexts();
   return (
     <AbBlock
@@ -887,8 +905,11 @@ function AbEifTres() {
       optimisation={t.optimisation}
       impact={
         <>
-          Le surplus de <strong>{DASH}</strong>, déjà fiscalisé, peut être extrait sans frottement vers
-          des supports de placement personnels.
+          Le surplus de{" "}
+          <strong>
+            <Val donnees={donnees} k="eif_surplus_extractible" />
+          </strong>
+          , déjà fiscalisé, peut être extrait sans frottement vers des supports de placement personnels.
         </>
       }
       justification={t.justification}
@@ -923,7 +944,7 @@ function StructFiscRisqueOppOpt() {
   };
 }
 
-function AbEimFisc() {
+function AbEimFisc({ donnees }: { donnees: EtudeDonnees }) {
   const t = StructFiscRisqueOppOpt();
   return (
     <AbBlock
@@ -935,9 +956,12 @@ function AbEimFisc() {
         <>
           <li>Monsieur exerce en Entreprise Individuelle à l&apos;impôt sur le revenu.</li>
           <li>
-            L&apos;intégralité du bénéfice net (<strong>{DASH}</strong> en 2024) est soumise au barème
-            progressif de l&apos;impôt sur le revenu (TMI à 41 %) et aux cotisations sociales (URSSAF et
-            caisse de retraite de la profession).
+            L&apos;intégralité du bénéfice net (
+            <strong>
+              <Val donnees={donnees} k="eim_benefice_net" />
+            </strong>{" "}
+            en 2024) est soumise au barème progressif de l&apos;impôt sur le revenu (TMI à 41 %) et aux
+            cotisations sociales (URSSAF et caisse de retraite de la profession).
           </li>
         </>
       }
@@ -947,7 +971,11 @@ function AbEimFisc() {
       impact={
         <>
           En l&apos;état, aucune stratégie de capitalisation à taux réduit n&apos;est possible au sein de
-          l&apos;outil professionnel ; le prélèvement représente <strong>{DASH}</strong> du bénéfice.
+          l&apos;outil professionnel ; le prélèvement représente{" "}
+          <strong>
+            <Val donnees={donnees} k="eim_taux_prelevement" format="percent" />
+          </strong>{" "}
+          du bénéfice.
         </>
       }
       justification={t.justification}
@@ -956,7 +984,7 @@ function AbEimFisc() {
   );
 }
 
-function AbEifFisc() {
+function AbEifFisc({ donnees }: { donnees: EtudeDonnees }) {
   const t = StructFiscRisqueOppOpt();
   return (
     <AbBlock
@@ -968,9 +996,12 @@ function AbEifFisc() {
         <>
           <li>Madame exerce en Entreprise Individuelle à l&apos;impôt sur le revenu.</li>
           <li>
-            L&apos;intégralité du bénéfice net (<strong>{DASH}</strong> en 2024) est soumise au barème
-            progressif de l&apos;impôt sur le revenu (TMI à 41 % ou 45 %) et aux cotisations sociales
-            (URSSAF et caisse de retraite de la profession).
+            L&apos;intégralité du bénéfice net (
+            <strong>
+              <Val donnees={donnees} k="eif_benefice_net" />
+            </strong>{" "}
+            en 2024) est soumise au barème progressif de l&apos;impôt sur le revenu (TMI à 41 % ou 45 %)
+            et aux cotisations sociales (URSSAF et caisse de retraite de la profession).
           </li>
         </>
       }
@@ -980,7 +1011,11 @@ function AbEifFisc() {
       impact={
         <>
           En l&apos;état, aucune stratégie de capitalisation à taux réduit n&apos;est possible au sein de
-          l&apos;outil professionnel ; le prélèvement représente <strong>{DASH}</strong> du bénéfice.
+          l&apos;outil professionnel ; le prélèvement représente{" "}
+          <strong>
+            <Val donnees={donnees} k="eif_taux_prelevement" format="percent" />
+          </strong>{" "}
+          du bénéfice.
         </>
       }
       justification={t.justification}
@@ -989,7 +1024,7 @@ function AbEifFisc() {
   );
 }
 
-function AbGlobFisc() {
+function AbGlobFisc({ donnees }: { donnees: EtudeDonnees }) {
   return (
     <AbBlock
       blocKey="Saturation fiscale des activités libérales"
@@ -1000,8 +1035,11 @@ function AbGlobFisc() {
         <>
           <li>Les deux activités sont exercées en Entreprise Individuelle au régime BNC.</li>
           <li>
-            Les bénéfices cumulés (<strong>{DASH}</strong> en 2024) supportent l&apos;impôt sur le revenu
-            (TMI 41 %) et les cotisations sociales.
+            Les bénéfices cumulés (
+            <strong>
+              <Val donnees={donnees} k="soc_benefices_cumules" />
+            </strong>{" "}
+            en 2024) supportent l&apos;impôt sur le revenu (TMI 41 %) et les cotisations sociales.
           </li>
         </>
       }
@@ -1022,8 +1060,15 @@ function AbGlobFisc() {
       }
       impact={
         <>
-          Prélèvements de <strong>{DASH}</strong> (Monsieur) et <strong>{DASH}</strong> (Madame) du
-          bénéfice, sans levier de capitalisation à taux réduit.
+          Prélèvements de{" "}
+          <strong>
+            <Val donnees={donnees} k="eim_taux_prelevement" format="percent" />
+          </strong>{" "}
+          (Monsieur) et{" "}
+          <strong>
+            <Val donnees={donnees} k="eif_taux_prelevement" format="percent" />
+          </strong>{" "}
+          (Madame) du bénéfice, sans levier de capitalisation à taux réduit.
         </>
       }
       justification="Transparence fiscale du régime BNC."
@@ -1072,7 +1117,7 @@ function AbGlobJur() {
   );
 }
 
-function AbGlobTres() {
+function AbGlobTres({ donnees }: { donnees: EtudeDonnees }) {
   return (
     <AbBlock
       blocKey="Trésoreries professionnelles dormantes"
@@ -1097,8 +1142,11 @@ function AbGlobTres() {
       optimisation={<>Mobiliser les trésoreries vers des supports de placement adaptés.</>}
       impact={
         <>
-          Surplus extractible (<strong>{DASH}</strong> chez Madame) et rémunération possible du matelas
-          de sécurité.
+          Surplus extractible (
+          <strong>
+            <Val donnees={donnees} k="eif_surplus_extractible" />
+          </strong>{" "}
+          chez Madame) et rémunération possible du matelas de sécurité.
         </>
       }
       justification="Soldes bancaires professionnels et niveaux de trésorerie."
@@ -1448,20 +1496,26 @@ export default function SocietesSection({ donnees }: { donnees: EtudeDonnees }) 
                   professionnel et personnel.
                 </li>
                 <li>
-                  Le bénéfice net comptable de <strong>{DASH}</strong> en 2024 constitue l&apos;intégralité
-                  de la base imposable et sociale.
+                  Le bénéfice net comptable de{" "}
+                  <strong>
+                    <Val donnees={donnees} k="eim_benefice_net" />
+                  </strong>{" "}
+                  en 2024 constitue l&apos;intégralité de la base imposable et sociale.
                 </li>
                 <li>
-                  Les cotisations sociales payées en 2024 s&apos;élèvent à <strong>{DASH}</strong>, après
-                  déduction des aides éventuelles.
+                  Les cotisations sociales payées en 2024 s&apos;élèvent à{" "}
+                  <strong>
+                    <Val donnees={donnees} k="eim_cotisations_sociales" />
+                  </strong>
+                  , après déduction des aides éventuelles.
                 </li>
               </ul>
               <SocLabel>Protection sociale — couverture santé et prévoyance</SocLabel>
               <ul className="dlist">
                 <li>
                   Monsieur bénéficie du régime obligatoire de sa profession libérale, avec,
-                  le cas échéant, une prise en charge partielle de ses cotisations à hauteur de {DASH}
-                  en 2024.
+                  le cas échéant, une prise en charge partielle de ses cotisations à hauteur de{" "}
+                  <Val donnees={donnees} k="eim_cotisations_prise_en_charge" /> en 2024.
                 </li>
                 <li>
                   Les contrats mutuelle et prévoyance sont souscrits via la structure professionnelle dans
@@ -1541,7 +1595,7 @@ export default function SocietesSection({ donnees }: { donnees: EtudeDonnees }) 
                 </li>
               </ul>
               <SocLabel>Risques et opportunités</SocLabel>
-              <AbEimRem />
+              <AbEimRem donnees={donnees} />
             </SubAcc>
 
             <SubAcc
@@ -1554,26 +1608,39 @@ export default function SocietesSection({ donnees }: { donnees: EtudeDonnees }) 
               <ul className="dlist">
                 <li>
                   <b>Fonds de sécurité</b> : il serait recommandé de conserver l&apos;équivalent de 3 mois
-                  de charges d&apos;exploitation. Avec {DASH} de charges annuelles (soit {DASH}/mois), le
-                  fonds de sécurité cible s&apos;établit à <strong>{DASH}</strong>.
+                  de charges d&apos;exploitation. Avec <Val donnees={donnees} k="eim_charges_annuelles" /> de
+                  charges annuelles (soit <Val donnees={donnees} k="eim_charges_mensuelles" />/mois), le
+                  fonds de sécurité cible s&apos;établit à{" "}
+                  <strong>
+                    <Val donnees={donnees} k="eim_fonds_securite_cible" />
+                  </strong>
+                  .
                 </li>
                 <li>
                   <b>Besoin en fonds de roulement (BFR)</b> : le BFR est structurellement négatif (
-                  <strong>{DASH}</strong>). C&apos;est un excellent indicateur : l&apos;entreprise encaisse
-                  ses honoraires avant de payer ses charges sociales et ses fournisseurs, générant une
-                  ressource de trésorerie constante.
+                  <strong>
+                    <Val donnees={donnees} k="eim_bfr" />
+                  </strong>
+                  ). C&apos;est un excellent indicateur : l&apos;entreprise encaisse ses honoraires avant de
+                  payer ses charges sociales et ses fournisseurs, générant une ressource de trésorerie
+                  constante.
                 </li>
                 <li>
                   <b>Analyse de l&apos;excédent</b> : le solde du compte professionnel correspond presque
                   exactement au fonds de sécurité. Il n&apos;existe donc pas de trésorerie excédentaire
-                  libre pour des investissements longs, la quasi-totalité des bénéfices ({DASH}) étant
-                  prélevée chaque année pour les besoins du foyer.
+                  libre pour des investissements longs, la quasi-totalité des bénéfices (
+                  <Val donnees={donnees} k="eim_prelevement_annuel" />) étant prélevée chaque année pour les
+                  besoins du foyer.
                 </li>
               </ul>
               <SocLabel>Performance actuelle de la trésorerie</SocLabel>
               <ul className="dlist">
                 <li>
-                  <b>Liquidités disponibles</b> : <strong>{DASH}</strong> (solde du compte professionnel).
+                  <b>Liquidités disponibles</b> :{" "}
+                  <strong>
+                    <Val donnees={donnees} k="eim_liquidites" />
+                  </strong>{" "}
+                  (solde du compte professionnel).
                 </li>
                 <li>Les fonds sont laissés intégralement sur le compte courant, sans rémunération.</li>
                 <li>
@@ -1583,8 +1650,9 @@ export default function SocietesSection({ donnees }: { donnees: EtudeDonnees }) 
                 </li>
                 <li>
                   Le placement du matelas de sécurité sur un support monétaire liquide (compte à terme,
-                  livret pro) permettrait de générer des intérêts couvrant au minimum les {DASH} de frais
-                  bancaires annuels, transformant un poste de coût en opération blanche.
+                  livret pro) permettrait de générer des intérêts couvrant au minimum les{" "}
+                  <Val donnees={donnees} k="eim_frais_bancaires" /> de frais bancaires annuels, transformant
+                  un poste de coût en opération blanche.
                 </li>
               </ul>
               <KeyNote>
@@ -1602,7 +1670,7 @@ export default function SocietesSection({ donnees }: { donnees: EtudeDonnees }) 
               title="Optimisation fiscale"
               cert={{ level: "c-moy", label: "Confiance modérée · 80 %", certif: "eimfiscS" }}
             >
-              <AbEimFisc />
+              <AbEimFisc donnees={donnees} />
             </SubAcc>
 
             <SynthBlock
@@ -1618,10 +1686,13 @@ export default function SocietesSection({ donnees }: { donnees: EtudeDonnees }) 
                     efficacement la création de richesse du foyer.
                   </p>
                   <p>
-                    Avec un prélèvement de <strong>{DASH}</strong> du bénéfice, l&apos;outil professionnel
-                    n&apos;est plus un levier de capitalisation mais un simple canal de revenus lourdement
-                    taxés. Son encapsulation dans une structure à l&apos;IS et le placement de la
-                    trésorerie constituent les leviers prioritaires.
+                    Avec un prélèvement de{" "}
+                    <strong>
+                      <Val donnees={donnees} k="eim_taux_prelevement" format="percent" />
+                    </strong>{" "}
+                    du bénéfice, l&apos;outil professionnel n&apos;est plus un levier de capitalisation mais
+                    un simple canal de revenus lourdement taxés. Son encapsulation dans une structure à
+                    l&apos;IS et le placement de la trésorerie constituent les leviers prioritaires.
                   </p>
                 </>
               }
@@ -1682,20 +1753,26 @@ export default function SocietesSection({ donnees }: { donnees: EtudeDonnees }) 
                   professionnel et personnel.
                 </li>
                 <li>
-                  Le bénéfice net comptable de <strong>{DASH}</strong> en 2024 constitue l&apos;intégralité
-                  de la base imposable et sociale.
+                  Le bénéfice net comptable de{" "}
+                  <strong>
+                    <Val donnees={donnees} k="eif_benefice_net" />
+                  </strong>{" "}
+                  en 2024 constitue l&apos;intégralité de la base imposable et sociale.
                 </li>
                 <li>
-                  Les cotisations sociales payées en 2024 s&apos;élèvent à <strong>{DASH}</strong>, après
-                  déduction des aides éventuelles.
+                  Les cotisations sociales payées en 2024 s&apos;élèvent à{" "}
+                  <strong>
+                    <Val donnees={donnees} k="eif_cotisations_sociales" />
+                  </strong>
+                  , après déduction des aides éventuelles.
                 </li>
               </ul>
               <SocLabel>Protection sociale — couverture santé et prévoyance</SocLabel>
               <ul className="dlist">
                 <li>
                   Madame bénéficie du régime obligatoire de sa profession libérale, avec,
-                  le cas échéant, une prise en charge partielle de ses cotisations à hauteur de {DASH}
-                  en 2024.
+                  le cas échéant, une prise en charge partielle de ses cotisations à hauteur de{" "}
+                  <Val donnees={donnees} k="eif_cotisations_prise_en_charge" /> en 2024.
                 </li>
                 <li>
                   Les contrats mutuelle et prévoyance sont souscrits via la structure professionnelle dans
@@ -1775,7 +1852,7 @@ export default function SocietesSection({ donnees }: { donnees: EtudeDonnees }) 
                 </li>
               </ul>
               <SocLabel>Risques et opportunités</SocLabel>
-              <AbEifRem />
+              <AbEifRem donnees={donnees} />
             </SubAcc>
 
             <SubAcc
@@ -1788,28 +1865,44 @@ export default function SocietesSection({ donnees }: { donnees: EtudeDonnees }) 
               <ul className="dlist">
                 <li>
                   <b>Fonds de sécurité</b> : il serait recommandé de conserver l&apos;équivalent de 3 mois
-                  de charges d&apos;exploitation. Avec {DASH} de charges annuelles (soit {DASH}/mois), le
-                  fonds de sécurité cible s&apos;établit à <strong>{DASH}</strong>.
+                  de charges d&apos;exploitation. Avec <Val donnees={donnees} k="eif_charges_annuelles" /> de
+                  charges annuelles (soit <Val donnees={donnees} k="eif_charges_mensuelles" />/mois), le
+                  fonds de sécurité cible s&apos;établit à{" "}
+                  <strong>
+                    <Val donnees={donnees} k="eif_fonds_securite_cible" />
+                  </strong>
+                  .
                 </li>
                 <li>
                   <b>Besoin en fonds de roulement (BFR)</b> : le BFR est structurellement négatif (
-                  <strong>{DASH}</strong>). C&apos;est un excellent indicateur : l&apos;entreprise encaisse
-                  ses honoraires avant de payer ses charges sociales et ses fournisseurs, générant une
-                  ressource de trésorerie constante.
+                  <strong>
+                    <Val donnees={donnees} k="eif_bfr" />
+                  </strong>
+                  ). C&apos;est un excellent indicateur : l&apos;entreprise encaisse ses honoraires avant de
+                  payer ses charges sociales et ses fournisseurs, générant une ressource de trésorerie
+                  constante.
                 </li>
                 <li>
                   <b>Analyse de l&apos;excédent</b> : le solde du compte professionnel est supérieur au
-                  fonds de sécurité. Ce surplus de <strong>{DASH}</strong> ne constitue pas une
-                  capitalisation au sens comptable (faute de personne morale), mais une épargne personnelle
-                  déjà taxée laissée sur le compte professionnel. Ne prélevant que {DASH} de son bénéfice,
-                  Madame accumule des liquidités déjà soumises à l&apos;impôt sur le revenu (TMI 41 %) sans
-                  support de placement.
+                  fonds de sécurité. Ce surplus de{" "}
+                  <strong>
+                    <Val donnees={donnees} k="eif_surplus_extractible" />
+                  </strong>{" "}
+                  ne constitue pas une capitalisation au sens comptable (faute de personne morale), mais une
+                  épargne personnelle déjà taxée laissée sur le compte professionnel. Ne prélevant que{" "}
+                  <Val donnees={donnees} k="eif_taux_prelevement" format="percent" /> de son bénéfice, Madame
+                  accumule des liquidités déjà soumises à l&apos;impôt sur le revenu (TMI 41 %) sans support
+                  de placement.
                 </li>
               </ul>
               <SocLabel>Performance actuelle de la trésorerie</SocLabel>
               <ul className="dlist">
                 <li>
-                  <b>Liquidités disponibles</b> : <strong>{DASH}</strong> (comptes professionnels).
+                  <b>Liquidités disponibles</b> :{" "}
+                  <strong>
+                    <Val donnees={donnees} k="eif_liquidites" />
+                  </strong>{" "}
+                  (comptes professionnels).
                 </li>
                 <li>Les fonds sont laissés intégralement sur le compte courant, sans rémunération.</li>
                 <li>
@@ -1819,19 +1912,21 @@ export default function SocietesSection({ donnees }: { donnees: EtudeDonnees }) 
                 </li>
                 <li>
                   Le placement du matelas de sécurité sur un support monétaire liquide (compte à terme,
-                  livret pro) permettrait de générer des intérêts couvrant au minimum les {DASH} de frais
-                  bancaires annuels, transformant un poste de coût en opération blanche.
+                  livret pro) permettrait de générer des intérêts couvrant au minimum les{" "}
+                  <Val donnees={donnees} k="eif_frais_bancaires" /> de frais bancaires annuels, transformant
+                  un poste de coût en opération blanche.
                 </li>
               </ul>
               <KeyNote>
                 La trésorerie est largement suffisante pour assurer la stabilité. L&apos;absence de
                 distinction fiscale entre compte professionnel et compte personnel signifie que ce surplus
-                de {DASH} est de l&apos;argent statique, qui pourrait être extrait vers des supports
+                de <Val donnees={donnees} k="eif_surplus_extractible" /> est de l&apos;argent statique, qui
+                pourrait être extrait vers des supports
                 d&apos;investissement personnels sans frottement fiscal supplémentaire, l&apos;impôt ayant
                 déjà été acquitté.
               </KeyNote>
               <SocLabel>Risques et opportunités</SocLabel>
-              <AbEifTres />
+              <AbEifTres donnees={donnees} />
             </SubAcc>
 
             <SubAcc
@@ -1840,7 +1935,7 @@ export default function SocietesSection({ donnees }: { donnees: EtudeDonnees }) 
               title="Optimisation fiscale"
               cert={{ level: "c-moy", label: "Confiance modérée · 80 %", certif: "eiffiscS" }}
             >
-              <AbEifFisc />
+              <AbEifFisc donnees={donnees} />
             </SubAcc>
 
             <SynthBlock
@@ -1856,11 +1951,18 @@ export default function SocietesSection({ donnees }: { donnees: EtudeDonnees }) 
                     protéger efficacement la création de richesse du foyer.
                   </p>
                   <p>
-                    Bien que Madame soit plus prudente (prélèvement de <strong>{DASH}</strong> du bénéfice
-                    contre <strong>{DASH}</strong> pour Monsieur), la transparence fiscale l&apos;oblige à
-                    acquitter l&apos;impôt au prix fort (TMI 41 %) sur des revenus qu&apos;elle ne consomme
-                    pas. L&apos;outil professionnel est devenu un simple réceptacle d&apos;épargne déjà
-                    taxée, qui mériterait d&apos;être encapsulé ou extrait vers des supports de placement.
+                    Bien que Madame soit plus prudente (prélèvement de{" "}
+                    <strong>
+                      <Val donnees={donnees} k="eif_taux_prelevement" format="percent" />
+                    </strong>{" "}
+                    du bénéfice contre{" "}
+                    <strong>
+                      <Val donnees={donnees} k="eim_taux_prelevement" format="percent" />
+                    </strong>{" "}
+                    pour Monsieur), la transparence fiscale l&apos;oblige à acquitter l&apos;impôt au prix
+                    fort (TMI 41 %) sur des revenus qu&apos;elle ne consomme pas. L&apos;outil professionnel
+                    est devenu un simple réceptacle d&apos;épargne déjà taxée, qui mériterait d&apos;être
+                    encapsulé ou extrait vers des supports de placement.
                   </p>
                 </>
               }
@@ -1908,9 +2010,9 @@ export default function SocietesSection({ donnees }: { donnees: EtudeDonnees }) 
           </div>
           <div className="mod-body">
             <SocLabel>Risques et opportunités consolidés</SocLabel>
-            <AbGlobFisc />
+            <AbGlobFisc donnees={donnees} />
             <AbGlobJur />
-            <AbGlobTres />
+            <AbGlobTres donnees={donnees} />
 
             <SocLabel margin="18px 0 5px">Rappel des risques et opportunités des modules</SocLabel>
             <Bloc blocKey="Rappel consolidé des risques et opportunités" className="lead">
@@ -1921,13 +2023,13 @@ export default function SocietesSection({ donnees }: { donnees: EtudeDonnees }) 
             <AbCession />
             <AbProtSocSci />
             <AbEimSoc />
-            <AbEimRem />
+            <AbEimRem donnees={donnees} />
             <AbEimTres />
-            <AbEimFisc />
+            <AbEimFisc donnees={donnees} />
             <AbEifSoc />
-            <AbEifRem />
-            <AbEifTres />
-            <AbEifFisc />
+            <AbEifRem donnees={donnees} />
+            <AbEifTres donnees={donnees} />
+            <AbEifFisc donnees={donnees} />
 
             <SynthBlock
               anchorId="synthese-globale-societes"
@@ -1944,10 +2046,14 @@ export default function SocietesSection({ donnees }: { donnees: EtudeDonnees }) 
                   </p>
                   <p>
                     Les deux activités libérales sont saines mais fiscalement saturées : l&apos;intégralité
-                    des bénéfices (<strong>{DASH}</strong> cumulés en 2024) supporte l&apos;impôt sur le
-                    revenu (TMI 41 %) et les cotisations sociales, sans possibilité d&apos;arbitrage ni de
-                    capitalisation à taux réduit. Les trésoreries professionnelles, structurellement
-                    excédentaires, restent statiques et non rémunérées.
+                    des bénéfices (
+                    <strong>
+                      <Val donnees={donnees} k="soc_benefices_cumules" />
+                    </strong>{" "}
+                    cumulés en 2024) supporte l&apos;impôt sur le revenu (TMI 41 %) et les cotisations
+                    sociales, sans possibilité d&apos;arbitrage ni de capitalisation à taux réduit. Les
+                    trésoreries professionnelles, structurellement excédentaires, restent statiques et non
+                    rémunérées.
                   </p>
                   <p>
                     L&apos;enjeu central est la <b>transformation des outils professionnels</b> :

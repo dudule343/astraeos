@@ -39,6 +39,7 @@ import {
   validateBloc,
 } from "../actions";
 import { BlocProvider, type BlocContextValue, type ViewMode } from "./Bloc";
+import { ValeurProvider } from "./ValeurEditable";
 import { readBlocHtml, readBlocText } from "./sanitize";
 import { getCertifPanel, type CertifDet, type CertifPanel } from "./certif-data";
 import type { AuditSection, TocEntry } from "./etude-audit-structure";
@@ -728,6 +729,7 @@ export default function EtudeAuditClient({
 
   return (
     <BlocProvider value={ctxValue}>
+      <ValeurProvider etudeId={etudeId}>
       <div className={wrapperClass} data-view={view}>
         {/* ===== TOPBAR ===== */}
         <div className="topbar">
@@ -1012,6 +1014,7 @@ export default function EtudeAuditClient({
           </div>
         </div>
       </div>
+      </ValeurProvider>
     </BlocProvider>
   );
 }
