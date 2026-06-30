@@ -16,9 +16,12 @@
  *  - TOUS les montants du patrimoine (valorisations, répartitions, passif…)
  *    n'existent pas en base : ils sont lus dans donnees.valeurs[<clé>] (null par
  *    défaut) et affichés « — » tant qu'ils ne sont pas saisis. Aucun chiffre de
- *    la maquette n'est recopié comme s'il était réel ; la géométrie des SVG est
- *    conservée telle quelle pour servir de squelette au rendu graphique câblé
- *    ensuite par le main loop.
+ *    la maquette n'est recopié comme s'il était réel.
+ *  - La GÉOMÉTRIE des SVG (donuts, barres du bilan, barres divergentes) DÉCOULE
+ *    désormais des montants client via les helpers purs de ../chart-geom
+ *    (donutSegments / barHeights / divergePair). Tant que rien n'est saisi, les
+ *    graphiques affichent un état vide neutre (anneau gris, barres à zéro) et
+ *    jamais la forme figée héritée du dossier-type.
  */
 
 import { MARITAL_REGIME_LABELS } from "../../../../_data/fiche-client";
@@ -26,6 +29,7 @@ import type { EtudeDonnees } from "../../../../_data/etudes-patrimoniales";
 
 import { Bloc } from "../Bloc";
 import ValeurEditable from "../ValeurEditable";
+import { donutSegments, barHeights, divergePair } from "../chart-geom";
 import "../../../../_styles/sections/patrimoine-synthese.css";
 
 const DASH = "—";
@@ -63,18 +67,28 @@ type Classe = {
   div: string; // libellé barres divergentes
   leg: string; // libellé légende donut
   color: string;
-  dash: string;
-  off: string;
 };
 
 const CLASSES: Classe[] = [
-  { key: "immo_usage", bilan: "Immobilier d’usage", div: "Immobilier d’usage", leg: "Immobilier d’usage", color: "#102D50", dash: "66.1 273.2", off: "0" },
-  { key: "immo_rapport", bilan: "Immobilier de rapport", div: "Immobilier de rapport", leg: "Immobilier de rapport", color: "#46638A", dash: "57.7 281.6", off: "-66.1" },
-  { key: "patrimoine_pro", bilan: "Patrimoine professionnel", div: "Patrimoine professionnel", leg: "Patrimoine professionnel", color: "#8A99AD", dash: "81.7 257.6", off: "-123.8" },
-  { key: "liquidites", bilan: "Liquidités", div: "Liquidités", leg: "Liquidités", color: "#DDBB6E", dash: "19.1 320.2", off: "-205.5" },
-  { key: "assurance_vie", bilan: "Assurance-vie / Capitalisation", div: "Assurance-vie / Capi.", leg: "Assurance-vie / Capitalisation", color: "#C68E0E", dash: "95.8 243.5", off: "-224.6" },
-  { key: "valeurs_mobilieres", bilan: "Valeurs mobilières & autres placements", div: "Valeurs mobilières", leg: "Valeurs mobilières & autres placements", color: "#A57608", dash: "18.9 320.4", off: "-320.4" },
+  { key: "immo_usage", bilan: "Immobilier d’usage", div: "Immobilier d’usage", leg: "Immobilier d’usage", color: "#102D50" },
+  { key: "immo_rapport", bilan: "Immobilier de rapport", div: "Immobilier de rapport", leg: "Immobilier de rapport", color: "#46638A" },
+  { key: "patrimoine_pro", bilan: "Patrimoine professionnel", div: "Patrimoine professionnel", leg: "Patrimoine professionnel", color: "#8A99AD" },
+  { key: "liquidites", bilan: "Liquidités", div: "Liquidités", leg: "Liquidités", color: "#DDBB6E" },
+  { key: "assurance_vie", bilan: "Assurance-vie / Capitalisation", div: "Assurance-vie / Capi.", leg: "Assurance-vie / Capitalisation", color: "#C68E0E" },
+  { key: "valeurs_mobilieres", bilan: "Valeurs mobilières & autres placements", div: "Valeurs mobilières", leg: "Valeurs mobilières & autres placements", color: "#A57608" },
 ];
+
+// Couleurs des barres du bilan patrimonial (actif / passif / actif net).
+const BILAN_BARS = [
+  { key: "total_actif", x: 155, tx: 190, color: "#102D50" },
+  { key: "total_passif", x: 311, tx: 346, color: "#A4AEBB" },
+  { key: "actif_net", x: 467, tx: 502, color: "#A57608" },
+];
+// Échelle de l'axe (fixe, comme la maquette) : 0 € en bas (y=255), 3,5 M€ en haut (y=35).
+const BILAN_SCALE_MAX = 3_500_000;
+const BILAN_AXIS_H = 220;
+const BILAN_BASE_Y = 255;
+const BILAN_BAR_W = 70;
 
 const PASSIF: { key: string; label: string }[] = [
   { key: "passif_emprunt_immobilier", label: "Emprunt immobilier" },
@@ -83,30 +97,27 @@ const PASSIF: { key: string; label: string }[] = [
   { key: "passif_dettes", label: "Dettes" },
 ];
 
-const NIVEAUX: { key: string; label: string; color: string; dash: string; off: string }[] = [
-  { key: "liq_haute", label: "Hautement liquide", color: "#C68E0E", dash: "19.1 320.2", off: "0" },
-  { key: "liq_moyenne", label: "Moyennement liquide", color: "#708196", dash: "109.1 230.2", off: "-19.1" },
-  { key: "liq_faible", label: "Faiblement liquide", color: "#102D50", dash: "211.1 128.2", off: "-128.2" },
+const NIVEAUX: { key: string; label: string; color: string }[] = [
+  { key: "liq_haute", label: "Hautement liquide", color: "#C68E0E" },
+  { key: "liq_moyenne", label: "Moyennement liquide", color: "#708196" },
+  { key: "liq_faible", label: "Faiblement liquide", color: "#102D50" },
 ];
 
-// Géométrie exacte des barres divergentes (reprise de la maquette, ligne par ligne).
-const DIVERGE: {
-  key: string;
-  label: string;
-  y: number;
-  ty: number;
-  mX: number;
-  mW: number;
-  mTx: number;
-  mme?: { w: number; tx: number };
-}[] = [
-  { key: "immo_usage", label: "Immobilier d’usage", y: 28, ty: 43, mX: 140.0, mW: 70.0, mTx: 133.0, mme: { w: 104.4, tx: 501.4 } },
-  { key: "immo_rapport", label: "Immobilier de rapport", y: 70, ty: 85, mX: 136.1, mW: 73.9, mTx: 129.1, mme: { w: 78.4, tx: 475.4 } },
-  { key: "patrimoine_pro", label: "Patrimoine professionnel", y: 112, ty: 127, mX: 67.8, mW: 142.2, mTx: 60.8, mme: { w: 73.4, tx: 470.4 } },
-  { key: "liquidites", label: "Liquidités", y: 154, ty: 169, mX: 186.4, mW: 23.6, mTx: 179.4, mme: { w: 26.7, tx: 423.7 } },
-  { key: "assurance_vie", label: "Assurance-vie / Capi.", y: 196, ty: 211, mX: 83.8, mW: 126.2, mTx: 76.8, mme: { w: 126.7, tx: 523.7 } },
-  { key: "valeurs_mobilieres", label: "Valeurs mobilières", y: 238, ty: 253, mX: 160.2, mW: 49.8, mTx: 153.2 },
+// Barres divergentes : seules les positions VERTICALES (y de la barre, y du texte)
+// sont fixes ; les largeurs découlent des montants. Monsieur croît vers la gauche
+// depuis l'axe x=210, Madame croît vers la droite depuis l'axe x=390.
+const DIVERGE: { key: string; label: string; y: number; ty: number }[] = [
+  { key: "immo_usage", label: "Immobilier d’usage", y: 28, ty: 43 },
+  { key: "immo_rapport", label: "Immobilier de rapport", y: 70, ty: 85 },
+  { key: "patrimoine_pro", label: "Patrimoine professionnel", y: 112, ty: 127 },
+  { key: "liquidites", label: "Liquidités", y: 154, ty: 169 },
+  { key: "assurance_vie", label: "Assurance-vie / Capi.", y: 196, ty: 211 },
+  { key: "valeurs_mobilieres", label: "Valeurs mobilières", y: 238, ty: 253 },
 ];
+// Axes des barres divergentes et largeur px allouée à la valeur maximale.
+const DIV_RIGHT_M = 210; // bord droit (fixe) des barres Monsieur
+const DIV_LEFT_MME = 390; // bord gauche (fixe) des barres Madame
+const DIV_BAR_W = 145; // largeur px de la plus grande valeur
 
 // ---------------------------------------------------------------------------
 // Icônes (chemins SVG repris de la maquette)
@@ -125,24 +136,31 @@ function InfoCircle() {
 // Fragments d'affichage
 // ---------------------------------------------------------------------------
 
-/** Donut générique (cercle de fond + segments) avec tip central honnête. */
+/**
+ * Donut générique (cercle de fond + segments). La géométrie de chaque segment
+ * DÉCOULE des montants client (donnees.valeurs[item.key]) via donutSegments :
+ * la part de chaque arc est proportionnelle au total réel. Si rien n'est saisi
+ * (total nul), les segments sont plats et seul l'anneau gris de fond reste
+ * visible — état vide neutre, jamais la forme du dossier-type.
+ */
 function Donut({
   id,
-  segments,
+  items,
   tipKey,
   donnees,
 }: {
   id: string;
-  segments: { color: string; dash: string; off: string }[];
+  items: { color: string; key: string }[];
   tipKey: string;
   donnees: EtudeDonnees;
 }) {
+  const { segments } = donutSegments(items.map((it) => num(donnees, it.key)));
   return (
     <div className="donutbox" id={`box-${id}`}>
       <svg className="donut" viewBox="0 0 140 140">
         <circle cx="70" cy="70" r="54" fill="none" stroke="#DBE0E4" strokeWidth="17" />
         <g transform="rotate(-90 70 70)" fill="none" strokeWidth="17">
-          {segments.map((s, i) => (
+          {items.map((it, i) => (
             <circle
               key={i}
               className="seg"
@@ -150,9 +168,9 @@ function Donut({
               cx="70"
               cy="70"
               r="54"
-              stroke={s.color}
-              strokeDasharray={s.dash}
-              strokeDashoffset={s.off}
+              stroke={it.color}
+              strokeDasharray={segments[i].dasharray}
+              strokeDashoffset={segments[i].dashoffset}
             />
           ))}
         </g>
@@ -213,6 +231,30 @@ function MP({ donnees, valKey, pctKey }: { donnees: EtudeDonnees; valKey: string
 // ---------------------------------------------------------------------------
 
 export default function PatrimoineSynthese({ donnees }: { donnees: EtudeDonnees }) {
+  // Barres du bilan patrimonial : hauteurs calées sur l'axe fixe 0 → 3,5 M€.
+  const bilan = barHeights(
+    BILAN_BARS.map((b) => num(donnees, b.key)),
+    { height: BILAN_AXIS_H, max: BILAN_SCALE_MAX },
+  );
+  const bilanBars = BILAN_BARS.map((b, i) => {
+    const h = Math.min(bilan.heights[i], BILAN_AXIS_H);
+    return { ...b, h, y: BILAN_BASE_Y - h };
+  });
+
+  // Barres divergentes Monsieur / Madame : échelle commune sur la valeur max.
+  const divMax = DIVERGE.reduce((m, d) => {
+    const a = num(donnees, `${d.key}_m`) ?? 0;
+    const b = num(donnees, `${d.key}_mme`) ?? 0;
+    return Math.max(m, a, b);
+  }, 0);
+  const divBars = DIVERGE.map((d) => {
+    const { leftW, rightW } = divergePair(num(donnees, `${d.key}_m`), num(donnees, `${d.key}_mme`), {
+      max: divMax,
+      width: DIV_BAR_W,
+    });
+    return { ...d, leftW, rightW };
+  });
+
   return (
     <div className="immo-mod">
       <div className="page modfold">
@@ -369,14 +411,21 @@ export default function PatrimoineSynthese({ donnees }: { donnees: EtudeDonnees 
               <text x="85" y="69.4">3 M€</text>
               <text x="85" y="38.0">3,5 M€</text>
             </g>
-            <rect x="155" y="54.0" width="70" height="201.0" fill="#102D50" rx="3" />
-            <rect x="311" y="210.1" width="70" height="44.9" fill="#A4AEBB" rx="3" />
-            <rect x="467" y="98.9" width="70" height="156.1" fill="#A57608" rx="3" />
+            {bilanBars.map((b) => (
+              <rect key={b.key} x={b.x} y={b.y} width={BILAN_BAR_W} height={b.h} fill={b.color} rx="3" />
+            ))}
             <g fill="#102D50" fontSize="12" fontWeight="600" textAnchor="middle">
-              <text x="190" y="46">{eur(donnees, "total_actif")}</text>
-              <text x="346" y="202">{eur(donnees, "total_passif")}</text>
-              <text x="502" y="91">{eur(donnees, "actif_net")}</text>
+              {bilanBars.map((b) => (
+                <text key={b.key} x={b.tx} y={b.y - 8}>
+                  {eur(donnees, b.key)}
+                </text>
+              ))}
             </g>
+            {!bilan.hasData ? (
+              <text x="346" y="150" textAnchor="middle" fill="#8A99AD" fontSize="11">
+                Graphique disponible une fois les montants saisis
+              </text>
+            ) : null}
             <g fill="#102D50" fontSize="12.5" fontWeight="600" textAnchor="middle">
               <text x="190" y="277">Actif</text>
               <text x="346" y="277">Passif</text>
@@ -474,7 +523,7 @@ export default function PatrimoineSynthese({ donnees }: { donnees: EtudeDonnees 
             id="synthdiv"
             donnees={donnees}
             tipKey="total_actif"
-            segments={CLASSES.map((c) => ({ color: c.color, dash: c.dash, off: c.off }))}
+            items={CLASSES.map((c) => ({ color: c.color, key: c.key }))}
           />
           <div className="leg">
             {CLASSES.map((c, i) => (
@@ -565,7 +614,7 @@ export default function PatrimoineSynthese({ donnees }: { donnees: EtudeDonnees 
             id="synthliq"
             donnees={donnees}
             tipKey="total_actif"
-            segments={NIVEAUX.map((n) => ({ color: n.color, dash: n.dash, off: n.off }))}
+            items={NIVEAUX.map((n) => ({ color: n.color, key: n.key }))}
           />
           <div className="leg wv">
             {NIVEAUX.map((n, i) => (
@@ -626,9 +675,9 @@ export default function PatrimoineSynthese({ donnees }: { donnees: EtudeDonnees 
             id="synthrep"
             donnees={donnees}
             tipKey="total_actif"
-            segments={[
-              { color: "#102D50", dash: "184.1 155.2", off: "0" },
-              { color: "#C68E0E", dash: "155.2 184.1", off: "-184.1" },
+            items={[
+              { color: "#102D50", key: "total_actif_m" },
+              { color: "#C68E0E", key: "total_actif_mme" },
             ]}
           />
           <div className="leg nl wv">
@@ -664,22 +713,20 @@ export default function PatrimoineSynthese({ donnees }: { donnees: EtudeDonnees 
             </span>
           </div>
           <svg viewBox="0 0 600 288" xmlns="http://www.w3.org/2000/svg" fontFamily="Epilogue,sans-serif">
-            {DIVERGE.map((d) => (
+            {divBars.map((d) => (
               <g key={d.key} fontFamily="inherit">
                 <g className="m-bar">
-                  <rect x={d.mX} y={d.y} width={d.mW} height="23" rx="2.5" fill="#102D50" />
-                  <text x={d.mTx} y={d.ty} textAnchor="end" fill="#102D50" fontSize="11" fontWeight="600">
+                  <rect x={DIV_RIGHT_M - d.leftW} y={d.y} width={d.leftW} height="23" rx="2.5" fill="#102D50" />
+                  <text x={DIV_RIGHT_M - d.leftW - 7} y={d.ty} textAnchor="end" fill="#102D50" fontSize="11" fontWeight="600">
                     {eur(donnees, `${d.key}_m`)}
                   </text>
                 </g>
-                {d.mme ? (
-                  <g className="mme-bar">
-                    <rect x="390" y={d.y} width={d.mme.w} height="23" rx="2.5" fill="#C68E0E" />
-                    <text x={d.mme.tx} y={d.ty} textAnchor="start" fill="#A57608" fontSize="11" fontWeight="600">
-                      {eur(donnees, `${d.key}_mme`)}
-                    </text>
-                  </g>
-                ) : null}
+                <g className="mme-bar">
+                  <rect x={DIV_LEFT_MME} y={d.y} width={d.rightW} height="23" rx="2.5" fill="#C68E0E" />
+                  <text x={DIV_LEFT_MME + d.rightW + 7} y={d.ty} textAnchor="start" fill="#A57608" fontSize="11" fontWeight="600">
+                    {eur(donnees, `${d.key}_mme`)}
+                  </text>
+                </g>
                 <text x="300.0" y={d.ty} textAnchor="middle" fill="#33414F" fontSize="12">
                   {d.label}
                 </text>

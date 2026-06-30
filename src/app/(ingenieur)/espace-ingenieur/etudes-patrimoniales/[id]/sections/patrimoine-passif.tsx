@@ -25,6 +25,7 @@ import { type CSSProperties, type ReactNode } from "react";
 
 import { Bloc } from "../Bloc";
 import ValeurEditable from "../ValeurEditable";
+import { donutSegments } from "../chart-geom";
 import type { EtudeDonnees } from "../../../../_data/etudes-patrimoniales";
 
 import "../../../../_styles/sections/patrimoine-passif.css";
@@ -49,6 +50,20 @@ function fmtEuro(v: string | number | null | undefined): string {
 /** Montant lu dans le dictionnaire éditable `valeurs` (null par défaut). */
 function montant(donnees: EtudeDonnees, key: string): string {
   return fmtEuro(donnees.valeurs[key]);
+}
+
+/**
+ * Montant brut depuis donnees.valeurs → nombre exploitable par la géométrie des
+ * graphiques (ou null si non saisi). Tolère les valeurs stockées en chaîne.
+ */
+function montantNum(donnees: EtudeDonnees, key: string): number | null {
+  const v = donnees.valeurs[key];
+  if (typeof v === "number") return Number.isFinite(v) ? v : null;
+  if (typeof v === "string") {
+    const n = Number(v.replace(/[^\d.,-]/g, "").replace(/\s/g, "").replace(",", "."));
+    return Number.isFinite(n) ? n : null;
+  }
+  return null;
 }
 
 /** Patronyme du foyer (person_a), pour les phrases — null si absent. */
@@ -311,6 +326,23 @@ export default function PatrimoinePassif({ donnees }: { donnees: EtudeDonnees })
   const foyer = foyerLabel(donnees);
   const cautions = cautionsSubject(donnees);
 
+  // Géométrie des donuts dérivée des montants saisis (donnees.valeurs). Tant
+  // qu'aucun montant n'est saisi, donutSegments renvoie des segments plats
+  // (dasharray "0 C") : seul l'anneau gris neutre reste visible — état vide
+  // honnête, jamais la forme figée du dossier-type.
+  // Par nature : emprunts immobiliers / emprunt d'investissement (local pro) /
+  // crédit à la consommation — mêmes clés que la note récapitulative.
+  const passNat = donutSegments([
+    montantNum(donnees, "passif_immo_total"),
+    montantNum(donnees, "passif_pret_local_pro_crd"),
+    montantNum(donnees, "passif_pret_conso_crd"),
+  ]);
+  // Par détenteur : dette en nom propre / dette logée dans les SCI.
+  const passDet = donutSegments([
+    montantNum(donnees, "passif_dette_personnelle"),
+    montantNum(donnees, "passif_dette_sci"),
+  ]);
+
   return (
     <div className="immo-mod">
       <div className="page modfold">
@@ -502,8 +534,8 @@ export default function PatrimoinePassif({ donnees }: { donnees: EtudeDonnees })
                     cy="70"
                     r="54"
                     stroke="#102D50"
-                    strokeDasharray="0 339.29"
-                    strokeDashoffset="0"
+                    strokeDasharray={passNat.segments[0].dasharray}
+                    strokeDashoffset={passNat.segments[0].dashoffset}
                   />
                   <circle
                     className="seg"
@@ -512,8 +544,8 @@ export default function PatrimoinePassif({ donnees }: { donnees: EtudeDonnees })
                     cy="70"
                     r="54"
                     stroke="#C68E0E"
-                    strokeDasharray="0 339.29"
-                    strokeDashoffset="0"
+                    strokeDasharray={passNat.segments[1].dasharray}
+                    strokeDashoffset={passNat.segments[1].dashoffset}
                   />
                   <circle
                     className="seg"
@@ -522,8 +554,8 @@ export default function PatrimoinePassif({ donnees }: { donnees: EtudeDonnees })
                     cy="70"
                     r="54"
                     stroke="#708196"
-                    strokeDasharray="0 339.29"
-                    strokeDashoffset="0"
+                    strokeDasharray={passNat.segments[2].dasharray}
+                    strokeDashoffset={passNat.segments[2].dashoffset}
                   />
                 </g>
               </svg>
@@ -569,8 +601,8 @@ export default function PatrimoinePassif({ donnees }: { donnees: EtudeDonnees })
                     cy="70"
                     r="54"
                     stroke="#102D50"
-                    strokeDasharray="0 339.29"
-                    strokeDashoffset="0"
+                    strokeDasharray={passDet.segments[0].dasharray}
+                    strokeDashoffset={passDet.segments[0].dashoffset}
                   />
                   <circle
                     className="seg"
@@ -579,8 +611,8 @@ export default function PatrimoinePassif({ donnees }: { donnees: EtudeDonnees })
                     cy="70"
                     r="54"
                     stroke="#C68E0E"
-                    strokeDasharray="0 339.29"
-                    strokeDashoffset="0"
+                    strokeDasharray={passDet.segments[1].dasharray}
+                    strokeDashoffset={passDet.segments[1].dashoffset}
                   />
                 </g>
               </svg>

@@ -30,6 +30,7 @@ import type { ReactNode } from "react";
 
 import { Bloc } from "../Bloc";
 import ValeurEditable from "../ValeurEditable";
+import { donutSegments } from "../chart-geom";
 import {
   householdNameFromDonnees,
   type EtudeDonnees,
@@ -226,6 +227,32 @@ export default function PatrimoineImmobilier({ donnees }: { donnees: EtudeDonnee
   const pct = (k: string) => (
     <ValeurEditable vKey={k} format="percent" initial={donnees.valeurs[k] ?? null} />
   );
+  // Montant numérique d'une clé (les euros/% sont stockés en nombre ; tout le reste -> null).
+  const val = (k: string): number | null => {
+    const raw = donnees.valeurs[k];
+    if (typeof raw === "number") return Number.isFinite(raw) ? raw : null;
+    if (typeof raw === "string") {
+      const n = Number(raw.replace(/\s/g, "").replace(",", "."));
+      return Number.isFinite(n) ? n : null;
+    }
+    return null;
+  };
+
+  // Géométrie des donuts calculée à partir des montants saisis par client (mêmes clés
+  // que les ValeurEditable). Si rien n'est saisi, donutSegments renvoie des segments
+  // plats (arc nul) : seuls les anneaux gris de fond restent visibles — état vide honnête,
+  // jamais la forme héritée du dossier-type. Anneau r=54 → circonférence par défaut.
+  const destDonut = donutSegments([val("residence_principale"), val("immobilier_locatif")]);
+  const bienDonut = donutSegments([
+    val("immo_rp_valeur"),
+    val("immo_lmnp_valeur"),
+    val("immo_nu_valeur"),
+    val("immo_park_valeur_totale"),
+  ]);
+  const segGeom = (donut: ReturnType<typeof donutSegments>, i: number) => {
+    const s = donut.segments[i];
+    return { strokeDasharray: s.dasharray, strokeDashoffset: s.dashoffset };
+  };
 
   return (
     <div className="immo-mod">
@@ -339,8 +366,8 @@ export default function PatrimoineImmobilier({ donnees }: { donnees: EtudeDonnee
                   <svg className="donut" viewBox="0 0 140 140">
                     <circle cx="70" cy="70" r="54" fill="none" stroke="#DBE0E4" strokeWidth="16" />
                     <g transform="rotate(-90 70 70)" fill="none" strokeWidth="16">
-                      <circle className="seg" id="seg-dest-0" cx="70" cy="70" r="54" stroke="#102D50" strokeDasharray="181.1 158.2" strokeDashoffset="0" />
-                      <circle className="seg" id="seg-dest-1" cx="70" cy="70" r="54" stroke="#C68E0E" strokeDasharray="158.2 181.1" strokeDashoffset="-181.1" />
+                      <circle className="seg" id="seg-dest-0" cx="70" cy="70" r="54" stroke="#102D50" {...segGeom(destDonut, 0)} />
+                      <circle className="seg" id="seg-dest-1" cx="70" cy="70" r="54" stroke="#C68E0E" {...segGeom(destDonut, 1)} />
                     </g>
                   </svg>
                   <div className="donut-tip" id="tip-dest">
@@ -372,10 +399,10 @@ export default function PatrimoineImmobilier({ donnees }: { donnees: EtudeDonnee
                   <svg className="donut" viewBox="0 0 140 140">
                     <circle cx="70" cy="70" r="54" fill="none" stroke="#DBE0E4" strokeWidth="16" />
                     <g transform="rotate(-90 70 70)" fill="none" strokeWidth="16">
-                      <circle className="seg" id="seg-bien-0" cx="70" cy="70" r="54" stroke="#102D50" strokeDasharray="145.4 193.9" strokeDashoffset="0" />
-                      <circle className="seg" id="seg-bien-1" cx="70" cy="70" r="54" stroke="#C68E0E" strokeDasharray="145.4 193.9" strokeDashoffset="-145.4" />
-                      <circle className="seg" id="seg-bien-2" cx="70" cy="70" r="54" stroke="#708196" strokeDasharray="35.8 303.5" strokeDashoffset="-290.7" />
-                      <circle className="seg" id="seg-bien-3" cx="70" cy="70" r="54" stroke="#DDBB6E" strokeDasharray="12.8 326.5" strokeDashoffset="-326.5" />
+                      <circle className="seg" id="seg-bien-0" cx="70" cy="70" r="54" stroke="#102D50" {...segGeom(bienDonut, 0)} />
+                      <circle className="seg" id="seg-bien-1" cx="70" cy="70" r="54" stroke="#C68E0E" {...segGeom(bienDonut, 1)} />
+                      <circle className="seg" id="seg-bien-2" cx="70" cy="70" r="54" stroke="#708196" {...segGeom(bienDonut, 2)} />
+                      <circle className="seg" id="seg-bien-3" cx="70" cy="70" r="54" stroke="#DDBB6E" {...segGeom(bienDonut, 3)} />
                     </g>
                   </svg>
                   <div className="donut-tip" id="tip-bien">

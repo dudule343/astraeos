@@ -35,6 +35,7 @@ import type { EtudeDonnees, EtudeProduit } from "../../../../_data/etudes-patrim
 
 import { Bloc } from "../Bloc";
 import ValeurEditable from "../ValeurEditable";
+import { donutSegments } from "../chart-geom";
 import "../../../../_styles/sections/patrimoine-financier.css";
 
 const DASH = "—";
@@ -46,6 +47,19 @@ const DASH = "—";
 function eurNum(n: number | null): string {
   if (n == null) return DASH;
   return `${n.toLocaleString("fr-FR", { maximumFractionDigits: 0 })} €`;
+}
+
+/**
+ * Montant brut depuis donnees.valeurs → nombre exploitable par la géométrie des
+ * graphiques (ou null si non saisi). Tolère les valeurs stockées en chaîne.
+ */
+function montant(v: string | number | null | undefined): number | null {
+  if (typeof v === "number") return Number.isFinite(v) ? v : null;
+  if (typeof v === "string") {
+    const n = Number(v.replace(/[^\d.,-]/g, "").replace(/\s/g, "").replace(",", "."));
+    return Number.isFinite(n) ? n : null;
+  }
+  return null;
 }
 
 /** Date ISO « yyyy-mm-dd » → « mm/yyyy » (souscription), « — » si absente. */
@@ -81,6 +95,21 @@ export default function PatrimoineFinancier({ donnees }: { donnees: EtudeDonnees
           avProduits.length > 1 ? "s" : ""
         } au cabinet`
       : "Aucun contrat collecté · à compléter";
+
+  // Géométrie des donuts dérivée des montants saisis (donnees.valeurs). Tant
+  // qu'aucun montant n'est saisi, donutSegments renvoie des segments plats
+  // (dasharray "0 C") : seul l'anneau gris neutre reste visible — état vide honnête.
+  const finTit = donutSegments([
+    montant(donnees.valeurs["fin_repartition_titulaire_monsieur"]),
+    montant(donnees.valeurs["fin_repartition_titulaire_madame"]),
+    montant(donnees.valeurs["fin_repartition_titulaire_commun"]),
+    montant(donnees.valeurs["fin_repartition_titulaire_enfants"]),
+  ]);
+  const finLiq = donutSegments([
+    montant(donnees.valeurs["fin_liquidite_haute"]),
+    montant(donnees.valeurs["fin_liquidite_moyenne"]),
+    montant(donnees.valeurs["fin_liquidite_faible"]),
+  ]);
 
   return (
     <div className="fin-mod">
@@ -203,10 +232,10 @@ export default function PatrimoineFinancier({ donnees }: { donnees: EtudeDonnees
                   <svg className="donut" viewBox="0 0 140 140">
                     <circle cx="70" cy="70" r="54" fill="none" stroke="#DBE0E4" strokeWidth="17" />
                     <g transform="rotate(-90 70 70)" fill="none" strokeWidth="17">
-                      <circle className="seg" id="seg-fintit-0" cx="70" cy="70" r="54" stroke="#102D50" strokeDasharray="156.1 183.2" strokeDashoffset="0" />
-                      <circle className="seg" id="seg-fintit-1" cx="70" cy="70" r="54" stroke="#C68E0E" strokeDasharray="131.5 207.8" strokeDashoffset="-156.1" />
-                      <circle className="seg" id="seg-fintit-2" cx="70" cy="70" r="54" stroke="#708196" strokeDasharray="30.1 309.2" strokeDashoffset="-287.5" />
-                      <circle className="seg" id="seg-fintit-3" cx="70" cy="70" r="54" stroke="#DDBB6E" strokeDasharray="21.6 317.7" strokeDashoffset="-317.6" />
+                      <circle className="seg" id="seg-fintit-0" cx="70" cy="70" r="54" stroke="#102D50" strokeDasharray={finTit.segments[0].dasharray} strokeDashoffset={finTit.segments[0].dashoffset} />
+                      <circle className="seg" id="seg-fintit-1" cx="70" cy="70" r="54" stroke="#C68E0E" strokeDasharray={finTit.segments[1].dasharray} strokeDashoffset={finTit.segments[1].dashoffset} />
+                      <circle className="seg" id="seg-fintit-2" cx="70" cy="70" r="54" stroke="#708196" strokeDasharray={finTit.segments[2].dasharray} strokeDashoffset={finTit.segments[2].dashoffset} />
+                      <circle className="seg" id="seg-fintit-3" cx="70" cy="70" r="54" stroke="#DDBB6E" strokeDasharray={finTit.segments[3].dasharray} strokeDashoffset={finTit.segments[3].dashoffset} />
                     </g>
                   </svg>
                   <div className="donut-tip" id="tip-fintit">
@@ -248,9 +277,9 @@ export default function PatrimoineFinancier({ donnees }: { donnees: EtudeDonnees
                   <svg className="donut" viewBox="0 0 140 140">
                     <circle cx="70" cy="70" r="54" fill="none" stroke="#DBE0E4" strokeWidth="17" />
                     <g transform="rotate(-90 70 70)" fill="none" strokeWidth="17">
-                      <circle className="seg" id="seg-finliq-0" cx="70" cy="70" r="54" stroke="#C68E0E" strokeDasharray="48.4 290.9" strokeDashoffset="0" />
-                      <circle className="seg" id="seg-finliq-1" cx="70" cy="70" r="54" stroke="#708196" strokeDasharray="276.6 62.7" strokeDashoffset="-48.4" />
-                      <circle className="seg" id="seg-finliq-2" cx="70" cy="70" r="54" stroke="#102D50" strokeDasharray="14.3 325" strokeDashoffset="-325" />
+                      <circle className="seg" id="seg-finliq-0" cx="70" cy="70" r="54" stroke="#C68E0E" strokeDasharray={finLiq.segments[0].dasharray} strokeDashoffset={finLiq.segments[0].dashoffset} />
+                      <circle className="seg" id="seg-finliq-1" cx="70" cy="70" r="54" stroke="#708196" strokeDasharray={finLiq.segments[1].dasharray} strokeDashoffset={finLiq.segments[1].dashoffset} />
+                      <circle className="seg" id="seg-finliq-2" cx="70" cy="70" r="54" stroke="#102D50" strokeDasharray={finLiq.segments[2].dasharray} strokeDashoffset={finLiq.segments[2].dashoffset} />
                     </g>
                   </svg>
                   <div className="donut-tip" id="tip-finliq">

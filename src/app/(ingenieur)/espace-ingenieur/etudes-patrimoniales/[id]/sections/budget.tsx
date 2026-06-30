@@ -28,7 +28,8 @@ import { type ReactNode } from "react";
 
 import { Bloc } from "../Bloc";
 import ValeurEditable from "../ValeurEditable";
-import type { ValeurFormat } from "../format-valeur";
+import { donutSegments } from "../chart-geom";
+import { parseMontant, type ValeurFormat } from "../format-valeur";
 import type { EtudeDonnees } from "../../../../_data/etudes-patrimoniales";
 
 const DASH = "—";
@@ -136,6 +137,28 @@ export default function BudgetSection({ donnees }: { donnees: EtudeDonnees }) {
   const mt = (vKey: string, format: ValeurFormat) => (
     <ValeurEditable vKey={vKey} format={format} initial={donnees.valeurs[vKey] ?? null} />
   );
+
+  /** Coercition d'une valeur (string saisie / number / null) en nombre exploitable. */
+  const num = (vKey: string): number | null => {
+    const v = donnees.valeurs[vKey];
+    if (typeof v === "number") return Number.isFinite(v) ? v : null;
+    if (typeof v === "string") return parseMontant(v);
+    return null;
+  };
+
+  /**
+   * Géométrie de l'anneau « Allocation du revenu annuel », calculée côté serveur
+   * à partir des montants du client. Les quatre segments suivent la légende :
+   * dépenses d'usage, impôts et taxes, service de la dette, capacité d'épargne.
+   * Tant que rien n'est saisi, donutSegments renvoie des arcs nuls (« 0 C ») :
+   * l'anneau gris de fond (#DBE0E4) reste seul visible, état vide honnête.
+   */
+  const allocSeg = donutSegments([
+    num("budget_depenses_usage"),
+    num("budget_impots_taxes"),
+    num("budget_service_dette_annuel"),
+    num("budget_capacite_epargne_an"),
+  ]).segments;
 
   return (
     <div className="immo-mod">
@@ -505,8 +528,8 @@ export default function BudgetSection({ donnees }: { donnees: EtudeDonnees }) {
                         cy="70"
                         r="54"
                         stroke="#102D50"
-                        strokeDasharray="0 339.29"
-                        strokeDashoffset="0"
+                        strokeDasharray={allocSeg[0].dasharray}
+                        strokeDashoffset={allocSeg[0].dashoffset}
                       />
                       <circle
                         className="seg"
@@ -515,8 +538,8 @@ export default function BudgetSection({ donnees }: { donnees: EtudeDonnees }) {
                         cy="70"
                         r="54"
                         stroke="#C68E0E"
-                        strokeDasharray="0 339.29"
-                        strokeDashoffset="0"
+                        strokeDasharray={allocSeg[1].dasharray}
+                        strokeDashoffset={allocSeg[1].dashoffset}
                       />
                       <circle
                         className="seg"
@@ -525,8 +548,8 @@ export default function BudgetSection({ donnees }: { donnees: EtudeDonnees }) {
                         cy="70"
                         r="54"
                         stroke="#708196"
-                        strokeDasharray="0 339.29"
-                        strokeDashoffset="0"
+                        strokeDasharray={allocSeg[2].dasharray}
+                        strokeDashoffset={allocSeg[2].dashoffset}
                       />
                       <circle
                         className="seg"
@@ -535,8 +558,8 @@ export default function BudgetSection({ donnees }: { donnees: EtudeDonnees }) {
                         cy="70"
                         r="54"
                         stroke="#DDBB6E"
-                        strokeDasharray="0 339.29"
-                        strokeDashoffset="0"
+                        strokeDasharray={allocSeg[3].dasharray}
+                        strokeDashoffset={allocSeg[3].dashoffset}
                       />
                     </g>
                   </svg>
