@@ -5,6 +5,7 @@
   --navy-300: #708196;
   --navy-200: #A4AEBB;
   --navy-100: #DBE0E4;
+  --navy-deep: #0A1F3A;
   --gold: #C68E0E;
   --gold-300: #DDBB6E;
   --gold-200: #EEDDB6;
@@ -20,8 +21,14 @@
   --red-text: #8B3A2A;
   --orange-bg: #FBE7CE;
   --orange-text: #8B5A2A;
+  --purple-bg: #E5DCEB;
+  --purple-text: #5B3A6E;
   --sidebar-w: 280px;
   --content-pad: 40px;
+  /* Serif « luxe » des titres (Dirigeant, parcours, référentiel ingénieur).
+     Défini ici en source unique pour que var(--serif) soit toujours résolu,
+     même dans les espaces qui ne le redéclarent pas. */
+  --serif: var(--font-cormorant), Georgia, serif;
 }
 
 @theme inline {
