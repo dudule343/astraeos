@@ -1,0 +1,95 @@
+/**
+ * Règles propres à la sous-section « Rappel des objectifs du client » du
+ * document d'audit (maquette, partie Audit). Extraites du <style> de la
+ * maquette et SCOPÉES sous « .maq-etude » (chaque sélecteur préfixé), pour ne
+ * pas fuir hors du document. Les polices 'Cinzel'/'Epilogue' de la maquette
+ * sont remplacées par les variables déjà chargées (var(--font-cinzel)).
+ */
+
+.maq-etude .obj-card {
+  background: #fff;
+  border: 1px solid var(--navy-100);
+  border-left: 3px solid var(--gold);
+  border-radius: 0 12px 12px 0;
+  padding: 18px 22px;
+  margin: 16px 0 0;
+}
+
+.maq-etude .obj-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 13px;
+  margin-bottom: 10px;
+}
+
+.maq-etude .obj-n {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--navy);
+  color: var(--ivory);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-cinzel), serif;
+  font-size: 15px;
+  font-weight: 600;
+  flex: 0 0 auto;
+  margin-top: 1px;
+}
+
+.maq-etude .obj-card h3 {
+  font-family: var(--font-cinzel), serif;
+  font-size: 15.5px;
+  color: var(--navy);
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: 0.2px;
+  margin: 3px 0 0;
+  flex: 1;
+}
+
+.maq-etude .obj-card p {
+  font-size: 14px;
+  line-height: 1.75;
+  color: var(--text);
+  margin: 0;
+}
+
+.maq-etude .obj-card .quote {
+  color: var(--gold-deep);
+  font-weight: 600;
+}
+
+.maq-etude .obj-target {
+  display: flex;
+  gap: 14px;
+  margin-top: 15px;
+}
+
+.maq-etude .ot-item {
+  flex: 1;
+  text-align: center;
+  background: #fff;
+  border: 1px solid var(--navy-100);
+  border-radius: 10px;
+  padding: 13px;
+}
+
+.maq-etude .ot-v {
+  display: block;
+  font-family: var(--font-cinzel), serif;
+  font-size: 21px;
+  font-weight: 600;
+  color: var(--gold-deep);
+  line-height: 1.1;
+}
+
+.maq-etude .ot-l {
+  display: block;
+  font-size: 10.5px;
+  color: var(--navy-300);
+  margin-top: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}

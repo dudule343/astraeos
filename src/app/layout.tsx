@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Epilogue, Cormorant_Garamond, JetBrains_Mono } from "next/font/google";
+import { Epilogue, Cormorant_Garamond, JetBrains_Mono, Cinzel } from "next/font/google";
 import "./globals.css";
 
 const epilogue = Epilogue({
@@ -25,6 +25,14 @@ const jetbrainsMono = JetBrains_Mono({
   weight: ["400", "500", "600", "700"],
 });
 
+// Serif d'apparat des titres de l'audit patrimonial (maquette « Étude
+// patrimoniale »). Chargée comme les autres, consommée via var(--font-cinzel).
+const cinzel = Cinzel({
+  variable: "--font-cinzel",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+});
+
 export const metadata: Metadata = {
   title: "Astraeos · Admin Éditeur",
   description: "SaaS d'études patrimoniales — espace administrateur éditeur",
@@ -36,7 +44,7 @@ export default function RootLayout({
   return (
     <html
       lang="fr"
-      className={`${epilogue.variable} ${cormorant.variable} ${jetbrainsMono.variable}`}
+      className={`${epilogue.variable} ${cormorant.variable} ${jetbrainsMono.variable} ${cinzel.variable}`}
     >
       <body>{children}</body>
     </html>

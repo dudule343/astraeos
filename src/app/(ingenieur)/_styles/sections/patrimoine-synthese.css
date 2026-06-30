@@ -1,0 +1,546 @@
+/*
+ * Styles propres à la sous-section « Analyse du patrimoine — Synthèse » du
+ * document d'audit (maquette lignes 1575-1766). Règles extraites du <style> de
+ * la maquette et SCOPÉES sous « .maq-etude » (le wrapper unique du document).
+ * Polices remappées sur les variables next/font ('Cinzel' → var(--font-cinzel),
+ * 'Epilogue' → var(--font-epilogue)). Aucune redéclaration de .subsect (déjà
+ * portée dans etude-audit.css).
+ */
+
+/* Patrimoine net & brut --------------------------------------------------- */
+.maq-etude .pstat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin: 16px 0 0;
+}
+.maq-etude .pstat {
+  background: #fff;
+  border: 1px solid var(--navy-100);
+  border-radius: 12px;
+  padding: 22px 18px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 108px;
+}
+.maq-etude .pstat.net {
+  border: 1.5px solid var(--gold-300);
+}
+.maq-etude .pstat .pl {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--navy-300);
+}
+.maq-etude .pstat .pv {
+  font-family: var(--font-cinzel), serif;
+  font-size: 21px;
+  font-weight: 600;
+  color: var(--navy);
+  margin-top: 8px;
+  line-height: 1.1;
+}
+.maq-etude .pstat.net .pv {
+  color: var(--gold-deep);
+}
+.maq-etude .pstat .ps {
+  font-size: 11px;
+  color: var(--navy-300);
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+.maq-etude .pstat .ps .info-i {
+  width: 13px;
+  height: 13px;
+  font-size: 8.5px;
+}
+.maq-etude .formula-note {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px 22px;
+  font-size: 11.5px;
+  color: var(--navy-300);
+  margin-top: 13px;
+  padding: 11px 15px;
+  background: #fff;
+  border: 1px solid var(--navy-100);
+  border-radius: 9px;
+}
+.maq-etude .formula-note span {
+  display: inline-flex;
+  gap: 7px;
+}
+.maq-etude .formula-note b {
+  color: var(--navy);
+  font-weight: 600;
+}
+
+/* Pastille « i » d'info-bulle -------------------------------------------- */
+.maq-etude .info-i {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  border: 1px solid var(--navy-300);
+  color: var(--navy-300);
+  font-size: 9.5px;
+  font-weight: 700;
+  cursor: help;
+  position: relative;
+}
+.maq-etude .info-i:hover {
+  border-color: var(--gold);
+  color: var(--gold-deep);
+}
+.maq-etude .info-i::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: 155%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--navy);
+  color: var(--ivory);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.2px;
+  padding: 7px 12px;
+  border-radius: 7px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+  z-index: 60;
+}
+.maq-etude .info-i:hover::after {
+  opacity: 1;
+}
+
+/* Bilan patrimonial ------------------------------------------------------- */
+.maq-etude .bilan2 {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid var(--navy-200);
+  border-radius: 10px;
+  overflow: hidden;
+  font-size: 12.5px;
+  margin: 16px 0 0;
+}
+.maq-etude .bilan2 th {
+  background: var(--navy);
+  color: var(--ivory);
+  font-family: var(--font-cinzel), serif;
+  font-weight: 600;
+  text-align: left;
+  padding: 10px 14px;
+  font-size: 12.5px;
+  letter-spacing: 0.4px;
+}
+.maq-etude .bilan2 td {
+  padding: 9px 14px;
+  border-top: 1px solid var(--navy-100);
+  color: var(--navy);
+}
+.maq-etude .bilan2 td.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.maq-etude .bilan2 td.pct {
+  text-align: right;
+  color: var(--navy-300);
+  width: 56px;
+  font-variant-numeric: tabular-nums;
+}
+.maq-etude .bilan2 td.sp,
+.maq-etude .bilan2 th.sp {
+  border-left: 1px solid var(--navy-200);
+}
+.maq-etude .bilan2 tr.empty td {
+  color: var(--navy-200);
+}
+.maq-etude .bilan2 tr.empty td.num {
+  font-weight: 400;
+}
+.maq-etude .bilan2 tfoot td {
+  border-top: 2px solid var(--navy-200);
+  font-weight: 700;
+}
+.maq-etude .anet {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 12px 0 0;
+  padding: 13px 22px;
+  background: #fff;
+  border: 1.5px solid var(--gold-300);
+  border-radius: 10px;
+}
+.maq-etude .anet-l {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--navy);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  letter-spacing: 0.2px;
+}
+.maq-etude .anet-v {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--gold-deep);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Graphiques en cadre ----------------------------------------------------- */
+.maq-etude .chart-wrap {
+  background: #fff;
+  border: 1px solid var(--navy-100);
+  border-radius: 12px;
+  padding: 16px 20px 12px;
+  margin: 18px 0 0;
+}
+.maq-etude .chart-title {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--navy-300);
+  text-align: center;
+  margin-bottom: 4px;
+}
+.maq-etude .chart-wrap svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 560px;
+  margin: 0 auto;
+}
+/* Le SVG porte font-family="Epilogue,…" en attribut de présentation (1:1 avec
+   la maquette) ; une var CSS n'y résout pas, donc on remappe la police via une
+   règle d'auteur (prioritaire sur l'attribut) — 'Epilogue' → var(--font-epilogue). */
+.maq-etude .chart-wrap svg text {
+  font-family: var(--font-epilogue), sans-serif;
+}
+
+/* Listes de taxinomie (classes d'actifs, niveaux de liquidité) ------------ */
+.maq-etude .subsect ul.tax {
+  margin: 11px 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.maq-etude .subsect ul.tax li {
+  position: relative;
+  padding-left: 18px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--text);
+}
+.maq-etude .subsect ul.tax li::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 8px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--gold);
+}
+.maq-etude .subsect ul.tax li b {
+  color: var(--navy);
+  font-weight: 600;
+}
+
+/* Tableaux de répartition (par personne / par niveau) --------------------- */
+.maq-etude .div-tbl {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid var(--navy-200);
+  border-radius: 10px;
+  overflow: hidden;
+  font-size: 12px;
+  margin: 16px 0 0;
+}
+.maq-etude .div-tbl th {
+  background: var(--navy);
+  color: var(--ivory);
+  font-family: var(--font-cinzel), serif;
+  font-weight: 600;
+  padding: 9px 12px;
+  font-size: 11.5px;
+  letter-spacing: 0.3px;
+  text-align: right;
+}
+.maq-etude .div-tbl th:first-child {
+  text-align: left;
+}
+.maq-etude .div-tbl td {
+  padding: 8px 12px;
+  border-top: 1px solid var(--navy-100);
+  color: var(--navy);
+  text-align: right;
+  vertical-align: top;
+}
+.maq-etude .div-tbl td:first-child {
+  text-align: left;
+  font-weight: 500;
+}
+.maq-etude .div-tbl td .m {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.maq-etude .div-tbl td .p {
+  display: block;
+  font-size: 10.5px;
+  color: var(--navy-300);
+  font-variant-numeric: tabular-nums;
+  margin-top: 1px;
+}
+.maq-etude .div-tbl td.dash {
+  color: var(--navy-200);
+  font-weight: 400;
+}
+.maq-etude .div-tbl tfoot td {
+  border-top: 2px solid var(--navy-200);
+  font-weight: 700;
+}
+.maq-etude .div-tbl tfoot td .m {
+  font-weight: 700;
+}
+
+/* Encadré « point clé » --------------------------------------------------- */
+.maq-etude .keynote {
+  display: flex;
+  gap: 13px;
+  align-items: flex-start;
+  background: #fff;
+  border: 1px solid var(--navy-100);
+  border-left: 3px solid var(--gold);
+  border-radius: 9px;
+  padding: 14px 18px;
+  margin: 18px 0 0;
+}
+.maq-etude .keynote .ki {
+  flex: 0 0 auto;
+  color: var(--gold-deep);
+  margin-top: 1px;
+}
+.maq-etude .keynote .ki svg {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+.maq-etude .keynote p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--text);
+}
+.maq-etude .keynote b {
+  color: var(--navy);
+  font-weight: 600;
+}
+
+/* Donut unifié (diversification, liquidité, répartition) ------------------ */
+.maq-etude .donutwrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 36px;
+}
+.maq-etude .donut {
+  width: 212px;
+  height: 212px;
+  flex: 0 0 auto;
+}
+.maq-etude .donut text {
+  font-family: var(--font-cinzel), serif;
+  fill: var(--navy);
+}
+.maq-etude .donutbox {
+  position: relative;
+  width: 212px;
+  height: 212px;
+  flex: 0 0 auto;
+}
+.maq-etude .donut circle.seg {
+  cursor: pointer;
+  transition: stroke-width 0.14s ease, opacity 0.14s;
+}
+.maq-etude .donutbox.hovering circle.seg {
+  opacity: 0.4;
+}
+.maq-etude .donutbox.hovering circle.seg.hot {
+  opacity: 1;
+  stroke-width: 20;
+}
+.maq-etude .donut-tip {
+  position: absolute;
+  top: 47%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  pointer-events: none;
+  width: 122px;
+}
+.maq-etude .donut-tip .dt-v {
+  font-family: var(--font-cinzel), serif;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--navy);
+  line-height: 1.05;
+}
+.maq-etude .donut-tip .dt-p {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--gold-deep);
+  margin-top: 2px;
+}
+.maq-etude .donut-tip .dt-l {
+  font-size: 9.5px;
+  color: var(--navy-300);
+  margin-top: 3px;
+  line-height: 1.25;
+}
+.maq-etude .donut-tip .dt-hint {
+  font-size: 10.5px;
+  color: var(--navy-200);
+  line-height: 1.3;
+}
+.maq-etude .leg {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.maq-etude .leg .lr {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 7px 6px;
+  border-radius: 8px;
+  transition: background 0.14s;
+  cursor: default;
+}
+.maq-etude .leg .sw {
+  width: 13px;
+  height: 13px;
+  border-radius: 4px;
+  flex: 0 0 auto;
+}
+.maq-etude .leg .ll {
+  color: var(--navy);
+  font-weight: 600;
+  font-size: 13.5px;
+  width: 188px;
+  flex: 0 0 auto;
+  line-height: 1.25;
+}
+.maq-etude .leg .lv {
+  font-family: var(--font-cinzel), serif;
+  color: var(--navy);
+  font-weight: 600;
+  font-size: 17px;
+  width: 96px;
+  text-align: right;
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+.maq-etude .leg .lp {
+  color: var(--gold-deep);
+  font-weight: 700;
+  font-size: 13.5px;
+  width: 46px;
+  text-align: right;
+  flex: 0 0 auto;
+}
+.maq-etude .leg.wv .ll {
+  width: 160px;
+}
+.maq-etude .leg.wv .lv {
+  width: 116px;
+}
+.maq-etude .leg.nl .ll {
+  width: 108px;
+}
+.maq-etude .leg .lr.hot {
+  background: var(--gold-100);
+}
+
+/* Barres divergentes (répartition par classe entre conjoints) ------------- */
+.maq-etude .diverge-head {
+  display: flex;
+  justify-content: center;
+  gap: 48px;
+  margin: 2px 0 14px;
+  font-size: 12.5px;
+  color: var(--navy);
+  font-weight: 600;
+}
+.maq-etude .diverge-head span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 4px 12px;
+  border-radius: 8px;
+  transition: background 0.15s ease;
+}
+.maq-etude .diverge-head span:hover {
+  background: var(--light-blue);
+}
+.maq-etude .diverge-head i {
+  width: 13px;
+  height: 13px;
+  border-radius: 3px;
+  display: inline-block;
+}
+.maq-etude .diverge-wrap svg {
+  max-width: 600px;
+}
+.maq-etude .diverge-wrap svg g rect {
+  transition: opacity 0.18s ease;
+}
+.maq-etude .diverge-wrap.iso-m .mme-bar {
+  opacity: 0.12;
+}
+.maq-etude .diverge-wrap.iso-mme .m-bar {
+  opacity: 0.12;
+}
+
+/* Tableaux : police uniforme et chiffres tabulaires (override maquette) --- */
+.maq-etude .div-tbl th,
+.maq-etude .div-tbl td,
+.maq-etude .div-tbl td .m,
+.maq-etude .div-tbl td .p,
+.maq-etude .bilan2 th,
+.maq-etude .bilan2 td,
+.maq-etude td.num,
+.maq-etude .num {
+  font-family: var(--font-epilogue), sans-serif !important;
+}
+.maq-etude .div-tbl td .m,
+.maq-etude .div-tbl td .p,
+.maq-etude .bilan2 td.num,
+.maq-etude .bilan2 td.pct,
+.maq-etude td.num,
+.maq-etude .num {
+  font-variant-numeric: tabular-nums !important;
+  font-feature-settings: normal !important;
+}

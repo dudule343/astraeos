@@ -1,0 +1,288 @@
+/**
+ * Règles propres à la sous-section « Synthèse des risques » du document d'audit
+ * (maquette, partie Audit, lignes 3602-3897). Extraites du <style> de la
+ * maquette et SCOPÉES sous « .maq-etude » (chaque sélecteur préfixé), pour ne
+ * pas fuir hors du document.
+ *
+ * Les classes partagées des fiches (.immo-mod, .ablock, .ab-h, .ab-grid, .dim,
+ * .rio, .fond, .lawchip, .ab-foot, .cert, .shead, .pic, .mx, .subttl, .eye,
+ * .chips, .dlist…) sont déjà définies par les autres sections du document et
+ * disponibles globalement sur la page : on n'ajoute ici que le tableau de bord
+ * (.synr-*) et la pastille de gravité (.prio), absents ailleurs.
+ *
+ * Les polices 'Cinzel'/'Epilogue' de la maquette sont remplacées par les
+ * variables déjà chargées (var(--font-cinzel)/var(--font-epilogue)). L'ordre des
+ * règles reproduit la cascade de la maquette (les surcharges finales gagnent).
+ */
+
+/* ===== Synthèse des risques : tableau de bord, gravité, préconisations ===== */
+.maq-etude .synr-board {
+  background: linear-gradient(180deg, #fff, var(--ivory));
+  border: 1px solid var(--navy-100);
+  border-radius: 16px;
+  padding: 22px 26px;
+  margin: 6px 0 20px;
+  box-shadow: 0 2px 12px rgba(16, 45, 80, 0.05);
+}
+.maq-etude .synr-board-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--navy-100);
+}
+.maq-etude .synr-total {
+  display: flex;
+  align-items: baseline;
+  gap: 13px;
+}
+.maq-etude .synr-tnum {
+  font-family: var(--font-cinzel), serif;
+  font-size: 38px;
+  font-weight: 700;
+  color: var(--navy);
+  line-height: 1;
+}
+.maq-etude .synr-tlab {
+  font-size: 12.5px;
+  color: #708196;
+  max-width: 230px;
+  line-height: 1.4;
+}
+.maq-etude .synr-tools {
+  display: flex;
+  gap: 10px;
+}
+.maq-etude .synr-btn {
+  background: var(--navy);
+  color: #fff;
+  border: none;
+  border-radius: 9px;
+  padding: 9px 17px;
+  font-family: var(--font-epilogue), sans-serif;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.maq-etude .synr-btn:hover {
+  background: #1b3d68;
+}
+.maq-etude .synr-board-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 18px;
+}
+.maq-etude .synr-col-h {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+  color: #a57608;
+  margin-bottom: 10px;
+}
+.maq-etude .synr-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.maq-etude .synr-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: #fff;
+  border: 1px solid var(--navy-100);
+  border-radius: 20px;
+  padding: 5px 13px;
+  font-size: 12px;
+  color: var(--navy);
+}
+.maq-etude .synr-pill i {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex: none;
+}
+.maq-etude .synr-pill b {
+  font-weight: 700;
+}
+.maq-etude .synr-pill.cf i {
+  background: #1e7a3d;
+}
+.maq-etude .synr-pill.cm i {
+  background: #c68e0e;
+}
+.maq-etude .synr-pill.cw i {
+  background: #a12b1e;
+}
+.maq-etude .synr-pill.pt i {
+  background: #a4aebb;
+}
+.maq-etude .synr-pill.ph i {
+  background: #a12b1e;
+}
+.maq-etude .synr-pill.pm i {
+  background: #c68e0e;
+}
+.maq-etude .synr-pill.pf i {
+  background: #1e7a3d;
+}
+.maq-etude .synr-tgrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+.maq-etude .synr-tcard {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  background: var(--ivory);
+  border: 1px solid var(--navy-100);
+  border-left: 3px solid var(--gold);
+  border-radius: 9px;
+  padding: 9px 13px;
+  text-decoration: none;
+  transition: 0.18s;
+}
+.maq-etude .synr-tcard:hover {
+  background: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(16, 45, 80, 0.08);
+}
+.maq-etude .synr-tc-n {
+  font-family: var(--font-cinzel), serif;
+  font-size: 19px;
+  font-weight: 600;
+  color: var(--navy);
+}
+.maq-etude .synr-tc-l {
+  font-size: 11px;
+  color: #708196;
+}
+.maq-etude .prio {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid;
+  margin-right: 8px;
+  white-space: nowrap;
+  transition: 0.15s;
+}
+.maq-etude .prio svg {
+  width: 12px;
+  height: 12px;
+}
+.maq-etude .prio:hover {
+  filter: brightness(0.96);
+}
+.maq-etude .prio-todo {
+  background: #fff;
+  color: #708196;
+  border-color: var(--navy-100);
+}
+.maq-etude .prio-haute {
+  background: #fbeaea;
+  color: #a12b1e;
+  border-color: #e3b7b0;
+}
+.maq-etude .prio-moy {
+  background: #fbf1dc;
+  color: #a57608;
+  border-color: #e8d199;
+}
+.maq-etude .prio-faible {
+  background: #e6f4ea;
+  color: #1e7a3d;
+  border-color: #a9d8b8;
+}
+.maq-etude .synr-preco {
+  margin-top: 24px;
+}
+.maq-etude .synr-preco-lead {
+  font-size: 12.5px;
+  color: #708196;
+  line-height: 1.55;
+  margin: 8px 0 4px;
+  max-width: 780px;
+}
+.maq-etude .synr-btn {
+  display: none;
+}
+.maq-etude .prio {
+  cursor: default;
+}
+
+/* ===== Filtres de la synthèse des risques ===== */
+.maq-etude .synr-pill.filt {
+  cursor: pointer;
+  transition: 0.15s;
+}
+.maq-etude .synr-pill.filt:hover {
+  border-color: var(--navy-300);
+}
+.maq-etude .synr-pill.filt.on {
+  background: var(--navy);
+  color: #fff;
+  border-color: var(--navy);
+}
+.maq-etude .synr-pill.filt.on b {
+  color: #fff;
+}
+.maq-etude .synr-tcard.filt {
+  cursor: pointer;
+}
+.maq-etude .synr-tcard.filt.on {
+  background: var(--navy);
+  border-left-color: var(--gold);
+}
+.maq-etude .synr-tcard.filt.on .synr-tc-n,
+.maq-etude .synr-tcard.filt.on .synr-tc-l {
+  color: #fff;
+}
+.maq-etude .synr-btn-reset {
+  background: #fff;
+  color: var(--navy);
+  border: 1px solid var(--navy-100);
+}
+.maq-etude .synr-btn-reset:hover {
+  background: var(--ivory);
+}
+
+/* Bandeau synthèse : compteur raffiné + pastilles sur une ligne */
+.maq-etude .synr-tnum {
+  display: none;
+}
+.maq-etude .synr-count {
+  font-family: var(--font-cinzel), serif;
+  font-size: 23px;
+  font-weight: 600;
+  color: #a57608;
+  line-height: 1;
+  letter-spacing: 0.5px;
+}
+.maq-etude .synr-total {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.maq-etude .synr-total .synr-tlab {
+  max-width: 260px;
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: #708196;
+  border-left: 1px solid var(--navy-100);
+  padding-left: 14px;
+}
+.maq-etude .synr-col .synr-pills {
+  flex-wrap: nowrap;
+}

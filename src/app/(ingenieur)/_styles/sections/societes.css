@@ -1,0 +1,661 @@
+/*
+ * Styles de la section « Analyse des sociétés » du document d'audit.
+ *
+ * Règles extraites du <style> de la maquette pour les modules à ascenseur
+ * (.immo-mod / .page / .page.modfold) et les briques propres à la section :
+ * en-tête de module, badges de confiance (c-forte / c-moy / c-faible),
+ * sous-accordéons .subacc, schéma .orgwrap, analyse .ablock, encart .keynote,
+ * synthèse rédactionnelle .synthacc / .synthprose. Chaque sélecteur est scopé
+ * sous « .maq-etude » ; les polices 'Cinzel'/'Epilogue' de la maquette sont
+ * remplacées par les variables var(--font-cinzel)/var(--font-epilogue).
+ */
+
+/* ── ascenseur de module ─────────────────────────────────────────────────── */
+.maq-etude .immo-mod .shead {
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background 0.15s;
+}
+.maq-etude .immo-mod .shead:hover {
+  background: rgba(16, 45, 80, 0.022);
+}
+.maq-etude .page.modfold .mod-body {
+  display: none;
+}
+.maq-etude[data-view="client"] .mod-body,
+.maq-etude[data-view="pdf"] .mod-body,
+.maq-etude[data-view="word"] .mod-body {
+  display: block !important;
+}
+.maq-etude[data-view="client"] .shead,
+.maq-etude[data-view="pdf"] .shead,
+.maq-etude[data-view="word"] .shead {
+  cursor: default;
+  background: none !important;
+}
+.maq-etude .modchev {
+  flex: 0 0 auto;
+  color: var(--navy-300);
+  display: flex;
+  transition: transform 0.25s;
+  transform: rotate(180deg);
+}
+.maq-etude .modchev svg {
+  width: 22px;
+  height: 22px;
+  display: block;
+}
+.maq-etude .page.modfold .modchev {
+  transform: rotate(0deg);
+}
+
+/* ── page / en-tête de module ────────────────────────────────────────────── */
+.maq-etude .immo-mod .page {
+  max-width: 1030px;
+  margin: 0 auto;
+  background: var(--ivory);
+  border: 1px solid var(--navy-100);
+  border-radius: 12px;
+  box-shadow: 0 10px 32px rgba(16, 45, 80, 0.07);
+  padding: 28px 34px;
+}
+.maq-etude[data-view="pdf"] .page,
+.maq-etude[data-view="word"] .page {
+  background: #fff;
+  box-shadow: 0 10px 40px rgba(16, 45, 80, 0.14);
+}
+.maq-etude .immo-mod .shead {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  margin-bottom: 4px;
+}
+.maq-etude .immo-mod .shead .pic {
+  width: 42px;
+  height: 42px;
+  border-radius: 11px;
+  background: var(--gold-100);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+.maq-etude .immo-mod .shead .pic svg {
+  width: 24px;
+  height: 24px;
+}
+.maq-etude .immo-mod .shead h1 {
+  font-family: var(--font-cinzel), serif;
+  font-weight: 600;
+  color: var(--navy);
+  font-size: 22px;
+  letter-spacing: 0.3px;
+}
+.maq-etude .immo-mod .shead .crumb2 {
+  font-size: 11px;
+  color: var(--navy-300);
+}
+.maq-etude .immo-mod .lead {
+  font-family: var(--font-epilogue), sans-serif;
+  font-size: 13px;
+  color: var(--navy-300);
+  margin: 8px 0 20px 55px;
+  max-width: 720px;
+  line-height: 1.55;
+}
+.maq-etude .immo-mod .lead.sel {
+  outline: 2px solid var(--gold);
+  outline-offset: 6px;
+  border-radius: 4px;
+}
+.maq-etude .immo-mod .anchor {
+  scroll-margin-top: 14px;
+}
+
+/* ── badges de confiance ─────────────────────────────────────────────────── */
+.maq-etude .cert {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 3px 6px 3px 10px;
+  border-radius: 13px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.maq-etude .cert .co {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.35);
+  flex: 0 0 auto;
+}
+.maq-etude .cert .co svg {
+  width: 11px;
+  height: 11px;
+  display: block;
+}
+.maq-etude .cert:hover .co {
+  background: rgba(255, 255, 255, 0.6);
+}
+.maq-etude .c-forte {
+  background: #eaf3ec;
+  color: #2e6b4f;
+  border: 1px solid #c2decc;
+}
+.maq-etude .c-forte .co {
+  background: #d5e8db;
+}
+.maq-etude .c-moy {
+  background: #fbf1dd;
+  color: #9a6a08;
+  border: 1px solid #e8cd8a;
+}
+.maq-etude .c-moy .co {
+  background: #f3e2be;
+}
+.maq-etude .c-faible {
+  background: #faebeb;
+  color: #a53b3b;
+  border: 1px solid #e6bebe;
+}
+.maq-etude .c-faible .co {
+  background: #f1d6d6;
+}
+
+/* ── sous-titres de module ───────────────────────────────────────────────── */
+.maq-etude .immo-mod .subttl {
+  font-family: var(--font-cinzel), serif;
+  color: var(--navy);
+  font-size: 17px;
+  font-weight: 600;
+  margin: 36px 0 14px;
+  letter-spacing: 0.4px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 9px;
+  border-bottom: 2px solid var(--navy-100);
+  position: relative;
+}
+.maq-etude .immo-mod .subttl:before {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  width: 56px;
+  height: 2px;
+  background: var(--gold);
+}
+.maq-etude .immo-mod .subttl svg {
+  width: 21px;
+  height: 21px;
+}
+
+/* ── sous-accordéons (.subacc) ───────────────────────────────────────────── */
+.maq-etude .subacc {
+  border: 1px solid var(--navy-100);
+  border-radius: 11px;
+  margin: 13px 0;
+  overflow: hidden;
+  background: var(--ivory);
+}
+.maq-etude .subacc .sub-h {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 17px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.maq-etude .subacc .sub-h:hover {
+  background: rgba(16, 45, 80, 0.025);
+}
+.maq-etude .subacc .sub-ic {
+  flex: 0 0 auto;
+  color: var(--gold-deep);
+  display: flex;
+}
+.maq-etude .subacc .sub-ic svg {
+  width: 19px;
+  height: 19px;
+}
+.maq-etude .subacc .sub-tt {
+  font-family: var(--font-cinzel), serif;
+  font-weight: 600;
+  font-size: 14.5px;
+  color: var(--navy);
+  letter-spacing: 0.3px;
+}
+.maq-etude .subacc .sub-chev {
+  flex: 0 0 auto;
+  color: var(--navy-300);
+  display: flex;
+  transition: transform 0.25s;
+}
+.maq-etude .subacc .sub-chev svg {
+  width: 20px;
+  height: 20px;
+}
+.maq-etude .subacc.open .sub-chev {
+  transform: rotate(180deg);
+}
+.maq-etude .subacc .subbody {
+  display: none;
+  padding: 6px 18px 16px;
+  border-top: 1px solid var(--navy-100);
+}
+.maq-etude .subacc.open .subbody {
+  display: block;
+}
+.maq-etude[data-view="client"] .subacc .subbody,
+.maq-etude[data-view="pdf"] .subacc .subbody,
+.maq-etude[data-view="word"] .subacc .subbody {
+  display: block !important;
+}
+
+/* ── schéma d'organigramme ───────────────────────────────────────────────── */
+.maq-etude .orgwrap {
+  text-align: center;
+  margin: 14px 0 4px;
+}
+
+/* ── encart clé (.keynote) ───────────────────────────────────────────────── */
+.maq-etude .keynote {
+  display: flex;
+  gap: 13px;
+  align-items: flex-start;
+  background: #fff;
+  border: 1px solid var(--navy-100);
+  border-left: 3px solid var(--gold);
+  border-radius: 9px;
+  padding: 14px 18px;
+  margin: 18px 0 0;
+}
+.maq-etude .keynote .ki {
+  flex: 0 0 auto;
+  color: var(--gold-deep);
+  margin-top: 1px;
+}
+.maq-etude .keynote .ki svg {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+.maq-etude .keynote p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--text);
+}
+.maq-etude .keynote b {
+  color: var(--navy);
+  font-weight: 600;
+}
+
+/* ── analyse 3 dimensions (.ablock) ──────────────────────────────────────── */
+.maq-etude .immo-mod .ablock {
+  border: 1px solid var(--navy-200);
+  border-radius: 11px;
+  margin-bottom: 13px;
+  background: #fff;
+  overflow: hidden;
+  transition: box-shadow 0.15s, border-color 0.15s;
+}
+.maq-etude .immo-mod .ablock.sel {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 2px var(--gold), 0 6px 18px rgba(198, 142, 14, 0.14);
+}
+.maq-etude .immo-mod .ab-h {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 12px 15px;
+  background: var(--light-blue);
+  border-bottom: 1px solid var(--navy-100);
+}
+.maq-etude .immo-mod .ab-h .mx {
+  width: 26px;
+  height: 26px;
+  flex: 0 0 auto;
+}
+.maq-etude .immo-mod .ab-h .mx svg {
+  width: 26px;
+  height: 26px;
+}
+.maq-etude .immo-mod .ab-h .tt {
+  font-weight: 700;
+  color: var(--navy);
+  font-size: 13.5px;
+  flex: 1;
+}
+.maq-etude .immo-mod .fold .ab-h {
+  cursor: pointer;
+  user-select: none;
+}
+.maq-etude .immo-mod .fold .ab-h:hover {
+  background: var(--navy-100);
+}
+.maq-etude .immo-mod .fold .ab-h::after {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid var(--navy-300);
+  border-bottom: 2px solid var(--navy-300);
+  transform: rotate(45deg);
+  margin-left: 6px;
+  margin-top: -3px;
+  flex: 0 0 auto;
+  transition: transform 0.2s ease;
+}
+.maq-etude .immo-mod .fold.open .ab-h::after {
+  transform: rotate(-135deg);
+  margin-top: 3px;
+}
+.maq-etude .immo-mod .fold:not(.open) .ab-h {
+  border-bottom: none;
+}
+.maq-etude .immo-mod .fold:not(.open) .ab-grid,
+.maq-etude .immo-mod .fold:not(.open) .ab-foot {
+  display: none;
+}
+.maq-etude .immo-mod .ab-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+}
+.maq-etude .immo-mod .dim {
+  padding: 13px 15px;
+}
+.maq-etude .immo-mod .dim + .dim {
+  border-left: 1px solid var(--navy-100);
+}
+.maq-etude .immo-mod .dim .dh {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--navy);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.maq-etude .immo-mod .dim .dh svg {
+  width: 14px;
+  height: 14px;
+}
+.maq-etude .immo-mod .dim p,
+.maq-etude .immo-mod .dim li {
+  font-size: 11.5px;
+  color: #4a4a4a;
+  line-height: 1.55;
+}
+.maq-etude .immo-mod .dlist {
+  list-style: none;
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+.maq-etude .immo-mod .dlist li {
+  position: relative;
+  padding-left: 13px;
+  margin-bottom: 7px;
+}
+.maq-etude .immo-mod .dlist li:before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 6px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--gold);
+}
+.maq-etude .immo-mod .rio {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+.maq-etude .immo-mod .rio .it {
+  border-left: 3px solid;
+  padding: 9px 12px;
+  border-radius: 0 7px 7px 0;
+  font-size: 12.5px;
+  line-height: 1.55;
+}
+.maq-etude .immo-mod .rio .r {
+  border-color: var(--navy);
+  background: var(--ivory);
+}
+.maq-etude .immo-mod .rio .o {
+  border-color: var(--gold);
+  background: var(--ivory);
+}
+.maq-etude .immo-mod .rio .opt {
+  border-color: var(--navy-300);
+  background: var(--ivory);
+}
+.maq-etude .immo-mod .rio .it .lab {
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 2px;
+}
+.maq-etude .immo-mod .rio .r .lab {
+  color: var(--navy);
+}
+.maq-etude .immo-mod .rio .o .lab {
+  color: var(--gold-deep);
+}
+.maq-etude .immo-mod .rio .opt .lab {
+  color: var(--navy-300);
+}
+.maq-etude .immo-mod .ab-foot {
+  padding: 12px 16px;
+  border-top: 1px solid var(--navy-100);
+  background: var(--ivory);
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  font-size: 12px;
+  color: var(--navy);
+  line-height: 1.55;
+}
+.maq-etude .immo-mod .ab-foot svg {
+  width: 14px;
+  height: 14px;
+  color: var(--gold);
+  flex: 0 0 auto;
+  margin-top: 1px;
+}
+
+/* ── synthèse rédactionnelle du thème ────────────────────────────────────── */
+.maq-etude .synth-cert {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid;
+  border-radius: 8px;
+  padding: 9px 14px;
+  margin: 2px 0 18px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.maq-etude .synth-cert .sc-ico {
+  display: flex;
+  flex: 0 0 auto;
+}
+.maq-etude .synth-cert .sc-ico svg {
+  width: 15px;
+  height: 15px;
+}
+.maq-etude .synth-cert b {
+  font-weight: 700;
+}
+.maq-etude .synth-cert .sc-link {
+  margin-left: auto;
+  font-weight: 600;
+  white-space: nowrap;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.maq-etude .sc-green {
+  background: #eaf3ec;
+  border-color: #c2decc;
+  border-left-width: 3px;
+  border-left-color: #2e6b4f;
+  color: #2e6b4f;
+}
+.maq-etude .sc-green:hover {
+  background: #deede2;
+}
+.maq-etude .immo-mod .synthprose {
+  background: var(--ivory);
+  border: 1px solid var(--navy-100);
+  border-left: 4px solid var(--gold);
+  border-radius: 14px;
+  padding: 24px 30px;
+}
+.maq-etude .immo-mod .synthprose .sp-head {
+  font-family: var(--font-cinzel), serif;
+  color: var(--navy);
+  font-size: 16px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--gold);
+  letter-spacing: 0.3px;
+}
+.maq-etude .immo-mod .synthprose .sp-head svg {
+  width: 20px;
+  height: 20px;
+  color: var(--gold-deep);
+  flex: 0 0 auto;
+}
+.maq-etude .immo-mod .synthprose p {
+  font-size: 14px;
+  line-height: 1.75;
+  color: var(--text);
+  margin-bottom: 14px;
+  max-width: none;
+}
+.maq-etude .immo-mod .synthprose p:last-of-type {
+  margin-bottom: 0;
+}
+.maq-etude .immo-mod .synthprose b {
+  color: var(--navy);
+  font-weight: 600;
+}
+.maq-etude .immo-mod .sp-recap {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 14px;
+  margin: 0 0 18px;
+}
+.maq-etude .immo-mod .sp-recap .spr {
+  background: #fff;
+  border: 1px solid var(--navy-100);
+  border-radius: 10px;
+  padding: 15px 17px;
+}
+.maq-etude .immo-mod .sp-recap .spr-r {
+  border-left: 3px solid var(--navy);
+}
+.maq-etude .immo-mod .sp-recap .spr-o {
+  border-left: 3px solid var(--gold);
+}
+.maq-etude .immo-mod .sp-recap .spr-opt {
+  border-left: 3px solid var(--navy-300);
+}
+.maq-etude .immo-mod .sp-recap .spr-h {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-bottom: 10px;
+}
+.maq-etude .immo-mod .sp-recap .spr-r .spr-h {
+  color: var(--navy);
+}
+.maq-etude .immo-mod .sp-recap .spr-o .spr-h {
+  color: var(--gold-deep);
+}
+.maq-etude .immo-mod .sp-recap .spr-opt .spr-h {
+  color: var(--navy);
+}
+.maq-etude .immo-mod .sp-recap ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.maq-etude .immo-mod .sp-recap li {
+  font-size: 12.5px;
+  color: var(--text);
+  line-height: 1.5;
+  padding-left: 16px;
+  position: relative;
+  margin-bottom: 8px;
+}
+.maq-etude .immo-mod .sp-recap li:last-child {
+  margin-bottom: 0;
+}
+.maq-etude .immo-mod .sp-recap li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 7px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--navy-200);
+}
+.maq-etude .immo-mod .sp-recap .spr-o li::before {
+  background: var(--gold-300);
+}
+.maq-etude .immo-mod .sp-recap .spr-opt li::before {
+  background: var(--navy-200);
+}
+.maq-etude .immo-mod .synthacc .synth-h {
+  cursor: pointer;
+}
+.maq-etude .immo-mod .synthacc .synthchev {
+  margin-left: auto;
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+  color: var(--navy-300);
+  transition: transform 0.2s;
+}
+.maq-etude .immo-mod .synthacc.open .synthchev {
+  transform: rotate(180deg);
+}
+.maq-etude .immo-mod .synthacc:not(.open) .synthprose {
+  display: none;
+}
+.maq-etude[data-view="client"] .synthprose,
+.maq-etude[data-view="pdf"] .synthprose,
+.maq-etude[data-view="word"] .synthprose {
+  display: block !important;
+}
+.maq-etude[data-view="client"] .synthchev,
+.maq-etude[data-view="pdf"] .synthchev,
+.maq-etude[data-view="word"] .synthchev {
+  display: none;
+}
+
+/* ── visibilité ingénieur / client ───────────────────────────────────────── */
+.maq-etude[data-view="client"] .eng-only,
+.maq-etude[data-view="pdf"] .eng-only,
+.maq-etude[data-view="word"] .eng-only {
+  display: none !important;
+}

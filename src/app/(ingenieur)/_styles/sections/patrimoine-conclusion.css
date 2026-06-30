@@ -1,0 +1,345 @@
+/*
+ * Styles de la sous-section « Synthèse de l'analyse du patrimoine »
+ * (id « patrimoine-conclusion », maquette lignes 2968-3269).
+ *
+ * Règles extraites du <style> de la maquette (bloc « module immobilier »
+ * cloisonné sous .immo-mod) et SCOPÉES sous .maq-etude. 'Cinzel' et 'Epilogue'
+ * sont remplacées par les variables de police du thème. Les variantes de vue
+ * (body[data-view=…]) sont reportées sur la racine .maq-etude[data-view=…].
+ */
+
+/* --- Sous-titre de thème + ancre --- */
+.maq-etude .immo-mod .anchor { scroll-margin-top: 14px; }
+.maq-etude .immo-mod .subttl {
+  font-family: var(--font-cinzel), serif;
+  color: var(--navy);
+  font-size: 17px;
+  font-weight: 600;
+  margin: 36px 0 14px;
+  letter-spacing: .4px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 9px;
+  border-bottom: 2px solid var(--navy-100);
+  position: relative;
+}
+.maq-etude .immo-mod .subttl:before {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  width: 56px;
+  height: 2px;
+  background: var(--gold);
+}
+.maq-etude .immo-mod .subttl svg { width: 21px; height: 21px; }
+
+/* --- Badge de confiance --- */
+.maq-etude .immo-mod .cert {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 3px 6px 3px 10px;
+  border-radius: 13px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.maq-etude .immo-mod .cert .co {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .35);
+}
+.maq-etude .immo-mod .cert .co svg { width: 11px; height: 11px; }
+.maq-etude .immo-mod .cert:hover .co { background: rgba(255, 255, 255, .6); }
+.maq-etude .immo-mod .c-tres,
+.maq-etude .immo-mod .c-forte { background: #EAF3EC; color: #2E6B4F; border: 1px solid #C2DECC; }
+.maq-etude .immo-mod .c-moy { background: #FBF1DD; color: #9A6A08; border: 1px solid #E8CD8A; }
+.maq-etude .immo-mod .c-faible { background: #FAEBEB; color: #A53B3B; border: 1px solid #E6BEBE; }
+.maq-etude .immo-mod .c-tres .co,
+.maq-etude .immo-mod .c-forte .co { background: #D5E8DB; }
+.maq-etude .immo-mod .c-moy .co { background: #F3E2BE; }
+.maq-etude .immo-mod .c-faible .co { background: #F1D6D6; }
+
+/* --- Chapeau « Rappel des modules » --- */
+.maq-etude .immo-mod .lead {
+  font-family: var(--font-epilogue), sans-serif;
+  font-size: 13px;
+  color: var(--navy-300);
+  margin: 8px 0 20px 55px;
+  max-width: 720px;
+  line-height: 1.55;
+}
+.maq-etude .immo-mod .lead.sel { outline: 2px solid var(--gold); outline-offset: 6px; border-radius: 4px; }
+
+/* --- Bloc d'analyse avancée --- */
+.maq-etude .immo-mod .ablock {
+  border: 1px solid var(--navy-200);
+  border-radius: 11px;
+  margin-bottom: 13px;
+  background: #fff;
+  overflow: hidden;
+  transition: box-shadow .15s, border-color .15s;
+}
+.maq-etude .immo-mod .ablock.sel {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 2px var(--gold), 0 6px 18px rgba(198, 142, 14, .14);
+}
+.maq-etude .immo-mod .ab-h {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 12px 15px;
+  background: var(--light-blue);
+  border-bottom: 1px solid var(--navy-100);
+}
+.maq-etude .immo-mod .ab-h .mx { width: 26px; height: 26px; flex: 0 0 auto; }
+.maq-etude .immo-mod .ab-h .mx svg { width: 26px; height: 26px; }
+.maq-etude .immo-mod .ab-h .tt { font-weight: 700; color: var(--navy); font-size: 13.5px; flex: 1; }
+.maq-etude .immo-mod .fold .ab-h { cursor: pointer; user-select: none; }
+.maq-etude .immo-mod .fold .ab-h:hover { background: var(--navy-100); }
+.maq-etude .immo-mod .fold .ab-h::after {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid var(--navy-300);
+  border-bottom: 2px solid var(--navy-300);
+  transform: rotate(45deg);
+  margin-left: 6px;
+  margin-top: -3px;
+  flex: 0 0 auto;
+  transition: transform .2s ease;
+}
+.maq-etude .immo-mod .fold.open .ab-h::after { transform: rotate(-135deg); margin-top: 3px; }
+.maq-etude .immo-mod .fold:not(.open) .ab-h { border-bottom: none; }
+.maq-etude .immo-mod .fold:not(.open) .ab-grid,
+.maq-etude .immo-mod .fold:not(.open) .fond,
+.maq-etude .immo-mod .fold:not(.open) .ab-foot { display: none; }
+
+/* --- Grille « dimensions » --- */
+.maq-etude .immo-mod .ab-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+.maq-etude .immo-mod .dim { padding: 13px 15px; }
+.maq-etude .immo-mod .dim + .dim { border-left: 1px solid var(--navy-100); }
+.maq-etude .immo-mod .dim .dh {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+  color: var(--navy);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.maq-etude .immo-mod .dim .dh svg { width: 14px; height: 14px; }
+.maq-etude .immo-mod .dim p,
+.maq-etude .immo-mod .dim li { font-size: 11.5px; color: #4A4A4A; line-height: 1.55; }
+.maq-etude .immo-mod .dlist { list-style: none; font-size: 12.5px; line-height: 1.5; }
+.maq-etude .immo-mod .dlist li { position: relative; padding-left: 13px; margin-bottom: 7px; }
+.maq-etude .immo-mod .dlist li:before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 6px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--gold);
+}
+
+/* --- Risque / Opportunité / Optimisation --- */
+.maq-etude .immo-mod .rio { display: flex; flex-direction: column; gap: 9px; }
+.maq-etude .immo-mod .rio .it {
+  border-left: 3px solid;
+  padding: 9px 12px;
+  border-radius: 0 7px 7px 0;
+  font-size: 12.5px;
+  line-height: 1.55;
+}
+.maq-etude .immo-mod .rio .r { border-color: var(--navy); background: var(--ivory); }
+.maq-etude .immo-mod .rio .o { border-color: var(--gold); background: var(--ivory); }
+.maq-etude .immo-mod .rio .opt { border-color: var(--navy-300); background: var(--ivory); }
+.maq-etude .immo-mod .rio .it .lab {
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: .4px;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 2px;
+}
+.maq-etude .immo-mod .rio .r .lab { color: var(--navy); }
+.maq-etude .immo-mod .rio .o .lab { color: var(--gold-deep); }
+.maq-etude .immo-mod .rio .opt .lab { color: var(--navy-300); }
+
+/* --- Pied de bloc + œil « sources » --- */
+.maq-etude .immo-mod .ab-foot {
+  padding: 12px 16px;
+  border-top: 1px solid var(--navy-100);
+  background: var(--ivory);
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  font-size: 12px;
+  color: var(--navy);
+  line-height: 1.55;
+}
+.maq-etude .immo-mod .ab-foot svg { width: 14px; height: 14px; color: var(--gold); flex: 0 0 auto; margin-top: 1px; }
+.maq-etude .immo-mod .eye {
+  color: var(--gold-deep);
+  cursor: pointer;
+  font-size: 12px;
+  margin-left: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 600;
+}
+.maq-etude .immo-mod .eye svg { width: 14px; height: 14px; }
+.maq-etude .immo-mod .fn { font-size: 9px; color: var(--gold-deep); font-weight: 700; vertical-align: super; }
+
+/* --- Fondements juridiques & fiscaux --- */
+.maq-etude .immo-mod .fond {
+  margin: 0 16px 16px;
+  background: var(--ivory);
+  border: 1px solid var(--navy-100);
+  border-radius: 10px;
+  padding: 13px 15px;
+}
+.maq-etude .immo-mod .fond .fl {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--navy);
+  letter-spacing: .5px;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 11px;
+}
+.maq-etude .immo-mod .fond .fl svg { width: 15px; height: 15px; color: var(--gold-deep); }
+.maq-etude .immo-mod .fond .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.maq-etude .immo-mod .lawchip {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 3px;
+  background: #fff;
+  border: 1px solid var(--navy-100);
+  border-left: 3px solid var(--gold);
+  border-radius: 0 8px 8px 0;
+  padding: 8px 13px;
+  font-size: 12.5px;
+  color: var(--navy);
+  cursor: pointer;
+  transition: .12s;
+  line-height: 1.4;
+  max-width: 360px;
+}
+.maq-etude .immo-mod .lawchip:hover { border-color: var(--gold-300); box-shadow: 0 2px 8px rgba(16, 45, 80, .06); }
+.maq-etude .immo-mod .lawchip .k {
+  font-weight: 700;
+  color: var(--gold-deep);
+  font-size: 8.5px;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.maq-etude .immo-mod .lawchip .k svg { width: 11px; height: 11px; }
+.maq-etude .immo-mod .lawchip .lt { font-weight: 600; }
+
+/* --- Synthèse du thème (accordéon) --- */
+.maq-etude .immo-mod .synthacc .synth-h { cursor: pointer; }
+.maq-etude .immo-mod .synthacc .synthchev {
+  margin-left: auto;
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+  color: var(--navy-300);
+  transition: transform .2s;
+}
+.maq-etude .immo-mod .synthacc.open .synthchev { transform: rotate(180deg); }
+.maq-etude .immo-mod .synthacc:not(.open) .synthprose { display: none; }
+.maq-etude[data-view="client"] .immo-mod .synthchev,
+.maq-etude[data-view="pdf"] .immo-mod .synthchev,
+.maq-etude[data-view="word"] .immo-mod .synthchev { display: none; }
+
+.maq-etude .immo-mod .synthprose {
+  background: var(--ivory);
+  border: 1px solid var(--navy-100);
+  border-left: 4px solid var(--gold);
+  border-radius: 14px;
+  padding: 24px 30px;
+}
+.maq-etude .immo-mod .synthprose .sp-head {
+  font-family: var(--font-cinzel), serif;
+  color: var(--navy);
+  font-size: 16px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--gold);
+  letter-spacing: .3px;
+}
+.maq-etude .immo-mod .synthprose .sp-head svg { width: 20px; height: 20px; color: var(--gold-deep); flex: 0 0 auto; }
+.maq-etude .immo-mod .synthprose p { font-size: 14px; line-height: 1.75; color: var(--text); margin-bottom: 14px; max-width: none; }
+.maq-etude .immo-mod .synthprose p:last-of-type { margin-bottom: 0; }
+.maq-etude .immo-mod .synthprose b { color: var(--navy); font-weight: 600; }
+
+.maq-etude .immo-mod .sp-recap { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin: 0 0 18px; }
+.maq-etude .immo-mod .sp-recap .spr { background: #fff; border: 1px solid var(--navy-100); border-radius: 10px; padding: 15px 17px; }
+.maq-etude .immo-mod .sp-recap .spr-r { border-left: 3px solid var(--navy); }
+.maq-etude .immo-mod .sp-recap .spr-o { border-left: 3px solid var(--gold); }
+.maq-etude .immo-mod .sp-recap .spr-opt { border-left: 3px solid var(--navy-300); }
+.maq-etude .immo-mod .sp-recap .spr-h { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; margin-bottom: 10px; }
+.maq-etude .immo-mod .sp-recap .spr-r .spr-h { color: var(--navy); }
+.maq-etude .immo-mod .sp-recap .spr-o .spr-h { color: var(--gold-deep); }
+.maq-etude .immo-mod .sp-recap .spr-opt .spr-h { color: var(--navy); }
+.maq-etude .immo-mod .sp-recap ul { margin: 0; padding: 0; list-style: none; }
+.maq-etude .immo-mod .sp-recap li { font-size: 12.5px; color: var(--text); line-height: 1.5; padding-left: 16px; position: relative; margin-bottom: 8px; }
+.maq-etude .immo-mod .sp-recap li:last-child { margin-bottom: 0; }
+.maq-etude .immo-mod .sp-recap li::before { content: ""; position: absolute; left: 0; top: 7px; width: 5px; height: 5px; border-radius: 50%; background: var(--navy-200); }
+.maq-etude .immo-mod .sp-recap .spr-o li::before { background: var(--gold-300); }
+.maq-etude .immo-mod .sp-recap .spr-opt li::before { background: var(--navy-200); }
+@media (max-width: 880px) { .maq-etude .immo-mod .sp-recap { grid-template-columns: 1fr; } }
+
+/* --- Bandeau de confiance de synthèse --- */
+.maq-etude .synth-cert {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid;
+  border-radius: 8px;
+  padding: 9px 14px;
+  margin: 2px 0 18px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background .15s;
+}
+.maq-etude .synth-cert .sc-ico { display: flex; flex: 0 0 auto; }
+.maq-etude .synth-cert .sc-ico svg { width: 15px; height: 15px; }
+.maq-etude .synth-cert b { font-weight: 700; }
+.maq-etude .synth-cert .sc-link { margin-left: auto; font-weight: 600; white-space: nowrap; text-decoration: underline; text-underline-offset: 2px; }
+.maq-etude .sc-green { background: #EAF3EC; border-color: #C2DECC; border-left-width: 3px; border-left-color: #2E6B4F; color: #2E6B4F; }
+.maq-etude .sc-green:hover { background: #DEEDE2; }
+.maq-etude .sc-gold { background: var(--gold-100); border-color: var(--gold-300); border-left-width: 3px; border-left-color: var(--gold-deep); color: var(--gold-deep); }
+.maq-etude .sc-gold:hover { background: #F0E4C8; }
+
+/* --- Étiquette de rappel (chapeau de la section consolidée) --- */
+.maq-etude .immo-mod .recap-kicker {
+  color: #A57608;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .6px;
+  text-transform: uppercase;
+  margin: 18px 0 5px;
+}

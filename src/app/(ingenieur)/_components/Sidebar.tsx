@@ -177,6 +177,7 @@ const SECTIONS: Section[] = [
   {
     title: "Outils",
     items: [
+      { href: `${BASE}/etudes-patrimoniales`, label: "Études patrimoniales", icon: "doc" },
       { href: `${BASE}/marketplace`, label: "Catalogue produits", icon: "marketplace" },
       { href: `${BASE}/simulateurs`, label: "Simulateurs & calculateurs", icon: "chart" },
     ],

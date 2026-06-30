@@ -1,0 +1,1561 @@
+/**
+ * Règles propres à la sous-section « Patrimoine immobilier » du document d'audit
+ * (maquette, module .immo-mod de la partie Audit). Extraites du <style> de la
+ * maquette et SCOPÉES sous « .maq-etude » (chaque sélecteur préfixé), pour ne
+ * pas fuir hors du document. Les polices 'Cinzel'/'Epilogue' de la maquette sont
+ * remplacées par les variables déjà chargées (var(--font-cinzel) /
+ * var(--font-epilogue)). Les tokens couleur (--navy, --gold, …) et les
+ * comportements transverses (eng-only/client-only, [data-view], .validated-badge,
+ * [data-block].sel) sont fournis par etude-audit.css et ne sont pas redéfinis ici.
+ */
+
+.maq-etude .immo-mod svg {
+  display: block;
+}
+
+/* En-tête de module repliable */
+.maq-etude .immo-mod .shead {
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  margin-bottom: 4px;
+}
+.maq-etude .immo-mod .shead:hover {
+  background: rgba(16, 45, 80, 0.022);
+}
+.maq-etude .modchev {
+  flex: 0 0 auto;
+  color: var(--navy-300);
+  display: flex;
+  transition: transform 0.25s;
+  transform: rotate(180deg);
+}
+.maq-etude .modchev svg {
+  width: 22px;
+  height: 22px;
+  display: block;
+}
+.maq-etude .page.modfold .modchev {
+  transform: rotate(0deg);
+}
+.maq-etude .page.modfold .mod-body {
+  display: none;
+}
+
+.maq-etude .immo-mod .page {
+  max-width: 1030px;
+  margin: 0 auto;
+  background: var(--ivory);
+  border: 1px solid var(--navy-100);
+  border-radius: 12px;
+  box-shadow: 0 10px 32px rgba(16, 45, 80, 0.07);
+  padding: 28px 34px;
+}
+.maq-etude .immo-mod .shead .pic {
+  width: 42px;
+  height: 42px;
+  border-radius: 11px;
+  background: var(--gold-100);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+.maq-etude .immo-mod .shead .pic svg {
+  width: 24px;
+  height: 24px;
+}
+.maq-etude .immo-mod .shead h1 {
+  font-family: var(--font-cinzel), serif;
+  font-weight: 600;
+  color: var(--navy);
+  font-size: 22px;
+  letter-spacing: 0.3px;
+}
+.maq-etude .immo-mod .shead .crumb2 {
+  font-size: 11px;
+  color: var(--navy-300);
+}
+.maq-etude .immo-mod .lead {
+  font-family: var(--font-epilogue), sans-serif;
+  font-size: 13px;
+  color: var(--navy-300);
+  margin: 8px 0 20px 55px;
+  max-width: 720px;
+  line-height: 1.55;
+}
+.maq-etude .immo-mod .anchor {
+  scroll-margin-top: 14px;
+}
+.maq-etude .immo-mod .leadreset {
+  align-items: center;
+  gap: 6px;
+  margin: -6px 0 18px 55px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--gold-deep);
+  background: var(--gold-100);
+  border: 1px solid var(--gold-300);
+  border-radius: 7px;
+  padding: 5px 10px;
+  cursor: pointer;
+  width: fit-content;
+}
+.maq-etude .immo-mod .leadreset svg {
+  width: 13px;
+  height: 13px;
+}
+
+/* Badge de confiance */
+.maq-etude .immo-mod .cert {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 3px 6px 3px 10px;
+  border-radius: 13px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.maq-etude .immo-mod .cert .co {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.35);
+}
+.maq-etude .immo-mod .cert .co svg {
+  width: 11px;
+  height: 11px;
+}
+.maq-etude .immo-mod .cert:hover .co {
+  background: rgba(255, 255, 255, 0.6);
+}
+.maq-etude .immo-mod .c-tres,
+.maq-etude .immo-mod .c-forte {
+  background: #eaf3ec;
+  color: #2e6b4f;
+  border: 1px solid #c2decc;
+}
+.maq-etude .immo-mod .c-moy {
+  background: #fbf1dd;
+  color: #9a6a08;
+  border: 1px solid #e8cd8a;
+}
+.maq-etude .immo-mod .c-faible {
+  background: #faebeb;
+  color: #a53b3b;
+  border: 1px solid #e6bebe;
+}
+.maq-etude .immo-mod .c-tres .co,
+.maq-etude .immo-mod .c-forte .co {
+  background: #d5e8db;
+}
+.maq-etude .immo-mod .c-moy .co {
+  background: #f3e2be;
+}
+.maq-etude .immo-mod .c-faible .co {
+  background: #f1d6d6;
+}
+
+/* Sous-titres de rubrique */
+.maq-etude .immo-mod .subttl {
+  font-family: var(--font-cinzel), serif;
+  color: var(--navy);
+  font-size: 17px;
+  font-weight: 600;
+  margin: 36px 0 14px;
+  letter-spacing: 0.4px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 9px;
+  border-bottom: 2px solid var(--navy-100);
+  position: relative;
+}
+.maq-etude .immo-mod .rep-tot {
+  margin-left: auto;
+  font-family: var(--font-cinzel), serif;
+  color: var(--navy);
+  font-weight: 600;
+  font-size: 17px;
+  letter-spacing: 0.3px;
+}
+.maq-etude .immo-mod .subttl:before {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  width: 56px;
+  height: 2px;
+  background: var(--gold);
+}
+.maq-etude .immo-mod .subttl svg {
+  width: 21px;
+  height: 21px;
+}
+.maq-etude .immo-mod .subttl .sx {
+  font-family: var(--font-epilogue);
+  font-size: 11px;
+  color: var(--navy-300);
+  font-weight: 400;
+  margin-left: 2px;
+}
+
+/* Accordéons « détail bien par bien » */
+.maq-etude .immo-mod .acc {
+  border: 1px solid var(--navy-100);
+  border-radius: 10px;
+  margin-bottom: 9px;
+  background: #fff;
+  overflow: hidden;
+}
+.maq-etude .immo-mod .acc.empty {
+  background: var(--ivory);
+  opacity: 0.85;
+}
+.maq-etude .immo-mod .acc-h {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 15px;
+  cursor: pointer;
+  user-select: none;
+}
+.maq-etude .immo-mod .acc-h:hover {
+  background: var(--ivory);
+}
+.maq-etude .immo-mod .acc.empty .acc-h {
+  cursor: default;
+}
+.maq-etude .immo-mod .acc-h .ic {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--gold-100);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+.maq-etude .immo-mod .acc-h .ic svg {
+  width: 18px;
+  height: 18px;
+}
+.maq-etude .immo-mod .acc-h .nm {
+  font-weight: 600;
+  color: var(--navy);
+  font-size: 13.5px;
+  flex: 1;
+}
+.maq-etude .immo-mod .acc-h .nm .sub {
+  font-weight: 400;
+  color: var(--navy-300);
+  font-size: 11.5px;
+  display: block;
+  margin-top: 2px;
+}
+.maq-etude .immo-mod .acc-h .amt {
+  font-family: var(--font-cinzel), serif;
+  font-weight: 600;
+  color: var(--navy);
+  font-size: 15px;
+  text-align: right;
+}
+.maq-etude .immo-mod .acc-h .amt .pct {
+  display: block;
+  font-family: var(--font-epilogue);
+  font-weight: 400;
+  font-size: 10.5px;
+  color: var(--navy-300);
+}
+.maq-etude .immo-mod .acc-h .chev {
+  color: var(--navy-300);
+  transition: transform 0.25s;
+  flex: 0 0 auto;
+}
+.maq-etude .immo-mod .acc-h .chev svg {
+  width: 18px;
+  height: 18px;
+}
+.maq-etude .immo-mod .acc.open .acc-h .chev {
+  transform: rotate(180deg);
+}
+.maq-etude .immo-mod .acc-b {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease;
+}
+.maq-etude .immo-mod .acc.open .acc-b {
+  max-height: 1600px;
+}
+.maq-etude .immo-mod .acc-in {
+  padding: 4px 15px 15px;
+}
+
+/* Tableaux éditables */
+.maq-etude .immo-mod .et {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  margin-top: 8px;
+  table-layout: fixed;
+}
+.maq-etude .immo-mod .et th {
+  background: var(--navy);
+  color: var(--ivory);
+  font-weight: 600;
+  text-align: left;
+  padding: 9px 10px;
+  font-size: 10.5px;
+  line-height: 1.25;
+  white-space: normal;
+}
+.maq-etude .immo-mod .et th.num {
+  text-align: right;
+}
+.maq-etude .immo-mod .et td {
+  padding: 0;
+  border-bottom: 1px solid var(--navy-100);
+  color: #4a4a4a;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.maq-etude .immo-mod .et td .cell {
+  padding: 8px 11px;
+  outline: none;
+  border-radius: 4px;
+  transition: 0.12s;
+  white-space: normal;
+  line-height: 1.35;
+}
+.maq-etude .immo-mod .et td.num .cell {
+  text-align: right;
+  color: var(--navy);
+  font-weight: 500;
+  white-space: nowrap;
+}
+.maq-etude[data-view="ing"] .immo-mod .et td .cell.ed:hover {
+  background: var(--gold-100);
+  box-shadow: inset 0 0 0 1px var(--gold-300);
+  cursor: text;
+}
+.maq-etude[data-view="ing"] .immo-mod .et td .cell.ed:focus {
+  background: #fff;
+  box-shadow: inset 0 0 0 2px var(--gold);
+  overflow: visible;
+}
+.maq-etude .immo-mod .et tbody tr:nth-child(even) {
+  background: var(--light-blue);
+}
+.maq-etude .immo-mod .et tbody tr.edited {
+  background: var(--gold-100) !important;
+}
+.maq-etude .immo-mod .et tbody tr.edited td:first-child .cell:after {
+  content: " ●";
+  color: var(--gold-deep);
+  font-size: 9px;
+}
+.maq-etude .immo-mod .et tfoot td {
+  background: var(--light-blue);
+  color: var(--navy);
+  font-weight: 700;
+  border-top: 2px solid var(--gold-300);
+}
+.maq-etude .immo-mod .et tfoot td .cell {
+  font-weight: 700;
+}
+
+/* Régularité (cartes synthèse par bien) */
+.maq-etude .immo-mod .regul {
+  margin-top: 8px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+}
+.maq-etude .immo-mod .regul.r4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+.maq-etude .immo-mod .regul .rc {
+  background: var(--light-blue);
+  border: 1px solid var(--navy-100);
+  border-radius: 8px;
+  padding: 9px 11px;
+}
+.maq-etude .immo-mod .regul .rc-click {
+  cursor: pointer;
+  transition: 0.12s;
+}
+.maq-etude .immo-mod .regul .rc-click:hover {
+  border-color: var(--gold);
+  background: #fff;
+}
+.maq-etude .immo-mod .regul .rl {
+  font-size: 11px;
+  color: var(--navy-300);
+}
+.maq-etude .immo-mod .regul .rv {
+  font-weight: 700;
+  color: var(--navy);
+  font-size: 14px;
+  margin-top: 3px;
+}
+.maq-etude .immo-mod .consq {
+  margin-top: 8px;
+  background: var(--ivory);
+  border: 1px solid var(--navy-100);
+  border-left: 3px solid var(--gold);
+  border-radius: 0 7px 7px 0;
+  padding: 11px 14px;
+  font-size: 12.5px;
+  color: var(--navy);
+  line-height: 1.55;
+}
+
+/* Rendement pondéré */
+.maq-etude .immo-mod .rpgrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 9px;
+  margin-top: 4px;
+}
+.maq-etude .immo-mod .rpc {
+  background: #fff;
+  border: 1px solid var(--navy-100);
+  border-radius: 10px;
+  padding: 15px 15px;
+}
+.maq-etude .immo-mod .rpc.glob {
+  border-color: var(--navy-100);
+  border-top: 3px solid var(--gold);
+}
+.maq-etude .immo-mod .rpc.glob .rv {
+  color: var(--navy);
+}
+.maq-etude .immo-mod .rpc .rl {
+  font-size: 12px;
+  color: var(--navy-300);
+  margin-bottom: 5px;
+}
+.maq-etude .immo-mod .rpc .rv {
+  font-family: var(--font-cinzel), serif;
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--navy);
+  line-height: 1.1;
+}
+.maq-etude .immo-mod .rpc .rs {
+  font-size: 11.5px;
+  color: var(--gold-deep);
+  margin-top: 4px;
+  font-weight: 600;
+}
+
+/* KPI */
+.maq-etude .immo-mod .kpirow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+.maq-etude .immo-mod .kpi {
+  background: #fff;
+  border: 1px solid var(--navy-100);
+  border-top: 3px solid var(--gold);
+  border-radius: 10px;
+  padding: 15px 6px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+}
+.maq-etude .immo-mod .kpi .kv {
+  font-family: var(--font-cinzel), serif;
+  color: var(--navy);
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+.maq-etude .immo-mod .kpi .kl {
+  font-size: 10px;
+  color: var(--navy-300);
+  margin-top: 6px;
+  line-height: 1.3;
+  min-height: 15px;
+  letter-spacing: -0.1px;
+  white-space: nowrap;
+}
+.maq-etude .immo-mod .kpi .kf {
+  font-size: 10px;
+  color: var(--gold-deep);
+  margin-top: auto;
+  padding-top: 5px;
+  font-weight: 600;
+  white-space: nowrap;
+  letter-spacing: -0.1px;
+}
+.maq-etude .immo-mod .rappel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--navy);
+  background: var(--ivory);
+  border: 1px solid var(--navy-100);
+  border-radius: 9px;
+  padding: 9px 12px;
+  margin-top: 9px;
+}
+.maq-etude .immo-mod .rappel svg {
+  width: 14px;
+  height: 14px;
+  color: var(--gold);
+  flex: 0 0 auto;
+}
+
+/* Camemberts */
+.maq-etude .immo-mod .charts {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.maq-etude .immo-mod .chartc {
+  background: #fff;
+  border: 1px solid var(--navy-100);
+  border-radius: 12px;
+  padding: 18px 22px;
+}
+.maq-etude .immo-mod .ct-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 14px;
+  padding-bottom: 11px;
+  border-bottom: 1px solid var(--navy-100);
+}
+.maq-etude .immo-mod .ct-row .ct {
+  font-weight: 600;
+  color: var(--navy);
+  font-size: 15px;
+}
+.maq-etude .immo-mod .ct-row .ct-tot {
+  font-family: var(--font-cinzel), serif;
+  font-weight: 600;
+  color: var(--navy);
+  font-size: 19px;
+}
+.maq-etude .immo-mod .donutwrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  flex-wrap: wrap;
+}
+.maq-etude .immo-mod .donut {
+  width: 212px;
+  height: 212px;
+  flex: 0 0 auto;
+}
+.maq-etude .immo-mod .donut text {
+  font-family: var(--font-cinzel), serif;
+  fill: var(--navy);
+}
+.maq-etude .immo-mod .leg {
+  flex: 1 1 auto;
+  min-width: 280px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.maq-etude .immo-mod .leg .lr {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 7px 9px;
+  border-radius: 7px;
+  padding-left: 6px;
+  padding-right: 6px;
+  transition: background 0.14s;
+}
+.maq-etude .immo-mod .leg .lr.hot {
+  background: var(--gold-100);
+  border-radius: 8px;
+}
+.maq-etude .immo-mod .leg .sw {
+  width: 13px;
+  height: 13px;
+  border-radius: 4px;
+  flex: 0 0 auto;
+}
+.maq-etude .immo-mod .leg .ll {
+  color: var(--navy);
+  font-weight: 600;
+  font-size: 13.5px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.maq-etude .immo-mod .leg .lv {
+  font-family: var(--font-cinzel), serif;
+  color: var(--navy);
+  font-weight: 600;
+  font-size: 17px;
+  width: 96px;
+  text-align: right;
+  flex: 0 0 auto;
+}
+.maq-etude .immo-mod .leg .lp {
+  color: var(--gold-deep);
+  font-weight: 700;
+  font-size: 13.5px;
+  width: 44px;
+  text-align: right;
+  flex: 0 0 auto;
+}
+
+/* Donut interactif */
+.maq-etude .immo-mod .donutbox {
+  position: relative;
+  width: 212px;
+  height: 212px;
+  flex: 0 0 auto;
+}
+.maq-etude .immo-mod .donut circle.seg {
+  cursor: pointer;
+  transition: stroke-width 0.14s ease, opacity 0.14s;
+}
+.maq-etude .immo-mod .donutbox.hovering circle.seg {
+  opacity: 0.4;
+}
+.maq-etude .immo-mod .donutbox.hovering circle.seg.hot {
+  opacity: 1;
+  stroke-width: 20;
+}
+.maq-etude .immo-mod .donut-tip {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  pointer-events: none;
+  width: 128px;
+}
+.maq-etude .immo-mod .donut-tip .dt-v {
+  font-family: var(--font-cinzel), serif;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--navy);
+  line-height: 1.05;
+}
+.maq-etude .immo-mod .donut-tip .dt-p {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--gold-deep);
+  margin-top: 2px;
+}
+.maq-etude .immo-mod .donut-tip .dt-l {
+  font-size: 9.5px;
+  color: var(--navy-300);
+  margin-top: 3px;
+  line-height: 1.25;
+  white-space: nowrap;
+}
+
+/* Analyse 3 dimensions */
+.maq-etude .immo-mod .ablock {
+  border: 1px solid var(--navy-200);
+  border-radius: 11px;
+  margin-bottom: 13px;
+  background: #fff;
+  overflow: hidden;
+  transition: box-shadow 0.15s, border-color 0.15s;
+}
+.maq-etude .immo-mod .ablock.sel {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 2px var(--gold), 0 6px 18px rgba(198, 142, 14, 0.14);
+}
+.maq-etude .immo-mod .ab-h {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 12px 15px;
+  background: var(--light-blue);
+  border-bottom: 1px solid var(--navy-100);
+}
+.maq-etude .immo-mod .ab-h .mx {
+  width: 26px;
+  height: 26px;
+  flex: 0 0 auto;
+}
+.maq-etude .immo-mod .ab-h .mx svg {
+  width: 26px;
+  height: 26px;
+}
+.maq-etude .immo-mod .ab-h .tt {
+  font-weight: 700;
+  color: var(--navy);
+  font-size: 13.5px;
+  flex: 1;
+}
+.maq-etude .immo-mod .fold .ab-h {
+  cursor: pointer;
+  user-select: none;
+}
+.maq-etude .immo-mod .fold .ab-h:hover {
+  background: var(--navy-100);
+}
+.maq-etude .immo-mod .fold .ab-h::after {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid var(--navy-300);
+  border-bottom: 2px solid var(--navy-300);
+  transform: rotate(45deg);
+  margin-left: 6px;
+  margin-top: -3px;
+  flex: 0 0 auto;
+  transition: transform 0.2s ease;
+}
+.maq-etude .immo-mod .fold.open .ab-h::after {
+  transform: rotate(-135deg);
+  margin-top: 3px;
+}
+.maq-etude .immo-mod .fold:not(.open) .ab-h {
+  border-bottom: none;
+}
+.maq-etude .immo-mod .fold:not(.open) .ab-grid,
+.maq-etude .immo-mod .fold:not(.open) .fond,
+.maq-etude .immo-mod .fold:not(.open) .ab-foot {
+  display: none;
+}
+.maq-etude .immo-mod .ab-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+}
+.maq-etude .immo-mod .dim {
+  padding: 13px 15px;
+}
+.maq-etude .immo-mod .dim + .dim {
+  border-left: 1px solid var(--navy-100);
+}
+.maq-etude .immo-mod .dim .dh {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--navy);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.maq-etude .immo-mod .dim .dh svg {
+  width: 14px;
+  height: 14px;
+}
+.maq-etude .immo-mod .dim p,
+.maq-etude .immo-mod .dim li {
+  font-size: 11.5px;
+  color: #4a4a4a;
+  line-height: 1.55;
+}
+.maq-etude .immo-mod .dlist {
+  list-style: none;
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+.maq-etude .immo-mod .dlist li {
+  position: relative;
+  padding-left: 13px;
+  margin-bottom: 7px;
+}
+.maq-etude .immo-mod .dlist li:before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 6px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--gold);
+}
+.maq-etude .immo-mod .rio {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+.maq-etude .immo-mod .rio .it {
+  border-left: 3px solid;
+  padding: 9px 12px;
+  border-radius: 0 7px 7px 0;
+  font-size: 12.5px;
+  line-height: 1.55;
+}
+.maq-etude .immo-mod .rio .r {
+  border-color: var(--navy);
+  background: var(--ivory);
+}
+.maq-etude .immo-mod .rio .o {
+  border-color: var(--gold);
+  background: var(--ivory);
+}
+.maq-etude .immo-mod .rio .opt {
+  border-color: var(--navy-300);
+  background: var(--ivory);
+}
+.maq-etude .immo-mod .rio .it .lab {
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 2px;
+}
+.maq-etude .immo-mod .rio .r .lab {
+  color: var(--navy);
+}
+.maq-etude .immo-mod .rio .o .lab {
+  color: var(--gold-deep);
+}
+.maq-etude .immo-mod .rio .opt .lab {
+  color: var(--navy-300);
+}
+.maq-etude .immo-mod .ab-foot {
+  padding: 12px 16px;
+  border-top: 1px solid var(--navy-100);
+  background: var(--ivory);
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  font-size: 12px;
+  color: var(--navy);
+  line-height: 1.55;
+}
+.maq-etude .immo-mod .ab-foot svg {
+  width: 14px;
+  height: 14px;
+  color: var(--gold);
+  flex: 0 0 auto;
+  margin-top: 1px;
+}
+.maq-etude .immo-mod .eye {
+  color: var(--gold-deep);
+  cursor: pointer;
+  font-size: 12px;
+  margin-left: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 600;
+}
+.maq-etude .immo-mod .eye svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Fondements juridiques & fiscaux */
+.maq-etude .immo-mod .fond {
+  margin: 0 16px 16px;
+  background: var(--ivory);
+  border: 1px solid var(--navy-100);
+  border-radius: 10px;
+  padding: 13px 15px;
+}
+.maq-etude .immo-mod .fond .fl {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--navy);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 11px;
+}
+.maq-etude .immo-mod .fond .fl svg {
+  width: 15px;
+  height: 15px;
+  color: var(--gold-deep);
+}
+.maq-etude .immo-mod .fond .chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.maq-etude .immo-mod .lawchip {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 3px;
+  background: #fff;
+  border: 1px solid var(--navy-100);
+  border-left: 3px solid var(--gold);
+  border-radius: 0 8px 8px 0;
+  padding: 8px 13px;
+  font-size: 12.5px;
+  color: var(--navy);
+  cursor: pointer;
+  transition: 0.12s;
+  line-height: 1.4;
+  max-width: 360px;
+}
+.maq-etude .immo-mod .lawchip:hover {
+  border-color: var(--gold-300);
+  box-shadow: 0 2px 8px rgba(16, 45, 80, 0.06);
+}
+.maq-etude .immo-mod .lawchip .k {
+  font-weight: 700;
+  color: var(--gold-deep);
+  font-size: 8.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.maq-etude .immo-mod .lawchip .k svg {
+  width: 11px;
+  height: 11px;
+}
+.maq-etude .immo-mod .lawchip .lt {
+  font-weight: 600;
+}
+
+/* Bloc financement par bien */
+.maq-etude .immo-mod .finbox {
+  margin-top: 15px;
+  background: var(--light-blue);
+  border: 1px solid var(--navy-100);
+  border-radius: 9px;
+  padding: 11px 13px;
+}
+.maq-etude .immo-mod .finbox .fh {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--navy);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 10px;
+  letter-spacing: 0.3px;
+}
+.maq-etude .immo-mod .finbox .fh svg {
+  width: 16px;
+  height: 16px;
+  color: var(--gold-deep);
+}
+.maq-etude .immo-mod .finrow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 15px;
+}
+.maq-etude .immo-mod .finrow .fc .fk {
+  font-size: 10.5px;
+  color: var(--navy-300);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.maq-etude .immo-mod .finrow .fc .fv {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--navy);
+}
+
+/* Répartition de la propriété */
+.maq-etude .immo-mod .owners {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 14px 0 0;
+  padding: 10px 14px;
+  background: var(--ivory);
+  border: 1px solid var(--navy-100);
+  border-radius: 9px;
+  font-size: 13px;
+}
+.maq-etude .immo-mod .owners > svg {
+  width: 17px;
+  height: 17px;
+  color: var(--gold-deep);
+  flex: 0 0 auto;
+}
+.maq-etude .immo-mod .owners .ok {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: var(--navy-300);
+  margin-right: 2px;
+}
+.maq-etude .immo-mod .owners .ov {
+  font-weight: 700;
+  color: var(--navy);
+}
+.maq-etude .immo-mod .owners .osep {
+  color: var(--navy-200);
+}
+
+/* Information manquante / libellés d'aide */
+.maq-etude .immo-mod .miss {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #fbf1da;
+  border: 1px solid var(--gold-300);
+  color: var(--gold-deep);
+  border-radius: 6px;
+  padding: 3px 9px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  position: relative;
+  letter-spacing: 0.2px;
+  vertical-align: middle;
+}
+.maq-etude .immo-mod .miss > svg {
+  width: 13px;
+  height: 13px;
+}
+.maq-etude .immo-mod .miss .mchev {
+  width: 11px;
+  height: 11px;
+  margin-left: 1px;
+}
+.maq-etude .immo-mod .lbl-info {
+  border-bottom: 1px dotted var(--navy-200);
+  cursor: help;
+}
+.maq-etude .immo-mod .kinfo {
+  display: inline-flex;
+  position: relative;
+  align-items: center;
+  justify-content: center;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  border: 1px solid var(--navy-200);
+  color: var(--navy-300);
+  cursor: pointer;
+  margin-left: 4px;
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1;
+  vertical-align: middle;
+  font-family: Georgia, "Times New Roman", serif;
+}
+.maq-etude .immo-mod .kinfo:hover {
+  border-color: var(--gold);
+  color: var(--gold-deep);
+  background: var(--gold-100);
+}
+
+/* Synthèse rédactionnelle */
+.maq-etude .immo-mod .synthprose {
+  background: var(--ivory);
+  border: 1px solid var(--navy-100);
+  border-left: 4px solid var(--gold);
+  border-radius: 14px;
+  padding: 24px 30px;
+}
+.maq-etude .immo-mod .synthprose .sp-head {
+  font-family: var(--font-cinzel), serif;
+  color: var(--navy);
+  font-size: 16px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--gold);
+  letter-spacing: 0.3px;
+}
+.maq-etude .immo-mod .synthprose .sp-head svg {
+  width: 20px;
+  height: 20px;
+  color: var(--gold-deep);
+  flex: 0 0 auto;
+}
+.maq-etude .immo-mod .synthprose p {
+  font-size: 14px;
+  line-height: 1.75;
+  color: var(--text);
+  margin-bottom: 14px;
+  max-width: none;
+}
+.maq-etude .immo-mod .synthprose p:last-of-type {
+  margin-bottom: 0;
+}
+.maq-etude .immo-mod .synthprose b {
+  color: var(--navy);
+  font-weight: 600;
+}
+.maq-etude .immo-mod .synthprose .sp-close {
+  font-size: 12.5px;
+  color: var(--navy-300);
+  border-top: 1px solid var(--navy-100);
+  padding-top: 13px;
+  margin-top: 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.maq-etude .immo-mod .synthprose .sp-close svg {
+  width: 15px;
+  height: 15px;
+  color: var(--gold-deep);
+  flex: 0 0 auto;
+  margin-top: 1px;
+}
+.maq-etude .immo-mod .sp-recap {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 14px;
+  margin: 0 0 18px;
+}
+.maq-etude .immo-mod .sp-recap .spr {
+  background: #fff;
+  border: 1px solid var(--navy-100);
+  border-radius: 10px;
+  padding: 15px 17px;
+}
+.maq-etude .immo-mod .sp-recap .spr-r {
+  border-left: 3px solid var(--navy);
+}
+.maq-etude .immo-mod .sp-recap .spr-o {
+  border-left: 3px solid var(--gold);
+}
+.maq-etude .immo-mod .sp-recap .spr-opt {
+  border-left: 3px solid var(--navy-300);
+}
+.maq-etude .immo-mod .sp-recap .spr-h {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-bottom: 10px;
+}
+.maq-etude .immo-mod .sp-recap .spr-r .spr-h {
+  color: var(--navy);
+}
+.maq-etude .immo-mod .sp-recap .spr-o .spr-h {
+  color: var(--gold-deep);
+}
+.maq-etude .immo-mod .sp-recap .spr-opt .spr-h {
+  color: var(--navy);
+}
+.maq-etude .immo-mod .sp-recap ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.maq-etude .immo-mod .sp-recap li {
+  font-size: 12.5px;
+  color: var(--text);
+  line-height: 1.5;
+  padding-left: 16px;
+  position: relative;
+  margin-bottom: 8px;
+}
+.maq-etude .immo-mod .sp-recap li:last-child {
+  margin-bottom: 0;
+}
+.maq-etude .immo-mod .sp-recap li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 7px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--navy-200);
+}
+.maq-etude .immo-mod .sp-recap .spr-o li::before {
+  background: var(--gold-300);
+}
+.maq-etude .immo-mod .sp-recap .spr-opt li::before {
+  background: var(--navy-200);
+}
+@media (max-width: 880px) {
+  .maq-etude .immo-mod .sp-recap {
+    grid-template-columns: 1fr;
+  }
+}
+.maq-etude .immo-mod .fn {
+  font-size: 9px;
+  color: var(--gold-deep);
+  font-weight: 700;
+  vertical-align: super;
+}
+
+/* Bandeau de confiance de la synthèse */
+.maq-etude .synth-cert {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid;
+  border-radius: 8px;
+  padding: 9px 14px;
+  margin: 2px 0 18px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.maq-etude .synth-cert .sc-ico {
+  display: flex;
+  flex: 0 0 auto;
+}
+.maq-etude .synth-cert .sc-ico svg {
+  width: 15px;
+  height: 15px;
+}
+.maq-etude .synth-cert b {
+  font-weight: 700;
+}
+.maq-etude .synth-cert .sc-link {
+  margin-left: auto;
+  font-weight: 600;
+  white-space: nowrap;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.maq-etude .sc-green {
+  background: #eaf3ec;
+  border-color: #c2decc;
+  border-left-width: 3px;
+  border-left-color: #2e6b4f;
+  color: #2e6b4f;
+}
+.maq-etude .sc-green:hover {
+  background: #deede2;
+}
+
+/* Coût d'opportunité — modules .copp */
+.maq-etude .immo-mod .coppintro > svg:first-child {
+  width: 15px;
+  height: 15px;
+}
+.maq-etude .immo-mod .coppintro {
+  background: var(--light-blue);
+  border: 1px solid var(--navy-100);
+  border-radius: 10px;
+  padding: 14px 16px;
+  font-size: 13px;
+  color: var(--navy);
+  line-height: 1.6;
+  margin-bottom: 13px;
+}
+.maq-etude .immo-mod .coppintro b {
+  color: var(--navy);
+}
+.maq-etude .immo-mod .copp {
+  border: 1px solid var(--navy-100);
+  border-radius: 12px;
+  background: #fff;
+  padding: 0;
+  overflow: hidden;
+}
+.maq-etude .immo-mod .copp .ch {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 13px 16px;
+  background: var(--navy);
+  color: var(--ivory);
+  cursor: pointer;
+}
+.maq-etude .immo-mod .copp .ch .t {
+  font-weight: 700;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  letter-spacing: 0.3px;
+}
+.maq-etude .immo-mod .copp .ch .t svg {
+  width: 20px;
+  height: 20px;
+  color: var(--gold-300);
+}
+.maq-etude .immo-mod .hyprow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.maq-etude .immo-mod .hyprow .hl {
+  font-size: 10.5px;
+  color: var(--navy-200);
+  margin-right: 2px;
+}
+.maq-etude .immo-mod .hbtn {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--ivory);
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 7px;
+  padding: 5px 11px;
+  cursor: pointer;
+}
+.maq-etude .immo-mod .hbtn:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+.maq-etude .immo-mod .hbtn.on {
+  background: var(--gold);
+  color: #fff;
+  border-color: var(--gold);
+}
+.maq-etude .immo-mod .hyp-client {
+  display: none;
+  font-size: 11.5px;
+  color: var(--ivory);
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 7px;
+  padding: 5px 11px;
+}
+.maq-etude .immo-mod .copp-body {
+  padding: 16px;
+}
+.maq-etude .immo-mod .compare {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  margin-bottom: 16px;
+}
+.maq-etude .immo-mod .cstate {
+  flex: 1;
+  text-align: center;
+  padding: 15px 11px;
+  border-radius: 11px;
+  position: relative;
+  background: #fff;
+  border: 1px solid var(--navy-100);
+}
+.maq-etude .immo-mod .cstate .cl {
+  font-size: 12px;
+  color: var(--navy-300);
+  margin-bottom: 6px;
+  min-height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.maq-etude .immo-mod .cstate .cv {
+  font-family: var(--font-cinzel), serif;
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--navy);
+  line-height: 1.1;
+}
+.maq-etude .immo-mod .cstate .cd {
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 5px;
+}
+.maq-etude .immo-mod .cstate.now {
+  border-top: 3px solid var(--navy-300);
+}
+.maq-etude .immo-mod .cstate.cur {
+  border-top: 3px solid var(--navy-200);
+}
+.maq-etude .immo-mod .cstate.cur .cd {
+  color: var(--navy-300);
+}
+.maq-etude .immo-mod .cstate.opt {
+  border-top: 3px solid var(--gold);
+}
+.maq-etude .immo-mod .cstate.opt .cv {
+  color: var(--gold-deep);
+}
+.maq-etude .immo-mod .cstate.opt .cd {
+  color: var(--gold-deep);
+}
+.maq-etude .immo-mod .carrow {
+  display: flex;
+  align-items: center;
+  color: var(--navy-200);
+  padding: 0 4px;
+}
+.maq-etude .immo-mod .carrow svg {
+  width: 24px;
+  height: 24px;
+}
+.maq-etude .immo-mod .gapband {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: var(--navy);
+  color: var(--ivory);
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-size: 13.5px;
+  margin-bottom: 14px;
+}
+.maq-etude .immo-mod .gapband svg {
+  width: 21px;
+  height: 21px;
+  color: var(--ivory);
+}
+.maq-etude .immo-mod .gapband b {
+  color: var(--ivory);
+  font-family: var(--font-cinzel), serif;
+  font-size: 17px;
+}
+.maq-etude .immo-mod .srcbtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--gold-deep);
+  font-weight: 600;
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-family: inherit;
+  text-decoration: underline;
+  padding: 0;
+}
+.maq-etude .immo-mod .srcbtn svg {
+  width: 13px;
+  height: 13px;
+}
+.maq-etude .immo-mod .copp .cch {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+  color: var(--gold-300);
+  transition: transform 0.2s;
+  margin-left: 2px;
+}
+.maq-etude .immo-mod .copp.foldopen .cch {
+  transform: rotate(180deg);
+}
+.maq-etude .immo-mod .copp:not(.foldopen) .copp-body {
+  display: none;
+}
+.maq-etude .immo-mod .copp:not(.foldopen) .hyprow {
+  display: none;
+}
+
+/* Synthèse de thème repliable */
+.maq-etude .immo-mod .synthacc .synth-h {
+  cursor: pointer;
+}
+.maq-etude .immo-mod .synthacc .synthchev {
+  margin-left: auto;
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+  color: var(--navy-300);
+  transition: transform 0.2s;
+}
+.maq-etude .immo-mod .synthacc.open .synthchev {
+  transform: rotate(180deg);
+}
+.maq-etude .immo-mod .synthacc:not(.open) .synthprose {
+  display: none;
+}
+
+/* Détail du calcul de plus-value */
+.maq-etude .immo-mod .pvacc {
+  border: 1px solid var(--navy-100);
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 8px 0 4px;
+  background: #fff;
+}
+.maq-etude .immo-mod .pvacc-h {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 11px 14px;
+  cursor: pointer;
+  background: var(--ivory-deep);
+  user-select: none;
+}
+.maq-etude .immo-mod .pvacc-h > svg:first-child {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+}
+.maq-etude .immo-mod .pvacc-h .pvt {
+  flex: 1;
+  font-family: var(--font-cinzel), serif;
+  font-weight: 600;
+  font-size: 13.5px;
+  color: var(--navy);
+}
+.maq-etude .immo-mod .pvacc-h .pvchev {
+  width: 17px;
+  height: 17px;
+  flex: 0 0 auto;
+  color: var(--navy-300);
+  transition: transform 0.2s;
+}
+.maq-etude .immo-mod .pvacc.open .pvchev {
+  transform: rotate(180deg);
+}
+.maq-etude .immo-mod .pvacc-body {
+  display: none;
+  padding: 4px 14px 12px;
+}
+.maq-etude .immo-mod .pvacc.open .pvacc-body {
+  display: block;
+}
+.maq-etude .immo-mod .pvacc .pvsub td {
+  font-weight: 600;
+  border-top: 1px solid var(--navy-100);
+}
+.maq-etude .immo-mod .pvnote {
+  color: var(--navy-300);
+  font-weight: 400;
+  font-size: 11.5px;
+}
+
+/* Note d'avertissement */
+.maq-etude .immo-mod .note {
+  font-size: 12px;
+  color: var(--navy-300);
+  line-height: 1.6;
+}
+.maq-etude .immo-mod .note svg {
+  width: 13px;
+  height: 13px;
+  vertical-align: -2px;
+}
+
+/* Annexe client (sources & méthode) */
+.maq-etude .immo-mod .appendix {
+  margin-top: 26px;
+  border-top: 2px solid var(--gold-300);
+  padding-top: 16px;
+}
+.maq-etude .immo-mod .appendix h2 {
+  font-family: var(--font-cinzel), serif;
+  font-size: 15px;
+  color: var(--navy);
+  margin-bottom: 10px;
+}
+.maq-etude .immo-mod .appref {
+  display: flex;
+  gap: 10px;
+  font-size: 11.5px;
+  color: #4a4a4a;
+  line-height: 1.55;
+  margin-bottom: 9px;
+}
+.maq-etude .immo-mod .appref .n {
+  font-weight: 700;
+  color: var(--gold-deep);
+  flex: 0 0 auto;
+}
