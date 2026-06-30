@@ -25,6 +25,7 @@ import {
 } from "react";
 
 import { formatHeureValidation } from "./etude-audit-structure";
+import { sanitizeHtml } from "./sanitize";
 
 export type ViewMode = "ing" | "client" | "pdf" | "word";
 
@@ -37,6 +38,14 @@ export type BlocContextValue = {
   isValidated: (key: string) => boolean;
   validatedAt: (key: string) => string | null;
   editedContent: (key: string) => string | null;
+  /**
+   * Jeton de révision du contenu d'un bloc, incrémenté à chaque application
+   * (transformation IA). Sert de clé de remontage : après une application, le
+   * contenu visible a été muté hors React (range.deleteContents / remplacement
+   * du nœud), donc on remonte l'élément de lecture plutôt que de laisser React
+   * réconcilier des nœuds DOM déjà détachés (sinon removeChild lève une erreur).
+   */
+  editedRev: (key: string) => number;
   /** sélectionne un bloc (clic) — ignoré hors mode bloc / hors vue ingénieur. */
   selectBloc: (key: string) => void;
   /** retire la validation d'un bloc (clic sur le tampon). */
@@ -95,6 +104,7 @@ export function Bloc({ blocKey, as, className, children }: BlocProps) {
   const editing = ctx.editingKey === blocKey;
   const validated = ctx.isValidated(blocKey);
   const edited = ctx.editedContent(blocKey);
+  const rev = ctx.editedRev(blocKey);
 
   const elRef = useRef<HTMLElement | null>(null);
   // attachEl est stable côté parent (useCallback []), donc setRef l'est aussi :
@@ -145,31 +155,66 @@ export function Bloc({ blocKey, as, className, children }: BlocProps) {
     ctx.unvalidateBloc(blocKey);
   }
 
+  // Le contenu édité est conservé en HTML pour préserver la mise en forme. Il
+  // est assaini avant rendu (dangerouslySetInnerHTML).
+  const useHtml = edited != null;
+  const html = useHtml ? sanitizeHtml(edited as string) : null;
+
+  const badge =
+    validated && !editing ? (
+      <span
+        className="validated-badge"
+        contentEditable={false}
+        role="button"
+        tabIndex={0}
+        title="Retirer la validation"
+        onClick={handleUnvalidate}
+      >
+        <CheckIcon /> Validé {formatHeureValidation(ctx.validatedAt(blocKey))}
+      </span>
+    ) : null;
+
+  // En édition : le contenu HTML (s'il existe) est injecté directement dans le
+  // bloc contenteditable, sans enveloppe, pour une édition et une relecture
+  // d'innerHTML propres. Le tampon n'est jamais affiché en édition.
+  if (editing) {
+    return (
+      <Tag
+        key="edit"
+        ref={setRef}
+        data-block={blocKey}
+        className={cls}
+        contentEditable
+        suppressContentEditableWarning
+        onClick={handleClick}
+        {...(useHtml ? { dangerouslySetInnerHTML: { __html: html as string } } : {})}
+      >
+        {useHtml ? undefined : children}
+      </Tag>
+    );
+  }
+
+  // En lecture : le contenu édité est rendu dans une enveloppe .bloc-content
+  // (display:contents, donc visuellement neutre) afin de cohabiter avec le
+  // tampon de validation rendu par React en frère.
   return (
-    // La clé change avec l'état d'édition : changer de clé remonte l'élément et
-    // purge les mutations faites en contenteditable lors d'une annulation.
     <Tag
-      key={editing ? "edit" : "view"}
+      key={`view-${rev}`}
       ref={setRef}
       data-block={blocKey}
       className={cls}
-      contentEditable={editing}
-      suppressContentEditableWarning
       onClick={handleClick}
     >
-      {edited != null ? edited : children}
-      {validated && !editing ? (
+      {useHtml ? (
         <span
-          className="validated-badge"
-          contentEditable={false}
-          role="button"
-          tabIndex={0}
-          title="Retirer la validation"
-          onClick={handleUnvalidate}
-        >
-          <CheckIcon /> Validé {formatHeureValidation(ctx.validatedAt(blocKey))}
-        </span>
-      ) : null}
+          className="bloc-content"
+          style={{ display: "contents" }}
+          dangerouslySetInnerHTML={{ __html: html as string }}
+        />
+      ) : (
+        children
+      )}
+      {badge}
     </Tag>
   );
 }

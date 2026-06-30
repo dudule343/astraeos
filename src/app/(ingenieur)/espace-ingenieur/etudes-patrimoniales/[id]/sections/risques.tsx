@@ -854,7 +854,7 @@ export default function RisquesSection({ donnees }: { donnees: EtudeDonnees }): 
               foot: (
                 <>
                   <b>Préconisation :</b> réalisation des diagnostics de performance énergétique sur les
-                  studios parisiens.
+                  biens concernés.
                 </>
               ),
             },
@@ -1208,13 +1208,16 @@ export default function RisquesSection({ donnees }: { donnees: EtudeDonnees }): 
               title: "Faible performance des contrats",
               constat: [
                 <>
-                  Depuis 2009, rendements nets de <strong>{D}</strong> (Monsieur) et <strong>{D}</strong>{" "}
-                  (Madame). Inflation moyenne 16 ans : 1,85 %.
+                  Depuis l’origine des contrats, rendements nets de <strong>{D}</strong> (Monsieur) et{" "}
+                  <strong>{D}</strong> (Madame). Inflation moyenne sur la période : {D}.
                 </>,
-                <>Contrats enfants (2015) : {D} et {D} pour une inflation de 2,45 % — réel également négatif.</>,
                 <>
-                  Origine : exposition massive aux fonds euros ; injection de <strong>{D}</strong> en
-                  2025 figeant une part prépondérante du capital.
+                  Contrats des enfants : {D} et {D} pour une inflation de {D} sur la période —
+                  performance réelle à apprécier.
+                </>,
+                <>
+                  Origine : forte exposition aux fonds euros ; une injection récente de{" "}
+                  <strong>{D}</strong> fige une part prépondérante du capital.
                 </>,
               ],
               rio: {
@@ -2048,8 +2051,9 @@ export default function RisquesSection({ donnees }: { donnees: EtudeDonnees }): 
               constat: [
                 <>Monsieur exerce en Entreprise Individuelle à l’impôt sur le revenu.</>,
                 <>
-                  L’intégralité du bénéfice net ({D} en 2024) est soumise au barème progressif de
-                  l’impôt sur le revenu (TMI à 41 %) et aux cotisations sociales (URSSAF / CARCDSF).
+                  L’intégralité du bénéfice net ({D}, dernier exercice) est soumise au barème
+                  progressif de l’impôt sur le revenu (TMI à 41 %) et aux cotisations sociales (URSSAF /
+                  CARCDSF).
                 </>,
               ],
               rio: {
@@ -2175,9 +2179,9 @@ export default function RisquesSection({ donnees }: { donnees: EtudeDonnees }): 
               constat: [
                 <>Madame exerce en Entreprise Individuelle à l’impôt sur le revenu.</>,
                 <>
-                  L’intégralité du bénéfice net ({D} en 2024) est soumise au barème progressif de
-                  l’impôt sur le revenu (TMI à 41 % ou 45 %) et aux cotisations sociales (URSSAF /
-                  CARCDSF).
+                  L’intégralité du bénéfice net ({D}, dernier exercice) est soumise au barème
+                  progressif de l’impôt sur le revenu (TMI à 41 % ou 45 %) et aux cotisations sociales
+                  (URSSAF / CARCDSF).
                 </>,
               ],
               rio: {
@@ -2215,8 +2219,8 @@ export default function RisquesSection({ donnees }: { donnees: EtudeDonnees }): 
               constat: [
                 <>Les deux activités sont exercées en Entreprise Individuelle au régime BNC.</>,
                 <>
-                  Les bénéfices cumulés ({D} en 2024) supportent l’impôt sur le revenu (TMI 41 %) et les
-                  cotisations sociales.
+                  Les bénéfices cumulés ({D}, dernier exercice) supportent l’impôt sur le revenu (TMI
+                  41 %) et les cotisations sociales.
                 </>,
               ],
               rio: {

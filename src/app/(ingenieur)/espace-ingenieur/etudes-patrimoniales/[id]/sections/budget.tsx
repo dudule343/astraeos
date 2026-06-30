@@ -488,7 +488,7 @@ export default function BudgetSection({ donnees }: { donnees: EtudeDonnees }) {
                         cy="70"
                         r="54"
                         stroke="#102D50"
-                        strokeDasharray="81.37 257.92"
+                        strokeDasharray="0 339.29"
                         strokeDashoffset="0"
                       />
                       <circle
@@ -498,8 +498,8 @@ export default function BudgetSection({ donnees }: { donnees: EtudeDonnees }) {
                         cy="70"
                         r="54"
                         stroke="#C68E0E"
-                        strokeDasharray="96.70 242.59"
-                        strokeDashoffset="-81.37"
+                        strokeDasharray="0 339.29"
+                        strokeDashoffset="0"
                       />
                       <circle
                         className="seg"
@@ -508,8 +508,8 @@ export default function BudgetSection({ donnees }: { donnees: EtudeDonnees }) {
                         cy="70"
                         r="54"
                         stroke="#708196"
-                        strokeDasharray="65.74 273.55"
-                        strokeDashoffset="-178.07"
+                        strokeDasharray="0 339.29"
+                        strokeDashoffset="0"
                       />
                       <circle
                         className="seg"
@@ -518,8 +518,8 @@ export default function BudgetSection({ donnees }: { donnees: EtudeDonnees }) {
                         cy="70"
                         r="54"
                         stroke="#DDBB6E"
-                        strokeDasharray="95.49 243.80"
-                        strokeDashoffset="-243.81"
+                        strokeDasharray="0 339.29"
+                        strokeDashoffset="0"
                       />
                     </g>
                   </svg>

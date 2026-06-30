@@ -29,6 +29,22 @@ import type { EtudeDonnees, EtudePersonne } from "../../../../_data/etudes-patri
 const DASH = "—";
 const TODO = "À compléter";
 
+/**
+ * Lecture d'un montant/taux saisi par l'ingénieur dans le dictionnaire éditable
+ * `donnees.valeurs` (pensions projetées, taux de remplacement, revenus
+ * professionnels…). Aucune de ces valeurs n'est calculée ici : tant que rien
+ * n'est saisi, on affiche « — ». L'unité reste libre (montant en euros ou taux)
+ * car ces montants n'ont pas tous la même nature.
+ */
+function lire(donnees: EtudeDonnees, key: string): string {
+  const v = donnees.valeurs[key];
+  if (typeof v === "number" && Number.isFinite(v)) {
+    return new Intl.NumberFormat("fr-FR").format(v);
+  }
+  if (typeof v === "string" && v.trim() !== "") return v.trim();
+  return DASH;
+}
+
 function roleRank(role: EtudePersonne["role"]): number {
   return role === "person_a" ? 0 : 1;
 }
@@ -370,10 +386,13 @@ export default function RetraiteSection({ donnees }: { donnees: EtudeDonnees }) 
                 </svg>
               </span>
               <p>
-                Le cumul des pensions projetées s’élève à <b>{DASH}</b>, soit une baisse de revenus de
-                l’ordre de <b>{DASH}</b> par rapport aux revenus professionnels actuels du couple
-                (<b>{DASH}</b>). Ce taux de remplacement appelle l’anticipation de revenus
-                complémentaires pour préserver le niveau de vie à la retraite.
+                Le cumul des pensions projetées s’élève à{" "}
+                <b>{lire(donnees, "retraite_pensions_cumul")}</b>, soit une baisse de revenus de
+                l’ordre de <b>{lire(donnees, "retraite_taux_remplacement_baisse")}</b> par rapport
+                aux revenus professionnels actuels du couple (
+                <b>{lire(donnees, "retraite_revenus_pro_actuels")}</b>). Ce taux de remplacement
+                appelle l’anticipation de revenus complémentaires pour préserver le niveau de vie à
+                la retraite.
               </p>
             </div>
           </Bloc>
@@ -395,7 +414,8 @@ export default function RetraiteSection({ donnees }: { donnees: EtudeDonnees }) 
                 </svg>
               </span>
               <span className="tt">
-                Un taux de remplacement faible : baisse des ressources de {DASH} à la retraite
+                Un taux de remplacement faible : baisse des ressources de{" "}
+                {lire(donnees, "retraite_taux_remplacement_baisse")} à la retraite
               </span>
               <span className="cert c-moy eng-only" data-certif="retrisq">
                 <span>Confiance modérée · 82 %</span>
@@ -418,16 +438,17 @@ export default function RetraiteSection({ donnees }: { donnees: EtudeDonnees }) 
                 </div>
                 <ul className="dlist">
                   <li>
-                    Le revenu professionnel annuel actuel du couple s’élève à <strong>{DASH}</strong>{" "}
-                    (net imposable).
+                    Le revenu professionnel annuel actuel du couple s’élève à{" "}
+                    <strong>{lire(donnees, "retraite_revenus_pro_actuels")}</strong> (net imposable).
                   </li>
                   <li>
                     Le montant prévisionnel des pensions (régime de base et complémentaire) est estimé
-                    à <strong>{DASH}</strong> bruts par an.
+                    à <strong>{lire(donnees, "retraite_pensions_cumul")}</strong> bruts par an.
                   </li>
                   <li>
-                    Cette projection met en évidence une baisse de revenus de <strong>{DASH}</strong>{" "}
-                    au moment du départ à la retraite.
+                    Cette projection met en évidence une baisse de revenus de{" "}
+                    <strong>{lire(donnees, "retraite_taux_remplacement_baisse")}</strong> au moment du
+                    départ à la retraite.
                   </li>
                 </ul>
               </div>
@@ -526,11 +547,14 @@ export default function RetraiteSection({ donnees }: { donnees: EtudeDonnees }) 
                 <span className="sc-link">Voir le détail</span>
               </div>
               <p>
-                À la retraite, le couple percevrait des pensions de <b>{DASH}</b> pour {colA} et{" "}
-                <b>{DASH}</b> pour {colB}, soit un cumul de <b>{DASH}</b> bruts par an.
+                À la retraite, le couple percevrait des pensions de{" "}
+                <b>{lire(donnees, "retraite_pension_person_a")}</b> pour {colA} et{" "}
+                <b>{lire(donnees, "retraite_pension_person_b")}</b> pour {colB}, soit un cumul de{" "}
+                <b>{lire(donnees, "retraite_pensions_cumul")}</b> bruts par an.
               </p>
               <p>
-                Ce montant représente une baisse de l’ordre de <b>{DASH}</b> par rapport aux revenus
+                Ce montant représente une baisse de l’ordre de{" "}
+                <b>{lire(donnees, "retraite_taux_remplacement_baisse")}</b> par rapport aux revenus
                 professionnels actuels. Le taux de remplacement est donc faible, ce qui est habituel
                 pour des professions libérales fortement rémunérées, dont les cotisations ne couvrent
                 qu’une part limitée du revenu d’activité.

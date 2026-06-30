@@ -10,8 +10,11 @@
  *
  *  1. Replis internes — .shead → .page.modfold (toggleMod), .ab-h → .ablock.open
  *     (toggleAb), .sub-h → .subacc.open (toggleSub), .synth-h → .synthacc.open
- *     (toggleSynth), lignes de dette (.grp-dette → toggleDetteRows). Le repli de
- *     SECTION reste géré par EtudeSection côté React.
+ *     (toggleSynth), .acc-h → .acc.open (toggleAcc, enveloppes « Détail par
+ *     enveloppe »), .pvacc-h → .pvacc.open (plus-value immobilière), .ch →
+ *     .copp.foldopen (toggleCopp, coût d'opportunité), lignes de dette
+ *     (.grp-dette → toggleDetteRows). Le repli de SECTION reste géré par
+ *     EtudeSection côté React.
  *  2. Graphiques — anneaux à segments (.donutbox / .seg) et anneaux à légende
  *     (.donut-block, initDonuts) en survol ; bascule Monsieur / Madame des
  *     barres divergentes (.diverge-wrap, initDiverge). Aucune valeur-exemple
@@ -267,6 +270,43 @@ export function useEtudeBehaviors(
       const detteHead = t.closest<HTMLElement>(".grp-dette");
       if (detteHead && root.contains(detteHead)) {
         toggleDetteRows(detteHead);
+        return;
+      }
+
+      // Enveloppes « Détail par enveloppe » (.acc) — financier, immobilier,
+      // passif. Clic sur .acc-h → bascule .acc.open (le chevron .acc-h .chev
+      // pivote via le CSS .acc.open). Les enveloppes marquées .empty ne se
+      // déplient pas, à l'identique de toggleAcc() dans la maquette.
+      const accHead = t.closest<HTMLElement>(".acc-h");
+      if (accHead && root.contains(accHead)) {
+        const acc = accHead.closest<HTMLElement>(".acc");
+        if (acc && !acc.classList.contains("empty")) acc.classList.toggle("open");
+        return;
+      }
+
+      // Plus-value immobilière (.pvacc) : clic sur .pvacc-h → bascule
+      // .pvacc.open (chevron .pvchev piloté par le CSS), comme la maquette
+      // (onclick="this.parentElement.classList.toggle('open')").
+      const pvaccHead = t.closest<HTMLElement>(".pvacc-h");
+      if (pvaccHead && root.contains(pvaccHead)) {
+        pvaccHead.parentElement?.classList.toggle("open");
+        return;
+      }
+
+      // Coût d'opportunité / capacité de refinancement (.copp) : clic sur
+      // l'en-tête .ch → bascule .copp.foldopen (chevron .cch). Reproduit
+      // toggleCopp() : seuls les blocs munis d'un chevron .cch sont repliables
+      // (le bloc financier « Projection sur 10 ans » est figé ouvert, sans
+      // chevron, donc non câblé) et un clic sur les boutons d'hypothèse
+      // (.hbtn) ou les liens de méthode (.srcbtn) ne replie pas le bloc.
+      const coppHead = t.closest<HTMLElement>(".ch");
+      if (
+        coppHead &&
+        root.contains(coppHead) &&
+        coppHead.parentElement?.classList.contains("copp") &&
+        coppHead.querySelector(".cch")
+      ) {
+        if (!t.closest(".hbtn, .srcbtn")) coppHead.parentElement.classList.toggle("foldopen");
         return;
       }
 

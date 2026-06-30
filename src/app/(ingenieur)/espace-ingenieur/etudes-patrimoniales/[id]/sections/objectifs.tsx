@@ -40,7 +40,7 @@ const CARTES: CarteDefaut[] = [
     blocKey: "Objectif 1 — Optimisation professionnelle et fiscale",
     titre: "Optimisation de la structure professionnelle et de l’efficience fiscale",
     description:
-      "Rationaliser les flux de revenus issus de l’activité libérale afin d’en alléger le frottement fiscal et social. La démarche consiste à arbitrer de façon cohérente entre les différents modes de rémunération, pour maximiser le revenu net réellement disponible du foyer.",
+      "Rationaliser les flux de revenus issus de l’activité professionnelle afin d’en alléger le frottement fiscal et social. La démarche consiste à arbitrer de façon cohérente entre les différents modes de rémunération, pour maximiser le revenu net réellement disponible du foyer.",
   },
   {
     blocKey: "Objectif 2 — Autonomie financière et retraite",

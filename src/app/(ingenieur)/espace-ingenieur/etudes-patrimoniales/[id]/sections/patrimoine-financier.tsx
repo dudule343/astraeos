@@ -349,8 +349,8 @@ export default function PatrimoineFinancier({ donnees }: { donnees: EtudeDonnees
                   </tfoot>
                 </table>
                 <div className="callout" style={{ marginTop: 10 }}>
-                  <strong>À part :</strong> les comptes professionnels sont rattachés aux entreprises
-                  individuelles et analysés dans la section « Sociétés ».
+                  <strong>À part :</strong> les comptes professionnels éventuels sont rattachés à
+                  l&apos;activité professionnelle et analysés dans la section « Sociétés ».
                 </div>
               </div>
             </div>

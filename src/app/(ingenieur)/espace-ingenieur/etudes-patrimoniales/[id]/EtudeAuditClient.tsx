@@ -9,9 +9,10 @@
  * phrase, toasts, tiroir d'aide.
  *
  * Honnête de bout en bout :
- *  - VALIDATION et ÉDITION manuelle = REELLES (server actions → etude_blocs) ;
- *  - transformations IA et rattachement de sources = aperçu « bientôt »
- *    explicitement signalé, jamais de fausse retouche appliquée.
+ *  - VALIDATION, ÉDITION manuelle et TRANSFORMATIONS IA = REELLES (server
+ *    actions → etude_blocs ; transformerTexte appelle le modèle du cabinet) ;
+ *  - le rattachement de sources reste un aperçu « bientôt » explicitement
+ *    signalé, jamais de fausse référence appliquée.
  *
  * Frontière client/serveur : ce composant n'importe que le module pur
  * (structure), le système de blocs et les server actions (stubs RPC). Aucune
@@ -32,11 +33,13 @@ import {
 import type { BlocState } from "../../../_data/etudes-patrimoniales";
 import {
   editBloc,
+  transformerTexte,
   unvalidateBloc as unvalidateBlocAction,
   validateAll,
   validateBloc,
 } from "../actions";
 import { BlocProvider, type BlocContextValue, type ViewMode } from "./Bloc";
+import { readBlocHtml, readBlocText } from "./sanitize";
 import { getCertifPanel, type CertifDet, type CertifPanel } from "./certif-data";
 import type { AuditSection, TocEntry } from "./etude-audit-structure";
 import { useEtudeBehaviors } from "./use-etude-behaviors";
@@ -181,7 +184,7 @@ const HELP_ROWS: { d: string; title: string; desc: string }[] = [
   {
     d: "M4 12a8 8 0 0 1 14-5l2 2M20 4v5h-5",
     title: "Transformations IA",
-    desc: "Six retouches du texte — reformuler, approfondir, simplifier, corriger, compléter, ajuster. Chacune propose un aperçu, à venir.",
+    desc: "Six retouches du texte : reformuler, approfondir, simplifier, corriger, compléter, ajuster. Chacune propose un aperçu réel que vous appliquez ou annulez.",
   },
   {
     d: "M4 19.5A2.5 2.5 0 0 1 6.5 17H20M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z",
@@ -215,10 +218,37 @@ type Target =
   | { kind: "phrase"; text: string };
 
 type Preview =
-  | { kind: "ia"; action: string }
+  | {
+      kind: "ia";
+      action: string;
+      status: "loading" | "ready" | "error";
+      /** texte transformé renvoyé par le modèle (status « ready »). */
+      result?: string;
+      /** raison honnête en cas d'échec (status « error »). */
+      message?: string;
+    }
   | { kind: "sources" }
   | { kind: "edit" }
   | null;
+
+/** Cible figée au moment où l'on lance une transformation IA. */
+type IaCapture =
+  | { kind: "phrase"; range: Range; blocKey: string; text: string }
+  | { kind: "bloc"; blocKey: string; text: string };
+
+/**
+ * Remplace tout le contenu visible d'un bloc par un texte (nœud texte, jamais
+ * d'HTML), en préservant le tampon de validation rendu par React.
+ */
+function replaceBlocContent(el: HTMLElement, text: string) {
+  const badge = el.querySelector(".validated-badge");
+  Array.from(el.childNodes).forEach((n) => {
+    if (n !== badge) el.removeChild(n);
+  });
+  const tn = document.createTextNode(text);
+  if (badge) el.insertBefore(tn, badge);
+  else el.appendChild(tn);
+}
 
 export default function EtudeAuditClient({
   etudeId,
@@ -258,6 +288,14 @@ export default function EtudeAuditClient({
   const docwrapRef = useRef<HTMLDivElement | null>(null);
   const blocEls = useRef<Map<string, HTMLElement>>(new Map());
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Phrase surlignée capturée au relâché de souris (Range + bloc contenant),
+  // pour rester valide même si la sélection se vide en cliquant une action.
+  const phraseRangeRef = useRef<{ range: Range; blocKey: string } | null>(null);
+  // Cible figée au lancement d'une transformation IA, réutilisée à « Appliquer ».
+  const iaCaptureRef = useRef<IaCapture | null>(null);
+  // Jeton de révision par bloc : incrémenté à chaque application IA pour forcer
+  // le remontage de l'élément de lecture (le contenu a été muté hors React).
+  const blocRevRef = useRef<Map<string, number>>(new Map());
 
   const showToast = useCallback((m: string) => {
     setToast(m);
@@ -297,13 +335,27 @@ export default function EtudeAuditClient({
 
   function onDocMouseUp() {
     if (view !== "ing" || mode !== "bloc" || editingKey) return;
-    const raw = (typeof window !== "undefined" ? window.getSelection()?.toString() : "") ?? "";
-    const t = raw.trim();
-    if (t.length > 3) {
-      setTarget({ kind: "phrase", text: t.length > 120 ? `${t.slice(0, 120)}…` : t });
-      setSelectedKey(null);
-      setPreview(null);
-    }
+    const sel = typeof window !== "undefined" ? window.getSelection() : null;
+    const t = (sel?.toString() ?? "").trim();
+    if (t.length <= 3 || !sel || sel.rangeCount === 0) return;
+
+    const range = sel.getRangeAt(0);
+    const blocOf = (node: Node | null): HTMLElement | null => {
+      const el = node && node.nodeType === 1 ? (node as HTMLElement) : node?.parentElement ?? null;
+      return el?.closest<HTMLElement>("[data-block]") ?? null;
+    };
+    const startBloc = blocOf(range.startContainer);
+    const endBloc = blocOf(range.endContainer);
+    // On n'agit que sur une phrase contenue dans un seul bloc : ailleurs la
+    // sélection n'est pas une cible exploitable.
+    if (!startBloc || startBloc !== endBloc) return;
+    const key = startBloc.getAttribute("data-block");
+    if (!key) return;
+
+    phraseRangeRef.current = { range: range.cloneRange(), blocKey: key };
+    setTarget({ kind: "phrase", text: t.length > 120 ? `${t.slice(0, 120)}…` : t });
+    setSelectedKey(null);
+    setPreview(null);
   }
 
   const hasTarget = target.kind === "bloc" || target.kind === "phrase";
@@ -337,7 +389,118 @@ export default function EtudeAuditClient({
       setPreview({ kind: "sources" });
       return;
     }
-    setPreview({ kind: "ia", action: a });
+    void runIa(a);
+  }
+
+  /** Fige la cible (phrase surlignée prioritaire, sinon bloc) au lancement IA. */
+  function captureCible(): IaCapture | null {
+    if (target.kind === "phrase") {
+      const cap = phraseRangeRef.current;
+      if (
+        cap &&
+        cap.range.startContainer.isConnected &&
+        cap.range.endContainer.isConnected
+      ) {
+        const text = cap.range.toString().trim();
+        if (text) return { kind: "phrase", range: cap.range, blocKey: cap.blocKey, text };
+      }
+      return null;
+    }
+    if (target.kind === "bloc" && selectedKey) {
+      const el = blocEls.current.get(selectedKey);
+      const text = el ? readBlocText(el) : "";
+      if (text) return { kind: "bloc", blocKey: selectedKey, text };
+    }
+    return null;
+  }
+
+  async function runIa(action: string) {
+    const cap = captureCible();
+    if (!cap) {
+      showToast("Sélectionnez à nouveau un bloc ou une phrase");
+      return;
+    }
+    iaCaptureRef.current = cap;
+    setPreview({ kind: "ia", action, status: "loading" });
+    const res = await transformerTexte(action, cap.text);
+    // L'ingénieur peut avoir fermé l'aperçu ou lancé une autre action entre-temps.
+    setPreview((prev) => {
+      if (!prev || prev.kind !== "ia" || prev.action !== action || prev.status !== "loading") {
+        return prev;
+      }
+      if (res.ok && res.texte) {
+        return { kind: "ia", action, status: "ready", result: res.texte };
+      }
+      return {
+        kind: "ia",
+        action,
+        status: "error",
+        message: res.raison ?? "La transformation a échoué.",
+      };
+    });
+  }
+
+  /** Applique réellement le résultat IA : remplace la sélection puis persiste. */
+  function applyIa() {
+    const cap = iaCaptureRef.current;
+    if (!cap || !preview || preview.kind !== "ia" || preview.status !== "ready" || !preview.result) {
+      return;
+    }
+    const result = preview.result;
+    const key = cap.blocKey;
+    const el = blocEls.current.get(key);
+    if (!el) {
+      showToast("Bloc introuvable");
+      return;
+    }
+    const previousContenu = blocStates[key]?.contenu ?? null;
+
+    if (cap.kind === "phrase") {
+      if (!cap.range.startContainer.isConnected || !cap.range.toString().trim()) {
+        showToast("La sélection n'est plus valide, recommencez");
+        return;
+      }
+      // Remplacement en NŒUD TEXTE : aucune injection HTML possible.
+      cap.range.deleteContents();
+      cap.range.insertNode(document.createTextNode(result));
+    } else {
+      replaceBlocContent(el, result);
+    }
+
+    // innerHTML relu après mutation (tampon écarté, enveloppe dé-emballée) :
+    // c'est la source persistée et ré-affichée.
+    const html = readBlocHtml(el);
+    // Le contenu visible vient d'être muté hors React (deleteContents /
+    // remplacement de nœud). On bascule la clé de l'élément de lecture pour le
+    // remonter proprement, au lieu de laisser React réconcilier des nœuds déjà
+    // détachés (ce qui ferait échouer removeChild).
+    blocRevRef.current.set(key, (blocRevRef.current.get(key) ?? 0) + 1);
+    setBlocStates((prev) => ({
+      ...prev,
+      [key]: { ...(prev[key] ?? { valide: false, valideAt: null, contenu: null }), contenu: html || null },
+    }));
+    setPreview(null);
+    setTarget({ kind: "bloc", label: key });
+    setSelectedKey(key);
+    phraseRangeRef.current = null;
+    iaCaptureRef.current = null;
+    if (typeof window !== "undefined") window.getSelection()?.removeAllRanges();
+
+    startTransition(async () => {
+      const res = await editBloc(etudeId, key, html);
+      if (res.ok) {
+        showToast("Transformation appliquée");
+      } else {
+        setBlocStates((prev) => ({
+          ...prev,
+          [key]: {
+            ...(prev[key] ?? { valide: false, valideAt: null, contenu: null }),
+            contenu: previousContenu,
+          },
+        }));
+        showToast(res.error ?? "Échec de l'enregistrement");
+      }
+    });
   }
 
   function startEdit() {
@@ -355,16 +518,17 @@ export default function EtudeAuditClient({
     if (!key) return;
     if (save) {
       const el = blocEls.current.get(key);
-      const text = (el?.textContent ?? "").trim();
+      // innerHTML (et non innerText) pour préserver la mise en forme saisie.
+      const html = el ? readBlocHtml(el) : "";
       const previousContenu = blocStates[key]?.contenu ?? null;
-      // Mise à jour optimiste : on affiche le texte saisi tout de suite (pas de
+      // Mise à jour optimiste : on affiche le contenu saisi tout de suite (pas de
       // retour visuel à l'original le temps de l'aller-retour serveur).
       setBlocStates((prev) => ({
         ...prev,
-        [key]: { ...(prev[key] ?? { valide: false, valideAt: null, contenu: null }), contenu: text || null },
+        [key]: { ...(prev[key] ?? { valide: false, valideAt: null, contenu: null }), contenu: html || null },
       }));
       startTransition(async () => {
-        const res = await editBloc(etudeId, key, text);
+        const res = await editBloc(etudeId, key, html);
         if (res.ok) {
           showToast("Modifications enregistrées");
         } else {
@@ -552,6 +716,7 @@ export default function EtudeAuditClient({
       isValidated: (k) => !!blocStates[k]?.valide,
       validatedAt: (k) => blocStates[k]?.valideAt ?? null,
       editedContent: (k) => blocStates[k]?.contenu ?? null,
+      editedRev: (k) => blocRevRef.current.get(k) ?? 0,
       selectBloc,
       unvalidateBloc: handleUnvalidate,
       attachEl,
@@ -727,6 +892,7 @@ export default function EtudeAuditClient({
                 pending={pending}
                 onClose={() => setPreview(null)}
                 onFinishEdit={finishEdit}
+                onApplyIa={applyIa}
               />
             ) : null}
 
@@ -888,7 +1054,8 @@ function VTarget({ mode, target }: { mode: "bloc" | "glob"; target: Target }) {
 }
 
 // ---------------------------------------------------------------------------
-// Aperçu du volet (vprev) — IA « bientôt », sources « bientôt », édition réelle
+// Aperçu du volet (vprev) — IA réelle (aperçu + Appliquer/Annuler), édition
+// réelle, sources « bientôt »
 // ---------------------------------------------------------------------------
 
 function PreviewBox({
@@ -896,11 +1063,13 @@ function PreviewBox({
   pending,
   onClose,
   onFinishEdit,
+  onApplyIa,
 }: {
   preview: NonNullable<Preview>;
   pending: boolean;
   onClose: () => void;
   onFinishEdit: (save: boolean) => void;
+  onApplyIa: () => void;
 }) {
   if (preview.kind === "edit") {
     return (
@@ -954,20 +1123,67 @@ function PreviewBox({
   }
 
   // preview.kind === "ia"
+  if (preview.status === "loading") {
+    return (
+      <div className="vprev">
+        <span className="pl">Aperçu · {preview.action}</span>
+        <div className="pb">{ACTS[preview.action]?.r}</div>
+        <div className="pnote">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+            <path d="M12 8v4m0 4h.01" />
+            <circle cx="12" cy="12" r="9" />
+          </svg>
+          Transformation en cours…
+        </div>
+        <div className="pa">
+          <button type="button" className="ca" onClick={onClose}>
+            Annuler
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (preview.status === "error") {
+    return (
+      <div className="vprev">
+        <span className="pl">Aperçu · {preview.action}</span>
+        <div className="pnote">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+            <path d="M12 8v4m0 4h.01" />
+            <circle cx="12" cy="12" r="9" />
+          </svg>
+          {preview.message ?? "La transformation a échoué."}
+        </div>
+        <div className="pa">
+          <button type="button" className="ca" onClick={onClose}>
+            Fermer
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // status === "ready" : aperçu réel du texte transformé.
   return (
     <div className="vprev">
       <span className="pl">Aperçu · {preview.action}</span>
-      <div className="pb">{ACTS[preview.action]?.r}</div>
+      <div className="pb" style={{ whiteSpace: "pre-wrap" }}>
+        {preview.result}
+      </div>
       <div className="pnote">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-          <path d="M12 8v4m0 4h.01" />
-          <circle cx="12" cy="12" r="9" />
+          <path d="M9 11l3 3 8-8" />
+          <path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9" />
         </svg>
-        Retouche assistée par IA — bientôt disponible.
+        « Appliquer » remplace la sélection dans le document, puis enregistre.
       </div>
       <div className="pa">
-        <button type="button" className="ca" onClick={onClose}>
-          Fermer
+        <button type="button" className="ap" onClick={onApplyIa} disabled={pending}>
+          {pending ? "Application…" : "Appliquer"}
+        </button>
+        <button type="button" className="ca" onClick={onClose} disabled={pending}>
+          Annuler
         </button>
       </div>
     </div>

@@ -396,7 +396,7 @@ export default function PatrimoinePassif({ donnees }: { donnees: EtudeDonnees })
                     cy="70"
                     r="54"
                     stroke="#102D50"
-                    strokeDasharray="227.78 111.51"
+                    strokeDasharray="0 339.29"
                     strokeDashoffset="0"
                   />
                   <circle
@@ -406,8 +406,8 @@ export default function PatrimoinePassif({ donnees }: { donnees: EtudeDonnees })
                     cy="70"
                     r="54"
                     stroke="#C68E0E"
-                    strokeDasharray="104.40 234.89"
-                    strokeDashoffset="-227.78"
+                    strokeDasharray="0 339.29"
+                    strokeDashoffset="0"
                   />
                   <circle
                     className="seg"
@@ -416,8 +416,8 @@ export default function PatrimoinePassif({ donnees }: { donnees: EtudeDonnees })
                     cy="70"
                     r="54"
                     stroke="#708196"
-                    strokeDasharray="7.12 332.17"
-                    strokeDashoffset="-332.18"
+                    strokeDasharray="0 339.29"
+                    strokeDashoffset="0"
                   />
                 </g>
               </svg>
@@ -463,7 +463,7 @@ export default function PatrimoinePassif({ donnees }: { donnees: EtudeDonnees })
                     cy="70"
                     r="54"
                     stroke="#102D50"
-                    strokeDasharray="121.00 218.29"
+                    strokeDasharray="0 339.29"
                     strokeDashoffset="0"
                   />
                   <circle
@@ -473,8 +473,8 @@ export default function PatrimoinePassif({ donnees }: { donnees: EtudeDonnees })
                     cy="70"
                     r="54"
                     stroke="#C68E0E"
-                    strokeDasharray="218.29 121.00"
-                    strokeDashoffset="-121.00"
+                    strokeDasharray="0 339.29"
+                    strokeDashoffset="0"
                   />
                 </g>
               </svg>

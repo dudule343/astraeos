@@ -520,7 +520,7 @@ export default function PatrimoineConclusion({ donnees }: { donnees: EtudeDonnee
                 Le patrimoine professionnel s’élève à <strong>{eur(v.actifs_professionnels)}</strong>,
                 deuxième poste du patrimoine (<strong>{DASH}</strong> %).
               </li>
-              <li>Il est étroitement lié à l’activité libérale et peu liquide.</li>
+              <li>Il est étroitement lié à l’activité professionnelle et peu liquide.</li>
             </ul>
           </DimConstat>
           <Rio
@@ -536,7 +536,7 @@ export default function PatrimoineConclusion({ donnees }: { donnees: EtudeDonnee
               en sécurité et en liquidité par une structuration anticipée.
             </p>
           </DimImpact>
-          <DimJustif>Bilans des activités libérales et structure de détention.</DimJustif>
+          <DimJustif>Bilans des activités professionnelles et structure de détention.</DimJustif>
         </AbGrid2>
         <AbFoot>
           <b>Préconisation :</b> étudier la structuration et la transmission de l’outil professionnel
@@ -559,7 +559,10 @@ export default function PatrimoineConclusion({ donnees }: { donnees: EtudeDonnee
                 Le patrimoine net atteint <strong>{eur(v.patrimoine_net)}</strong>, détenu sous{" "}
                 {RegimeFragment}, avec {enfants}.
               </li>
-              <li>La détention combine indivision, SCI et biens propres.</li>
+              <li>
+                La structure de détention est à préciser au regard de l’inventaire (indivision,
+                société civile, biens propres).
+              </li>
             </ul>
           </DimConstat>
           <Rio
@@ -603,9 +606,9 @@ export default function PatrimoineConclusion({ donnees }: { donnees: EtudeDonnee
           <DimConstat>
             <ul className="dlist">
               <li>
-                La résidence principale et les parkings (<strong>{eur(v.residence_principale)}</strong>)
-                sont libres de toute hypothèque ; le capital restant dû total s&rsquo;élève à{" "}
-                <strong>{eur(v.credit_capital_restant)}</strong> sur les deux appartements.
+                Une partie du parc immobilier (<strong>{eur(v.residence_principale)}</strong>) est
+                libre de toute hypothèque ; le capital restant dû total s&rsquo;élève à{" "}
+                <strong>{eur(v.credit_capital_restant)}</strong> sur les biens financés.
               </li>
               <li>Le service annuel de la dette reste modéré au regard de la valeur du parc.</li>
               <li>
@@ -662,15 +665,15 @@ export default function PatrimoineConclusion({ donnees }: { donnees: EtudeDonnee
           <DimConstat>
             <ul className="dlist">
               <li>
-                Une <strong>Contribution sur les revenus locatifs</strong> est acquittée pour deux
-                appartements (<strong>{DASH}</strong> et <strong>{DASH}</strong>).
+                Une <strong>Contribution sur les revenus locatifs</strong> est acquittée pour les
+                biens concernés (<strong>{DASH}</strong>).
               </li>
               <li>
                 Cette contribution vise principalement les revenus perçus par des personnes morales
                 soumises à l’impôt sur les sociétés.
               </li>
               <li>
-                Or ces biens sont détenus par des <strong>personnes physiques</strong> —
+                Or, lorsque ces biens sont détenus par des <strong>personnes physiques</strong>,
                 l’assujettissement ne paraît pas juridiquement fondé.
               </li>
             </ul>
@@ -775,12 +778,12 @@ export default function PatrimoineConclusion({ donnees }: { donnees: EtudeDonnee
           <DimConstat>
             <ul className="dlist">
               <li>
-                Sur l’appartement meublé détenu en nom propre, les charges représentent{" "}
+                Sur le bien meublé détenu en nom propre, le cas échéant, les charges représentent{" "}
                 <strong>{DASH}</strong>, soit ≈ <strong>{DASH} %</strong> du chiffre d’affaires — un
                 poste à surveiller.
               </li>
               <li>
-                Sur les studios détenus en <strong>SCI</strong>, ce ratio atteint près de{" "}
+                Sur les biens détenus en <strong>société civile</strong>, ce ratio atteint près de{" "}
                 <strong>{DASH} %</strong> (honoraires comptables, copropriété, assurances, frais
                 d’agence) — analysé dans le thème « Sociétés ».
               </li>
@@ -813,7 +816,7 @@ export default function PatrimoineConclusion({ donnees }: { donnees: EtudeDonnee
           <DimConstat>
             <ul className="dlist">
               <li>
-                L’appartement meublé est exploité en location meublée non professionnelle : les
+                Le bien meublé concerné est exploité en location meublée non professionnelle : les
                 recettes (<strong>{DASH}</strong>) restent inférieures à 23 000 € et aux autres
                 revenus du foyer.
               </li>
@@ -884,8 +887,8 @@ export default function PatrimoineConclusion({ donnees }: { donnees: EtudeDonnee
           <DimConstat>
             <ul className="dlist">
               <li>
-                Pour les biens financés par emprunt — détenus via la SCI, ou en location meublée non
-                professionnelle (LMNP) et professionnelle (LMP) — une assurance emprunteur garantit le
+                Pour les biens financés par emprunt — détenus via une société civile, ou en location
+                meublée non professionnelle (LMNP) ou professionnelle (LMP) — une assurance emprunteur garantit le
                 remboursement du prêt en cas de décès ou de perte totale et irréversible d’autonomie
                 d’un assuré.
               </li>
@@ -919,7 +922,7 @@ export default function PatrimoineConclusion({ donnees }: { donnees: EtudeDonnee
           <DimImpact>
             <p>
               <b>SCI à l’impôt sur les sociétés :</b> produit = capital restant dû remboursé (à titre
-              d’illustration, ≈ <b>{DASH}</b> sur le local financé), imposé à l’impôt sur les sociétés,{" "}
+              d’illustration, ≈ <b>{DASH}</b> sur le bien financé), imposé à l’impôt sur les sociétés,{" "}
               <b>étalable sur 5 ans</b>. <b>SCI à l’impôt sur le revenu :</b> l’indemnité constitue des{" "}
               <b>recettes foncières</b> dès lors que les intérêts ont été déduits.{" "}
               <b>Location meublée au réel (LMNP ou LMP) :</b> le capital remboursé constitue un{" "}
@@ -1128,7 +1131,7 @@ export default function PatrimoineConclusion({ donnees }: { donnees: EtudeDonnee
                 Les financements en cours s’échelonnent de <strong>{DASH}</strong>.
               </li>
               <li>
-                Le prêt de l’appartement meublé (<strong>{DASH}</strong>) et le crédit à la
+                Le prêt du bien meublé (<strong>{DASH}</strong>) et le crédit à la
                 consommation (<strong>{DASH}</strong>) ressortent{" "}
                 <strong>au-dessus des conditions de marché</strong> actuelles (≈ <strong>{DASH}</strong>{" "}
                 sur 15 ans).
@@ -1186,12 +1189,12 @@ export default function PatrimoineConclusion({ donnees }: { donnees: EtudeDonnee
           <DimConstat>
             <ul className="dlist">
               <li>
-                Le prêt du local professionnel (SCI) est assuré à une{" "}
+                Le prêt du local professionnel (société civile) est assuré à une{" "}
                 <strong>quotité de {DASH} par tête</strong>, soit <strong>{DASH}</strong> au global.
               </li>
               <li>
                 Son coût (≈ <strong>{DASH}</strong> / mois) <strong>pèse sur la rentabilité</strong> de
-                la SCI.
+                la société civile.
               </li>
             </ul>
           </DimConstat>
@@ -1211,7 +1214,8 @@ export default function PatrimoineConclusion({ donnees }: { donnees: EtudeDonnee
             }
             optimisation={
               <>
-                Relever les quotités (cible <strong>100 % par tête</strong> sur les prêts SCI) et
+                Relever les quotités (cible <strong>100 % par tête</strong> sur les prêts logés en
+                société civile) et
                 mettre l’assurance en concurrence par délégation.
               </>
             }
@@ -1243,7 +1247,7 @@ export default function PatrimoineConclusion({ donnees }: { donnees: EtudeDonnee
       <Bloc blocKey="Caution solidaire — exposition personnelle" className="ablock fold">
         <AbHead
           mx={MxCaution}
-          title="Caution solidaire — la dette des SCI pèse sur le patrimoine personnel"
+          title="Caution solidaire — la dette des sociétés civiles pèse sur le patrimoine personnel"
           level="moy"
           label="Confiance modérée · 80 %"
         />
@@ -1251,8 +1255,8 @@ export default function PatrimoineConclusion({ donnees }: { donnees: EtudeDonnee
           <DimConstat>
             <ul className="dlist">
               <li>
-                Les deux financements logés dans les SCI (studios locatifs et local professionnel)
-                représentent <strong>{DASH}</strong> de capital restant dû.
+                Les financements logés dans les sociétés civiles représentent{" "}
+                <strong>{DASH}</strong> de capital restant dû.
               </li>
               <li>
                 Ces prêts sont assortis d’une <strong>caution solidaire</strong> consentie
@@ -1264,9 +1268,10 @@ export default function PatrimoineConclusion({ donnees }: { donnees: EtudeDonnee
           <Rio
             risque={
               <>
-                Sous le régime de la <strong>séparation de biens</strong>, l’engagement de caution
-                n’est pas couvert par les protections propres aux régimes communautaires : il pèse sur
-                le <strong>patrimoine propre</strong> de chaque caution, au-delà du capital social.
+                L’étendue de cette exposition dépend du régime matrimonial : sous un{" "}
+                <strong>régime séparatif</strong>, l’engagement de caution n’est pas couvert par les
+                protections propres aux régimes communautaires et pèse sur le{" "}
+                <strong>patrimoine propre</strong> de chaque caution, au-delà du capital social.
               </>
             }
             opportunite={
@@ -1290,7 +1295,7 @@ export default function PatrimoineConclusion({ donnees }: { donnees: EtudeDonnee
             </p>
           </DimImpact>
           <DimJustif fn="¹" sources="sources">
-            Contrats de prêt des SCI et actes de cautionnement ; régime de la séparation de biens.
+            Contrats de prêt des sociétés civiles et actes de cautionnement ; régime matrimonial.
           </DimJustif>
         </AbGrid2>
         <Fond title="Fondements juridiques">
@@ -1302,7 +1307,7 @@ export default function PatrimoineConclusion({ donnees }: { donnees: EtudeDonnee
           </LawChip>
         </Fond>
         <AbFoot>
-          <b>Préconisations :</b> renégociation des cautions bancaires des SCI et délégation
+          <b>Préconisations :</b> renégociation des cautions bancaires des sociétés civiles et délégation
           d’assurance emprunteur (chiffrées dans la partie « Préconisations »).
         </AbFoot>
       </Bloc>
@@ -1340,7 +1345,7 @@ export default function PatrimoineConclusion({ donnees }: { donnees: EtudeDonnee
             Le patrimoine net du foyer s’établit à <b>{eur(v.patrimoine_net)}</b>, pour un patrimoine
             brut de {eur(v.patrimoine_brut)}. Il est diversifié entre l’immobilier (d’usage et de
             rapport), le patrimoine professionnel, l’assurance-vie et les placements financiers, et se
-            répartit de façon équilibrée entre les conjoints (<b>{DASH}</b> et <b>{DASH}</b>) sous{" "}
+            répartit entre les conjoints (<b>{DASH}</b> et <b>{DASH}</b>) sous{" "}
             {regime ? (
               <>
                 le régime de la <b>{regime}</b>

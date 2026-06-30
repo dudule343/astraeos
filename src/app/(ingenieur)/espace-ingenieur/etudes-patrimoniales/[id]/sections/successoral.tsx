@@ -15,7 +15,7 @@
  * - Identité des membres du foyer : les conjoints sont nommés à partir du RÉEL
  *   (personnes person_a/person_b) ; les enfants, dont les prénoms n'existent pas
  *   en base, sont désignés par des libellés neutres (« Premier enfant »…). Aucun
- *   nom d'exemple de la maquette (« Delaunay », « Hugo », « Léa ») n'est recopié.
+ *   nom d'exemple de la maquette n'est recopié.
  * - Tous les MONTANTS du calcul successoral (masses transmises/taxables, droits,
  *   assurance-vie, coûts globaux, parts taxables, droits par tranche, totaux de
  *   synthèse…) n'existent pas en base : ils sont affichés « — », éditables,

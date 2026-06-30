@@ -366,20 +366,20 @@ function buildABlocks(donnees: EtudeDonnees): Record<string, ReactNode> {
         constat={
           <ul className="dlist">
             <li>
-              Une clause d’exécution « au jour le jour » de la contribution aux charges du mariage
-              figure au contrat.
+              Présence d’une clause d’exécution « au jour le jour » de la contribution aux charges du
+              mariage : à vérifier au contrat du foyer.
             </li>
             <li>
-              Elle rend les époux irrecevables à contester leur part de contribution ultérieurement
-              (aménagement de l’article 214 du Code civil).
+              Lorsqu’elle est prévue, elle rend les époux irrecevables à contester leur part de
+              contribution ultérieurement (aménagement de l’article 214 du Code civil).
             </li>
           </ul>
         }
         risque="Elle nécessite une vigilance particulière sur le paiement des dépenses courantes, afin d’éviter tout déséquilibre économique majeur non compensable."
         opportunite="Elle est particulièrement protectrice en cas de séparation : un époux ne peut réclamer un remboursement au motif qu’il aurait payé plus que sa part durant la vie commune."
         optimisation="Maintenir un suivi des dépenses courantes pour préserver l’équilibre de la répartition."
-        impact="Équilibre dans la répartition des dépenses du foyer, sécurisé par une présomption de paiement libératoire."
-        justification="Contrat de mariage et clause d’exécution « au jour le jour » (article 214 du Code civil)."
+        impact="Équilibre dans la répartition des dépenses du foyer, sécurisé par une présomption de paiement libératoire lorsque la clause est prévue."
+        justification="Clause d’exécution « au jour le jour » de la contribution aux charges (aménagement de l’article 214 du Code civil), à confirmer au contrat de mariage du foyer."
         preconisation={<>veiller à l’équilibre du paiement des dépenses courantes (partie « Préconisations »).</>}
       />
     ),
@@ -392,9 +392,10 @@ function buildABlocks(donnees: EtudeDonnees): Record<string, ReactNode> {
         constat={
           <ul className="dlist">
             <li>
-              Le contrat ayant été signé en {marriageYear(donnees)} sans état descriptif, il pourrait
-              être complexe de prouver l’origine de certains biens ou liquidités détenus avant le
-              mariage.
+              À défaut d’état descriptif des biens établi à la signature du contrat (en{" "}
+              {marriageYear(donnees)}), il pourrait être complexe de prouver l’origine de certains
+              biens ou liquidités détenus avant le mariage. La présence d’un tel état est à vérifier
+              pour ce dossier.
             </li>
           </ul>
         }
@@ -402,7 +403,7 @@ function buildABlocks(donnees: EtudeDonnees): Record<string, ReactNode> {
         opportunite="L’établissement d’un état des biens propres détenus avant le mariage réduirait l’incertitude sur leur origine."
         optimisation="Constituer un inventaire des biens et liquidités propres antérieurs au mariage, avec les justificatifs disponibles."
         impact="Présomption de propriété par moitié pour tout bien non justifié, lors de la liquidation du régime."
-        justification={`Contrat de mariage de ${marriageYear(donnees)} sans état descriptif ; présomption d’indivision (article 1538, alinéa 3 du Code civil).`}
+        justification={`Contrat de mariage de ${marriageYear(donnees)} ; à défaut d’état descriptif des biens, présomption d’indivision (article 1538, alinéa 3 du Code civil).`}
         preconisation={<>constituer un inventaire des biens propres (partie « Préconisations »).</>}
       />
     ),
@@ -790,17 +791,18 @@ export default function MatrimonialSection({ donnees }: { donnees: EtudeDonnees 
           <div className="mod-body">
             <Bloc blocKey="Aménagements du contrat de mariage">
               <p>
-                Le contrat de mariage comporte plusieurs aménagements qui précisent et renforcent la
-                portée du régime de {reg} :
+                Un contrat de mariage peut comporter plusieurs aménagements qui précisent et renforcent
+                la portée du régime de {reg}. Les clauses retenues dans le contrat du foyer sont à
+                reprendre et à valider parmi les aménagements usuels suivants :
               </p>
             </Bloc>
             <ul className="dlist">
               <li>
                 <b>Contribution aux charges du mariage :</b> la contribution est proportionnelle aux
-                facultés respectives des époux. Une clause d’exécution « au jour le jour » a été mise
-                en place, rendant les époux irrecevables à contester leur part de contribution
-                ultérieurement. Cette clause constitue un aménagement de la portée de l’article 214 du
-                Code civil en instaurant une présomption de paiement libératoire.
+                facultés respectives des époux. Lorsqu’une clause d’exécution « au jour le jour » est
+                prévue, elle rend les époux irrecevables à contester leur part de contribution
+                ultérieurement. Une telle clause constitue un aménagement de la portée de l’article 214
+                du Code civil en instaurant une présomption de paiement libératoire.
               </li>
               <li>
                 <b>Clause de présomption de propriété :</b> preuve par tous moyens. En l’absence de
@@ -808,19 +810,18 @@ export default function MatrimonialSection({ donnees }: { donnees: EtudeDonnees 
                 compte. Indivision par moitié pour les biens non justifiés.
               </li>
               <li>
-                <b>Responsabilité des dettes (article 4 du contrat) :</b> le contrat précise une
-                garantie d’indemnisation par la succession de l’autre époux pour les engagements
-                contractés pour le conjoint. Cette disposition sécurise le patrimoine personnel de
-                chaque époux en cas d’engagement pour le compte de l’autre durant l’union.
+                <b>Responsabilité des dettes :</b> certains contrats prévoient une garantie
+                d’indemnisation par la succession de l’autre époux pour les engagements contractés pour
+                le conjoint. Cette disposition sécurise le patrimoine personnel de chaque époux en cas
+                d’engagement pour le compte de l’autre durant l’union.
               </li>
               <li>
-                <b>Évaluation des créances entre époux (article 5 du contrat) :</b> le contrat stipule
-                que les créances entre les époux seront évaluées selon les règles de l’article 1469,
-                alinéa 3 du Code civil. Il s’agit d’un aménagement important car, par défaut dans une
-                séparation de biens, les créances sont évaluées selon leur montant nominal. Ici,
-                l’utilisation du « profit subsistant » implique que si Monsieur ou Madame finance un
-                bien propre de l’autre, la créance suivra la valeur du bien (plus-value) plutôt que la
-                simple somme déboursée.
+                <b>Évaluation des créances entre époux :</b> un contrat peut stipuler que les créances
+                entre les époux seront évaluées selon les règles de l’article 1469, alinéa 3 du Code
+                civil. Il s’agit d’un aménagement important car, par défaut dans une séparation de
+                biens, les créances sont évaluées selon leur montant nominal. L’utilisation du « profit
+                subsistant » implique que si l’un des époux finance un bien propre de l’autre, la
+                créance suit la valeur du bien (plus-value) plutôt que la simple somme déboursée.
               </li>
             </ul>
             <GoldLabel>Risques et opportunités</GoldLabel>
@@ -828,14 +829,15 @@ export default function MatrimonialSection({ donnees }: { donnees: EtudeDonnees 
             {ab.inventaire}
             <SynthAcc anchorId="synthese-theme-mat-amenagements" heading="Aménagements du contrat de mariage">
               <p>
-                Les aménagements du contrat renforcent la protection du régime : clause de
+                Les aménagements du contrat peuvent renforcer la protection du régime : clause de
                 contribution « au jour le jour », présomption de propriété, garantie d’indemnisation et
-                évaluation au profit subsistant. L’absence d’inventaire initial demeure le principal
-                point d’attention.
+                évaluation au profit subsistant. Ceux retenus dans le contrat du foyer sont à confirmer.
+                À défaut d’inventaire initial des biens propres, ce point demeure une attention
+                principale.
               </p>
               <Recap
                 risques={[
-                  "Absence d’inventaire initial (présomption par moitié).",
+                  "À défaut d’inventaire initial : présomption par moitié.",
                   "Vigilance sur l’équilibre des dépenses courantes.",
                 ]}
                 opportunites={[
@@ -885,20 +887,21 @@ export default function MatrimonialSection({ donnees }: { donnees: EtudeDonnees 
             {ab.inventaire}
             <SynthAcc anchorId="synthese-theme-matrimonial" heading="Analyse matrimoniale — lecture stratégique">
               <p>
-                Le couple est marié sous le régime de la {reg} depuis le {dateLong}, assorti
-                d’aménagements protecteurs : clause de contribution « au jour le jour », présomption de
-                propriété, garantie d’indemnisation entre successions et évaluation des créances au
-                profit subsistant.
+                Le couple est marié sous le régime de la {reg} depuis le {dateLong}. Le contrat peut
+                être assorti d’aménagements protecteurs (clause de contribution « au jour le jour »,
+                présomption de propriété, garantie d’indemnisation entre successions, évaluation des
+                créances au profit subsistant), à reprendre et à confirmer au cas par cas pour ce
+                dossier.
               </p>
               <p>
                 Ce cadre assure une autonomie patrimoniale forte et protège le patrimoine personnel de
                 chaque époux face aux dettes de l’autre. Le principal point de vigilance tient à
-                l’absence d’inventaire initial : faute de preuve d’origine, les biens non justifiés
-                seraient présumés indivis par moitié à la dissolution.
+                l’établissement d’un inventaire initial : à défaut de preuve d’origine, les biens non
+                justifiés seraient présumés indivis par moitié à la dissolution.
               </p>
               <Recap
                 risques={[
-                  "Absence d’inventaire initial (présomption d’indivision par moitié).",
+                  "À défaut d’inventaire initial : présomption d’indivision par moitié.",
                   "Indivision des biens acquis ensemble sans preuve d’origine.",
                   "Vigilance sur l’équilibre des dépenses courantes.",
                 ]}

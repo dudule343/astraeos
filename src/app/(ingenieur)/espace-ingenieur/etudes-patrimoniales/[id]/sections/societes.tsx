@@ -675,12 +675,12 @@ function ProtectionRetraiteTexts() {
     constat: (
       <>
         <li>
-          La couverture santé et prévoyance relève de la loi Madelin et du régime des praticiens et
-          auxiliaires médicaux.
+          La couverture santé et prévoyance relève de la loi Madelin et du régime obligatoire de la
+          profession.
         </li>
         <li>
-          La retraite repose sur le régime obligatoire CARCDSF (base, complémentaire, prestation
-          complémentaire de vieillesse), par points.
+          La retraite repose sur le régime obligatoire de la profession libérale (base, complémentaire,
+          et le cas échéant prestation complémentaire de vieillesse), par points.
         </li>
       </>
     ),
@@ -699,7 +699,7 @@ function ProtectionRetraiteTexts() {
     ),
     optimisation: <>Constituer une épargne retraite dédiée et compléter les garanties de prévoyance.</>,
     impact: <>Sans capitalisation, baisse significative du niveau de vie au départ à la retraite.</>,
-    justification: "Régime de retraite des chirurgiens-dentistes et fonctionnement par points.",
+    justification: "Régime de retraite de la profession libérale et fonctionnement par points.",
     preco: "mettre en place une épargne retraite complémentaire (partie « Préconisations »).",
   };
 }
@@ -936,8 +936,8 @@ function AbEimFisc() {
           <li>Monsieur exerce en Entreprise Individuelle à l&apos;impôt sur le revenu.</li>
           <li>
             L&apos;intégralité du bénéfice net (<strong>{DASH}</strong> en 2024) est soumise au barème
-            progressif de l&apos;impôt sur le revenu (TMI à 41 %) et aux cotisations sociales (URSSAF /
-            CARCDSF).
+            progressif de l&apos;impôt sur le revenu (TMI à 41 %) et aux cotisations sociales (URSSAF et
+            caisse de retraite de la profession).
           </li>
         </>
       }
@@ -970,7 +970,7 @@ function AbEifFisc() {
           <li>
             L&apos;intégralité du bénéfice net (<strong>{DASH}</strong> en 2024) est soumise au barème
             progressif de l&apos;impôt sur le revenu (TMI à 41 % ou 45 %) et aux cotisations sociales
-            (URSSAF / CARCDSF).
+            (URSSAF et caisse de retraite de la profession).
           </li>
         </>
       }
@@ -1146,10 +1146,10 @@ export default function SocietesSection({ donnees }: { donnees: EtudeDonnees }) 
                 l&apos;entreprise, notamment la cession et la transmission.
               </p>
               <p>
-                Le foyer s&apos;appuie sur <b>trois structures</b> : une SCI patrimoniale et les deux
-                entreprises individuelles d&apos;exercice de Monsieur et Madame. Chacune est analysée
-                ci-dessous selon quatre axes (juridique, social, trésorerie, fiscalité), puis consolidée
-                dans une synthèse d&apos;ensemble.
+                Nous recensons les structures professionnelles et patrimoniales rattachées au foyer
+                (sociétés civiles ou commerciales, entreprises individuelles), puis nous analysons
+                chacune selon quatre axes (juridique, social, trésorerie, fiscalité) avant de consolider
+                une synthèse d&apos;ensemble. Structures retenues pour ce dossier : {DASH}.
               </p>
             </Bloc>
           </div>
@@ -1214,7 +1214,7 @@ export default function SocietesSection({ donnees }: { donnees: EtudeDonnees }) 
                     fontSize="10.5"
                     letterSpacing="0.5"
                   >
-                    Impôt sur les sociétés (IS)
+                    Régime fiscal : {DASH}
                   </text>
                   <line x1="240" y1="58" x2="240" y2="92" stroke="#C68E0E" strokeWidth="2" />
                   <rect x="148" y="92" width="184" height="44" rx="9" fill="#F4ECD9" stroke="#C68E0E" strokeWidth="1.5" />
@@ -1326,8 +1326,8 @@ export default function SocietesSection({ donnees }: { donnees: EtudeDonnees }) 
                   respectives ; la SCI n&apos;assume pas ces frais.
                 </li>
                 <li>
-                  Des contrats de protection juridique professionnelle (« Multi Pro ») garantissent le
-                  couple en tant que locataires des locaux professionnels.
+                  Des contrats de protection juridique professionnelle peuvent garantir le couple en
+                  tant que locataires des locaux professionnels.
                 </li>
               </ul>
               <SocLabel>Risques et opportunités</SocLabel>
@@ -1380,9 +1380,8 @@ export default function SocietesSection({ donnees }: { donnees: EtudeDonnees }) 
               paras={
                 <>
                   <p>
-                    La SCI est détenue à parts égales (50/50) par les deux conjoints et soumise à
-                    l&apos;impôt sur les sociétés. L&apos;analyse juridique révèle des fragilités de
-                    gouvernance et de transmission.
+                    La SCI est détenue à parts égales (50/50) par les deux conjoints. L&apos;analyse
+                    juridique révèle des fragilités de gouvernance et de transmission.
                   </p>
                   <p>
                     Deux risques majeurs ressortent : une paralysie potentielle (capital 50/50 et
@@ -1454,15 +1453,15 @@ export default function SocietesSection({ donnees }: { donnees: EtudeDonnees }) 
                 </li>
                 <li>
                   Les cotisations sociales payées en 2024 s&apos;élèvent à <strong>{DASH}</strong>, après
-                  déduction de l&apos;aide PCPAM.
+                  déduction des aides éventuelles.
                 </li>
               </ul>
               <SocLabel>Protection sociale — couverture santé et prévoyance</SocLabel>
               <ul className="dlist">
                 <li>
-                  Monsieur bénéficie du régime obligatoire des Praticiens et Auxiliaires Médicaux (PAM),
-                  avec une prise en charge partielle (PCPAM) de ses cotisations à hauteur de {DASH} en
-                  2024.
+                  Monsieur bénéficie du régime obligatoire de sa profession libérale, avec,
+                  le cas échéant, une prise en charge partielle de ses cotisations à hauteur de {DASH}
+                  en 2024.
                 </li>
                 <li>
                   Les contrats mutuelle et prévoyance sont souscrits via la structure professionnelle dans
@@ -1477,7 +1476,7 @@ export default function SocietesSection({ donnees }: { donnees: EtudeDonnees }) 
                 <li>La couverture prévoit des indemnités journalières en cas d&apos;accident ou de maladie.</li>
                 <li>
                   La garantie est « professionnelle » : le taux d&apos;invalidité est apprécié au regard de
-                  l&apos;aptitude à exercer la profession de chirurgien-dentiste, et non d&apos;une activité
+                  l&apos;aptitude à exercer la profession déclarée, et non d&apos;une activité
                   quelconque.
                 </li>
               </ul>
@@ -1489,19 +1488,19 @@ export default function SocietesSection({ donnees }: { donnees: EtudeDonnees }) 
               <SocLabel>Régime de retraite</SocLabel>
               <ul className="dlist">
                 <li>
-                  En tant que chirurgien-dentiste libéral, la retraite repose sur un système par points
-                  géré par la CARCDSF, qui se décompose en trois étages :
+                  En tant que professionnel libéral, la retraite repose sur un système par points
+                  géré par la caisse de retraite de la profession, qui se décompose en trois étages :
                 </li>
                 <li>
                   <b>Régime de base (CNAVPL)</b> : acquisition de points proportionnels aux revenus.
                 </li>
                 <li>
-                  <b>Régime complémentaire (CARCDSF)</b> : spécifique à la profession, alimenté par une
+                  <b>Régime complémentaire</b> : spécifique à la profession, alimenté par une
                   cotisation forfaitaire et une cotisation proportionnelle.
                 </li>
                 <li>
-                  <b>Prestation complémentaire de vieillesse (PCV)</b> : réservée aux praticiens
-                  conventionnés, avec participation de l&apos;assurance maladie au financement.
+                  <b>Prestation complémentaire de vieillesse (PCV)</b>, le cas échéant : pour les
+                  professions conventionnées, avec participation au financement par le régime obligatoire.
                 </li>
                 <li>L&apos;âge légal de départ est de 64 ans et 1 mois ; le taux plein est fixé à 67 ans.</li>
               </ul>
@@ -1523,7 +1522,7 @@ export default function SocietesSection({ donnees }: { donnees: EtudeDonnees }) 
                 <li>
                   <b>Pression sociale et fiscale</b> : contrairement à une structure à l&apos;impôt sur les
                   sociétés (IS), l&apos;intégralité du bénéfice est soumise aux cotisations sociales
-                  (URSSAF, CARCDSF) et à l&apos;impôt sur le revenu (TMI à 41 %).
+                  (URSSAF, caisse de retraite de la profession) et à l&apos;impôt sur le revenu (TMI à 41 %).
                 </li>
                 <li>
                   <b>Absence de pilotage</b> : le statut EI interdit tout arbitrage entre rémunération et
@@ -1536,7 +1535,7 @@ export default function SocietesSection({ donnees }: { donnees: EtudeDonnees }) 
                   patrimoniale pérenne.
                 </li>
                 <li>
-                  <b>Arbitrage retraite</b> : la dépendance au régime obligatoire CARCDSF demeure élevée ;
+                  <b>Arbitrage retraite</b> : la dépendance au régime obligatoire de la profession demeure élevée ;
                   sans dispositifs de capitalisation complémentaires, les revenus à la retraite risquent
                   d&apos;être insuffisants pour maintenir le niveau de vie.
                 </li>
@@ -1688,15 +1687,15 @@ export default function SocietesSection({ donnees }: { donnees: EtudeDonnees }) 
                 </li>
                 <li>
                   Les cotisations sociales payées en 2024 s&apos;élèvent à <strong>{DASH}</strong>, après
-                  déduction de l&apos;aide PCPAM.
+                  déduction des aides éventuelles.
                 </li>
               </ul>
               <SocLabel>Protection sociale — couverture santé et prévoyance</SocLabel>
               <ul className="dlist">
                 <li>
-                  Madame bénéficie du régime obligatoire des Praticiens et Auxiliaires Médicaux (PAM),
-                  avec une prise en charge partielle (PCPAM) de ses cotisations à hauteur de {DASH} en
-                  2024.
+                  Madame bénéficie du régime obligatoire de sa profession libérale, avec,
+                  le cas échéant, une prise en charge partielle de ses cotisations à hauteur de {DASH}
+                  en 2024.
                 </li>
                 <li>
                   Les contrats mutuelle et prévoyance sont souscrits via la structure professionnelle dans
@@ -1711,7 +1710,7 @@ export default function SocietesSection({ donnees }: { donnees: EtudeDonnees }) 
                 <li>La couverture prévoit des indemnités journalières en cas d&apos;accident ou de maladie.</li>
                 <li>
                   La garantie est « professionnelle » : le taux d&apos;invalidité est apprécié au regard de
-                  l&apos;aptitude à exercer la profession de chirurgien-dentiste, et non d&apos;une activité
+                  l&apos;aptitude à exercer la profession déclarée, et non d&apos;une activité
                   quelconque.
                 </li>
               </ul>
@@ -1723,19 +1722,19 @@ export default function SocietesSection({ donnees }: { donnees: EtudeDonnees }) 
               <SocLabel>Régime de retraite</SocLabel>
               <ul className="dlist">
                 <li>
-                  En tant que chirurgien-dentiste libéral, la retraite repose sur un système par points
-                  géré par la CARCDSF, qui se décompose en trois étages :
+                  En tant que professionnel libéral, la retraite repose sur un système par points
+                  géré par la caisse de retraite de la profession, qui se décompose en trois étages :
                 </li>
                 <li>
                   <b>Régime de base (CNAVPL)</b> : acquisition de points proportionnels aux revenus.
                 </li>
                 <li>
-                  <b>Régime complémentaire (CARCDSF)</b> : spécifique à la profession, alimenté par une
+                  <b>Régime complémentaire</b> : spécifique à la profession, alimenté par une
                   cotisation forfaitaire et une cotisation proportionnelle.
                 </li>
                 <li>
-                  <b>Prestation complémentaire de vieillesse (PCV)</b> : réservée aux praticiens
-                  conventionnés, avec participation de l&apos;assurance maladie au financement.
+                  <b>Prestation complémentaire de vieillesse (PCV)</b>, le cas échéant : pour les
+                  professions conventionnées, avec participation au financement par le régime obligatoire.
                 </li>
                 <li>L&apos;âge légal de départ est de 64 ans ; le taux plein est fixé à 67 ans.</li>
               </ul>
@@ -1757,7 +1756,7 @@ export default function SocietesSection({ donnees }: { donnees: EtudeDonnees }) 
                 <li>
                   <b>Pression sociale et fiscale</b> : contrairement à une structure à l&apos;impôt sur les
                   sociétés (IS), l&apos;intégralité du bénéfice est soumise aux cotisations sociales
-                  (URSSAF, CARCDSF) et à l&apos;impôt sur le revenu (TMI à 41 %).
+                  (URSSAF, caisse de retraite de la profession) et à l&apos;impôt sur le revenu (TMI à 41 %).
                 </li>
                 <li>
                   <b>Absence de pilotage</b> : le statut EI interdit tout arbitrage entre rémunération et
@@ -1770,7 +1769,7 @@ export default function SocietesSection({ donnees }: { donnees: EtudeDonnees }) 
                   patrimoniale pérenne.
                 </li>
                 <li>
-                  <b>Arbitrage retraite</b> : la dépendance au régime obligatoire CARCDSF demeure élevée ;
+                  <b>Arbitrage retraite</b> : la dépendance au régime obligatoire de la profession demeure élevée ;
                   sans dispositifs de capitalisation complémentaires, les revenus à la retraite risquent
                   d&apos;être insuffisants pour maintenir le niveau de vie.
                 </li>
@@ -1810,8 +1809,7 @@ export default function SocietesSection({ donnees }: { donnees: EtudeDonnees }) 
               <SocLabel>Performance actuelle de la trésorerie</SocLabel>
               <ul className="dlist">
                 <li>
-                  <b>Liquidités disponibles</b> : <strong>{DASH}</strong> (comptes professionnels BNP
-                  Paribas).
+                  <b>Liquidités disponibles</b> : <strong>{DASH}</strong> (comptes professionnels).
                 </li>
                 <li>Les fonds sont laissés intégralement sur le compte courant, sans rémunération.</li>
                 <li>
@@ -1939,10 +1937,10 @@ export default function SocietesSection({ donnees }: { donnees: EtudeDonnees }) 
               paras={
                 <>
                   <p>
-                    Le foyer s&apos;appuie sur trois structures : une <b>SCI patrimoniale à l&apos;IS</b>{" "}
-                    (50/50) et deux <b>entreprises individuelles</b> (Monsieur et Madame,
-                    chirurgiens-dentistes au régime BNC). La SCI porte un enjeu juridique et successoral ;
-                    les deux EI portent un enjeu de structuration fiscale et de capitalisation.
+                    Le foyer s&apos;appuie sur des structures professionnelles et patrimoniales : une{" "}
+                    <b>SCI patrimoniale</b> (50/50) et des <b>entreprises individuelles</b> (au régime
+                    BNC). La SCI porte un enjeu juridique et successoral ; les entreprises individuelles
+                    portent un enjeu de structuration fiscale et de capitalisation.
                   </p>
                   <p>
                     Les deux activités libérales sont saines mais fiscalement saturées : l&apos;intégralité
